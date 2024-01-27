@@ -10,7 +10,7 @@
  * Description: Paydock simplify how you manage your payments. Reduce costs, technical headaches & streamline compliance using Paydock's payment orchestration.
  * Author: Paydock
  * Author URI: https://www.paydock.com/
- * Version: 0.1.8
+ * Version: 0.2.2
  * Requires at least: 6.4.2
  * Text Domain: facebook-for-woocommerce
  * Tested up to: 6.4.2

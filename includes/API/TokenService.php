@@ -9,11 +9,13 @@ class TokenService extends AbstractApiService
     const ENDPOINT = 'payment_sources/tokens';
 
     protected array $allowedAction = [
-        'create' => 'GET'
+        'create' => 'POST',
     ];
 
-    public function create(): TokenService
+    public function create(array $params): TokenService
     {
+        $this->parameters = $params;
+
         $this->setAction('create');
 
         return $this;
@@ -21,6 +23,6 @@ class TokenService extends AbstractApiService
 
     protected function buildEndpoint(): ?string
     {
-        return self::ENDPOINT . '?public_key=' . urlencode(ConfigService::$publicKey);
+        return self::ENDPOINT;
     }
 }

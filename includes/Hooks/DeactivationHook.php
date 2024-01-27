@@ -23,5 +23,7 @@ class DeactivationHook implements Hook
     public static function handle(): void
     {
         $instance = new self();
+        delete_option('woocommerce_pay_dock_settings');
+        delete_option('woocommerce_pay_dock_sandbox_settings');
     }
 }

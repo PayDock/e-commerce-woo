@@ -2,16 +2,14 @@
 
 namespace Paydock;
 
-use Paydock\Abstract\AbstractSettingService;
 use Paydock\Abstract\AbstractSingleton;
 use Paydock\Hooks\ActivationHook;
 use Paydock\Hooks\DeactivationHook;
 use Paydock\Repositories\LogRepository;
 use Paydock\Services\ActionsService;
+use Paydock\Services\Assets\AdminAssetsService;
 use Paydock\Services\FiltersService;
-use Paydock\Services\LiveConnectionSettingService;
-use Paydock\Services\SandboxConnectionSettingService;
-use Paydock\Services\WidgetSettingService;
+use Paydock\Services\Settings\LiveConnectionSettingService;
 
 if (!class_exists('\Paydock\PaydockPlugin')) {
     final class PaydockPlugin extends AbstractSingleton
@@ -35,20 +33,6 @@ if (!class_exists('\Paydock\PaydockPlugin')) {
 
             ActionsService::getInstance();
             FiltersService::getInstance();
-        }
-
-        public function getPaymentService(): ?LiveConnectionSettingService
-        {
-            global $current_section;
-            if (is_null($this->paymentService)) {
-                $this->paymentService = match ($current_section) {
-                    AbstractSettingService::SANDBOX_CONNECTION_TAB => new SandboxConnectionSettingService(),
-                    AbstractSettingService::WIDGET_TAB => new WidgetSettingService(),
-                    default => new LiveConnectionSettingService(),
-                };
-            }
-
-            return $this->paymentService;
         }
     }
 }

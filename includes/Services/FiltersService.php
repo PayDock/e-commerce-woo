@@ -2,9 +2,13 @@
 
 namespace Paydock\Services;
 
-use Paydock\Abstract\AbstractSettingService;
 use Paydock\Abstract\AbstractSingleton;
+use Paydock\Enums\SettingsTabs;
 use Paydock\PaydockPlugin;
+use Paydock\Services\Settings\LiveConnectionSettingService;
+use Paydock\Services\Settings\LogsSettingService;
+use Paydock\Services\Settings\SandboxConnectionSettingService;
+use Paydock\Services\Settings\WidgetSettingService;
 
 class FiltersService extends AbstractSingleton
 {
@@ -23,10 +27,10 @@ class FiltersService extends AbstractSingleton
 
         $methods[] = LiveConnectionSettingService::class;
         if ($current_tab == 'checkout'
-            && in_array($current_section, AbstractSettingService::SECONDARY_PAYMENT_METHODS)) {
+            && in_array($current_section, array_map(fn(SettingsTabs $tab) => $tab->value, SettingsTabs::secondary()))) {
             $methods[] = SandboxConnectionSettingService::class;
             $methods[] = WidgetSettingService::class;
-            $methods[] = LogsTabService::class;
+            $methods[] = LogsSettingService::class;
         }
 
 

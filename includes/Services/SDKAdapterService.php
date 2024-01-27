@@ -5,9 +5,17 @@ namespace Paydock\Services;
 use Paydock\API\ConfigService;
 use Paydock\API\GatewayService;
 use Paydock\API\TokenService;
+use Paydock\Enums\CredentialSettings;
+use Paydock\Enums\CredentialsTypes;
+use Paydock\Enums\SettingGroups;
+use Paydock\Services\Settings\LiveConnectionSettingService;
+use Paydock\Services\Settings\SandboxConnectionSettingService;
 
 class SDKAdapterService
 {
+    private const ENABLED_CONDITION = 'yes';
+    private const PROD_ENV = 'production';
+    private const SANDBOX_ENV = 'sandbox';
     private static ?SDKAdapterService $instance = null;
 
     public static function getInstance(): self
@@ -34,11 +42,11 @@ class SDKAdapterService
         return $gatewayService->search($parameters)->call();
     }
 
-    public function token(): array
+    public function token(array $params = ['gateway_id' => '', 'type' => '']): array
     {
         $tokenService = new TokenService;
 
-        return $tokenService->create()->call();
+        return $tokenService->create($params)->call();
     }
 
     public function getGatewayById(string $id): array
@@ -48,28 +56,60 @@ class SDKAdapterService
         return $gatewayService->get()->setId($id)->call();
     }
 
-    public function initialise(): void
+    public function initialise(?bool $forcedEnv = null): void
     {
-        $section = $_GET['section'] ?? 'production';
-        $environment = $section == 'pay_dock_sandbox' ? 'sandbox' : 'production';
-        if ($environment == 'sandbox') {
-            $options = get_option('woocommerce_pay_dock_sandbox_settings');
-            $publicKey = $_POST['woocommerce_pay_dock_sandbox_pay_dock_sandbox_Credentials_PublicKey'] ?? "";
-            $secretKey = $_POST['woocommerce_pay_dock_sandbox_pay_dock_sandbox_Credentials_SecretKey'] ?? "";
-            if(!empty($options) && !$publicKey && !$secretKey){
-                $publicKey = $options['pay_dock_sandbox_Credentials_PublicKey'];
-                $secretKey = $options['pay_dock_sandbox_Credentials_SecretKey'];
-            }
+        $isProd = $this->isProd($forcedEnv);
+
+        $settingsService = SettingsService::getInstance();
+
+        if ($isProd) {
+            $settings = new LiveConnectionSettingService();
+
         } else {
-            $options = get_option('woocommerce_pay_dock_settings');
-            $publicKey = $_POST['woocommerce_pay_dock_pay_dock_Credentials_PublicKey'] ?? "";
-            $secretKey = $_POST['woocommerce_pay_dock_pay_dock_Credentials_SecretKey'] ?? "";
-            if(!empty($options) && !$publicKey && !$secretKey){
-                $publicKey = $options['pay_dock_Credentials_PublicKey'];
-                $secretKey = $options['pay_dock_Credentials_SecretKey'];
-            }
+            $settings = new SandboxConnectionSettingService();
         }
 
-        ConfigService::init($environment, $secretKey, $publicKey);
+        $isAccessToken = CredentialsTypes::AccessKey->name == $settings->get_option(
+                $settingsService->getOptionName($settings->id, [
+                    SettingGroups::Credentials->name,
+                    CredentialSettings::Type->name,
+                ])
+            );
+
+        if ($isAccessToken) {
+            $secretKey = $settings->get_option($settingsService->getOptionName($settings->id, [
+                SettingGroups::Credentials->name,
+                CredentialSettings::AccessKey->name,
+            ]));
+        } else {
+            $publicKey = $settings->get_option($settingsService->getOptionName($settings->id, [
+                SettingGroups::Credentials->name,
+                CredentialSettings::PublicKey->name,
+            ]));
+            $secretKey = $settings->get_option($settingsService->getOptionName($settings->id, [
+                SettingGroups::Credentials->name,
+                CredentialSettings::SecretKey->name,
+            ]));
+        }
+
+        $env = $isProd ? self::PROD_ENV : self::SANDBOX_ENV;
+
+        ConfigService::init($env, $secretKey, $publicKey ?? null);
+    }
+
+    private function isProd(?bool $forcedProdEnv = null): bool
+    {
+        if (is_null($forcedProdEnv)) {
+            $settings = new SandboxConnectionSettingService();
+
+            return self::ENABLED_CONDITION == $settings->get_option(
+                    SettingsService::getInstance()->getOptionName($settings->id, [
+                        SettingGroups::Credentials->name,
+                        CredentialSettings::Sandbox->name,
+                    ])
+                );
+        }
+
+        return $forcedProdEnv;
     }
 }

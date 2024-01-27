@@ -14,12 +14,12 @@ abstract class AbstractApiService
     public function call(): array
     {
         $url = ConfigService::buildApiUrl($this->buildEndpoint());
-
         $args = [
             'headers' => [
-                'content-type' => 'application/json'
-            ]
+                'content-type' => 'application/json',
+            ],
         ];
+
 
         if (!empty(ConfigService::$secretKey)) {
             $args['headers']['x-user-secret-key'] = ConfigService::$secretKey;
@@ -29,14 +29,18 @@ abstract class AbstractApiService
             $args['headers']['x-access-token'] = ConfigService::$accessToken;
         }
 
-        if($this->allowedAction[$this->action] === 'POST') {
-            $args['body'] = $this->parameters;
+        if (!empty(ConfigService::$publicKey)) {
+            $args['headers']['x-user-public-key'] = ConfigService::$publicKey;
+        }
+
+        if ($this->allowedAction[$this->action] === 'POST') {
+            $args['body'] = json_encode($this->parameters);
             $request = wp_remote_post($url, $args);
         } else {
             $request = wp_remote_get($url, $args);
         }
 
-        if($request instanceof WP_Error) {
+        if ($request instanceof WP_Error) {
             return ['status' => 403, 'error' => $request];
         }
 

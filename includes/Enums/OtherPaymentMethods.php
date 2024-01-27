@@ -8,14 +8,12 @@ enum OtherPaymentMethods
     case PayPal;
     case Zippay;
 
-
     public function getLabel(): string
     {
         return match ($this) {
+            self::Zippay => 'Zippay',
+            self::PayPal => 'PayPal',
             self::Afterpay => 'Afterpay v1',
-            self::Zippay => 'Secret Key',
-            self::PayPal => 'Access Token',
         };
     }
-
 }

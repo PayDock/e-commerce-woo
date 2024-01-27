@@ -7,6 +7,7 @@ enum WalletPaymentMethods
     case ApplePay;
     case GooglePay;
     case PayPalSmartButton;
+    case Afterpay;
 
     public function getLabel(): string
     {
@@ -14,6 +15,7 @@ enum WalletPaymentMethods
             self::ApplePay => 'Apple Pay',
             self::GooglePay => 'Google Pay',
             self::PayPalSmartButton => 'PayPal Smart Button',
+            self::Afterpay => 'Afterpay v2',
         };
     }
 }

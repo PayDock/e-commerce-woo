@@ -39,8 +39,6 @@ class GatewayService extends AbstractApiService
 
     protected function buildEndpoint(): ?string
     {
-        $result = '';
-
         switch ($this->action) {
             case 'get':
                 $result = self::ENDPOINT . '/' . urlencode($this->id);
