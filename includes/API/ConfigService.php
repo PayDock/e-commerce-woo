@@ -28,11 +28,11 @@ class ConfigService
 
     public static function buildApiUrl(?string $endpoint = null): string
     {
-        if (self::$environment === ConfigAPI::ProductionEnvironment->value) {
-            return ConfigAPI::ProductionApiUrl->value . $endpoint;
+        if (self::$environment === ConfigAPI::PRODUCTION_ENVIRONMENT()->value) {
+            return ConfigAPI::PRODUCTION_API_URL()->value . $endpoint;
         }
 
-        return ConfigAPI::SandboxApiUrl->value . $endpoint;
+        return ConfigAPI::SANDBOX_API_URL()->value . $endpoint;
     }
 
     public static function isAccessToken(string $token): bool

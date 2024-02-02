@@ -2,48 +2,50 @@
 
 namespace Paydock\Enums;
 
-enum APMsSettings
+use Paydock\Abstract\AbstractEnum;
+
+class APMsSettings extends AbstractEnum
 {
-    case Enable;
-    case GatewayId;
-    case Fraud;
-    case FraudServiceId;
-    case DirectCharge;
-    case SaveCard;
-    case SaveCardOption;
+    protected const ENABLE = 'ENABLE';
+    protected const GATEWAY_ID = 'GATEWAY_ID';
+    protected const FRAUD = 'FRAUD';
+    protected const FRAUD_SERVICE_ID = 'FRAUD_SERVICE_ID';
+    protected const DIRECT_CHARGE = 'DIRECT_CHARGE';
+    protected const SAVE_CARD = 'SAVE_CARD';
+    protected const SAVE_CARD_OPTION = 'SAVE_CARD_OPTION';
 
     public function getInputType(): string
     {
-        return match ($this) {
-            self::GatewayId => 'text',
-            self::Enable,
-            self::Fraud => 'checkbox',
-            self::FraudServiceId => 'text',
-            self::DirectCharge,
-            self::SaveCard => 'checkbox',
-            self::SaveCardOption => 'select',
-
+        return match ($this->name) {
+            self::GATEWAY_ID => 'text',
+            self::ENABLE,
+            self::FRAUD => 'checkbox',
+            self::FRAUD_SERVICE_ID => 'text',
+            self::DIRECT_CHARGE,
+            self::SAVE_CARD => 'checkbox',
+            self::SAVE_CARD_OPTION => 'select',
         };
     }
 
     public function getLabel(): string
     {
-        return match ($this) {
-            self::Fraud,
-            self::Enable => $this->name,
-            self::GatewayId => 'Gateway ID',
-            self::DirectCharge => 'Direct Charge',
-            self::FraudServiceId => 'Fraud service ID',
-            self::SaveCard => 'Save card',
-            self::SaveCardOption => 'Save card option',
+        return match ($this->name) {
+            self::FRAUD,
+            self::ENABLE => ucfirst(strtolower($this->name)),
+            self::GATEWAY_ID => 'Gateway ID',
+            self::DIRECT_CHARGE => 'Direct Charge',
+            self::FRAUD_SERVICE_ID => 'Fraud service ID',
+            self::SAVE_CARD => 'Save card',
+            self::SAVE_CARD_OPTION => 'Save card option',
         };
     }
 
     public function getDescription(): string
     {
-        return match ($this) {
-            self::DirectCharge => 'Direct charge stands for authorization and capture in a single request',
-            self::SaveCard => 'Offer your customer to save the card permanently at Paydock for further usage',
+        return match ($this->name) {
+            self::DIRECT_CHARGE => 'Direct charge stands for authorization and capture in a single request',
+            self::SAVE_CARD => 'Offer your customer the option to save the card information permanently at Paydock for '
+                . 'further usage',
 
             default => ''
         };

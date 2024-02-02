@@ -2,11 +2,13 @@
 
 namespace Paydock\Enums;
 
-enum DSTypes: string
+use Paydock\Abstract\AbstractEnum;
+
+class DSTypes extends AbstractEnum
 {
-    case Disable = 'Disable';
-    case Standalone = 'Standalone 3DS';
-    case InBuild = 'In-built 3DS';
+    protected const DISABLE = 'Disable';
+    protected const STANDALONE = 'Standalone 3DS';
+    protected const IN_BUILD = 'In-built 3DS';
 
 
     public static function toArray(): array

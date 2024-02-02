@@ -2,18 +2,20 @@
 
 namespace Paydock\Enums;
 
-enum OtherPaymentMethods
+use Paydock\Abstract\AbstractEnum;
+
+class OtherPaymentMethods extends AbstractEnum
 {
-    case Afterpay;
-    case PayPal;
-    case Zippay;
+    protected const AFTERPAY = 'AFTERPAY';
+    protected const PAY_PAL = 'PAY_PAL';
+    protected const ZIPPAY = 'ZIPPAY';
 
     public function getLabel(): string
     {
-        return match ($this) {
-            self::Zippay => 'Zippay',
-            self::PayPal => 'PayPal',
-            self::Afterpay => 'Afterpay v1',
+        return match ($this->name) {
+            self::ZIPPAY => 'Zippay',
+            self::PAY_PAL => 'PayPal',
+            self::AFTERPAY => 'Afterpay v1',
         };
     }
 }

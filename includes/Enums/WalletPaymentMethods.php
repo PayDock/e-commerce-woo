@@ -2,20 +2,22 @@
 
 namespace Paydock\Enums;
 
-enum WalletPaymentMethods
+use Paydock\Abstract\AbstractEnum;
+
+class WalletPaymentMethods extends AbstractEnum
 {
-    case ApplePay;
-    case GooglePay;
-    case PayPalSmartButton;
-    case Afterpay;
+    protected const APPLE_PAY = 'APPLE_PAY';
+    protected const GOOGLE_PAY = 'GOOGLE_PAY';
+    protected const PAY_PAL_SMART_BUTTON = 'PAY_PAL_SMART_BUTTON';
+    protected const AFTERPAY = 'AFTERPAY';
 
     public function getLabel(): string
     {
-        return match ($this) {
-            self::ApplePay => 'Apple Pay',
-            self::GooglePay => 'Google Pay',
-            self::PayPalSmartButton => 'PayPal Smart Button',
-            self::Afterpay => 'Afterpay v2',
+        return match ($this->name) {
+            self::APPLE_PAY => 'Apple Pay',
+            self::GOOGLE_PAY => 'Google Pay',
+            self::PAY_PAL_SMART_BUTTON => 'PayPal Smart Button',
+            self::AFTERPAY => 'Afterpay v2',
         };
     }
 }

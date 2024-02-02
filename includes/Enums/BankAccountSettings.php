@@ -2,38 +2,40 @@
 
 namespace Paydock\Enums;
 
-enum BankAccountSettings
+use Paydock\Abstract\AbstractEnum;
+
+class BankAccountSettings extends AbstractEnum
 {
-    case Enable;
-    case GatewayId;
-    case SaveCard;
-    case SaveCardOption;
+    protected const ENABLE = 'ENABLE';
+    protected const GATEWAY_ID = 'GATEWAY_ID';
+    protected const SAVE_CARD = 'SAVE_CARD';
+    protected const SAVE_CARD_OPTION = 'SAVE_CARD_OPTION';
 
     public function getLabel(): string
     {
-        return match ($this) {
-            self::Enable => $this->name,
-            self::GatewayId => 'Gateway ID',
-            self::SaveCard => 'Save bank account',
-            self::SaveCardOption => 'Save bank account option',
+        return match ($this->name) {
+            self::ENABLE => ucfirst(strtolower($this->name)),
+            self::GATEWAY_ID => 'Gateway ID',
+            self::SAVE_CARD => 'Save bank account',
+            self::SAVE_CARD_OPTION => 'Save bank account option',
         };
     }
 
     public function getInputType(): string
     {
-        return match ($this) {
-            self::GatewayId => 'text',
-            self::Enable,
-            self::SaveCard => 'checkbox',
+        return match ($this->name) {
+            self::GATEWAY_ID => 'text',
+            self::ENABLE,
+            self::SAVE_CARD => 'checkbox',
             default => 'select'
         };
     }
 
     public function getDescription(): string
     {
-        return match ($this) {
-            self::SaveCard => 'Offer your customer to save the bank account information permanently at Paydock for'
-                . ' further usage',
+        return match ($this->name) {
+            self::SAVE_CARD => 'Offer your customer the option to permanently save the bank account information at '
+                . 'Paydock for further usage',
             default => ''
         };
     }

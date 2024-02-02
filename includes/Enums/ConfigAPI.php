@@ -2,10 +2,12 @@
 
 namespace PayDock\Enums;
 
-enum ConfigAPI: string
+use Paydock\Abstract\AbstractEnum;
+
+class ConfigAPI extends AbstractEnum
 {
-    case ProductionApiUrl = 'https://api.paydock.com/v1/';
-    case SandboxApiUrl = 'https://api-sandbox.paydock.com/v1/';
-    case ProductionEnvironment = 'production';
-    case SandboxEnvironment = 'sandbox';
+    protected const PRODUCTION_API_URL = 'https://api.paydock.com/v1/';
+    protected const SANDBOX_API_URL = 'https://api-sandbox.paydock.com/v1/';
+    protected const PRODUCTION_ENVIRONMENT = 'production';
+    protected const SANDBOX_ENVIRONMENT = 'sandbox';
 }

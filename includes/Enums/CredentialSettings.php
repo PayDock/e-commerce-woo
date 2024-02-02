@@ -2,42 +2,44 @@
 
 namespace Paydock\Enums;
 
-enum CredentialSettings
+use Paydock\Abstract\AbstractEnum;
+
+class CredentialSettings extends AbstractEnum
 {
-    case Sandbox;
-    case Type;
-    case PublicKey;
-    case SecretKey;
-    case AccessKey;
+    protected const SANDBOX = 'SANDBOX';
+    protected const TYPE = 'TYPE';
+    protected const PUBLIC_KEY = 'PUBLIC_KEY';
+    protected const SECRET_KEY = 'SECRET_KEY';
+    protected const ACCESS_KEY = 'ACCESS_KEY';
 
     public function getInputType(): string
     {
-        return match ($this) {
-            self::PublicKey => 'password',
-            self::SecretKey => 'password',
-            self::AccessKey => 'password',
-            self::Sandbox => 'checkbox',
-            self::Type => 'select'
+        return match ($this->name) {
+            self::PUBLIC_KEY => 'password',
+            self::SECRET_KEY => 'password',
+            self::ACCESS_KEY => 'password',
+            self::SANDBOX => 'checkbox',
+            self::TYPE => 'select'
         };
     }
 
     public function getLabel(): string
     {
-        return match ($this) {
-            self::PublicKey => 'Public Key',
-            self::SecretKey => 'Secret Key',
-            self::AccessKey => 'Access Token',
-            self::Sandbox => 'Sandbox',
-            self::Type => 'Connection to Paydock'
+        return match ($this->name) {
+            self::PUBLIC_KEY => 'Public Key',
+            self::SECRET_KEY => 'Secret Key',
+            self::ACCESS_KEY => 'Access Token',
+            self::SANDBOX => 'Sandbox',
+            self::TYPE => 'Connection to Paydock'
         };
     }
 
     public function getDescription(): string
     {
-        return match ($this) {
-            self::PublicKey => 'Public Key from Paydock partner panel.',
-            self::SecretKey => 'Secret Key from Paydock partner panel.',
-            self::AccessKey => 'Access Token from Paydock partner panel.',
+        return match ($this->name) {
+            self::PUBLIC_KEY => 'Public Key from Paydock/Powerboard',
+            self::SECRET_KEY => 'Secret Key from Paydock/Powerboard',
+            self::SANDBOX => 'Access Token from Paydock/Powerboard',
             default => ''
         };
     }

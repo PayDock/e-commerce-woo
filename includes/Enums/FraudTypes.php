@@ -2,11 +2,13 @@
 
 namespace Paydock\Enums;
 
-enum FraudTypes: string
+use Paydock\Abstract\AbstractEnum;
+
+class FraudTypes extends AbstractEnum
 {
-    case Disable = 'Disable';
-    case Standalone = 'Standalone Fraud';
-    case InBuild = 'In-built Fraud';
+    protected const  DISABLE = 'Disable';
+    protected const  STANDALONE = 'Standalone Fraud';
+    protected const  IN_BUILD = 'In-built Fraud';
 
 
     public static function toArray(): array

@@ -6,15 +6,19 @@ use Paydock\Abstract\AbstractSettingService;
 
 class TemplateService
 {
+    protected $currentSection = '';
     private const TEMPLATE_DIR = 'templates';
     private const ADMIN_TEMPLATE_DIR = 'admin';
 
     private const TEMPLATE_END = '.php';
+    private ?AbstractSettingService $settingService = null;
 
     private string $templateAdminDir = '';
 
-    public function __construct(protected readonly AbstractSettingService $settingService)
+    public function __construct(AbstractSettingService $service)
     {
+        $this->settingService = $service;
+        $this->currentSection = $service->currentSection ?? $_GET['section'];
         $this->templateAdminDir = implode(DIRECTORY_SEPARATOR, [self::TEMPLATE_DIR, self::ADMIN_TEMPLATE_DIR]);
     }
 

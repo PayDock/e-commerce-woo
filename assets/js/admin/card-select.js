@@ -19,7 +19,7 @@ jQuery(window).on('load', function () {
             {
                 "image": "/wp-content/plugins/paydock/assets/images/bpoint.png",
                 "title": "Bpoint",
-                "type": "Advam"
+                "type": "Bpoint"
             },
             {
                 "image": "/wp-content/plugins/paydock/assets/images/braintree.png",
@@ -243,7 +243,7 @@ jQuery(window).on('load', function () {
             }
         });
 
-        const valueDefault = selectValue.innerText
+        const valueDefault = 'Please select payment methods...'
 
         let timerLeave = null
 
@@ -261,7 +261,7 @@ jQuery(window).on('load', function () {
                 item.style.display = text.includes(search.value.toUpperCase()) ? 'block' : 'none'
             })
             listWrap.style.overflowY = listWrap.offsetHeight < 206 ? 'auto' : 'scroll'
-            searchError.style.display = listWrap.offsetHeight < 41 ? 'block' : 'none'
+            searchError.style.display = listWrap.offsetHeight < 40 ? 'block' : 'none'
         })
 
         selectValue.addEventListener('click', function () {
@@ -280,6 +280,14 @@ jQuery(window).on('load', function () {
 
         select.onmouseleave = () => {
             timerLeave = setTimeout(() => {
+                search.value = '';
+
+                list.forEach(item => {
+                    const text = item.querySelector('label').innerText.toUpperCase()
+                    item.style.display = text.includes(search.value.toUpperCase()) ? 'block' : 'none'
+                })
+                searchError.style.display = 'none'
+
                 select.classList.remove('-open')
             }, 500)
         }

@@ -2,11 +2,13 @@
 
 namespace Paydock\Enums;
 
-enum SaveCardOptions: string
+use Paydock\Abstract\AbstractEnum;
+
+class SaveCardOptions extends AbstractEnum
 {
-    case Vault = 'Vault token';
-    case WithGateWay = 'Customer with Gateway ID';
-    case WithoutGateway = 'Customer without Gateway ID';
+    protected const VAULT = 'Vault token';
+    protected const WITH_GATEWAY = 'Customer with Gateway ID';
+    protected const WITHOUT_GATEWAY = 'Customer without Gateway ID';
 
     public static function toArray(): array
     {

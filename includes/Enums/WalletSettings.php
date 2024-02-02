@@ -2,40 +2,36 @@
 
 namespace Paydock\Enums;
 
-enum WalletSettings
+use Paydock\Abstract\AbstractEnum;
+
+class WalletSettings extends AbstractEnum
 {
-    case Enable;
-    case GatewayId;
-    case Fraud;
-    case FraudServiceId;
-    case DirectCharge;
+    protected const ENABLE = 'ENABLE';
+    protected const GATEWAY_ID = 'GATEWAY_ID';
+    protected const FRAUD = 'FRAUD';
+    protected const FRAUD_SERVICE_ID = 'FRAUD_SERVICE_ID';
+    protected const DIRECT_CHARGE = 'DIRECT_CHARGE';
 
     public function getInputType(): string
     {
-        return match ($this) {
-            self::GatewayId => 'text',
-            self::Fraud,
-            self::Enable,
-            self::DirectCharge => 'checkbox',
-            self::FraudServiceId => 'text',
+        return match ($this->name) {
+            self::GATEWAY_ID => 'text',
+            self::FRAUD,
+            self::ENABLE,
+            self::DIRECT_CHARGE => 'checkbox',
+            self::FRAUD_SERVICE_ID => 'text',
         };
     }
 
     public function getLabel(): string
     {
-        return match ($this) {
-            self::Fraud,
-            self::Enable => $this->name,
-            self::GatewayId => 'Gateway ID',
-            self::FraudServiceId => 'Fraud service ID',
-            self::DirectCharge => 'Direct Charge',
-        };
+        return ucfirst(strtolower(str_replace('_', ' ', $this->name)));
     }
 
     public function getDescription(): string
     {
-        return match ($this) {
-            self::DirectCharge => 'Direct charge stands for authorization and capture in a single request',
+        return match ($this->name) {
+            self::DIRECT_CHARGE => 'Direct charge stands for authorization and capture in a single request',
             default => ''
         };
     }

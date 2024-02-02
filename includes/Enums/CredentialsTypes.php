@@ -2,10 +2,12 @@
 
 namespace Paydock\Enums;
 
-enum CredentialsTypes: string
+use Paydock\Abstract\AbstractEnum;
+
+class CredentialsTypes extends AbstractEnum
 {
-    case Credentials = 'Public & Secret Keys';
-    case AccessKey = 'Access Token';
+    protected const CREDENTIALS = 'Public & Secret Keys';
+    protected const ACCESS_KEY = 'Access Token';
 
     public static function toArray(): array
     {

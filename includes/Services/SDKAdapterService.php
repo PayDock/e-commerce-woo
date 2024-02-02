@@ -2,9 +2,12 @@
 
 namespace Paydock\Services;
 
+use Paydock\API\ChargeService;
 use Paydock\API\ConfigService;
 use Paydock\API\GatewayService;
+use Paydock\API\CustomerService;
 use Paydock\API\TokenService;
+use Paydock\API\VaultService;
 use Paydock\Enums\CredentialSettings;
 use Paydock\Enums\CredentialsTypes;
 use Paydock\Enums\SettingGroups;
@@ -56,6 +59,27 @@ class SDKAdapterService
         return $gatewayService->get()->setId($id)->call();
     }
 
+    public function createVaultToken(array $params): array
+    {
+        $vaultService = new VaultService;
+
+        return $vaultService->create($params)->call();
+    }
+
+    public function createCustomer(array $params): array
+    {
+        $customerService = new CustomerService;
+
+        return $customerService->create($params)->call();
+    }
+
+    public function createCharge(array $params): array
+    {
+        $chargeService = new ChargeService;
+
+        return $chargeService->create($params)->call();
+    }
+
     public function initialise(?bool $forcedEnv = null): void
     {
         $isProd = $this->isProd($forcedEnv);
@@ -69,26 +93,26 @@ class SDKAdapterService
             $settings = new SandboxConnectionSettingService();
         }
 
-        $isAccessToken = CredentialsTypes::AccessKey->name == $settings->get_option(
-                $settingsService->getOptionName($settings->id, [
-                    SettingGroups::Credentials->name,
-                    CredentialSettings::Type->name,
-                ])
-            );
+        $isAccessToken = CredentialsTypes::ACCESS_KEY()->name == $settings->get_option(
+            $settingsService->getOptionName($settings->id, [
+                SettingGroups::CREDENTIALS()->name,
+                CredentialSettings::TYPE()->name,
+            ])
+        );
 
         if ($isAccessToken) {
             $secretKey = $settings->get_option($settingsService->getOptionName($settings->id, [
-                SettingGroups::Credentials->name,
-                CredentialSettings::AccessKey->name,
+                SettingGroups::CREDENTIALS()->name,
+                CredentialSettings::ACCESS_KEY()->name,
             ]));
         } else {
             $publicKey = $settings->get_option($settingsService->getOptionName($settings->id, [
-                SettingGroups::Credentials->name,
-                CredentialSettings::PublicKey->name,
+                SettingGroups::CREDENTIALS()->name,
+                CredentialSettings::PUBLIC_KEY()->name,
             ]));
             $secretKey = $settings->get_option($settingsService->getOptionName($settings->id, [
-                SettingGroups::Credentials->name,
-                CredentialSettings::SecretKey->name,
+                SettingGroups::CREDENTIALS()->name,
+                CredentialSettings::SECRET_KEY()->name,
             ]));
         }
 
@@ -102,12 +126,12 @@ class SDKAdapterService
         if (is_null($forcedProdEnv)) {
             $settings = new SandboxConnectionSettingService();
 
-            return self::ENABLED_CONDITION == $settings->get_option(
-                    SettingsService::getInstance()->getOptionName($settings->id, [
-                        SettingGroups::Credentials->name,
-                        CredentialSettings::Sandbox->name,
-                    ])
-                );
+            return self::ENABLED_CONDITION !== $settings->get_option(
+                SettingsService::getInstance()->getOptionName($settings->id, [
+                    SettingGroups::CREDENTIALS()->name,
+                    CredentialSettings::SANDBOX()->name,
+                ])
+            );
         }
 
         return $forcedProdEnv;

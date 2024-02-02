@@ -67,25 +67,29 @@ abstract class AbstractSettingService extends \WC_Payment_Gateway
         return parent::generate_settings_html($formFields, $echo);
     }
 
-    private function getTabs(): array
+    protected function getTabs(): array
     {
         return [
-            SettingsTabs::LiveConnection->value => [
+            SettingsTabs::LIVE_CONNECTION()->value => [
                 'label' => __('Live Connection'),
-                'active' => $this->currentSection == SettingsTabs::LiveConnection->value,
+                'active' => $this->currentSection == SettingsTabs::LIVE_CONNECTION()->value,
             ],
-            SettingsTabs::SandBoxConnection->value => [
+            SettingsTabs::SANDBOX_CONNECTION()->value => [
                 'label' => __('Sandbox Connection'),
-                'active' => $this->currentSection == SettingsTabs::SandBoxConnection->value,
+                'active' => $this->currentSection == SettingsTabs::SANDBOX_CONNECTION()->value,
             ],
-            SettingsTabs::Widget->value => [
+            SettingsTabs::WIDGET()->value => [
                 'label' => __('Widget Configuration'),
-                'active' => $this->currentSection == SettingsTabs::Widget->value,
+                'active' => $this->currentSection == SettingsTabs::WIDGET()->value,
             ],
-            SettingsTabs::Log->value => [
+            SettingsTabs::LOG()->value => [
                 'label' => __('Logs'),
-                'active' => $this->currentSection == SettingsTabs::Log->value,
-            ]
+                'active' => $this->currentSection == SettingsTabs::LOG()->value,
+            ],
+//            SettingsTabs::WebHooks->value => [
+//                'label' => __('Webhooks'),
+//                'active' => $this->currentSection == SettingsTabs::WebHooks->value,
+//            ],
         ];
     }
 

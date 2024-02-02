@@ -2,55 +2,52 @@
 
 namespace Paydock\Enums;
 
-enum CardSettings
-{
-    case Enable;
-    case GatewayId;
-    case DS;
-    case DSServiceId;
-    case Fraud;
-    case FraudServiceId;
-    case DirectCharge;
-    case SaveCard;
-    case SaveCardOption;
+use Paydock\Abstract\AbstractEnum;
 
-    case SupportedCardTypes;
+class CardSettings extends AbstractEnum
+{
+    protected const ENABLE = 'ENABLE';
+    protected const GATEWAY_ID = 'GATEWAY_ID';
+    protected const DS = 'DS';
+    protected const DS_SERVICE_ID = 'DS_SERVICE_ID';
+    protected const TYPE_EXCHANGE_OTT = 'TYPE_EXCHANGE_OTT';
+    protected const FRAUD = 'FRAUD';
+    protected const FRAUD_SERVICE_ID = 'FRAUD_SERVICE_ID';
+    protected const DIRECT_CHARGE = 'DIRECT_CHARGE';
+    protected const SAVE_CARD = 'SAVE_CARD';
+    protected const SAVE_CARD_OPTION = 'SAVE_CARD_OPTION';
+    protected const SUPPORTED_CARD_TYPES = 'SUPPORTED_CARD_TYPES';
 
     public function getInputType(): string
     {
-        return match ($this) {
-            self::GatewayId => 'text',
-            self::DSServiceId => 'text',
-            self::FraudServiceId => 'text',
-            self::Enable,
-            self::DirectCharge,
-            self::SaveCard => 'checkbox',
-            self::SupportedCardTypes => 'card_select',
+        return match ($this->name) {
+            self::GATEWAY_ID => 'text',
+            self::DS_SERVICE_ID => 'text',
+            self::FRAUD_SERVICE_ID => 'text',
+            self::ENABLE,
+            self::DIRECT_CHARGE,
+            self::SAVE_CARD => 'checkbox',
+            self::SUPPORTED_CARD_TYPES => 'card_select',
+            self::TYPE_EXCHANGE_OTT => 'select',
             default => 'select'
         };
     }
 
     public function getLabel(): string
     {
-        return match ($this) {
-            self::Fraud,
-            self::Enable => $this->name,
-            self::GatewayId => 'Gateway ID',
+        return match ($this->name) {
             self::DS => '3DS',
-            self::DSServiceId => '3DS service ID',
-            self::FraudServiceId => 'Fraud service ID',
-            self::DirectCharge => 'Direct Charge',
-            self::SaveCard => 'Save card',
-            self::SaveCardOption => 'Save card option',
-            self::SupportedCardTypes => 'Supported card types',
+            self::DS_SERVICE_ID => '3DS service ID',
+            self::TYPE_EXCHANGE_OTT => '3DS flow',
+            default => ucfirst(strtolower(str_replace('_', ' ', $this->name)))
         };
     }
 
     public function getDescription(): string
     {
-        return match ($this) {
-            self::DirectCharge => 'Direct charge stands for authorization and capture in a single request',
-            self::SaveCard => 'Offer your customer to save the card permanently at Paydock for further usage',
+        return match ($this->name) {
+            self::DIRECT_CHARGE => 'Direct charge stands for authorization and capture in a single request',
+            self::SAVE_CARD => 'Offer your customer to save the card permanently at Paydock for further usage',
             default => ''
         };
     }

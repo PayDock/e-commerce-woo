@@ -6,139 +6,151 @@ jQuery(document).ready(function ($) {
     const prefixes = [
         'woocommerce_pay_dock_pay_dock_',
         'woocommerce_pay_dock_sandbox_pay_dock_sandbox_',
+        'woocommerce_pay_dock_widget_pay_dock_widget_'
     ];
 
     const conditions = [
         {
-            element: 'Credentials_Type',
-            condition: 'Credentials',
+            element: 'VERSION',
+            condition: 'custom',
             type: types.select,
             hide: [
-                'Credentials_AccessKey'
+                'CREDENTIALS_ACCESS_KEY'
             ],
             show: [
-                'Credentials_PublicKey',
-                'Credentials_SecretKey'
+                'CUSTOM_VERSION',
             ],
         },
         {
-            element: 'Card_DS',
-            condition: 'Disable',
+            element: 'CREDENTIALS_TYPE',
+            condition: 'CREDENTIALS',
             type: types.select,
-            hide: ['Card_DSServiceId'],
+            hide: [
+                'CREDENTIALS_ACCESS_KEY'
+            ],
+            show: [
+                'CREDENTIALS_PUBLIC_KEY',
+                'CREDENTIALS_SECRET_KEY'
+            ],
+        },
+        {
+            element: 'CARD_DS',
+            condition: 'DISABLE',
+            type: types.select,
+            hide: ['CARD_DS_SERVICE_ID'],
             show: [],
         },
         {
-            element: 'Card_Fraud',
-            condition: 'Disable',
+            element: 'CARD_FRAUD',
+            condition: 'DISABLE',
             type: types.select,
-            hide: ['Card_FraudServiceId'],
+            hide: ['CARD_FRAUD_SERVICE_ID'],
             show: [],
         },
         {
-            element: 'Card_SaveCard',
-            condition: 'Disable',
+            element: 'CARD_SAVE_CARD',
+            condition: 'DISABLE',
             type: types.checkbox,
             hide: [],
-            show: ['Card_SaveCardOption'],
+            show: ['CARD_SAVE_CARD_OPTION'],
         },
         {
-            element: 'BankAccount_SaveCard',
-            condition: 'Disable',
+            element: 'BANK_ACCOUNT_SAVE_CARD',
+            condition: 'DISABLE',
             type: types.checkbox,
             hide: [],
-            show: ['BankAccount_SaveCardOption'],
+            show: ['BANK_ACCOUNT_SAVE_CARD_OPTION'],
         },
         {
-            element: 'Wallets_Afterpay_SaveCard',
-            condition: 'Disable',
+            element: 'WALLETS_AFTERPAY_SAVE_CARD',
+            condition: 'DISABLE',
             type: types.checkbox,
             hide: [],
-            show: ['Wallets_Afterpay_SaveCardOption'],
+            show: ['WALLETS_AFTERPAY_SAVE_CARD_OPTION'],
         },
         {
-            element: 'Wallets_ZipMoney_SaveCard',
-            condition: 'Disable',
+            element: 'WALLETS_ZIPPAY_SAVE_CARD',
+            condition: 'DISABLE',
             type: types.checkbox,
             hide: [],
-            show: ['Wallets_ZipMoney_SaveCardOption'],
+            show: ['WALLETS_ZIPPAY_SAVE_CARD_OPTION'],
         },
         {
-            element: 'Wallets_PayPal_SaveCard',
-            condition: 'Disable',
+            element: 'WALLETS_PAY_PAL_SAVE_CARD',
+            condition: 'DISABLE',
             type: types.checkbox,
             hide: [],
-            show: ['Wallets_PayPal_SaveCardOption'],
+            show: ['WALLETS_PAY_PAL_SAVE_CARD_OPTION'],
         },
         {
-            element: 'Wallets_ApplePay_Fraud',
-            condition: 'Disable',
+            element: 'WALLETS_APPLE_PAY_FRAUD',
+            condition: 'DISABLE',
             type: types.checkbox,
             hide: [],
-            show: ['Wallets_ApplePay_FraudServiceId'],
+            show: ['WALLETS_APPLE_PAY_FRAUD_SERVICE_ID'],
         },
         {
-            element: 'Wallets_GooglePay_Fraud',
-            condition: 'Disable',
+            element: 'WALLETS_GOOGLE_PAY_FRAUD',
+            condition: 'DISABLE',
             type: types.checkbox,
             hide: [],
-            show: ['Wallets_GooglePay_FraudServiceId'],
+            show: ['WALLETS_GOOGLE_PAY_FRAUD_SERVICE_ID'],
         },
         {
-            element: 'Wallets_PayPalSmartButton_Fraud',
-            condition: 'Disable',
+            element: 'WALLETS_PAY_PAL_SMART_BUTTON_FRAUD',
+            condition: 'DISABLE',
             type: types.checkbox,
             hide: [],
-            show: ['Wallets_PayPalSmartButton_FraudServiceId'],
+            show: ['WALLETS_PAY_PAL_SMART_BUTTON_FRAUD_SERVICE_ID'],
         },
         {
-            element: 'Wallets_Afterpay_Fraud',
-            condition: 'Disable',
+            element: 'WALLETS_AFTERPAY_FRAUD',
+            condition: 'DISABLE',
             type: types.checkbox,
             hide: [],
-            show: ['Wallets_Afterpay_FraudServiceId'],
+            show: ['WALLETS_AFTERPAY_FRAUD_SERVICE_ID'],
         },
         {
-            element: 'APMs_PayPal_SaveCard',
-            condition: 'Disable',
+            element: 'A_P_M_SPAY_PAL_SAVE_CARD',
+            condition: 'DISABLE',
             type: types.checkbox,
             hide: [],
-            show: ['APMs_PayPal_SaveCardOption'],
+            show: ['A_P_M_SPAY_PAL_SAVE_CARD_OPTION'],
         },
         {
-            element: 'APMs_PayPal_Fraud',
-            condition: 'Disable',
+            element: 'A_P_M_SPAY_PAL_FRAUD',
+            condition: 'DISABLE',
             type: types.checkbox,
             hide: [],
-            show: ['APMs_PayPal_FraudServiceId'],
+            show: ['A_P_M_SPAY_PAL_FRAUD_SERVICE_ID'],
         },
         {
-            element: 'APMs_Zippay_Fraud',
-            condition: 'Disable',
+            element: 'A_P_M_SZIPPAY_FRAUD',
+            condition: 'DISABLE',
             type: types.checkbox,
             hide: [],
-            show: ['APMs_Zippay_FraudServiceId'],
+            show: ['A_P_M_SZIPPAY_FRAUD_SERVICE_ID'],
         },
         {
-            element: 'APMs_Zippay_SaveCard',
-            condition: 'Disable',
+            element: 'A_P_M_SZIPPAY_SAVE_CARD',
+            condition: 'DISABLE',
             type: types.checkbox,
             hide: [],
-            show: ['APMs_Zippay_SaveCardOption'],
+            show: ['A_P_M_SZIPPAY_SAVE_CARD_OPTION'],
         },
         {
-            element: 'APMs_Afterpay_SaveCard',
-            condition: 'Disable',
+            element: 'A_P_M_SAFTERPAY_SAVE_CARD',
+            condition: 'DISABLE',
             type: types.checkbox,
             hide: [],
-            show: ['APMs_Afterpay_SaveCardOption'],
+            show: ['A_P_M_SAFTERPAY_SAVE_CARD_OPTION'],
         },
         {
-            element: 'APMs_Afterpay_Fraud',
-            condition: 'Disable',
+            element: 'A_P_M_SAFTERPAY_FRAUD',
+            condition: 'DISABLE',
             type: types.checkbox,
             hide: [],
-            show: ['APMs_Afterpay_FraudServiceId'],
+            show: ['A_P_M_SAFTERPAY_FRAUD_SERVICE_ID'],
         },
     ];
 
@@ -165,7 +177,6 @@ jQuery(document).ready(function ($) {
 
     prefixes.map((prefix) => {
         conditions.map((conditionValue) => {
-            console.log('#' + prefix + conditionValue.element)
             let trackedElement = $('#' + prefix + conditionValue.element);
 
             trackedElement.on('change', (event) => {

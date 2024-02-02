@@ -12,21 +12,21 @@ class SandboxConnectionSettingService extends LiveConnectionSettingService
 {
     protected function getId(): string
     {
-        return SettingsTabs::SandBoxConnection->value;
+        return SettingsTabs::SANDBOX_CONNECTION()->value;
     }
 
     public function init_form_fields(): void
     {
         $sandBoxOptionKey = SettingsService::getInstance()
-            ->getOptionName($this->id, [SettingGroups::Credentials->name, CredentialSettings::Sandbox->name]);
+            ->getOptionName($this->id, [SettingGroups::CREDENTIALS()->name, CredentialSettings::SANDBOX()->name]);
 
         $this->form_fields[$sandBoxOptionKey] = [
-            'type' => CredentialSettings::Sandbox->getInputType(),
+            'type' => CredentialSettings::SANDBOX()->getInputType(),
             'label' => __(
                 'To test your Paydock for WooCommerce Plugin, you can use the sandbox mode.',
                 PaydockPlugin::PLUGIN_PREFIX
             ),
-            'title' => __(CredentialSettings::Sandbox->getLabel(), PaydockPlugin::PLUGIN_PREFIX),
+            'title' => __(CredentialSettings::SANDBOX()->getLabel(), PaydockPlugin::PLUGIN_PREFIX),
         ];
         parent::init_form_fields();
     }
