@@ -1,4 +1,4 @@
-=== WooCommerce Paydock plugin ===
+# WooCommerce Paydock plugin
 
 To install and configure Paydock plugin, you need:
 
