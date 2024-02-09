@@ -7,6 +7,9 @@ use Paydock\Abstract\AbstractEnum;
 class CardSettings extends AbstractEnum
 {
     protected const ENABLE = 'ENABLE';
+
+    protected const SUPPORTED_CARD_TYPES = 'SUPPORTED_CARD_TYPES';
+
     protected const GATEWAY_ID = 'GATEWAY_ID';
     protected const DS = 'DS';
     protected const DS_SERVICE_ID = 'DS_SERVICE_ID';
@@ -16,7 +19,6 @@ class CardSettings extends AbstractEnum
     protected const DIRECT_CHARGE = 'DIRECT_CHARGE';
     protected const SAVE_CARD = 'SAVE_CARD';
     protected const SAVE_CARD_OPTION = 'SAVE_CARD_OPTION';
-    protected const SUPPORTED_CARD_TYPES = 'SUPPORTED_CARD_TYPES';
 
     public function getInputType(): string
     {
@@ -39,6 +41,7 @@ class CardSettings extends AbstractEnum
             self::DS => '3DS',
             self::DS_SERVICE_ID => '3DS service ID',
             self::TYPE_EXCHANGE_OTT => '3DS flow',
+            self::SUPPORTED_CARD_TYPES => 'Supported card schemes',
             default => ucfirst(strtolower(str_replace('_', ' ', $this->name)))
         };
     }

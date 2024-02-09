@@ -95,9 +95,6 @@ class LiveConnectionSettingService extends AbstractSettingService
         $service = SettingsService::getInstance();
 
         foreach (CardSettings::cases() as $cardSettings) {
-            if (CardSettings::TYPE_EXCHANGE_OTT()->name == $cardSettings->name) {
-                continue;
-            }
             $key = $service->getOptionName($this->id, [SettingGroups::CARD()->name, $cardSettings->name]);
             $fields[$key] = [
                 'type' => $cardSettings->getInputType(),

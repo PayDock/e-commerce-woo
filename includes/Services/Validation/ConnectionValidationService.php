@@ -9,13 +9,13 @@ use Paydock\Enums\BankAccountSettings;
 use Paydock\Enums\CardSettings;
 use Paydock\Enums\CredentialSettings;
 use Paydock\Enums\CredentialsTypes;
+use Paydock\Enums\FraudTypes;
 use Paydock\Enums\OtherPaymentMethods;
 use Paydock\Enums\SettingGroups;
 use Paydock\Enums\SettingsTabs;
 use Paydock\Enums\WalletPaymentMethods;
 use Paydock\Enums\WalletSettings;
 use Paydock\Services\SDKAdapterService;
-use Paydock\Services\Settings\LiveConnectionSettingService;
 use Paydock\Services\SettingsService;
 
 class ConnectionValidationService
@@ -23,15 +23,22 @@ class ConnectionValidationService
     private const ENABLED_CONDITION = 'yes';
 
     private const UNSELECTED_CRD_VALUE = 'Please select payment methods...';
-    private array $errors = [];
 
-    private array $result = [];
-
-    private array $data = [];
-
-    private array $getawayIds = [];
+    private const AVAILABLE_CARD_TYPES = [
+        'mastercard' => 'MasterCard',
+        'visa' => 'Visa',
+        'amex' => 'American Express',
+        'diners' => 'Diners Club',
+        'japcb' => 'Japanese Credit Bureau',
+        'maestro' => 'Maestro',
+        'ausbc' => 'Australian Bank Card',
+    ];
     public ?AbstractSettingService $service = null;
-
+    private array $errors = [];
+    private array $result = [];
+    private array $data = [];
+    private array $getawayIds = [];
+    private array $servicesIds = [];
     private ?SDKAdapterService $adapterService = null;
 
     public function __construct(AbstractSettingService $service)
@@ -48,19 +55,9 @@ class ConnectionValidationService
 
         return update_option(
             $option_key,
-            apply_filters('woocommerce_settings_api_sanitized_fields_' . $service->id, $service->settings),
+            apply_filters('woocommerce_settings_api_sanitized_fields_'.$service->id, $service->settings),
             'yes'
         );
-    }
-
-    public function getResult(): array
-    {
-        return $this->result;
-    }
-
-    public function getErrors(): array
-    {
-        return $this->errors;
     }
 
     private function prepareFormData(): void
@@ -92,196 +89,6 @@ class ConnectionValidationService
             $this->validateWallets();
             $this->validateAPMs();
         }
-    }
-
-    private function validateWallets(): void
-    {
-        foreach (WalletPaymentMethods::cases() as $method) {
-            $result = true;
-            $enabledKey = SettingsService::getInstance()
-                ->getOptionName($this->service->id, [
-                    SettingGroups::WALLETS()->name,
-                    $method->name,
-                    WalletSettings::ENABLE()->name,
-                ]);
-            $gatewayKey = SettingsService::getInstance()
-                ->getOptionName($this->service->id, [
-                    SettingGroups::WALLETS()->name,
-                    $method->name,
-                    WalletSettings::GATEWAY_ID()->name,
-                ]);
-            $isEnabled = self::ENABLED_CONDITION === $this->data[$enabledKey];
-            if ($isEnabled) {
-                $result = match ($method) {
-                    WalletPaymentMethods::PAY_PAL_SMART_BUTTON() => $this->validateId(
-                        $this->data[$gatewayKey],
-                        'Paypal',
-                        true
-                    ),
-                    WalletPaymentMethods::AFTERPAY() => $this->validateId(
-                        $this->data[$gatewayKey],
-                        'Afterpay v2',
-                        true
-                    ),
-                    default => $this->validateId($this->data[$gatewayKey], 'MPGS'),
-                };
-            }
-
-            if (!$result) {
-                $this->errors[] = 'Wrong Gateway ID for ' . $method->getLabel() . ' wallet.';
-            }
-        }
-    }
-
-    private function validateAPMs(): void
-    {
-        foreach (OtherPaymentMethods::cases() as $method) {
-            $result = true;
-            $enabledKey = SettingsService::getInstance()
-                ->getOptionName($this->service->id, [
-                    SettingGroups::A_P_M_S()->name,
-                    $method->name,
-                    WalletSettings::ENABLE()->name,
-                ]);
-            $gatewayKey = SettingsService::getInstance()
-                ->getOptionName($this->service->id, [
-                    SettingGroups::A_P_M_S()->name,
-                    $method->name,
-                    WalletSettings::GATEWAY_ID()->name,
-                ]);
-            $isEnabled = self::ENABLED_CONDITION === $this->data[$enabledKey];
-            if ($isEnabled) {
-                $result = match ($method) {
-                    OtherPaymentMethods::PAY_PAL() => $this->validateId(
-                        $this->data[$gatewayKey],
-                        'PayPal',
-                        true
-                    ),
-                    OtherPaymentMethods::AFTERPAY() => $this->validateId(
-                        $this->data[$gatewayKey],
-                        'Afterpay v1',
-                        true
-                    ),
-                    default => $this->validateId($this->data[$gatewayKey], $method->name),
-                };
-            }
-
-            if (!$result) {
-                $this->errors[] = 'Wrong Gateway ID for ' . $method->getLabel() . ' APM.';
-            }
-        }
-    }
-
-    private function validateBankAccount(): void
-    {
-        $enabledKey = SettingsService::getInstance()
-            ->getOptionName($this->service->id, [
-                SettingGroups::BANK_ACCOUNT()->name,
-                BankAccountSettings::ENABLE()->name,
-            ]);
-        $gatewayKey = SettingsService::getInstance()
-            ->getOptionName($this->service->id, [
-                SettingGroups::BANK_ACCOUNT()->name,
-                BankAccountSettings::GATEWAY_ID()->name,
-            ]);
-
-        $result = false;
-
-        if (self::ENABLED_CONDITION !== $this->data[$enabledKey]) {
-            $result = true;
-        }
-
-        if (!$result && $this->validateId($this->data[$gatewayKey], 'bank account')) {
-            $result = true;
-        }
-
-        if (!$result) {
-            $this->errors[] = 'Wrong bank account gateway ID.';
-        }
-    }
-
-    private function validateCard(): void
-    {
-        $enableKey = SettingsService::getInstance()
-            ->getOptionName($this->service->id, [
-                SettingGroups::CARD()->name,
-                CardSettings::ENABLE()->name,
-            ]);
-
-        $gatewayIdKey = SettingsService::getInstance()
-            ->getOptionName($this->service->id, [
-                SettingGroups::CARD()->name,
-                CardSettings::GATEWAY_ID()->name,
-            ]);
-
-        $this->result[$enableKey] = $this->data[$enableKey];
-
-        if ('yes' !== $this->data[$enableKey]) {
-            $this->result[$gatewayIdKey] = $this->data[$gatewayIdKey];
-        }
-
-        $supportedCardTypesKey = SettingsService::getInstance()->getOptionName($this->service->id, [
-            SettingGroups::CARD()->name,
-            CardSettings::SUPPORTED_CARD_TYPES()->name,
-        ]);
-
-
-        if ('yes' == $this->data[$enableKey] && !empty($this->data[$gatewayIdKey])) {
-            if ($this->validateId($this->data[$gatewayIdKey])) {
-                $this->result[$gatewayIdKey] = $this->data[$gatewayIdKey];
-                $supportCardTypeByGatewayId = $this->getSupportCardTypeByGatewayId($this->data[$gatewayIdKey]);
-                if ($supportCardTypeByGatewayId) {
-                    if ($this->data[$supportedCardTypesKey]) {
-                        if (self::UNSELECTED_CRD_VALUE == $this->data[$supportedCardTypesKey]) {
-                            $this->errors[] = 'Supported card types cant be empty.';
-                        } else {
-                            $supportCardType = str_replace(' ', '', $this->data[$supportedCardTypesKey]);
-                            $arraySupportedCardTypesKey = explode(',', $supportCardType);
-                            if (!in_array($supportCardTypeByGatewayId, $arraySupportedCardTypesKey)) {
-                                $this->errors[] = 'Selected types of cards (' . $this->data[$supportedCardTypesKey] . ') are not supported by this Gateway ID';
-                            }
-                        }
-                    } else {
-                        $this->errors[] = 'You do not select any supported card types';
-                    }
-                }
-
-            } else {
-                $this->errors[] = 'Incorrect Gateway ID for the card: ' . $this->data[$gatewayIdKey];
-            }
-        }
-
-    }
-
-    private function getSupportCardTypeByGatewayId($gatewayIdKey): ?string
-    {
-        foreach ($this->getawayIds['resource']['data'] as $getawayId) {
-            if ($getawayId['_id'] == $gatewayIdKey) {
-                return $getawayId['type'];
-            }
-        }
-        return false;
-    }
-
-    private function validateId(string $id, string $checkedName = '', bool $checkFull = false): bool
-    {
-        $needCheck = !empty($checkedName);
-
-        foreach ($this->getawayIds['resource']['data'] as $getawayId) {
-            $checked = !$needCheck;
-
-            if ($needCheck && $checkFull) {
-                $checked = strtolower($checkedName) == strtolower($getawayId['name']);
-            } elseif ($needCheck) {
-                $checked = (false === strpos(strtolower($getawayId['name']), strtolower($checkedName)));
-            }
-
-            if ($getawayId['_id'] == $id && $checked) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private function validateCredential(): bool
@@ -340,6 +147,11 @@ class ConnectionValidationService
         return empty($this->getawayIds['error']);
     }
 
+    private function checkCredentialConnection(?string $public, ?string $secret): bool
+    {
+        return $this->checkPublicKey($public) && $this->checkSecretKey($secret);
+    }
+
     private function checkPublicKey(?string $publicKey): bool
     {
         ConfigService::$publicKey = $publicKey;
@@ -358,12 +170,303 @@ class ConnectionValidationService
         ConfigService::$secretKey = $secretKey;
 
         $this->getawayIds = $this->adapterService->searchGateway(['sort_direction' => 'DESC']);
+        $this->servicesIds = $this->adapterService->searchServices(['sort_direction' => 'DESC']);
 
         return empty($this->getawayIds['error']);
     }
 
-    private function checkCredentialConnection(?string $public, ?string $secret): bool
+    private function validateCard(): void
     {
-        return $this->checkPublicKey($public) && $this->checkSecretKey($secret);
+        $enableKey = SettingsService::getInstance()
+            ->getOptionName($this->service->id, [
+                SettingGroups::CARD()->name,
+                CardSettings::ENABLE()->name,
+            ]);
+
+        $gatewayIdKey = SettingsService::getInstance()
+            ->getOptionName($this->service->id, [
+                SettingGroups::CARD()->name,
+                CardSettings::GATEWAY_ID()->name,
+            ]);
+
+        $fraudEnableServiceKey = SettingsService::getInstance()
+            ->getOptionName($this->service->id, [
+                SettingGroups::CARD()->name,
+                CardSettings::FRAUD()->name,
+            ]);
+
+        $fraudGatewayIdKey = SettingsService::getInstance()
+            ->getOptionName($this->service->id, [
+                SettingGroups::CARD()->name,
+                CardSettings::FRAUD_SERVICE_ID()->name,
+            ]);
+
+        $_3DSEnableServiceKey = SettingsService::getInstance()
+            ->getOptionName($this->service->id, [
+                SettingGroups::CARD()->name,
+                CardSettings::DS()->name,
+            ]);
+
+        $_3DSGatewayIdKey = SettingsService::getInstance()
+            ->getOptionName($this->service->id, [
+                SettingGroups::CARD()->name,
+                CardSettings::DS_SERVICE_ID()->name,
+            ]);
+
+        $this->result[$enableKey] = $this->data[$enableKey];
+
+        if ('yes' !== $this->data[$enableKey]) {
+            $this->result[$gatewayIdKey] = $this->data[$gatewayIdKey];
+        }
+
+        $supportedCardTypesKey = SettingsService::getInstance()->getOptionName($this->service->id, [
+            SettingGroups::CARD()->name,
+            CardSettings::SUPPORTED_CARD_TYPES()->name,
+        ]);
+
+
+        if ('yes' == $this->data[$enableKey] && !empty($this->data[$gatewayIdKey])) {
+            if ($isValidGateway = $this->validateId($this->data[$gatewayIdKey])) {
+                $this->result[$gatewayIdKey] = $this->data[$gatewayIdKey];
+                $supportCardTypeByGatewayId = $this->getSupportCardTypeByGatewayId($this->data[$gatewayIdKey]);
+                if ($supportCardTypeByGatewayId) {
+                    if ($this->data[$supportedCardTypesKey]) {
+                        if (self::UNSELECTED_CRD_VALUE == $this->data[$supportedCardTypesKey]) {
+                            $this->errors[] = 'Supported card types cant be empty.';
+                        } else {
+                            $supportCardType = strtolower(str_replace(' ', '',
+                                $this->data[$supportedCardTypesKey]));
+                            $arraySupportedCardTypesKeys = explode(',', $supportCardType);
+                            if (empty(array_intersect($arraySupportedCardTypesKeys,
+                                array_keys(self::AVAILABLE_CARD_TYPES)))) {
+                                $this->errors[] = 'Selected types of cards ('.implode(',',
+                                        $arraySupportedCardTypesKeys).') are not supported by this Gateway ID';
+                            }
+                        }
+                    } else {
+                        $this->errors[] = 'You do not select any supported card types';
+                    }
+                }
+
+            } else {
+                $this->errors[] = 'Incorrect Gateway ID for the card: '.$this->data[$gatewayIdKey];
+            }
+
+            if (
+                $isValidGateway
+                && (FraudTypes::DISABLE()->name !== $this->data[$fraudEnableServiceKey])
+                && !$this->validateId($this->data[$fraudGatewayIdKey])
+            ) {
+                $this->errors[] = 'Incorrect Fraud Service ID: '.$this->data[$fraudGatewayIdKey];
+            }
+
+            if (
+                $isValidGateway
+                && (FraudTypes::DISABLE()->name !== $this->data[$_3DSEnableServiceKey])
+                && !$this->validateId($this->data[$_3DSGatewayIdKey])
+            ) {
+                $this->errors[] = 'Incorrect 3DS Service ID: '.$this->data[$_3DSGatewayIdKey];
+            }
+        }
+    }
+
+    private function validateId(string $id, string $checkedName = '', bool $checkFull = false): bool
+    {
+        $needCheck = !empty($checkedName);
+
+        foreach ($this->getawayIds['resource']['data'] as $getawayId) {
+            $checked = !$needCheck;
+
+            if ($needCheck && $checkFull) {
+                $checked = strtolower($checkedName) == strtolower($getawayId['name']);
+            } elseif ($needCheck) {
+                $checked = (false !== strpos(strtolower($getawayId['name']), strtolower($checkedName)));
+            }
+
+            if ($getawayId['_id'] == $id && $checked) {
+                return true;
+            }
+        }
+
+        foreach ($this->servicesIds['resource']['data'] as $servicesId) {
+            if ($id == $servicesId['_id']) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function getSupportCardTypeByGatewayId($gatewayIdKey): ?string
+    {
+        foreach ($this->getawayIds['resource']['data'] as $getawayId) {
+            if ($getawayId['_id'] == $gatewayIdKey) {
+                return strtolower($getawayId['type']);
+            }
+        }
+
+        return false;
+    }
+
+    private function validateBankAccount(): void
+    {
+        $enabledKey = SettingsService::getInstance()
+            ->getOptionName($this->service->id, [
+                SettingGroups::BANK_ACCOUNT()->name,
+                BankAccountSettings::ENABLE()->name,
+            ]);
+        $gatewayKey = SettingsService::getInstance()
+            ->getOptionName($this->service->id, [
+                SettingGroups::BANK_ACCOUNT()->name,
+                BankAccountSettings::GATEWAY_ID()->name,
+            ]);
+
+        $result = false;
+
+        if (self::ENABLED_CONDITION !== $this->data[$enabledKey]) {
+            $result = true;
+        }
+
+        if (!$result && $this->validateId($this->data[$gatewayKey], 'bank account')) {
+            $result = true;
+        }
+
+        if (!$result) {
+            $this->errors[] = 'Wrong bank account gateway ID.';
+        }
+    }
+
+    private function validateWallets(): void
+    {
+        foreach (WalletPaymentMethods::cases() as $method) {
+            $result = true;
+            $enabledKey = SettingsService::getInstance()
+                ->getOptionName($this->service->id, [
+                    SettingGroups::WALLETS()->name,
+                    $method->name,
+                    WalletSettings::ENABLE()->name,
+                ]);
+            $gatewayKey = SettingsService::getInstance()
+                ->getOptionName($this->service->id, [
+                    SettingGroups::WALLETS()->name,
+                    $method->name,
+                    WalletSettings::GATEWAY_ID()->name,
+                ]);
+            $fraudEnableKey = SettingsService::getInstance()
+                ->getOptionName($this->service->id, [
+                    SettingGroups::WALLETS()->name,
+                    $method->name,
+                    WalletSettings::FRAUD()->name,
+                ]);
+            $fraudGatewayIdKey = SettingsService::getInstance()
+                ->getOptionName($this->service->id, [
+                    SettingGroups::WALLETS()->name,
+                    $method->name,
+                    WalletSettings::FRAUD_SERVICE_ID()->name,
+                ]);
+            $isEnabled = self::ENABLED_CONDITION === $this->data[$enabledKey];
+            if ($isEnabled) {
+                $result = match ($method) {
+                    WalletPaymentMethods::PAY_PAL_SMART_BUTTON() => $this->validateId(
+                        $this->data[$gatewayKey],
+                        'Paypal',
+                        true
+                    ),
+                    WalletPaymentMethods::AFTERPAY() => $this->validateId(
+                        $this->data[$gatewayKey],
+                        'Afterpay v2',
+                        true
+                    ),
+                    default => $this->validateId($this->data[$gatewayKey], 'MPGS'),
+                };
+            }
+
+            if (!$result) {
+                $this->errors[] = 'Wrong Gateway ID for '.$method->getLabel().' wallet.';
+            }
+
+            if (
+                $isEnabled
+                && (self::ENABLED_CONDITION == $this->data[$fraudEnableKey])
+                && !$this->validateId($this->data[$fraudGatewayIdKey])
+            ) {
+                $this->errors[] = 'Incorrect '
+                    .$method->getLabel()
+                    .' wallet Fraud Service ID: '
+                    .$this->data[$fraudGatewayIdKey];
+            }
+        }
+    }
+
+    private function validateAPMs(): void
+    {
+        foreach (OtherPaymentMethods::cases() as $method) {
+            $result = true;
+            $enabledKey = SettingsService::getInstance()
+                ->getOptionName($this->service->id, [
+                    SettingGroups::A_P_M_S()->name,
+                    $method->name,
+                    WalletSettings::ENABLE()->name,
+                ]);
+            $gatewayKey = SettingsService::getInstance()
+                ->getOptionName($this->service->id, [
+                    SettingGroups::A_P_M_S()->name,
+                    $method->name,
+                    WalletSettings::GATEWAY_ID()->name,
+                ]);
+            $fraudEnableKey = SettingsService::getInstance()
+                ->getOptionName($this->service->id, [
+                    SettingGroups::A_P_M_S()->name,
+                    $method->name,
+                    WalletSettings::FRAUD()->name,
+                ]);
+            $fraudGatewayIdKey = SettingsService::getInstance()
+                ->getOptionName($this->service->id, [
+                    SettingGroups::A_P_M_S()->name,
+                    $method->name,
+                    WalletSettings::FRAUD_SERVICE_ID()->name,
+                ]);
+            $isEnabled = self::ENABLED_CONDITION === $this->data[$enabledKey];
+            if ($isEnabled) {
+                $result = match ($method) {
+                    OtherPaymentMethods::PAY_PAL() => $this->validateId(
+                        $this->data[$gatewayKey],
+                        'PayPal',
+                        true
+                    ),
+                    OtherPaymentMethods::AFTERPAY() => $this->validateId(
+                        $this->data[$gatewayKey],
+                        'Afterpay v1',
+                        true
+                    ),
+                    default => $this->validateId($this->data[$gatewayKey], $method->name),
+                };
+            }
+
+            if (!$result) {
+                $this->errors[] = 'Wrong Gateway ID for '.$method->getLabel().' APM.';
+            }
+
+            if (
+                $isEnabled
+                && (self::ENABLED_CONDITION == $this->data[$fraudEnableKey])
+                && !$this->validateId($this->data[$fraudGatewayIdKey])
+            ) {
+                $this->errors[] = 'Incorrect '
+                    .$method->getLabel()
+                    .' APM Fraud Service ID: '
+                    .$this->data[$fraudGatewayIdKey];
+            }
+        }
+    }
+
+    public function getResult(): array
+    {
+        return $this->result;
+    }
+
+    public function getErrors(): array
+    {
+        return $this->errors;
     }
 }

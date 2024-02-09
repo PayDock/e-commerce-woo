@@ -2,198 +2,55 @@ jQuery(window).on('load', function () {
     const json = {
         "options": [
             {
-                "image": "/wp-content/plugins/paydock/assets/images/advam.png",
-                "title": "Advam",
-                "type": "Advam"
-            },
-            {
-                "image": "/wp-content/plugins/paydock/assets/images/adyen.png",
-                "title": "Adyen",
-                "type": "Adyen"
-            },
-            {
-                "image": "/wp-content/plugins/paydock/assets/images/authorize.png",
-                "title": "Authorize Net",
-                "type": "AuthorizeNet"
-            },
-            {
-                "image": "/wp-content/plugins/paydock/assets/images/bpoint.png",
-                "title": "Bpoint",
-                "type": "Bpoint"
-            },
-            {
-                "image": "/wp-content/plugins/paydock/assets/images/braintree.png",
-                "title": "Brain Tree",
-                "type": "BrainTree"
-            },
-            {
-                "image": "/wp-content/plugins/paydock/assets/images/cybersource.png",
-                "title": "Cybersource",
-                "type": "Cybersource"
-            },
-            {
-                "image": "/wp-content/plugins/paydock/assets/images/elavon.png",
-                "title": "Elavon",
-                "type": "Elavon"
-            },
-            {
-                "image": "/wp-content/plugins/paydock/assets/images/ems.png",
-                "title": "Ems",
-                "type": "Ems"
-            },
-            {
-                "image": "/wp-content/plugins/paydock/assets/images/eway.png",
-                "title": "Eway",
-                "type": "Eway"
-            },
-            {
-                "image": "/wp-content/plugins/paydock/assets/images/ezidebit.png",
-                "title": "Ezidebit",
-                "type": "Ezidebit"
-            },
-            {
-                "image": "/wp-content/plugins/paydock/assets/images/ezidebit35.png",
-                "title": "Ezidebit 3.5",
-                "type": "Ezidebit3"
-            },
-            {
-                "image": "/wp-content/plugins/paydock/assets/images/fatzebra.png",
-                "title": "Fat Zebra",
-                "type": "FatZebra"
-            },
-            {
-                "image": "/wp-content/plugins/paydock/assets/images/first_american.png",
-                "title": "First American",
-                "type": "FirstAmerican"
-            },
-            {
-                "image": "/wp-content/plugins/paydock/assets/images/fiserv.png",
-                "title": "Fiserv",
-                "type": "Fiserv"
-            },
-            {
-                "image": "/wp-content/plugins/paydock/assets/images/flow2cash.png",
-                "title": "Flo 2 Cash",
-                "type": "Flo2Cash"
-            }, {
-                "image": "/wp-content/plugins/paydock/assets/images/flypay.png",
-                "title": "Flypay",
-                "type": "Flypay"
-            }, {
-                "image": "/wp-content/plugins/paydock/assets/images/flypay_v2.png",
-                "title": "Flypay V2",
-                "type": "FlypayV2"
-            },
-            {
-                "image": "/wp-content/plugins/paydock/assets/images/forte.png",
-                "title": "Forte",
-                "type": "Forte"
-            },
-            {
-                "image": "/wp-content/plugins/paydock/assets/images/bambora.png",
-                "title": "Bambora",
-                "type": "Bambora"
-            },
-            {
-                "image": "/wp-content/plugins/paydock/assets/images/mastercard_gateway.png",
-                "title": "Mastercard Payment Gateway Services (MPGS)",
-                "type": "MasterCard"
-            },
-            {
-                "image": "/wp-content/plugins/paydock/assets/images/mw.png",
-                "title": "Merchantwarrior",
-                "type": "Merchantwarrior"
-            },
-            {
-                "image": "/wp-content/plugins/paydock/assets/images/moneris.png",
-                "title": "Moneris",
-                "type": "Moneris"
-            },
-            {
-                "image": "/wp-content/plugins/paydock/assets/images/nab.png",
-                "title": "NAB",
-                "type": "NAB",
-            },
-            {
-                "image": "/wp-content/plugins/paydock/assets/images/paperless.png",
-                "title": "Paperless",
-                "type": "Paperless"
-            },
-            {
-                "image": "/wp-content/plugins/paydock/assets/images/windcave.png",
-                "title": "Windcave",
-                "type": "Windcave"
-            },
-            {
-                "image": "/wp-content/plugins/paydock/assets/images/westpac.png",
-                "title": "Pay Way Classic",
-                "type": "PayWayClassic"
-            },
-            {
-                "image": "/wp-content/plugins/paydock/assets/images/pin.png",
-                "title": "Pin",
-                "type": "Pin"
-            },
-            {
-                "image": "/wp-content/plugins/paydock/assets/images/promise-pay.png",
-                "title": "Assembly",
-                "type": "Assembly"
-            },
-            {
-                "image": "/wp-content/plugins/paydock/assets/images/qualpay.svg",
-                "title": "Qualpay",
-                "type": "Qualpay"
-            },
-            {
-                "image": "/wp-content/plugins/paydock/assets/images/securepay.png",
-                "title": "Secure Pay",
-                "type": "SecurePay"
-            },
-            {
-                "image": "/wp-content/plugins/paydock/assets/images/zepto.png",
-                "title": "Zepto",
-                "type": "Zepto"
-            },
-            {
-                "image": "/wp-content/plugins/paydock/assets/images/sqid.png",
-                "title": "Sqid",
-                "type": "Sqid"
-            },
-            {
-                "image": "/wp-content/plugins/paydock/assets/images/stripe.png",
-                "title": "Stripe",
-                "type": "Stripe"
-            },
-            {
-                "image": "/wp-content/plugins/paydock/assets/images/till-payments.png",
-                "title": "Till Payments",
-                "type": "TillPayments"
-            },
-            {
-                "image": "/wp-content/plugins/paydock/assets/images/worldpay.png",
-                "title": "World Pay",
-                "type": "WorldPay"
-            },
-            {
-                "image": "/wp-content/plugins/paydock/assets/images/worldpay.png",
-                "title": "World Pay WPG",
-                "type": "WorldPayWPG"
-            },
-            {
-                "image": "/wp-content/plugins/paydock/assets/images/eftpos.png",
-                "title": "EFTPOS",
-                "type": "EFTPOS"
-            },
-            {
-                "image": "/wp-content/plugins/paydock/assets/images/vii.png",
-                "title": "Vii",
-                "type": "Vii"
+                "image": "/wp-content/plugins/paydock/assets/images/ausbc.png",
+                "title": "Australian Bank Card",
+                "type": "ausbc"
             },
             {
                 "image": "/wp-content/plugins/paydock/assets/images/diners.png",
-                "title": "Diners Club",
-                "type": "DinersClub"
-            }
+                "title": "Diner's Club, Diner's Club International, Diner's Club / Carte Blanche",
+                "type": "diners"
+            },
+            {
+                "image": "/wp-content/plugins/paydock/assets/images/japcb.png",
+                "title": "Japanese Credit Bureau",
+                "type": "japcb"
+            },
+            {
+                "image": "/wp-content/plugins/paydock/assets/images/maestro.png",
+                "title": "Maestro",
+                "type": "maestro"
+            },
+            {
+                "image": "/wp-content/plugins/paydock/assets/images/laser.png",
+                "title": "Laser",
+                "type": "laser"
+            },
+            {
+                "image": "/wp-content/plugins/paydock/assets/images/solo.png",
+                "title": "Solo (Paymentech)",
+                "type": "solo"
+            },
+            {
+                "image": "/wp-content/plugins/paydock/assets/images/mastercard.png",
+                "title": "MasterCard",
+                "type": "mastercard"
+            },
+            {
+                "image": "/wp-content/plugins/paydock/assets/images/discover.png",
+                "title": "Discover",
+                "type": "discover"
+            },
+            {
+                "image": "/wp-content/plugins/paydock/assets/images/amex.png",
+                "title": "American Express",
+                "type": "amex"
+            },
+            {
+                "image": "/wp-content/plugins/paydock/assets/images/visa.png",
+                "title": "Visa, Visa Electron",
+                "type": "visa"
+            },
         ]
     }
     const inputElement = document.getElementById('card-select');

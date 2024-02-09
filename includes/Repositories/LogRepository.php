@@ -7,7 +7,12 @@ use Paydock\Contracts\Repository;
 
 class LogRepository extends AbstractRepository implements Repository
 {
-
+    private const AVAILABLE_SORT = [
+        'id',
+        'created_at',
+        'operation',
+        'status',
+    ];
     protected string $table = 'logs';
 
     public const DEFAULT = 0;
@@ -48,15 +53,34 @@ class LogRepository extends AbstractRepository implements Repository
             ON `$fullTableName` (`gateway`);";
     }
 
-    public function getLogs(int $page = 1, int $perPage = 50): array
+    public function getLogs(int $page = 1, int $perPage = 50, string $orderBy = 'created_at', string $order = 'desc'): array
     {
-        $page = $page > 1 ? $page : 1;
-        $fullTableName = $this->getFullTableName($this->table);
-        $offset = --$page * $perPage;
+        $page = max($page, 1);
+        $orderBy = in_array($orderBy, self::AVAILABLE_SORT, true) ? $orderBy : 'created_at';
+        $order = $order == 'asc' ? 'asc': 'desc';
 
-        return $this->wordpressDB->get_results(
-            "SELECT * FROM $fullTableName ORDER BY `created_at` DESC LIMIT $perPage OFFSET $offset;"
+        $fullTableName = $this->getFullTableName($this->table);
+        $offset = ($page - 1) * $perPage;
+
+        $result = [];
+
+        $result['data'] = $this->wordpressDB->get_results(
+            "SELECT * FROM `$fullTableName` ORDER BY `$orderBy` $order LIMIT $perPage OFFSET $offset;"
         );
+
+        $result['count'] = $this->wordpressDB->get_row(
+            "SELECT COUNT(*) as `count` FROM `$fullTableName`;"
+        )->count;
+
+        $result['from'] = $result['count'] > 0 ? $offset + 1 : 0;
+        $max = $page * $perPage;
+        $result['to'] = $max < $result['count'] ? $max : $result['count'];
+        $result['last_page'] = $result['count'] > 0 ? ceil($result['count'] / $perPage) : 1;
+        $result['current'] = $page;
+        $result['order'] = $order;
+        $result['orderBy'] = $orderBy;
+
+        return $result;
     }
 
     public function createLogRecord(

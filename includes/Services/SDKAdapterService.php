@@ -6,6 +6,7 @@ use Paydock\API\ChargeService;
 use Paydock\API\ConfigService;
 use Paydock\API\GatewayService;
 use Paydock\API\CustomerService;
+use Paydock\API\ServiceService;
 use Paydock\API\TokenService;
 use Paydock\API\VaultService;
 use Paydock\Enums\CredentialSettings;
@@ -44,6 +45,12 @@ class SDKAdapterService
 
         return $gatewayService->search($parameters)->call();
     }
+    public function searchServices(array $parameters = []): array
+    {
+        $gatewayService = new ServiceService();
+
+        return $gatewayService->search($parameters)->call();
+    }
 
     public function token(array $params = ['gateway_id' => '', 'type' => '']): array
     {
@@ -78,6 +85,20 @@ class SDKAdapterService
         $chargeService = new ChargeService;
 
         return $chargeService->create($params)->call();
+    }
+
+    public function standaloneFraudCharge(array $params): array
+    {
+        $chargeService = new ChargeService;
+
+        return $chargeService->standaloneFraud($params)->call();
+    }
+
+    public function standalone3DsCharge(array $params): array
+    {
+        $chargeService = new ChargeService;
+
+        return $chargeService->standalone3Ds($params)->call();
     }
 
     public function initialise(?bool $forcedEnv = null): void
@@ -119,6 +140,21 @@ class SDKAdapterService
         $env = $isProd ? self::PROD_ENV : self::SANDBOX_ENV;
 
         ConfigService::init($env, $secretKey, $publicKey ?? null);
+    }
+
+    public function errorMessageToString(array $responce): string
+    {
+        $result = !empty($responce['error']['message']) ? ' ' . $responce['error']['message'] : '';
+        if (isset($responce['error']['details'])) {
+            $firstDetail = reset($responce['error']['details']);
+            if (is_array($firstDetail)) {
+                $result .= ' ' . implode(',', $firstDetail);
+            } else {
+                $result .= ' ' . implode(',', $responce['error']['details']);
+            }
+        }
+
+        return $result;
     }
 
     private function isProd(?bool $forcedProdEnv = null): bool

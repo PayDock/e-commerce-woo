@@ -39,7 +39,7 @@ class CredentialSettings extends AbstractEnum
         return match ($this->name) {
             self::PUBLIC_KEY => 'Public Key from Paydock/Powerboard',
             self::SECRET_KEY => 'Secret Key from Paydock/Powerboard',
-            self::SANDBOX => 'Access Token from Paydock/Powerboard',
+            self::ACCESS_KEY => 'Access Token from Paydock/Powerboard',
             default => ''
         };
     }

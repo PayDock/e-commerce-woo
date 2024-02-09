@@ -6,16 +6,16 @@
     position: relative;
     display: inline-block;
     min-width: 160px;
-    margin-bottom: 24px;
     width: 100%;
 }
 
 .select .value {
     color: #1c2730;
+    margin-bottom: -7px;
     font-size: 14px;
     line-height: 19px;
     border: 1px solid #8c8f94;
-    padding: 7px 24px 7px 8px;
+    padding: 4px 24px 7px 8px;
     background-color: #fff;
     border-radius: 5px;
     text-decoration: none;
@@ -27,7 +27,7 @@
     transition: all .25s ease-in-out;
     position: relative;
     z-index: 1;
-    max-height: 48px;
+    max-height: 34px;
 }
 .select .value:hover {
     border-color: #666;

@@ -1,4 +1,4 @@
-const defaultConfig = require('@wordpress/scripts/config/webpack.config');
+const defaultConfig = require('@wordpress/scripts/config/webpack.config.js');
 const WooCommerceDependencyExtractionWebpackPlugin = require('@woocommerce/dependency-extraction-webpack-plugin');
 const path = require('path');
 
@@ -29,6 +29,7 @@ module.exports = {
     ...defaultConfig,
     entry: {
         'frontend/blocks': '/resources/js/frontend/index.js',
+        'frontend/bank-account-form': '/resources/js/frontend/bank-account-form.js',
     },
     output: {
         path: path.resolve(__dirname, 'assets/build/js'),

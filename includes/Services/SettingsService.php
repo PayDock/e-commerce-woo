@@ -150,11 +150,11 @@ final class SettingsService
         $settingService = $this->getSettingsService();
 
         return self::ENABLED_CONDITION == $settingService->get_option($this->getOptionName(
-                $settingService->id, [
-                    SettingGroups::CARD()->name,
-                    CardSettings::ENABLE()->name
-                ]
-            ));
+            $settingService->id, [
+                SettingGroups::CARD()->name,
+                CardSettings::ENABLE()->name
+            ]
+        ));
     }
 
     public function isBankAccountEnabled(): bool
@@ -162,11 +162,11 @@ final class SettingsService
         $settingService = $this->getSettingsService();
 
         return self::ENABLED_CONDITION == $settingService->get_option($this->getOptionName(
-                $settingService->id, [
-                    SettingGroups::BANK_ACCOUNT()->name,
-                    BankAccountSettings::ENABLE()->name
-                ]
-            ));
+            $settingService->id, [
+                SettingGroups::BANK_ACCOUNT()->name,
+                BankAccountSettings::ENABLE()->name
+            ]
+        ));
     }
 
     public function isWalletEnabled(WalletPaymentMethods $methods): bool
@@ -174,12 +174,12 @@ final class SettingsService
         $settingService = $this->getSettingsService();
 
         return self::ENABLED_CONDITION == $settingService->get_option($this->getOptionName(
-                $settingService->id, [
-                    SettingGroups::WALLETS()->name,
-                    $methods->name,
-                    WalletSettings::ENABLE()->name,
-                ]
-            ));
+            $settingService->id, [
+                SettingGroups::WALLETS()->name,
+                $methods->name,
+                WalletSettings::ENABLE()->name,
+            ]
+        ));
     }
 
     public function getCard3DS(): string
@@ -235,11 +235,11 @@ final class SettingsService
         $settingService = $this->getSettingsService();
 
         return self::ENABLED_CONDITION == $settingService->get_option($this->getOptionName(
-                $settingService->id, [
-                    SettingGroups::CARD()->name,
-                    CardSettings::DIRECT_CHARGE()->name,
-                ]
-            ));
+            $settingService->id, [
+                SettingGroups::CARD()->name,
+                CardSettings::DIRECT_CHARGE()->name,
+            ]
+        ));
     }
 
     public function getCardSaveCard(): bool
@@ -247,47 +247,47 @@ final class SettingsService
         $settingService = $this->getSettingsService();
 
         return self::ENABLED_CONDITION == $settingService->get_option($this->getOptionName(
-                $settingService->id, [
-                    SettingGroups::CARD()->name,
-                    CardSettings::SAVE_CARD()->name,
-                ]
-            ));
+            $settingService->id, [
+                SettingGroups::CARD()->name,
+                CardSettings::SAVE_CARD()->name,
+            ]
+        ));
     }
 
     public function getCardSaveCardOption(): string
     {
         $settingService = $this->getSettingsService();
 
-        return self::ENABLED_CONDITION == $settingService->get_option($this->getOptionName(
-                $settingService->id, [
-                    SettingGroups::CARD()->name,
-                    CardSettings::SAVE_CARD_OPTION()->name,
-                ]
-            ));
+        return $this->getCardSaveCard() ? $settingService->get_option($this->getOptionName(
+            $settingService->id, [
+                SettingGroups::CARD()->name,
+                CardSettings::SAVE_CARD_OPTION()->name,
+            ]
+        )) : '';
     }
 
     public function getCardSupportedCardTypes(): string
     {
         $settingService = $this->getSettingsService();
 
-        return self::ENABLED_CONDITION == $settingService->get_option($this->getOptionName(
-                $settingService->id, [
-                    SettingGroups::CARD()->name,
-                    CardSettings::SUPPORTED_CARD_TYPES()->name,
-                ]
-            ));
+        return $settingService->get_option($this->getOptionName(
+            $settingService->id, [
+                SettingGroups::CARD()->name,
+                CardSettings::SUPPORTED_CARD_TYPES()->name,
+            ]
+        ));
     }
 
     public function getCardTypeExchangeOtt(): string
     {
         $settingService = $this->getSettingsService();
 
-        return self::ENABLED_CONDITION == $settingService->get_option($this->getOptionName(
-                $settingService->id, [
-                    SettingGroups::CARD()->name,
-                    CardSettings::TYPE_EXCHANGE_OTT()->name,
-                ]
-            ));
+        return $settingService->get_option($this->getOptionName(
+            $settingService->id, [
+                SettingGroups::CARD()->name,
+                CardSettings::TYPE_EXCHANGE_OTT()->name,
+            ]
+        ));
     }
 
     public function isAPMsEnabled(OtherPaymentMethods $methods): ?string
@@ -295,12 +295,12 @@ final class SettingsService
         $settingService = $this->getSettingsService();
 
         return self::ENABLED_CONDITION == $settingService->get_option($this->getOptionName(
-                $settingService->id, [
-                    SettingGroups::A_P_M_S()->name,
-                    $methods->name,
-                    APMsSettings::ENABLE()->name,
-                ]
-            ));
+            $settingService->id, [
+                SettingGroups::A_P_M_S()->name,
+                $methods->name,
+                APMsSettings::ENABLE()->name,
+            ]
+        ));
     }
 
     public function getBankAccountSaveAccount(): bool
@@ -308,18 +308,18 @@ final class SettingsService
         $settingService = $this->getSettingsService();
 
         return self::ENABLED_CONDITION == $settingService->get_option($this->getOptionName(
-                $settingService->id, [
-                    SettingGroups::BANK_ACCOUNT()->name,
-                    BankAccountSettings::SAVE_CARD()->name,
-                ]
-            ));
+            $settingService->id, [
+                SettingGroups::BANK_ACCOUNT()->name,
+                BankAccountSettings::SAVE_CARD()->name,
+            ]
+        ));
     }
 
-    public function getBankAccountSaveAccountOption(): bool
+    public function getBankAccountSaveAccountOption(): string
     {
         $settingService = $this->getSettingsService();
 
-        return self::ENABLED_CONDITION == $settingService->get_option($this->getOptionName(
+        return $settingService->get_option($this->getOptionName(
                 $settingService->id, [
                     SettingGroups::BANK_ACCOUNT()->name,
                     BankAccountSettings::SAVE_CARD_OPTION()->name,
@@ -332,12 +332,12 @@ final class SettingsService
         $settingService = $this->getSettingsService();
 
         return self::ENABLED_CONDITION == $settingService->get_option($this->getOptionName(
-                $settingService->id, [
-                    SettingGroups::WALLETS()->name,
-                    $methods->name,
-                    WalletSettings::FRAUD()->name,
-                ]
-            ));
+            $settingService->id, [
+                SettingGroups::WALLETS()->name,
+                $methods->name,
+                WalletSettings::FRAUD()->name,
+            ]
+        ));
     }
 
     public function isWalletDirectCharge(WalletPaymentMethods $methods): bool
@@ -345,12 +345,12 @@ final class SettingsService
         $settingService = $this->getSettingsService();
 
         return self::ENABLED_CONDITION == $settingService->get_option($this->getOptionName(
-                $settingService->id, [
-                    SettingGroups::WALLETS()->name,
-                    $methods->name,
-                    WalletSettings::DIRECT_CHARGE()->name,
-                ]
-            ));
+            $settingService->id, [
+                SettingGroups::WALLETS()->name,
+                $methods->name,
+                WalletSettings::DIRECT_CHARGE()->name,
+            ]
+        ));
     }
 
     public function getWalletFraudServiceId(WalletPaymentMethods $methods): string
@@ -384,12 +384,12 @@ final class SettingsService
         $settingService = $this->getSettingsService();
 
         return self::ENABLED_CONDITION == $settingService->get_option($this->getOptionName(
-                $settingService->id, [
-                    SettingGroups::A_P_M_S()->name,
-                    $methods->name,
-                    APMsSettings::FRAUD()->name,
-                ]
-            ));
+            $settingService->id, [
+                SettingGroups::A_P_M_S()->name,
+                $methods->name,
+                APMsSettings::FRAUD()->name,
+            ]
+        ));
     }
 
     public function getAPMsFraudServiceId(OtherPaymentMethods $methods): ?string
@@ -410,12 +410,12 @@ final class SettingsService
         $settingService = $this->getSettingsService();
 
         return self::ENABLED_CONDITION == $settingService->get_option($this->getOptionName(
-                $settingService->id, [
-                    SettingGroups::A_P_M_S()->name,
-                    $methods->name,
-                    APMsSettings::DIRECT_CHARGE()->name,
-                ]
-            ));
+            $settingService->id, [
+                SettingGroups::A_P_M_S()->name,
+                $methods->name,
+                APMsSettings::DIRECT_CHARGE()->name,
+            ]
+        ));
     }
 
     public function isAPMsSaveCard(OtherPaymentMethods $methods): bool
@@ -423,12 +423,12 @@ final class SettingsService
         $settingService = $this->getSettingsService();
 
         return self::ENABLED_CONDITION == $settingService->get_option($this->getOptionName(
-                $settingService->id, [
-                    SettingGroups::A_P_M_S()->name,
-                    $methods->name,
-                    APMsSettings::SAVE_CARD()->name,
-                ]
-            ));
+            $settingService->id, [
+                SettingGroups::A_P_M_S()->name,
+                $methods->name,
+                APMsSettings::SAVE_CARD()->name,
+            ]
+        ));
     }
 
     public function isAPMsSaveCardOption(OtherPaymentMethods $methods): bool
@@ -436,12 +436,12 @@ final class SettingsService
         $settingService = $this->getSettingsService();
 
         return self::ENABLED_CONDITION == $settingService->get_option($this->getOptionName(
-                $settingService->id, [
-                    SettingGroups::A_P_M_S()->name,
-                    $methods->name,
-                    APMsSettings::SAVE_CARD_OPTION()->name,
-                ]
-            ));
+            $settingService->id, [
+                SettingGroups::A_P_M_S()->name,
+                $methods->name,
+                APMsSettings::SAVE_CARD_OPTION()->name,
+            ]
+        ));
     }
 
     public function getWidgetTitle(): string
@@ -622,10 +622,10 @@ final class SettingsService
         $this->settingService = new SandboxConnectionSettingService();
 
         $this->isSandbox = self::ENABLED_CONDITION == $this->settingService
-                ->get_option($this->getOptionName($this->settingService->id, [
-                    SettingGroups::CREDENTIALS()->name,
-                    CredentialSettings::SANDBOX()->name,
-                ]));
+            ->get_option($this->getOptionName($this->settingService->id, [
+                SettingGroups::CREDENTIALS()->name,
+                CredentialSettings::SANDBOX()->name,
+            ]));
 
         if (!$this->isSandbox) {
             $this->settingService = new LiveConnectionSettingService();
@@ -650,5 +650,12 @@ final class SettingsService
         }
 
         return $this->getWidgetService()->get_option($customVersionKey) ?? $version;
+    }
+
+    public function getWidgetScriptUrl(): string
+    {
+        $sdkUrl = 'https://widget.paydock.com/sdk/{version}/widget.umd.js';
+//        $sdkUrl = 'https://widget.paydock.com/sdk/{version}/widget.umd.min.js';
+        return preg_replace('{version}', SettingsService::getInstance()->getVersion(), $sdkUrl);
     }
 }
