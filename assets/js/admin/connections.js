@@ -143,13 +143,12 @@ jQuery(document).ready(function ($) {
 
     const disableSelect = 'DISABLE';
 
-    function saveCardProcess(saveCard, _3DSFlow) {
+    function saveCardProcess(saveCard, _3DSFlow, _3DS) {
         if ('SESSION_VAULT' === _3DSFlow.val()) {
-            saveCard.prop('checked', false)
-            saveCard.prop('disabled', true).change();
+            saveCard.prop('checked', false).change()
+            saveCard.prop('disabled', true);
         } else {
-            saveCard.prop('checked', true)
-            saveCard.prop('disabled', false).change();
+            saveCard.prop('disabled', false);
         }
     }
 
@@ -187,10 +186,18 @@ jQuery(document).ready(function ($) {
             && !saveCard.prop('checked')
         ) {
             directCharge.prop("disabled", false);
-            directCharge.prop("checked", false);
         } else {
             directCharge.prop("checked", false);
             directCharge.prop("disabled", true);
+        }
+    }
+
+    function _3DSFlowProcess(_3DS, _3DSFlow) {
+        if ('STANDALONE' === _3DS.val()) {
+            _3DSFlow.val('PERMANENT_VAULT')
+            _3DSFlow.prop("disabled", true);
+        } else if ('IN_BUILD' === _3DS.val()) {
+            _3DSFlow.prop("disabled", false);
         }
     }
 
@@ -204,15 +211,18 @@ jQuery(document).ready(function ($) {
         let fraud = $('#' + prefix + 'CARD_FRAUD');
         let saveCardOption = $('#' + prefix + 'CARD_SAVE_CARD_OPTION');
 
+        _3DSFlowProcess(_3DS, _3DSFlow);
+        saveCardProcess(saveCard, _3DSFlow, _3DS);
+        directChargeProcess(_3DS, fraud, saveCard, saveCardOption, directCharge);
         saveCardOptionProcess(_3DS, fraud, saveCard, saveCardOption, directCharge);
-        directChargeProcess(_3DS, fraud, saveCard, saveCardOption, directCharge)
 
         _3DS.on('change', () => {
             saveCardOptionProcess(_3DS, fraud, saveCard, saveCardOption, directCharge);
             directChargeProcess(_3DS, fraud, saveCard, saveCardOption, directCharge)
+            _3DSFlowProcess(_3DS, _3DSFlow)
         })
         _3DSFlow.on('change', () => {
-            saveCardProcess(saveCard, _3DSFlow);
+            saveCardProcess(saveCard, _3DSFlow, _3DS);
         })
         fraud.on('change', () => {
             saveCardOptionProcess(_3DS, fraud, saveCard, saveCardOption, directCharge);
@@ -239,24 +249,6 @@ jQuery(document).ready(function ($) {
             trackedElement.map((elementIndex, elementValue) => {
                 processedElement(conditionValue, elementValue, types, prefix)
             })
-        })
-
-        saveCard.on('change', (cardSaveCardEvent) => {
-            if (('VAULT' !== CardSaveOption.val()) && cardSaveCardEvent.target.checked) {
-                directCharge.prop('checked', false);
-                directCharge.prop('disabled', true);
-            } else {
-                directCharge.prop('disabled', false);
-            }
-        })
-
-        _3DS.on('change', (dsEvent) => {
-            if ('STANDALONE' === dsEvent.target.value) {
-                _3DSFlow.val('PERMANENT_VAULT')
-                _3DSFlow.prop("disabled", true);
-            } else if ('IN_BUILD' === dsEvent.target.value) {
-                _3DSFlow.prop("disabled", false);
-            }
         })
     })
 });
