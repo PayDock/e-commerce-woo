@@ -5,11 +5,14 @@ namespace Paydock\Services;
 use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Paydock\Abstract\AbstractSingleton;
+use Paydock\Controllers\Admin\WidgetController;
 use Paydock\Enums\SettingsTabs;
 use Paydock\PaydockPlugin;
 use Paydock\Services\Checkout\BankAccountPaymentService;
+use Paydock\Util\ApmBlock;
 use Paydock\Util\BankAccountBlock;
 use Paydock\Util\PaydockGatewayBlocks;
+use Paydock\Util\WalletsBlock;
 
 class ActionsService extends AbstractSingleton
 {
@@ -25,6 +28,7 @@ class ActionsService extends AbstractSingleton
             $this->addPaymentActions();
             $this->addPaymentMethodToChekout();
             $this->addSettingsActions();
+            $this->addEndpoints();
         });
     }
 
@@ -71,6 +75,8 @@ class ActionsService extends AbstractSingleton
             function (PaymentMethodRegistry $payment_method_registry) {
                 $payment_method_registry->register(new PaydockGatewayBlocks);
                 $payment_method_registry->register(new BankAccountBlock());
+                $payment_method_registry->register(new WalletsBlock());
+                $payment_method_registry->register(new ApmBlock());
             });
     }
 
@@ -84,5 +90,16 @@ class ActionsService extends AbstractSingleton
                 $settingsTab->value => __('', PaydockPlugin::PLUGIN_PREFIX),
             ]));
         }
+    }
+
+    protected function addEndpoints()
+    {
+        add_action('rest_api_init', function () {
+            register_rest_route('paydock/v1', '/wallets/charge', array(
+                'methods' => \WP_REST_Server::CREATABLE,
+                'callback' => [new WidgetController(), 'createWalletCharge'],
+                'permission_callback' => '__return_true'
+            ));
+        });
     }
 }

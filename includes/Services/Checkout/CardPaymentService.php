@@ -6,8 +6,8 @@ use Exception;
 use Paydock\Enums\SettingsTabs;
 use Paydock\Enums\WidgetSettings;
 use Paydock\Repositories\LogRepository;
+use Paydock\Repositories\UserTokenRepository;
 use Paydock\Services\ProcessPayment\CardProcessor;
-use Paydock\Services\ProcessPaymentService;
 use Paydock\Services\SDKAdapterService;
 use Paydock\Services\SettingsService;
 use WC_Payment_Gateway;
@@ -45,7 +45,7 @@ class CardPaymentService extends WC_Payment_Gateway
         $keyTitle = $service->getOptionName(SettingsTabs::WIDGET()->value, [WidgetSettings::PAYMENT_CARD_TITLE()->name]);
         $keyDescription = $service->getOptionName(SettingsTabs::WIDGET()->value, [WidgetSettings::PAYMENT_CARD_DESCRIPTION()->name]);
 
-        $this->title = get_option('woocommerce_pay_dock_widget_pay_dock_widget_PAYMENT_CARD_TITLE');
+        $this->title = get_option($keyTitle);
         $this->description = get_option($keyDescription);
         // Actions.
         add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
@@ -66,26 +66,7 @@ class CardPaymentService extends WC_Payment_Gateway
      */
     function is_available()
     {
-        return true;
-    }
-
-    public function get_vault_token(): void
-    {
-        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
-            $cardProcessor = new CardProcessor($_POST);
-            $type = !empty($_POST['type']) ? $_POST['type'] : null;
-            switch ($type) {
-                case 'standalone-3ds-token':
-                    echo $cardProcessor->getStandalone3dsToken();
-                    break;
-                default:
-                    echo $cardProcessor->getVaultToken();
-            }
-        } else {
-            header("Location: " . $_SERVER["HTTP_REFERER"]);
-        }
-
-        die();
+        return SettingsService::getInstance()->isCardEnabled();
     }
 
     public function payment_scripts()
@@ -134,35 +115,81 @@ class CardPaymentService extends WC_Payment_Gateway
                 'description' => $description
             ], $_POST));
 
-            $responce = $cardProcessor->run();
+            $response = $cardProcessor->run();
 
-            if (!empty($responce['error'])) {
-                $message = SDKAdapterService::getInstance()->errorMessageToString($responce);
+            if (!empty($response['error'])) {
+                $message = SDKAdapterService::getInstance()->errorMessageToString($response);
                 throw new Exception(__('Can\'t charge.' . $message, PAY_DOCK_TEXT_DOMAIN));
             }
 
-            $chargeId = !empty($responce['resource']['data']['_id']) ? $responce['resource']['data']['_id'] : '';
+            $chargeId = !empty($response['resource']['data']['_id']) ? $response['resource']['data']['_id'] : '';
         } catch (Exception $e) {
             $loggerRepository->createLogRecord($chargeId ?? '', 'Charges', 'UnfulfilledCondition', $e->getMessage(), LogRepository::ERROR);
             wc_add_notice(__('Error:', PAY_DOCK_TEXT_DOMAIN) . ' ' . $e->getMessage(), 'error');
             exit;
         }
 
-        $isCompleted = 'complete' === strtolower($responce['resource']['data']['transactions'][0]['status']);
+        try {
+            $cardProcessor->createCustomer();
+        } catch (Exception $e) {
+            $loggerRepository->createLogRecord($chargeId ?? '', 'Create customer after charge', 'UnfulfilledCondition', $e->getMessage(), LogRepository::ERROR);
+            wc_add_notice(__('Error:', PAY_DOCK_TEXT_DOMAIN) . ' ' . $e->getMessage(), 'error');
+            exit;
+        }
+
+        $status = ucfirst(strtolower($response['resource']['data']['transactions'][0]['status'] ?? 'undefined'));
+        $operation = ucfirst(strtolower($response['resource']['type'] ?? 'undefined'));
+
+        $isCompleted = 'complete' === strtolower($status);
+
         $order->set_status($isCompleted ? 'wc-paydock-paid' : 'wc-paydock-pending');
         $order->payment_complete();
         $order->save();
 
         WC()->cart->empty_cart();
 
-        if ($chargeId !== null) {
-            $loggerRepository->createLogRecord($chargeId, 'Charges', 'Completed', '', LogRepository::SUCCESS);
-        }
+        $loggerRepository->createLogRecord(
+            $chargeId,
+            $operation,
+            $status,
+            '',
+            $isCompleted ? LogRepository::DEFAULT : LogRepository::SUCCESS);
 
         return [
-            'result' => 'success',
-            'redirect' => $this->get_return_url($order)
+            'result' => 'success', 'redirect' => $this->get_return_url($order)
         ];
+    }
+
+    /**
+     * Ajax function
+     */
+    public function get_vault_token(): void
+    {
+        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+            $cardProcessor = new CardProcessor($_POST);
+            $type = !empty($_POST['type']) ? $_POST['type'] : null;
+            try {
+
+                switch ($type) {
+                    case 'clear-user-tokens':
+                        (new UserTokenRepository())->deleteAllUserTokens();
+                        break;
+                    case 'standalone-3ds-token':
+                        echo $cardProcessor->getStandalone3dsToken();
+                        break;
+                    default:
+                        echo $cardProcessor->getVaultToken();
+                }
+            } catch (Exception $e) {
+                (new LogRepository())->createLogRecord('', 'Charges', 'UnfulfilledCondition', $e->getMessage(), LogRepository::ERROR);
+                wc_add_notice(__('Error:', PAY_DOCK_TEXT_DOMAIN) . ' ' . $e->getMessage(), 'error');
+            }
+
+        } else {
+            header("Location: " . $_SERVER["HTTP_REFERER"]);
+        }
+
+        die();
     }
 
     public function webhook()

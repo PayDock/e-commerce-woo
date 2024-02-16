@@ -1,6 +1,8 @@
 <?php
+
 namespace Paydock\Util;
 
+use Paydock\Abstract\AbstractBlock;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
 use Paydock\API\ConfigService;
 use Paydock\Repositories\UserTokenRepository;
@@ -8,11 +10,12 @@ use Paydock\Services\Checkout\CardPaymentService;
 use Paydock\Services\SDKAdapterService;
 use Paydock\Services\SettingsService;
 
-final class PaydockGatewayBlocks extends AbstractPaymentMethodType
+final class PaydockGatewayBlocks extends AbstractBlock
 {
+    protected const SCRIPT = 'blocks';
 
-    private $gateway;
-    protected $name = 'paydock'; // your payment gateway name
+    private CardPaymentService $gateway;
+    protected $name = 'paydock';
 
     public function initialize()
     {
@@ -27,8 +30,8 @@ final class PaydockGatewayBlocks extends AbstractPaymentMethodType
 
     public function get_payment_method_script_handles()
     {
-        $script_path = 'assets/build/js/frontend/blocks.js';
-        $script_asset_path = PAY_DOCK_PLUGIN_PATH . '/assets/build/js/frontend/blocks.asset.php';
+        $script_path = 'assets/build/js/frontend/' . self::SCRIPT . '.js';
+        $script_asset_path = PAY_DOCK_PLUGIN_PATH . '/assets/build/js/frontend/' . self::SCRIPT . '.asset.php';
         $script_asset = file_exists($script_asset_path)
             ? require($script_asset_path)
             : array(
@@ -57,33 +60,42 @@ final class PaydockGatewayBlocks extends AbstractPaymentMethodType
     {
         SDKAdapterService::getInstance();
         $settingsService = SettingsService::getInstance();
-
-        $userTokens = ['cardTokens' => []];
+        $userTokens = [];
         if (is_user_logged_in()) {
-            $userTokens['cardTokens'] = (new UserTokenRepository)->getUserTokens();
+            $userTokens['tokens'] = (new UserTokenRepository)->getUserTokens();
         }
         
         return array_merge($userTokens, [
+            // Wordpress data
             'isUserLoggedIn' => is_user_logged_in(),
             'isSandbox' => $settingsService->isSandbox(),
-            'cardTotal' => WC()->cart->total,
+            // Woocommerce data
+            'amount' => WC()->cart->total,
             'currency' => strtoupper(get_woocommerce_currency()),
-            'title' => $settingsService->getWidgetTitle(),
-            'description' => $settingsService->getWidgetDescription(),
-            'paymentCardTitle' => $settingsService->getWidgetPaymentCardTitle(),
-            'paymentCardDescription' => $settingsService->getWidgetPaymentCardDescription(),
+            // Widget
+            'title' => $settingsService->getWidgetPaymentCardTitle(),
+            'description' => $settingsService->getWidgetPaymentCardDescription(),
+            'styles' => $settingsService->getWidgetStyles(),
+            // Tokens & keys
+            'publicKey' => ConfigService::$publicKey,
+            'selectedToken' => '',
+            'paymentSourceToken' => '',
+            // Card
             'cardSupportedCardTypes' => $settingsService->getCardSupportedCardTypes(),
             'gatewayId' => $settingsService->getCardGatewayId(),
+            // 3DS
             'card3DS' => $settingsService->getCard3DS(),
             'card3DSServiceId' => $settingsService->getCard3DSServiceId(),
             'card3DSFlow' => $settingsService->getCardTypeExchangeOtt(),
+            'charge3dsId' => '',
+            // Fraud
             'cardFraud' => $settingsService->getCardFraud(),
             'cardFraudServiceId' => $settingsService->getCardFraudServiceId(),
-            'cardDirectCharge' => $settingsService->getCardDirectCharge(),
+            // SaveCard
             'cardSaveCard' => $settingsService->getCardSaveCard(),
             'cardSaveCardOption' => $settingsService->getCardSaveCardOption(),
-            'styles' => $settingsService->getWidgetStyles(),
-            'publicKey' => ConfigService::$publicKey,
+            'cardSaveCardChecked' => false,
+            // Other
             'supports' => array_filter($this->gateway->supports, [$this->gateway, 'supports'])
         ]);
     }

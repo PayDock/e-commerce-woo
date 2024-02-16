@@ -2,7 +2,9 @@
 
 namespace Paydock\Exceptions;
 
-class LoggedException extends \Exception
+use Exception;
+
+class LoggedException extends Exception
 {
     public array $response = [];
 
@@ -18,11 +20,7 @@ class LoggedException extends \Exception
      */
     public static function throw(array $response = []): void
     {
-        throw new self(
-            __('Something want wrong. Check data, refresh page and try again.', PAY_DOCK_TEXT_DOMAIN),
-            0,
-            null,
-            $response
-        );
+        throw new self(__('Something want wrong. Check data, refresh page and try again.', PAY_DOCK_TEXT_DOMAIN), 0,
+            null, $response);
     }
 }

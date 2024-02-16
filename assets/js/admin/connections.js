@@ -1,254 +1,232 @@
 jQuery(document).ready(function ($) {
+    const DISABLE_TEXT = 'DISABLE';
     const types = {
-        select: 'select', checkbox: 'checkbox',
+        select: 'select',
+        checkbox: 'checkbox'
     };
     const prefixes = [
         'woocommerce_pay_dock_pay_dock_',
         'woocommerce_pay_dock_sandbox_pay_dock_sandbox_',
-        'woocommerce_pay_dock_widget_pay_dock_widget_'];
+        'woocommerce_pay_dock_widget_pay_dock_widget_'
+    ];
 
-    const conditions = [{
-        element: 'VERSION',
-        condition: 'custom',
-        type: types.select,
-        hide: ['CREDENTIALS_ACCESS_KEY'],
-        show: ['CUSTOM_VERSION',],
-    }, {
-        element: 'CREDENTIALS_TYPE',
-        condition: 'CREDENTIALS',
-        type: types.select,
-        hide: ['CREDENTIALS_ACCESS_KEY'],
-        show: ['CREDENTIALS_PUBLIC_KEY', 'CREDENTIALS_SECRET_KEY'],
-    }, {
-        element: 'CARD_DS',
-        condition: 'DISABLE',
-        type: types.select,
-        hide: ['CARD_DS_SERVICE_ID', 'CARD_TYPE_EXCHANGE_OTT'],
-        show: [],
-    }, {
-        element: 'CARD_FRAUD',
-        condition: 'DISABLE',
-        type: types.select,
-        hide: ['CARD_FRAUD_SERVICE_ID'],
-        show: [],
-    }, {
-        element: 'CARD_SAVE_CARD',
-        condition: 'DISABLE',
-        type: types.checkbox,
-        hide: [],
-        show: ['CARD_SAVE_CARD_OPTION'],
-    }, {
-        element: 'BANK_ACCOUNT_SAVE_CARD',
-        condition: 'DISABLE',
-        type: types.checkbox,
-        hide: [],
-        show: ['BANK_ACCOUNT_SAVE_CARD_OPTION'],
-    }, {
-        element: 'WALLETS_AFTERPAY_SAVE_CARD',
-        condition: 'DISABLE',
-        type: types.checkbox,
-        hide: [],
-        show: ['WALLETS_AFTERPAY_SAVE_CARD_OPTION'],
-    }, {
-        element: 'WALLETS_ZIPPAY_SAVE_CARD',
-        condition: 'DISABLE',
-        type: types.checkbox,
-        hide: [],
-        show: ['WALLETS_ZIPPAY_SAVE_CARD_OPTION'],
-    }, {
-        element: 'WALLETS_PAY_PAL_SAVE_CARD',
-        condition: 'DISABLE',
-        type: types.checkbox,
-        hide: [],
-        show: ['WALLETS_PAY_PAL_SAVE_CARD_OPTION'],
-    }, {
-        element: 'WALLETS_APPLE_PAY_FRAUD',
-        condition: 'DISABLE',
-        type: types.checkbox,
-        hide: [],
-        show: ['WALLETS_APPLE_PAY_FRAUD_SERVICE_ID'],
-    }, {
-        element: 'WALLETS_GOOGLE_PAY_FRAUD',
-        condition: 'DISABLE',
-        type: types.checkbox,
-        hide: [],
-        show: ['WALLETS_GOOGLE_PAY_FRAUD_SERVICE_ID'],
-    }, {
-        element: 'WALLETS_PAY_PAL_SMART_BUTTON_FRAUD',
-        condition: 'DISABLE',
-        type: types.checkbox,
-        hide: [],
-        show: ['WALLETS_PAY_PAL_SMART_BUTTON_FRAUD_SERVICE_ID'],
-    }, {
-        element: 'WALLETS_AFTERPAY_FRAUD',
-        condition: 'DISABLE',
-        type: types.checkbox,
-        hide: [],
-        show: ['WALLETS_AFTERPAY_FRAUD_SERVICE_ID'],
-    }, {
-        element: 'A_P_M_S_PAY_PAL_SAVE_CARD',
-        condition: 'DISABLE',
-        type: types.checkbox,
-        hide: [],
-        show: ['A_P_M_S_PAY_PAL_SAVE_CARD_OPTION'],
-    }, {
-        element: 'A_P_M_S_PAY_PAL_FRAUD',
-        condition: 'DISABLE',
-        type: types.checkbox,
-        hide: [],
-        show: ['A_P_M_S_PAY_PAL_FRAUD_SERVICE_ID'],
-    }, {
-        element: 'A_P_M_S_ZIPPAY_FRAUD',
-        condition: 'DISABLE',
-        type: types.checkbox,
-        hide: [],
-        show: ['A_P_M_S_ZIPPAY_FRAUD_SERVICE_ID'],
-    }, {
-        element: 'A_P_M_S_ZIPPAY_SAVE_CARD',
-        condition: 'DISABLE',
-        type: types.checkbox,
-        hide: [],
-        show: ['A_P_M_S_ZIPPAY_SAVE_CARD_OPTION'],
-    }, {
-        element: 'A_P_M_S_AFTERPAY_SAVE_CARD',
-        condition: 'DISABLE',
-        type: types.checkbox,
-        hide: [],
-        show: ['A_P_M_S_AFTERPAY_SAVE_CARD_OPTION'],
-    }, {
-        element: 'A_P_M_S_AFTERPAY_FRAUD',
-        condition: 'DISABLE',
-        type: types.checkbox,
-        hide: [],
-        show: ['A_P_M_S_AFTERPAY_FRAUD_SERVICE_ID'],
-    },];
+    const conditions = [
+        {
+            element: 'VERSION',
+            condition: 'custom',
+            type: types.select,
+            hide: ['CREDENTIALS_ACCESS_KEY'],
+            show: ['CUSTOM_VERSION',],
+        },
+        {
+            element: 'CREDENTIALS_TYPE',
+            condition: 'CREDENTIALS',
+            type: types.select,
+            hide: ['CREDENTIALS_ACCESS_KEY'],
+            show: ['CREDENTIALS_PUBLIC_KEY', 'CREDENTIALS_SECRET_KEY'],
+        },
+        {
+            element: 'CARD_DS',
+            condition: 'DISABLE',
+            type: types.select,
+            hide: ['CARD_DS_SERVICE_ID', 'CARD_TYPE_EXCHANGE_OTT'],
+            show: [],
+        },
+        {
+            element: 'CARD_TYPE_EXCHANGE_OTT',
+            condition: 'custom',
+            type: types.select,
+            hide: [],
+            show: [],
+        },
+        {
+            element: 'CARD_FRAUD',
+            condition: 'DISABLE',
+            type: types.select,
+            hide: ['CARD_FRAUD_SERVICE_ID'],
+            show: [],
+        },
+        {
+            element: 'CARD_SAVE_CARD',
+            condition: 'DISABLE',
+            type: types.checkbox,
+            hide: [],
+            show: ['CARD_SAVE_CARD_OPTION'],
+        },
+        {
+            element: 'BANK_ACCOUNT_SAVE_CARD',
+            condition: 'DISABLE',
+            type: types.checkbox,
+            hide: [],
+            show: ['BANK_ACCOUNT_SAVE_CARD_OPTION'],
+        },
+        {
+            element: 'WALLETS_AFTERPAY_SAVE_CARD',
+            condition: 'DISABLE',
+            type: types.checkbox,
+            hide: [],
+            show: ['WALLETS_AFTERPAY_SAVE_CARD_OPTION'],
+        },
+        {
+            element: 'WALLETS_ZIPPAY_SAVE_CARD',
+            condition: 'DISABLE',
+            type: types.checkbox,
+            hide: [],
+            show: ['WALLETS_ZIPPAY_SAVE_CARD_OPTION'],
+        },
+        {
+            element: 'WALLETS_PAY_PAL_SAVE_CARD',
+            condition: 'DISABLE',
+            type: types.checkbox,
+            hide: [],
+            show: ['WALLETS_PAY_PAL_SAVE_CARD_OPTION'],
+        },
+        {
+            element: 'WALLETS_APPLE_PAY_FRAUD',
+            condition: 'DISABLE',
+            type: types.checkbox,
+            hide: [],
+            show: ['WALLETS_APPLE_PAY_FRAUD_SERVICE_ID'],
+        },
+        {
+            element: 'WALLETS_GOOGLE_PAY_FRAUD',
+            condition: 'DISABLE',
+            type: types.checkbox,
+            hide: [],
+            show: ['WALLETS_GOOGLE_PAY_FRAUD_SERVICE_ID'],
+        },
+        {
+            element: 'WALLETS_PAY_PAL_SMART_BUTTON_FRAUD',
+            condition: 'DISABLE',
+            type: types.checkbox,
+            hide: [],
+            show: ['WALLETS_PAY_PAL_SMART_BUTTON_FRAUD_SERVICE_ID'],
+        },
+        {
+            element: 'WALLETS_AFTERPAY_FRAUD',
+            condition: 'DISABLE',
+            type: types.checkbox,
+            hide: [],
+            show: ['WALLETS_AFTERPAY_FRAUD_SERVICE_ID'],
+        },
+        {
+            element: 'A_P_M_S_ZIPPAY_FRAUD',
+            condition: 'DISABLE',
+            type: types.checkbox,
+            hide: [],
+            show: ['A_P_M_S_ZIPPAY_FRAUD_SERVICE_ID'],
+        },
+        {
+            element: 'A_P_M_S_ZIPPAY_SAVE_CARD',
+            condition: 'DISABLE',
+            type: types.checkbox,
+            hide: [],
+            show: ['A_P_M_S_ZIPPAY_SAVE_CARD_OPTION'],
+        },
+        {
+            element: 'A_P_M_S_AFTERPAY_SAVE_CARD',
+            condition: 'DISABLE',
+            type: types.checkbox,
+            hide: [],
+            show: ['A_P_M_S_AFTERPAY_SAVE_CARD_OPTION'],
+        },
+        {
+            element: 'A_P_M_S_AFTERPAY_FRAUD',
+            condition: 'DISABLE',
+            type: types.checkbox,
+            hide: [],
+            show: ['A_P_M_S_AFTERPAY_FRAUD_SERVICE_ID'],
+        }
+    ];
 
-    function processedElement(conditionValue, elementValue, types, prefix) {
-        if ((types.select === conditionValue.type && elementValue.value === conditionValue.condition) || (types.checkbox === conditionValue.type && elementValue.checked)) {
-            conditionValue.show.map((showElementValue) => {
-                $('#' + prefix + showElementValue).parent().parent().parent().show()
+    function removeOptionsExcept(value, element) {
+        element.find('option').each((index, el) => {
+            const option = jQuery(el);
+            if (option.val() === value) {
+                return
+            }
+
+            option.remove()
+        })
+    }
+
+    function processedElement(conditionValue, element, prefix) {
+        const selectCondition = types.select === conditionValue.type && element.value === conditionValue.condition;
+        const checkboxCondition = types.checkbox === conditionValue.type && element.checked;
+        if (selectCondition || checkboxCondition) {
+            conditionValue.show.map((id) => {
+                $('#' + prefix + id).closest('tr').show()
             })
-            conditionValue.hide.map((showElementValue) => {
-                $('#' + prefix + showElementValue).parent().parent().parent().hide()
+            conditionValue.hide.map((id) => {
+                $('#' + prefix + id).closest('tr').hide()
             })
         } else {
-            conditionValue.show.map((showElementValue) => {
-                $('#' + prefix + showElementValue).parent().parent().parent().hide()
+            conditionValue.show.map((id) => {
+                $('#' + prefix + id).closest('tr').hide()
             })
-            conditionValue.hide.map((showElementValue) => {
-                $('#' + prefix + showElementValue).parent().parent().parent().show()
+            conditionValue.hide.map((id) => {
+                $('#' + prefix + id).closest('tr').show()
             })
         }
     }
 
-    const disableSelect = 'DISABLE';
+    function saveCardProcess(saveCard, saveCardOption, _3DSFlow, _3DS) {
+        saveCard.removeAttribute('disabled')
+        saveCardOption.removeAttribute('disabled')
 
-    function saveCardProcess(saveCard, _3DSFlow, _3DS) {
-        if ('SESSION_VAULT' === _3DSFlow.val()) {
-            saveCard.prop('checked', false).change()
-            saveCard.prop('disabled', true);
-        } else {
-            saveCard.prop('disabled', false);
+        if ('SESSION_VAULT' === _3DSFlow.val() && _3DS.val() !== DISABLE_TEXT) {
+            saveCard.setAttribute('checked', false)
+            saveCard.setAttribute('disabled', true)
+            saveCardOption.setAttribute('disabled', true)
         }
     }
 
-    function saveCardOptionProcess(_3DS, fraud, saveCard, saveCardOption, directCharge) {
-        if (
-            (
-                (disableSelect !== _3DS.val() || disableSelect !== fraud.val())
-                && saveCard.prop('checked')
-            )
-            || (
-                (disableSelect === _3DS.val() || disableSelect === fraud.val())
-                && saveCard.prop('checked')
-                && directCharge.prop('checked')
-            )
-        ) {
-            saveCardOption.val('VAULT').change();
-            saveCardOption.prop("disabled", true);
-        } else {
-            saveCardOption.prop("disabled", false);
-        }
-    }
+    function _3DSFlowProcess(_3DS, _3DSFlow, optionsHtml) {
+        _3DSFlow.html(optionsHtml)
 
-    function directChargeProcess(_3DS, fraud, saveCard, saveCardOption, directCharge) {
-        if (
-            disableSelect === _3DS.val()
-            && disableSelect === fraud.val()
-            && saveCard.prop('checked')
-            && 'VAULT' === saveCardOption.val()
-        ) {
-            directCharge.prop("checked", true);
-            directCharge.prop("disabled", true);
-        } else if (
-            disableSelect === _3DS.val()
-            && disableSelect === fraud.val()
-            && !saveCard.prop('checked')
-        ) {
-            directCharge.prop("disabled", false);
-        } else {
-            directCharge.prop("checked", false);
-            directCharge.prop("disabled", true);
-        }
-    }
-
-    function _3DSFlowProcess(_3DS, _3DSFlow) {
         if ('STANDALONE' === _3DS.val()) {
-            _3DSFlow.val('PERMANENT_VAULT')
-            _3DSFlow.prop("disabled", true);
-        } else if ('IN_BUILD' === _3DS.val()) {
-            _3DSFlow.prop("disabled", false);
+            removeOptionsExcept('PERMANENT_VAULT', _3DSFlow)
         }
     }
 
+    const optionsCache = {};
     prefixes.map((prefix) => {
+        if (document.getElementById(prefix + 'CREDENTIALS_TYPE') === null) {
+            return;
+        }
+
         //checkoboxes
-        let directCharge = $('#' + prefix + 'CARD_DIRECT_CHARGE');
-        let saveCard = $('#' + prefix + 'CARD_SAVE_CARD');
+        const saveCard = document.getElementById(prefix + 'CARD_SAVE_CARD');
+        const saveCardOption = document.getElementById(prefix + 'CARD_SAVE_CARD_OPTION');
         //selects
-        let _3DS = $('#' + prefix + 'CARD_DS');
-        let _3DSFlow = $('#' + prefix + 'CARD_TYPE_EXCHANGE_OTT');
-        let fraud = $('#' + prefix + 'CARD_FRAUD');
-        let saveCardOption = $('#' + prefix + 'CARD_SAVE_CARD_OPTION');
+        const _3DS = $('#' + prefix + 'CARD_DS');
+        const _3DSFlow = $('#' + prefix + 'CARD_TYPE_EXCHANGE_OTT');
 
-        _3DSFlowProcess(_3DS, _3DSFlow);
-        saveCardProcess(saveCard, _3DSFlow, _3DS);
-        directChargeProcess(_3DS, fraud, saveCard, saveCardOption, directCharge);
-        saveCardOptionProcess(_3DS, fraud, saveCard, saveCardOption, directCharge);
+        optionsCache[prefix + 'CARD_TYPE_EXCHANGE_OTT'] = _3DSFlow.html()
 
-        _3DS.on('change', () => {
-            saveCardOptionProcess(_3DS, fraud, saveCard, saveCardOption, directCharge);
-            directChargeProcess(_3DS, fraud, saveCard, saveCardOption, directCharge)
-            _3DSFlowProcess(_3DS, _3DSFlow)
-        })
-        _3DSFlow.on('change', () => {
-            saveCardProcess(saveCard, _3DSFlow, _3DS);
-        })
-        fraud.on('change', () => {
-            saveCardOptionProcess(_3DS, fraud, saveCard, saveCardOption, directCharge);
-            directChargeProcess(_3DS, fraud, saveCard, saveCardOption, directCharge)
-        })
-        saveCard.on('change', () => {
-            saveCardOptionProcess(_3DS, fraud, saveCard, saveCardOption, directCharge);
-            directChargeProcess(_3DS, fraud, saveCard, saveCardOption, directCharge)
-        })
-        saveCardOption.on('change', () => {
-            directChargeProcess(_3DS, fraud, saveCard, saveCardOption, directCharge)
-        })
-        directCharge.on('change', () => {
-            saveCardOptionProcess(_3DS, fraud, saveCard, saveCardOption, directCharge);
-        })
+        _3DSFlowProcess(_3DS, _3DSFlow, optionsCache[prefix + 'CARD_TYPE_EXCHANGE_OTT']);
+        saveCardProcess(saveCard, saveCardOption, _3DSFlow, _3DS)
 
         conditions.map((conditionValue) => {
-            let trackedElement = $('#' + prefix + conditionValue.element);
+            const trackedElement = $('#' + prefix + conditionValue.element)
+            if(trackedElement.length === 0) {
+                return;
+            }
+
+            processedElement(conditionValue, trackedElement[0], prefix)
 
             trackedElement.on('change', (event) => {
-                processedElement(conditionValue, event.target, types, prefix)
-            });
+                const target = event.target
 
-            trackedElement.map((elementIndex, elementValue) => {
-                processedElement(conditionValue, elementValue, types, prefix)
-            })
+                switch (target.getAttribute('id')) {
+                    case prefix + 'CARD_DS':
+                        _3DSFlowProcess(_3DS, _3DSFlow, optionsCache[prefix + 'CARD_TYPE_EXCHANGE_OTT'])
+                        break;
+                }
+
+                saveCardProcess(saveCard, saveCardOption, _3DSFlow, _3DS)
+                processedElement(conditionValue, target, prefix)
+            });
         })
     })
 });

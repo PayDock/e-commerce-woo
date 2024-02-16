@@ -7,6 +7,10 @@ use WP_Error;
 
 abstract class AbstractApiService
 {
+    const METHOD_GET = 'GET';
+    const METHOD_POST = 'POST';
+    const METHOD_DELETE = 'DELETE';
+
     protected ?string $action;
     protected array $parameters = [];
     protected array $allowedAction = [];
@@ -33,18 +37,40 @@ abstract class AbstractApiService
             $args['headers']['x-user-public-key'] = ConfigService::$publicKey;
         }
 
-        if ($this->allowedAction[$this->action] === 'POST') {
-            $args['body'] = json_encode($this->parameters);
-            $request = wp_remote_post($url, $args);
-        } else {
-            $request = wp_remote_get($url, $args);
+        switch ($this->allowedAction[$this->action]) {
+            case 'POST':
+                $args['body'] = json_encode($this->parameters);
+                $parsed_args = wp_parse_args($args, [
+                    'method' => 'POST',
+                    'timeout' => 10
+                ]);
+                break;
+            case 'DELETE':
+                $parsed_args = wp_parse_args($args, [
+                    'method' => 'DELETE',
+                    'timeout' => 10
+                ]);
+                break;
+            default:
+                $parsed_args = wp_parse_args($args, [
+                    'method' => 'GET',
+                    'timeout' => 10
+                ]);
         }
+
+        $request = _wp_http_get_object()->request($url, $parsed_args);
 
         if ($request instanceof WP_Error) {
             return ['status' => 403, 'error' => $request];
         }
 
-        return json_decode($request['body'], true);
+        $body = json_decode($request['body'], true);
+
+        if ($body === null && json_last_error() !== JSON_ERROR_NONE) {
+            return ['status' => 403, 'error' => ['message' => 'Paydock api not response'], 'body' => $request['body']];
+        }
+
+        return $body;
     }
 
     protected function setAction($action): void

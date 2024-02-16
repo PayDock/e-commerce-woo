@@ -31,12 +31,56 @@ class UserTokenRepository
         return $this->cache;
     }
 
+    public function getUserToken(string $token): array
+    {
+        $tokens = $this->getUserTokens();
+
+        $vaultToken = [];
+
+        foreach($tokens as $item)
+        {
+            if ($item['vault_token'] === $token) {
+                $vaultToken = $item;
+                break;
+            }
+        }
+
+        return $vaultToken;
+    }
+
     public function saveUserToken(array $token): int|bool
     {
         $tokens = $this->getUserTokens();
         $tokens[] = $token;
 
         $result = update_user_meta($this->userId, self::CARD_TOKENS_KEY, $tokens);
+
+        $this->cleanCache();
+
+        return $result;
+    }
+
+    public function updateUserToken(string $token, $data): int|bool
+    {
+        $tokens = $this->getUserTokens();
+
+        $tokens = array_map(function($value) use ($token, $data) {
+            if ($value['vault_token'] === $token) {
+                $value = array_merge($value, $data);
+            }
+            return $value;
+        }, $tokens);
+
+        $result = update_user_meta($this->userId, self::CARD_TOKENS_KEY, $tokens);
+
+        $this->cleanCache();
+
+        return $result;
+    }
+
+    public function deleteAllUserTokens(): int|bool
+    {
+        $result = delete_user_meta($this->userId, self::CARD_TOKENS_KEY);
 
         $this->cleanCache();
 

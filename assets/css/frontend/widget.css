@@ -1,13 +1,33 @@
+#paydockWidgetCard{
+    min-height: 260px;
+    scrollbar-width: thin;
+}
+
+#paydockWidgetCard::-webkit-scrollbar-thumb {
+    border: 1px solid black;  /* creates padding around scroll thumb */
+}
+#paydockWidgetBankAccount {
+    min-height: 200px;
+}
+
+.logo-comm-bank{
+    text-align: center;
+}
+.woocommerce-page .logo-comm-bank img{
+    height:50px;
+}
 #paydockWidgetCard iframe {
     border: 0;
     width: 100%;
-    height: 360px;
+    height: 280px;
 }
+
 #paydockWidgetBankAccount iframe {
     border: 0;
     width: 100%;
-    height: 275px;
+    height: 200px;
 }
+
 .form-widget {
     overflow: hidden;
 }
@@ -16,4 +36,14 @@
     border: 0;
     width: 100%;
     height: 360px;
+}
+
+#paydockWidgetApm{
+    margin-top: 25px;
+}
+#paydockWidgetApm img{
+    margin-top: 50px;
+}
+#paydockWidgetApm img{
+    margin: 0 50px;
 }

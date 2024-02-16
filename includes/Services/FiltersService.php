@@ -5,8 +5,10 @@ namespace Paydock\Services;
 use Paydock\Abstract\AbstractSingleton;
 use Paydock\Enums\SettingsTabs;
 use Paydock\PaydockPlugin;
+use Paydock\Services\Checkout\ApmsPaymentService;
 use Paydock\Services\Checkout\BankAccountPaymentService;
 use Paydock\Services\Checkout\CardPaymentService;
+use Paydock\Services\Checkout\WalletsPaymentService;
 use Paydock\Services\Settings\LiveConnectionSettingService;
 use Paydock\Services\Settings\LogsSettingService;
 use Paydock\Services\Settings\SandboxConnectionSettingService;
@@ -35,6 +37,8 @@ class FiltersService extends AbstractSingleton
             $methods[] = LogsSettingService::class;
             $methods[] = CardPaymentService::class;
             $methods[] = BankAccountPaymentService::class;
+            $methods[] = WalletsPaymentService::class;
+            $methods[] = ApmsPaymentService::class;
         }
 
 

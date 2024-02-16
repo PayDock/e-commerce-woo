@@ -27,6 +27,7 @@
 	},
 	"dependencies": {
 		"@babel/types": "^7.23.9",
+		"axios": "^1.6.7",
 		"caniuse-lite": "^1.0.30001585"
 	}
 }

@@ -366,16 +366,14 @@ class ConnectionValidationService
                 ]);
             $isEnabled = self::ENABLED_CONDITION === $this->data[$enabledKey];
             if ($isEnabled) {
-                $result = match ($method) {
-                    WalletPaymentMethods::PAY_PAL_SMART_BUTTON() => $this->validateId(
+                $result = match ($method->name) {
+                    WalletPaymentMethods::PAY_PAL_SMART_BUTTON()->name => $this->validateId(
                         $this->data[$gatewayKey],
-                        'Paypal',
-                        true
+                        'Paypal'
                     ),
-                    WalletPaymentMethods::AFTERPAY() => $this->validateId(
+                    WalletPaymentMethods::AFTERPAY()->name => $this->validateId(
                         $this->data[$gatewayKey],
-                        'Afterpay v2',
-                        true
+                        'Afterpay v2'
                     ),
                     default => $this->validateId($this->data[$gatewayKey], 'MPGS'),
                 };
@@ -429,11 +427,6 @@ class ConnectionValidationService
             $isEnabled = self::ENABLED_CONDITION === $this->data[$enabledKey];
             if ($isEnabled) {
                 $result = match ($method) {
-                    OtherPaymentMethods::PAY_PAL() => $this->validateId(
-                        $this->data[$gatewayKey],
-                        'PayPal',
-                        true
-                    ),
                     OtherPaymentMethods::AFTERPAY() => $this->validateId(
                         $this->data[$gatewayKey],
                         'Afterpay v1',

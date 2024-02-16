@@ -57,6 +57,9 @@ jQuery(window).on('load', function () {
 
     const createOptions = () => {
         const dropdown = document.getElementById('multiselect')
+        if (dropdown === null) {
+            return
+        }
         const itemWrap = document.createElement('div')
         const itemUl = document.createElement('ul')
 

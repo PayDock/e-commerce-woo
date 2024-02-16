@@ -9,8 +9,8 @@ class GatewayService extends AbstractApiService
     const ENDPOINT = 'gateways';
 
     protected array $allowedAction = [
-        'get' => 'GET',
-        'search' => 'GET'
+        'get' => self::METHOD_GET,
+        'search' => self::METHOD_GET
     ];
 
     private string $id;

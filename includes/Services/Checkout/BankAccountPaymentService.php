@@ -16,8 +16,8 @@ class BankAccountPaymentService extends AbstractPaymentService
         $settings = SettingsService::getInstance();
 
         $this->id = 'paydock_bank_account_gateway';
-        $this->title = $settings->getWidgetPaymentBangAccountTitle();
-        $this->description = $settings->getWidgetPaymentBangAccountDescription();
+        $this->title = $settings->getWidgetPaymentBankAccountTitle();
+        $this->description = $settings->getWidgetPaymentBankAccountDescription();
 
         parent::__construct();
     }
@@ -40,7 +40,7 @@ class BankAccountPaymentService extends AbstractPaymentService
         $chargeId = '';
 
         try {
-            $processor = new BankAccountProcessor($order);
+            $processor = new BankAccountProcessor($order, $_POST);
 
             $response = $processor->run();
             $chargeId = !empty($response['resource']['data']['_id']) ? $response['resource']['data']['_id'] : '';

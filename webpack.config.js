@@ -30,6 +30,8 @@ module.exports = {
     entry: {
         'frontend/blocks': '/resources/js/frontend/index.js',
         'frontend/bank-account-form': '/resources/js/frontend/bank-account-form.js',
+        'frontend/wallets-form': '/resources/js/frontend/wallets-form.js',
+        'frontend/apms': '/resources/js/frontend/apms.js',
     },
     output: {
         path: path.resolve(__dirname, 'assets/build/js'),

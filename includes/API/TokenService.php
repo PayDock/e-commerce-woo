@@ -9,7 +9,7 @@ class TokenService extends AbstractApiService
     const ENDPOINT = 'payment_sources/tokens';
 
     protected array $allowedAction = [
-        'create' => 'POST',
+        'create' => self::METHOD_POST,
     ];
 
     public function create(array $params): TokenService

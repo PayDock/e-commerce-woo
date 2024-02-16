@@ -4,82 +4,105 @@ namespace Paydock\Services\ProcessPayment;
 
 use Paydock\Enums\SaveCardOptions;
 use Paydock\Exceptions\LoggedException;
+use Paydock\Helpers\ArgsForProcessPayment;
+use Paydock\Helpers\VaultTokenHelper;
+use Paydock\Repositories\UserTokenRepository;
 use Paydock\Services\SDKAdapterService;
 use WC_Order;
 use WC_Order_Refund;
 
 class BankAccountProcessor
 {
-    protected const OTT_POST_KEY = 'paymentsourcetoken';
+    private VaultTokenHelper $vaultTokenHelper;
     protected bool|WC_Order|WC_Order_Refund $order;
     protected array $args;
+    protected array $tokenData = [];
 
-    public function __construct(bool|WC_Order|WC_Order_Refund $order)
+    public function __construct(bool|WC_Order|WC_Order_Refund $order, $args)
     {
         $this->order = $order;
-        $this->args = $_POST;
+        $this->args = ArgsForProcessPayment::prepare($args);
+        $this->vaultTokenHelper = new VaultTokenHelper($this->args);
+    }
+
+    public function run(): array
+    {
+        if (
+            $this->args['bankaccountsaveaccount']
+            && (
+                SaveCardOptions::WITH_GATEWAY()->name === $this->getSaveType()
+                || SaveCardOptions::WITHOUT_GATEWAY()->name === $this->getSaveType()
+            )
+        ) {
+            return $this->chargeWithCustomerId();
+        }
+
+        return $this->directCharge();
     }
 
     public function chargeWithCustomerId(): array
     {
-        $addPaymentSource = $this->getAdditionalFields();
-
-        $amount = $addPaymentSource['amount'];
-        unset($addPaymentSource['amount']);
-
         $request = [
             'payment_source' => array_merge([
-                'amount' => $amount,
+                'amount' => $this->args['amount'],
                 'type' => 'bank_account',
-                'vault_token' => $this->getVault(false)
-            ], $addPaymentSource)
+                'vault_token' => $this->getVaultToken()
+            ], $this->getAdditionalFields('amount'))
         ];
 
-        if (isset($this->args['gatewayid']) && SaveCardOptions::WITH_GATEWAY()->name === $this->getSaveType()) {
+        if (!empty($this->args['gatewayid']) && SaveCardOptions::WITH_GATEWAY()->name === $this->getSaveType()) {
             $request['payment_source']['gateway_id'] = $this->args['gatewayid'];
         }
 
-        $response = SDKAdapterService::getInstance()->createCustomer($request);
+        if (!empty($this->tokenData) && !empty($this->tokenData['customer_id'])) {
+            $customerId = $this->tokenData['customer_id'];
+        } else {
+            $response = SDKAdapterService::getInstance()->createCustomer($request);
 
-        if (!empty($response['error']) || empty($response['resource']['data']['_id'])) {
-            LoggedException::throw($response);
+            if (!empty($response['error']) || empty($response['resource']['data']['_id'])) {
+                LoggedException::throw($response);
+            }
+
+            if ($this->vaultTokenHelper->shouldSaveVaultToken()) {
+                (new UserTokenRepository())->updateUserToken($this->args['selectedtoken'], [
+                    'customer_id' => $response['resource']['data']['_id']
+                ]);
+            }
+
+            $customerId = $response['resource']['data']['_id'];
         }
 
-        if (!empty($this->args['saveaccount']) && !empty($this->args['savevault'])) {
-            $this->save($request['payment_source']['vault_token'], $response['resource']['data']['_id']);
-        }
+        $customerId = $response['resource']['data']['_id'];
 
-        return $this->directCharge($response['resource']['data']['_id'], $request['payment_source']['vault_token']);
+        return $this->directCharge($customerId);
     }
 
     /**
      * @throws LoggedException
      */
-    protected function directCharge(string $customer = '', string $vaultToken = ''): array
+    protected function directCharge(?string $customerId = null): array
     {
-        $addPaymentSource = $this->getAdditionalFields();
-
-        $amount = $addPaymentSource['amount'];
-        unset($addPaymentSource['amount']);
+        $addPaymentSource = $this->getAdditionalFields('amount');
 
         $paymentSource = [
-            'vault_token' => !empty($vaultToken) ? $vaultToken : $this->getVault(),
+            'vault_token' => !empty($this->args['selectedtoken']) ? $this->args['selectedtoken'] : $this->getVaultToken(),
             'type' => 'bank_account'
         ];
 
-        if (isset($this->args['gatewayid'])) {
+        if (!empty($this->args['gatewayid'])) {
             $paymentSource['gateway_id'] = $this->args['gatewayid'];
         }
+
         $request = [
-            'amount' => $amount,
+            'amount' => $this->args['amount'],
             'currency' => strtoupper(get_woocommerce_currency()),
             'customer' => [
                 'payment_source' => array_merge($addPaymentSource, $paymentSource)
             ]
         ];
 
-        if (!empty($customer)) {
-            $request['customer_id'] = $customer;
+        if (!empty($customerId)) {
+            $request['customer_id'] = $customerId;
         }
 
         $response = SDKAdapterService::getInstance()->createCharge($request);
@@ -94,67 +117,26 @@ class BankAccountProcessor
     /**
      * @throws LoggedException
      */
-    protected function getVault(bool $saveVaultIfSave = true): string
+    protected function getVaultToken(): string
     {
-        $request = [
-            'token' => $this->args[self::OTT_POST_KEY] ?? null,
-        ];
+        if (!empty($this->args['selectedtoken'])) {
+            $this->tokenData = (new UserTokenRepository())->getUserToken($this->args['selectedtoken']);
 
-        $save = !empty($this->args['saveaccount']);
-
-        if (!$save) {
-            $request['vault_type'] = 'session';
+            return $this->args['selectedtoken'];
         }
 
-        $request = array_merge($request, $this->getAdditionalFields());
+        $token = $this->vaultTokenHelper->get($this->getAdditionalFields());
 
-        $response = SDKAdapterService::getInstance()->createVaultToken($request);
-
-        $token = $response['resource']['data']['vault_token'];
-
-        if (!empty($response['error']) || empty($token)) {
-            LoggedException::throw($response);
-        }
-
-        if ($save) {
-            $this->save($token);
+        if (!empty($token)) {
+            $this->args['selectedtoken'] = $token;
         }
 
         return $token;
     }
 
-    public function run(): array
-    {
-        if (
-            !empty($this->args['saveaccount'])
-            && (
-                SaveCardOptions::WITH_GATEWAY()->name === $this->getSaveType()
-                || SaveCardOptions::WITHOUT_GATEWAY()->name === $this->getSaveType()
-            )
-        ) {
-            return $this->chargeWithCustomerId();
-        }
-
-        return $this->directCharge();
-    }
-
-    protected function save(string $vault, ?string $customer = null): void
-    {
-        $user_id = $this->order->get_customer_id();
-        if ($user_id > 0) {
-            $meta_value = get_user_meta($user_id, 'paydock_customers', true);
-
-            $meta_value = empty($meta_value) ? [] : json_decode($meta_value, true);
-
-            $meta_value[$vault] = $customer;
-
-            update_user_meta($user_id, 'paydock_customers', json_encode($meta_value));
-        }
-    }
-
     protected function getSaveType(): ?string
     {
-        return match ($this->args['saveaccounttype']) {
+        return match ($this->args['bankaccountsaveaccountoption']) {
             SaveCardOptions::VAULT()->name => SaveCardOptions::VAULT()->name,
             SaveCardOptions::WITH_GATEWAY()->name => SaveCardOptions::WITH_GATEWAY()->name,
             SaveCardOptions::WITHOUT_GATEWAY()->name => SaveCardOptions::WITHOUT_GATEWAY()->name,
@@ -162,12 +144,12 @@ class BankAccountProcessor
         };
     }
 
-    protected function getAdditionalFields(): array
+    protected function getAdditionalFields(array|string $exclude = []): array
     {
         $address1 = $this->order->get_billing_address_1();
         $address2 = $this->order->get_billing_address_2();
 
-        return [
+        $result = [
             'amount' => (float) $this->order->get_total(),
             'address_country' => $this->order->get_billing_country(),
             'address_postcode' => $this->order->get_billing_postcode(),
@@ -176,5 +158,15 @@ class BankAccountProcessor
             'address_line1' => $address1,
             'address_line2' => empty($address2) ? $address1 : $address2,
         ];
+
+        if (!empty($exclude)) {
+            if (!is_array($exclude)) {
+                $exclude = [$exclude];
+            }
+
+            $result = array_diff_key($result, array_flip($exclude));
+        }
+
+        return $result;
     }
 }

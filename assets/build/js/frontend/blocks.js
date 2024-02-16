@@ -2,6 +2,474 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
+/***/ "./resources/js/includes/components/checkbox-saved-apms.js":
+/*!*****************************************************************!*\
+  !*** ./resources/js/includes/components/checkbox-saved-apms.js ***!
+  \*****************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _woocommerce_settings__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @woocommerce/settings */ "@woocommerce/settings");
+/* harmony import */ var _woocommerce_settings__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_woocommerce_settings__WEBPACK_IMPORTED_MODULE_1__);
+
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ((saveCardLabel = 'Save card') => {
+  const settings = (0,_woocommerce_settings__WEBPACK_IMPORTED_MODULE_1__.getSetting)('paydock_apms_data', {});
+  if (!settings.isUserLoggedIn) {
+    return '';
+  }
+  return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    class: 'wc-block-components-checkbox amps-save-card',
+    style: {
+      display: settings.afterpaySaveCard && settings.zippaySaveCard ? 'block' : 'none'
+    }
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("label", {
+    for: 'apms_save_card',
+    onChange: e => {
+      settings.apmSaveCardChecked = e.target.checked;
+    }
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("input", {
+    class: 'wc-block-components-checkbox__input',
+    id: 'apms_save_card',
+    type: 'checkbox',
+    name: 'apms_save_card'
+  }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("svg", {
+    class: 'wc-block-components-checkbox__mark',
+    "aria-hidden": true,
+    xmlns: 'http://www.w3.org/2000/svg',
+    "viewBox": '0 0 24 20'
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("path", {
+    d: 'M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z'
+  })), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("span", {
+    class: 'wc-block-components-checkbox__label'
+  }, saveCardLabel)));
+});
+
+/***/ }),
+
+/***/ "./resources/js/includes/components/checkbox-saved-bank-account.js":
+/*!*************************************************************************!*\
+  !*** ./resources/js/includes/components/checkbox-saved-bank-account.js ***!
+  \*************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _woocommerce_settings__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @woocommerce/settings */ "@woocommerce/settings");
+/* harmony import */ var _woocommerce_settings__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_woocommerce_settings__WEBPACK_IMPORTED_MODULE_1__);
+
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ((saveBankAccountLabel = 'Save bank account') => {
+  const settings = (0,_woocommerce_settings__WEBPACK_IMPORTED_MODULE_1__.getSetting)('paydock_bank_account_block_data', {});
+  if (!settings.bankAccountSaveAccount || !settings.isUserLoggedIn) {
+    return '';
+  }
+  return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    class: 'wc-block-components-checkbox'
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("label", {
+    for: 'bank_account_save',
+    onChange: e => {
+      settings.bankAccountSaveChecked = e.target.checked;
+    }
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("input", {
+    class: 'wc-block-components-checkbox__input',
+    id: 'bank_account_save',
+    type: 'checkbox',
+    name: 'bank_account_save'
+  }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("svg", {
+    class: 'wc-block-components-checkbox__mark',
+    "aria-hidden": true,
+    xmlns: 'http://www.w3.org/2000/svg',
+    "viewBox": '0 0 24 20'
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("path", {
+    d: 'M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z'
+  })), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("span", {
+    class: 'wc-block-components-checkbox__label'
+  }, saveBankAccountLabel)));
+});
+
+/***/ }),
+
+/***/ "./resources/js/includes/components/checkbox-saved-cards.js":
+/*!******************************************************************!*\
+  !*** ./resources/js/includes/components/checkbox-saved-cards.js ***!
+  \******************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _woocommerce_settings__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @woocommerce/settings */ "@woocommerce/settings");
+/* harmony import */ var _woocommerce_settings__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_woocommerce_settings__WEBPACK_IMPORTED_MODULE_1__);
+
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ((saveCardLabel = 'Save card') => {
+  const settings = (0,_woocommerce_settings__WEBPACK_IMPORTED_MODULE_1__.getSetting)('paydock_data', {});
+  if (!settings.cardSaveCard || !settings.isUserLoggedIn) {
+    return '';
+  }
+  return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    class: 'wc-block-components-checkbox'
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("label", {
+    for: 'card_save_card',
+    onChange: e => {
+      settings.cardSaveCardChecked = e.target.checked;
+    }
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("input", {
+    class: 'wc-block-components-checkbox__input',
+    id: 'card_save_card',
+    type: 'checkbox',
+    name: 'card_save_card'
+  }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("svg", {
+    class: 'wc-block-components-checkbox__mark',
+    "aria-hidden": true,
+    xmlns: 'http://www.w3.org/2000/svg',
+    "viewBox": '0 0 24 20'
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("path", {
+    d: 'M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z'
+  })), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("span", {
+    class: 'wc-block-components-checkbox__label'
+  }, saveCardLabel)));
+});
+
+/***/ }),
+
+/***/ "./resources/js/includes/components/select-saved-bank-accounts.js":
+/*!************************************************************************!*\
+  !*** ./resources/js/includes/components/select-saved-bank-accounts.js ***!
+  \************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _woocommerce_settings__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @woocommerce/settings */ "@woocommerce/settings");
+/* harmony import */ var _woocommerce_settings__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_woocommerce_settings__WEBPACK_IMPORTED_MODULE_2__);
+
+
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ((selectTokenLabel = 'Saved bank accounts') => {
+  const settings = (0,_woocommerce_settings__WEBPACK_IMPORTED_MODULE_2__.getSetting)('paydock_bank_account_block_data', {});
+  if (!settings.bankAccountSaveAccount || !settings.isUserLoggedIn || settings.tokens.length === 0) {
+    return '';
+  }
+  const options = [{
+    label: '-',
+    value: ''
+  }];
+  settings.tokens.forEach(token => {
+    if (token.type !== 'bank_account') {
+      return;
+    }
+    const scheme = token.account_name;
+    const accountNumber = token.account_number.slice(-4);
+    const label = `${scheme} ${accountNumber}`;
+    options.push({
+      label: label,
+      value: token.vault_token
+    });
+  });
+  return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.SelectControl, {
+    label: selectTokenLabel,
+    options: options,
+    onChange: value => {
+      settings.selectedToken = value;
+      window.widgetBankAccount.setFormValue('account_name', '');
+      window.widgetBankAccount.setFormValue('account_number', '');
+      window.widgetBankAccount.setFormValue('account_routing', '');
+      document.getElementById('bank_account_save').disabled = false;
+      if (value !== '') {
+        const token = settings.tokens.find(token => token.vault_token === value);
+        if (token !== undefined) {
+          window.widgetBankAccount.setFormValue('account_name', token.account_name);
+          window.widgetBankAccount.setFormValue('account_number', token.account_number);
+          window.widgetBankAccount.setFormValue('account_routing', token.account_routing);
+          document.getElementById('bank_account_save').disabled = true;
+        }
+      }
+      window.widgetBankAccount.reload();
+    }
+  });
+});
+
+/***/ }),
+
+/***/ "./resources/js/includes/components/select-saved-cards.js":
+/*!****************************************************************!*\
+  !*** ./resources/js/includes/components/select-saved-cards.js ***!
+  \****************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _woocommerce_settings__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @woocommerce/settings */ "@woocommerce/settings");
+/* harmony import */ var _woocommerce_settings__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_woocommerce_settings__WEBPACK_IMPORTED_MODULE_2__);
+
+
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ((selectTokenLabel = 'Saved cards') => {
+  const settings = (0,_woocommerce_settings__WEBPACK_IMPORTED_MODULE_2__.getSetting)('paydock_data', {});
+  if (!settings.cardSaveCard || !settings.isUserLoggedIn || settings.tokens.length === 0) {
+    return '';
+  }
+  const options = [{
+    label: '-',
+    value: ''
+  }];
+  settings.tokens.forEach(token => {
+    if (token.type !== 'card') {
+      return;
+    }
+    const cardScheme = token.card_scheme.charAt(0).toUpperCase() + token.card_scheme.slice(1);
+    const expireMonth = token.expire_month < 10 ? `0${token.expire_month}` : token.expire_month;
+    const label = `${cardScheme} ${token.card_number_last4} ${expireMonth}/${token.expire_year}`;
+    options.push({
+      label: label,
+      value: token.vault_token
+    });
+  });
+  return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__.SelectControl, {
+    label: selectTokenLabel,
+    options: options,
+    onChange: value => {
+      settings.selectedToken = value;
+      window.widget.setFormValue('card_name', '');
+      window.widget.setFormValue('card_number', '');
+      window.widget.setFormValue('expire_month', '');
+      window.widget.setFormValue('expire_year', '');
+      document.getElementById('card_save_card').disabled = false;
+      if (value !== '') {
+        const token = settings.tokens.find(token => token.vault_token === value);
+        if (token !== undefined) {
+          if (token.card_name !== undefined) {
+            window.widget.setFormValue('card_name', token.card_name);
+          }
+          window.widget.setFormValue('card_number', `${token.card_number_last4}`);
+          window.widget.setFormValue('expire_month', `${token.expire_month}`);
+          window.widget.setFormValue('expire_year', `${token.expire_year}`);
+          document.getElementById('card_save_card').disabled = true;
+        }
+      }
+      window.widget.reload();
+    }
+  });
+});
+
+/***/ }),
+
+/***/ "./resources/js/includes/get-standalone-3ds-token.js":
+/*!***********************************************************!*\
+  !*** ./resources/js/includes/get-standalone-3ds-token.js ***!
+  \***********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _woocommerce_settings__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @woocommerce/settings */ "@woocommerce/settings");
+/* harmony import */ var _woocommerce_settings__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_woocommerce_settings__WEBPACK_IMPORTED_MODULE_0__);
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (async () => {
+  const data = (0,_woocommerce_settings__WEBPACK_IMPORTED_MODULE_0__.getSetting)('paydock_data', {});
+  data.action = 'get_vault_token';
+  data.type = 'standalone-3ds-token';
+  data.tokens = '';
+  data.styles = '';
+  data.supports = '';
+  return jQuery.post(PaydockAjax.url, data).then();
+});
+
+/***/ }),
+
+/***/ "./resources/js/includes/get-vault-token.js":
+/*!**************************************************!*\
+  !*** ./resources/js/includes/get-vault-token.js ***!
+  \**************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _woocommerce_settings__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @woocommerce/settings */ "@woocommerce/settings");
+/* harmony import */ var _woocommerce_settings__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_woocommerce_settings__WEBPACK_IMPORTED_MODULE_0__);
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (async () => {
+  const data = (0,_woocommerce_settings__WEBPACK_IMPORTED_MODULE_0__.getSetting)('paydock_data', {});
+  data.action = 'get_vault_token';
+  data.tokens = '';
+  data.styles = '';
+  data.supports = '';
+  return jQuery.post(PaydockAjax.url, data).then();
+});
+
+/***/ }),
+
+/***/ "./resources/js/includes/in-build-3ds.js":
+/*!***********************************************!*\
+  !*** ./resources/js/includes/in-build-3ds.js ***!
+  \***********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _woocommerce_settings__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @woocommerce/settings */ "@woocommerce/settings");
+/* harmony import */ var _woocommerce_settings__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_woocommerce_settings__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _get_vault_token__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./get-vault-token */ "./resources/js/includes/get-vault-token.js");
+
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (async (forcePermanentVault = false) => {
+  const settings = (0,_woocommerce_settings__WEBPACK_IMPORTED_MODULE_0__.getSetting)('paydock_data', {});
+  if (settings.selectedToken.trim().length === 0 && settings.card3DSFlow === 'PERMANENT_VAULT') {
+    settings.selectedToken = await (0,_get_vault_token__WEBPACK_IMPORTED_MODULE_1__["default"])();
+  }
+  const preAuthData = {
+    amount: settings.amount,
+    currency: settings.currency
+  };
+  if (settings.card3DSFlow === 'PERMANENT_VAULT' || forcePermanentVault) {
+    preAuthData.customer = {
+      payment_source: {
+        vault_token: settings.selectedToken,
+        gateway_id: settings.gatewayId
+      }
+    };
+  } else {
+    preAuthData.token = settings.paymentSourceToken;
+  }
+  const envVal = settings.isSandbox ? 'sandbox' : 'production';
+  const preAuthResp = await new window.paydock.Api(settings.publicKey).setEnv(envVal).charge().preAuth(preAuthData);
+  if (typeof preAuthResp._3ds.token === "undefined") {
+    return false;
+  }
+  const canvas = new window.paydock.Canvas3ds('#paydockWidget3ds', preAuthResp._3ds.token);
+  canvas.load();
+  document.getElementById('paydockWidgetCard').setAttribute('style', 'display: none');
+  const chargeAuthEvent = await canvas.on('chargeAuth');
+  return chargeAuthEvent.charge_3ds_id;
+});
+
+/***/ }),
+
+/***/ "./resources/js/includes/sleep.js":
+/*!****************************************!*\
+  !*** ./resources/js/includes/sleep.js ***!
+  \****************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+let sleepSetTimeout_ctrl;
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ms => {
+  clearInterval(sleepSetTimeout_ctrl);
+  return new Promise(resolve => sleepSetTimeout_ctrl = setTimeout(resolve, ms));
+});
+
+/***/ }),
+
+/***/ "./resources/js/includes/standalone-3ds.js":
+/*!*************************************************!*\
+  !*** ./resources/js/includes/standalone-3ds.js ***!
+  \*************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _woocommerce_settings__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @woocommerce/settings */ "@woocommerce/settings");
+/* harmony import */ var _woocommerce_settings__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_woocommerce_settings__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _get_vault_token__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./get-vault-token */ "./resources/js/includes/get-vault-token.js");
+/* harmony import */ var _get_standalone_3ds_token__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./get-standalone-3ds-token */ "./resources/js/includes/get-standalone-3ds-token.js");
+
+
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (async () => {
+  const settings = (0,_woocommerce_settings__WEBPACK_IMPORTED_MODULE_0__.getSetting)('paydock_data', {});
+  if (settings.selectedToken.trim().length === 0) {
+    settings.selectedToken = await (0,_get_vault_token__WEBPACK_IMPORTED_MODULE_1__["default"])();
+  }
+  const threeDsToken = await (0,_get_standalone_3ds_token__WEBPACK_IMPORTED_MODULE_2__["default"])(settings.selectedToken);
+  const canvas = new window.paydock.Canvas3ds('#paydockWidget3ds', threeDsToken);
+  canvas.load();
+  const chargeAuthSuccessEvent = await canvas.on('chargeAuthSuccess');
+  return chargeAuthSuccessEvent.charge_3ds_id;
+});
+
+/***/ }),
+
+/***/ "./resources/js/includes/wc-paydock.js":
+/*!*********************************************!*\
+  !*** ./resources/js/includes/wc-paydock.js ***!
+  \*********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   checkboxSavedApmsComponent: () => (/* reexport safe */ _components_checkbox_saved_apms__WEBPACK_IMPORTED_MODULE_9__["default"]),
+/* harmony export */   checkboxSavedBankAccountComponent: () => (/* reexport safe */ _components_checkbox_saved_bank_account__WEBPACK_IMPORTED_MODULE_8__["default"]),
+/* harmony export */   checkboxSavedCardsComponent: () => (/* reexport safe */ _components_checkbox_saved_cards__WEBPACK_IMPORTED_MODULE_6__["default"]),
+/* harmony export */   getStandalone3dsToken: () => (/* reexport safe */ _get_standalone_3ds_token__WEBPACK_IMPORTED_MODULE_2__["default"]),
+/* harmony export */   getVaultToken: () => (/* reexport safe */ _get_vault_token__WEBPACK_IMPORTED_MODULE_1__["default"]),
+/* harmony export */   inBuild3Ds: () => (/* reexport safe */ _in_build_3ds__WEBPACK_IMPORTED_MODULE_3__["default"]),
+/* harmony export */   selectSavedBankAccountsComponent: () => (/* reexport safe */ _components_select_saved_bank_accounts__WEBPACK_IMPORTED_MODULE_7__["default"]),
+/* harmony export */   selectSavedCardsComponent: () => (/* reexport safe */ _components_select_saved_cards__WEBPACK_IMPORTED_MODULE_5__["default"]),
+/* harmony export */   sleep: () => (/* reexport safe */ _sleep__WEBPACK_IMPORTED_MODULE_0__["default"]),
+/* harmony export */   standalone3Ds: () => (/* reexport safe */ _standalone_3ds__WEBPACK_IMPORTED_MODULE_4__["default"])
+/* harmony export */ });
+/* harmony import */ var _sleep__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./sleep */ "./resources/js/includes/sleep.js");
+/* harmony import */ var _get_vault_token__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./get-vault-token */ "./resources/js/includes/get-vault-token.js");
+/* harmony import */ var _get_standalone_3ds_token__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./get-standalone-3ds-token */ "./resources/js/includes/get-standalone-3ds-token.js");
+/* harmony import */ var _in_build_3ds__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./in-build-3ds */ "./resources/js/includes/in-build-3ds.js");
+/* harmony import */ var _standalone_3ds__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./standalone-3ds */ "./resources/js/includes/standalone-3ds.js");
+/* harmony import */ var _components_select_saved_cards__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./components/select-saved-cards */ "./resources/js/includes/components/select-saved-cards.js");
+/* harmony import */ var _components_checkbox_saved_cards__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./components/checkbox-saved-cards */ "./resources/js/includes/components/checkbox-saved-cards.js");
+/* harmony import */ var _components_select_saved_bank_accounts__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./components/select-saved-bank-accounts */ "./resources/js/includes/components/select-saved-bank-accounts.js");
+/* harmony import */ var _components_checkbox_saved_bank_account__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./components/checkbox-saved-bank-account */ "./resources/js/includes/components/checkbox-saved-bank-account.js");
+/* harmony import */ var _components_checkbox_saved_apms__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./components/checkbox-saved-apms */ "./resources/js/includes/components/checkbox-saved-apms.js");
+
+
+
+
+
+
+
+
+
+
+// export { default as selectSavedBankAccountsComponent } from './components/select-saved-bank-accounts';
+
+
+/***/ }),
+
 /***/ "react":
 /*!************************!*\
   !*** external "React" ***!
@@ -147,8 +615,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_html_entities__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_wordpress_html_entities__WEBPACK_IMPORTED_MODULE_3__);
 /* harmony import */ var _woocommerce_settings__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @woocommerce/settings */ "@woocommerce/settings");
 /* harmony import */ var _woocommerce_settings__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_woocommerce_settings__WEBPACK_IMPORTED_MODULE_4__);
-/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
-/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var _includes_wc_paydock__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../includes/wc-paydock */ "./resources/js/includes/wc-paydock.js");
 
 
 
@@ -157,118 +624,21 @@ __webpack_require__.r(__webpack_exports__);
 
 
 const settings = (0,_woocommerce_settings__WEBPACK_IMPORTED_MODULE_4__.getSetting)('paydock_data', {});
-const defaultLabel = (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Paydock Payments', 'paydock-for-woo');
-const saveCardLabel = (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Save card', 'paydock-for-woo');
-const selectTokenLabel = (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Select card', 'paydock-for-woo');
-const placeOrderButtonLabel = (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Place Order by Paydock', 'paydock-for-woo');
-const fillDataError = (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Please fill card data', 'paydock-for-woo');
-function getPromiseFromEvent(item, event) {
-  return new Promise(resolve => {
-    const listener = () => {
-      item.removeEventListener(event, listener);
-      resolve();
-    };
-    item.addEventListener(event, listener);
-  });
-}
-const label = (0,_wordpress_html_entities__WEBPACK_IMPORTED_MODULE_3__.decodeEntities)(settings.title) || defaultLabel;
+const textDomain = 'paydock-for-woo';
+const labels = {
+  defaultLabel: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Paydock Payments', textDomain),
+  saveCardLabel: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Save card', textDomain),
+  selectTokenLabel: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Saved cards', textDomain),
+  placeOrderButtonLabel: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Place Order by Paydock', textDomain),
+  fillDataError: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Please fill card data', textDomain)
+};
+const label = (0,_wordpress_html_entities__WEBPACK_IMPORTED_MODULE_3__.decodeEntities)(settings.title) || labels.defaultLabel;
 let sleepSetTimeout_ctrl;
-function sleep(ms) {
+const sleep = ms => {
   clearInterval(sleepSetTimeout_ctrl);
   return new Promise(resolve => sleepSetTimeout_ctrl = setTimeout(resolve, ms));
-}
-const getVaultToken = async ottToken => {
-  return jQuery.post(PaydockAjax.url, {
-    action: 'get_vault_token',
-    paymentsourcetoken: ottToken,
-    cardsavecard: true
-  }).then();
 };
-const getStandalone3dsToken = async vaultToken => {
-  return jQuery.post(PaydockAjax.url, {
-    action: 'get_vault_token',
-    type: 'standalone-3ds-token',
-    vaulttoken: vaultToken,
-    gatewayid: settings.gatewayId,
-    amount: settings.cardTotal,
-    curency: settings.curency,
-    card3dsserviceid: settings.card3DSServiceId
-  }).then();
-};
-const standalone3Ds = async ottToken => {
-  settings.selectedToken = await getVaultToken(ottToken);
-  const threeDsToken = await getStandalone3dsToken(settings.selectedToken);
-  const canvas = new window.paydock.Canvas3ds('#paydockWidget3ds', threeDsToken);
-  canvas.load();
-  const chargeAuthSuccessEvent = await canvas.on('chargeAuthSuccess');
-  return chargeAuthSuccessEvent.charge_3ds_id;
-};
-const inBuild3Ds = async ottToken => {
-  const preAuthData = {
-    amount: settings.cardTotal,
-    currency: settings.currency
-  };
-  if (settings.card3DSFlow === 'PERMANENT_VAULT') {
-    preAuthData.customer = {
-      payment_source: {
-        vault_token: await getVaultToken(ottToken),
-        gateway_id: settings.gatewayId
-      }
-    };
-  } else {
-    preAuthData.token = ottToken;
-  }
-  const envVal = settings.isSandbox ? 'sandbox' : 'production';
-  const preAuthResp = await new window.paydock.Api(settings.publicKey).setEnv(envVal).charge().preAuth(preAuthData);
-  if (typeof preAuthResp._3ds.token === "undefined") {
-    return false;
-  }
-  const canvas = new window.paydock.Canvas3ds('#paydockWidget3ds', preAuthResp._3ds.token);
-  canvas.load();
-  document.getElementById('paydockWidgetCard').setAttribute('style', 'display: none');
-  const chargeAuthEvent = await canvas.on('chargeAuth');
-  return chargeAuthEvent.charge_3ds_id;
-};
-window.formSubmittedAlready = false;
-const selectSavedCardsComponent = () => {
-  if (!settings.cardSaveCard || !settings.isUserLoggedIn) {
-    return '';
-  }
-  const options = [{
-    label: selectTokenLabel,
-    value: ''
-  }];
-  settings.cardTokens.forEach(token => {
-    let label = `${token.card_number_bin}****${token.card_number_last4}`;
-    if (token.card_name !== undefined) {
-      label = `${token.card_name} ${token.card_number_bin}****${token.card_number_last4}`;
-    }
-    options.push({
-      label: label,
-      value: token.vault_token
-    });
-  });
-  return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.SelectControl, {
-    options: options,
-    onChange: value => {
-      settings.selectedToken = value;
-      window.widget.setFormValue('card_name', '');
-      window.widget.setFormValue('card_number', '');
-      document.getElementById('card_save_card').disabled = false;
-      if (value !== '') {
-        const token = settings.cardTokens.find(token => token.vault_token === value);
-        if (token !== undefined) {
-          if (token.card_name !== undefined) {
-            window.widget.setFormValue('card_name', token.card_name);
-          }
-          window.widget.setFormValue('card_number', `${token.card_number_bin}`);
-          document.getElementById('card_save_card').disabled = true;
-        }
-      }
-      window.widget.reload();
-    }
-  });
-};
+let formSubmittedAlready = false;
 const Content = props => {
   const {
     eventRegistration,
@@ -280,43 +650,41 @@ const Content = props => {
   } = eventRegistration;
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
     const validation = onCheckoutValidation(async () => {
-      if (settings.selectedToken !== undefined && settings.selectedToken !== '') {
+      if (settings.selectedToken.trim().length > 0) {
+        if (settings.card3DS == 'IN_BUILD' || settings.card3DS === 'STANDALONE') {
+          settings.charge3dsId = settings.card3DS == 'IN_BUILD' ? await (0,_includes_wc_paydock__WEBPACK_IMPORTED_MODULE_5__.inBuild3Ds)(true) : await (0,_includes_wc_paydock__WEBPACK_IMPORTED_MODULE_5__.standalone3Ds)();
+          if (settings.charge3dsId === false) {
+            return {
+              type: emitResponse.responseTypes.ERROR,
+              errorMessage: labels.fillDataError
+            };
+          }
+        }
         return true;
       }
-      if (window.formSubmittedAlready) {
+      if (formSubmittedAlready) {
         return true;
       }
       window.widget.trigger(window.paydock.TRIGGER.SUBMIT_FORM);
       let result = false;
-      let ottToken;
       window.widget.on(window.paydock.EVENT.FINISH, event => {
-        ottToken = event.payment_source;
+        settings.paymentSourceToken = event.payment_source;
         result = true;
       });
       for (let second = 1; second <= 100; second++) {
         await sleep(100);
         if (result) {
-          window.formSubmittedAlready = true;
+          formSubmittedAlready = true;
           break;
         }
       }
       if (result) {
-        if (settings.card3DS === 'IN_BUILD') {
-          const charge3dsId = await inBuild3Ds(ottToken);
-          settings.charge3dsId = charge3dsId;
-          if (charge3dsId === false) {
+        if (settings.card3DS == 'IN_BUILD' || settings.card3DS === 'STANDALONE') {
+          settings.charge3dsId = settings.card3DS == 'IN_BUILD' ? await (0,_includes_wc_paydock__WEBPACK_IMPORTED_MODULE_5__.inBuild3Ds)() : await (0,_includes_wc_paydock__WEBPACK_IMPORTED_MODULE_5__.standalone3Ds)();
+          if (settings.charge3dsId === false) {
             return {
               type: emitResponse.responseTypes.ERROR,
-              errorMessage: fillDataError
-            };
-          }
-        } else if (settings.card3DS === 'STANDALONE') {
-          const charge3dsId = await standalone3Ds(ottToken);
-          settings.charge3dsId = charge3dsId;
-          if (charge3dsId === false) {
-            return {
-              type: emitResponse.responseTypes.ERROR,
-              errorMessage: fillDataError
+              errorMessage: labels.fillDataError
             };
           }
         }
@@ -324,99 +692,48 @@ const Content = props => {
       }
       return {
         type: emitResponse.responseTypes.ERROR,
-        errorMessage: fillDataError
+        errorMessage: labels.fillDataError
       };
     });
     const unsubscribe = onPaymentSetup(async () => {
-      const paymentSourceToken = document.querySelector('input[name="payment_source_token"]').value;
-      const gatewayId = settings.gatewayId;
-      const cardDirectCharge = settings.cardDirectCharge;
-      const cardSaveCard = settings.cardSaveCard;
-      const cardSaveCardOption = settings.cardSaveCardOption;
-      const card3DS = settings.card3DS;
-      const card3DSServiceId = settings.card3DSServiceId;
-      const card3DSFlow = settings.card3DSFlow;
-      const cardFraud = settings.cardFraud;
-      const cardFraudServiceId = settings.cardFraudServiceId;
-      let cardSaveCardChecked = false;
-      if (cardSaveCard && document.getElementById('card_save_card') !== null) {
-        cardSaveCardChecked = document.getElementById('card_save_card').checked;
+      const paymentSourceToken = document.querySelector('input[name="payment_source_token"]');
+      if (paymentSourceToken === null) {
+        return;
       }
-      let charge3dsId;
-      if (typeof settings.charge3dsId !== "undefined") {
-        charge3dsId = settings.charge3dsId;
-      }
-      let selectedToken;
-      const selectedTokenNotEmpty = settings.selectedToken !== undefined && settings.selectedToken !== '';
-      if (settings.selectedToken !== undefined) {
-        selectedToken = settings.selectedToken;
-      }
-      const customDataIsValid = !!paymentSourceToken.length || selectedTokenNotEmpty;
-      if (customDataIsValid) {
+      settings.paymentSourceToken = paymentSourceToken.value;
+      if (settings.paymentSourceToken.length > 0 || settings.selectedToken.length > 0) {
+        const data = settings;
+        data.tokens = '';
+        data.styles = '';
+        data.supports = '';
         return {
           type: emitResponse.responseTypes.SUCCESS,
           meta: {
-            paymentMethodData: {
-              selectedToken,
-              paymentSourceToken,
-              gatewayId,
-              cardDirectCharge,
-              cardSaveCard,
-              cardSaveCardOption,
-              cardSaveCardChecked,
-              card3DS,
-              card3DSServiceId,
-              card3DSFlow,
-              charge3dsId,
-              cardFraud,
-              cardFraudServiceId
-            }
+            paymentMethodData: data
           }
         };
       }
       return {
         type: emitResponse.responseTypes.ERROR,
-        message: fillDataError
+        message: labels.fillDataError
       };
     });
     return () => {
       validation() && unsubscribe();
     };
   }, [emitResponse.responseTypes.ERROR, emitResponse.responseTypes.SUCCESS, onPaymentSetup, onCheckoutValidation]);
-  let selectSavedCards = '';
-  if (settings.cardTokens.length > 0) {
-    selectSavedCards = selectSavedCardsComponent();
-  }
-  let saveCard = '';
-  if (settings.isUserLoggedIn && settings.cardSaveCard) {
-    saveCard = (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
-      class: 'wc-block-components-checkbox'
-    }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("label", {
-      for: 'card_save_card'
-    }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("input", {
-      class: 'wc-block-components-checkbox__input',
-      id: 'card_save_card',
-      type: 'checkbox',
-      name: 'card_save_card'
-    }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("svg", {
-      class: 'wc-block-components-checkbox__mark',
-      "aria-hidden": true,
-      xmlns: 'http://www.w3.org/2000/svg',
-      "viewBox": '0 0 24 20'
-    }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("path", {
-      d: 'M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z'
-    })), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("span", {
-      class: 'wc-block-components-checkbox__label'
-    }, saveCardLabel)));
-  }
-  return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)('div', null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", null, (0,_wordpress_html_entities__WEBPACK_IMPORTED_MODULE_3__.decodeEntities)(settings.description || '')), selectSavedCards, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+  return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)('div', null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", null, (0,_wordpress_html_entities__WEBPACK_IMPORTED_MODULE_3__.decodeEntities)(settings.description || '')), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    class: 'logo-comm-bank'
+  }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("img", {
+    src: '/wp-content/plugins/paydock/assets/images/commBank_logo.png'
+  })), (0,_includes_wc_paydock__WEBPACK_IMPORTED_MODULE_5__.selectSavedCardsComponent)(labels.selectTokenLabel), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
     id: 'paydockWidgetCard'
   }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
     id: 'paydockWidget3ds'
   }), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)("input", {
     type: 'hidden',
     name: 'payment_source_token'
-  }), saveCard);
+  }), (0,_includes_wc_paydock__WEBPACK_IMPORTED_MODULE_5__.checkboxSavedCardsComponent)(labels.saveCardLabel));
 };
 const Label = props => {
   const {
@@ -431,7 +748,7 @@ const Paydok = {
   label: (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(Label, null),
   content: (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(Content, null),
   edit: (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(Content, null),
-  placeOrderButtonLabel: placeOrderButtonLabel,
+  placeOrderButtonLabel: labels.placeOrderButtonLabel,
   canMakePayment: () => true,
   ariaLabel: label,
   supports: {

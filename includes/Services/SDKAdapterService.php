@@ -4,8 +4,8 @@ namespace Paydock\Services;
 
 use Paydock\API\ChargeService;
 use Paydock\API\ConfigService;
-use Paydock\API\GatewayService;
 use Paydock\API\CustomerService;
+use Paydock\API\GatewayService;
 use Paydock\API\ServiceService;
 use Paydock\API\TokenService;
 use Paydock\API\VaultService;
@@ -45,6 +45,7 @@ class SDKAdapterService
 
         return $gatewayService->search($parameters)->call();
     }
+
     public function searchServices(array $parameters = []): array
     {
         $gatewayService = new ServiceService();
@@ -87,6 +88,13 @@ class SDKAdapterService
         return $chargeService->create($params)->call();
     }
 
+    public function createWalletCharge(array $params, ?bool $directCharge): array
+    {
+        $chargeService = new ChargeService;
+
+        return $chargeService->walletsInitialize($params, $directCharge)->call();
+    }
+
     public function standaloneFraudCharge(array $params): array
     {
         $chargeService = new ChargeService;
@@ -99,6 +107,20 @@ class SDKAdapterService
         $chargeService = new ChargeService;
 
         return $chargeService->standalone3Ds($params)->call();
+    }
+
+    public function capture(array $params): array
+    {
+        $chargeService = new ChargeService;
+
+        return $chargeService->capture($params)->call();
+    }
+
+    public function cancelAuthorised(array $params): array
+    {
+        $chargeService = new ChargeService;
+
+        return $chargeService->cancelAuthorised($params)->call();
     }
 
     public function initialise(?bool $forcedEnv = null): void
@@ -115,11 +137,11 @@ class SDKAdapterService
         }
 
         $isAccessToken = CredentialsTypes::ACCESS_KEY()->name == $settings->get_option(
-            $settingsService->getOptionName($settings->id, [
-                SettingGroups::CREDENTIALS()->name,
-                CredentialSettings::TYPE()->name,
-            ])
-        );
+                $settingsService->getOptionName($settings->id, [
+                    SettingGroups::CREDENTIALS()->name,
+                    CredentialSettings::TYPE()->name,
+                ])
+            );
 
         if ($isAccessToken) {
             $secretKey = $settings->get_option($settingsService->getOptionName($settings->id, [
@@ -144,13 +166,13 @@ class SDKAdapterService
 
     public function errorMessageToString(array $responce): string
     {
-        $result = !empty($responce['error']['message']) ? ' ' . $responce['error']['message'] : '';
+        $result = !empty($responce['error']['message']) ? ' '.$responce['error']['message'] : '';
         if (isset($responce['error']['details'])) {
             $firstDetail = reset($responce['error']['details']);
             if (is_array($firstDetail)) {
-                $result .= ' ' . implode(',', $firstDetail);
+                $result .= ' '.implode(',', $firstDetail);
             } else {
-                $result .= ' ' . implode(',', $responce['error']['details']);
+                $result .= ' '.implode(',', $responce['error']['details']);
             }
         }
 
@@ -163,11 +185,11 @@ class SDKAdapterService
             $settings = new SandboxConnectionSettingService();
 
             return self::ENABLED_CONDITION !== $settings->get_option(
-                SettingsService::getInstance()->getOptionName($settings->id, [
-                    SettingGroups::CREDENTIALS()->name,
-                    CredentialSettings::SANDBOX()->name,
-                ])
-            );
+                    SettingsService::getInstance()->getOptionName($settings->id, [
+                        SettingGroups::CREDENTIALS()->name,
+                        CredentialSettings::SANDBOX()->name,
+                    ])
+                );
         }
 
         return $forcedProdEnv;

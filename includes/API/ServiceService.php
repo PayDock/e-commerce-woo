@@ -9,8 +9,8 @@ class ServiceService extends AbstractApiService
     const ENDPOINT = 'services';
 
     protected array $allowedAction = [
-        'get' => 'GET',
-        'search' => 'GET'
+        'get' => self::METHOD_GET,
+        'search' => self::METHOD_GET
     ];
 
     private string $id;

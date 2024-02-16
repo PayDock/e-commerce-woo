@@ -230,18 +230,6 @@ final class SettingsService
         ));
     }
 
-    public function getCardDirectCharge(): bool
-    {
-        $settingService = $this->getSettingsService();
-
-        return self::ENABLED_CONDITION == $settingService->get_option($this->getOptionName(
-            $settingService->id, [
-                SettingGroups::CARD()->name,
-                CardSettings::DIRECT_CHARGE()->name,
-            ]
-        ));
-    }
-
     public function getCardSaveCard(): bool
     {
         $settingService = $this->getSettingsService();
@@ -290,7 +278,7 @@ final class SettingsService
         ));
     }
 
-    public function isAPMsEnabled(OtherPaymentMethods $methods): ?string
+    public function isAPMsEnabled(OtherPaymentMethods $methods): bool
     {
         $settingService = $this->getSettingsService();
 
@@ -492,7 +480,7 @@ final class SettingsService
         );
     }
 
-    public function getWidgetPaymentBangAccountTitle(): string
+    public function getWidgetPaymentBankAccountTitle(): string
     {
         $setting = WidgetSettings::PAYMENT_BANK_ACCOUNT_TITLE();
 
@@ -504,7 +492,7 @@ final class SettingsService
         );
     }
 
-    public function getWidgetPaymentBangAccountDescription(): string
+    public function getWidgetPaymentBankAccountDescription(): string
     {
         $setting = WidgetSettings::PAYMENT_BANK_ACCOUNT_DESCRIPTION();
 
@@ -531,6 +519,30 @@ final class SettingsService
     public function getWidgetPaymentWalletDescription(): string
     {
         $setting = WidgetSettings::PAYMENT_WALLET_DESCRIPTION();
+
+        return $this->getWidgetService()->get_option(
+            $this->getOptionName($this->getWidgetService()->id, [
+                $setting->name
+            ]),
+            $setting->getDefault()
+        );
+    }
+
+    public function getWidgetPaymentAPMTitle(): string
+    {
+        $setting = WidgetSettings::PAYMENT_A_P_M_S_TITLE();
+
+        return $this->getWidgetService()->get_option(
+            $this->getOptionName($this->getWidgetService()->id, [
+                $setting->name
+            ]),
+            $setting->getDefault()
+        );
+    }
+
+    public function getWidgetPaymentAPMDescription(): string
+    {
+        $setting = WidgetSettings::PAYMENT_A_P_M_S_DESCRIPTION();
 
         return $this->getWidgetService()->get_option(
             $this->getOptionName($this->getWidgetService()->id, [

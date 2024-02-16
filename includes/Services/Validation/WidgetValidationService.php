@@ -11,8 +11,8 @@ use Paydock\Services\SettingsService;
 class WidgetValidationService
 {
     private const VALIDATED_FIELDS = [
-        'TITLE',
-        'DESCRIPTION',
+        // 'TITLE',
+        // 'DESCRIPTION',
         'PAYMENT_CARD_TITLE',
         'PAYMENT_CARD_DESCRIPTION',
         'PAYMENT_BANK_ACCOUNT_TITLE',

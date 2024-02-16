@@ -6,8 +6,8 @@ use Paydock\Abstract\AbstractEnum;
 
 class WidgetSettings extends AbstractEnum
 {
-    protected const TITLE = 'TITLE';
-    protected const DESCRIPTION = 'DESCRIPTION';
+    // protected const TITLE = 'TITLE';
+    // protected const DESCRIPTION = 'DESCRIPTION';
     protected const VERSION = 'VERSION';
     protected const CUSTOM_VERSION = 'CUSTOM_VERSION';
     protected const PAYMENT_CARD_TITLE = 'PAYMENT_CARD_TITLE';
@@ -58,8 +58,8 @@ class WidgetSettings extends AbstractEnum
     public function getInputType(): string
     {
         return match ($this->name) {
-            self::TITLE,
-            self::DESCRIPTION,
+            // self::TITLE,
+            // self::DESCRIPTION,
             self::CUSTOM_VERSION,
             self::PAYMENT_CARD_TITLE,
             self::PAYMENT_CARD_DESCRIPTION,
@@ -131,8 +131,8 @@ class WidgetSettings extends AbstractEnum
         return match ($this->name) {
             self::STYLE_FONT_SIZE => '18px',
             self::VERSION => 'latest',
-            self::TITLE => 'Paydock',
-            self::DESCRIPTION => 'The payment orchestration specialists.',
+            // self::TITLE => 'Paydock',
+            // self::DESCRIPTION => 'The payment orchestration specialists.',
             self::PAYMENT_CARD_TITLE => 'Cards',
             self::PAYMENT_CARD_DESCRIPTION => 'Pay by cards',
             self::PAYMENT_A_P_M_S_TITLE => 'APMs',

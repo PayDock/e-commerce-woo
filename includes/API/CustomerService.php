@@ -9,7 +9,7 @@ class CustomerService extends AbstractApiService
     const ENDPOINT = 'customers';
 
     protected array $allowedAction = [
-        'create' => 'POST'
+        'create' => self::METHOD_POST
     ];
 
     public function create(array $params): CustomerService

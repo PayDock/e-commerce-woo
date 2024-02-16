@@ -6,41 +6,72 @@ use Exception;
 use Paydock\Enums\DSTypes;
 use Paydock\Enums\FraudTypes;
 use Paydock\Enums\SaveCardOptions;
+use Paydock\Helpers\ArgsForProcessPayment;
+use Paydock\Helpers\VaultTokenHelper;
 use Paydock\Repositories\UserTokenRepository;
 use Paydock\Services\SDKAdapterService;
 
 class CardProcessor
 {
-    private array $args = [];
+    const FRAUD_3DS_CHARGE_METHOD = 'fraud3DsCharge';
+    const THREE_DS_CHARGE_METHOD = 'threeDsCharge';
+    const FRAUD_CHARGE_METHOD = 'fraudCharge';
+    const DIRECT_CHARGE_METHOD = 'directCharge';
+    const CUSTOMER_CHARGE_METHOD = 'customerCharge';
+    const ALLOWED_METHODS = [
+        self::FRAUD_3DS_CHARGE_METHOD,
+        self::THREE_DS_CHARGE_METHOD,
+        self::FRAUD_CHARGE_METHOD,
+        self::DIRECT_CHARGE_METHOD,
+        self::CUSTOMER_CHARGE_METHOD
+    ];
+
+    protected VaultTokenHelper $vaultTokenHelper;
+
+    protected array $args = [];
+    protected array $tokenData = [];
+    private ?string $runMethod;
 
     public function __construct(array $args = [])
     {
-        $this->args = $this->prepareArgs($args);
+        $this->args = ArgsForProcessPayment::prepare($args);
+        $this->vaultTokenHelper = new VaultTokenHelper($this->args);
     }
 
     public function run(): array
     {
-        $responce = [];
+        $this->setRunMethod();
 
-        switch (true) {
-            case !empty($this->args['card3ds']) && !empty($this->args['cardfraud']):
-                $responce = $this->fraud3DsCharge();
-                break;
-            case !empty($this->args['card3ds']):
-                $responce = $this->threeDsCharge();
-                break;
-            case !empty($this->args['cardfraud']):
-                $responce = $this->fraudCharge();
-                break;
-            case isset($this->args['saveaccount']) && empty($this->args['saveaccount']):
-            case isset($this->args['carddirectcharge']):
-                $responce = $this->directCharge();
-                break;
-            default:
-                $responce = $this->customerCharge();
+        if (!in_array($this->runMethod, self::ALLOWED_METHODS)) {
+            throw new Exception(__('Undefined run method', PAY_DOCK_TEXT_DOMAIN));
         }
 
-        return $responce;
+        return call_user_func([$this, $this->runMethod]);
+    }
+
+    public function getRunMethod()
+    {
+        return $this->runMethod;
+    }
+
+    private function setRunMethod()
+    {
+        switch (true) {
+            case !empty($this->args['card3ds']) && !empty($this->args['cardfraud']):
+                $this->runMethod = self::FRAUD_3DS_CHARGE_METHOD;
+                break;
+            case !empty($this->args['card3ds']):
+                $this->runMethod = self::THREE_DS_CHARGE_METHOD;
+                break;
+            case !empty($this->args['cardfraud']):
+                $this->runMethod = self::FRAUD_CHARGE_METHOD;
+                break;
+            case $this->args['cardsavecard']:
+                $this->runMethod = self::CUSTOMER_CHARGE_METHOD;
+                break;
+            default:
+                $this->runMethod = self::DIRECT_CHARGE_METHOD;
+        }
     }
 
     private function fraud3DsCharge(): array
@@ -217,24 +248,6 @@ class CardProcessor
         ]);
     }
 
-    private function directCharge(): array
-    {
-        $vaultToken = $this->getVaultToken();
-
-        $paymentSource = ['vault_token' => $vaultToken];
-        if (isset($this->args['gatewayid'])) {
-            $paymentSource['gateway_id'] = $this->args['gatewayid'];
-        }
-
-        return SDKAdapterService::getInstance()->createCharge([
-            'amount' => $this->args['amount'],
-            'currency' => strtoupper(get_woocommerce_currency()),
-            'customer' => [
-                'payment_source' => $paymentSource
-            ]
-        ]);
-    }
-
     private function customerCharge(): array
     {
         $vaultToken = $this->getVaultToken();
@@ -253,11 +266,10 @@ class CardProcessor
             throw new Exception(__('Can\'t create Paydock customer.' . $message, PAY_DOCK_TEXT_DOMAIN));
         }
 
-        if ($this->args['isuserloggedin'] &&
-            !empty($this->args['cardsavecard']) &&
-            $this->args['cardsavecardoption'] !== SaveCardOptions::VAULT()->name &&
-            $this->args['cardsavecardchecked']) {
-            // todo: save customer to database
+        if ($this->vaultTokenHelper->shouldSaveVaultToken()) {
+            (new UserTokenRepository())->updateUserToken($this->args['selectedtoken'], [
+                'customer_id' => $customer['resource']['data']['_id']
+            ]);
         }
 
         $params = [
@@ -266,7 +278,10 @@ class CardProcessor
             'customer_id' => $customer['resource']['data']['_id']
         ];
 
-        if (isset($this->args['gatewayid'])) {
+        if (isset($this->args['gatewayid']) && in_array($this->args['cardsavecardoption'], [
+            SaveCardOptions::WITH_GATEWAY()->name,
+            SaveCardOptions::VAULT()->name
+        ])) {
             $params['customer'] = [
                 'payment_source' => [
                     'gateway_id' => $this->args['gatewayid']
@@ -284,14 +299,60 @@ class CardProcessor
         return $responce;
     }
 
+    private function directCharge(): array
+    {
+        $vaultToken = $this->getVaultToken();
+
+        $paymentSource = ['vault_token' => $vaultToken];
+        if (isset($this->args['gatewayid'])) {
+            $paymentSource['gateway_id'] = $this->args['gatewayid'];
+        }
+
+        return SDKAdapterService::getInstance()->createCharge([
+            'amount' => $this->args['amount'],
+            'currency' => strtoupper(get_woocommerce_currency()),
+            'customer' => [
+                'payment_source' => $paymentSource
+            ]
+        ]);
+    }
+
+    public function createCustomer($force = false): void
+    {
+        if ($this->shouldNotCreateCustomer() || $force) {
+            return;
+        }
+
+        $customerArgs = [
+            'payment_source' => [
+                'amount' => $this->args['amount'],
+                'vault_token' => $this->args['selectedtoken']
+            ]
+        ];
+
+        if ($this->args['cardsavecardoption'] === SaveCardOptions::WITH_GATEWAY()->value && isset($this->args['gatewayid'])) {
+            $customerArgs['payment_source']['gateway_id'] = $this->args['gatewayid'];
+        }
+
+        $customer = SDKAdapterService::getInstance()->createCustomer($customerArgs);
+        if (!empty($customer['error']) || empty($customer['resource']['data']['_id'])) {
+            $message = !empty($customer['error']['message']) ? ' ' . $customer['error']['message'] : '';
+            throw new Exception(__('Can\'t create Paydock customer.' . $message, PAY_DOCK_TEXT_DOMAIN));
+        }
+
+        (new UserTokenRepository())->updateUserToken($this->args['selectedtoken'], [
+            'customer_id' => $customer['resource']['data']['_id']
+        ]);
+    }
+
     public function getStandalone3dsToken(): string
     {
-        $vaultToken = $this->args['vaulttoken'];
+        $vaultToken = $this->getVaultToken();
 
         $paymentSource = [
             'vault_token' => $vaultToken,
         ];
-        
+
         if (isset($this->args['gatewayid'])) {
             $paymentSource['gateway_id'] = $this->args['gatewayid'];
         }
@@ -321,61 +382,27 @@ class CardProcessor
 
     public function getVaultToken(): string
     {
-        $vaultToken = !empty($this->args['selectedtoken']) ? $this->args['selectedtoken'] : null;
-        $OTTtoken = !empty($this->args['paymentsourcetoken']) ? $this->args['paymentsourcetoken'] : null;
-        $saveCard = !empty($this->args['cardsavecard']) ? true : false;
-        $saveCardOption = !empty($this->args['cardsavecardoption']) ? $this->args['cardsavecardoption'] : null;
+        $token = $this->vaultTokenHelper->get();
 
-        if ($vaultToken !== null) {
-            return $vaultToken;
+        if (!empty($token)) {
+            $this->args['selectedtoken'] = $token;
         }
 
-        if (empty($OTTtoken)) {
-            throw new Exception(__('The token wasn\'t generated correctly.', PAY_DOCK_TEXT_DOMAIN));
-        }
-
-        $vaultTokenData = [
-            'token' => $OTTtoken
-        ];
-
-        if (!$saveCard) {
-            $vaultTokenData['vault_type'] = 'session';
-        }
-
-        $responce = SDKAdapterService::getInstance()->createVaultToken($vaultTokenData);
-
-        if (!empty($responce['error']) || empty($responce['resource']['data']['vault_token'])) {
-            $message = !empty($responce['error']['message']) ? ' ' . $responce['error']['message'] : '';
-            throw new Exception(__('Can\'t create Paydock vault token.' . $message, PAY_DOCK_TEXT_DOMAIN));
-        }
-
-        if ($this->args['isuserloggedin'] &&
-            $saveCard &&
-            $saveCardOption === SaveCardOptions::VAULT()->name &&
-            $this->args['cardsavecardchecked']) {
-            $userTokenRepository = new UserTokenRepository();
-            $userTokenRepository->saveUserToken($responce['resource']['data']);
-        }
-
-        return $responce['resource']['data']['vault_token'];
+        return $token;
     }
 
-    private function prepareArgs(array $args = []): array
+    private function shouldCreateCustomer(): bool
     {
-        $args['isuserloggedin'] = is_user_logged_in();
+        return $this->vaultTokenHelper->shouldSaveVaultToken() &&
+            in_array($this->args['cardsavecardoption'], [
+                SaveCardOptions::WITH_GATEWAY()->name,
+                SaveCardOptions::WITHOUT_GATEWAY()->name
+            ]) &&
+            $this->runMethod !== self::CUSTOMER_CHARGE_METHOD;
+    }
 
-        if (!empty($args['card3ds']) && $args['card3ds'] === DSTypes::DISABLE()->name) {
-            $args['card3ds'] = '';
-        }
-
-        if (!empty($args['cardfraud']) && $args['cardfraud'] === FraudTypes::DISABLE()->name) {
-            $args['cardfraud'] = '';
-        }
-
-        if (isset($args['cardsavecardchecked'])) {
-            $args['cardsavecardchecked'] = $args['cardsavecardchecked'] === '1';
-        }
-
-        return $args;
+    private function shouldNotCreateCustomer(): bool
+    {
+        return !$this->shouldCreateCustomer();
     }
 }
