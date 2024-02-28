@@ -1,8 +1,8 @@
 <?php
 
-namespace Paydock\Enums;
+namespace PowerBoard\Enums;
 
-use Paydock\Abstract\AbstractEnum;
+use PowerBoard\Abstract\AbstractEnum;
 
 class WidgetSettings extends AbstractEnum
 {
@@ -58,8 +58,6 @@ class WidgetSettings extends AbstractEnum
     public function getInputType(): string
     {
         return match ($this->name) {
-            // self::TITLE,
-            // self::DESCRIPTION,
             self::CUSTOM_VERSION,
             self::PAYMENT_CARD_TITLE,
             self::PAYMENT_CARD_DESCRIPTION,
@@ -109,10 +107,11 @@ class WidgetSettings extends AbstractEnum
     public function getFontFamily(): array
     {
         $fonts = [
-            'serif',
             'sans-serif',
+            'serif',
             'monospace',
-            'cursive', 'fantasy',
+            'cursive',
+            'fantasy',
             'system-ui',
             'ui-serif',
             'ui-sans-serif',
@@ -131,8 +130,6 @@ class WidgetSettings extends AbstractEnum
         return match ($this->name) {
             self::STYLE_FONT_SIZE => '18px',
             self::VERSION => 'latest',
-            // self::TITLE => 'Paydock',
-            // self::DESCRIPTION => 'The payment orchestration specialists.',
             self::PAYMENT_CARD_TITLE => 'Cards',
             self::PAYMENT_CARD_DESCRIPTION => 'Pay by cards',
             self::PAYMENT_A_P_M_S_TITLE => 'APMs',
@@ -141,11 +138,11 @@ class WidgetSettings extends AbstractEnum
             self::PAYMENT_BANK_ACCOUNT_DESCRIPTION => 'Pay by Bank Accounts',
             self::PAYMENT_WALLET_TITLE => 'Wallets',
             self::PAYMENT_WALLET_DESCRIPTION => 'Google Pay, Apple Pay, PayPal',
-            self::STYLE_BACKGROUND_COLOR => '#ffffff',
-            self::STYLE_TEXT_COLOR => '#000000',
-            self::STYLE_BORDER_COLOR => '#000000',
-            self::STYLE_ERROR_COLOR => '#ff0000',
-            self::STYLE_SUCCESS_COLOR => '#00ff00',
+            self::STYLE_BACKGROUND_COLOR => 'rgb(235,235,235)',
+            self::STYLE_TEXT_COLOR => '#1E1E1E',
+            self::STYLE_BORDER_COLOR => '#B5B5B5',
+            self::STYLE_ERROR_COLOR => '#e1001a',
+            self::STYLE_SUCCESS_COLOR => '#00A000',
             default => null,
         };
     }

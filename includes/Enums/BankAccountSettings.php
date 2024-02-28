@@ -1,8 +1,8 @@
 <?php
 
-namespace Paydock\Enums;
+namespace PowerBoard\Enums;
 
-use Paydock\Abstract\AbstractEnum;
+use PowerBoard\Abstract\AbstractEnum;
 
 class BankAccountSettings extends AbstractEnum
 {
@@ -35,7 +35,7 @@ class BankAccountSettings extends AbstractEnum
     {
         return match ($this->name) {
             self::SAVE_CARD => 'Offer your customer the option to permanently save the bank account information at '
-                . 'Paydock for further usage',
+                . 'PowerBoard for further usage',
             default => ''
         };
     }

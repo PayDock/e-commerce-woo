@@ -1,12 +1,12 @@
 <?php
 
-namespace Paydock\Services\Validation;
+namespace PowerBoard\Services\Validation;
 
-use Paydock\Enums\CustomStylesElements;
-use Paydock\Enums\WidgetSettings;
-use Paydock\PaydockPlugin;
-use Paydock\Services\Settings\WidgetSettingService;
-use Paydock\Services\SettingsService;
+use PowerBoard\Enums\CustomStylesElements;
+use PowerBoard\Enums\WidgetSettings;
+use PowerBoard\PowerBoardPlugin;
+use PowerBoard\Services\Settings\WidgetSettingService;
+use PowerBoard\Services\SettingsService;
 
 class WidgetValidationService
 {
@@ -94,7 +94,7 @@ class WidgetValidationService
             if (($settingName = array_search($key, $validated)) && empty($value)) {
                 $this->errors[] = __(
                     WidgetSettings::{$settingName}()->getFullTitle() . " can`t be empty."
-                    , PaydockPlugin::PLUGIN_PREFIX
+                    , PowerBoardPlugin::PLUGIN_PREFIX
                 );
             }
             if (
@@ -108,12 +108,12 @@ class WidgetValidationService
                     || !$this->validateCustomStyles($decoded)
                 )
             ) {
-                $this->errors[] = __('Custom styles must be a valid JSON.', PaydockPlugin::PLUGIN_PREFIX);
+                $this->errors[] = __('Custom styles must be a valid JSON.', PowerBoardPlugin::PLUGIN_PREFIX);
             }
         }
 
         if ($this->data[$versionKey] == 'custom' && empty($this->data[$customVersionKey])) {
-            $this->errors[] = __("Version can`t be empty.", PaydockPlugin::PLUGIN_PREFIX);
+            $this->errors[] = __("Version can`t be empty.", PowerBoardPlugin::PLUGIN_PREFIX);
         }
     }
 

@@ -1,9 +1,9 @@
 <?php
 
-namespace Paydock\Abstract;
+namespace PowerBoard\Abstract;
 
-use Paydock\Contracts\Repository;
-use Paydock\PaydockPlugin;
+use PowerBoard\Contracts\Repository;
+use PowerBoard\PowerBoardPlugin;
 
 abstract class AbstractRepository implements Repository
 {
@@ -20,7 +20,7 @@ abstract class AbstractRepository implements Repository
 
     public function getFullTableName(string $table): string
     {
-        return $this->tablePrefix . PaydockPlugin::PLUGIN_PREFIX . '_' . $table;
+        return $this->tablePrefix . PowerBoardPlugin::PLUGIN_PREFIX . '_' . $table;
     }
 
     public function createTable(): void

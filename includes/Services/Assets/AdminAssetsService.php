@@ -1,8 +1,8 @@
 <?php
 
-namespace Paydock\Services\Assets;
+namespace PowerBoard\Services\Assets;
 
-use Paydock\PaydockPlugin;
+use PowerBoard\PowerBoardPlugin;
 
 class AdminAssetsService
 {
@@ -39,7 +39,7 @@ class AdminAssetsService
         foreach (self::SCRIPTS as $script) {
             wp_register_script(
                 $this->getScriptName($script),
-                plugins_url($this->getScriptPath($script), PAY_DOCK_PLUGIN_FILE)
+                plugins_url($this->getScriptPath($script), POWER_BOARD_PLUGIN_FILE)
             );
         }
     }
@@ -56,14 +56,14 @@ class AdminAssetsService
         foreach (self::STYLES as $style) {
             wp_enqueue_style(
                 $this->getStyleName($style),
-                plugins_url($this->getStylePath($style), PAY_DOCK_PLUGIN_FILE)
+                plugins_url($this->getStylePath($style), POWER_BOARD_PLUGIN_FILE)
             );
         }
     }
 
     private function getScriptName(string $script): string
     {
-        return implode('_', [PaydockPlugin::PLUGIN_PREFIX, self::PREFIX, self::SCRIPT_PREFIX, $script]);
+        return implode('_', [PowerBoardPlugin::PLUGIN_PREFIX, self::PREFIX, self::SCRIPT_PREFIX, $script]);
     }
 
     private function getScriptPath(string $script): string
@@ -73,7 +73,7 @@ class AdminAssetsService
 
     private function getStyleName(string $script): string
     {
-        return implode('_', [PaydockPlugin::PLUGIN_PREFIX, self::PREFIX, self::STYLE_PREFIX, $script]);
+        return implode('_', [PowerBoardPlugin::PLUGIN_PREFIX, self::PREFIX, self::STYLE_PREFIX, $script]);
     }
 
     private function getStylePath(string $script): string

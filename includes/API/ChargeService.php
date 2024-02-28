@@ -1,8 +1,8 @@
 <?php
 
-namespace Paydock\API;
+namespace PowerBoard\API;
 
-use Paydock\Abstract\AbstractApiService;
+use PowerBoard\Abstract\AbstractApiService;
 
 class ChargeService extends AbstractApiService
 {
@@ -11,14 +11,19 @@ class ChargeService extends AbstractApiService
     const STANDALONE_FRAUD_ENDPOINT = 'fraud';
     const STANDALONE_3DS_ENDPOINT = 'standalone-3ds';
     const CAPTURE_ENDPOINT = 'capture';
+    const REFUNDS_ENDPOINT = 'refunds';
 
     protected ?bool $directCharge = null;
+
+    protected ?string $id = null;
     protected array $allowedAction = [
         'create' => self::METHOD_POST,
+        'update' => self::METHOD_POST,
         'wallet-initialize' => self::METHOD_POST,
         'standalone-fraud' => self::METHOD_POST,
         'standalone-3ds' => self::METHOD_POST,
         'capture' => self::METHOD_POST,
+        'refunds' => self::METHOD_POST,
         'cancel-authorised' => self::METHOD_DELETE,
     ];
 
@@ -27,6 +32,16 @@ class ChargeService extends AbstractApiService
         $this->parameters = $params;
 
         $this->setAction('create');
+
+        return $this;
+    }
+
+    public function update(string $id, array $params): self
+    {
+        $this->id = $id;
+        $this->parameters = $params;
+
+        $this->setAction('update');
 
         return $this;
     }
@@ -69,6 +84,16 @@ class ChargeService extends AbstractApiService
         return $this;
     }
 
+
+    public function refunds(array $params): self
+    {
+        $this->parameters = $params;
+
+        $this->setAction('refunds');
+
+        return $this;
+    }
+
     public function cancelAuthorised(array $params): self
     {
         $this->parameters = $params;
@@ -94,6 +119,10 @@ class ChargeService extends AbstractApiService
             case 'standalone-3ds':
                 $result = self::ENDPOINT . '/' . self::STANDALONE_3DS_ENDPOINT;
                 break;
+            case 'refunds':
+                $result = self::ENDPOINT . '/' . $this->parameters['charge_id'] . '/' . self::REFUNDS_ENDPOINT;
+                unset($this->parameters['charge_id']);
+                break;
             case 'capture':
             case 'cancel-authorised':
                 $result = self::ENDPOINT . '/' . $this->parameters['charge_id'] . '/' . self::CAPTURE_ENDPOINT;
@@ -101,6 +130,9 @@ class ChargeService extends AbstractApiService
                 break;
             case 'wallet-initialize':
                 $result = self::ENDPOINT.'/'.self::WALLETS_INITIALIZE_ENDPOINT;
+                break;
+            case 'update':
+                $result = self::ENDPOINT.'/'.$this->id;
                 break;
             default:
                 $result = self::ENDPOINT;

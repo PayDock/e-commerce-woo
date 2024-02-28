@@ -1,9 +1,9 @@
 <?php
 
-namespace Paydock\Repositories;
+namespace PowerBoard\Repositories;
 
-use Paydock\Abstract\AbstractRepository;
-use Paydock\Contracts\Repository;
+use PowerBoard\Abstract\AbstractRepository;
+use PowerBoard\Contracts\Repository;
 
 class LogRepository extends AbstractRepository implements Repository
 {

@@ -1,8 +1,8 @@
 <?php
 
-namespace Paydock\Enums;
+namespace PowerBoard\Enums;
 
-use Paydock\Abstract\AbstractEnum;
+use PowerBoard\Abstract\AbstractEnum;
 
 class CustomLabelStyles extends AbstractEnum
 {

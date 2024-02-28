@@ -1,10 +1,10 @@
 <?php
 
-namespace Paydock\Hooks;
+namespace PowerBoard\Hooks;
 
-use Paydock\Contracts\Hook;
-use Paydock\Contracts\Repository;
-use Paydock\PaydockPlugin;
+use PowerBoard\Contracts\Hook;
+use PowerBoard\Contracts\Repository;
+use PowerBoard\PowerBoardPlugin;
 
 class UninstallHook implements Hook
 {
@@ -15,7 +15,7 @@ class UninstallHook implements Hook
 
     public static function handle(): void
     {
-        $repositories = array_map(fn(string $className) => new $className, PaydockPlugin::REPOSITORIES);
+        $repositories = array_map(fn(string $className) => new $className, PowerBoardPlugin::REPOSITORIES);
         array_map([new self(), 'runMigration'], $repositories);
     }
 

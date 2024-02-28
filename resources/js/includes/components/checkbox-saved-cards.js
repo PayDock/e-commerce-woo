@@ -2,14 +2,14 @@ import { createElement } from 'react';
 import { getSetting } from '@woocommerce/settings';
 
 export default (saveCardLabel = 'Save card') => {
-    const settings = getSetting('paydock_data', {});
+    const settings = getSetting('power_board_data', {});
 
     if (!settings.cardSaveCard || !settings.isUserLoggedIn) {
         return '';
     }
 
     return createElement("div",
-        { class: 'wc-block-components-checkbox' },
+        { class: 'wc-block-components-checkbox power_board-save-card' },
         createElement("label",
             {
                 for: 'card_save_card',

@@ -6,5 +6,5 @@ if (!defined('WP_UNINSTALL_PLUGIN')) {
 
 require_once "vendor/autoload.php";
 
-Paydock\Hooks\UninstallHook::handle();
+PowerBoard\Hooks\UninstallHook::handle();
 

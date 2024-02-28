@@ -1,8 +1,8 @@
 <?php
 
-namespace Paydock\API;
+namespace PowerBoard\API;
 
-use Paydock\Abstract\AbstractApiService;
+use PowerBoard\Abstract\AbstractApiService;
 
 class GatewayService extends AbstractApiService
 {
@@ -44,7 +44,7 @@ class GatewayService extends AbstractApiService
                 $result = self::ENDPOINT . '/' . urlencode($this->id);
                 break;
             default:
-                $result = self::ENDPOINT;
+                $result = self::ENDPOINT . '?limit=-1';
         }
 
         return $result;

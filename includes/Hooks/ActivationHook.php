@@ -1,19 +1,19 @@
 <?php
 
-namespace Paydock\Hooks;
+namespace PowerBoard\Hooks;
 
-use Paydock\Contracts\Hook;
-use Paydock\Contracts\Repository;
-use Paydock\Enums\APMsSettings;
-use Paydock\Enums\BankAccountSettings;
-use Paydock\Enums\CardSettings;
-use Paydock\Enums\CredentialSettings;
-use Paydock\Enums\OtherPaymentMethods;
-use Paydock\Enums\WalletPaymentMethods;
-use Paydock\Enums\WalletSettings;
-use Paydock\PaydockPlugin;
-use Paydock\Repositories\LogRepository;
-use Paydock\Services\SettingsService;
+use PowerBoard\Contracts\Hook;
+use PowerBoard\Contracts\Repository;
+use PowerBoard\Enums\APMsSettings;
+use PowerBoard\Enums\BankAccountSettings;
+use PowerBoard\Enums\CardSettings;
+use PowerBoard\Enums\CredentialSettings;
+use PowerBoard\Enums\OtherPaymentMethods;
+use PowerBoard\Enums\WalletPaymentMethods;
+use PowerBoard\Enums\WalletSettings;
+use PowerBoard\PowerBoardPlugin;
+use PowerBoard\Repositories\LogRepository;
+use PowerBoard\Services\SettingsService;
 
 class ActivationHook implements Hook
 {
@@ -26,11 +26,10 @@ class ActivationHook implements Hook
     {
         $instance = new self();
 
-        $repositories = array_map(fn(string $className) => new $className, PaydockPlugin::REPOSITORIES);
+        $repositories = array_map(fn(string $className) => new $className, PowerBoardPlugin::REPOSITORIES);
 
         array_map([$instance, 'runMigration'], $repositories);
 
-        $instance->createLogs();
     }
 
     protected function runMigration(Repository $repository): void
@@ -38,35 +37,4 @@ class ActivationHook implements Hook
         $repository->createTable();
     }
 
-    private function createLogs(): void
-    {
-        $stubData = [
-            [
-                '5ec63451b12c99579e46ee31',
-                'Charges',
-                'Pending',
-                '',
-                LogRepository::DEFAULT
-            ],
-            [
-                '5ec63445b12c99579e46ee27',
-                'Charges',
-                'Completed',
-                '',
-                LogRepository::SUCCESS
-            ],
-            [
-                '5ec63445b12c99579e46ee27',
-                'Charges',
-                'UnfulfilledCondition',
-                'Charge authenticated using different currency',
-                LogRepository::ERROR
-            ],
-        ];
-        $repository = new LogRepository();
-
-        foreach ($stubData as $stub) {
-            $repository->createLogRecord(...$stub);
-        }
-    }
 }

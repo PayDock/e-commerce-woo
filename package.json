@@ -1,6 +1,6 @@
 {
-	"name": "woocommerce-gateway-paydock",
-	"title": "WooCommerce Paydock Payment",
+	"name": "woocommerce-gateway-power_board",
+	"title": "WooCommerce PowerBoard Payment",
 	"version": "0.2.4",
 	"author": "JSP",
 	"keywords": [],
@@ -28,6 +28,7 @@
 	"dependencies": {
 		"@babel/types": "^7.23.9",
 		"axios": "^1.6.7",
-		"caniuse-lite": "^1.0.30001585"
+		"caniuse-lite": "^1.0.30001585",
+		"react-select": "^5.8.0"
 	}
 }

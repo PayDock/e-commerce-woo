@@ -1,10 +1,10 @@
 <?php
 
-namespace Paydock\Helpers;
+namespace PowerBoard\Helpers;
 
 use Exception;
-use Paydock\Repositories\UserTokenRepository;
-use Paydock\Services\SDKAdapterService;
+use PowerBoard\Repositories\UserTokenRepository;
+use PowerBoard\Services\SDKAdapterService;
 
 class VaultTokenHelper
 {
@@ -25,7 +25,7 @@ class VaultTokenHelper
         }
 
         if (empty($OTTtoken)) {
-            throw new Exception(__('The token wasn\'t generated correctly.', PAY_DOCK_TEXT_DOMAIN));
+            throw new Exception(__('The token wasn\'t generated correctly.', POWER_BOARD_TEXT_DOMAIN));
         }
 
         $vaultTokenData = [
@@ -44,7 +44,7 @@ class VaultTokenHelper
 
         if (!empty($responce['error']) || empty($responce['resource']['data']['vault_token'])) {
             $message = !empty($responce['error']['message']) ? ' ' . $responce['error']['message'] : '';
-            throw new Exception(__('Can\'t create Paydock vault token.' . $message, PAY_DOCK_TEXT_DOMAIN));
+            throw new Exception(__('Can\'t create PowerBoard vault token.' . $message, POWER_BOARD_TEXT_DOMAIN));
         }
 
         if ($this->shouldSaveVaultToken()) {

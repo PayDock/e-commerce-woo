@@ -1,6 +1,6 @@
 <?php
 
-namespace Paydock\Services;
+namespace PowerBoard\Services;
 
 class LoggerService
 {

@@ -3,47 +3,25 @@ import { registerPaymentMethod } from '@woocommerce/blocks-registry';
 import { decodeEntities } from '@wordpress/html-entities';
 import { getSetting } from '@woocommerce/settings';
 import { useEffect } from 'react';
-// import { sleep } from '../includes/wc-paydock';
-import {
-    checkboxSavedApmsComponent
-} from '../includes/wc-paydock';
 
-const settings = getSetting('paydock_apms_data', {});
+const settings = getSetting('power_board_apms_data', {});
 
-const textDomain = 'paydock-for-woo';
+const textDomain = 'power_board';
 const labels = {
-    defaultLabel: __('Paydock Payments', textDomain),
-    placeOrderButtonLabel: __('Place Order by Paydock', textDomain)
+    defaultLabel: __('PowerBoard Payments', textDomain),
+    placeOrderButtonLabel: __('Place Order by PowerBoard', textDomain),
+    validationError: __('Please fill required fields of the form to display payment methods', textDomain),
+    availableAfterpay: __('Payment method Afterpay is not avalaible for your country!!!', textDomain),
+    availableZippay: __('Payment method Zippay is not avalaible for your country!!!', textDomain)
 }
 
 const label = decodeEntities(settings.title) || labels.defaultLabel;
 
-let formSubmittedAlready = false;
 const Content = (props) => {
     const { eventRegistration, emitResponse } = props;
     const { onPaymentSetup, onCheckoutValidation } = eventRegistration;
 
     useEffect(() => {
-        const validation = onCheckoutValidation(async () => {
-            if (settings.selectedToken.trim().length > 0) {
-                return true;
-            }
-
-            if (formSubmittedAlready) {
-                return true;
-            }
-
-            let result = true;
-            if (result) {
-                return true;
-            }
-
-            return {
-                type: emitResponse.responseTypes.ERROR,
-                errorMessage: labels.fillDataError,
-            }
-        });
-
         const unsubscribe = onPaymentSetup(async () => {
             const paymentSourceToken = document.querySelector('input[name="payment_source_apm_token"]')
             if (paymentSourceToken === null) {
@@ -52,7 +30,7 @@ const Content = (props) => {
 
             settings.paymentSourceToken = paymentSourceToken.value;
             if (settings.paymentSourceToken.length > 0 || settings.selectedToken.length > 0) {
-                const data = settings
+                const data = { ...settings }
                 data.customers = '';
                 data.styles = '';
                 data.supports = '';
@@ -71,7 +49,7 @@ const Content = (props) => {
             };
         });
         return () => {
-            validation() && unsubscribe();
+            unsubscribe();
         };
     }, [
         emitResponse.responseTypes.ERROR,
@@ -92,26 +70,58 @@ const Content = (props) => {
             { class: 'logo-comm-bank' },
             createElement(
                 "img",
-                { src: '/wp-content/plugins/paydock/assets/images/commBank_logo.png' }
+                { src: '/wp-content/plugins/power_board/assets/images/logo.png' }
             ),
         ),
         createElement(
             'div',
-            { id: 'paydockWidgetApm' },
-            createElement('img',
+            {
+                id: 'powerBoardWidgetApm',
+                class: 'power_board-widget-content',
+                style: {
+                    display: 'none',
+                    'text-align': 'center'
+                }
+            },
+            createElement('button',
                 {
-                    src: '/wp-content/plugins/paydock/assets/images/zip_money.png',
+                    type: 'button',
+                    src: '/wp-content/plugins/power_board/assets/images/zip_money.png',
                     id: 'zippay',
-                    class: 'btn-apm-zippay'
+                    class: 'btn-apm btn-apm-zippay',
+                    style: {
+                        display: 'none',
+                    }
                 },
+                createElement('img',
+                    {
+                        src: '/wp-content/plugins/power_board/assets/images/zip_money.png',
+                    },
+                ),
             ),
-            createElement('img',
+            createElement('button',
                 {
-                    src: '/wp-content/plugins/paydock/assets/images/afterpay_icon.png',
+                    type: 'button',
+                    src: '/wp-content/plugins/power_board/assets/images/zip_money.png',
                     id: 'afterpay',
-                    class: 'btn-apm-afterpay'
+                    class: 'btn-apm btn-apm-afterpay',
+                    style: {
+                        display: 'none',
+                    }
                 },
-            )
+                createElement('img',
+                    {
+                        src: '/wp-content/plugins/power_board/assets/images/afterpay_icon.png',
+                    },
+                ),
+            ),
+        ),
+        createElement(
+            'div',
+            {
+                class: 'power_board-validation-error',
+            },
+            labels.validationError
         ),
         createElement(
             'input',
@@ -120,7 +130,26 @@ const Content = (props) => {
                 name: 'payment_source_apm_token'
             }
         ),
-        checkboxSavedApmsComponent()
+        createElement(
+            "div",
+            {
+                class: 'power_board-country-available-afterpay',
+                style:{
+                    display:'none'
+                }
+            },
+            labels.availableAfterpay
+        ),
+        createElement(
+            "div",
+            {
+                class: 'power_board-country-available-zippay',
+                style:{
+                    display:'none'
+                }
+            },
+            labels.availableZippay
+        ),
     );
 };
 
@@ -130,7 +159,7 @@ const Label = (props) => {
 };
 
 const PaydokApms = {
-    name: 'paydock_apms_gateway',
+    name: 'power_board_apms_gateway',
     label: <Label />,
     content: <Content />,
     edit: <Content />,

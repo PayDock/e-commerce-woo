@@ -1,17 +1,17 @@
 <?php
 
-namespace Paydock\Util;
+namespace PowerBoard\Util;
 
-use Paydock\Abstract\AbstractBlock;
-use Paydock\Repositories\UserTokenRepository;
-use Paydock\Services\Checkout\BankAccountPaymentService;
-use Paydock\Services\SettingsService;
+use PowerBoard\Abstract\AbstractBlock;
+use PowerBoard\Repositories\UserTokenRepository;
+use PowerBoard\Services\Checkout\BankAccountPaymentService;
+use PowerBoard\Services\SettingsService;
 
 final class BankAccountBlock extends AbstractBlock
 {
     protected const SCRIPT = 'bank-account-form';
 
-    protected $name = 'paydock_bank_account_block';
+    protected $name = 'power_board_bank_account_block';
 
     protected BankAccountPaymentService $gateway;
 

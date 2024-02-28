@@ -1,19 +1,19 @@
 <?php
 
-namespace Paydock\Hooks;
+namespace PowerBoard\Hooks;
 
-use Paydock\Contracts\Hook;
-use Paydock\Contracts\Repository;
-use Paydock\Enums\APMsSettings;
-use Paydock\Enums\BankAccountSettings;
-use Paydock\Enums\CardSettings;
-use Paydock\Enums\CredentialSettings;
-use Paydock\Enums\OtherPaymentMethods;
-use Paydock\Enums\WalletPaymentMethods;
-use Paydock\Enums\WalletSettings;
-use Paydock\PaydockPlugin;
-use Paydock\Plugin;
-use Paydock\Services\SettingsService;
+use PowerBoard\Contracts\Hook;
+use PowerBoard\Contracts\Repository;
+use PowerBoard\Enums\APMsSettings;
+use PowerBoard\Enums\BankAccountSettings;
+use PowerBoard\Enums\CardSettings;
+use PowerBoard\Enums\CredentialSettings;
+use PowerBoard\Enums\OtherPaymentMethods;
+use PowerBoard\Enums\WalletPaymentMethods;
+use PowerBoard\Enums\WalletSettings;
+use PowerBoard\PowerBoardPlugin;
+use PowerBoard\Plugin;
+use PowerBoard\Services\SettingsService;
 
 class DeactivationHook implements Hook
 {
@@ -26,7 +26,7 @@ class DeactivationHook implements Hook
     {
         $instance = new self();
 
-        $repositories = array_map(fn(string $className) => new $className, PaydockPlugin::REPOSITORIES);
+        $repositories = array_map(fn(string $className) => new $className, PowerBoardPlugin::REPOSITORIES);
 
         array_map([$instance, 'runMigration'], $repositories);
     }

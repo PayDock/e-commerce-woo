@@ -1,10 +1,11 @@
 import { getSetting } from '@woocommerce/settings';
 
 export default async () => {
-    const data = getSetting('paydock_data', {});
+    const data = { ...getSetting('power_board_data', {}) }
     data.action = 'get_vault_token';
     data.tokens = '';
     data.styles = '';
     data.supports = '';
-    return jQuery.post(PaydockAjax.url, data).then();
+    
+    return jQuery.post(PowerBoardAjax.url, data).then();
 }

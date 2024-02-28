@@ -1,18 +1,18 @@
 <?php
 
-namespace Paydock\Util;
+namespace PowerBoard\Util;
 
-use Paydock\Abstract\AbstractBlock;
-use Paydock\Enums\OtherPaymentMethods;
-use Paydock\Repositories\UserCustomerRepository;
-use Paydock\Services\Checkout\ApmsPaymentService;
-use Paydock\Services\SettingsService;
+use PowerBoard\Abstract\AbstractBlock;
+use PowerBoard\Enums\OtherPaymentMethods;
+use PowerBoard\Repositories\UserCustomerRepository;
+use PowerBoard\Services\Checkout\ApmsPaymentService;
+use PowerBoard\Services\SettingsService;
 
 final class ApmBlock extends AbstractBlock
 {
     protected const SCRIPT = 'apms';
 
-    protected $name = 'paydock_apms';
+    protected $name = 'power_board_apms';
 
     protected ApmsPaymentService $gateway;
 
@@ -43,6 +43,8 @@ final class ApmBlock extends AbstractBlock
             'description' => $settingsService->getWidgetPaymentAPMDescription(),
             'styles' => $settingsService->getWidgetStyles(),
             // Apms
+            'afterpayEnable' => $settingsService->isAPMsEnabled(OtherPaymentMethods::AFTERPAY()),
+            'zippayEnable' => $settingsService->isAPMsEnabled(OtherPaymentMethods::ZIPPAY()),
             'gatewayType' => '',
             'gatewayId' => '',
             'afterpayGatewayId' => $settingsService->getAPMsGatewayId(OtherPaymentMethods::AFTERPAY()),

@@ -2,7 +2,7 @@ import { createElement } from 'react';
 import { getSetting } from '@woocommerce/settings';
 
 export default (saveBankAccountLabel = 'Save bank account') => {
-    const settings = getSetting('paydock_bank_account_block_data', {});
+    const settings = getSetting('power_board_bank_account_block_data', {});
 
     if (!settings.bankAccountSaveAccount || !settings.isUserLoggedIn) {
         return '';

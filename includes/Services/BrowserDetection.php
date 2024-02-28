@@ -30,7 +30,7 @@
 * @link https://github.com/foroco/php-browser-detection
 */
 
-namespace Paydock\Services;
+namespace PowerBoard\Services;
 
 class BrowserDetection
 {

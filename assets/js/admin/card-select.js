@@ -2,61 +2,61 @@ jQuery(window).on('load', function () {
     const json = {
         "options": [
             {
-                "image": "/wp-content/plugins/paydock/assets/images/ausbc.png",
+                "image": "/wp-content/plugins/power_board/assets/images/ausbc.png",
                 "title": "Australian Bank Card",
                 "type": "ausbc"
             },
             {
-                "image": "/wp-content/plugins/paydock/assets/images/diners.png",
+                "image": "/wp-content/plugins/power_board/assets/images/diners.png",
                 "title": "Diner's Club, Diner's Club International, Diner's Club / Carte Blanche",
                 "type": "diners"
             },
             {
-                "image": "/wp-content/plugins/paydock/assets/images/japcb.png",
+                "image": "/wp-content/plugins/power_board/assets/images/japcb.png",
                 "title": "Japanese Credit Bureau",
                 "type": "japcb"
             },
             {
-                "image": "/wp-content/plugins/paydock/assets/images/maestro.png",
+                "image": "/wp-content/plugins/power_board/assets/images/maestro.png",
                 "title": "Maestro",
                 "type": "maestro"
             },
             {
-                "image": "/wp-content/plugins/paydock/assets/images/laser.png",
+                "image": "/wp-content/plugins/power_board/assets/images/laser.png",
                 "title": "Laser",
                 "type": "laser"
             },
             {
-                "image": "/wp-content/plugins/paydock/assets/images/solo.png",
+                "image": "/wp-content/plugins/power_board/assets/images/solo.png",
                 "title": "Solo (Paymentech)",
                 "type": "solo"
             },
             {
-                "image": "/wp-content/plugins/paydock/assets/images/mastercard.png",
+                "image": "/wp-content/plugins/power_board/assets/images/mastercard.png",
                 "title": "MasterCard",
                 "type": "mastercard"
             },
             {
-                "image": "/wp-content/plugins/paydock/assets/images/discover.png",
+                "image": "/wp-content/plugins/power_board/assets/images/discover.png",
                 "title": "Discover",
                 "type": "discover"
             },
             {
-                "image": "/wp-content/plugins/paydock/assets/images/amex.png",
+                "image": "/wp-content/plugins/power_board/assets/images/amex.png",
                 "title": "American Express",
                 "type": "amex"
             },
             {
-                "image": "/wp-content/plugins/paydock/assets/images/visa.png",
+                "image": "/wp-content/plugins/power_board/assets/images/visa.png",
                 "title": "Visa, Visa Electron",
                 "type": "visa"
             },
         ]
     }
-    const inputElement = document.getElementById('card-select');
+    const inputElement = document.getElementById('card-select-2');
 
     const createOptions = () => {
-        const dropdown = document.getElementById('multiselect')
+        const dropdown = document.getElementById('multiselect-2')
         if (dropdown === null) {
             return
         }
@@ -74,8 +74,8 @@ jQuery(window).on('load', function () {
             const itemLi = document.createElement('li')
 
             itemLi.innerHTML = `
-            <input type="checkbox" id="${index}" value="${option.type}" class="checkbox">
-            <label for="${index}">
+            <input type="checkbox" id="1${index}" value="${option.type}" class="checkbox">
+            <label for="1${index}">
                 <i><img src="${option.image}" alt="${option.title}"></i>${option.title}
             </label>
         `

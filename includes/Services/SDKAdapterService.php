@@ -1,19 +1,20 @@
 <?php
 
-namespace Paydock\Services;
+namespace PowerBoard\Services;
 
-use Paydock\API\ChargeService;
-use Paydock\API\ConfigService;
-use Paydock\API\CustomerService;
-use Paydock\API\GatewayService;
-use Paydock\API\ServiceService;
-use Paydock\API\TokenService;
-use Paydock\API\VaultService;
-use Paydock\Enums\CredentialSettings;
-use Paydock\Enums\CredentialsTypes;
-use Paydock\Enums\SettingGroups;
-use Paydock\Services\Settings\LiveConnectionSettingService;
-use Paydock\Services\Settings\SandboxConnectionSettingService;
+use PowerBoard\API\ChargeService;
+use PowerBoard\API\ConfigService;
+use PowerBoard\API\CustomerService;
+use PowerBoard\API\GatewayService;
+use PowerBoard\API\NotificationService;
+use PowerBoard\API\ServiceService;
+use PowerBoard\API\TokenService;
+use PowerBoard\API\VaultService;
+use PowerBoard\Enums\CredentialSettings;
+use PowerBoard\Enums\CredentialsTypes;
+use PowerBoard\Enums\SettingGroups;
+use PowerBoard\Services\Settings\LiveConnectionSettingService;
+use PowerBoard\Services\Settings\SandboxConnectionSettingService;
 
 class SDKAdapterService
 {
@@ -48,9 +49,23 @@ class SDKAdapterService
 
     public function searchServices(array $parameters = []): array
     {
-        $gatewayService = new ServiceService();
+        $serviceService = new ServiceService();
 
-        return $gatewayService->search($parameters)->call();
+        return $serviceService->search($parameters)->call();
+    }
+
+    public function searchNotifications(array $parameters = []): array
+    {
+        $notificationService = new NotificationService();
+
+        return $notificationService->search($parameters)->call();
+    }
+
+    public function createNotification(array $parameters = []): array
+    {
+        $notificationService = new NotificationService();
+
+        return $notificationService->create($parameters)->call();
     }
 
     public function token(array $params = ['gateway_id' => '', 'type' => '']): array
@@ -121,6 +136,13 @@ class SDKAdapterService
         $chargeService = new ChargeService;
 
         return $chargeService->cancelAuthorised($params)->call();
+    }
+
+    public function refunds(array $params): array
+    {
+        $chargeService = new ChargeService;
+
+        return $chargeService->refunds($params)->call();
     }
 
     public function initialise(?bool $forcedEnv = null): void

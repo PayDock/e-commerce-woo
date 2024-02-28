@@ -1,132 +1,236 @@
-jQuery(function ($) {
-    var lastInit = '';
-    setTimeout(() => {
-        const idPaydockWidgetCard = 'radio-control-wc-payment-method-options-paydock_gateway';
-        const idPaydockWidgetBankAccount = 'radio-control-wc-payment-method-options-paydock_bank_account_gateway';
-        const idPaydockWidgetWallets = 'radio-control-wc-payment-method-options-paydock_wallets_gateway';
-        const idPaydockWidgetApm = 'radio-control-wc-payment-method-options-paydock_apms_gateway';
-        const $radioWidgetCard = $('#' + idPaydockWidgetCard);
-        const $radioWidgetBankAccount = $('#' + idPaydockWidgetBankAccount);
-        const $radioWidgetApm = $('#' + idPaydockWidgetApm);
+(function () {
+    const afterpayCountries = ['au','nz','us','ca','uk','gb','fr','it','es','de'];
+    const zippayCountries = ['au','nz','us','ca'];
+    let lastInit = '';
 
-        $radioWidgetCard.on('change', function () {
-            initPaydockWidgetCard();
-        });
-
-        $radioWidgetBankAccount.on('change', function () {
-            initPaydockWidgetBankAccount();
-        });
-
-        $radioWidgetApm.on('change', function () {
-            initPaydockWidgetApm();
-        });
-
-        if ($radioWidgetCard.attr('checked') === 'checked') {
-            initPaydockWidgetCard();
-        } else if ($radioWidgetBankAccount.attr('checked') === 'checked') {
-            initPaydockWidgetBankAccount();
-        } else if ($radioWidgetApm.attr('checked') === 'checked') {
-            initPaydockWidgetApm();
-        }
-
-        function initPaydockWidgetApm() {
-            if ($('#paydockWidgetApm').length === 0) {
+    const powerBoardValidation = {
+        shouldValidateWcForm: true,
+        wcFormSetBlurEventListener() {
+            const checkoutFormElements = document.querySelectorAll('.wc-block-checkout__form input, .wc-block-checkout__form select');
+            if (checkoutFormElements.length === 0) {
                 return;
             }
 
-            lastInit = idPaydockWidgetApm;
+            const self = this
+            checkoutFormElements.forEach(element => {
+                switch (element.type) {
+                    case 'email':
+                    case 'text':
+                    case 'tel':
+                        element.addEventListener('blur', () => {
+                            if (!self.shouldValidateWcForm) {
+                                return;
+                            }
 
-            const paydockApmSettings = window.wc.wcSettings.getSetting('paydock_apms_data', {});
-            paydockApmSettings.email = $('#email').val()
+                            if (self.wcFormValidation()) {
+                                self.shouldValidateWcForm = false
+                                lastInit = ''
+                            }
+                        })
+                        break;
+                }
+            })
+        },
+        lastWcFormValidation: false,
+        wcFormValidation() {
+            const checkoutFormElements = document.querySelectorAll('.wc-block-checkout__form input, .wc-block-checkout__form select');
+            if (checkoutFormElements.length === 0) {
+                return null;
+            }
 
-            const zippay = new paydock.ZipmoneyCheckoutButton('#zippay', paydockApmSettings.publicKey, paydockApmSettings.zippayGatewayId);
-            zippay.onFinishInsert('input[name="payment_source_apm_token"]', 'payment_source_token');
-            zippay.setMeta({
-                charge: {
-                    amount: paydockApmSettings.amount,
-                    currency: paydockApmSettings.currency,
-                }
-            });
+            const BreakException = {};
 
-            zippay.on('finish', function () {
-                paydockApmSettings.gatewayType = 'zippay'
-                if (paydockApmSettings.zippaySaveCard) {
-                    paydockApmSettings.apmSaveCard = true
-                }
-                if (paydockApmSettings.zippayDirectCharge) {
-                    paydockApmSettings.directCharge = true
-                }
-                if (paydockApmSettings.zippayFraud) {
-                    paydockApmSettings.fraud = true
-                    paydockApmSettings.fraudServiceId = paydockApmSettings.zippayFraudServiceId
-                }
-                paydockApmSettings.gatewayId = paydockApmSettings.zippayGatewayId
-                document.getElementById('paydockWidgetApm').innerHTML = '<div style="color:#008731">Payment data collected</div>';
+            let result = true
 
-                const saveCard = document.querySelector('.amps-save-card');
-                if (paydockApmSettings.zippaySaveCard && saveCard !== null) {
-                    saveCard.setAttribute('style', '')
-                }
-            });
+            try {
+                checkoutFormElements.forEach(element => {
+                    if (!element.required) {
+                        return
+                    }
 
-            const afterpay = new paydock.AfterpayCheckoutButton('#afterpay', paydockApmSettings.publicKey, paydockApmSettings.afterpayGatewayId)
-            afterpay.onFinishInsert('input[name="payment_source_apm_token"]', 'payment_source_token')
-            afterpay.showEnhancedTrackingProtectionPopup(true)
-            afterpay.setMeta({
-                amount: paydockApmSettings.amount,
-                currency: paydockApmSettings.currency,
-                email: paydockApmSettings.email,
-                first_name: $('#shipping-first_name').val(),
-                last_name: $('#shipping-last_name').val(),
-            });
+                    result = element.validity.valid;
+                    if (result === false) {
+                        throw BreakException
+                    }
+                })
+            } catch (e) {
+                if (e !== BreakException) throw e
+            }
 
-            afterpay.on('finish', function () {
-                paydockApmSettings.gatewayType = 'afterpay'
-                if (paydockApmSettings.afterpaySaveCard) {
-                    paydockApmSettings.apmSaveCard = true
-                }
-                if (paydockApmSettings.afterpayDirectCharge) {
-                    paydockApmSettings.directCharge = true
-                }
-                if (paydockApmSettings.afterpayFraud) {
-                    paydockApmSettings.fraud = true
-                    paydockApmSettings.fraudServiceId = paydockApmSettings.afterpayFraudServiceId
-                }
-                paydockApmSettings.gatewayId = paydockApmSettings.afterpayGatewayId
-                document.getElementById('paydockWidgetApm').innerHTML = '<div style="color:#008731">Payment data collected</div>';
+            this.lastWcFormValidation = result
+            this.shouldValidateWcForm = !result
 
-                const saveCard = document.querySelector('.amps-save-card');
-                if (paydockApmSettings.afterpaySaveCard && saveCard !== null) {
-                    saveCard.setAttribute('style', '')
-                }
-            });
-        }
+            return result;
+        },
+        createWidgetDiv(id) {
+            if (document.getElementById(id) !== null) {
+                return null;
+            }
 
-        function initPaydockWidgetBankAccount() {
-            if ($('#paydockWidgetBankAccount').length === 0) {
+            const div = document.createElement('div')
+            div.setAttribute('id', id)
+            div.setAttribute('style', 'display:none')
+
+            document.body.append(div)
+
+            return div;
+        },
+        passWidgetToWrapper(id) {
+            const wrapper = document.getElementById(id + '_wrapper')
+            const htmlWidget = document.getElementById(id)
+            if (wrapper.querySelector('#' + id) === null && htmlWidget !== null) {
+                const clonnedHtmlWidget = htmlWidget.cloneNode(true)
+                clonnedHtmlWidget.setAttribute('style', '');
+                document.getElementById(id + '_wrapper').append(clonnedHtmlWidget);
+            }
+        },
+    }
+
+    window.powerBoardValidation = powerBoardValidation;
+
+    jQuery(function ($) {
+        const idPowerBoardWidgetCard = 'radio-control-wc-payment-method-options-power_board_gateway';
+        const idPowerBoardWidgetBankAccount = 'radio-control-wc-payment-method-options-power_board_bank_account_gateway';
+        const idPowerBoardWidgetWallets = 'radio-control-wc-payment-method-options-power_board_wallets_gateway';
+        const idPowerBoardWidgetApm = 'radio-control-wc-payment-method-options-power_board_apms_gateway';
+
+        const $radioWidgetCard = $('#' + idPowerBoardWidgetCard);
+        const $radioWidgetBankAccount = $('#' + idPowerBoardWidgetBankAccount);
+        const $radioWidgetApm = $('#' + idPowerBoardWidgetApm);
+        const $radioWidgetWallets = $('#' + idPowerBoardWidgetWallets);
+
+        const searchParams = new URLSearchParams(window.location.search);
+        const powerBoardWalletsSettings = window.wc.wcSettings.getSetting('power_board_wallets_block_data', {});
+
+        function initPowerBoardWidgetApm(checkoutButton) {
+            lastInit = idPowerBoardWidgetApm;
+
+            if ($('#powerBoardWidgetApm').length === 0) {
                 return;
             }
-            lastInit = idPaydockWidgetBankAccount;
 
-            const paydockBankAccountSettings = window.wc.wcSettings.getSetting('paydock_bank_account_block_data', {});
+            if (!powerBoardValidation.wcFormValidation()) {
+                return;
+            } else {
+                $('#powerBoardWidgetApm').parent().find('.power_board-validation-error').css('display', 'none')
+                $('#powerBoardWidgetApm').css('display', 'block')
+            }
 
-            const gateway = paydockBankAccountSettings.bankAccountSaveAccount
-                ? paydockBankAccountSettings.gatewayId
+            checkoutButton.hide();
+
+            const powerBoardApmSettings = window.wc.wcSettings.getSetting('power_board_apms_data', {});
+            powerBoardApmSettings.email = $('#email').val()
+
+            const zippayButton = document.querySelector('#zippay')
+            if (powerBoardApmSettings.zippayEnable || zippayButton === null) {
+                zippayButton.style = ''
+                const zippay = new cba.ZipmoneyCheckoutButton('#zippay', powerBoardApmSettings.publicKey, powerBoardApmSettings.zippayGatewayId)
+                zippay.onFinishInsert('input[name="payment_source_apm_token"]', 'payment_source_token')
+                zippay.setMeta({
+                    charge: {
+                        amount: powerBoardApmSettings.amount,
+                        currency: powerBoardApmSettings.currency,
+                    }
+                });
+
+                zippay.on('finish', function () {
+                    powerBoardApmSettings.gatewayType = 'zippay'
+                    if (powerBoardApmSettings.zippayDirectCharge) {
+                        powerBoardApmSettings.directCharge = true
+                    }
+                    if (powerBoardApmSettings.zippayFraud) {
+                        powerBoardApmSettings.fraud = true
+                        powerBoardApmSettings.fraudServiceId = powerBoardApmSettings.zippayFraudServiceId
+                    }
+                    powerBoardApmSettings.gatewayId = powerBoardApmSettings.zippayGatewayId
+                    document.getElementById('powerBoardWidgetApm').innerHTML = '<div style="color:#008731">Payment data collected</div>';
+
+                    if (checkoutButton !== null) {
+                        checkoutButton.click()
+                    }
+                });
+            }
+
+            const afterpayButton = document.querySelector('#afterpay')
+
+            if (powerBoardApmSettings.afterpayEnable || afterpayButton === null) {
+                afterpayButton.style = ''
+                const afterpay = new cba.AfterpayCheckoutButton('#afterpay', powerBoardApmSettings.publicKey, powerBoardApmSettings.afterpayGatewayId)
+                afterpay.onFinishInsert('input[name="payment_source_apm_token"]', 'payment_source_token')
+                afterpay.showEnhancedTrackingProtectionPopup(true)
+                
+                let firstName = '';
+                let lastName = '';
+                if ($('#shipping-first_name').length > 0) {
+                    firstName = $('#shipping-first_name').val()
+                }
+                if ($('#billing-first_name').length > 0) {
+                    firstName = $('#billing-first_name').val()
+                }
+                if ($('#shipping-last_name').length > 0) {
+                    lastName = $('#shipping-last_name').val()
+                }
+                if ($('#billing-last_name').length > 0) {
+                    lastName = $('#billing-last_name').val()
+                }
+
+                afterpay.setMeta({
+                    amount: powerBoardApmSettings.amount,
+                    currency: powerBoardApmSettings.currency,
+                    email: powerBoardApmSettings.email,
+                    first_name: firstName,
+                    last_name: lastName,
+                });
+
+                afterpay.on('finish', function () {
+                    powerBoardApmSettings.gatewayType = 'afterpay'
+                    if (powerBoardApmSettings.afterpayDirectCharge) {
+                        powerBoardApmSettings.directCharge = true
+                    }
+                    if (powerBoardApmSettings.afterpayFraud) {
+                        powerBoardApmSettings.fraud = true
+                        powerBoardApmSettings.fraudServiceId = powerBoardApmSettings.afterpayFraudServiceId
+                    }
+                    powerBoardApmSettings.gatewayId = powerBoardApmSettings.afterpayGatewayId
+                    document.getElementById('powerBoardWidgetApm').innerHTML = '<div style="color:#008731">Payment data collected</div>';
+
+                    if (checkoutButton !== null) {
+                        checkoutButton.click()
+                    }
+                });
+            }
+        }
+
+        function initPowerBoardWidgetBankAccount() {
+            lastInit = idPowerBoardWidgetBankAccount;
+
+            const htmlWidget = document.getElementById('powerBoardWidgetBankAccount')
+            if (htmlWidget !== null && htmlWidget.innerHTML.trim().length > 0) {
+                powerBoardValidation.passWidgetToWrapper('powerBoardWidgetBankAccount')
+                return;
+            }
+
+            const powerBoardBankAccountSettings = window.wc.wcSettings.getSetting('power_board_bank_account_block_data', {});
+
+            const gateway = powerBoardBankAccountSettings.bankAccountSaveAccount
+                ? powerBoardBankAccountSettings.gatewayId
                 : 'not_configured';
 
-            var bankAccount = new paydock.Configuration(gateway, 'bank_account');
+            var bankAccount = new cba.Configuration(gateway, 'bank_account');
             bankAccount.setFormFields(['account_routing']);
-            var widget = new paydock.HtmlMultiWidget(
-                '#paydockWidgetBankAccount',
-                paydockBankAccountSettings.publicKey,
+
+            powerBoardValidation.createWidgetDiv('powerBoardWidgetBankAccount');
+            var widget = new cba.HtmlMultiWidget(
+                '#powerBoardWidgetBankAccount',
+                powerBoardBankAccountSettings.publicKey,
                 [bankAccount]
             );
 
-            window.widgetBankAccount = widget;
-            widget.setStyles(paydockBankAccountSettings.styles);
+            window.widget2BankAccount = widget;
+            widget.setStyles(powerBoardBankAccountSettings.styles);
 
-            if (typeof paydockBankAccountSettings.styles.custom_elements !== "undefined") {
-                $.each(paydockBankAccountSettings.styles.custom_elements, function (element, styles) {
+            if (typeof powerBoardBankAccountSettings.styles.custom_elements !== "undefined") {
+                $.each(powerBoardBankAccountSettings.styles.custom_elements, function (element, styles) {
                     widget.setElementStyle(element, styles);
                 });
             }
@@ -135,139 +239,274 @@ jQuery(function ($) {
             widget.hideElements(['submit_button']);
             widget.interceptSubmitForm('#widget');
             widget.load();
+
+            widget.on(window.cba.EVENT.AFTER_LOAD, () => {
+                if ($('#powerBoardWidgetBankAccount_wrapper').length > 0) {
+                    powerBoardValidation.passWidgetToWrapper('powerBoardWidgetBankAccount')
+                }
+            })
         }
 
-        function initPaydockWidgetWallets(orderButton) {
-            const paydockWalletsSettings = window.wc.wcSettings.getSetting('paydock_wallets_block_data', {});
-            if (
-                (
-                    ($('#paydockWalletsApplePay').length === 0)
-                    && ($('#paydockWalletsGooglePay').length === 0)
-                    && ($('#paydockWalletsAfterPay').length === 0)
-                    && ($('#paydockWalletsPaypal').length === 0)
-                )
-                || (undefined === window.paydockWallets)
-            ) {
-                return;
-            }
-            lastInit = idPaydockWidgetWallets;
-
-            for (let key in window.paydockWallets) {
+        function initWalletsButtonsWidgets(orderButton) {
+            for (let key in window.powerBoardWallets) {
                 let id = '#';
                 let height = 45;
-                if ('apple_pay' === key) {
-                    id += 'paydockWalletsGoogleApplePay'
-                    height = 45;
-                } else if ('google_pay' === key) {
-                    id += 'paydockWalletsGoogleApplePay'
-                    height = 45;
-                } else if ('afterpay' === key) {
-                    id += 'paydockWalletsAfterPay'
-                    height = 35;
-                } else if ('pay_pal_smart_button' === key) {
-                    id += 'paydockWalletsPaypal'
-                    height = 55;
+
+                switch (key) {
+                    case 'apple_pay':
+                    case 'google_pay':
+                        id += 'powerBoardWalletsGoogleApplePay'
+                        break;
+                    case 'afterpay':
+                        id += 'powerBoardWalletsAfterPay'
+                        height = 35;
+                        break;
+                    case 'pay_pal_smart_button':
+                        id += 'powerBoardWalletsPaypal'
+                        height = 55;
+                        break;
                 }
-                let button = new paydock.WalletButtons(
-                    id,
-                    window.paydockWallets[key].resource.data.token,
+                let config =
                     {
-                        country: window.paydockWallets[key].county,
+                        country: window.powerBoardWallets[key].county,
                         style: {
                             height: height,
-                        },
-                        wallets: ["google", "apple"],
-                    }
+                        }
+                    };
+
+                if ('apple_pay' === key) {
+                    config['wallets'] = ['apple'];
+                    config['amount_label'] = "Total";
+                }
+
+                if ('pay_pal_smart_button' === key) {
+                    config['pay_later'] = window.powerBoardWallets[key].pay_later;
+                }
+
+                const button = new cba.WalletButtons(
+                    id,
+                    window.powerBoardWallets[key].resource.data.token,
+                    config
                 );
-                if (paydockWalletsSettings.isSandbox) {
+                if (powerBoardWalletsSettings.isSandbox) {
                     button.setEnv('sandbox');
                 }
 
                 button.onPaymentSuccessful((data) => {
                     $('#paymentSourceWalletsToken').val(JSON.stringify(data))
                     $('#paymentCompleted').show();
-                    $('#paydockWalletsGoogleApplePay').hide();
-                    $('#paydockWalletsAfterPay').hide();
-                    $('#paydockWalletsPaypal').hide();
+                    $('#powerBoardWalletsGoogleApplePay, #powerBoardWalletsAfterPay, #powerBoardWalletsPaypal').hide();
                     orderButton.show();
                     orderButton.click();
                 });
 
-                button.onPaymentError((data) => console.log("The payment was not successful"));
-                button.onPaymentInReview((data) => console.log("The payment is on fraud review"));
-                button.setupWalletCallback((data) => console.log('blah blah', data))
+                button.onPaymentError((data) => orderButton.click());
+                button.onPaymentInReview((data) => orderButton.click());
 
                 button.load();
             }
         }
 
-        function initPaydockWidgetCard() {
-            if ($('#paydockWidgetCard').length === 0) {
+        function initPowerBoardWidgetWallets(orderButton) {
+            lastInit = idPowerBoardWidgetWallets;
+
+            if (!powerBoardValidation.wcFormValidation()) {
+                return;
+            } else {
+                $('#powerBoardWidgetWallets').parent().find('.powerBoard-validation-error').css('display', 'none')
+                $('#powerBoardWidgetWallets')
+            }
+
+            if (window.powerBoardWallets) {
+                initWalletsButtonsWidgets();
                 return;
             }
-            lastInit = idPaydockWidgetCard;
 
-            const paydockCardSettings = window.wc.wcSettings.getSetting('paydock_data', {});
+            if ($('#powerBoardWalletsApplePay, #powerBoardWalletsGooglePay, #powerBoardWalletsAfterPay, #powerBoardWalletsPaypal').length === 0) {
+                return;
+            }
+            let billingData = {};
+            const {CHECKOUT_STORE_KEY, CART_STORE_KEY} = window.wc.wcBlocksData;
 
-            if (paydockCardSettings.cardSaveCardOption === 'WITHOUT_GATEWAY' && !['IN_BUILD', 'STANDALONE'].includes(paydockCardSettings.card3DS)) {
-                widget = new paydock.HtmlWidget('#paydockWidgetCard', paydockCardSettings.publicKey, 'not_configured');
-            } else {
-                widget = new paydock.HtmlWidget('#paydockWidgetCard', paydockCardSettings.publicKey, paydockCardSettings.gatewayId);
+            billingData['order_id'] = window.wp.data.select(CHECKOUT_STORE_KEY).getOrderId();
+            billingData['total'] = window.wp.data.select(CART_STORE_KEY).getCartTotals();
+            billingData['address'] = window.wp.data.select(CART_STORE_KEY).getCustomerData().billingAddress;
+
+            window.axios.post('/wp-json/power_board/v1/wallets/charge', billingData).then((response) => {
+                window.powerBoardWallets = response.data;
+                initWalletsButtonsWidgets(orderButton)
+            })
+        }
+
+        function initPowerBoardWidgetCard() {
+            lastInit = idPowerBoardWidgetCard;
+
+            const htmlWidget = document.getElementById('powerBoardWidgetCard')
+            if (htmlWidget !== null && htmlWidget.innerHTML.trim().length > 0) {
+                powerBoardValidation.passWidgetToWrapper('powerBoardWidgetCard')
+                return;
             }
 
-            window.widget = widget;
-            widget.setStyles(paydockCardSettings.styles);
+            const powerBoardCardSettings = window.wc.wcSettings.getSetting('power_board_block_data', {});
 
-            if (typeof paydockCardSettings.styles.custom_elements !== "undefined") {
-                $.each(paydockCardSettings.styles.custom_elements, function (element, styles) {
+            let gatewayId = powerBoardCardSettings.gatewayId;
+            switch (true) {
+                case powerBoardCardSettings.card3DS === 'STANDALONE':
+                case powerBoardCardSettings.cardSaveCardOption === 'WITHOUT_GATEWAY':
+                case powerBoardCardSettings.card3DS !== 'IN_BUILD':
+                    gatewayId = 'not_configured'
+                    break;
+            }
+
+            powerBoardValidation.createWidgetDiv('powerBoardWidgetCard');
+            widget2 = new cba.HtmlWidget('#powerBoardWidgetCard', powerBoardCardSettings.publicKey, gatewayId);
+
+            window.widget2 = widget;
+            widget.setStyles(powerBoardCardSettings.styles);
+
+            if (typeof powerBoardCardSettings.styles?.custom_elements !== "undefined") {
+                $.each(powerBoardCardSettings.styles.custom_elements, function (element, styles) {
                     widget.setElementStyle(element, styles);
                 });
             }
 
-            if (paydockCardSettings.cardSupportedCardTypes !== '') {
-                supportedCard = paydockCardSettings.cardSupportedCardTypes.replaceAll(' ', '').split(',')
+            if (powerBoardCardSettings.cardSupportedCardTypes && powerBoardCardSettings.cardSupportedCardTypes !== '') {
+                supportedCard = powerBoardCardSettings.cardSupportedCardTypes.replaceAll(' ', '').split(',')
                 widget.setSupportedCardIcons(supportedCard);
             }
 
+            widget.setFormFields(['email', 'phone']);
             widget.onFinishInsert('input[name="payment_source_token"]', 'payment_source');
-            widget.hideElements(['submit_button', 'email']);
             widget.interceptSubmitForm('#widget');
             widget.load();
+
+            widget.on(window.cba.EVENT.AFTER_LOAD, () => {
+                widget.hideElements(['submit_button', 'email', 'phone']);
+                if ($('#powerBoardWidgetCard_wrapper').length > 0) {
+                    powerBoardValidation.passWidgetToWrapper('powerBoardWidgetCard')
+                }
+            })
         }
 
-        setInterval(() => {
-            var $paymentMethods = $('input[name=radio-control-wc-payment-method-options]:checked');
-            let $orderButton = $('.wc-block-components-checkout-place-order-button');
+        let initInterval = setInterval(() => {
+            const $orderButton = $('.wc-block-components-checkout-place-order-button');
+            if ($orderButton.length === 0) {
+                return;
+            }
 
-            for (var i = 0; i < $paymentMethods.length; i++) {
+            initPowerBoardWidgetCard();
+            initPowerBoardWidgetBankAccount();
+
+            switch (true) {
+                case $radioWidgetCard.attr('checked') === 'checked':
+                    break;
+                case $radioWidgetBankAccount.attr('checked') === 'checked':
+                    break;
+                case $radioWidgetApm.attr('checked') === 'checked':
+                    initPowerBoardWidgetApm();
+                    break;
+            }
+
+            $radioWidgetCard.on('change', function () {
+                initPowerBoardWidgetCard();
+            });
+
+            $radioWidgetBankAccount.on('change', function () {
+                initPowerBoardWidgetBankAccount();
+            });
+
+            $radioWidgetApm.on('change', function () {
+                initPowerBoardWidgetApm($orderButton);
+            });
+
+            $radioWidgetWallets.on('change', function () {
+                initPowerBoardWidgetWallets($orderButton);
+            });
+
+            let wasClick = false;
+            setInterval(() => {
                 if (
-                    ($paymentMethods[i].type === 'radio')
-                    && $paymentMethods[i].checked
-                    && ($paymentMethods[i].id !== lastInit)) {
-                    switch ($paymentMethods[i].id) {
-                        case idPaydockWidgetCard:
-                            initPaydockWidgetCard();
+                    powerBoardWalletsSettings.hasOwnProperty('afterpayChargeId')
+                    && (powerBoardWalletsSettings.afterpayChargeId.length > 0)
+                    && searchParams.has('afterpay_success')
+                    && !wasClick
+                ) {
+                    wasClick = true
+                    $('#' + idPowerBoardWidgetWallets).parent().click();
+                    $radioWidgetWallets
+                    $('#paymentCompleted').show();
+                    $('#paymentSourceWalletsToken').val(JSON.stringify({
+                        data:{
+                            id:powerBoardWalletsSettings.afterpayChargeId,
+                            status: (searchParams.get('direct_charge') === 'true') ? 'paid' : 'pending'
+                        }
+                    }));
+                    $orderButton.click();
+                }
+
+                const $paymentMethods = $('input[name=radio-control-wc-payment-method-options]:checked');
+
+                $paymentMethods.each((i, $paymentMethod) => {
+                    if (
+                        $paymentMethod.type !== 'radio'
+                        || !$paymentMethod.checked
+                        || $paymentMethod.id === lastInit) {
+                        return;
+                    }
+
+                    switch ($paymentMethod.id) {
+                        case idPowerBoardWidgetCard:
+                            initPowerBoardWidgetCard();
                             $orderButton.show();
                             break;
-                        case idPaydockWidgetBankAccount:
-                            initPaydockWidgetBankAccount();
+                        case idPowerBoardWidgetBankAccount:
+                            initPowerBoardWidgetBankAccount();
                             $orderButton.show();
                             break;
-                        case idPaydockWidgetWallets:
-                            initPaydockWidgetWallets($orderButton);
+                        case idPowerBoardWidgetWallets:
+                            initPowerBoardWidgetWallets($orderButton);
                             $orderButton.hide();
                             $('#paymentCompleted').hide();
                             break;
-                        case idPaydockWidgetApm:
-                            initPaydockWidgetApm();
-                            $orderButton.show();
+                        case idPowerBoardWidgetApm:
+                            initPowerBoardWidgetApm($orderButton);
                             break;
                         default:
                             lastInit = 'undefined';
                             $orderButton.show();
                     }
+                })
+                try{
+                    let {CHECKOUT_STORE_KEY, CART_STORE_KEY} = window.wc.wcBlocksData;
+                    let powerBoardApmSettings = window.wc.wcSettings.getSetting('power_board_apms_data', {});
+                    choisenCountry = window.wp.data.select(CART_STORE_KEY).getCustomerData().billingAddress.country;
+                    $afterpayNotice = $('.power_board-country-available-afterpay');
+                    $zippayNotice = $('.power_board-country-available-zippay');
+
+                    if(
+                        (
+                            powerBoardWalletsSettings.wallets.hasOwnProperty('afterpay')
+                            || powerBoardApmSettings.afterpayEnable
+                        )
+                        && !afterpayCountries.includes(choisenCountry.toLowerCase())
+                    ){
+                        $afterpayNotice.show();
+                    }else{
+                        $afterpayNotice.hide();
+                    }
+
+                    if(powerBoardApmSettings.zippayEnable
+                        && !zippayCountries.includes(choisenCountry.toLowerCase())){
+                        $zippayNotice.show();
+                    }else{
+                        $zippayNotice.hide();
+                    }
+                }catch (e){
+                    console.log(e)
                 }
-            }
-        }, 100)
-    });
-}, 1000)
+            }, 100)
+
+            clearInterval(initInterval)
+        }, 100);
+    })
+})()

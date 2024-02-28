@@ -4,7 +4,7 @@
            class="nav-tab <?php if ($tab['active']) echo 'nav-tab-active' ?>"><?php echo $tab['label']; ?></a>
     <?php endforeach; ?>
 </nav>
-<?php if ('pay_dock_log' !== $this->currentSection): ?>
+<?php if ('power_board_log' !== $this->currentSection): ?>
     <?php echo $this->settingService->parentGenerateSettingsHtml($form_fields, false) ?>
 <?php else: ?>
     <table class="wp-list-table widefat fixed striped table-view-list orders wc-orders-list-table wc-orders-list-table-shop_order">

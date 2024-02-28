@@ -1,16 +1,16 @@
-const paydockSettings = window.wc.wcSettings.getSetting('paydock_data', {});
-const paydockLabel = window.wp.htmlEntities.decodeEntities(paydockSettings.title) || window.wp.i18n.__('Paydock', 'paydock_gateway');
+const power_boardSettings = window.wc.wcSettings.getSetting('power_board_data', {});
+const power_boardLabel = window.wp.htmlEntities.decodeEntities(power_boardSettings.title) || window.wp.i18n.__('PowerBoard', 'power_board_gateway');
 
-const paydockContent = () => {
+const power_boardContent = () => {
     return wp.element.createElement('div', null,
         wp.element.createElement(
             "div",
             null,
-            window.wp.htmlEntities.decodeEntities(paydockSettings.description || '')
+            window.wp.htmlEntities.decodeEntities(power_boardSettings.description || '')
         ), wp.element.createElement(
             "div",
             {
-                id: 'paydockWidgetCard',
+                id: 'power_boardWidgetCard',
             }
         ), wp.element.createElement(
             "input",
@@ -21,17 +21,17 @@ const paydockContent = () => {
         ));
 };
 
-const Block_Paydock_Gateway = {
-    name: 'paydock_gateway',
-    label: paydockLabel,
-    content: Object(window.wp.element.createElement)(paydockContent, null),
-    edit: Object(window.wp.element.createElement)(paydockContent, null),
-    placeOrderButtonLabel: 'Place Order by Paydock',
+const Block_PowerBoard_Gateway = {
+    name: 'power_board_gateway',
+    label: power_boardLabel,
+    content: Object(window.wp.element.createElement)(power_boardContent, null),
+    edit: Object(window.wp.element.createElement)(power_boardContent, null),
+    placeOrderButtonLabel: 'Place Order by PowerBoard',
     canMakePayment: () => true,
-    ariaLabel: paydockLabel,
+    ariaLabel: power_boardLabel,
     supports: {
-        features: paydockSettings.supports,
+        features: power_boardSettings.supports,
     },
 };
 
-window.wc.wcBlocksRegistry.registerPaymentMethod(Block_Paydock_Gateway);
+window.wc.wcBlocksRegistry.registerPaymentMethod(Block_PowerBoard_Gateway);

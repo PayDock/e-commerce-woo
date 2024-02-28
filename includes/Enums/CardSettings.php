@@ -1,8 +1,8 @@
 <?php
 
-namespace Paydock\Enums;
+namespace PowerBoard\Enums;
 
-use Paydock\Abstract\AbstractEnum;
+use PowerBoard\Abstract\AbstractEnum;
 
 class CardSettings extends AbstractEnum
 {
@@ -16,6 +16,7 @@ class CardSettings extends AbstractEnum
     protected const TYPE_EXCHANGE_OTT = 'TYPE_EXCHANGE_OTT';
     protected const FRAUD = 'FRAUD';
     protected const FRAUD_SERVICE_ID = 'FRAUD_SERVICE_ID';
+    protected const DIRECT_CHARGE = 'DIRECT_CHARGE';
     protected const SAVE_CARD = 'SAVE_CARD';
     protected const SAVE_CARD_OPTION = 'SAVE_CARD_OPTION';
 
@@ -26,6 +27,7 @@ class CardSettings extends AbstractEnum
             self::DS_SERVICE_ID => 'text',
             self::FRAUD_SERVICE_ID => 'text',
             self::ENABLE,
+            self::DIRECT_CHARGE,
             self::SAVE_CARD => 'checkbox',
             self::SUPPORTED_CARD_TYPES => 'card_select',
             self::TYPE_EXCHANGE_OTT => 'select',
@@ -47,7 +49,15 @@ class CardSettings extends AbstractEnum
     public function getDescription(): string
     {
         return match ($this->name) {
-            self::SAVE_CARD => 'Offer your customer to save the card permanently at Paydock for further usage',
+            self::SAVE_CARD => 'Offer your customer to save the card permanently at PowerBoard for further usage',
+            default => ''
+        };
+    }
+
+    public function getDefault(): string
+    {
+        return match ($this->name) {
+            self::DIRECT_CHARGE => 'yes',
             default => ''
         };
     }

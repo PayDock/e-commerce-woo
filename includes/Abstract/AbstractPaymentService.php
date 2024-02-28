@@ -1,8 +1,8 @@
 <?php
 
-namespace Paydock\Abstract;
+namespace PowerBoard\Abstract;
 
-use Paydock\Services\SettingsService;
+use PowerBoard\Services\SettingsService;
 use WC_Payment_Gateway;
 
 abstract class AbstractPaymentService extends WC_Payment_Gateway
@@ -12,7 +12,7 @@ abstract class AbstractPaymentService extends WC_Payment_Gateway
      */
     public function __construct()
     {
-        $this->icon = apply_filters('woocommerce_paydock_gateway_icon', '');
+        $this->icon = apply_filters('woocommerce_power_board_gateway_icon', '');
         $this->has_fields = true;
         $this->supports = array(
             'products', 'subscriptions', 'subscription_cancellation', 'subscription_suspension',
@@ -20,10 +20,15 @@ abstract class AbstractPaymentService extends WC_Payment_Gateway
             'multiple_subscriptions', 'default_credit_card_form'
         );
 
-        $this->method_title = _x('Paydock payment', 'Paydock payment method', 'woocommerce-gateway-paydock');
-        $this->method_description = __('Allows Paydock payments.', 'woocommerce-gateway-paydock');
+        $this->method_title = _x('PowerBoard payment', 'PowerBoard payment method', 'woocommerce-gateway-power_board');
+        $this->method_description = __('Allows PowerBoard payments.', 'woocommerce-gateway-power_board');
 
         $this->init_settings();
+    }
+
+
+    public function woocommerce_before_checkout_form($arg){
+        
     }
 
     public function payment_scripts()
@@ -31,13 +36,11 @@ abstract class AbstractPaymentService extends WC_Payment_Gateway
         if (!is_checkout() || !$this->is_available()) {
             return '';
         }
-        $sdkUrl = 'https://widget.paydock.com/sdk/{version}/widget.umd.js';
-//        $sdkUrl = 'https://widget.paydock.com/sdk/{version}/widget.umd.min.js';
-        $sdkUrl = preg_replace('{version}', SettingsService::getInstance()->getVersion(), $sdkUrl);
+        $sdkUrl =SettingsService::getInstance()->getWidgetScriptUrl();
 
-        wp_enqueue_script('paydock-form', PAY_DOCK_PLUGIN_URL.'/assets/js/frontend/form.js', array(), time(), true);
-        wp_enqueue_style('paydock-widget-css', PAY_DOCK_PLUGIN_URL.'/assets/css/frontend/widget.css', array(), time());
+        wp_enqueue_script('power_board-form', POWER_BOARD_PLUGIN_URL.'/assets/js/frontend/form.js', array(), time(), true);
+        wp_enqueue_style('power_board-widget-css', POWER_BOARD_PLUGIN_URL.'/assets/css/frontend/widget.css', array(), time());
 
-        wp_enqueue_script('paydock-api', $sdkUrl, array(), time(), true);
+        wp_enqueue_script('power_board-api', $sdkUrl, array(), time(), true);
     }
 }

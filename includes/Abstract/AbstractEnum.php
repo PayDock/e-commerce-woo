@@ -1,6 +1,6 @@
 <?php
 
-namespace Paydock\Abstract;
+namespace PowerBoard\Abstract;
 
 abstract class AbstractEnum
 {

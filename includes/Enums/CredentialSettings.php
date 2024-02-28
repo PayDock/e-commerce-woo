@@ -1,8 +1,8 @@
 <?php
 
-namespace Paydock\Enums;
+namespace PowerBoard\Enums;
 
-use Paydock\Abstract\AbstractEnum;
+use PowerBoard\Abstract\AbstractEnum;
 
 class CredentialSettings extends AbstractEnum
 {
@@ -30,17 +30,26 @@ class CredentialSettings extends AbstractEnum
             self::SECRET_KEY => 'Secret Key',
             self::ACCESS_KEY => 'Access Token',
             self::SANDBOX => 'Sandbox',
-            self::TYPE => 'Connection to Paydock'
+            self::TYPE => 'Connection to PowerBoard'
         };
     }
 
     public function getDescription(): string
     {
         return match ($this->name) {
-            self::PUBLIC_KEY => 'Public Key from Paydock/Powerboard',
-            self::SECRET_KEY => 'Secret Key from Paydock/Powerboard',
-            self::ACCESS_KEY => 'Access Token from Paydock/Powerboard',
+            self::PUBLIC_KEY => 'Public Key from PowerBoard',
+            self::SECRET_KEY => 'Secret Key from PowerBoard',
+            self::ACCESS_KEY => 'Access Token from PowerBoard',
             default => ''
         };
+    }
+
+    public static function getHashed():array
+    {
+        return [
+            self::PUBLIC_KEY()->name,
+            self::SECRET_KEY()->name,
+            self::ACCESS_KEY()->name,
+        ];
     }
 }

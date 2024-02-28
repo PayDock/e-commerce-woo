@@ -1,6 +1,6 @@
 <?php
 
-namespace Paydock\Exceptions;
+namespace PowerBoard\Exceptions;
 
 use Exception;
 
@@ -12,7 +12,7 @@ class LoggedException extends Exception
     {
         $this->response = $response;
 
-        parent::__construct(__($message, PAY_DOCK_TEXT_DOMAIN), $code, $previous);
+        parent::__construct(__($message, POWER_BOARD_TEXT_DOMAIN), $code, $previous);
     }
 
     /**
@@ -20,7 +20,7 @@ class LoggedException extends Exception
      */
     public static function throw(array $response = []): void
     {
-        throw new self(__('Something want wrong. Check data, refresh page and try again.', PAY_DOCK_TEXT_DOMAIN), 0,
+        throw new self(__('Something want wrong. Check data, refresh page and try again.', POWER_BOARD_TEXT_DOMAIN), 0,
             null, $response);
     }
 }

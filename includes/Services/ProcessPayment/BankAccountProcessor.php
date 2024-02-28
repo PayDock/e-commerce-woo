@@ -1,13 +1,14 @@
 <?php
 
-namespace Paydock\Services\ProcessPayment;
+namespace PowerBoard\Services\ProcessPayment;
 
-use Paydock\Enums\SaveCardOptions;
-use Paydock\Exceptions\LoggedException;
-use Paydock\Helpers\ArgsForProcessPayment;
-use Paydock\Helpers\VaultTokenHelper;
-use Paydock\Repositories\UserTokenRepository;
-use Paydock\Services\SDKAdapterService;
+use PowerBoard\Enums\SaveCardOptions;
+use PowerBoard\Exceptions\LoggedException;
+use PowerBoard\Helpers\ArgsForProcessPayment;
+use PowerBoard\Helpers\VaultTokenHelper;
+use PowerBoard\Repositories\LogRepository;
+use PowerBoard\Repositories\UserTokenRepository;
+use PowerBoard\Services\SDKAdapterService;
 use WC_Order;
 use WC_Order_Refund;
 
@@ -17,16 +18,20 @@ class BankAccountProcessor
     protected bool|WC_Order|WC_Order_Refund $order;
     protected array $args;
     protected array $tokenData = [];
+    protected ?string $orderId;
+    private ?LogRepository $logger;
 
     public function __construct(bool|WC_Order|WC_Order_Refund $order, $args)
     {
         $this->order = $order;
+        $this->logger = new LogRepository();
         $this->args = ArgsForProcessPayment::prepare($args);
         $this->vaultTokenHelper = new VaultTokenHelper($this->args);
     }
 
-    public function run(): array
+    public function run(string $orderId = null): array
     {
+        $this->orderId = $orderId;
         if (
             $this->args['bankaccountsaveaccount']
             && (
@@ -43,6 +48,11 @@ class BankAccountProcessor
     public function chargeWithCustomerId(): array
     {
         $request = [
+            'reference' => (string) $this->orderId,
+            'first_name' => $this->order->get_billing_first_name(),
+            'last_name' => $this->order->get_billing_last_name(),
+            'email' => $this->order->get_billing_email(),
+            'phone' => $this->order->get_billing_phone(),
             'payment_source' => array_merge([
                 'amount' => $this->args['amount'],
                 'type' => 'bank_account',
@@ -60,8 +70,23 @@ class BankAccountProcessor
             $response = SDKAdapterService::getInstance()->createCustomer($request);
 
             if (!empty($response['error']) || empty($response['resource']['data']['_id'])) {
+                $this->logger->createLogRecord(
+                    '',
+                    'Create customer',
+                    'Error',
+                    $response['error']['message'],
+                    LogRepository::ERROR
+                );
                 LoggedException::throw($response);
             }
+
+            $this->logger->createLogRecord(
+                $response['resource']['data']['_id'],
+                'Create customer',
+                'Success',
+                '',
+                LogRepository::SUCCESS
+            );
 
             if ($this->vaultTokenHelper->shouldSaveVaultToken()) {
                 (new UserTokenRepository())->updateUserToken($this->args['selectedtoken'], [
@@ -71,8 +96,6 @@ class BankAccountProcessor
 
             $customerId = $response['resource']['data']['_id'];
         }
-
-        $customerId = $response['resource']['data']['_id'];
 
         return $this->directCharge($customerId);
     }
@@ -94,6 +117,7 @@ class BankAccountProcessor
         }
 
         $request = [
+            'reference' => (string) $this->orderId,
             'amount' => $this->args['amount'],
             'currency' => strtoupper(get_woocommerce_currency()),
             'customer' => [

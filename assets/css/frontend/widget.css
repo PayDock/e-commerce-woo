@@ -1,28 +1,42 @@
-#paydockWidgetCard{
+#power_boardWidgetCard, #power_boardWidgetCard_wrapper {
     min-height: 260px;
     scrollbar-width: thin;
+    position: relative;
+}
+#power_boardWidgetCard_wrapper:before, #power_boardWidgetBankAccount_wrapper:before {
+    content: 'loading...';
+    font-size: 12px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: -1;
 }
 
-#paydockWidgetCard::-webkit-scrollbar-thumb {
-    border: 1px solid black;  /* creates padding around scroll thumb */
+#power_boardWidgetCard::-webkit-scrollbar-thumb {
+    border: 1px solid black; /* creates padding around scroll thumb */
 }
-#paydockWidgetBankAccount {
+
+#power_boardWidgetBankAccount, #power_boardWidgetBankAccount_wrapper {
     min-height: 200px;
+    position: relative;
 }
 
-.logo-comm-bank{
+.logo-comm-bank {
     text-align: center;
 }
-.woocommerce-page .logo-comm-bank img{
-    height:50px;
+
+.woocommerce-page .logo-comm-bank img {
+    height: 50px;
 }
-#paydockWidgetCard iframe {
+
+#power_boardWidgetCard iframe {
     border: 0;
     width: 100%;
     height: 280px;
 }
 
-#paydockWidgetBankAccount iframe {
+#power_boardWidgetBankAccount iframe {
     border: 0;
     width: 100%;
     height: 200px;
@@ -32,18 +46,116 @@
     overflow: hidden;
 }
 
-#paydockWidget3ds iframe {
+#power_boardWidget3ds iframe {
     border: 0;
     width: 100%;
     height: 360px;
 }
 
-#paydockWidgetApm{
+#power_boardWidgetApm {
     margin-top: 25px;
 }
-#paydockWidgetApm img{
+
+#power_boardWidgetApm img {
     margin-top: 50px;
 }
-#paydockWidgetApm img{
+
+#power_boardWidgetApm img {
     margin: 0 50px;
+}
+
+.btn-apm {
+    all: unset;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+
+.power_board-validation-error {
+    color: red;
+    padding: 20px;
+    text-align: center;
+}
+.power_board-country-available-afterpay {
+    color: red;
+    padding: 20px;
+    text-align: center;
+}
+.power_board-country-available-zippay {
+    color: red;
+    padding: 20px;
+    text-align: center;
+}
+
+.power_board-cvv-code input {
+    -webkit-text-security: disc;
+    text-security: disc;
+}
+
+
+#paymentCompleted {
+    min-height: 320px;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+}
+
+.paudock-wallets-buttons {
+    height: 55px;
+    margin-bottom: 20px;
+}
+.paudock-wallets-buttons button {
+    width: 150px;
+}
+
+#power_boardWidgetWallets {
+    -webkit-display: flex;
+    -webkit-flex-wrap: wrap;
+    -webkit-justify-content: space-between;
+    -webkit-align-items: flex-start;
+    -moz-display: flex;
+    -moz-flex-wrap: wrap;
+    -moz-justify-content: space-between;
+    -moz-align-items: flex-start;
+    -o-display: flex;
+    -o-flex-wrap: wrap;
+    -o-justify-content: space-between;
+    -o-align-items: flex-start;
+    -ms-display: flex;
+    -ms-flex-wrap: wrap;
+    -ms-justify-content: space-between;
+    -ms-align-items: flex-start;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+    flex-direction: column;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+#power_boardWidgetWallets #paymentCompleted {
+    display: none !important;
+}
+
+@media (min-width: 1100px) {
+    #power_boardWidgetWallets {
+        flex-direction: row;
+    }
+    .paudock-wallets-buttons {
+        height: 55px;
+        margin-bottom: 75px;
+    }
+}
+@media (max-width: 1099px) {
+    #power_boardWalletsPaypal {
+        margin-bottom: 75px;
+    }
+}
+
+.power_board-apple-container {
+    display:block;
+    width: 150px !important;
+    height: 55px !important;
+    box-sizing: border-box;
 }

@@ -1,10 +1,10 @@
 <?php
 
-namespace Paydock\Services\Settings;
+namespace PowerBoard\Services\Settings;
 
-use Paydock\Abstract\AbstractSettingService;
-use Paydock\Enums\SettingsTabs;
-use Paydock\Repositories\LogRepository;
+use PowerBoard\Abstract\AbstractSettingService;
+use PowerBoard\Enums\SettingsTabs;
+use PowerBoard\Repositories\LogRepository;
 
 class LogsSettingService extends AbstractSettingService
 {
@@ -22,7 +22,6 @@ class LogsSettingService extends AbstractSettingService
 
         $tabs = $this->getTabs();
         $records = (new LogRepository())->getLogs($page, $perPage, $orderBy, $order);
-
         $html = $this->templateService->getAdminHtml('admin', compact('tabs', 'records'));
 
         if ($echo) {

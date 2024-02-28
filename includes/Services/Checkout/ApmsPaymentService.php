@@ -1,14 +1,14 @@
 <?php
 
-namespace Paydock\Services\Checkout;
+namespace PowerBoard\Services\Checkout;
 
 use Exception;
-use Paydock\Enums\OtherPaymentMethods;
-use Paydock\Repositories\LogRepository;
-use Paydock\Services\ProcessPayment\ApmProcessor;
-use Paydock\Services\SDKAdapterService;
-use Paydock\Services\SettingsService;
-use Paydock\Abstract\AbstractPaymentService;
+use PowerBoard\Abstract\AbstractPaymentService;
+use PowerBoard\Enums\OtherPaymentMethods;
+use PowerBoard\Repositories\LogRepository;
+use PowerBoard\Services\ProcessPayment\ApmProcessor;
+use PowerBoard\Services\SDKAdapterService;
+use PowerBoard\Services\SettingsService;
 
 class ApmsPaymentService extends AbstractPaymentService
 {
@@ -19,7 +19,7 @@ class ApmsPaymentService extends AbstractPaymentService
     {
         $settings = SettingsService::getInstance();
 
-        $this->id = 'paydock_apms_gateway';
+        $this->id = 'power_board_apms_gateway';
         $this->title = $settings->getWidgetPaymentAPMTitle();
         $this->description = $settings->getWidgetPaymentAPMDescription();
 
@@ -34,8 +34,11 @@ class ApmsPaymentService extends AbstractPaymentService
      */
     function is_available()
     {
-        return SettingsService::getInstance()->isAPMsEnabled(OtherPaymentMethods::AFTERPAY()) ||
-            SettingsService::getInstance()->isAPMsEnabled(OtherPaymentMethods::ZIPPAY());
+        return SettingsService::getInstance()->isEnabledPayment()
+            && (
+                SettingsService::getInstance()->isAPMsEnabled(OtherPaymentMethods::AFTERPAY()) ||
+                SettingsService::getInstance()->isAPMsEnabled(OtherPaymentMethods::ZIPPAY())
+            );
     }
 
     /**
@@ -48,7 +51,8 @@ class ApmsPaymentService extends AbstractPaymentService
         $order = wc_get_order($order_id);
 
         $siteName = remove_accents(wp_specialchars_decode(get_bloginfo('name'), ENT_QUOTES));
-        $description = sprintf(__('Order №%s from %s.', 'paydock-for-woocommerce'), $order->get_order_number(), $siteName);
+        $description = sprintf(__('Order №%s from %s.', 'power_board-for-woocommerce'), $order->get_order_number(),
+            $siteName);
 
         $loggerRepository = new LogRepository();
         $chargeId = '';
@@ -56,28 +60,37 @@ class ApmsPaymentService extends AbstractPaymentService
         try {
             $processor = new ApmProcessor($_POST);
 
-            $response = $processor->run();
+            $response = $processor->run($order);
 
             if (!empty($response['error']) || empty($response['resource']['data']['_id'])) {
                 $message = SDKAdapterService::getInstance()->errorMessageToString($response);
-                throw new Exception(__('Can\'t charge.' . $message, PAY_DOCK_TEXT_DOMAIN));
+                throw new Exception(__('Can\'t charge.'.$message, POWER_BOARD_TEXT_DOMAIN));
             }
 
             $chargeId = $response['resource']['data']['_id'];
         } catch (Exception $e) {
-            $loggerRepository->createLogRecord($chargeId ?? '', 'Charges', 'UnfulfilledCondition', $e->getMessage(), LogRepository::ERROR);
-            wc_add_notice(__('Error:', PAY_DOCK_TEXT_DOMAIN) . ' ' . $e->getMessage(), 'error');
+            $loggerRepository->createLogRecord($chargeId ?? '', 'Charges', 'UnfulfilledCondition', $e->getMessage(),
+                LogRepository::ERROR);
+            wc_add_notice(__('Error:', POWER_BOARD_TEXT_DOMAIN).' '.$e->getMessage(), 'error');
             exit;
         }
 
         $status = ucfirst(strtolower($response['resource']['data']['transactions'][0]['status'] ?? 'undefined'));
         $operation = ucfirst(strtolower($response['resource']['type'] ?? 'undefined'));
-
-        $isCompleted = 'complete' === strtolower($status);
-
-        $order->set_status($isCompleted ? 'wc-paydock-paid' : 'wc-paydock-pending');
+        $isAuthorization = $response['resource']['data']['authorization'] ?? 0;
+        $isCompleted = false;
+        if ($isAuthorization && $status == 'Pending') {
+            $status = 'wc-power_board-authorize';
+        } else {
+            $isCompleted = 'complete' === strtolower($status);
+            $status = $isCompleted ? 'wc-power_board-paid' : 'wc-power_board-pending';
+        }
+        $order->set_status($status);
         $order->payment_complete();
         $order->save();
+
+        update_post_meta($order->get_id(), 'power_board_charge_id', $chargeId);
+
 
         WC()->cart->empty_cart();
 
@@ -86,7 +99,7 @@ class ApmsPaymentService extends AbstractPaymentService
             $operation,
             $status,
             '',
-            $isCompleted ? LogRepository::DEFAULT : LogRepository::SUCCESS);
+            $status == 'wc-power_board-paid' ? LogRepository::SUCCESS : LogRepository::DEFAULT);
 
         return [
             'result' => 'success', 'redirect' => $this->get_return_url($order)

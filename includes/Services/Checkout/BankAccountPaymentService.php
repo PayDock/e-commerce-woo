@@ -1,13 +1,13 @@
 <?php
 
-namespace Paydock\Services\Checkout;
+namespace PowerBoard\Services\Checkout;
 
 use Exception;
-use Paydock\Abstract\AbstractPaymentService;
-use Paydock\Exceptions\LoggedException;
-use Paydock\Repositories\LogRepository;
-use Paydock\Services\ProcessPayment\BankAccountProcessor;
-use Paydock\Services\SettingsService;
+use PowerBoard\Abstract\AbstractPaymentService;
+use PowerBoard\Exceptions\LoggedException;
+use PowerBoard\Repositories\LogRepository;
+use PowerBoard\Services\ProcessPayment\BankAccountProcessor;
+use PowerBoard\Services\SettingsService;
 
 class BankAccountPaymentService extends AbstractPaymentService
 {
@@ -15,7 +15,7 @@ class BankAccountPaymentService extends AbstractPaymentService
     {
         $settings = SettingsService::getInstance();
 
-        $this->id = 'paydock_bank_account_gateway';
+        $this->id = 'power_board_bank_account_gateway';
         $this->title = $settings->getWidgetPaymentBankAccountTitle();
         $this->description = $settings->getWidgetPaymentBankAccountDescription();
 
@@ -24,7 +24,8 @@ class BankAccountPaymentService extends AbstractPaymentService
 
     public function is_available()
     {
-        return SettingsService::getInstance()->isBankAccountEnabled();
+        return SettingsService::getInstance()->isEnabledPayment()
+            && SettingsService::getInstance()->isBankAccountEnabled();
     }
 
     public function payment_scripts()
@@ -42,11 +43,11 @@ class BankAccountPaymentService extends AbstractPaymentService
         try {
             $processor = new BankAccountProcessor($order, $_POST);
 
-            $response = $processor->run();
+            $response = $processor->run($order_id);
             $chargeId = !empty($response['resource']['data']['_id']) ? $response['resource']['data']['_id'] : '';
         } catch (LoggedException $exception) {
             wc_add_notice(
-                __('Error:', PAY_DOCK_TEXT_DOMAIN).' '.$exception->getMessage(),
+                __('Error:', POWER_BOARD_TEXT_DOMAIN).' '.$exception->getMessage(),
                 'error'
             );
 
@@ -61,7 +62,7 @@ class BankAccountPaymentService extends AbstractPaymentService
             ];
         } catch (Exception $exception) {
             wc_add_notice(
-                __('Error:', PAY_DOCK_TEXT_DOMAIN).' '.$exception->getMessage(),
+                __('Error:', POWER_BOARD_TEXT_DOMAIN).' '.$exception->getMessage(),
                 'error'
             );
 
@@ -73,13 +74,20 @@ class BankAccountPaymentService extends AbstractPaymentService
 
         $status = ucfirst(strtolower($response['resource']['data']['transactions'][0]['status'] ?? 'undefined'));
         $operation = ucfirst(strtolower($response['resource']['type'] ?? 'undefined'));
-
-        $isCompleted = 'Complete' === $status;
-
-        $order->set_status($isCompleted ? 'wc-paydock-paid' : 'wc-paydock-pending');
+        $isAuthorization = $response['resource']['data']['authorization'] ?? 0;
+        $isCompleted = false;
+        $markAsSuccess = false;
+        if($isAuthorization && $status == 'Pending'){
+            $status = 'wc-power_board-authorize';
+        }else {
+            $markAsSuccess = true;
+            $isCompleted = 'Complete' === $status;
+            $status = $isCompleted ? 'wc-power_board-paid' : 'wc-power_board-requested';
+        }
+        $order->set_status($status);
         $order->payment_complete();
         $order->save();
-
+        update_post_meta($order->get_id(), 'power_board_charge_id', $chargeId);
         WC()->cart->empty_cart();
 
         $loggerRepository->createLogRecord(
@@ -87,7 +95,7 @@ class BankAccountPaymentService extends AbstractPaymentService
             $operation,
             $status,
             '',
-            $isCompleted ? LogRepository::DEFAULT : LogRepository::SUCCESS);
+            $markAsSuccess ? LogRepository::SUCCESS : LogRepository::DEFAULT);
 
         return [
             'result' => 'success', 'redirect' => $this->get_return_url($order)

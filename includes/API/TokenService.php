@@ -1,8 +1,8 @@
 <?php
 
-namespace Paydock\API;
+namespace PowerBoard\API;
 
-use Paydock\Abstract\AbstractApiService;
+use PowerBoard\Abstract\AbstractApiService;
 
 class TokenService extends AbstractApiService
 {

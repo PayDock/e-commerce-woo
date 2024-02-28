@@ -1,8 +1,8 @@
 <?php
 
-namespace Paydock\Abstract;
+namespace PowerBoard\Abstract;
 
-use Paydock\API\ConfigService;
+use PowerBoard\API\ConfigService;
 use WP_Error;
 
 abstract class AbstractApiService
@@ -24,7 +24,6 @@ abstract class AbstractApiService
             ],
         ];
 
-
         if (!empty(ConfigService::$secretKey)) {
             $args['headers']['x-user-secret-key'] = ConfigService::$secretKey;
         }
@@ -36,6 +35,15 @@ abstract class AbstractApiService
         if (!empty(ConfigService::$publicKey)) {
             $args['headers']['x-user-public-key'] = ConfigService::$publicKey;
         }
+
+        if (!empty(ConfigService::$publicKey)) {
+            $args['headers']['x-user-public-key'] = ConfigService::$publicKey;
+        }
+
+        $args['headers']['X-'.POWER_BOARD_TEXT_DOMAIN.'-Meta'] = 'V'
+            .POWER_BOARD_PLUGIN_VERSION
+            .'_woocommerce_'
+            .WC()->version;
 
         switch ($this->allowedAction[$this->action]) {
             case 'POST':
@@ -67,7 +75,7 @@ abstract class AbstractApiService
         $body = json_decode($request['body'], true);
 
         if ($body === null && json_last_error() !== JSON_ERROR_NONE) {
-            return ['status' => 403, 'error' => ['message' => 'Paydock api not response'], 'body' => $request['body']];
+            return ['status' => 403, 'error' => ['message' => 'PowerBoard api not response'], 'body' => $request['body']];
         }
 
         return $body;
@@ -76,7 +84,7 @@ abstract class AbstractApiService
     protected function setAction($action): void
     {
         if (empty($this->allowedAction[$action])) {
-            throw new \LogicException(__('Not allowed action ' . $action));
+            throw new \LogicException(__('Not allowed action '.$action));
         }
 
         $this->action = $action;

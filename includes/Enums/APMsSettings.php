@@ -1,8 +1,8 @@
 <?php
 
-namespace Paydock\Enums;
+namespace PowerBoard\Enums;
 
-use Paydock\Abstract\AbstractEnum;
+use PowerBoard\Abstract\AbstractEnum;
 
 class APMsSettings extends AbstractEnum
 {
@@ -44,7 +44,7 @@ class APMsSettings extends AbstractEnum
     {
         return match ($this->name) {
             self::DIRECT_CHARGE => 'Direct charge stands for authorization and capture in a single request',
-            self::SAVE_CARD => 'Offer your customer the option to save the card information permanently at Paydock for '
+            self::SAVE_CARD => 'Offer your customer the option to save the card information permanently at PowerBoard for '
                 . 'further usage',
 
             default => ''

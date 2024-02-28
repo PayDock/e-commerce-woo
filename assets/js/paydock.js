@@ -12,35 +12,35 @@ jQuery(document).ready(function () {
         'billing_country': 'address_country'
     };
 
-    if (paydock_object.gateways.creditCard === 'yes') {
-        // Paydock Credit Card gateway
-        var paydock_cc = new paydock.HtmlWidget('#paydock_cc', paydock_object.publicKey, paydock_object.creditGatewayId);
+    if (power_board_object.gateways.creditCard === 'yes') {
+        // PowerBoard Credit Card gateway
+        var power_board_cc = new power_board.HtmlWidget('#power_board_cc', power_board_object.publicKey, power_board_object.creditGatewayId);
 
-        if (paydock_object.sandbox == true) {
-            paydock_cc.setEnv('sandbox');
+        if (power_board_object.sandbox == true) {
+            power_board_cc.setEnv('sandbox');
         } else {
-            paydock_cc.setEnv('production');
+            power_board_cc.setEnv('production');
         }
 
-        if (paydock_object.cc_email === true) {
-            paydock_cc.setFormFields(['email']);
+        if (power_board_object.cc_email === true) {
+            power_board_cc.setFormFields(['email']);
         }
 
-        paydock_cc.interceptSubmitForm('#paydock_cc');
+        power_board_cc.interceptSubmitForm('#power_board_cc');
 
-        paydock_cc.onFinishInsert('input[name="payment_source"]', 'payment_source');
+        power_board_cc.onFinishInsert('input[name="payment_source"]', 'payment_source');
 
-        paydock_cc.setStyles({
+        power_board_cc.setStyles({
             font_size: '12px',
             background_color: 'rgb(255, 255, 255)'
         });
 
-        paydock_cc.on('finish', function (data) {
-            jQuery('input[name="paydock_gateway"]').val('credit_card');
+        power_board_cc.on('finish', function (data) {
+            jQuery('input[name="power_board_gateway"]').val('credit_card');
             jQuery('#place_order').submit();
         });
 
-        paydock_cc.load();
+        power_board_cc.load();
 
 
         //set value "requiredFilds" in widget
@@ -49,7 +49,7 @@ jQuery(document).ready(function () {
             let data = [];
 
             data[requiredFilds[key]] =  _this.val();
-            paydock_cc.setFormValues(data);
+            power_board_cc.setFormValues(data);
 
             switch (_this.prop("tagName"))  {
                 case 'INPUT':
@@ -57,77 +57,77 @@ jQuery(document).ready(function () {
                         let data = [];
 
                         data[requiredFilds[key]] =  jQuery(this).val() ;
-                        paydock_cc.setFormValues(data);
+                        power_board_cc.setFormValues(data);
                     });
                     break;
                 case 'SELECT':
                     _this.change( function(){
                         let data = [];
                         data[requiredFilds[key]] =  jQuery(this).val() ;
-                        paydock_cc.setFormValues(data);
+                        power_board_cc.setFormValues(data);
                     });
                     break;
             }
         });
     }
 
-    if (paydock_object.gateways.directDebit === 'yes') {
-        // Paydock Direct Debit gateway
-        var paydock_dd = new paydock.HtmlWidget('#paydock_dd', paydock_object.publicKey, paydock_object.debitGatewayId, 'bank_account');
-        if (paydock_object.sandbox == true) {
-            paydock_dd.setEnv('sandbox');
+    if (power_board_object.gateways.directDebit === 'yes') {
+        // PowerBoard Direct Debit gateway
+        var power_board_dd = new power_board.HtmlWidget('#power_board_dd', power_board_object.publicKey, power_board_object.debitGatewayId, 'bank_account');
+        if (power_board_object.sandbox == true) {
+            power_board_dd.setEnv('sandbox');
         } else {
-            paydock_dd.setEnv('production');
+            power_board_dd.setEnv('production');
         }
 
-        paydock_dd.setStyles({
+        power_board_dd.setStyles({
             font_size: '12px',
             background_color: 'rgb(255, 255, 255)'
         });
 
-        paydock_dd.setFormFields(['account_bsb']);
+        power_board_dd.setFormFields(['account_bsb']);
 
-        paydock_dd.interceptSubmitForm('#paydock_dd');
+        power_board_dd.interceptSubmitForm('#power_board_dd');
 
-        paydock_dd.onFinishInsert('input[name="payment_source"]', 'payment_source');
+        power_board_dd.onFinishInsert('input[name="payment_source"]', 'payment_source');
 
-        paydock_dd.on('finish', function (data) {
-            jQuery('input[name="paydock_gateway"]').val('direct_debit');
+        power_board_dd.on('finish', function (data) {
+            jQuery('input[name="power_board_gateway"]').val('direct_debit');
             jQuery('#place_order').submit();
         });
 
-        paydock_dd.load();
+        power_board_dd.load();
     }
 
     body.on('updated_checkout', function () {
-        if (paydock_object.gateways.creditCard === 'yes') {
-            paydock_cc.reload();
+        if (power_board_object.gateways.creditCard === 'yes') {
+            power_board_cc.reload();
         }
 
-        if (paydock_object.gateways.directDebit === 'yes') {
-            paydock_dd.reload();
+        if (power_board_object.gateways.directDebit === 'yes') {
+            power_board_dd.reload();
         }
     });
 
     body.on('click', '#place_order', function (e) {
-        if (jQuery('.woocommerce-checkout').find('#payment_method_paydock').attr('checked') === 'checked') {
+        if (jQuery('.woocommerce-checkout').find('#payment_method_power_board').attr('checked') === 'checked') {
             e.preventDefault();
 
             jQuery('html, body').animate({
-                scrollTop: jQuery(".paydock-tab-wrap").offset().top
+                scrollTop: jQuery(".power_board-tab-wrap").offset().top
             }, 500);
 
-            var gateway = jQuery(".paydock-tab:checked").data('gateway');
+            var gateway = jQuery(".power_board-tab:checked").data('gateway');
 
             switch (gateway) {
                 case 'credit_card':
-                    paydock_cc.trigger('submit_form');
+                    power_board_cc.trigger('submit_form');
                     break;
                 case 'direct_debit':
-                    paydock_dd.trigger('submit_form');
+                    power_board_dd.trigger('submit_form');
                     break;
                 case 'paypal_express':
-                    jQuery('#paydock-paypal-express').trigger('click');
+                    jQuery('#power_board-paypal-express').trigger('click');
                     break;
                 case 'zip_money':
                     jQuery('#zip-money-button').trigger('click');
@@ -146,7 +146,7 @@ jQuery(document).ready(function () {
     });
 
     body.on('click', '.paypal-express-tab', function (e) {
-        jQuery(this).find('#paydock-paypal-express').get(0).click();
+        jQuery(this).find('#power_board-paypal-express').get(0).click();
     });
 
     body.on('click', '.afterpay-tab', function (e) {

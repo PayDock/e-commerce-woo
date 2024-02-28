@@ -1,13 +1,13 @@
 <?php
 
-namespace PayDock\Enums;
+namespace PowerBoard\Enums;
 
-use Paydock\Abstract\AbstractEnum;
+use PowerBoard\Abstract\AbstractEnum;
 
 class ConfigAPI extends AbstractEnum
 {
-    protected const PRODUCTION_API_URL = 'https://api.paydock.com/v1/';
-    protected const SANDBOX_API_URL = 'https://api-sandbox.paydock.com/v1/';
+    protected const PRODUCTION_API_URL = 'https://api.production.powerboard.commbank.com.au/v1/';
+    protected const SANDBOX_API_URL = 'https://api.preproduction.powerboard.commbank.com.au/v1/';
     protected const PRODUCTION_ENVIRONMENT = 'production';
     protected const SANDBOX_ENVIRONMENT = 'sandbox';
 }

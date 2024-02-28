@@ -1,49 +1,63 @@
 <?php
 
-namespace Paydock\Services\ProcessPayment;
+namespace PowerBoard\Services\ProcessPayment;
 
 use Exception;
-use Paydock\Enums\DSTypes;
-use Paydock\Enums\FraudTypes;
-use Paydock\Enums\SaveCardOptions;
-use Paydock\Helpers\ArgsForProcessPayment;
-use Paydock\Helpers\VaultTokenHelper;
-use Paydock\Repositories\UserTokenRepository;
-use Paydock\Services\SDKAdapterService;
+use PowerBoard\Enums\DSTypes;
+use PowerBoard\Enums\FraudTypes;
+use PowerBoard\Enums\SaveCardOptions;
+use PowerBoard\Helpers\ArgsForProcessPayment;
+use PowerBoard\Helpers\VaultTokenHelper;
+use PowerBoard\Repositories\LogRepository;
+use PowerBoard\Repositories\UserTokenRepository;
+use PowerBoard\Services\SDKAdapterService;
+use WC_Order;
+use WC_Order_Refund;
 
 class CardProcessor
 {
     const FRAUD_3DS_CHARGE_METHOD = 'fraud3DsCharge';
     const THREE_DS_CHARGE_METHOD = 'threeDsCharge';
     const FRAUD_CHARGE_METHOD = 'fraudCharge';
-    const DIRECT_CHARGE_METHOD = 'directCharge';
     const CUSTOMER_CHARGE_METHOD = 'customerCharge';
+    const CHARGE_METHOD = 'charge';
     const ALLOWED_METHODS = [
         self::FRAUD_3DS_CHARGE_METHOD,
         self::THREE_DS_CHARGE_METHOD,
         self::FRAUD_CHARGE_METHOD,
-        self::DIRECT_CHARGE_METHOD,
-        self::CUSTOMER_CHARGE_METHOD
+        self::CUSTOMER_CHARGE_METHOD,
+        self::CHARGE_METHOD
     ];
 
     protected VaultTokenHelper $vaultTokenHelper;
+    protected UserTokenRepository $userTokenRepository;
+    private ?LogRepository $logger;
 
     protected array $args = [];
     protected array $tokenData = [];
     private ?string $runMethod;
+    protected bool|WC_Order|WC_Order_Refund $order = false;
+    private ?string $customerId = null;
 
     public function __construct(array $args = [])
     {
+        $this->logger = new LogRepository();
         $this->args = ArgsForProcessPayment::prepare($args);
         $this->vaultTokenHelper = new VaultTokenHelper($this->args);
+
+        if ($this->args['isuserloggedin']) {
+            $this->userTokenRepository = new UserTokenRepository();
+        }
     }
 
-    public function run(): array
+    public function run(bool|WC_Order|WC_Order_Refund $order): array
     {
+        $this->order = $order;
+
         $this->setRunMethod();
 
         if (!in_array($this->runMethod, self::ALLOWED_METHODS)) {
-            throw new Exception(__('Undefined run method', PAY_DOCK_TEXT_DOMAIN));
+            throw new Exception(__('Undefined run method', POWER_BOARD_TEXT_DOMAIN));
         }
 
         return call_user_func([$this, $this->runMethod]);
@@ -57,6 +71,9 @@ class CardProcessor
     private function setRunMethod()
     {
         switch (true) {
+            case($this->isSavedVaultTokenWithCustomer()):
+                $this->runMethod = self::CUSTOMER_CHARGE_METHOD;
+                break;
             case !empty($this->args['card3ds']) && !empty($this->args['cardfraud']):
                 $this->runMethod = self::FRAUD_3DS_CHARGE_METHOD;
                 break;
@@ -66,11 +83,11 @@ class CardProcessor
             case !empty($this->args['cardfraud']):
                 $this->runMethod = self::FRAUD_CHARGE_METHOD;
                 break;
-            case $this->args['cardsavecard']:
+            case $this->args['cardsavecardchecked'] && $this->args['cardsavecardoption'] !== SaveCardOptions::VAULT()->name:
                 $this->runMethod = self::CUSTOMER_CHARGE_METHOD;
                 break;
             default:
-                $this->runMethod = self::DIRECT_CHARGE_METHOD;
+                $this->runMethod = self::CHARGE_METHOD;
         }
     }
 
@@ -88,9 +105,17 @@ class CardProcessor
 
     private function fraud3DsInBuildCharge(): array
     {
-        return SDKAdapterService::getInstance()->createCharge([
+        if (isset($this->args['gatewayid'])) {
+            $paymentSource['gateway_id'] = $this->args['gatewayid'];
+        }
+
+        $chargeArgs = [
             'amount' => $this->args['amount'],
+            'reference' => (string) $this->order->get_id(),
             'currency' => strtoupper(get_woocommerce_currency()),
+            'customer' => [
+                'payment_source' => array_merge($this->getAdditionalFields('amount'), $paymentSource)
+            ],
             '_3ds' => [
                 'id' => $this->args['charge3dsid'] ?? '',
                 'service_id' => $this->args['card3dsserviceid'] ?? ''
@@ -98,46 +123,56 @@ class CardProcessor
             'fraud' => [
                 'service_id' => $this->args['cardfraudserviceid'] ?? '',
                 'mode' => 'active',
-                'data' => []
-            ]
-        ]);
+                'data' => $this->getAdditionalFields()
+            ],
+            'capture' => $this->args['carddirectcharge']
+        ];
+
+        if (!empty($this->args['cvv'])) {
+            $chargeArgs['customer']['payment_source']['card_ccv'] = $this->args['cvv'];
+        }
+
+        return SDKAdapterService::getInstance()->createCharge($chargeArgs);
     }
 
     private function fraud3DsStandaloneCharge(): array
     {
+        $options = [
+            'method' => __FUNCTION__,
+            'capture' => $this->args['carddirectcharge'],
+            'charge3dsid' => $this->args['charge3dsid']
+        ];
         $vaultToken = $this->getVaultToken();
 
         $paymentSource = ['vault_token' => $vaultToken];
         if (isset($this->args['gatewayid'])) {
             $paymentSource['gateway_id'] = $this->args['gatewayid'];
+            $options['gateway_id'] = $this->args['gatewayid'];
         }
 
-        $faudCharge = SDKAdapterService::getInstance()->standaloneFraudCharge([
+        if (!empty($this->args['cvv'])) {
+            $paymentSource['card_ccv'] = $this->args['cvv'];
+            $options['ccv'] = $this->args['cvv'];
+        }
+
+        $response = SDKAdapterService::getInstance()->standaloneFraudCharge([
             'amount' => $this->args['amount'],
             'currency' => strtoupper(get_woocommerce_currency()),
+            'reference' => (string) $this->order->get_id(),
             'customer' => [
-                'payment_source' => $paymentSource
+                'payment_source' => array_merge($this->getAdditionalFields('amount'), $paymentSource)
             ],
             'fraud' => [
                 'service_id' => $this->args['cardfraudserviceid'] ?? '',
-                'data' => []
+                'data' => $this->getAdditionalFields()
             ]
         ]);
 
-        if (!empty($faudCharge['error']) || empty($faudCharge['resource']['data']['_id'])) {
-            $message = !empty($faudCharge['error']['message']) ? ' ' . $faudCharge['error']['message'] : '';
-            throw new Exception(__('Can\'t create Paydock fraud charge.' . $message, PAY_DOCK_TEXT_DOMAIN));
+        if (empty($response['error']) && !empty($response['resource']['data']['_id'])) {
+            update_option('power_board_fraud_' . (string) $this->order->get_id(), $options);
         }
 
-        return SDKAdapterService::getInstance()->createCharge([
-            'amount' => $this->args['amount'],
-            'currency' => strtoupper(get_woocommerce_currency()),
-            'customer' => [
-                'payment_source' => $paymentSource
-            ],
-            '_3ds_charge_id' => $this->args['charge3dsid'],
-            'fraud_charge_id' => $faudCharge['resource']['data']['_id']
-        ]);
+        return $response;
     }
 
     private function threeDsCharge(): array
@@ -151,14 +186,29 @@ class CardProcessor
 
     private function threeDsInBuildCharge(): array
     {
-        return SDKAdapterService::getInstance()->createCharge([
+        if (isset($this->args['gatewayid'])) {
+            $paymentSource['gateway_id'] = $this->args['gatewayid'];
+        }
+
+        $chargeArgs = [
             'amount' => $this->args['amount'],
+            'reference' => (string) $this->order->get_id(),
             'currency' => strtoupper(get_woocommerce_currency()),
+            'customer' => [
+                'payment_source' => array_merge($this->getAdditionalFields('amount'), $paymentSource)
+            ],
             '_3ds' => [
                 'id' => $this->args['charge3dsid'] ?? '',
                 'service_id' => $this->args['card3dsserviceid'] ?? ''
-            ]
-        ]);
+            ],
+            'capture' => $this->args['carddirectcharge']
+        ];
+
+        if (!empty($this->args['cvv'])) {
+            $chargeArgs['customer']['payment_source']['card_ccv'] = $this->args['cvv'];
+        }
+
+        return SDKAdapterService::getInstance()->createCharge($chargeArgs);
     }
 
     private function threeDsStandaloneCharge(): array
@@ -170,14 +220,22 @@ class CardProcessor
             $paymentSource['gateway_id'] = $this->args['gatewayid'];
         }
 
-        return SDKAdapterService::getInstance()->createCharge([
+        $chargeArgs = [
             'amount' => $this->args['amount'],
+            'reference' => (string) $this->order->get_id(),
             'currency' => strtoupper(get_woocommerce_currency()),
             'customer' => [
-                'payment_source' => $paymentSource
+                'payment_source' => array_merge($this->getAdditionalFields('amount'), $paymentSource)
             ],
-            '_3ds_charge_id' => $this->args['charge3dsid']
-        ]);
+            '_3ds_charge_id' => $this->args['charge3dsid'],
+            'capture' => $this->args['carddirectcharge']
+        ];
+
+        if (!empty($this->args['cvv'])) {
+            $chargeArgs['customer']['payment_source']['card_ccv'] = $this->args['cvv'];
+        }
+
+        return SDKAdapterService::getInstance()->createCharge($chargeArgs);
     }
 
     private function fraudCharge(): array
@@ -198,90 +256,133 @@ class CardProcessor
             $paymentSource['gateway_id'] = $this->args['gatewayid'];
         }
 
-        return SDKAdapterService::getInstance()->createCharge([
+        $chargeArgs = [
             'amount' => $this->args['amount'],
+            'reference' => (string) $this->order->get_id(),
             'currency' => strtoupper(get_woocommerce_currency()),
             'customer' => [
-                'payment_source' => $paymentSource
+                'payment_source' => array_merge($this->getAdditionalFields('amount'), $paymentSource)
             ],
             'fraud' => [
                 'service_id' => $this->args['cardfraudserviceid'] ?? '',
                 'mode' => 'active',
-                'data' => new \StdClass
-            ]
-        ]);
+                'data' => $this->getAdditionalFields()
+            ],
+            'capture' => $this->args['carddirectcharge']
+        ];
+
+        if (!empty($this->args['cvv'])) {
+            $chargeArgs['customer']['payment_source']['card_ccv'] = $this->args['cvv'];
+        }
+
+        return SDKAdapterService::getInstance()->createCharge($chargeArgs);
     }
 
     private function fraudStandaloneCharge(): array
     {
+        $options = [
+            'method' => __FUNCTION__,
+            'capture' => $this->args['carddirectcharge']
+        ];
         $vaultToken = $this->getVaultToken();
 
         $paymentSource = ['vault_token' => $vaultToken];
         if (isset($this->args['gatewayid'])) {
             $paymentSource['gateway_id'] = $this->args['gatewayid'];
+            $options['gateway_id'] = $this->args['gatewayid'];
         }
 
-        $faudCharge = SDKAdapterService::getInstance()->standaloneFraudCharge([
+        if (!empty($this->args['cvv'])) {
+            $paymentSource['card_ccv'] = $this->args['cvv'];
+            $options['ccv'] = $this->args['cvv'];
+        }
+
+        $response = SDKAdapterService::getInstance()->standaloneFraudCharge([
             'amount' => $this->args['amount'],
+            'reference' => (string) $this->order->get_id(),
             'currency' => strtoupper(get_woocommerce_currency()),
             'customer' => [
-                'payment_source' => $paymentSource
+                'payment_source' => array_merge($this->getAdditionalFields('amount'), $paymentSource)
             ],
             'fraud' => [
                 'service_id' => $this->args['cardfraudserviceid'],
-                'data' => []
-            ]
+                'data' => $this->getAdditionalFields()
+            ],
         ]);
 
-        if (!empty($faudCharge['error']) || empty($faudCharge['resource']['data']['_id'])) {
-            $message = !empty($faudCharge['error']['message']) ? ' ' . $faudCharge['error']['message'] : '';
-            throw new Exception(__('Can\'t create Paydock fraud charge.' . $message, PAY_DOCK_TEXT_DOMAIN));
+        if (empty($response['error']) && !empty($response['resource']['data']['_id'])) {
+            update_option('power_board_fraud_' . (string) $this->order->get_id(), $options);
         }
 
-        return SDKAdapterService::getInstance()->createCharge([
-            'amount' => $this->args['amount'],
-            'currency' => strtoupper(get_woocommerce_currency()),
-            'customer' => [
-                'payment_source' => $paymentSource
-            ],
-            'fraud_charge_id' => $faudCharge['resource']['data']['_id']
-        ]);
+        return $response;
     }
 
     private function customerCharge(): array
     {
-        $vaultToken = $this->getVaultToken();
+        if ($this->customerId === null) {
+            $vaultToken = $this->getVaultToken();
 
-        $customerArgs = [
-            'payment_source' => [
-                'amount' => $this->args['amount'],
-                'vault_token' => $vaultToken
-            ]
-        ];
+            $customerArgs = array_merge([
+                'first_name' => $this->order->get_billing_last_name(),
+                'last_name' => $this->order->get_billing_first_name(),
+                'email' => $this->order->get_billing_email(),
+                'phone' => $this->order->get_billing_phone(),
+                'payment_source' => [
+                    'amount' => $this->args['amount'],
+                    'vault_token' => $vaultToken
+                ],
+            ], $this->getAdditionalFields('amount'));
 
-        $customer = SDKAdapterService::getInstance()->createCustomer($customerArgs);
+            if ($this->args['cardsavecardoption'] === SaveCardOptions::WITH_GATEWAY()->name && !empty($this->args['gatewayid'])) {
+                $customerArgs['payment_source']['gateway_id'] = $this->args['gatewayid'];
+            }
 
-        if (!empty($customer['error']) || empty($customer['resource']['data']['_id'])) {
-            $message = !empty($customer['error']['message']) ? ' ' . $customer['error']['message'] : '';
-            throw new Exception(__('Can\'t create Paydock customer.' . $message, PAY_DOCK_TEXT_DOMAIN));
-        }
+            $customer = SDKAdapterService::getInstance()->createCustomer($customerArgs);
 
-        if ($this->vaultTokenHelper->shouldSaveVaultToken()) {
-            (new UserTokenRepository())->updateUserToken($this->args['selectedtoken'], [
-                'customer_id' => $customer['resource']['data']['_id']
-            ]);
+            if (!empty($customer['error']) || empty($customer['resource']['data']['_id'])) {
+                $message = !empty($customer['error']['message']) ? ' ' . $customer['error']['message'] : '';
+                $this->logger->createLogRecord(
+                    '',
+                    'Create customer',
+                    'error',
+                    $message,
+                    LogRepository::ERROR
+                );
+                throw new Exception(__('Can\'t create PowerBoard customer.' . $message, POWER_BOARD_TEXT_DOMAIN));
+            }
+
+            $this->logger->createLogRecord(
+                $customer['resource']['data']['_id'],
+                'Create customer',
+                'Success',
+                '',
+                LogRepository::SUCCESS
+            );
+
+            if ($this->vaultTokenHelper->shouldSaveVaultToken() && in_array($this->args['cardsavecardoption'], [
+                SaveCardOptions::WITH_GATEWAY()->name,
+                SaveCardOptions::WITHOUT_GATEWAY()->name
+            ])) {
+                $this->userTokenRepository->updateUserToken($this->args['selectedtoken'], [
+                    'customer_id' => $customer['resource']['data']['_id']
+                ]);
+            }
+
+            $customerId = $customer['resource']['data']['_id'];
+        } else {
+            $customerId = $this->customerId;
         }
 
         $params = [
             'amount' => $this->args['amount'],
+            'reference' => (string) $this->order->get_id(),
             'currency' => strtoupper(get_woocommerce_currency()),
-            'customer_id' => $customer['resource']['data']['_id']
+            'customer_id' => $customerId,
+            'capture' => $this->args['carddirectcharge'],
+            'customer' => ['payment_source' => $this->getAdditionalFields('amount')]
         ];
 
-        if (isset($this->args['gatewayid']) && in_array($this->args['cardsavecardoption'], [
-            SaveCardOptions::WITH_GATEWAY()->name,
-            SaveCardOptions::VAULT()->name
-        ])) {
+        if (!empty($this->args['gatewayid'])) {
             $params['customer'] = [
                 'payment_source' => [
                     'gateway_id' => $this->args['gatewayid']
@@ -289,17 +390,21 @@ class CardProcessor
             ];
         }
 
+        if (!empty($this->args['cvv'])) {
+            $params['customer']['payment_source']['card_ccv'] = $this->args['cvv'];
+        }
+
         $responce = SDKAdapterService::getInstance()->createCharge($params);
 
         if (!empty($responce['error'])) {
             $message = !empty($responce['error']['message']) ? ' ' . $responce['error']['message'] : '';
-            throw new Exception(__('Can\'t create Paydock charge.' . $message, PAY_DOCK_TEXT_DOMAIN));
+            throw new Exception(__('Can\'t create PowerBoard charge.' . $message, POWER_BOARD_TEXT_DOMAIN));
         }
 
         return $responce;
     }
 
-    private function directCharge(): array
+    private function charge(): array
     {
         $vaultToken = $this->getVaultToken();
 
@@ -308,13 +413,21 @@ class CardProcessor
             $paymentSource['gateway_id'] = $this->args['gatewayid'];
         }
 
-        return SDKAdapterService::getInstance()->createCharge([
+        $chargeArgs = [
             'amount' => $this->args['amount'],
+            'reference' => (string) $this->order->get_id(),
             'currency' => strtoupper(get_woocommerce_currency()),
             'customer' => [
-                'payment_source' => $paymentSource
-            ]
-        ]);
+                'payment_source' => array_merge($this->getAdditionalFields('amount'), $paymentSource)
+            ],
+            'capture' => $this->args['carddirectcharge']
+        ];
+
+        if (!empty($this->args['cvv'])) {
+            $chargeArgs['customer']['payment_source']['card_ccv'] = $this->args['cvv'];
+        }
+
+        return SDKAdapterService::getInstance()->createCharge($chargeArgs);
     }
 
     public function createCustomer($force = false): void
@@ -323,24 +436,42 @@ class CardProcessor
             return;
         }
 
-        $customerArgs = [
+        $customerArgs = array_merge([
+            'first_name' => $this->order->get_billing_first_name(),
+            'last_name' => $this->order->get_billing_last_name(),
+            'email' => $this->order->get_billing_email(),
+            'phone' => $this->order->get_billing_phone(),
             'payment_source' => [
                 'amount' => $this->args['amount'],
                 'vault_token' => $this->args['selectedtoken']
             ]
-        ];
+        ], $this->getAdditionalFields('amount'));
 
-        if ($this->args['cardsavecardoption'] === SaveCardOptions::WITH_GATEWAY()->value && isset($this->args['gatewayid'])) {
+        if ($this->args['cardsavecardoption'] === SaveCardOptions::WITH_GATEWAY()->name && !empty($this->args['gatewayid'])) {
             $customerArgs['payment_source']['gateway_id'] = $this->args['gatewayid'];
         }
 
         $customer = SDKAdapterService::getInstance()->createCustomer($customerArgs);
         if (!empty($customer['error']) || empty($customer['resource']['data']['_id'])) {
             $message = !empty($customer['error']['message']) ? ' ' . $customer['error']['message'] : '';
-            throw new Exception(__('Can\'t create Paydock customer.' . $message, PAY_DOCK_TEXT_DOMAIN));
+            $this->logger->createLogRecord(
+                '',
+                'Create customer',
+                'error',
+                $message,
+                LogRepository::ERROR
+            );
+            throw new Exception(__('Can\'t create PowerBoard customer.' . $message, POWER_BOARD_TEXT_DOMAIN));
         }
+        $this->logger->createLogRecord(
+            $customer['resource']['data']['_id'],
+            'Create customer',
+            'Success',
+            '',
+            LogRepository::SUCCESS
+        );
 
-        (new UserTokenRepository())->updateUserToken($this->args['selectedtoken'], [
+        $this->userTokenRepository->updateUserToken($this->args['selectedtoken'], [
             'customer_id' => $customer['resource']['data']['_id']
         ]);
     }
@@ -359,6 +490,7 @@ class CardProcessor
 
         $threeDsCharge = SDKAdapterService::getInstance()->standalone3DsCharge([
             'amount' => $this->args['amount'],
+            'reference' => '',
             'currency' => strtoupper(get_woocommerce_currency()),
             'customer' => [
                 'payment_source' => $paymentSource
@@ -374,15 +506,30 @@ class CardProcessor
 
         if (!empty($threeDsCharge['error']) || empty($threeDsCharge['resource']['data']['_3ds']['token'])) {
             $message = !empty($threeDsCharge['error']['message']) ? ' ' . $threeDsCharge['error']['message'] : '';
-            throw new Exception(__('Can\'t create Paydock 3ds charge.' . $message, PAY_DOCK_TEXT_DOMAIN));
+            $this->logger->createLogRecord(
+                '',
+                '3DS Charge',
+                'error',
+                $message,
+                LogRepository::ERROR
+            );
+            throw new Exception(__('Can\'t create Power Board 3ds charge.' . $message, POWER_BOARD_TEXT_DOMAIN));
         }
+
+        $this->logger->createLogRecord(
+            '',
+            '3DS Charge',
+            'Success',
+            '',
+            LogRepository::SUCCESS
+        );
 
         return $threeDsCharge['resource']['data']['_3ds']['token'];
     }
 
     public function getVaultToken(): string
     {
-        $token = $this->vaultTokenHelper->get();
+        $token = $this->vaultTokenHelper->get($this->getAdditionalFields('amount'));
 
         if (!empty($token)) {
             $this->args['selectedtoken'] = $token;
@@ -404,5 +551,51 @@ class CardProcessor
     private function shouldNotCreateCustomer(): bool
     {
         return !$this->shouldCreateCustomer();
+    }
+
+    private function isSavedVaultTokenWithCustomer(): bool
+    {
+        if (!$this->args['isuserloggedin'] || empty($this->args['selectedtoken'])) {
+            return false;
+        }
+
+        $vaultToken = $this->userTokenRepository->getUserToken($this->args['selectedtoken']);
+        if (empty($vaultToken) || empty($vaultToken['customer_id'])) {
+            return false;
+        }
+
+        $this->customerId = $vaultToken['customer_id'];
+
+        return true;
+    }
+
+    protected function getAdditionalFields(array|string $exclude = []): array
+    {
+        if (!$this->order) {
+            return [];
+        }
+
+        $address1 = $this->order->get_billing_address_1();
+        $address2 = $this->order->get_billing_address_2();
+
+        $result = [
+            'amount' => (float) $this->order->get_total(),
+            'address_country' => $this->order->get_billing_country(),
+            'address_postcode' => $this->order->get_billing_postcode(),
+            'address_city' => $this->order->get_billing_city(),
+            'address_state' => $this->order->get_billing_state(),
+            'address_line1' => $address1,
+            'address_line2' => empty($address2) ? $address1 : $address2,
+        ];
+
+        if (!empty($exclude)) {
+            if (!is_array($exclude)) {
+                $exclude = [$exclude];
+            }
+
+            $result = array_diff_key($result, array_flip($exclude));
+        }
+
+        return $result;
     }
 }

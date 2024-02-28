@@ -1,13 +1,13 @@
 <?php
 
-namespace Paydock\Services\Settings;
+namespace PowerBoard\Services\Settings;
 
-use Paydock\Abstract\AbstractSettingService;
-use Paydock\Enums\SettingsTabs;
-use Paydock\Enums\WidgetSettings;
-use Paydock\PaydockPlugin;
-use Paydock\Services\SettingsService;
-use Paydock\Services\Validation\WidgetValidationService;
+use PowerBoard\Abstract\AbstractSettingService;
+use PowerBoard\Enums\SettingsTabs;
+use PowerBoard\Enums\WidgetSettings;
+use PowerBoard\PowerBoardPlugin;
+use PowerBoard\Services\SettingsService;
+use PowerBoard\Services\Validation\WidgetValidationService;
 
 class WidgetSettingService extends AbstractSettingService
 {
@@ -77,37 +77,37 @@ class WidgetSettingService extends AbstractSettingService
             if (WidgetSettings::PAYMENT_CARD_TITLE()->name === $case->name) {
                 $this->form_fields[$key . '_big_label'] = [
                     'type' => 'big_label',
-                    'title' => __('Payment Methods:', PaydockPlugin::PLUGIN_PREFIX),
+                    'title' => __('Payment Methods:', PowerBoardPlugin::PLUGIN_PREFIX),
                 ];
                 $this->form_fields[$key . '_label'] = [
                     'type' => 'label',
-                    'title' => __('Cards', PaydockPlugin::PLUGIN_PREFIX),
+                    'title' => __('Cards', PowerBoardPlugin::PLUGIN_PREFIX),
                 ];
             } elseif (WidgetSettings::PAYMENT_BANK_ACCOUNT_TITLE()->name === $case->name) {
                 $this->form_fields[$key . '_label'] = [
                     'type' => 'label',
-                    'title' => __('Bank Accounts', PaydockPlugin::PLUGIN_PREFIX),
+                    'title' => __('Bank Accounts', PowerBoardPlugin::PLUGIN_PREFIX),
                 ];
             } elseif (WidgetSettings::PAYMENT_WALLET_TITLE()->name === $case->name) {
                 $this->form_fields[$key . '_label'] = [
                     'type' => 'label',
-                    'title' => __('Wallets', PaydockPlugin::PLUGIN_PREFIX),
+                    'title' => __('Wallets', PowerBoardPlugin::PLUGIN_PREFIX),
                 ];
             } elseif (WidgetSettings::PAYMENT_A_P_M_S_TITLE()->name === $case->name) {
                 $this->form_fields[$key . '_label'] = [
                     'type' => 'label',
-                    'title' => __('APMs', PaydockPlugin::PLUGIN_PREFIX),
+                    'title' => __('APMs', PowerBoardPlugin::PLUGIN_PREFIX),
                 ];
             }  elseif (WidgetSettings::STYLE_BACKGROUND_COLOR()->name === $case->name) {
                 $this->form_fields[$key . '_label'] = [
                     'type' => 'big_label',
-                    'title' => __('Widget Styles:', PaydockPlugin::PLUGIN_PREFIX),
+                    'title' => __('Widget Styles:', PowerBoardPlugin::PLUGIN_PREFIX),
                 ];
             }
 
             $this->form_fields[$key] = [
                 'type' => $case->getInputType(),
-                'title' => __($case->getTitle(), PaydockPlugin::PLUGIN_PREFIX),
+                'title' => __($case->getTitle(), PowerBoardPlugin::PLUGIN_PREFIX),
                 'default' => $case->getDefault()
             ];
 

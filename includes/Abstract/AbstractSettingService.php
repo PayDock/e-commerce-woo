@@ -1,11 +1,12 @@
 <?php
 
-namespace Paydock\Abstract;
+namespace PowerBoard\Abstract;
 
-use Paydock\Enums\SettingsTabs;
-use Paydock\PaydockPlugin;
-use Paydock\Services\Assets\AdminAssetsService;
-use Paydock\Services\TemplateService;
+use PowerBoard\Enums\SettingsTabs;
+use PowerBoard\PowerBoardPlugin;
+use PowerBoard\Services\Assets\AdminAssetsService;
+use PowerBoard\Services\SettingsService;
+use PowerBoard\Services\TemplateService;
 
 abstract class AbstractSettingService extends \WC_Payment_Gateway
 {
@@ -13,20 +14,20 @@ abstract class AbstractSettingService extends \WC_Payment_Gateway
 
     protected TemplateService $templateService;
 
-    private const TITLE = 'Paydock Gateway';
-    private const DESCRIPTION = 'Paydock simplify how you manage your payments. Reduce costs, technical'
-    . ' headaches & streamline compliance using Paydock\'s payment orchestration.';
+    private const TITLE = 'PowerBoard Gateway';
+    private const DESCRIPTION = 'PowerBoard simplify how you manage your payments. Reduce costs, technical'
+    . ' headaches & streamline compliance using PowerBoard\'s payment orchestration.';
 
 
     public function __construct()
     {
         $this->currentSection = $_GET['section'] ?? '';
         $this->id = $this->getId();
-        $this->enabled = 'yes';
-        $this->method_title = __(self::TITLE, PaydockPlugin::PLUGIN_PREFIX);
-        $this->method_description = __(self::DESCRIPTION, PaydockPlugin::PLUGIN_PREFIX);
+        $this->enabled = $this->get_option('enabled');
+        $this->method_title = __(self::TITLE, PowerBoardPlugin::PLUGIN_PREFIX);
+        $this->method_description = __(self::DESCRIPTION, PowerBoardPlugin::PLUGIN_PREFIX);
 
-        $this->title = __(self::TITLE, PaydockPlugin::PLUGIN_PREFIX);
+        $this->title = __(self::TITLE, PowerBoardPlugin::PLUGIN_PREFIX);
 
         $this->icon = plugins_url('assets/images/logo.svg');
 

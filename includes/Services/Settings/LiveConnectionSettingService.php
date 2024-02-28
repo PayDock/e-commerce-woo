@@ -1,28 +1,48 @@
 <?php
 
-namespace Paydock\Services\Settings;
+namespace PowerBoard\Services\Settings;
 
-use Paydock\Abstract\AbstractSettingService;
-use Paydock\Enums\APMsSettings;
-use Paydock\Enums\BankAccountSettings;
-use Paydock\Enums\CardSettings;
-use Paydock\Enums\CredentialSettings;
-use Paydock\Enums\CredentialsTypes;
-use Paydock\Enums\DSTypes;
-use Paydock\Enums\FraudTypes;
-use Paydock\Enums\OtherPaymentMethods;
-use Paydock\Enums\SaveCardOptions;
-use Paydock\Enums\SettingGroups;
-use Paydock\Enums\SettingsTabs;
-use Paydock\Enums\TypeExchangeOTT;
-use Paydock\Enums\WalletPaymentMethods;
-use Paydock\Enums\WalletSettings;
-use Paydock\PaydockPlugin;
-use Paydock\Services\SettingsService;
-use Paydock\Services\Validation\ConnectionValidationService;
+use PowerBoard\Abstract\AbstractSettingService;
+use PowerBoard\Enums\APMsSettings;
+use PowerBoard\Enums\BankAccountSettings;
+use PowerBoard\Enums\CardSettings;
+use PowerBoard\Enums\CredentialSettings;
+use PowerBoard\Enums\CredentialsTypes;
+use PowerBoard\Enums\DSTypes;
+use PowerBoard\Enums\FraudTypes;
+use PowerBoard\Enums\OtherPaymentMethods;
+use PowerBoard\Enums\SaveCardOptions;
+use PowerBoard\Enums\SettingGroups;
+use PowerBoard\Enums\SettingsTabs;
+use PowerBoard\Enums\TypeExchangeOTT;
+use PowerBoard\Enums\WalletPaymentMethods;
+use PowerBoard\Enums\WalletSettings;
+use PowerBoard\PowerBoardPlugin;
+use PowerBoard\Services\HashService;
+use PowerBoard\Services\SettingsService;
+use PowerBoard\Services\Validation\ConnectionValidationService;
 
 class LiveConnectionSettingService extends AbstractSettingService
 {
+    public function __construct()
+    {
+        parent::__construct();
+
+        $service = SettingsService::getInstance();
+        foreach (CredentialSettings::cases() as $credentialSettings) {
+            if (in_array($credentialSettings->name, CredentialSettings::getHashed())) {
+                $key = $service->getOptionName($this->id, [
+                    SettingGroups::CREDENTIALS()->name,
+                    $credentialSettings->name,
+                ]);
+
+                if (!empty($this->settings[$key])) {
+                    $this->settings[$key] = HashService::decrypt($this->settings[$key]);
+                }
+            }
+        }
+    }
+
     protected function getId(): string
     {
         return SettingsTabs::LIVE_CONNECTION()->value;
@@ -33,21 +53,21 @@ class LiveConnectionSettingService extends AbstractSettingService
         $service = SettingsService::getInstance();
 
         foreach (SettingGroups::cases() as $settingGroup) {
-            $key = PaydockPlugin::PLUGIN_PREFIX . '_' . $service->getOptionName($this->id, [
+            $key = PowerBoardPlugin::PLUGIN_PREFIX.'_'.$service->getOptionName($this->id, [
                     $settingGroup->name,
                     'label',
                 ]);
 
             if (SettingGroups::CARD() == $settingGroup) {
-                $this->form_fields[$key . '_label'] = [
+                $this->form_fields[$key.'_label'] = [
                     'type' => 'big_label',
-                    'title' => __('Payment Methods:', PaydockPlugin::PLUGIN_PREFIX),
+                    'title' => __('Payment Methods:', PowerBoardPlugin::PLUGIN_PREFIX),
                 ];
             }
 
             $this->form_fields[$key] = [
                 'type' => 'big_label',
-                'title' => __($settingGroup->getLabel(), PaydockPlugin::PLUGIN_PREFIX),
+                'title' => __($settingGroup->getLabel(), PowerBoardPlugin::PLUGIN_PREFIX),
             ];
 
             $this->form_fields = array_merge($this->form_fields, match ($settingGroup->name) {
@@ -73,7 +93,7 @@ class LiveConnectionSettingService extends AbstractSettingService
                 ]);
                 $fields[$key] = [
                     'type' => $credentialSettings->getInputType(),
-                    'title' => __($credentialSettings->getLabel(), PaydockPlugin::PLUGIN_PREFIX),
+                    'title' => __($credentialSettings->getLabel(), PowerBoardPlugin::PLUGIN_PREFIX),
                 ];
                 if ($description = $credentialSettings->getDescription()) {
                     $fields[$key]['description'] = $description;
@@ -98,7 +118,9 @@ class LiveConnectionSettingService extends AbstractSettingService
             $key = $service->getOptionName($this->id, [SettingGroups::CARD()->name, $cardSettings->name]);
             $fields[$key] = [
                 'type' => $cardSettings->getInputType(),
-                'title' => __(preg_replace(['/ Id/', '/ id/'], ' ID', $cardSettings->getLabel()), PaydockPlugin::PLUGIN_PREFIX),
+                'title' => __(preg_replace(['/ Id/', '/ id/'], ' ID', $cardSettings->getLabel()),
+                    PowerBoardPlugin::PLUGIN_PREFIX),
+                'default' => $cardSettings->getDefault(),
             ];
 
             if ($description = $cardSettings->getDescription()) {
@@ -131,7 +153,7 @@ class LiveConnectionSettingService extends AbstractSettingService
 
             $fields[$key] = [
                 'type' => $bankAccountSettings->getInputType(),
-                'title' => __($bankAccountSettings->getLabel(), PaydockPlugin::PLUGIN_PREFIX),
+                'title' => __($bankAccountSettings->getLabel(), PowerBoardPlugin::PLUGIN_PREFIX),
             ];
 
             if ($description = $bankAccountSettings->getDescription()) {
@@ -159,7 +181,7 @@ class LiveConnectionSettingService extends AbstractSettingService
                 'label',
             ])] = [
                 'type' => 'label',
-                'title' => __($walletPaymentMethods->getLabel(), PaydockPlugin::PLUGIN_PREFIX),
+                'title' => __($walletPaymentMethods->getLabel(), PowerBoardPlugin::PLUGIN_PREFIX),
             ];
 
             foreach (WalletSettings::cases() as $walletSettings) {
@@ -171,7 +193,8 @@ class LiveConnectionSettingService extends AbstractSettingService
 
                 $fields[$key] = [
                     'type' => $walletSettings->getInputType(),
-                    'title' => __(preg_replace(['/ Id/', '/ id/'], ' ID', $walletSettings->getLabel()), PaydockPlugin::PLUGIN_PREFIX),
+                    'title' => __(preg_replace(['/ Id/', '/ id/'], ' ID', $walletSettings->getLabel()),
+                        PowerBoardPlugin::PLUGIN_PREFIX),
                 ];
 
                 if ($description = $walletSettings->getDescription()) {
@@ -188,7 +211,7 @@ class LiveConnectionSettingService extends AbstractSettingService
                 ]);
                 $fields[$key] = [
                     'type' => 'checkbox',
-                    'title' => __('Pay Later', PaydockPlugin::PLUGIN_PREFIX),
+                    'title' => __('Pay Later', PowerBoardPlugin::PLUGIN_PREFIX),
                 ];
             }
         }
@@ -208,10 +231,15 @@ class LiveConnectionSettingService extends AbstractSettingService
                 'label',
             ])] = [
                 'type' => 'label',
-                'title' => __($otherPaymentMethods->getLabel(), PaydockPlugin::PLUGIN_PREFIX),
+                'title' => __($otherPaymentMethods->getLabel(), PowerBoardPlugin::PLUGIN_PREFIX),
             ];
 
             foreach (APMsSettings::cases() as $APMsSettings) {
+                if ($otherPaymentMethods->name === OtherPaymentMethods::AFTERPAY()->name &&
+                    $APMsSettings->name === APMsSettings::DIRECT_CHARGE()->name) {
+                    continue;
+                }
+
                 $key = $service->getOptionName($this->id, [
                     SettingGroups::A_P_M_S()->name,
                     $otherPaymentMethods->name,
@@ -220,7 +248,7 @@ class LiveConnectionSettingService extends AbstractSettingService
 
                 $fields[$key] = [
                     'type' => $APMsSettings->getInputType(),
-                    'title' => __($APMsSettings->getLabel(), PaydockPlugin::PLUGIN_PREFIX),
+                    'title' => __($APMsSettings->getLabel(), PowerBoardPlugin::PLUGIN_PREFIX),
                 ];
 
                 if ($description = $APMsSettings->getDescription()) {
@@ -243,6 +271,20 @@ class LiveConnectionSettingService extends AbstractSettingService
         $validationService = new ConnectionValidationService($this);
         $this->settings = array_merge($this->settings, $validationService->getResult());
 
+        $service = SettingsService::getInstance();
+
+        foreach (CredentialSettings::cases() as $credentialSettings) {
+            if (in_array($credentialSettings->name, CredentialSettings::getHashed())) {
+                $key = $service->getOptionName($this->id, [
+                    SettingGroups::CREDENTIALS()->name,
+                    $credentialSettings->name,
+                ]);
+
+                if (!empty($this->settings[$key])) {
+                    $this->settings[$key] = HashService::encrypt($this->settings[$key]);
+                }
+            }
+        }
         foreach ($validationService->getErrors() as $error) {
             $this->add_error($error);
             \WC_Admin_Settings::add_error($error);
@@ -252,7 +294,7 @@ class LiveConnectionSettingService extends AbstractSettingService
         do_action('woocommerce_update_option', ['id' => $option_key]);
         return update_option(
             $option_key,
-            apply_filters('woocommerce_settings_api_sanitized_fields_' . $this->id, $this->settings),
+            apply_filters('woocommerce_settings_api_sanitized_fields_'.$this->id, $this->settings),
             'yes'
         );
     }

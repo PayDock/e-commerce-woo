@@ -1,23 +1,23 @@
 <?php
 
-namespace Paydock\Enums;
+namespace PowerBoard\Enums;
 
-use Paydock\Abstract\AbstractEnum;
-use Paydock\Abstract\AbstractSettingService;
-use Paydock\PaydockPlugin;
-use Paydock\Services\Settings\LiveConnectionSettingService;
-use Paydock\Services\Settings\LogsSettingService;
-use Paydock\Services\Settings\SandboxConnectionSettingService;
-use Paydock\Services\Settings\WebHooksSettingService;
-use Paydock\Services\Settings\WidgetSettingService;
+use PowerBoard\Abstract\AbstractEnum;
+use PowerBoard\Abstract\AbstractSettingService;
+use PowerBoard\PowerBoardPlugin;
+use PowerBoard\Services\Settings\LiveConnectionSettingService;
+use PowerBoard\Services\Settings\LogsSettingService;
+use PowerBoard\Services\Settings\SandboxConnectionSettingService;
+use PowerBoard\Services\Settings\WebHooksSettingService;
+use PowerBoard\Services\Settings\WidgetSettingService;
 
 class SettingsTabs extends AbstractEnum
 {
-    protected const LIVE_CONNECTION = PaydockPlugin::PLUGIN_PREFIX;
-    protected const SANDBOX_CONNECTION = PaydockPlugin::PLUGIN_PREFIX . '_sandbox';
-    protected const WEBHOOKS = PaydockPlugin::PLUGIN_PREFIX . '_webhooks';
-    protected const WIDGET = PaydockPlugin::PLUGIN_PREFIX . '_widget';
-    protected const LOG = PaydockPlugin::PLUGIN_PREFIX . '_log';
+    protected const LIVE_CONNECTION = PowerBoardPlugin::PLUGIN_PREFIX;
+    protected const SANDBOX_CONNECTION = PowerBoardPlugin::PLUGIN_PREFIX . '_sandbox';
+    protected const WEBHOOKS = PowerBoardPlugin::PLUGIN_PREFIX . '_webhooks';
+    protected const WIDGET = PowerBoardPlugin::PLUGIN_PREFIX . '_widget';
+    protected const LOG = PowerBoardPlugin::PLUGIN_PREFIX . '_log';
 
     public static function secondary(): array
     {
