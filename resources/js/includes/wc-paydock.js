@@ -5,6 +5,7 @@ export { default as inBuild3Ds } from './in-build-3ds';
 export { default as standalone3Ds } from './standalone-3ds';
 
 export { default as selectSavedCardsComponent } from './components/select-saved-cards';
+export { default as cvvCode } from './components/cvv-code';
 export { default as checkboxSavedCardsComponent } from './components/checkbox-saved-cards';
 
 export { default as selectSavedBankAccountsComponent } from './components/select-saved-bank-accounts';

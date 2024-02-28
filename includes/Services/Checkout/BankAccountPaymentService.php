@@ -24,7 +24,8 @@ class BankAccountPaymentService extends AbstractPaymentService
 
     public function is_available()
     {
-        return SettingsService::getInstance()->isBankAccountEnabled();
+        return SettingsService::getInstance()->isEnabledPayment()
+            && SettingsService::getInstance()->isBankAccountEnabled();
     }
 
     public function payment_scripts()
@@ -42,7 +43,7 @@ class BankAccountPaymentService extends AbstractPaymentService
         try {
             $processor = new BankAccountProcessor($order, $_POST);
 
-            $response = $processor->run();
+            $response = $processor->run($order_id);
             $chargeId = !empty($response['resource']['data']['_id']) ? $response['resource']['data']['_id'] : '';
         } catch (LoggedException $exception) {
             wc_add_notice(
@@ -73,13 +74,20 @@ class BankAccountPaymentService extends AbstractPaymentService
 
         $status = ucfirst(strtolower($response['resource']['data']['transactions'][0]['status'] ?? 'undefined'));
         $operation = ucfirst(strtolower($response['resource']['type'] ?? 'undefined'));
-
-        $isCompleted = 'Complete' === $status;
-
-        $order->set_status($isCompleted ? 'wc-paydock-paid' : 'wc-paydock-pending');
+        $isAuthorization = $response['resource']['data']['authorization'] ?? 0;
+        $isCompleted = false;
+        $markAsSuccess = false;
+        if ($isAuthorization && $status == 'Pending'){
+            $status = 'wc-paydock-authorize';
+        } else {
+            $markAsSuccess = true;
+            $isCompleted = 'Complete' === $status;
+            $status = $isCompleted ? 'wc-paydock-paid' : 'wc-paydock-requested';
+        }
+        $order->set_status($status);
         $order->payment_complete();
         $order->save();
-
+        update_post_meta($order->get_id(), 'paydock_charge_id', $chargeId);
         WC()->cart->empty_cart();
 
         $loggerRepository->createLogRecord(
@@ -87,7 +95,7 @@ class BankAccountPaymentService extends AbstractPaymentService
             $operation,
             $status,
             '',
-            $isCompleted ? LogRepository::DEFAULT : LogRepository::SUCCESS);
+            $markAsSuccess ? LogRepository::SUCCESS : LogRepository::DEFAULT);
 
         return [
             'result' => 'success', 'redirect' => $this->get_return_url($order)

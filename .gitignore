@@ -11,6 +11,7 @@ sftp-config.json
 
 # Grunt
 /node_modules/
+/node_modules2/
 /deploy/
 package-lock.json
 
@@ -25,3 +26,5 @@ Thumbs.db
 
 # ApiGen
 /wc-apidocs/
+
+webhook.txt

@@ -22,7 +22,6 @@ class LogsSettingService extends AbstractSettingService
 
         $tabs = $this->getTabs();
         $records = (new LogRepository())->getLogs($page, $perPage, $orderBy, $order);
-
         $html = $this->templateService->getAdminHtml('admin', compact('tabs', 'records'));
 
         if ($echo) {

@@ -43,4 +43,13 @@ class CredentialSettings extends AbstractEnum
             default => ''
         };
     }
+
+    public static function getHashed():array
+    {
+        return [
+            self::PUBLIC_KEY()->name,
+            self::SECRET_KEY()->name,
+            self::ACCESS_KEY()->name,
+        ];
+    }
 }

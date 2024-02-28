@@ -2,6 +2,8 @@
 
 namespace Paydock\Repositories;
 
+use Paydock\Services\HashService;
+
 class UserTokenRepository
 {
     const CARD_TOKENS_KEY = 'paydock_card_tokens';
@@ -21,8 +23,16 @@ class UserTokenRepository
     public function getUserTokens(): array
     {
         if ($this->cache === null) {
-            $this->cache = get_user_meta($this->userId, self::CARD_TOKENS_KEY, true);
-            
+            $userMeta = get_user_meta($this->userId, self::CARD_TOKENS_KEY, true);
+
+            foreach ($userMeta as $index => $item){
+                if(!empty($item['vault_token'])){
+                    $userMeta[$index]['vault_token'] = HashService::decrypt($item['vault_token']);
+                }
+            }
+
+            $this->cache = array_values(is_array($userMeta) ? $userMeta : []);
+
             if (empty($this->cache)) {
                 $this->cache = [];
             }
@@ -37,8 +47,7 @@ class UserTokenRepository
 
         $vaultToken = [];
 
-        foreach($tokens as $item)
-        {
+        foreach ($tokens as $item) {
             if ($item['vault_token'] === $token) {
                 $vaultToken = $item;
                 break;
@@ -51,7 +60,29 @@ class UserTokenRepository
     public function saveUserToken(array $token): int|bool
     {
         $tokens = $this->getUserTokens();
+        if (!empty($tokens)) {
+            $tokens = array_filter($tokens, function ($item) use ($token) {
+                $result = true;
+                switch ($token['type']) {
+                    case 'card':
+                        $result = $item['card_number_bin'].$item['card_number_last4'] !== $token['card_number_bin'].$token['card_number_last4'];
+                        break;
+                    case 'bank_account':
+                        $result = $item['account_routing'].$item['account_number'] !== $token['account_routing'].$token['account_number'];
+                        break;
+                }
+
+                return $result;
+            });
+        }
+
         $tokens[] = $token;
+
+        foreach ($tokens as $index => $item){
+            if(!empty($item['vault_token'])){
+                $tokens[$index]['vault_token'] = HashService::encrypt($item['vault_token']);
+            }
+        }
 
         $result = update_user_meta($this->userId, self::CARD_TOKENS_KEY, $tokens);
 
@@ -64,12 +95,18 @@ class UserTokenRepository
     {
         $tokens = $this->getUserTokens();
 
-        $tokens = array_map(function($value) use ($token, $data) {
+        $tokens = array_map(function ($value) use ($token, $data) {
             if ($value['vault_token'] === $token) {
                 $value = array_merge($value, $data);
             }
             return $value;
         }, $tokens);
+
+        foreach ($tokens as $index => $item){
+            if(!empty($item['vault_token'])){
+                $tokens[$index]['vault_token'] = HashService::encrypt($item['vault_token']);
+            }
+        }
 
         $result = update_user_meta($this->userId, self::CARD_TOKENS_KEY, $tokens);
 

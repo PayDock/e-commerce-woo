@@ -33,6 +33,16 @@ class ConnectionValidationService
         'maestro' => 'Maestro',
         'ausbc' => 'Australian Bank Card',
     ];
+    private const IS_WEBHOOK_SET_OPTION = 'is_paydock_webhook_set';
+    public const WEBHOOK_EVENT_FRAUD_CHECK_SUCCESS_NAME = 'standalone_fraud_check_success';
+    public const WEBHOOK_EVENT_TRANSACTION_SUCCESS_NAME = 'transaction_success';
+    public const WEBHOOK_EVENT_TRANSACTION_FAILURE_NAME = 'transaction_failure';
+    public const WEBHOOK_EVENTS = [
+        self::WEBHOOK_EVENT_FRAUD_CHECK_SUCCESS_NAME,
+        self::WEBHOOK_EVENT_TRANSACTION_SUCCESS_NAME,
+        self::WEBHOOK_EVENT_TRANSACTION_FAILURE_NAME
+    ];
+
     public ?AbstractSettingService $service = null;
     private array $errors = [];
     private array $result = [];
@@ -53,9 +63,9 @@ class ConnectionValidationService
         $option_key = $service->get_option_key();
         do_action('woocommerce_update_option', ['id' => $option_key]);
 
-        return update_option(
+        update_option(
             $option_key,
-            apply_filters('woocommerce_settings_api_sanitized_fields_'.$service->id, $service->settings),
+            apply_filters('woocommerce_settings_api_sanitized_fields_' . $service->id, $service->settings),
             'yes'
         );
     }
@@ -88,6 +98,7 @@ class ConnectionValidationService
             $this->validateBankAccount();
             $this->validateWallets();
             $this->validateAPMs();
+            $this->setWebhooks();
         }
     }
 
@@ -239,8 +250,8 @@ class ConnectionValidationService
                             $arraySupportedCardTypesKeys = explode(',', $supportCardType);
                             if (empty(array_intersect($arraySupportedCardTypesKeys,
                                 array_keys(self::AVAILABLE_CARD_TYPES)))) {
-                                $this->errors[] = 'Selected types of cards ('.implode(',',
-                                        $arraySupportedCardTypesKeys).') are not supported by this Gateway ID';
+                                $this->errors[] = 'Selected types of cards (' . implode(',',
+                                    $arraySupportedCardTypesKeys) . ') are not supported by this Gateway ID';
                             }
                         }
                     } else {
@@ -249,7 +260,7 @@ class ConnectionValidationService
                 }
 
             } else {
-                $this->errors[] = 'Incorrect Gateway ID for the card: '.$this->data[$gatewayIdKey];
+                $this->errors[] = 'Incorrect Gateway ID for the card: ' . $this->data[$gatewayIdKey];
             }
 
             if (
@@ -257,7 +268,7 @@ class ConnectionValidationService
                 && (FraudTypes::DISABLE()->name !== $this->data[$fraudEnableServiceKey])
                 && !$this->validateId($this->data[$fraudGatewayIdKey])
             ) {
-                $this->errors[] = 'Incorrect Fraud Service ID: '.$this->data[$fraudGatewayIdKey];
+                $this->errors[] = 'Incorrect Fraud Service ID: ' . $this->data[$fraudGatewayIdKey];
             }
 
             if (
@@ -265,25 +276,15 @@ class ConnectionValidationService
                 && (FraudTypes::DISABLE()->name !== $this->data[$_3DSEnableServiceKey])
                 && !$this->validateId($this->data[$_3DSGatewayIdKey])
             ) {
-                $this->errors[] = 'Incorrect 3DS Service ID: '.$this->data[$_3DSGatewayIdKey];
+                $this->errors[] = 'Incorrect 3DS Service ID: ' . $this->data[$_3DSGatewayIdKey];
             }
         }
     }
 
     private function validateId(string $id, string $checkedName = '', bool $checkFull = false): bool
     {
-        $needCheck = !empty($checkedName);
-
         foreach ($this->getawayIds['resource']['data'] as $getawayId) {
-            $checked = !$needCheck;
-
-            if ($needCheck && $checkFull) {
-                $checked = strtolower($checkedName) == strtolower($getawayId['name']);
-            } elseif ($needCheck) {
-                $checked = (false !== strpos(strtolower($getawayId['name']), strtolower($checkedName)));
-            }
-
-            if ($getawayId['_id'] == $id && $checked) {
+            if ($getawayId['_id'] == $id) {
                 return true;
             }
         }
@@ -380,7 +381,7 @@ class ConnectionValidationService
             }
 
             if (!$result) {
-                $this->errors[] = 'Wrong Gateway ID for '.$method->getLabel().' wallet.';
+                $this->errors[] = 'Wrong Gateway ID for ' . $method->getLabel() . ' wallet.';
             }
 
             if (
@@ -389,9 +390,9 @@ class ConnectionValidationService
                 && !$this->validateId($this->data[$fraudGatewayIdKey])
             ) {
                 $this->errors[] = 'Incorrect '
-                    .$method->getLabel()
-                    .' wallet Fraud Service ID: '
-                    .$this->data[$fraudGatewayIdKey];
+                    . $method->getLabel()
+                    . ' wallet Fraud Service ID: '
+                    . $this->data[$fraudGatewayIdKey];
             }
         }
     }
@@ -437,7 +438,7 @@ class ConnectionValidationService
             }
 
             if (!$result) {
-                $this->errors[] = 'Wrong Gateway ID for '.$method->getLabel().' APM.';
+                $this->errors[] = 'Wrong Gateway ID for ' . $method->getLabel() . ' APM.';
             }
 
             if (
@@ -446,10 +447,61 @@ class ConnectionValidationService
                 && !$this->validateId($this->data[$fraudGatewayIdKey])
             ) {
                 $this->errors[] = 'Incorrect '
-                    .$method->getLabel()
-                    .' APM Fraud Service ID: '
-                    .$this->data[$fraudGatewayIdKey];
+                    . $method->getLabel()
+                    . ' APM Fraud Service ID: '
+                    . $this->data[$fraudGatewayIdKey];
             }
+        }
+    }
+
+    private function setWebhooks(): void
+    {
+        $option = get_option(self::IS_WEBHOOK_SET_OPTION, false);
+        if ($option !== false && count((array) $option) === count(self::WEBHOOK_EVENTS)) {
+            return;
+        }
+
+        $notSettedWebhooks = self::WEBHOOK_EVENTS;
+        $webhookSiteUrl = get_site_url() . '/wc-api/paydock-webhook/';
+        $shouldCreateWebhook = true;
+        $webhookRequest = $this->adapterService->searchNotifications(['type' => 'webhook']);
+        if (!empty($webhookRequest['resource']['data'])) {
+            $events = [];
+            foreach ($webhookRequest['resource']['data'] as $webhook) {
+                if ($webhook['destination'] === $webhookSiteUrl) {
+                    $events[] = $webhook['event'];
+                }
+            }
+
+            $notSettedWebhooks = array_diff(self::WEBHOOK_EVENTS, $events);
+            if (empty($notSettedWebhooks)) {
+                $shouldCreateWebhook = false;
+            }
+        }
+
+        $webhookIds = [];
+        if ($shouldCreateWebhook) {
+            foreach ($notSettedWebhooks as $event) {
+                $result = $this->adapterService->createNotification([
+                    'event' => $event,
+                    'destination' => $webhookSiteUrl,
+                    'type' => 'webhook',
+                    'transaction_only' => false
+                ]);
+
+                if (!empty($result['resource']['data']['_id'])) {
+                    $webhookIds[] = $result['resource']['data']['_id'];
+                } else {
+                    $this->errors[] = __('Can\'t create webhook', PAY_DOCK_TEXT_DOMAIN) . (!empty($result['error']) ? ' ' . $result['error'] : '');
+                    return;
+                }
+            }
+
+            if (!empty($webhookIds)) {
+                update_option(self::IS_WEBHOOK_SET_OPTION, $webhookIds);
+            }
+        } else {
+            return;
         }
     }
 

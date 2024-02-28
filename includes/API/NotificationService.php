@@ -4,32 +4,26 @@ namespace Paydock\API;
 
 use Paydock\Abstract\AbstractApiService;
 
-class GatewayService extends AbstractApiService
+class NotificationService extends AbstractApiService
 {
-    const ENDPOINT = 'gateways';
+    const ENDPOINT = 'notifications';
 
     protected array $allowedAction = [
-        'get' => self::METHOD_GET,
+        'create' => self::METHOD_POST,
         'search' => self::METHOD_GET
     ];
 
     private string $id;
 
-    public function get(): GatewayService
+    public function create($params): NotificationService
     {
-        $this->setAction('get');
+        $this->setAction('create');
+        $this->parameters = $params;
 
         return $this;
     }
 
-    public function setId($id): GatewayService
-    {
-        $this->id = $id;
-
-        return $this;
-    }
-
-    public function search(array $parameters = []): GatewayService
+    public function search(array $parameters = []): NotificationService
     {
         $this->setAction('search');
         $this->parameters = $parameters;
@@ -40,8 +34,8 @@ class GatewayService extends AbstractApiService
     protected function buildEndpoint(): ?string
     {
         switch ($this->action) {
-            case 'get':
-                $result = self::ENDPOINT . '/' . urlencode($this->id);
+            case 'create':
+                $result = self::ENDPOINT;
                 break;
             default:
                 $result = self::ENDPOINT . '?limit=-1';

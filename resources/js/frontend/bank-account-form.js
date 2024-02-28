@@ -10,7 +10,7 @@ import {
 
 const settings = getSetting('paydock_bank_account_block_data', {});
 
-const textDomain = 'paydock-for-woo';
+const textDomain = 'pay_dock';
 const labels = {
     defaultLabel: __('Paydock Payments', textDomain),
     saveBankAcoountLabel: __('Save bank account', textDomain),
@@ -34,6 +34,15 @@ const Content = (props) => {
 
     useEffect(() => {
         const validation = onCheckoutValidation(async () => {
+            if (window.hasOwnProperty('paydockValidation')) {
+                if (!paydockValidation.wcFormValidation()) {
+                    return {
+                        type: emitResponse.responseTypes.ERROR,
+                        errorMessage: labels.requiredDataError
+                    }
+                }
+            }
+
             if (settings.selectedToken.trim().length > 0) {
                 return true;
             }
@@ -74,7 +83,7 @@ const Content = (props) => {
             }
             settings.paymentSourceToken = paymentSourceToken.value;
             if (settings.paymentSourceToken.length > 0 || settings.selectedToken.length > 0) {
-                const data = settings
+                const data = { ...settings }
                 data.tokens = '';
                 data.styles = '';
                 data.supports = '';
@@ -114,13 +123,13 @@ const Content = (props) => {
             { class: 'logo-comm-bank' },
             createElement(
                 "img",
-                { src: '/wp-content/plugins/paydock/assets/images/commBank_logo.png' }
+                { src: '/wp-content/plugins/paydock/assets/images/logo.png' }
             ),
         ),
         selectSavedBankAccountsComponent(labels.selectTokenLabel),
         createElement(
             "div",
-            { id: 'paydockWidgetBankAccount' }
+            { id: 'paydockWidgetBankAccount_wrapper' }
         ),
         createElement(
             "input",

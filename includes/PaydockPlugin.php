@@ -38,4 +38,3 @@ if (!class_exists('\Paydock\PaydockPlugin')) {
         }
     }
 }
-

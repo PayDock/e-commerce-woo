@@ -6,6 +6,7 @@ use Paydock\Enums\CredentialSettings;
 use Paydock\Enums\SettingGroups;
 use Paydock\Enums\SettingsTabs;
 use Paydock\PaydockPlugin;
+use Paydock\Services\HashService;
 use Paydock\Services\SettingsService;
 
 class SandboxConnectionSettingService extends LiveConnectionSettingService

@@ -10,7 +10,7 @@
  * Description: Paydock simplify how you manage your payments. Reduce costs, technical headaches & streamline compliance using Paydock's payment orchestration.
  * Author: Paydock
  * Author URI: https://www.paydock.com/
- * Version: 0.3.27
+ * Version: 0.7.0
  * Requires at least: 6.4.2
  * Text Domain: paydock-for-woo
  * Tested up to: 6.4.2
@@ -35,11 +35,11 @@ if (!defined('PAY_DOCK_PLUGIN_URL')) {
 }
 
 if (!defined('PAY_DOCK_PLUGIN_VERSION')) {
-    define('PAY_DOCK_PLUGIN_VERSION', '0.3.28');
+    define('PAY_DOCK_PLUGIN_VERSION', '0.7.0');
 }
 
 if (!defined('PAY_DOCK_TEXT_DOMAIN')) {
-    define('PAY_DOCK_TEXT_DOMAIN', 'paydock-for-woo');
+    define('PAY_DOCK_TEXT_DOMAIN', 'pay_dock');
 }
 
 require_once "vendor/autoload.php";

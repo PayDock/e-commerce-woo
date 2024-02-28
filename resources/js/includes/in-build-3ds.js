@@ -1,5 +1,6 @@
 import { getSetting } from '@woocommerce/settings';
 import getVaultToken from './get-vault-token';
+import sleep from './sleep';
 
 export default async (forcePermanentVault = false) => {
     const settings = getSetting('paydock_data', {});
@@ -37,9 +38,20 @@ export default async (forcePermanentVault = false) => {
     const canvas = new window.paydock.Canvas3ds('#paydockWidget3ds', preAuthResp._3ds.token);
     canvas.load();
 
-    document.getElementById('paydockWidgetCard').setAttribute('style', 'display: none')
+    document.getElementById('paydockWidgetCard_wrapper').setAttribute('style', 'display: none')
 
-    const chargeAuthEvent = await canvas.on('chargeAuth');
+    let result = false;
+    canvas.on('chargeAuth', (chargeAuthEvent) => {
+        result = chargeAuthEvent.charge_3ds_id
+    })
 
-    return chargeAuthEvent.charge_3ds_id;
+    for (let second = 1; second <= 100; second++) {
+        await sleep(100);
+
+        if (result !== false) {
+            break;
+        }
+    }
+
+    return result;
 }

@@ -66,7 +66,8 @@ class CardPaymentService extends WC_Payment_Gateway
      */
     function is_available()
     {
-        return SettingsService::getInstance()->isCardEnabled();
+        return SettingsService::getInstance()->isEnabledPayment()
+            && SettingsService::getInstance()->isCardEnabled();
     }
 
     public function payment_scripts()
@@ -75,19 +76,11 @@ class CardPaymentService extends WC_Payment_Gateway
             return '';
         }
 
-        $version = SettingsService::getInstance()->getVersion();
-        $sdkUrl = "https://widget.paydock.com/sdk/{$version}/widget.umd.min.js";
-
         wp_enqueue_script('paydock-form', PAY_DOCK_PLUGIN_URL . '/assets/js/frontend/form.js', array(), time(), true);
-        $paydockCardWidgetSettings = array(
-            'suportedCard' => 'Visa, Mastercard, Adex'
-        );
-        wp_localize_script('paydock-form', 'paydockCardWidgetSettings', $paydockCardWidgetSettings);
+        wp_localize_script('paydock-form', 'paydockCardWidgetSettings', ['suportedCard' => 'Visa, Mastercard, Adex']);
         wp_enqueue_style('paydock-widget-css', PAY_DOCK_PLUGIN_URL . '/assets/css/frontend/widget.css', array(), time());
 
-        wp_enqueue_script('paydock-api', $sdkUrl, array(), time(), true);
-
-        wp_localize_script('paydock-api', 'PaydockAjax', [
+        wp_localize_script('paydock-form', 'PaydockAjax', [
             'url' => admin_url('admin-ajax.php')
         ]);
 
@@ -115,7 +108,7 @@ class CardPaymentService extends WC_Payment_Gateway
                 'description' => $description
             ], $_POST));
 
-            $response = $cardProcessor->run();
+            $response = $cardProcessor->run($order);
 
             if (!empty($response['error'])) {
                 $message = SDKAdapterService::getInstance()->errorMessageToString($response);
@@ -124,7 +117,7 @@ class CardPaymentService extends WC_Payment_Gateway
 
             $chargeId = !empty($response['resource']['data']['_id']) ? $response['resource']['data']['_id'] : '';
         } catch (Exception $e) {
-            $loggerRepository->createLogRecord($chargeId ?? '', 'Charges', 'UnfulfilledCondition', $e->getMessage(), LogRepository::ERROR);
+            $loggerRepository->createLogRecord($chargeId ?? '', 'Charge', 'UnfulfilledCondition', $e->getMessage(), LogRepository::ERROR);
             wc_add_notice(__('Error:', PAY_DOCK_TEXT_DOMAIN) . ' ' . $e->getMessage(), 'error');
             exit;
         }
@@ -132,20 +125,28 @@ class CardPaymentService extends WC_Payment_Gateway
         try {
             $cardProcessor->createCustomer();
         } catch (Exception $e) {
-            $loggerRepository->createLogRecord($chargeId ?? '', 'Create customer after charge', 'UnfulfilledCondition', $e->getMessage(), LogRepository::ERROR);
+            $loggerRepository->createLogRecord($chargeId ?? '', 'Create customer', 'UnfulfilledCondition', $e->getMessage(), LogRepository::ERROR);
             wc_add_notice(__('Error:', PAY_DOCK_TEXT_DOMAIN) . ' ' . $e->getMessage(), 'error');
             exit;
         }
 
-        $status = ucfirst(strtolower($response['resource']['data']['transactions'][0]['status'] ?? 'undefined'));
+        $status = ucfirst(strtolower($response['resource']['data']['status'] ?? 'undefined'));
         $operation = ucfirst(strtolower($response['resource']['type'] ?? 'undefined'));
+        $isAuthorization = $response['resource']['data']['authorization'] ?? 0;
+        $isCompleted = false;
+        $markAsSuccess = false;
+        if ($isAuthorization && in_array($status, ['Pending', 'Pre_authentication_pending'])){
+            $status = 'wc-paydock-authorize';
+        } else {
+            $markAsSuccess = true;
+            $isCompleted = 'Complete' === $status;
+            $status = $isCompleted ? 'wc-paydock-paid' : 'wc-paydock-pending';
+        }
 
-        $isCompleted = 'complete' === strtolower($status);
-
-        $order->set_status($isCompleted ? 'wc-paydock-paid' : 'wc-paydock-pending');
+        $order->set_status($status);
         $order->payment_complete();
         $order->save();
-
+        update_post_meta($order->get_id(), 'paydock_charge_id', $chargeId);
         WC()->cart->empty_cart();
 
         $loggerRepository->createLogRecord(
@@ -153,7 +154,7 @@ class CardPaymentService extends WC_Payment_Gateway
             $operation,
             $status,
             '',
-            $isCompleted ? LogRepository::DEFAULT : LogRepository::SUCCESS);
+            $markAsSuccess ? LogRepository::SUCCESS : LogRepository::DEFAULT);
 
         return [
             'result' => 'success', 'redirect' => $this->get_return_url($order)
@@ -169,7 +170,6 @@ class CardPaymentService extends WC_Payment_Gateway
             $cardProcessor = new CardProcessor($_POST);
             $type = !empty($_POST['type']) ? $_POST['type'] : null;
             try {
-
                 switch ($type) {
                     case 'clear-user-tokens':
                         (new UserTokenRepository())->deleteAllUserTokens();
@@ -190,10 +190,5 @@ class CardPaymentService extends WC_Payment_Gateway
         }
 
         die();
-    }
-
-    public function webhook()
-    {
-
     }
 }

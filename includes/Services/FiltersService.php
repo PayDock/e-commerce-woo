@@ -55,6 +55,18 @@ class FiltersService extends AbstractSingleton
         add_filter('woocommerce_payment_gateways', [$this, 'registerInWooCommercePaymentClass']);
         add_filter('woocommerce_register_shop_order_post_statuses', [$this, 'addCustomOrderStatuses']);
         add_filter('wc_order_statuses', [$this, 'addCustomOrderSingleStatusesStatuses']);
+        add_filter('woocommerce_thankyou_order_received_text', [$this, 'woocommerceThankyouOrderReceivedText']);
+    }
+
+    public function woocommerceThankyouOrderReceivedText($text)
+    {
+        $orderId = absint(get_query_var('order-received'));
+        $options = get_option("paydock_fraud_{$orderId}");
+        if ($options === false) {
+            return $text;
+        }
+
+        return __('Your order is being processed. We’ll get back to you shortly', PAY_DOCK_TEXT_DOMAIN);
     }
 
     public function getSettingLink(array $links): array
@@ -107,6 +119,43 @@ class FiltersService extends AbstractSingleton
             'label_count' => _n_noop('Authorized via Paydock <span class="count">(%s)</span>',
                 'Authorized via Paydock <span class="count">(%s)</span>', 'woocommerce'),
         );
+        $order_statuses['wc-paydock-cancelled'] = array(
+            'label' => 'Cancelled authorize via Paydock',
+            'public' => true,
+            'exclude_from_search' => true,
+            'show_in_admin_all_list' => true,
+            'show_in_admin_status_list' => true,
+            'label_count' => _n_noop('Cancelled authorize via Paydock <span class="count">(%s)</span>',
+                'Cancelled authorize via Paydock <span class="count">(%s)</span>', 'woocommerce'),
+        );
+
+        $order_statuses['wc-paydock-refunded'] = array(
+            'label' => 'Refunded via Paydock',
+            'public' => true,
+            'exclude_from_search' => true,
+            'show_in_admin_all_list' => true,
+            'show_in_admin_status_list' => true,
+            'label_count' => _n_noop('Refunded via Paydock <span class="count">(%s)</span>',
+                'Refunded via Paydock <span class="count">(%s)</span>', 'woocommerce'),
+        );
+        $order_statuses['wc-paydock-p-refund'] = array(
+            'label' => 'Partial refunded via Paydock',
+            'public' => true,
+            'exclude_from_search' => true,
+            'show_in_admin_all_list' => true,
+            'show_in_admin_status_list' => true,
+            'label_count' => _n_noop('Partial refunded via Paydock <span class="count">(%s)</span>',
+                'Partial refunded via Paydock <span class="count">(%s)</span>', 'woocommerce'),
+        );
+        $order_statuses['wc-paydock-requested'] = array(
+            'label' => 'Requested via Paydock',
+            'public' => true,
+            'exclude_from_search' => true,
+            'show_in_admin_all_list' => true,
+            'show_in_admin_status_list' => true,
+            'label_count' => _n_noop('Requested via Paydock <span class="count">(%s)</span>',
+                'Requested via Paydock <span class="count">(%s)</span>', 'woocommerce'),
+        );
 
         return $order_statuses;
     }
@@ -117,7 +166,10 @@ class FiltersService extends AbstractSingleton
         $order_statuses['wc-paydock-pending'] = 'Pending via Paydock';
         $order_statuses['wc-paydock-paid'] = 'Paid via Paydock';
         $order_statuses['wc-paydock-authorize'] = 'Authorized via Paydock';
-
+        $order_statuses['wc-paydock-cancelled'] = 'Cancelled authorize via Paydock';
+        $order_statuses['wc-paydock-refunded'] = 'Refunded via Paydock';
+        $order_statuses['wc-paydock-p-refund'] = 'Partial refunded via Paydock';
+        $order_statuses['wc-paydock-requested'] = 'Requested via Paydock';
         return $order_statuses;
     }
 }

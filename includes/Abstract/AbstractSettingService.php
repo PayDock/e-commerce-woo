@@ -5,6 +5,7 @@ namespace Paydock\Abstract;
 use Paydock\Enums\SettingsTabs;
 use Paydock\PaydockPlugin;
 use Paydock\Services\Assets\AdminAssetsService;
+use Paydock\Services\SettingsService;
 use Paydock\Services\TemplateService;
 
 abstract class AbstractSettingService extends \WC_Payment_Gateway
@@ -22,7 +23,7 @@ abstract class AbstractSettingService extends \WC_Payment_Gateway
     {
         $this->currentSection = $_GET['section'] ?? '';
         $this->id = $this->getId();
-        $this->enabled = 'yes';
+        $this->enabled = $this->get_option('enabled');
         $this->method_title = __(self::TITLE, PaydockPlugin::PLUGIN_PREFIX);
         $this->method_description = __(self::DESCRIPTION, PaydockPlugin::PLUGIN_PREFIX);
 

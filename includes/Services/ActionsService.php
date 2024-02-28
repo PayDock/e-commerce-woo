@@ -5,6 +5,7 @@ namespace Paydock\Services;
 use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Paydock\Abstract\AbstractSingleton;
+use Paydock\Controllers\Webhooks\PaymentController;
 use Paydock\Controllers\Admin\WidgetController;
 use Paydock\Enums\SettingsTabs;
 use Paydock\PaydockPlugin;
@@ -13,6 +14,7 @@ use Paydock\Util\ApmBlock;
 use Paydock\Util\BankAccountBlock;
 use Paydock\Util\PaydockGatewayBlocks;
 use Paydock\Util\WalletsBlock;
+use Paydock\Services\OrderService;
 
 class ActionsService extends AbstractSingleton
 {
@@ -23,12 +25,19 @@ class ActionsService extends AbstractSingleton
 
     protected function __construct()
     {
+        add_action('init', function () {
+            if (!session_id()) {
+                session_start();
+            }
+        });
+
         add_action('before_woocommerce_init', function () {
             $this->addCompatibilityWithWooCommerce();
             $this->addPaymentActions();
             $this->addPaymentMethodToChekout();
             $this->addSettingsActions();
             $this->addEndpoints();
+            $this->addOrderActions();
         });
     }
 
@@ -45,8 +54,8 @@ class ActionsService extends AbstractSingleton
             'paydock_bank_account_gateway' => new BankAccountPaymentService(),
         ];
         foreach ($payments as $paymentKey => $payment) {
-            add_action('woocommerce_update_options_payment_gateways_'.$paymentKey, [$payment, 'process_admin_options']);
-            add_action('woocommerce_scheduled_subscription_payment_'.$paymentKey, [
+            add_action('woocommerce_update_options_payment_gateways_' . $paymentKey, [$payment, 'process_admin_options']);
+            add_action('woocommerce_scheduled_subscription_payment_' . $paymentKey, [
                 $payment,
                 'process_subscription_payment'
             ], 10, 2);
@@ -83,7 +92,7 @@ class ActionsService extends AbstractSingleton
     protected function addSettingsActions(): void
     {
         foreach (SettingsTabs::cases() as $settingsTab) {
-            add_action(self::PROCESS_OPTIONS_HOOK_PREFIX.$settingsTab->value, [
+            add_action(self::PROCESS_OPTIONS_HOOK_PREFIX . $settingsTab->value, [
                 $settingsTab->getSettingService(), self::PROCESS_OPTIONS_FUNCTION,
             ]);
             add_action(self::SECTION_HOOK, fn($systemTabs) => array_merge($systemTabs, [
@@ -102,4 +111,19 @@ class ActionsService extends AbstractSingleton
             ));
         });
     }
+
+    protected function addOrderActions()
+    {
+        $orderService = new OrderService();
+        $paymentController = new PaymentController();
+        add_action('woocommerce_order_item_add_action_buttons', [$orderService, 'iniPaydockOrderButtons'], 10, 2);
+        add_action('woocommerce_order_status_changed', [$orderService, 'statusChangeVerification'], 20, 4);
+        add_action('admin_notices', [$orderService, 'displayStatusChangeError']);
+        add_action('wp_ajax_paydock-capture-charge', [$paymentController, 'capturePayment']);
+        add_action('wp_ajax_paydock-cancel-authorised', [$paymentController, 'cancelAuthorised']);
+        add_action('woocommerce_create_refund', [$paymentController, 'refundProcess'], 10, 2);
+        add_action('woocommerce_order_refunded', [$paymentController,'afterRefundProcess'], 10, 2);
+        add_action('woocommerce_api_paydock-webhook', [$paymentController, 'webhook']);
+    }
+
 }

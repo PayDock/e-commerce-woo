@@ -30,7 +30,6 @@ class ActivationHook implements Hook
 
         array_map([$instance, 'runMigration'], $repositories);
 
-        $instance->createLogs();
     }
 
     protected function runMigration(Repository $repository): void
@@ -38,35 +37,4 @@ class ActivationHook implements Hook
         $repository->createTable();
     }
 
-    private function createLogs(): void
-    {
-        $stubData = [
-            [
-                '5ec63451b12c99579e46ee31',
-                'Charges',
-                'Pending',
-                '',
-                LogRepository::DEFAULT
-            ],
-            [
-                '5ec63445b12c99579e46ee27',
-                'Charges',
-                'Completed',
-                '',
-                LogRepository::SUCCESS
-            ],
-            [
-                '5ec63445b12c99579e46ee27',
-                'Charges',
-                'UnfulfilledCondition',
-                'Charge authenticated using different currency',
-                LogRepository::ERROR
-            ],
-        ];
-        $repository = new LogRepository();
-
-        foreach ($stubData as $stub) {
-            $repository->createLogRecord(...$stub);
-        }
-    }
 }

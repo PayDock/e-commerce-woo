@@ -26,13 +26,18 @@ abstract class AbstractPaymentService extends WC_Payment_Gateway
         $this->init_settings();
     }
 
+
+    public function woocommerce_before_checkout_form($arg){
+        
+    }
+
     public function payment_scripts()
     {
         if (!is_checkout() || !$this->is_available()) {
             return '';
         }
-        $sdkUrl = 'https://widget.paydock.com/sdk/{version}/widget.umd.js';
-//        $sdkUrl = 'https://widget.paydock.com/sdk/{version}/widget.umd.min.js';
+        //$sdkUrl = 'https://widget.paydock.com/sdk/{version}/widget.umd.js';
+        $sdkUrl = 'https://widget.paydock.com/sdk/{version}/widget.umd.min.js';
         $sdkUrl = preg_replace('{version}', SettingsService::getInstance()->getVersion(), $sdkUrl);
 
         wp_enqueue_script('paydock-form', PAY_DOCK_PLUGIN_URL.'/assets/js/frontend/form.js', array(), time(), true);

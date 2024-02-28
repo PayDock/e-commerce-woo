@@ -142,8 +142,14 @@ jQuery(document).ready(function ($) {
     function removeOptionsExcept(value, element) {
         element.find('option').each((index, el) => {
             const option = jQuery(el);
-            if (option.val() === value) {
-                return
+            if(typeof value === "object") {
+                if (option.val(), value.includes(option.val())) {
+                    return
+                }
+            } else {
+                if (option.val() === value) {
+                    return
+                }
             }
 
             option.remove()
@@ -181,11 +187,38 @@ jQuery(document).ready(function ($) {
         }
     }
 
-    function _3DSFlowProcess(_3DS, _3DSFlow, optionsHtml) {
-        _3DSFlow.html(optionsHtml)
+    function directChargeProcess(_3DS, fraud, saveCard, saveCardOption, directCharge) {
+        if (
+            disableSelect === _3DS.val()
+            && disableSelect === fraud.val()
+            && saveCard.prop('checked')
+            && 'VAULT' === saveCardOption.val()
+        ) {
+            directCharge.prop("checked", true);
+            directCharge.prop("disabled", true);
+        } else if (
+            disableSelect === _3DS.val()
+            && disableSelect === fraud.val()
+            && !saveCard.prop('checked')
+        ) {
+            directCharge.prop("disabled", false);
+        } else {
+            directCharge.prop("checked", false);
+            directCharge.prop("disabled", true);
+        }
+    }
+
+    function _3DSFlowProcess(_3DS, _3DSFlow, fraud, optionsHtml, prefix) {
+        _3DSFlow.html(optionsHtml[prefix + 'CARD_TYPE_EXCHANGE_OTT'])
+        fraud.html(optionsHtml[prefix + 'CARD_FRAUD'])
 
         if ('STANDALONE' === _3DS.val()) {
             removeOptionsExcept('PERMANENT_VAULT', _3DSFlow)
+            removeOptionsExcept(['STANDALONE', 'DISABLE'], fraud)
+            jQuery(fraud).val('DISABLE').change()
+        } else if('IN_BUILD' === _3DS.val()) {
+            removeOptionsExcept(['IN_BUILD', 'DISABLE'], fraud)
+            jQuery(fraud).val('DISABLE').change()
         }
     }
 
@@ -195,16 +228,26 @@ jQuery(document).ready(function ($) {
             return;
         }
 
+        // todo: remove when api for save card will ready
+        $('#' + prefix + 'A_P_M_S_ZIPPAY_SAVE_CARD').closest('tr').remove()
+        $('#' + prefix + 'A_P_M_S_ZIPPAY_SAVE_CARD_OPTION').closest('tr').remove()
+        $('#' + prefix + 'A_P_M_S_AFTERPAY_SAVE_CARD').closest('tr').remove()
+        $('#' + prefix + 'A_P_M_S_AFTERPAY_SAVE_CARD_OPTION').closest('tr').remove()
+        // todo: remove when api for save card will ready
+
         //checkoboxes
         const saveCard = document.getElementById(prefix + 'CARD_SAVE_CARD');
         const saveCardOption = document.getElementById(prefix + 'CARD_SAVE_CARD_OPTION');
+        
         //selects
         const _3DS = $('#' + prefix + 'CARD_DS');
         const _3DSFlow = $('#' + prefix + 'CARD_TYPE_EXCHANGE_OTT');
+        const fraud = $('#' + prefix + 'CARD_FRAUD');
 
         optionsCache[prefix + 'CARD_TYPE_EXCHANGE_OTT'] = _3DSFlow.html()
+        optionsCache[prefix + 'CARD_FRAUD'] = fraud.html()
 
-        _3DSFlowProcess(_3DS, _3DSFlow, optionsCache[prefix + 'CARD_TYPE_EXCHANGE_OTT']);
+        _3DSFlowProcess(_3DS, _3DSFlow, fraud, optionsCache, prefix);
         saveCardProcess(saveCard, saveCardOption, _3DSFlow, _3DS)
 
         conditions.map((conditionValue) => {
@@ -220,7 +263,7 @@ jQuery(document).ready(function ($) {
 
                 switch (target.getAttribute('id')) {
                     case prefix + 'CARD_DS':
-                        _3DSFlowProcess(_3DS, _3DSFlow, optionsCache[prefix + 'CARD_TYPE_EXCHANGE_OTT'])
+                        _3DSFlowProcess(_3DS, _3DSFlow, fraud, optionsCache, prefix)
                         break;
                 }
 

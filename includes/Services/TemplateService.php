@@ -2,8 +2,6 @@
 
 namespace Paydock\Services;
 
-use Paydock\Abstract\AbstractSettingService;
-
 class TemplateService
 {
     protected $currentSection = '';
@@ -11,14 +9,16 @@ class TemplateService
     private const ADMIN_TEMPLATE_DIR = 'admin';
 
     private const TEMPLATE_END = '.php';
-    private ?AbstractSettingService $settingService = null;
+    private $settingService = null;
 
     private string $templateAdminDir = '';
 
-    public function __construct(AbstractSettingService $service)
+    public function __construct($service = null)
     {
         $this->settingService = $service;
-        $this->currentSection = $service->currentSection ?? $_GET['section'];
+        if(isset($this->settingService->currentSection)){
+            $this->currentSection = $this->settingService->currentSection ?? $_GET['section'];
+        }
         $this->templateAdminDir = implode(DIRECTORY_SEPARATOR, [self::TEMPLATE_DIR, self::ADMIN_TEMPLATE_DIR]);
     }
 
@@ -37,11 +37,12 @@ class TemplateService
 
     private function getTemplatePath(string $template): string
     {
-        return plugin_dir_path(PAY_DOCK_PLUGIN_FILE) . $template . self::TEMPLATE_END;
+        return plugin_dir_path(PAY_DOCK_PLUGIN_FILE).$template.self::TEMPLATE_END;
     }
 
     private function getAdminPath(string $template): string
     {
-        return $this->getTemplatePath($this->templateAdminDir . DIRECTORY_SEPARATOR . $template);
+
+        return $this->getTemplatePath($this->templateAdminDir.DIRECTORY_SEPARATOR.$template);
     }
 }

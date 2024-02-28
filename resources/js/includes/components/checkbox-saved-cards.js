@@ -9,7 +9,7 @@ export default (saveCardLabel = 'Save card') => {
     }
 
     return createElement("div",
-        { class: 'wc-block-components-checkbox' },
+        { class: 'wc-block-components-checkbox paydock-save-card' },
         createElement("label",
             {
                 for: 'card_save_card',

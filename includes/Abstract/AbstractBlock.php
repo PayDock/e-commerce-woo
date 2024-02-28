@@ -17,9 +17,9 @@ abstract class AbstractBlock extends AbstractPaymentMethodType
 
     public function get_payment_method_script_handles()
     {
-        if (!self::$isLoad) {
-            $sdkUrl = 'https://widget.paydock.com/sdk/{version}/widget.umd.js';
-//        $sdkUrl = 'https://widget.paydock.com/sdk/{version}/widget.umd.min.js';
+        if (!self::$isLoad && is_checkout()) {
+            // $sdkUrl = 'https://widget.paydock.com/sdk/{version}/widget.umd.js';
+            $sdkUrl = 'https://widget.paydock.com/sdk/{version}/widget.umd.min.js';
             $sdkUrl = preg_replace('{version}', SettingsService::getInstance()->getVersion(), $sdkUrl);
 
             wp_enqueue_script(
@@ -36,7 +36,7 @@ abstract class AbstractBlock extends AbstractPaymentMethodType
                 time()
             );
 
-            wp_enqueue_script('paydock-api', $sdkUrl, array(), time(), true);
+            wp_enqueue_script('paydock-api', $sdkUrl);
 
             self::$isLoad = true;
         }

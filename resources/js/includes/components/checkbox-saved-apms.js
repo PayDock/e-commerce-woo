@@ -4,16 +4,13 @@ import { getSetting } from '@woocommerce/settings';
 export default (saveCardLabel = 'Save card') => {
     const settings = getSetting('paydock_apms_data', {});
 
-    if (!settings.isUserLoggedIn) {
+    if (!settings.isUserLoggedIn || (settings.afterpaySaveCard === false && settings.zippaySaveCard === false)) {
         return '';
     }
 
     return createElement("div",
         { 
             class: 'wc-block-components-checkbox amps-save-card',
-            style: {
-                display: settings.afterpaySaveCard && settings.zippaySaveCard ? 'block' : 'none'
-            }
          },
         createElement("label",
             {

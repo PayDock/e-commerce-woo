@@ -11,11 +11,7 @@ class ArgsForProcessPayment
     {
         $args = array_change_key_case($args, CASE_LOWER);
 
-        if (!isset($args['isuserloggedin'])) {
-            $args['isuserloggedin'] = is_user_logged_in();
-        } else {
-            $args['isuserloggedin'] = $args['isuserloggedin'] === '1' ? true : false;
-        }
+        $args['isuserloggedin'] = is_user_logged_in();
 
         if (!empty($args['card3ds']) && $args['card3ds'] === DSTypes::DISABLE()->name) {
             $args['card3ds'] = '';
@@ -28,6 +24,7 @@ class ArgsForProcessPayment
         $args['directcharge'] = !empty($args['directcharge']) ? true : false;  
         $args['fraud'] = !empty($args['fraud']) ? true : false;
 
+        $args['carddirectcharge'] = !empty($args['carddirectcharge']) ? true : false;        
         $args['cardsavecard'] = !empty($args['cardsavecard']) ? true : false;        
         $args['cardsavecardchecked'] = !empty($args['cardsavecardchecked']) ? true : false;
         $args['cardsavecardoption'] = isset($args['cardsavecardoption']) ? $args['cardsavecardoption'] : '';

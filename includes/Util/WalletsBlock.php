@@ -4,11 +4,15 @@ namespace Paydock\Util;
 
 use Paydock\Abstract\AbstractBlock;
 use Paydock\Enums\WalletPaymentMethods;
+use Paydock\PaydockPlugin;
 use Paydock\Services\Checkout\WalletsPaymentService;
 use Paydock\Services\SettingsService;
 
 class WalletsBlock extends AbstractBlock
 {
+    public const AFTERPAY_SESSION_KEY = PaydockPlugin::PLUGIN_PREFIX.'_afterpay_payment_session_token';
+    public const WALLETS_SESSION_KEY = PaydockPlugin::PLUGIN_PREFIX.'_wallets_payment_session_token';
+
     protected const SCRIPT = 'wallets-form';
 
     protected $name = 'paydock_wallets_block';
@@ -31,6 +35,10 @@ class WalletsBlock extends AbstractBlock
             'isSandbox' => $settings->isSandbox(),
             'styles' => $settings->getWidgetStyles(),
         ];
+
+        if (!empty($_SESSION[WalletsBlock::AFTERPAY_SESSION_KEY])) {
+            $result['afterpayChargeId'] = $_SESSION[WalletsBlock::AFTERPAY_SESSION_KEY];
+        }
 
         foreach (WalletPaymentMethods::cases() as $payment) {
             if ($settings->isWalletEnabled($payment)) {

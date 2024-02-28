@@ -43,6 +43,8 @@ final class ApmBlock extends AbstractBlock
             'description' => $settingsService->getWidgetPaymentAPMDescription(),
             'styles' => $settingsService->getWidgetStyles(),
             // Apms
+            'afterpayEnable' => $settingsService->isAPMsEnabled(OtherPaymentMethods::AFTERPAY()),
+            'zippayEnable' => $settingsService->isAPMsEnabled(OtherPaymentMethods::ZIPPAY()),
             'gatewayType' => '',
             'gatewayId' => '',
             'afterpayGatewayId' => $settingsService->getAPMsGatewayId(OtherPaymentMethods::AFTERPAY()),

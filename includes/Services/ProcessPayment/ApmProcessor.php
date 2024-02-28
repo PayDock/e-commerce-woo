@@ -3,38 +3,40 @@
 namespace Paydock\Services\ProcessPayment;
 
 use Exception;
+use Paydock\Enums\OtherPaymentMethods;
 use Paydock\Helpers\ArgsForProcessPayment;
+use Paydock\Repositories\LogRepository;
 use Paydock\Repositories\UserCustomerRepository;
 use Paydock\Services\SDKAdapterService;
+use WC_Order;
+use WC_Order_Refund;
 
 class ApmProcessor
 {
     const CHARGE_METHOD = 'charge';
     const CUSTOMER_CHARGE_METHOD = 'customerCharge';
-    const DIRECT_CHARGE_METHOD = 'directCharge';
     const FRAUD_CHARGE_METHOD = 'fraudCharge';
-    const DIRECT_FRAUD_CHARGE_METHOD = 'directFraudCharge';
-    const DIRECT_IN_REVIEW_FRAUD_CHARGE_METHOD = 'directInReviewFraudCharge';
     const ALLOWED_METHODS = [
         self::CHARGE_METHOD,
         self::CUSTOMER_CHARGE_METHOD,
-        self::DIRECT_CHARGE_METHOD,
-        self::FRAUD_CHARGE_METHOD,
-        self::DIRECT_FRAUD_CHARGE_METHOD,
-        self::DIRECT_IN_REVIEW_FRAUD_CHARGE_METHOD
+        self::FRAUD_CHARGE_METHOD
     ];
 
     protected array $args = [];
     protected array $tokenData = [];
     private ?string $runMethod;
+    private ?LogRepository $logger;
+    protected bool|WC_Order|WC_Order_Refund $order = false;
 
     public function __construct(array $args = [])
     {
+        $this->logger = new LogRepository();
         $this->args = ArgsForProcessPayment::prepare($args);
     }
 
-    public function run(): array
+    public function run(bool|WC_Order|WC_Order_Refund $order): array
     {
+        $this->order = $order;
         $this->setRunMethod();
 
         if (!in_array($this->runMethod, self::ALLOWED_METHODS)) {
@@ -47,14 +49,8 @@ class ApmProcessor
     private function setRunMethod()
     {
         switch (true) {
-            case $this->args['directcharge'] && $this->args['fraud']:
-                $this->runMethod = self::DIRECT_FRAUD_CHARGE_METHOD;
-                break;
             case $this->args['fraud']:
                 $this->runMethod = self::FRAUD_CHARGE_METHOD;
-                break;
-            case $this->args['directcharge']:
-                $this->runMethod = self::DIRECT_CHARGE_METHOD;
                 break;
             case $this->args['apmsavecard']:
                 $this->runMethod = self::CUSTOMER_CHARGE_METHOD;
@@ -74,7 +70,9 @@ class ApmProcessor
         $chargeArgs = [
             'amount' => $this->args['amount'],
             'currency' => strtoupper(get_woocommerce_currency()),
-            'token' => $this->args['paymentsourcetoken']
+            'token' => $this->args['paymentsourcetoken'],
+            'capture' => $this->args['gatewaytype'] === strtolower(OtherPaymentMethods::AFTERPAY()->name) ? : $this->args['directcharge'],
+            'reference' => (string) $this->order->get_id(),
         ];
 
         return SDKAdapterService::getInstance()->createCharge($chargeArgs);
@@ -82,19 +80,39 @@ class ApmProcessor
 
     private function customerCharge(): array
     {
-        $customerArgs = [
-            'token' => $this->args['paymentsourcetoken']
-        ];
+        $customerArgs = array_merge([
+            'first_name' => $this->order->get_billing_last_name(),
+            'last_name' => $this->order->get_billing_first_name(),
+            'email' => $this->order->get_billing_email(),
+            'phone' => $this->order->get_billing_phone(),
+            'token' => $this->args['paymentsourcetoken'],
+        ], $this->getAdditionalFields('amount'));
 
         $customer = SDKAdapterService::getInstance()->createCustomer($customerArgs);
 
         if (!empty($customer['error']) || empty($customer['resource']['data']['_id'])) {
             $message = !empty($customer['error']['message']) ? ' ' . $customer['error']['message'] : '';
+
+            $this->logger->createLogRecord(
+                '',
+                'Create customer',
+                'error',
+                $message,
+                LogRepository::ERROR
+            );
             throw new Exception(__('Can\'t create Paydock customer.' . $message, PAY_DOCK_TEXT_DOMAIN));
         }
 
+        $this->logger->createLogRecord(
+            $customer['resource']['data']['_id'],
+            'Create customer',
+            'Success',
+            '',
+            LogRepository::SUCCESS
+        );
+
         if ($this->args['apmsavecardchecked']) {
-            $res = (new UserCustomerRepository)->saveUserCustomer($customer['resource']['data']);
+            (new UserCustomerRepository)->saveUserCustomer($customer['resource']['data']);
         }
 
         $customer_id = $customer['resource']['data']['_id'];
@@ -103,27 +121,8 @@ class ApmProcessor
             'amount' => $this->args['amount'],
             'currency' => strtoupper(get_woocommerce_currency()),
             'customer_id' => $customer_id,
-        ]);
-    }
-
-    private function directCharge(): array
-    {
-        $chargeArgs = [
-            'amount' => $this->args['amount'],
-            'currency' => strtoupper(get_woocommerce_currency()),
-            'capture' => false,
-            'token' => $this->args['paymentsourcetoken']
-        ];
-
-        $charge = SDKAdapterService::getInstance()->createCharge($chargeArgs);
-
-        if (!empty($charge['error']) || empty($charge['resource']['data']['_id'])) {
-            $message = SDKAdapterService::getInstance()->errorMessageToString($charge);
-            throw new Exception(__('Can\'t charge.' . $message, PAY_DOCK_TEXT_DOMAIN));
-        }
-
-        return SDKAdapterService::getInstance()->capture([
-            'charge_id' => $charge['resource']['data']['_id']
+            'reference' => (string) $this->order->get_id(),
+            'capture' => $this->args['gatewaytype'] === strtolower(OtherPaymentMethods::AFTERPAY()->name) ? : $this->args['directcharge'],
         ]);
     }
 
@@ -132,63 +131,44 @@ class ApmProcessor
         return SDKAdapterService::getInstance()->createCharge([
             'amount' => $this->args['amount'],
             'currency' => strtoupper(get_woocommerce_currency()),
-            'capture' => true,
+            'capture' => $this->args['gatewaytype'] === strtolower(OtherPaymentMethods::AFTERPAY()->name) ? : $this->args['directcharge'],
             'token' => $this->args['paymentsourcetoken'],
+            'reference' => (string) $this->order->get_id(),
             'fraud' => [
                 'service_id' => $this->args['fraudserviceid'] ?? '',
-                'mode' => 'passive',
-                'data' => new \StdClass
+                'data' => $this->getAdditionalFields(),
+                'mode' => 'passive'
             ]
         ]);
     }
 
-    private function directFraudCharge(): array
+    protected function getAdditionalFields(array|string $exclude = []): array
     {
-        $charge = SDKAdapterService::getInstance()->createCharge([
-            'amount' => $this->args['amount'],
-            'currency' => strtoupper(get_woocommerce_currency()),
-            'capture' => false,
-            'token' => $this->args['paymentsourcetoken'],
-            'fraud' => [
-                'service_id' => $this->args['fraudserviceid'] ?? '',
-                'mode' => 'passive',
-                'data' => new \StdClass
-            ]
-        ]);
-
-        if (!empty($charge['error']) || empty($charge['resource']['data']['_id'])) {
-            $message = SDKAdapterService::getInstance()->errorMessageToString($charge);
-            throw new Exception(__('Can\'t charge.' . $message, PAY_DOCK_TEXT_DOMAIN));
+        if (!$this->order) {
+            return [];
         }
 
-        return SDKAdapterService::getInstance()->capture([
-            'charge_id' => $charge['resource']['data']['_id']
-        ]);
-    }
+        $address1 = $this->order->get_billing_address_1();
+        $address2 = $this->order->get_billing_address_2();
 
-    private function directInReviewFraudCharge(): array
-    {
-        $chargeArgs = [
-            'amount' => $this->args['amount'],
-            'currency' => strtoupper(get_woocommerce_currency()),
-            'capture' => false,
-            'token' => $this->args['paymentsourcetoken'],
-            'fraud' => [
-                'service_id' => $this->args['fraudserviceid'] ?? '',
-                'mode' => 'passive',
-                'data' => new \StdClass
-            ]
+        $result = [
+            'amount' => (float) $this->order->get_total(),
+            'address_country' => $this->order->get_billing_country(),
+            'address_postcode' => $this->order->get_billing_postcode(),
+            'address_city' => $this->order->get_billing_city(),
+            'address_state' => $this->order->get_billing_state(),
+            'address_line1' => $address1,
+            'address_line2' => empty($address2) ? $address1 : $address2,
         ];
 
-        $charge = SDKAdapterService::getInstance()->createCharge($chargeArgs);
+        if (!empty($exclude)) {
+            if (!is_array($exclude)) {
+                $exclude = [$exclude];
+            }
 
-        if (!empty($charge['error']) || empty($charge['resource']['data']['_id'])) {
-            $message = SDKAdapterService::getInstance()->errorMessageToString($charge);
-            throw new Exception(__('Can\'t charge.' . $message, PAY_DOCK_TEXT_DOMAIN));
+            $result = array_diff_key($result, array_flip($exclude));
         }
 
-        return SDKAdapterService::getInstance()->capture([
-            'charge_id' => $charge['resource']['data']['_id']
-        ]);
+        return $result;
     }
 }

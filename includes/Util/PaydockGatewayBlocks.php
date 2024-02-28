@@ -28,34 +28,6 @@ final class PaydockGatewayBlocks extends AbstractBlock
         return $this->gateway->is_available();
     }
 
-    public function get_payment_method_script_handles()
-    {
-        $script_path = 'assets/build/js/frontend/' . self::SCRIPT . '.js';
-        $script_asset_path = PAY_DOCK_PLUGIN_PATH . '/assets/build/js/frontend/' . self::SCRIPT . '.asset.php';
-        $script_asset = file_exists($script_asset_path)
-            ? require($script_asset_path)
-            : array(
-                'dependencies' => array(),
-                'version' => PAY_DOCK_PLUGIN_VERSION
-            );
-        $script_url = PAY_DOCK_PLUGIN_URL . $script_path;
-
-        wp_register_script(
-            'paydock_gateway',
-            $script_url,
-            $script_asset['dependencies'],
-            $script_asset['version'],
-            true
-        );
-
-        if (function_exists('wp_set_script_translations')) {
-            wp_set_script_translations('paydock_gateway');
-
-        }
-        return ['paydock_gateway'];
-    }
-
-
     public function get_payment_method_data()
     {
         SDKAdapterService::getInstance();
@@ -80,6 +52,7 @@ final class PaydockGatewayBlocks extends AbstractBlock
             'publicKey' => ConfigService::$publicKey,
             'selectedToken' => '',
             'paymentSourceToken' => '',
+            'cvv' => '',
             // Card
             'cardSupportedCardTypes' => $settingsService->getCardSupportedCardTypes(),
             'gatewayId' => $settingsService->getCardGatewayId(),
@@ -91,6 +64,8 @@ final class PaydockGatewayBlocks extends AbstractBlock
             // Fraud
             'cardFraud' => $settingsService->getCardFraud(),
             'cardFraudServiceId' => $settingsService->getCardFraudServiceId(),
+            // DirectCharge
+            'cardDirectCharge' => $settingsService->getCardDirectCharge(),
             // SaveCard
             'cardSaveCard' => $settingsService->getCardSaveCard(),
             'cardSaveCardOption' => $settingsService->getCardSaveCardOption(),
