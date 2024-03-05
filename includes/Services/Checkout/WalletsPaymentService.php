@@ -63,11 +63,19 @@ class WalletsPaymentService extends AbstractPaymentService
             $chargeId = $data['data']['id'];
         }
 
+        update_option('paydock_fraud_' . (string) $order->get_id(), []);
+
         $loggerRepository = new LogRepository();
-        $status = ((
-                ($data['data']['status'] === 'pending')
-                || (!empty($_GET['direct_charge']) && ($_GET['direct_charge'] == 'true'))
-            ) ? 'wc-power_board-authorize' : 'wc-power_board-paid');
+        if ('inreview' === $data['data']['status']) {
+            $status = 'wc-power_board-requested';
+        } elseif (
+            ($data['data']['status'] === 'pending')
+            || (!empty($_GET['direct_charge']) && ($_GET['direct_charge'] == 'true'))
+        ) {
+            $status = 'wc-power_board-authorize';
+        } else {
+            $status = 'wc-power_board-paid';
+        }
 
         $order->set_status($status);
         $order->payment_complete();
@@ -75,7 +83,6 @@ class WalletsPaymentService extends AbstractPaymentService
 
         unset(
             $_SESSION[WalletsBlock::AFTERPAY_SESSION_KEY],
-            $_SESSION[WalletsBlock::WALLETS_SESSION_KEY.$order_id]
         );
         update_post_meta($order_id, 'power_board_charge_id', $chargeId);
 
@@ -83,8 +90,8 @@ class WalletsPaymentService extends AbstractPaymentService
 
         $loggerRepository->createLogRecord(
             $data['data']['id'] ?? '',
-                'Charge',
-                $status,
+            'Charge',
+            $status,
             'Successful',
                 $status === 'wc-power_board-authorize' ? LogRepository::DEFAULT : LogRepository::SUCCESS);
 

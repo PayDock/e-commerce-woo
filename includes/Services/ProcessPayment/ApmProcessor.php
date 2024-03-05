@@ -81,8 +81,8 @@ class ApmProcessor
     private function customerCharge(): array
     {
         $customerArgs = array_merge([
-            'first_name' => $this->order->get_billing_last_name(),
-            'last_name' => $this->order->get_billing_first_name(),
+            'first_name' => $this->order->get_billing_first_name(),
+            'last_name' => $this->order->get_billing_last_name(),
             'email' => $this->order->get_billing_email(),
             'phone' => $this->order->get_billing_phone(),
             'token' => $this->args['paymentsourcetoken'],

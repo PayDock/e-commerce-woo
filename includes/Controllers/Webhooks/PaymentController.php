@@ -157,24 +157,21 @@ class PaymentController
         );
 
         $result = false;
-        switch ($input['event']) {
-            case ConnectionValidationService::WEBHOOK_EVENT_TRANSACTION_SUCCESS_NAME:
-                if (!empty($input['data']['reference'])) {
-                    $result = $this->bankAccountSuccessProcess($input);
-                }
-                break;
-            case ConnectionValidationService::WEBHOOK_EVENT_TRANSACTION_FAILURE_NAME:
-                if (!empty($input['data']['reference'])) {
-                    $result = $this->bankAccountFailureProcess($input);
-                }
-                break;
-            case ConnectionValidationService::WEBHOOK_EVENT_FRAUD_CHECK_SUCCESS_NAME:
-                if (!empty($input['data']['reference'])) {
+        if (!empty($input['data']['reference'])) {
+            switch ($input['event']) {
+                case ConnectionValidationService::WEBHOOK_EVENT_TRANSACTION_SUCCESS_NAME:
+                    $result = $this->successProcess($input);
+                    break;
+                case ConnectionValidationService::WEBHOOK_EVENT_TRANSACTION_FAILURE_NAME:
+                    $result = $this->failureProcess($input);
+                    break;
+                case ConnectionValidationService::WEBHOOK_EVENT_FRAUD_CHECK_SUCCESS_NAME:
+                case ConnectionValidationService::WEBHOOK_EVENT_FRAUD_CHECK_IN_REVIEW_APPROVED_NAME:
                     $result = $this->fraudSuccessProcess($input);
-                }
-                break;
-            default:
-                $result = true;
+                    break;
+                default:
+                    $result = false;
+            }
         }
 
         echo $result ? 'Ok' : 'Fail';
@@ -182,15 +179,20 @@ class PaymentController
         exit;
     }
 
-    private function bankAccountSuccessProcess(array $input): bool
+    private function successProcess(array $input): bool
     {
-        $loggerRepository = new LogRepository();
         $data = $input['data'];
-        $orderId = (int) $data['reference'];
-        $order = wc_get_order($orderId);
-        $type = strtolower($data['customer']['payment_source']['type'] ?? 'undefined');
 
-        if ($order === false || $type !== strtolower(SettingGroups::BANK_ACCOUNT()->name)) {
+        if (strpos($data['reference'], '_') === false) {
+            $orderId = (int) $data['reference'];
+        } else {
+            $referenceArray = explode('_', $data['reference']);
+            $orderId = (int) reset($referenceArray);
+        }
+
+        $order = wc_get_order($orderId);
+
+        if ($order === false) {
             return false;
         }
 
@@ -213,6 +215,7 @@ class PaymentController
         $order->save();
         update_post_meta($order->get_id(), 'power_board_charge_id', $chargeId);
 
+        $loggerRepository = new LogRepository();
         $loggerRepository->createLogRecord(
             $chargeId,
             $operation,
@@ -224,26 +227,40 @@ class PaymentController
         return true;
     }
 
-    private function bankAccountFailureProcess(array $input): bool
+    private function failureProcess(array $input): bool
     {
-        $loggerRepository = new LogRepository();
         $data = $input['data'];
-        $orderId = (int) $data['reference'];
-        $order = wc_get_order($orderId);
-        $type = strtolower($data['customer']['payment_source']['type'] ?? 'undefined');
 
-        if ($order === false || $type !== strtolower(SettingGroups::BANK_ACCOUNT()->name)) {
+        if (strpos($data['reference'], '_') === false) {
+            $orderId = (int) $data['reference'];
+        } else {
+            $referenceArray = explode('_', $data['reference']);
+            $orderId = (int) reset($referenceArray);
+        }
+        
+        $order = wc_get_order($orderId);
+
+        if ($order === false) {
             return false;
         }
 
         $chargeId = $data['_id'] ?? '';
-        $status = 'wc-power_board-failed';
+        $status = ucfirst(strtolower($data['status'] ?? 'undefined'));
         $operation = ucfirst(strtolower($data['type'] ?? 'undefined'));
+        $isAuthorization = $data['authorization'] ?? 0;
+
+        $isPending = 'Pending' === $status;
+        if ($isAuthorization && in_array($status, ['Pending', 'Pre_authentication_pending'])) {
+            $status = 'wc-power_board-authorize';
+        } else {
+            $status = $isPending ? 'wc-power_board-pending' : 'wc-power_board-failed';
+        }
 
         $order->set_status($status);
         $order->save();
         update_post_meta($order->get_id(), 'power_board_charge_id', $chargeId);
 
+        $loggerRepository = new LogRepository();
         $loggerRepository->createLogRecord(
             $chargeId,
             $operation,
@@ -259,7 +276,14 @@ class PaymentController
     {
         $loggerRepository = new LogRepository();
         $data = $input['data'];
-        $orderId = (int) $data['reference'];
+
+        if (strpos($data['reference'], '_') === false) {
+            $orderId = (int) $data['reference'];
+        } else {
+            $referenceArray = explode('_', $data['reference']);
+            $orderId = (int) reset($referenceArray);
+        }
+
         $order = wc_get_order($orderId);
         $fraudId = $data['_id'];
 
@@ -270,7 +294,7 @@ class PaymentController
             return false;
         }
 
-        $paymentSource = ['vault_token' => $data['customer']['payment_source']['vault_token']];
+        $paymentSource = $data['customer']['payment_source'];
         if (!empty($options['gateway_id'])) {
             $paymentSource['gateway_id'] = $options['gateway_id'];
         }
@@ -288,6 +312,10 @@ class PaymentController
 
         if (!empty($options['charge3dsid'])) {
             $chargeArgs['_3ds_charge_id'] = $options['charge3dsid'];
+        }
+
+        if (!empty($options['_3ds'])) {
+            $chargeArgs['_3ds'] = $options['_3ds'];
         }
 
         if (!empty($options['cvv'])) {

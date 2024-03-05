@@ -1,3 +1,4 @@
+window.paydockWalletsButtons = {};
 (function () {
     const afterpayCountries = ['au','nz','us','ca','uk','gb','fr','it','es','de'];
     const zippayCountries = ['au','nz','us','ca'];
@@ -266,7 +267,7 @@
                         height = 55;
                         break;
                 }
-                let config =
+                const config =
                     {
                         country: window.powerBoardWallets[key].county,
                         style: {
@@ -282,6 +283,8 @@
                 if ('pay_pal_smart_button' === key) {
                     config['pay_later'] = window.powerBoardWallets[key].pay_later;
                 }
+
+                $(id).children().remove()
 
                 const button = new cba.WalletButtons(
                     id,
@@ -300,10 +303,22 @@
                     orderButton.click();
                 });
 
-                button.onPaymentError((data) => orderButton.click());
-                button.onPaymentInReview((data) => orderButton.click());
+                button.onPaymentError((data) => {
+                    orderButton.click();
+                    initPaydockWidgetWallets(orderButton);
+                });
+                button.onPaymentInReview((data) =>{
+                    $('#paymentSourceWalletsToken').val(JSON.stringify(data))
+                    $('#paymentCompleted').show();
+                    $('#paydockWalletsGoogleApplePay, #paydockWalletsAfterPay, #paydockWalletsPaypal').hide();
+
+                    orderButton.show();
+                    orderButton.click();
+                });
 
                 button.load();
+
+                window.paydockWalletsButtons[key] = button;
             }
         }
 
@@ -315,11 +330,6 @@
             } else {
                 $('#powerBoardWidgetWallets').parent().find('.powerBoard-validation-error').css('display', 'none')
                 $('#powerBoardWidgetWallets')
-            }
-
-            if (window.powerBoardWallets) {
-                initWalletsButtonsWidgets();
-                return;
             }
 
             if ($('#powerBoardWalletsApplePay, #powerBoardWalletsGooglePay, #powerBoardWalletsAfterPay, #powerBoardWalletsPaypal').length === 0) {

@@ -95,12 +95,97 @@ class CardProcessor
     {
         switch (true) {
             case($this->args['card3ds'] === DSTypes::IN_BUILD()->name && $this->args['cardfraud'] === FraudTypes::IN_BUILD()->name):
-                return $this->fraud3DsInBuildCharge();
+                $result = $this->fraud3DsInBuildCharge();
+                break;
             case($this->args['card3ds'] === DSTypes::STANDALONE()->name && $this->args['cardfraud'] === FraudTypes::STANDALONE()->name):
-                return $this->fraud3DsStandaloneCharge();
+                $result = $this->fraud3DsStandaloneCharge();
+                break;
+            case($this->args['card3ds'] === DSTypes::IN_BUILD()->name && $this->args['cardfraud'] === FraudTypes::STANDALONE()->name):
+                $result = $this->fraudStandalone3DsInBuildCharge();
+                break;
+            case($this->args['card3ds'] === DSTypes::STANDALONE()->name && $this->args['cardfraud'] === FraudTypes::IN_BUILD()->name):
+                $result = $this->fraudInBuild3DsStandaloneCharge();
+                break;
+            default:
+                $result = ['error' => ['message' => 'In-built fraud & 3ds error']];
         }
 
-        return ['error' => ['message' => 'In-built fraud & 3ds error']];
+        return $result;
+    }
+
+    private function fraudInBuild3DsStandaloneCharge(): array
+    {
+        $vaultToken = $this->getVaultToken();
+
+        $paymentSource = ['vault_token' => $vaultToken];
+        if (isset($this->args['gatewayid'])) {
+            $paymentSource['gateway_id'] = $this->args['gatewayid'];
+        }
+
+        $chargeArgs = [
+            'amount' => $this->args['amount'],
+            'reference' => (string) $this->order->get_id(),
+            'currency' => strtoupper(get_woocommerce_currency()),
+            'customer' => [
+                'payment_source' => array_merge($this->getAdditionalFields('amount'), $paymentSource)
+            ],
+            '_3ds_charge_id' => $this->args['charge3dsid'],
+            'fraud' => [
+                'service_id' => $this->args['cardfraudserviceid'] ?? '',
+                'mode' => 'active',
+                'data' => $this->getAdditionalFields()
+            ],
+            'capture' => $this->args['carddirectcharge']
+        ];
+
+        if (!empty($this->args['cvv'])) {
+            $chargeArgs['customer']['payment_source']['card_ccv'] = $this->args['cvv'];
+        }
+
+        return SDKAdapterService::getInstance()->createCharge($chargeArgs);
+    }
+
+    private function fraudStandalone3DsInBuildCharge(): array
+    {
+        $options = [
+            'method' => __FUNCTION__,
+            'capture' => $this->args['carddirectcharge'],
+            '_3ds' => [
+                'id' => $this->args['charge3dsid'] ?? '',
+                'service_id' => $this->args['card3dsserviceid'] ?? ''
+            ]
+        ];
+        $vaultToken = $this->getVaultToken();
+
+        $paymentSource = ['vault_token' => $vaultToken];
+        if (isset($this->args['gatewayid'])) {
+            $paymentSource['gateway_id'] = $this->args['gatewayid'];
+            $options['gateway_id'] = $this->args['gatewayid'];
+        }
+
+        if (!empty($this->args['cvv'])) {
+            $paymentSource['card_ccv'] = $this->args['cvv'];
+            $options['ccv'] = $this->args['cvv'];
+        }
+
+        $response = SDKAdapterService::getInstance()->standaloneFraudCharge([
+            'amount' => $this->args['amount'],
+            'reference' => (string) $this->order->get_id(),
+            'currency' => strtoupper(get_woocommerce_currency()),
+            'customer' => [
+                'payment_source' => array_merge($this->getAdditionalFields('amount'), $paymentSource)
+            ],
+            'fraud' => [
+                'service_id' => $this->args['cardfraudserviceid'],
+                'data' => $this->getAdditionalFields()
+            ],
+        ]);
+
+        if (empty($response['error']) && !empty($response['resource']['data']['_id'])) {
+            update_option('paydock_fraud_' . (string) $this->order->get_id(), $options);
+        }
+
+        return $response;
     }
 
     private function fraud3DsInBuildCharge(): array
@@ -323,8 +408,8 @@ class CardProcessor
             $vaultToken = $this->getVaultToken();
 
             $customerArgs = array_merge([
-                'first_name' => $this->order->get_billing_last_name(),
-                'last_name' => $this->order->get_billing_first_name(),
+                'first_name' => $this->order->get_billing_first_name(),
+                'last_name' => $this->order->get_billing_last_name(),
                 'email' => $this->order->get_billing_email(),
                 'phone' => $this->order->get_billing_phone(),
                 'payment_source' => [

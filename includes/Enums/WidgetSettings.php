@@ -107,6 +107,8 @@ class WidgetSettings extends AbstractEnum
     public function getFontFamily(): array
     {
         $fonts = [
+            'Inter Regular',
+            'serif',
             'sans-serif',
             'serif',
             'monospace',

@@ -22,19 +22,7 @@ class WidgetController
 
         foreach (WalletPaymentMethods::cases() as $payment) {
             $key = strtolower($payment->name);
-            $seesionKey = WalletsBlock::WALLETS_SESSION_KEY.$payment->name.$request['order_id'];
             if ($settings->isWalletEnabled($payment)) {
-                if (
-                    !empty($_SESSION[$seesionKey])
-                    && (
-                        !empty($_SESSION[$seesionKey.'json_data'])
-                        && ($_SESSION[$seesionKey.'json_data'] === json_encode($request))
-                    )
-                ) {
-                    $result[$key] = $_SESSION[$seesionKey];
-                    continue;
-                }
-                $_SESSION[$seesionKey.'json_data'] = json_encode($request);
                 $reference = WalletPaymentMethods::PAY_PAL_SMART_BUTTON()->name === $payment->name
                     ? $request['order_id'].'_'.microtime()
                     : $request['order_id'];
@@ -44,6 +32,10 @@ class WidgetController
                     'currency' => $request['total']['currency_code'],
                     'reference' => (string) $reference,
                     'customer' => [
+                        'first_name' => $request['address']['first_name'],
+                        'last_name' => $request['address']['last_name'],
+                        'email' => $request['address']['email'],
+                        'phone' => $request['address']['phone'],
                         'payment_source' => [
                             'gateway_id' => $settings->getWalletGatewayId($payment),
                         ]
@@ -52,9 +44,11 @@ class WidgetController
                         'store_name' => get_bloginfo('name'),
                     ],
                 ];
+
                 if ($payment->name === WalletPaymentMethods::APPLE_PAY()->name) {
                     $chargeRequest['customer']['payment_source']['wallet_type'] = 'apple';
                 }
+
                 if (
                     $settings->isWalletFraud($payment)
                     && !empty($fraudService = $settings->getWalletFraudServiceId($payment))
@@ -112,8 +106,6 @@ class WidgetController
 
                     $loggerRepository->createLogRecord('', $operation, $status, $message, LogRepository::ERROR);
                 }
-
-                $_SESSION[$seesionKey] = $result[$key];
             }
         }
 

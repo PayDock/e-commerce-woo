@@ -5,11 +5,11 @@
  * This source code is licensed under the license found in the
  * LICENSE file in the root directory of this source tree.
  * Plugin Name: PowerBoard for WooCommerce
- * Plugin URI: https://github.com/PowerBoard/jsp-woocommerce
+ * Plugin URI: https://github.com/PowerBoard/jsp-woocommerce/tree/main
  * Description: PowerBoard simplify how you manage your payments. Reduce costs, technical headaches & streamline compliance using PowerBoard's payment orchestration.
  * Author: PowerBoard
  * Author URI: https://powerboard.commbank.com.au/
- * Version: 0.7.0
+ * Version: 0.7.5
  * Requires at least: 6.4.2
  * Text Domain: power_board-for-woo
  * Tested up to: 6.4.2
@@ -34,7 +34,7 @@ if (!defined('POWER_BOARD_PLUGIN_URL')) {
 }
 
 if (!defined('POWER_BOARD_PLUGIN_VERSION')) {
-    define('POWER_BOARD_PLUGIN_VERSION', '0.7.0');
+    define('POWER_BOARD_PLUGIN_VERSION', '0.7.5');
 }
 
 if (!defined('POWER_BOARD_TEXT_DOMAIN')) {

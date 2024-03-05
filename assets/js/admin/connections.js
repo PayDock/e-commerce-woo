@@ -187,38 +187,14 @@ jQuery(document).ready(function ($) {
         }
     }
 
-    function directChargeProcess(_3DS, fraud, saveCard, saveCardOption, directCharge) {
-        if (
-            disableSelect === _3DS.val()
-            && disableSelect === fraud.val()
-            && saveCard.prop('checked')
-            && 'VAULT' === saveCardOption.val()
-        ) {
-            directCharge.prop("checked", true);
-            directCharge.prop("disabled", true);
-        } else if (
-            disableSelect === _3DS.val()
-            && disableSelect === fraud.val()
-            && !saveCard.prop('checked')
-        ) {
-            directCharge.prop("disabled", false);
-        } else {
-            directCharge.prop("checked", false);
-            directCharge.prop("disabled", true);
-        }
-    }
-
     function _3DSFlowProcess(_3DS, _3DSFlow, fraud, optionsHtml, prefix) {
+        let oldVal = _3DSFlow.val()
         _3DSFlow.html(optionsHtml[prefix + 'CARD_TYPE_EXCHANGE_OTT'])
-        fraud.html(optionsHtml[prefix + 'CARD_FRAUD'])
 
-        if ('STANDALONE' === _3DS.val()) {
+        if ('STANDALONE' === _3DS.val() || 'DISABLE' !== fraud.val()) {
             removeOptionsExcept('PERMANENT_VAULT', _3DSFlow)
-            removeOptionsExcept(['STANDALONE', 'DISABLE'], fraud)
-            jQuery(fraud).val('DISABLE').change()
-        } else if('IN_BUILD' === _3DS.val()) {
-            removeOptionsExcept(['IN_BUILD', 'DISABLE'], fraud)
-            jQuery(fraud).val('DISABLE').change()
+        } else {
+            _3DSFlow.val(oldVal).change()
         }
     }
 
@@ -245,7 +221,6 @@ jQuery(document).ready(function ($) {
         const fraud = $('#' + prefix + 'CARD_FRAUD');
 
         optionsCache[prefix + 'CARD_TYPE_EXCHANGE_OTT'] = _3DSFlow.html()
-        optionsCache[prefix + 'CARD_FRAUD'] = fraud.html()
 
         _3DSFlowProcess(_3DS, _3DSFlow, fraud, optionsCache, prefix);
         saveCardProcess(saveCard, saveCardOption, _3DSFlow, _3DS)
@@ -263,6 +238,7 @@ jQuery(document).ready(function ($) {
 
                 switch (target.getAttribute('id')) {
                     case prefix + 'CARD_DS':
+                    case prefix + 'CARD_FRAUD':
                         _3DSFlowProcess(_3DS, _3DSFlow, fraud, optionsCache, prefix)
                         break;
                 }

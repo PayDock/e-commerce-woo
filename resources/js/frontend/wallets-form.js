@@ -44,7 +44,6 @@ const Content = (props) => {
             }
         });
         const unsubscribe = onPaymentSetup(async (data) => {
-            console.log(data);
             if (document.getElementById('paymentSourceWalletsToken').value
                 && (new URLSearchParams(window.location.search)).get('afterpay_success') !== 'false') {
                 return {

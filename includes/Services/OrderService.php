@@ -52,7 +52,7 @@ class OrderService
             'power_board-p-refund' => ['power_board-paid', 'power_board-refunded', 'refunded', 'cancelled', 'power_board-failed'],
             'power_board-authorize' => ['power_board-paid', 'power_board-cancelled', 'power_board-failed', 'cancelled', 'power_board-pending'],
             'power_board-cancelled' => ['power_board-failed', 'cancelled'],
-            'power_board-requested' => ['power_board-paid', 'power_board-failed', 'cancelled', 'power_board-pending']
+            'power_board-requested' => ['power_board-paid', 'power_board-failed', 'cancelled', 'power_board-pending', 'power_board-authorize']
         ];
         if (!empty($rulesForStatuses[$oldStatusKey])) {
             if (!in_array($newStatusKey, $rulesForStatuses[$oldStatusKey])) {

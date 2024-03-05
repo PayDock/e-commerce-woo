@@ -11,7 +11,6 @@ use PowerBoard\Services\SettingsService;
 class WalletsBlock extends AbstractBlock
 {
     public const AFTERPAY_SESSION_KEY = PowerBoardPlugin::PLUGIN_PREFIX.'_afterpay_payment_session_token';
-    public const WALLETS_SESSION_KEY = PowerBoardPlugin::PLUGIN_PREFIX.'_wallets_payment_session_token';
 
     protected const SCRIPT = 'wallets-form';
 
