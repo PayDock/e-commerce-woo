@@ -9,6 +9,7 @@ To install and configure Paydock plugin, you need:
 * PHP memory limit of 256MB.
 * PHP Requirements(curl, gd2, mbstring, xml, json, and zip
 
+
 Plugin install steps:
 
 1. Download zip file with the plugin: 
