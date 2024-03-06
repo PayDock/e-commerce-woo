@@ -35,12 +35,14 @@ class ConnectionValidationService
     ];
     private const IS_WEBHOOK_SET_OPTION = 'is_paydock_webhook_set';
     public const WEBHOOK_EVENT_FRAUD_CHECK_SUCCESS_NAME = 'standalone_fraud_check_success';
+    public const WEBHOOK_EVENT_FRAUD_CHECK_IN_REVIEW_APPROVED_NAME = 'standalone_fraud_check_in_review_approved';
     public const WEBHOOK_EVENT_TRANSACTION_SUCCESS_NAME = 'transaction_success';
     public const WEBHOOK_EVENT_TRANSACTION_FAILURE_NAME = 'transaction_failure';
     public const WEBHOOK_EVENTS = [
         self::WEBHOOK_EVENT_FRAUD_CHECK_SUCCESS_NAME,
         self::WEBHOOK_EVENT_TRANSACTION_SUCCESS_NAME,
-        self::WEBHOOK_EVENT_TRANSACTION_FAILURE_NAME
+        self::WEBHOOK_EVENT_TRANSACTION_FAILURE_NAME,
+        self::WEBHOOK_EVENT_FRAUD_CHECK_IN_REVIEW_APPROVED_NAME
     ];
 
     public ?AbstractSettingService $service = null;
@@ -457,7 +459,7 @@ class ConnectionValidationService
     private function setWebhooks(): void
     {
         $option = get_option(self::IS_WEBHOOK_SET_OPTION, false);
-        if ($option !== false && count((array) $option) === count(self::WEBHOOK_EVENTS)) {
+        if (strpos(get_site_url(), 'localhost') !== false || ($option !== false && count((array) $option) === count(self::WEBHOOK_EVENTS))) {
             return;
         }
 

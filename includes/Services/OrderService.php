@@ -52,7 +52,7 @@ class OrderService
             'paydock-p-refund' => ['paydock-paid', 'paydock-refunded', 'refunded', 'cancelled', 'paydock-failed'],
             'paydock-authorize' => ['paydock-paid', 'paydock-cancelled', 'paydock-failed', 'cancelled', 'paydock-pending'],
             'paydock-cancelled' => ['paydock-failed', 'cancelled'],
-            'paydock-requested' => ['paydock-paid', 'paydock-failed', 'cancelled', 'paydock-pending']
+            'paydock-requested' => ['paydock-paid', 'paydock-failed', 'cancelled', 'paydock-pending', 'paydock-authorize']
         ];
         if (!empty($rulesForStatuses[$oldStatusKey])) {
             if (!in_array($newStatusKey, $rulesForStatuses[$oldStatusKey])) {

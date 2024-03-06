@@ -42,7 +42,7 @@ class WalletsPaymentService extends AbstractPaymentService
     {
         if (!empty($_GET['afterpay_success']) && ($_GET['afterpay_success'] == 'false')) {
             wc_add_notice(
-                __('Error:', PAY_DOCK_TEXT_DOMAIN).' Afterpay returned a failure status.',
+                __('Error:', PAY_DOCK_TEXT_DOMAIN) . ' Afterpay returned a failure status.',
                 'error'
             );
 
@@ -63,11 +63,19 @@ class WalletsPaymentService extends AbstractPaymentService
             $chargeId = $data['data']['id'];
         }
 
+        update_option('paydock_fraud_' . (string) $order->get_id(), []);
+
         $loggerRepository = new LogRepository();
-        $status = ((
-                ($data['data']['status'] === 'pending')
-                || (!empty($_GET['direct_charge']) && ($_GET['direct_charge'] == 'true'))
-            ) ? 'wc-paydock-authorize' : 'wc-paydock-paid');
+        if ('inreview' === $data['data']['status']) {
+            $status = 'wc-paydock-requested';
+        } elseif (
+            ($data['data']['status'] === 'pending')
+            || (!empty($_GET['direct_charge']) && ($_GET['direct_charge'] == 'true'))
+        ) {
+            $status = 'wc-paydock-authorize';
+        } else {
+            $status = 'wc-paydock-paid';
+        }
 
         $order->set_status($status);
         $order->payment_complete();
@@ -75,7 +83,6 @@ class WalletsPaymentService extends AbstractPaymentService
 
         unset(
             $_SESSION[WalletsBlock::AFTERPAY_SESSION_KEY],
-            $_SESSION[WalletsBlock::WALLETS_SESSION_KEY.$order_id]
         );
         update_post_meta($order_id, 'paydock_charge_id', $chargeId);
 
@@ -83,10 +90,10 @@ class WalletsPaymentService extends AbstractPaymentService
 
         $loggerRepository->createLogRecord(
             $data['data']['id'] ?? '',
-                'Charge',
-                $status,
+            'Charge',
+            $status,
             'Successful',
-                $status === 'wc-paydock-authorize' ? LogRepository::DEFAULT : LogRepository::SUCCESS);
+            $status === 'wc-paydock-authorize' ? LogRepository::DEFAULT : LogRepository::SUCCESS);
 
         return [
             'result' => 'success', 'redirect' => $this->get_return_url($order)

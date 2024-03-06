@@ -1,3 +1,4 @@
+window.paydockWalletsButtons = {};
 (function () {
     const afterpayCountries = ['au','nz','us','ca','uk','gb','fr','it','es','de'];
     const zippayCountries = ['au','nz','us','ca'];
@@ -265,7 +266,7 @@
                         height = 55;
                         break;
                 }
-                let config =
+                const config =
                     {
                         country: window.paydockWallets[key].county,
                         style: {
@@ -281,6 +282,8 @@
                 if ('pay_pal_smart_button' === key) {
                     config['pay_later'] = window.paydockWallets[key].pay_later;
                 }
+
+                $(id).children().remove()
 
                 const button = new paydock.WalletButtons(
                     id,
@@ -299,10 +302,22 @@
                     orderButton.click();
                 });
 
-                button.onPaymentError((data) => orderButton.click());
-                button.onPaymentInReview((data) => orderButton.click());
+                button.onPaymentError((data) => {
+                    orderButton.click();
+                    initPaydockWidgetWallets(orderButton);
+                });
+                button.onPaymentInReview((data) =>{
+                    $('#paymentSourceWalletsToken').val(JSON.stringify(data))
+                    $('#paymentCompleted').show();
+                    $('#paydockWalletsGoogleApplePay, #paydockWalletsAfterPay, #paydockWalletsPaypal').hide();
+
+                    orderButton.show();
+                    orderButton.click();
+                });
 
                 button.load();
+
+                window.paydockWalletsButtons[key] = button;
             }
         }
 
@@ -314,11 +329,6 @@
             } else {
                 $('#paydockWidgetWallets').parent().find('.paydock-validation-error').css('display', 'none')
                 $('#paydockWidgetWallets')
-            }
-
-            if (window.paydockWallets) {
-                initWalletsButtonsWidgets();
-                return;
             }
 
             if ($('#paydockWalletsApplePay, #paydockWalletsGooglePay, #paydockWalletsAfterPay, #paydockWalletsPaypal').length === 0) {
