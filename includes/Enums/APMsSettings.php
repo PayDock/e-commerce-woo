@@ -2,7 +2,7 @@
 
 namespace PowerBoard\Enums;
 
-use PowerBoard\Abstract\AbstractEnum;
+use PowerBoard\Abstracts\AbstractEnum;
 
 class APMsSettings extends AbstractEnum
 {
@@ -16,38 +16,58 @@ class APMsSettings extends AbstractEnum
 
     public function getInputType(): string
     {
-        return match ($this->name) {
-            self::GATEWAY_ID => 'text',
-            self::ENABLE,
-            self::FRAUD => 'checkbox',
-            self::FRAUD_SERVICE_ID => 'text',
-            self::DIRECT_CHARGE,
-            self::SAVE_CARD => 'checkbox',
-            self::SAVE_CARD_OPTION => 'select',
-        };
+        switch ($this->name) {
+            case self::GATEWAY_ID:
+            case self::FRAUD_SERVICE_ID:
+                return 'text';
+
+            case self::ENABLE:
+            case self::FRAUD:
+            case self::DIRECT_CHARGE:
+            case self::SAVE_CARD:
+                return 'checkbox';
+
+            case self::SAVE_CARD_OPTION:
+                return 'select';
+
+            default:
+                // Consider adding a default case if applicable
+                return '';
+        }
     }
 
     public function getLabel(): string
     {
-        return match ($this->name) {
-            self::FRAUD,
-            self::ENABLE => ucfirst(strtolower($this->name)),
-            self::GATEWAY_ID => 'Gateway ID',
-            self::DIRECT_CHARGE => 'Direct Charge',
-            self::FRAUD_SERVICE_ID => 'Fraud service ID',
-            self::SAVE_CARD => 'Save card',
-            self::SAVE_CARD_OPTION => 'Save card option',
-        };
+        switch ($this->name) {
+            case self::FRAUD:
+            case self::ENABLE:
+                return ucfirst(strtolower($this->name));
+            case self::GATEWAY_ID:
+                return 'Gateway ID';
+            case self::DIRECT_CHARGE:
+                return 'Direct Charge';
+            case self::FRAUD_SERVICE_ID:
+                return 'Fraud service ID';
+            case self::SAVE_CARD:
+                return 'Save card';
+            case self::SAVE_CARD_OPTION:
+                return 'Save card option';
+            default:
+                return '';
+        }
     }
 
     public function getDescription(): string
     {
-        return match ($this->name) {
-            self::DIRECT_CHARGE => 'Direct charge stands for authorization and capture in a single request',
-            self::SAVE_CARD => 'Offer your customer the option to save the card information permanently at PowerBoard for '
-                . 'further usage',
+        switch ($this->name) {
+            case self::DIRECT_CHARGE:
+                return 'Direct charge stands for authorization and capture in a single request';
 
-            default => ''
-        };
+            case self::SAVE_CARD:
+                return 'Offer your customer the option to save the card information permanently at PowerBoard for further usage';
+
+            default:
+                return '';
+        }
     }
 }

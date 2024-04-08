@@ -2,7 +2,7 @@
 
 namespace PowerBoard\API;
 
-use PowerBoard\Abstract\AbstractApiService;
+use PowerBoard\Abstracts\AbstractApiService;
 
 class TokenService extends AbstractApiService
 {

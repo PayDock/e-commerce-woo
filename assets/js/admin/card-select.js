@@ -1,62 +1,41 @@
 jQuery(window).on('load', function () {
     const json = {
-        "options": [
-            {
-                "image": "/wp-content/plugins/power_board/assets/images/ausbc.png",
-                "title": "Australian Bank Card",
-                "type": "ausbc"
-            },
-            {
-                "image": "/wp-content/plugins/power_board/assets/images/diners.png",
-                "title": "Diner's Club, Diner's Club International, Diner's Club / Carte Blanche",
-                "type": "diners"
-            },
-            {
-                "image": "/wp-content/plugins/power_board/assets/images/japcb.png",
-                "title": "Japanese Credit Bureau",
-                "type": "japcb"
-            },
-            {
-                "image": "/wp-content/plugins/power_board/assets/images/maestro.png",
-                "title": "Maestro",
-                "type": "maestro"
-            },
-            {
-                "image": "/wp-content/plugins/power_board/assets/images/laser.png",
-                "title": "Laser",
-                "type": "laser"
-            },
-            {
-                "image": "/wp-content/plugins/power_board/assets/images/solo.png",
-                "title": "Solo (Paymentech)",
-                "type": "solo"
-            },
-            {
-                "image": "/wp-content/plugins/power_board/assets/images/mastercard.png",
-                "title": "MasterCard",
-                "type": "mastercard"
-            },
-            {
-                "image": "/wp-content/plugins/power_board/assets/images/discover.png",
-                "title": "Discover",
-                "type": "discover"
-            },
-            {
-                "image": "/wp-content/plugins/power_board/assets/images/amex.png",
-                "title": "American Express",
-                "type": "amex"
-            },
-            {
-                "image": "/wp-content/plugins/power_board/assets/images/visa.png",
-                "title": "Visa, Visa Electron",
-                "type": "visa"
-            },
-        ]
+        "options": [{
+            "image": "/wp-content/plugins/power_board/assets/images/ausbc.png",
+            "title": "Australian Bank Card",
+            "type": "ausbc"
+        }, {
+            "image": "/wp-content/plugins/power_board/assets/images/diners.png",
+            "title": "Diner's Club, Diner's Club International, Diner's Club / Carte Blanche",
+            "type": "diners"
+        }, {
+            "image": "/wp-content/plugins/power_board/assets/images/japcb.png",
+            "title": "Japanese Credit Bureau",
+            "type": "japcb"
+        }, {
+            "image": "/wp-content/plugins/power_board/assets/images/maestro.png", "title": "Maestro", "type": "maestro"
+        }, {
+            "image": "/wp-content/plugins/power_board/assets/images/laser.png", "title": "Laser", "type": "laser"
+        }, {
+            "image": "/wp-content/plugins/power_board/assets/images/solo.png", "title": "Solo (Paymentech)", "type": "solo"
+        }, {
+            "image": "/wp-content/plugins/power_board/assets/images/mastercard.png",
+            "title": "MasterCard",
+            "type": "mastercard"
+        }, {
+            "image": "/wp-content/plugins/power_board/assets/images/discover.png", "title": "Discover", "type": "discover"
+        }, {
+            "image": "/wp-content/plugins/power_board/assets/images/amex.png", "title": "American Express", "type": "amex"
+        }, {
+            "image": "/wp-content/plugins/power_board/assets/images/visa.png",
+            "title": "Visa, Visa Electron",
+            "type": "visa"
+        },]
     }
-    const inputElement = document.getElementById('card-select-2');
+    const inputElement = document.getElementById('card-select');
 
     const createOptions = () => {
-        const dropdown = document.getElementById('multiselect-2')
+        const dropdown = document.getElementById('multiselect-power-board')
         if (dropdown === null) {
             return
         }
@@ -74,8 +53,8 @@ jQuery(window).on('load', function () {
             const itemLi = document.createElement('li')
 
             itemLi.innerHTML = `
-            <input type="checkbox" id="1${index}" value="${option.type}" class="checkbox">
-            <label for="1${index}">
+            <input type="checkbox" id="power-board-card-type-${index}" value="${option.type}" class="checkbox">
+            <label for="power-board-card-type-${index}">
                 <i><img src="${option.image}" alt="${option.title}"></i>${option.title}
             </label>
         `
@@ -153,7 +132,7 @@ jQuery(window).on('load', function () {
         }
     }
 
-    const multiselect = document.querySelectorAll('.multiselect')
+    const multiselect = document.querySelectorAll('.multiselect-power-board')
 
     if (typeof (multiselect) != 'undefined' && multiselect != null) {
         createOptions()

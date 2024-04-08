@@ -3,13 +3,14 @@
 namespace PowerBoard\Services\Validation;
 
 use Exception;
-use PowerBoard\Abstract\AbstractSettingService;
+use PowerBoard\Abstracts\AbstractSettingService;
 use PowerBoard\API\ConfigService;
 use PowerBoard\Enums\BankAccountSettings;
 use PowerBoard\Enums\CardSettings;
 use PowerBoard\Enums\CredentialSettings;
 use PowerBoard\Enums\CredentialsTypes;
 use PowerBoard\Enums\FraudTypes;
+use PowerBoard\Enums\NotificationEvents;
 use PowerBoard\Enums\OtherPaymentMethods;
 use PowerBoard\Enums\SettingGroups;
 use PowerBoard\Enums\SettingsTabs;
@@ -20,30 +21,23 @@ use PowerBoard\Services\SettingsService;
 
 class ConnectionValidationService
 {
+    private $oldAccessToken = null;
+    private $oldPublicKey = null;
+    private $oldSecretKey = null;
     private const ENABLED_CONDITION = 'yes';
 
     private const UNSELECTED_CRD_VALUE = 'Please select payment methods...';
 
     private const AVAILABLE_CARD_TYPES = [
         'mastercard' => 'MasterCard',
-        'visa' => 'Visa',
-        'amex' => 'American Express',
-        'diners' => 'Diners Club',
-        'japcb' => 'Japanese Credit Bureau',
-        'maestro' => 'Maestro',
-        'ausbc' => 'Australian Bank Card',
+        'visa'       => 'Visa',
+        'amex'       => 'American Express',
+        'diners'     => 'Diners Club',
+        'japcb'      => 'Japanese Credit Bureau',
+        'maestro'    => 'Maestro',
+        'ausbc'      => 'Australian Bank Card',
     ];
     private const IS_WEBHOOK_SET_OPTION = 'is_power_board_webhook_set';
-    public const WEBHOOK_EVENT_FRAUD_CHECK_SUCCESS_NAME = 'standalone_fraud_check_success';
-    public const WEBHOOK_EVENT_FRAUD_CHECK_IN_REVIEW_APPROVED_NAME = 'standalone_fraud_check_in_review_approved';
-    public const WEBHOOK_EVENT_TRANSACTION_SUCCESS_NAME = 'transaction_success';
-    public const WEBHOOK_EVENT_TRANSACTION_FAILURE_NAME = 'transaction_failure';
-    public const WEBHOOK_EVENTS = [
-        self::WEBHOOK_EVENT_FRAUD_CHECK_SUCCESS_NAME,
-        self::WEBHOOK_EVENT_TRANSACTION_SUCCESS_NAME,
-        self::WEBHOOK_EVENT_TRANSACTION_FAILURE_NAME,
-        self::WEBHOOK_EVENT_FRAUD_CHECK_IN_REVIEW_APPROVED_NAME
-    ];
 
     public ?AbstractSettingService $service = null;
     private array $errors = [];
@@ -67,7 +61,7 @@ class ConnectionValidationService
 
         update_option(
             $option_key,
-            apply_filters('woocommerce_settings_api_sanitized_fields_' . $service->id, $service->settings),
+            apply_filters('woocommerce_settings_api_sanitized_fields_'.$service->id, $service->settings),
             'yes'
         );
     }
@@ -82,8 +76,8 @@ class ConnectionValidationService
 
                 if ('select' === $field['type'] || 'checkbox' === $field['type']) {
                     do_action('woocommerce_update_non_option_setting', [
-                        'id' => $key,
-                        'type' => $field['type'],
+                        'id'    => $key,
+                        'type'  => $field['type'],
                         'value' => $this->data[$key],
                     ]);
                 }
@@ -97,7 +91,7 @@ class ConnectionValidationService
     {
         if ($this->validateCredential()) {
             $this->validateCard();
-            $this->validateBankAccount();
+//            $this->validateBankAccount();
             $this->validateWallets();
             $this->validateAPMs();
             $this->setWebhooks();
@@ -112,13 +106,11 @@ class ConnectionValidationService
                 CredentialSettings::ACCESS_KEY()->name,
             ]);
 
-        $typeKey = SettingsService::getInstance()
+        $widgetKey = SettingsService::getInstance()
             ->getOptionName($this->service->id, [
                 SettingGroups::CREDENTIALS()->name,
-                CredentialSettings::TYPE()->name,
+                CredentialSettings::WIDGET_KEY()->name,
             ]);
-
-        $isAccessKey = CredentialsTypes::ACCESS_KEY()->name == $this->data[$typeKey];
 
         $publicKey = SettingsService::getInstance()
             ->getOptionName($this->service->id, [
@@ -132,9 +124,22 @@ class ConnectionValidationService
                 CredentialSettings::SECRET_KEY()->name,
             ]);
 
+        $typeKey = SettingsService::getInstance()
+            ->getOptionName($this->service->id, [
+                SettingGroups::CREDENTIALS()->name,
+                CredentialSettings::TYPE()->name,
+            ]);
+
+        $isAccessKey = CredentialsTypes::ACCESS_KEY()->name == $this->data[$typeKey];
+
         if (
-            ($isAccessKey && !empty($this->data[$accessKey]) && $this->checkAccessKeyConnection($this->data[$accessKey]))
-            || (
+            (
+                $isAccessKey
+                && !empty($this->data[$accessKey])
+                && !empty($this->data[$widgetKey])
+                && $this->checkAccessKeyConnection($this->data[$accessKey])
+                && $this->checkWidgetKeyConnection($this->data[$widgetKey])
+            ) || (
                 !$isAccessKey
                 && !empty($this->data[$publicKey])
                 && !empty($this->data[$secretKey])
@@ -144,20 +149,55 @@ class ConnectionValidationService
             return true;
         }
 
-        $this->errors[] = 'Invalid credentials';
+        $this->errors[] = 'Invalid credentials. Please update and try again. ';
 
         return false;
     }
 
     private function checkAccessKeyConnection(?string $accessToken): bool
     {
+        $this->saveOldCredential();
+
         ConfigService::$accessToken = $accessToken;
         ConfigService::$publicKey = null;
         ConfigService::$secretKey = null;
 
         $this->getawayIds = $this->adapterService->searchGateway(['sort_direction' => 'DESC']);
+        $this->servicesIds = $this->adapterService->searchServices(['sort_direction' => 'DESC']);
 
-        return empty($this->getawayIds['error']);
+        $result = empty($this->getawayIds['error']);
+
+        $this->restoreCredential();
+
+        return $result;
+    }
+    private function saveOldCredential()
+    {
+        $this->oldAccessToken = ConfigService::$accessToken;
+        $this->oldPublicKey = ConfigService::$publicKey;
+        $this->oldSecretKey = ConfigService::$secretKey;
+    }
+
+    private function restoreCredential()
+    {
+        ConfigService::$accessToken = $this->oldAccessToken;
+        ConfigService::$publicKey = $this->oldPublicKey;
+        ConfigService::$secretKey = $this->oldSecretKey;
+    }
+    private function checkWidgetKeyConnection(?string $accessToken): bool
+    {
+        $this->saveOldCredential();
+
+        ConfigService::$accessToken = $accessToken;
+        ConfigService::$publicKey = null;
+        ConfigService::$secretKey = null;
+
+        $result = $this->adapterService->token();
+        $result = empty($result['error']);
+
+        $this->restoreCredential();
+
+        return $result;
     }
 
     private function checkCredentialConnection(?string $public, ?string $secret): bool
@@ -167,17 +207,23 @@ class ConnectionValidationService
 
     private function checkPublicKey(?string $publicKey): bool
     {
+        $this->saveOldCredential();
         ConfigService::$publicKey = $publicKey;
         ConfigService::$secretKey = null;
         ConfigService::$accessToken = null;
 
-        $publicResult = $this->adapterService->token();
+        $result = $this->adapterService->token();
+        $result = empty($result['error']);
 
-        return empty($publicResult['error']);
+        $this->restoreCredential();
+
+        return $result;
     }
 
     private function checkSecretKey(?string $secretKey): bool
     {
+        $this->saveOldCredential();
+
         ConfigService::$publicKey = null;
         ConfigService::$accessToken = null;
         ConfigService::$secretKey = $secretKey;
@@ -185,7 +231,11 @@ class ConnectionValidationService
         $this->getawayIds = $this->adapterService->searchGateway(['sort_direction' => 'DESC']);
         $this->servicesIds = $this->adapterService->searchServices(['sort_direction' => 'DESC']);
 
-        return empty($this->getawayIds['error']);
+        $result = empty($this->getawayIds['error']);
+
+        $this->restoreCredential();
+
+        return $result;
     }
 
     private function validateCard(): void
@@ -245,24 +295,35 @@ class ConnectionValidationService
                 if ($supportCardTypeByGatewayId) {
                     if ($this->data[$supportedCardTypesKey]) {
                         if (self::UNSELECTED_CRD_VALUE == $this->data[$supportedCardTypesKey]) {
-                            $this->errors[] = 'Supported card types cant be empty.';
+                            $this->errors[] = 'You have not selected a supported card type. Please choose from the list of supported card types to continue.';
                         } else {
-                            $supportCardType = strtolower(str_replace(' ', '',
-                                $this->data[$supportedCardTypesKey]));
+                            $supportCardType = strtolower(
+                                str_replace(
+                                    ' ',
+                                    '',
+                                    $this->data[$supportedCardTypesKey]
+                                )
+                            );
                             $arraySupportedCardTypesKeys = explode(',', $supportCardType);
-                            if (empty(array_intersect($arraySupportedCardTypesKeys,
-                                array_keys(self::AVAILABLE_CARD_TYPES)))) {
-                                $this->errors[] = 'Selected types of cards (' . implode(',',
-                                    $arraySupportedCardTypesKeys) . ') are not supported by this Gateway ID';
+                            if (empty(
+                            array_intersect(
+                                $arraySupportedCardTypesKeys,
+                                array_keys(self::AVAILABLE_CARD_TYPES)
+                            )
+                            )) {
+                                $this->errors[] = 'The selected card types ('.implode(
+                                        ',',
+                                        $arraySupportedCardTypesKeys
+                                    ).') are not supported with this Gateway ID.';
                             }
                         }
                     } else {
-                        $this->errors[] = 'You do not select any supported card types';
+                        $this->errors[] = 'You have not selected a supported card type. Please choose from the list of supported card types to continue.';
                     }
                 }
 
             } else {
-                $this->errors[] = 'Incorrect Gateway ID for the card: ' . $this->data[$gatewayIdKey];
+                $this->errors[] = 'Incorrect Gateway ID for the card: '.$this->data[$gatewayIdKey];
             }
 
             if (
@@ -270,7 +331,7 @@ class ConnectionValidationService
                 && (FraudTypes::DISABLE()->name !== $this->data[$fraudEnableServiceKey])
                 && !$this->validateId($this->data[$fraudGatewayIdKey])
             ) {
-                $this->errors[] = 'Incorrect Fraud Service ID: ' . $this->data[$fraudGatewayIdKey];
+                $this->errors[] = 'Incorrect Fraud Service ID: '.$this->data[$fraudGatewayIdKey];
             }
 
             if (
@@ -278,12 +339,12 @@ class ConnectionValidationService
                 && (FraudTypes::DISABLE()->name !== $this->data[$_3DSEnableServiceKey])
                 && !$this->validateId($this->data[$_3DSGatewayIdKey])
             ) {
-                $this->errors[] = 'Incorrect 3DS Service ID: ' . $this->data[$_3DSGatewayIdKey];
+                $this->errors[] = 'Incorrect 3DS Service ID: '.$this->data[$_3DSGatewayIdKey];
             }
         }
     }
 
-    private function validateId(string $id, string $checkedName = '', bool $checkFull = false): bool
+    private function validateId(string $id, bool $fraudPassiveMode = false): bool
     {
         foreach ($this->getawayIds['resource']['data'] as $getawayId) {
             if ($getawayId['_id'] == $id) {
@@ -292,7 +353,17 @@ class ConnectionValidationService
         }
 
         foreach ($this->servicesIds['resource']['data'] as $servicesId) {
-            if ($id == $servicesId['_id']) {
+            if (
+                (
+                    !$fraudPassiveMode
+                    && $id == $servicesId['_id']
+                ) || (
+                    $id == $servicesId['_id']
+                    && $fraudPassiveMode
+                    && isset($servicesId['fraud_options']['mode'])
+                    && 'active' !== $servicesId['fraud_options']['mode']
+                )
+            ) {
                 return true;
             }
         }
@@ -313,6 +384,8 @@ class ConnectionValidationService
 
     private function validateBankAccount(): void
     {
+        return;
+
         $enabledKey = SettingsService::getInstance()
             ->getOptionName($this->service->id, [
                 SettingGroups::BANK_ACCOUNT()->name,
@@ -330,12 +403,12 @@ class ConnectionValidationService
             $result = true;
         }
 
-        if (!$result && $this->validateId($this->data[$gatewayKey], 'bank account')) {
+        if (!$result && $this->validateId($this->data[$gatewayKey])) {
             $result = true;
         }
 
         if (!$result) {
-            $this->errors[] = 'Wrong bank account gateway ID.';
+            $this->errors[] = 'Incorrect Gateway ID for Bank Accoun';
         }
     }
 
@@ -369,21 +442,17 @@ class ConnectionValidationService
                 ]);
             $isEnabled = self::ENABLED_CONDITION === $this->data[$enabledKey];
             if ($isEnabled) {
-                $result = match ($method->name) {
-                    WalletPaymentMethods::PAY_PAL_SMART_BUTTON()->name => $this->validateId(
-                        $this->data[$gatewayKey],
-                        'Paypal'
-                    ),
-                    WalletPaymentMethods::AFTERPAY()->name => $this->validateId(
-                        $this->data[$gatewayKey],
-                        'Afterpay v2'
-                    ),
-                    default => $this->validateId($this->data[$gatewayKey], 'MPGS'),
-                };
+                switch ($method->name) {
+                    case WalletPaymentMethods::PAY_PAL_SMART_BUTTON()->name:
+                    case WalletPaymentMethods::AFTERPAY()->name:
+                    default:
+                        $result = $this->validateId($this->data[$gatewayKey]);
+                        break;
+                }
             }
 
             if (!$result) {
-                $this->errors[] = 'Wrong Gateway ID for ' . $method->getLabel() . ' wallet.';
+                $this->errors[] = 'Incorrect Gateway ID for '.$method->getLabel().' wallet';
             }
 
             if (
@@ -391,10 +460,16 @@ class ConnectionValidationService
                 && (self::ENABLED_CONDITION == $this->data[$fraudEnableKey])
                 && !$this->validateId($this->data[$fraudGatewayIdKey])
             ) {
-                $this->errors[] = 'Incorrect '
-                    . $method->getLabel()
-                    . ' wallet Fraud Service ID: '
-                    . $this->data[$fraudGatewayIdKey];
+                $this->errors[] = 'Incorrect Fraud Service ID for '
+                    .$method->getLabel()
+                    .' wallet';
+            } elseif (
+                $isEnabled
+                && (self::ENABLED_CONDITION == $this->data[$fraudEnableKey])
+                && WalletPaymentMethods::AFTERPAY()->name == $method->name
+                && !$this->validateId($this->data[$fraudGatewayIdKey], true)
+            ) {
+                $this->errors[] = 'Fraud service mode is not supported with Alternative Payment Method';
             }
         }
     }
@@ -429,18 +504,18 @@ class ConnectionValidationService
                 ]);
             $isEnabled = self::ENABLED_CONDITION === $this->data[$enabledKey];
             if ($isEnabled) {
-                $result = match ($method) {
-                    OtherPaymentMethods::AFTERPAY() => $this->validateId(
-                        $this->data[$gatewayKey],
-                        'Afterpay v1',
-                        true
-                    ),
-                    default => $this->validateId($this->data[$gatewayKey], $method->name),
-                };
+                switch (true) {
+                    case $method === OtherPaymentMethods::AFTERPAY():
+                        $result = $this->validateId($this->data[$gatewayKey]);
+                        break;
+                    default:
+                        $result = $this->validateId($this->data[$gatewayKey]);
+                        break;
+                }
             }
 
             if (!$result) {
-                $this->errors[] = 'Wrong Gateway ID for ' . $method->getLabel() . ' APM.';
+                $this->errors[] = 'Incorrect Fraud Service ID for '.$method->getLabel().' Alternative Payment Method .';
             }
 
             if (
@@ -449,22 +524,31 @@ class ConnectionValidationService
                 && !$this->validateId($this->data[$fraudGatewayIdKey])
             ) {
                 $this->errors[] = 'Incorrect '
-                    . $method->getLabel()
-                    . ' APM Fraud Service ID: '
-                    . $this->data[$fraudGatewayIdKey];
+                    .$method->getLabel()
+                    .' APM Fraud Service ID: '
+                    .$this->data[$fraudGatewayIdKey];
+            } elseif (
+                $isEnabled
+                && (self::ENABLED_CONDITION == $this->data[$fraudEnableKey])
+                && !$this->validateId($this->data[$fraudGatewayIdKey], true)
+            ) {
+                $this->errors[] = 'Fraud service mode is not supported with Alternative Payment Method';
             }
         }
     }
 
     private function setWebhooks(): void
     {
+        $webhookEvents = NotificationEvents::events();
         $option = get_option(self::IS_WEBHOOK_SET_OPTION, false);
-        if (strpos(get_site_url(), 'localhost') !== false || ($option !== false && count((array) $option) === count(self::WEBHOOK_EVENTS))) {
+        if (strpos(get_site_url(), 'localhost') !== false || ($option !== false && count((array) $option) === count(
+                    $webhookEvents
+                ))) {
             return;
         }
 
-        $notSettedWebhooks = self::WEBHOOK_EVENTS;
-        $webhookSiteUrl = get_site_url() . '/wc-api/power_board-webhook/';
+        $notSettedWebhooks = $webhookEvents;
+        $webhookSiteUrl = get_site_url().'/wc-api/power-board-webhook/';
         $shouldCreateWebhook = true;
         $webhookRequest = $this->adapterService->searchNotifications(['type' => 'webhook']);
         if (!empty($webhookRequest['resource']['data'])) {
@@ -475,7 +559,7 @@ class ConnectionValidationService
                 }
             }
 
-            $notSettedWebhooks = array_diff(self::WEBHOOK_EVENTS, $events);
+            $notSettedWebhooks = array_diff($webhookEvents, $events);
             if (empty($notSettedWebhooks)) {
                 $shouldCreateWebhook = false;
             }
@@ -485,16 +569,20 @@ class ConnectionValidationService
         if ($shouldCreateWebhook) {
             foreach ($notSettedWebhooks as $event) {
                 $result = $this->adapterService->createNotification([
-                    'event' => $event,
-                    'destination' => $webhookSiteUrl,
-                    'type' => 'webhook',
-                    'transaction_only' => false
+                    'event'            => $event,
+                    'destination'      => $webhookSiteUrl,
+                    'type'             => 'webhook',
+                    'transaction_only' => false,
                 ]);
 
                 if (!empty($result['resource']['data']['_id'])) {
                     $webhookIds[] = $result['resource']['data']['_id'];
                 } else {
-                    $this->errors[] = __('Can\'t create webhook', POWER_BOARD_TEXT_DOMAIN) . (!empty($result['error']) ? ' ' . $result['error'] : '');
+                    $this->errors[] = __(
+                            'Can\'t create webhook',
+                            POWER_BOARD_TEXT_DOMAIN
+                        ).(!empty($result['error']) ? ' '.$result['error'] : '');
+
                     return;
                 }
             }

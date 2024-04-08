@@ -2,14 +2,14 @@
 
 namespace PowerBoard\API;
 
-use PowerBoard\Abstract\AbstractApiService;
+use PowerBoard\Abstracts\AbstractApiService;
 
 class VaultService extends AbstractApiService
 {
     const ENDPOINT = 'vault/payment_sources';
 
     protected array $allowedAction = [
-        'create' => self::METHOD_POST
+        'create' => self::METHOD_POST,
     ];
 
     public function create(array $params): self

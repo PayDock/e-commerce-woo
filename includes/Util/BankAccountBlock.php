@@ -2,7 +2,7 @@
 
 namespace PowerBoard\Util;
 
-use PowerBoard\Abstract\AbstractBlock;
+use PowerBoard\Abstracts\AbstractBlock;
 use PowerBoard\Repositories\UserTokenRepository;
 use PowerBoard\Services\Checkout\BankAccountPaymentService;
 use PowerBoard\Services\SettingsService;
@@ -29,27 +29,28 @@ final class BankAccountBlock extends AbstractBlock
         }
 
         return array_merge($userTokens, [
+            'isActive'                     => $this->is_active(),
             // Wordpress data
-            'isUserLoggedIn' => is_user_logged_in(),
-            'isSandbox' => $settingsService->isSandbox(),
+            'isUserLoggedIn'               => is_user_logged_in(),
+            'isSandbox'                    => $settingsService->isSandbox(),
             // Woocommerce data
-            'amount' => WC()->cart->total,
-            'currency' => strtoupper(get_woocommerce_currency()),
+            'amount'                       => WC()->cart->total,
+            'currency'                     => strtoupper(get_woocommerce_currency()),
             // Widget
-            'title' => $settingsService->getWidgetPaymentBankAccountTitle(),
-            'description' => $settingsService->getWidgetPaymentBankAccountDescription(),
-            'styles' => $settingsService->getWidgetStyles(),
+            'title'                        => $settingsService->getWidgetPaymentBankAccountTitle(),
+            'description'                  => $settingsService->getWidgetPaymentBankAccountDescription(),
+            'styles'                       => $settingsService->getWidgetStyles(),
             // Bank Account
-            'gatewayId' => $settingsService->getBankAccountGatewayId(),
+            'gatewayId'                    => $settingsService->getBankAccountGatewayId(),
             // SaveBankAccount
-            'bankAccountSaveAccount' => $settingsService->getBankAccountSaveAccount(),
+            'bankAccountSaveAccount'       => $settingsService->getBankAccountSaveAccount(),
             'bankAccountSaveAccountOption' => $settingsService->getBankAccountSaveAccountOption(),
             // Tokens & keys
-            'publicKey' => $settingsService->getPublicKey(),
-            'selectedToken' => '',
-            'paymentSourceToken' => '',
+            'publicKey'                    => $settingsService->getPublicKey(),
+            'selectedToken'                => '',
+            'paymentSourceToken'           => '',
             // Other
-            'supports' => array_filter($this->gateway->supports, [$this->gateway, 'supports'])
+            'supports'                     => array_filter($this->gateway->supports, [$this->gateway, 'supports']),
         ]);
     }
 }

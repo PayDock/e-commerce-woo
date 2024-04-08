@@ -2,15 +2,15 @@
 
 namespace PowerBoard\API;
 
-use PowerBoard\Abstract\AbstractApiService;
+use PowerBoard\Abstracts\AbstractApiService;
 
 class ServiceService extends AbstractApiService
 {
     const ENDPOINT = 'services';
 
     protected array $allowedAction = [
-        'get' => self::METHOD_GET,
-        'search' => self::METHOD_GET
+        'get'    => self::METHOD_GET,
+        'search' => self::METHOD_GET,
     ];
 
     private string $id;
@@ -41,7 +41,7 @@ class ServiceService extends AbstractApiService
     {
         switch ($this->action) {
             case 'get':
-                $result = self::ENDPOINT . '/' . urlencode($this->id);
+                $result = self::ENDPOINT.'/'.urlencode($this->id);
                 break;
             default:
                 $result = self::ENDPOINT;

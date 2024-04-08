@@ -2,7 +2,7 @@
 
 namespace PowerBoard\Services\Settings;
 
-use PowerBoard\Abstract\AbstractSettingService;
+use PowerBoard\Abstracts\AbstractSettingService;
 use PowerBoard\Enums\SettingsTabs;
 
 class WebHooksSettingService extends AbstractSettingService

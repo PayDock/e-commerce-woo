@@ -1,15 +1,13 @@
 <?php
 
-namespace PowerBoard;
+ namespace PowerBoard;
 
-use PowerBoard\Abstract\AbstractSingleton;
+use PowerBoard\Abstracts\AbstractSingleton;
 use PowerBoard\Hooks\ActivationHook;
 use PowerBoard\Hooks\DeactivationHook;
 use PowerBoard\Repositories\LogRepository;
 use PowerBoard\Services\ActionsService;
-use PowerBoard\Services\Assets\AdminAssetsService;
 use PowerBoard\Services\FiltersService;
-use PowerBoard\Services\Settings\LiveConnectionSettingService;
 
 if (!class_exists('\PowerBoard\PowerBoardPlugin')) {
     final class PowerBoardPlugin extends AbstractSingleton
@@ -22,9 +20,9 @@ if (!class_exists('\PowerBoard\PowerBoardPlugin')) {
 
         public const VERSION = '1.0.0';
 
-        protected static ?PowerBoardPlugin $instance = null;
+        protected static $instance = null;
 
-        protected LiveConnectionSettingService|null $paymentService = null;
+        protected $paymentService = null;
 
         protected function __construct()
         {
@@ -33,8 +31,6 @@ if (!class_exists('\PowerBoard\PowerBoardPlugin')) {
 
             ActionsService::getInstance();
             FiltersService::getInstance();
-
-
         }
     }
 }

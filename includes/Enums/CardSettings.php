@@ -2,7 +2,7 @@
 
 namespace PowerBoard\Enums;
 
-use PowerBoard\Abstract\AbstractEnum;
+use PowerBoard\Abstracts\AbstractEnum;
 
 class CardSettings extends AbstractEnum
 {
@@ -11,6 +11,7 @@ class CardSettings extends AbstractEnum
     protected const SUPPORTED_CARD_TYPES = 'SUPPORTED_CARD_TYPES';
 
     protected const GATEWAY_ID = 'GATEWAY_ID';
+
     protected const DS = 'DS';
     protected const DS_SERVICE_ID = 'DS_SERVICE_ID';
     protected const TYPE_EXCHANGE_OTT = 'TYPE_EXCHANGE_OTT';
@@ -22,43 +23,56 @@ class CardSettings extends AbstractEnum
 
     public function getInputType(): string
     {
-        return match ($this->name) {
-            self::GATEWAY_ID => 'text',
-            self::DS_SERVICE_ID => 'text',
-            self::FRAUD_SERVICE_ID => 'text',
-            self::ENABLE,
-            self::DIRECT_CHARGE,
-            self::SAVE_CARD => 'checkbox',
-            self::SUPPORTED_CARD_TYPES => 'card_select',
-            self::TYPE_EXCHANGE_OTT => 'select',
-            default => 'select'
-        };
+        switch ($this->name) {
+            case self::GATEWAY_ID:
+            case self::DS_SERVICE_ID:
+            case self::FRAUD_SERVICE_ID:
+                return 'text';
+            case self::ENABLE:
+            case self::DIRECT_CHARGE:
+            case self::SAVE_CARD:
+                return 'checkbox';
+            case self::SUPPORTED_CARD_TYPES:
+                return 'card_select';
+            case self::TYPE_EXCHANGE_OTT:
+            default:
+                return 'select';
+        }
     }
 
     public function getLabel(): string
     {
-        return match ($this->name) {
-            self::DS => '3DS',
-            self::DS_SERVICE_ID => '3DS service ID',
-            self::TYPE_EXCHANGE_OTT => '3DS flow',
-            self::SUPPORTED_CARD_TYPES => 'Supported card schemes',
-            default => ucfirst(strtolower(str_replace('_', ' ', $this->name)))
-        };
+        switch ($this->name) {
+            case self::DS:
+                return '3DS';
+            case self::DS_SERVICE_ID:
+                return '3DS service ID';
+            case self::TYPE_EXCHANGE_OTT:
+                return '3DS flow';
+            case self::SUPPORTED_CARD_TYPES:
+                return 'Supported card schemes';
+            default:
+                return ucfirst(strtolower(str_replace('_', ' ', $this->name)));
+        }
     }
 
     public function getDescription(): string
     {
-        return match ($this->name) {
-            self::SAVE_CARD => 'Offer your customer to save the card permanently at PowerBoard for further usage',
-            default => ''
-        };
+        switch ($this->name) {
+            case self::SAVE_CARD:
+                return 'Offer your customer to save the card permanently at PowerBoard for further usage';
+            default:
+                return '';
+        }
     }
 
     public function getDefault(): string
     {
-        return match ($this->name) {
-            self::DIRECT_CHARGE => 'yes',
-            default => ''
-        };
+        switch ($this->name) {
+            case self::DIRECT_CHARGE:
+                return 'yes';
+            default:
+                return '';
+        }
     }
 }

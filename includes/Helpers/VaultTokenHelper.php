@@ -29,10 +29,10 @@ class VaultTokenHelper
         }
 
         $vaultTokenData = [
-            'token' => $OTTtoken
+            'token' => $OTTtoken,
         ];
 
-        if (!$this->args['cardsavecard'] && !$this->args['bankaccountsaveaccount']) {
+        if (!$this->args['cardsavecardchecked'] && !$this->args['bankaccountsavechecked']) {
             $vaultTokenData['vault_type'] = 'session';
         }
 
@@ -43,8 +43,8 @@ class VaultTokenHelper
         $responce = SDKAdapterService::getInstance()->createVaultToken($vaultTokenData);
 
         if (!empty($responce['error']) || empty($responce['resource']['data']['vault_token'])) {
-            $message = !empty($responce['error']['message']) ? ' ' . $responce['error']['message'] : '';
-            throw new Exception(__('Can\'t create PowerBoard vault token.' . $message, POWER_BOARD_TEXT_DOMAIN));
+            $message = !empty($responce['error']['message']) ? ' '.$responce['error']['message'] : '';
+            throw new Exception(__('Can\'t create PowerBoard vault token.'.$message, POWER_BOARD_TEXT_DOMAIN));
         }
 
         if ($this->shouldSaveVaultToken()) {

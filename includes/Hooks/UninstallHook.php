@@ -15,7 +15,9 @@ class UninstallHook implements Hook
 
     public static function handle(): void
     {
-        $repositories = array_map(fn(string $className) => new $className, PowerBoardPlugin::REPOSITORIES);
+        $repositories = array_map(function (string $className) {
+            return new $className;
+        }, PowerBoardPlugin::REPOSITORIES);
         array_map([new self(), 'runMigration'], $repositories);
     }
 

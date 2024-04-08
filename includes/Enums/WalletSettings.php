@@ -2,7 +2,7 @@
 
 namespace PowerBoard\Enums;
 
-use PowerBoard\Abstract\AbstractEnum;
+use PowerBoard\Abstracts\AbstractEnum;
 
 class WalletSettings extends AbstractEnum
 {
@@ -14,13 +14,17 @@ class WalletSettings extends AbstractEnum
 
     public function getInputType(): string
     {
-        return match ($this->name) {
-            self::GATEWAY_ID => 'text',
-            self::FRAUD,
-            self::ENABLE,
-            self::DIRECT_CHARGE => 'checkbox',
-            self::FRAUD_SERVICE_ID => 'text',
-        };
+        switch ($this->name) {
+            case self::GATEWAY_ID:
+            case self::FRAUD_SERVICE_ID:
+                return 'text';
+            case self::FRAUD:
+            case self::ENABLE:
+            case self::DIRECT_CHARGE:
+                return 'checkbox';
+            default:
+                return '';
+        }
     }
 
     public function getLabel(): string
@@ -30,9 +34,11 @@ class WalletSettings extends AbstractEnum
 
     public function getDescription(): string
     {
-        return match ($this->name) {
-            self::DIRECT_CHARGE => 'Direct charge stands for authorization and capture in a single request',
-            default => ''
-        };
+        switch ($this->name) {
+            case self::DIRECT_CHARGE:
+                return 'Direct charge stands for authorization and capture in a single request';
+            default:
+                return '';
+        }
     }
 }

@@ -2,8 +2,9 @@
 
 namespace PowerBoard\Services\Checkout;
 
+use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Exception;
-use PowerBoard\Abstract\AbstractPaymentService;
+use PowerBoard\Abstracts\AbstractPaymentService;
 use PowerBoard\Exceptions\LoggedException;
 use PowerBoard\Repositories\LogRepository;
 use PowerBoard\Services\ProcessPayment\BankAccountProcessor;
@@ -46,30 +47,21 @@ class BankAccountPaymentService extends AbstractPaymentService
             $response = $processor->run($order_id);
             $chargeId = !empty($response['resource']['data']['_id']) ? $response['resource']['data']['_id'] : '';
         } catch (LoggedException $exception) {
-            wc_add_notice(
-                __('Error:', POWER_BOARD_TEXT_DOMAIN).' '.$exception->getMessage(),
-                'error'
-            );
 
             $operation = ucfirst(strtolower($exception->response['resource']['type'] ?? 'undefined'));
             $status = $exception->response['error']['message'] ?? 'empty status';
             $message = $exception->response['error']['details'][0]['gateway_specific_description'] ?? 'empty message';
 
             $loggerRepository->createLogRecord($chargeId, $operation, $status, $message, LogRepository::ERROR);
-
-            return [
-                'result' => 'fail'
-            ];
-        } catch (Exception $exception) {
-            wc_add_notice(
-                __('Error:', POWER_BOARD_TEXT_DOMAIN).' '.$exception->getMessage(),
-                'error'
+            throw new RouteException(
+                'woocommerce_rest_checkout_process_payment_error',
+                __('Error:', POWER_BOARD_TEXT_DOMAIN).' '.$exception->getMessage()
             );
-
-            return [
-                'result' => 'fail',
-                'error' => $exception->getMessage()
-            ];
+        } catch (Exception $exception) {
+            throw new RouteException(
+                'woocommerce_rest_checkout_process_payment_error',
+                __('Error:', POWER_BOARD_TEXT_DOMAIN).' '.$exception->getMessage()
+            );
         }
 
         $status = ucfirst(strtolower($response['resource']['data']['transactions'][0]['status'] ?? 'undefined'));
@@ -77,12 +69,12 @@ class BankAccountPaymentService extends AbstractPaymentService
         $isAuthorization = $response['resource']['data']['authorization'] ?? 0;
         $isCompleted = false;
         $markAsSuccess = false;
-        if($isAuthorization && $status == 'Pending'){
-            $status = 'wc-power_board-authorize';
-        }else {
+        if ($isAuthorization && $status == 'Pending') {
+            $status = 'wc-pb-authorize';
+        } else {
             $markAsSuccess = true;
             $isCompleted = 'Complete' === $status;
-            $status = $isCompleted ? 'wc-power_board-paid' : 'wc-power_board-requested';
+            $status = $isCompleted ? 'wc-pb-paid' : 'wc-pb-requested';
         }
         $order->set_status($status);
         $order->payment_complete();
@@ -95,10 +87,12 @@ class BankAccountPaymentService extends AbstractPaymentService
             $operation,
             $status,
             '',
-            $markAsSuccess ? LogRepository::SUCCESS : LogRepository::DEFAULT);
+            $markAsSuccess ? LogRepository::SUCCESS : LogRepository::DEFAULT
+        );
 
         return [
-            'result' => 'success', 'redirect' => $this->get_return_url($order)
+            'result' => 'success',
+            'redirect' => $this->get_return_url($order),
         ];
     }
 

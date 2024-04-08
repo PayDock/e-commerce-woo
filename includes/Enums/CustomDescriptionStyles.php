@@ -2,7 +2,7 @@
 
 namespace PowerBoard\Enums;
 
-use PowerBoard\Abstract\AbstractEnum;
+use PowerBoard\Abstracts\AbstractEnum;
 
 class CustomDescriptionStyles extends AbstractEnum
 {

@@ -2,7 +2,7 @@
 
 namespace PowerBoard\Services;
 
-use PowerBoard\Abstract\AbstractSettingService;
+use PowerBoard\Abstracts\AbstractSettingService;
 use PowerBoard\Enums\APMsSettings;
 use PowerBoard\Enums\BankAccountSettings;
 use PowerBoard\Enums\CardSettings;
@@ -38,15 +38,6 @@ final class SettingsService
             || (bool) $browser['browser_ios_webview'];
     }
 
-    public static function getInstance(): self
-    {
-        if (is_null(self::$instance)) {
-            self::$instance = new self();
-        }
-
-        return self::$instance;
-    }
-
     public function isEnabledPayment(): bool
     {
         return self::ENABLED_CONDITION === (new LiveConnectionSettingService())
@@ -60,23 +51,66 @@ final class SettingsService
         return $this->isSandbox;
     }
 
-    public function getAccessToken()
+    private function getSettingsService(): AbstractSettingService
+    {
+        if (!is_null($this->settingService)) {
+            return $this->settingService;
+        }
+
+        $this->settingService = new SandboxConnectionSettingService();
+
+        $this->isSandbox = self::ENABLED_CONDITION == $this->settingService
+                ->get_option(
+                    $this->getOptionName($this->settingService->id, [
+                        SettingGroups::CREDENTIALS()->name,
+                        CredentialSettings::SANDBOX()->name,
+                    ])
+                );
+
+        if (!$this->isSandbox) {
+            $this->settingService = new LiveConnectionSettingService();
+        }
+
+        return $this->settingService;
+    }
+
+    public function getOptionName(string $id, array $fragments): string
+    {
+        return implode('_', array_merge([$id], $fragments));
+    }
+
+    public function isAccessToken():bool
     {
         $settingService = $this->getSettingsService();
+
+        $typeKey = $this->getOptionName($settingService->id, [
+            SettingGroups::CREDENTIALS()->name,
+            CredentialSettings::TYPE()->name,
+        ]);
+        return CredentialsTypes::ACCESS_KEY()->name === $settingService->get_option($typeKey);
+    }
+
+    public function getPublicKey(): ?string
+    {
+        $settingService = $this->getSettingsService();
+
+        if ($this->isAccessToken()) {
+            return $this->getWidgetAccessToken();
+        }
 
         return HashService::decrypt(
             $settingService->get_option(
                 $this->getOptionName(
                     $settingService->id, [
                         SettingGroups::CREDENTIALS()->name,
-                        CredentialSettings::ACCESS_KEY()->name,
+                        CredentialSettings::PUBLIC_KEY()->name,
                     ]
                 )
             )
         );
     }
 
-    public function getSecretKey()
+    public function getSecretKey(): ?string
     {
         $settingService = $this->getSettingsService();
 
@@ -101,25 +135,32 @@ final class SettingsService
         );
     }
 
-    public function getPublicKey(): ?string
+    public function getWidgetAccessToken()
     {
         $settingService = $this->getSettingsService();
-
-        $typeKey = $this->getOptionName($settingService->id, [
-            SettingGroups::CREDENTIALS()->name,
-            CredentialSettings::TYPE()->name,
-        ]);
-
-        if (CredentialsTypes::ACCESS_KEY()->name === $settingService->get_option($typeKey)) {
-            return $this->getAccessToken();
-        }
 
         return HashService::decrypt(
             $settingService->get_option(
                 $this->getOptionName(
                     $settingService->id, [
                         SettingGroups::CREDENTIALS()->name,
-                        CredentialSettings::PUBLIC_KEY()->name,
+                        CredentialSettings::WIDGET_KEY()->name,
+                    ]
+                )
+            )
+        );
+    }
+
+    public function getAccessToken()
+    {
+        $settingService = $this->getSettingsService();
+
+        return HashService::decrypt(
+            $settingService->get_option(
+                $this->getOptionName(
+                    $settingService->id, [
+                        SettingGroups::CREDENTIALS()->name,
+                        CredentialSettings::ACCESS_KEY()->name,
                     ]
                 )
             )
@@ -130,87 +171,103 @@ final class SettingsService
     {
         $settingService = $this->getSettingsService();
 
-        return $settingService->get_option($this->getOptionName(
-            $settingService->id, [
-                SettingGroups::CARD()->name,
-                CardSettings::GATEWAY_ID()->name
-            ]
-        ));
+        return $settingService->get_option(
+            $this->getOptionName(
+                $settingService->id, [
+                    SettingGroups::CARD()->name,
+                    CardSettings::GATEWAY_ID()->name,
+                ]
+            )
+        );
     }
 
     public function getBankAccountGatewayId(): ?string
     {
         $settingService = $this->getSettingsService();
 
-        return $settingService->get_option($this->getOptionName(
-            $settingService->id, [
-                SettingGroups::BANK_ACCOUNT()->name,
-                BankAccountSettings::GATEWAY_ID()->name,
-            ]
-        ));
+        return $settingService->get_option(
+            $this->getOptionName(
+                $settingService->id, [
+                    SettingGroups::BANK_ACCOUNT()->name,
+                    BankAccountSettings::GATEWAY_ID()->name,
+                ]
+            )
+        );
     }
 
     public function getWalletGatewayId(WalletPaymentMethods $methods): ?string
     {
         $settingService = $this->getSettingsService();
 
-        return $settingService->get_option($this->getOptionName(
-            $settingService->id, [
-                SettingGroups::WALLETS()->name,
-                $methods->name,
-                WalletSettings::GATEWAY_ID()->name,
-            ]
-        ));
+        return $settingService->get_option(
+            $this->getOptionName(
+                $settingService->id, [
+                    SettingGroups::WALLETS()->name,
+                    $methods->name,
+                    WalletSettings::GATEWAY_ID()->name,
+                ]
+            )
+        );
     }
 
     public function getAPMsGatewayId(OtherPaymentMethods $methods): ?string
     {
         $settingService = $this->getSettingsService();
 
-        return $settingService->get_option($this->getOptionName(
-            $settingService->id, [
-                SettingGroups::A_P_M_S()->name,
-                $methods->name,
-                APMsSettings::GATEWAY_ID()->name,
-            ]
-        ));
+        return $settingService->get_option(
+            $this->getOptionName(
+                $settingService->id, [
+                    SettingGroups::A_P_M_S()->name,
+                    $methods->name,
+                    APMsSettings::GATEWAY_ID()->name,
+                ]
+            )
+        );
     }
 
     public function isCardEnabled(): bool
     {
         $settingService = $this->getSettingsService();
 
-        return self::ENABLED_CONDITION == $settingService->get_option($this->getOptionName(
-                $settingService->id, [
-                    SettingGroups::CARD()->name,
-                    CardSettings::ENABLE()->name
-                ]
-            ));
+        return self::ENABLED_CONDITION == $settingService->get_option(
+                $this->getOptionName(
+                    $settingService->id, [
+                        SettingGroups::CARD()->name,
+                        CardSettings::ENABLE()->name,
+                    ]
+                )
+            );
     }
 
     public function isBankAccountEnabled(): bool
     {
+        return false;
+
         $settingService = $this->getSettingsService();
 
-        return self::ENABLED_CONDITION == $settingService->get_option($this->getOptionName(
-                $settingService->id, [
-                    SettingGroups::BANK_ACCOUNT()->name,
-                    BankAccountSettings::ENABLE()->name
-                ]
-            ));
+        return self::ENABLED_CONDITION == $settingService->get_option(
+                $this->getOptionName(
+                    $settingService->id, [
+                        SettingGroups::BANK_ACCOUNT()->name,
+                        BankAccountSettings::ENABLE()->name,
+                    ]
+                )
+            );
     }
 
     public function isWalletEnabled(WalletPaymentMethods $methods): bool
     {
         $settingService = $this->getSettingsService();
 
-        $result = self::ENABLED_CONDITION == $settingService->get_option($this->getOptionName(
-                $settingService->id, [
-                    SettingGroups::WALLETS()->name,
-                    $methods->name,
-                    WalletSettings::ENABLE()->name,
-                ]
-            ));
+        $result = self::ENABLED_CONDITION == $settingService->get_option(
+                $this->getOptionName(
+                    $settingService->id, [
+                        SettingGroups::WALLETS()->name,
+                        $methods->name,
+                        WalletSettings::ENABLE()->name,
+                    ]
+                )
+            );
         $isApple = $methods->name === WalletPaymentMethods::APPLE_PAY()->name;
         $isGoogle = $methods->name === WalletPaymentMethods::GOOGLE_PAY()->name;
         if ($result && $isApple && !$this->isSafariOrIOS) {
@@ -227,286 +284,289 @@ final class SettingsService
     {
         $settingService = $this->getSettingsService();
 
-        return $settingService->get_option($this->getOptionName(
-            $settingService->id, [
-                SettingGroups::CARD()->name,
-                CardSettings::DS()->name,
-            ]
-        ));
+        return $settingService->get_option(
+            $this->getOptionName(
+                $settingService->id, [
+                    SettingGroups::CARD()->name,
+                    CardSettings::DS()->name,
+                ]
+            )
+        );
     }
 
     public function getCard3DSServiceId(): string
     {
         $settingService = $this->getSettingsService();
 
-        return $settingService->get_option($this->getOptionName(
-            $settingService->id, [
-                SettingGroups::CARD()->name,
-                CardSettings::DS_SERVICE_ID()->name,
-            ]
-        ));
+        return $settingService->get_option(
+            $this->getOptionName(
+                $settingService->id, [
+                    SettingGroups::CARD()->name,
+                    CardSettings::DS_SERVICE_ID()->name,
+                ]
+            )
+        );
     }
 
     public function getCardFraud(): string
     {
         $settingService = $this->getSettingsService();
 
-        return $settingService->get_option($this->getOptionName(
-            $settingService->id, [
-                SettingGroups::CARD()->name,
-                CardSettings::FRAUD()->name,
-            ]
-        ));
+        return $settingService->get_option(
+            $this->getOptionName(
+                $settingService->id, [
+                    SettingGroups::CARD()->name,
+                    CardSettings::FRAUD()->name,
+                ]
+            )
+        );
     }
 
     public function getCardFraudServiceId(): string
     {
         $settingService = $this->getSettingsService();
 
-        return $settingService->get_option($this->getOptionName(
-            $settingService->id, [
-                SettingGroups::CARD()->name,
-                CardSettings::FRAUD_SERVICE_ID()->name,
-            ]
-        ));
+        return $settingService->get_option(
+            $this->getOptionName(
+                $settingService->id, [
+                    SettingGroups::CARD()->name,
+                    CardSettings::FRAUD_SERVICE_ID()->name,
+                ]
+            )
+        );
     }
 
     public function getCardDirectCharge(): bool
     {
         $settingService = $this->getSettingsService();
 
-        return self::ENABLED_CONDITION == $settingService->get_option($this->getOptionName(
-                $settingService->id, [
-                    SettingGroups::CARD()->name,
-                    CardSettings::DIRECT_CHARGE()->name,
-                ]
-            ));
-    }
-
-    public function getCardSaveCard(): bool
-    {
-        $settingService = $this->getSettingsService();
-
-        return self::ENABLED_CONDITION == $settingService->get_option($this->getOptionName(
-                $settingService->id, [
-                    SettingGroups::CARD()->name,
-                    CardSettings::SAVE_CARD()->name,
-                ]
-            ));
+        return self::ENABLED_CONDITION == $settingService->get_option(
+                $this->getOptionName(
+                    $settingService->id, [
+                        SettingGroups::CARD()->name,
+                        CardSettings::DIRECT_CHARGE()->name,
+                    ]
+                )
+            );
     }
 
     public function getCardSaveCardOption(): string
     {
         $settingService = $this->getSettingsService();
 
-        return $this->getCardSaveCard() ? $settingService->get_option($this->getOptionName(
-            $settingService->id, [
-                SettingGroups::CARD()->name,
-                CardSettings::SAVE_CARD_OPTION()->name,
-            ]
-        )) : '';
+        return $this->getCardSaveCard() ? $settingService->get_option(
+            $this->getOptionName(
+                $settingService->id, [
+                    SettingGroups::CARD()->name,
+                    CardSettings::SAVE_CARD_OPTION()->name,
+                ]
+            )
+        ) : '';
+    }
+
+    public function getCardSaveCard(): bool
+    {
+        $settingService = $this->getSettingsService();
+
+        return self::ENABLED_CONDITION == $settingService->get_option(
+                $this->getOptionName(
+                    $settingService->id, [
+                        SettingGroups::CARD()->name,
+                        CardSettings::SAVE_CARD()->name,
+                    ]
+                )
+            );
     }
 
     public function getCardSupportedCardTypes(): string
     {
         $settingService = $this->getSettingsService();
 
-        return $settingService->get_option($this->getOptionName(
-            $settingService->id, [
-                SettingGroups::CARD()->name,
-                CardSettings::SUPPORTED_CARD_TYPES()->name,
-            ]
-        ));
+        return $settingService->get_option(
+            $this->getOptionName(
+                $settingService->id, [
+                    SettingGroups::CARD()->name,
+                    CardSettings::SUPPORTED_CARD_TYPES()->name,
+                ]
+            )
+        );
     }
 
     public function getCardTypeExchangeOtt(): string
     {
         $settingService = $this->getSettingsService();
 
-        return $settingService->get_option($this->getOptionName(
-            $settingService->id, [
-                SettingGroups::CARD()->name,
-                CardSettings::TYPE_EXCHANGE_OTT()->name,
-            ]
-        ));
+        return $settingService->get_option(
+            $this->getOptionName(
+                $settingService->id, [
+                    SettingGroups::CARD()->name,
+                    CardSettings::TYPE_EXCHANGE_OTT()->name,
+                ]
+            )
+        );
     }
 
     public function isAPMsEnabled(OtherPaymentMethods $methods): bool
     {
         $settingService = $this->getSettingsService();
 
-        return self::ENABLED_CONDITION == $settingService->get_option($this->getOptionName(
-                $settingService->id, [
-                    SettingGroups::A_P_M_S()->name,
-                    $methods->name,
-                    APMsSettings::ENABLE()->name,
-                ]
-            ));
+        return self::ENABLED_CONDITION == $settingService->get_option(
+                $this->getOptionName(
+                    $settingService->id, [
+                        SettingGroups::A_P_M_S()->name,
+                        $methods->name,
+                        APMsSettings::ENABLE()->name,
+                    ]
+                )
+            );
     }
 
     public function getBankAccountSaveAccount(): bool
     {
         $settingService = $this->getSettingsService();
 
-        return self::ENABLED_CONDITION == $settingService->get_option($this->getOptionName(
-                $settingService->id, [
-                    SettingGroups::BANK_ACCOUNT()->name,
-                    BankAccountSettings::SAVE_CARD()->name,
-                ]
-            ));
+        return self::ENABLED_CONDITION == $settingService->get_option(
+                $this->getOptionName(
+                    $settingService->id, [
+                        SettingGroups::BANK_ACCOUNT()->name,
+                        BankAccountSettings::SAVE_CARD()->name,
+                    ]
+                )
+            );
     }
 
     public function getBankAccountSaveAccountOption(): string
     {
         $settingService = $this->getSettingsService();
 
-        return $settingService->get_option($this->getOptionName(
-            $settingService->id, [
-                SettingGroups::BANK_ACCOUNT()->name,
-                BankAccountSettings::SAVE_CARD_OPTION()->name,
-            ]
-        ));
+        return $settingService->get_option(
+            $this->getOptionName(
+                $settingService->id, [
+                    SettingGroups::BANK_ACCOUNT()->name,
+                    BankAccountSettings::SAVE_CARD_OPTION()->name,
+                ]
+            )
+        );
     }
 
     public function isWalletFraud(WalletPaymentMethods $methods): bool
     {
         $settingService = $this->getSettingsService();
 
-        return self::ENABLED_CONDITION == $settingService->get_option($this->getOptionName(
-                $settingService->id, [
-                    SettingGroups::WALLETS()->name,
-                    $methods->name,
-                    WalletSettings::FRAUD()->name,
-                ]
-            ));
+        return self::ENABLED_CONDITION == $settingService->get_option(
+                $this->getOptionName(
+                    $settingService->id, [
+                        SettingGroups::WALLETS()->name,
+                        $methods->name,
+                        WalletSettings::FRAUD()->name,
+                    ]
+                )
+            );
     }
 
     public function isWalletDirectCharge(WalletPaymentMethods $methods): bool
     {
         $settingService = $this->getSettingsService();
 
-        return self::ENABLED_CONDITION == $settingService->get_option($this->getOptionName(
-                $settingService->id, [
-                    SettingGroups::WALLETS()->name,
-                    $methods->name,
-                    WalletSettings::DIRECT_CHARGE()->name,
-                ]
-            ));
+        return self::ENABLED_CONDITION == $settingService->get_option(
+                $this->getOptionName(
+                    $settingService->id, [
+                        SettingGroups::WALLETS()->name,
+                        $methods->name,
+                        WalletSettings::DIRECT_CHARGE()->name,
+                    ]
+                )
+            );
     }
 
     public function getWalletFraudServiceId(WalletPaymentMethods $methods): string
     {
         $settingService = $this->getSettingsService();
 
-        return $settingService->get_option($this->getOptionName(
-            $settingService->id, [
-                SettingGroups::WALLETS()->name,
-                $methods->name,
-                WalletSettings::FRAUD_SERVICE_ID()->name,
-            ]
-        ));
+        return $settingService->get_option(
+            $this->getOptionName(
+                $settingService->id, [
+                    SettingGroups::WALLETS()->name,
+                    $methods->name,
+                    WalletSettings::FRAUD_SERVICE_ID()->name,
+                ]
+            )
+        );
     }
 
     public function isPayPallSmartButtonPayLater(): string
     {
         $settingService = $this->getSettingsService();
 
-        return $settingService->get_option($this->getOptionName(
-            $settingService->id, [
-                SettingGroups::WALLETS()->name,
-                WalletPaymentMethods::PAY_PAL_SMART_BUTTON()->name,
-                'pay_later',
-            ]
-        ));
+        return $settingService->get_option(
+            $this->getOptionName(
+                $settingService->id, [
+                    SettingGroups::WALLETS()->name,
+                    WalletPaymentMethods::PAY_PAL_SMART_BUTTON()->name,
+                    'pay_later',
+                ]
+            )
+        );
     }
 
     public function isAPMsFraud(OtherPaymentMethods $methods): bool
     {
         $settingService = $this->getSettingsService();
 
-        return self::ENABLED_CONDITION == $settingService->get_option($this->getOptionName(
-                $settingService->id, [
-                    SettingGroups::A_P_M_S()->name,
-                    $methods->name,
-                    APMsSettings::FRAUD()->name,
-                ]
-            ));
+        return self::ENABLED_CONDITION == $settingService->get_option(
+                $this->getOptionName(
+                    $settingService->id, [
+                        SettingGroups::A_P_M_S()->name,
+                        $methods->name,
+                        APMsSettings::FRAUD()->name,
+                    ]
+                )
+            );
     }
 
     public function getAPMsFraudServiceId(OtherPaymentMethods $methods): ?string
     {
         $settingService = $this->getSettingsService();
 
-        return $settingService->get_option($this->getOptionName(
-            $settingService->id, [
-                SettingGroups::A_P_M_S()->name,
-                $methods->name,
-                APMsSettings::FRAUD_SERVICE_ID()->name,
-            ]
-        ));
+        return $settingService->get_option(
+            $this->getOptionName(
+                $settingService->id, [
+                    SettingGroups::A_P_M_S()->name,
+                    $methods->name,
+                    APMsSettings::FRAUD_SERVICE_ID()->name,
+                ]
+            )
+        );
     }
 
     public function isAPMsDirectCharge(OtherPaymentMethods $methods): bool
     {
         $settingService = $this->getSettingsService();
 
-        return self::ENABLED_CONDITION == $settingService->get_option($this->getOptionName(
-                $settingService->id, [
-                    SettingGroups::A_P_M_S()->name,
-                    $methods->name,
-                    APMsSettings::DIRECT_CHARGE()->name,
-                ]
-            ));
+        return self::ENABLED_CONDITION == $settingService->get_option(
+                $this->getOptionName(
+                    $settingService->id, [
+                        SettingGroups::A_P_M_S()->name,
+                        $methods->name,
+                        APMsSettings::DIRECT_CHARGE()->name,
+                    ]
+                )
+            );
     }
 
     public function isAPMsSaveCard(OtherPaymentMethods $methods): bool
     {
         $settingService = $this->getSettingsService();
 
-        return self::ENABLED_CONDITION == $settingService->get_option($this->getOptionName(
-                $settingService->id, [
-                    SettingGroups::A_P_M_S()->name,
-                    $methods->name,
-                    APMsSettings::SAVE_CARD()->name,
-                ]
-            ));
-    }
-
-    public function isAPMsSaveCardOption(OtherPaymentMethods $methods): bool
-    {
-        $settingService = $this->getSettingsService();
-
-        return self::ENABLED_CONDITION == $settingService->get_option($this->getOptionName(
-                $settingService->id, [
-                    SettingGroups::A_P_M_S()->name,
-                    $methods->name,
-                    APMsSettings::SAVE_CARD_OPTION()->name,
-                ]
-            ));
-    }
-
-    public function getWidgetTitle(): string
-    {
-        $setting = WidgetSettings::TITLE();
-
-        return $this->getWidgetService()->get_option(
-            $this->getOptionName($this->getWidgetService()->id, [
-                $setting->name
-            ]),
-            $setting->getDefault()
-        );
-    }
-
-    public function getWidgetDescription(): string
-    {
-        $setting = WidgetSettings::DESCRIPTION();
-
-        return $this->getWidgetService()->get_option(
-            $this->getOptionName($this->getWidgetService()->id, [
-                $setting->name
-            ]),
-            $setting->getDefault()
-        );
+        return self::ENABLED_CONDITION == $settingService->get_option(
+                $this->getOptionName(
+                    $settingService->id, [
+                        SettingGroups::A_P_M_S()->name,
+                        $methods->name,
+                        APMsSettings::SAVE_CARD()->name,
+                    ]
+                )
+            );
     }
 
     public function getWidgetPaymentCardTitle(): string
@@ -515,10 +575,19 @@ final class SettingsService
 
         return $this->getWidgetService()->get_option(
             $this->getOptionName($this->getWidgetService()->id, [
-                $setting->name
+                $setting->name,
             ]),
             $setting->getDefault()
         );
+    }
+
+    private function getWidgetService(): WidgetSettingService
+    {
+        if (is_null($this->widgetService)) {
+            $this->widgetService = new WidgetSettingService();
+        }
+
+        return $this->widgetService;
     }
 
     public function getWidgetPaymentCardDescription(): string
@@ -527,7 +596,7 @@ final class SettingsService
 
         return $this->getWidgetService()->get_option(
             $this->getOptionName($this->getWidgetService()->id, [
-                $setting->name
+                $setting->name,
             ]),
             $setting->getDefault()
         );
@@ -539,7 +608,7 @@ final class SettingsService
 
         return $this->getWidgetService()->get_option(
             $this->getOptionName($this->getWidgetService()->id, [
-                $setting->name
+                $setting->name,
             ]),
             $setting->getDefault()
         );
@@ -551,55 +620,95 @@ final class SettingsService
 
         return $this->getWidgetService()->get_option(
             $this->getOptionName($this->getWidgetService()->id, [
-                $setting->name
+                $setting->name,
             ]),
             $setting->getDefault()
         );
     }
 
-    public function getWidgetPaymentWalletTitle(): string
+    public function getWidgetPaymentWalletTitle(WalletPaymentMethods $methods): string
     {
-        $setting = WidgetSettings::PAYMENT_WALLET_TITLE();
+        switch ($methods->name) {
+            case WalletPaymentMethods::APPLE_PAY()->name:
+                $setting = WidgetSettings::PAYMENT_WALLET_APPLE_PAY_TITLE();
+                break;
+            case WalletPaymentMethods::GOOGLE_PAY()->name:
+                $setting = WidgetSettings::PAYMENT_WALLET_GOOGLE_PAY_TITLE();
+                break;
+            case WalletPaymentMethods::PAY_PAL_SMART_BUTTON()->name:
+                $setting = WidgetSettings::PAYMENT_WALLET_PAYPAL_TITLE();
+                break;
+            case WalletPaymentMethods::AFTERPAY()->name:
+                $setting = WidgetSettings::PAYMENT_WALLET_AFTERPAY_V2_TITLE();
+                break;
+        }
 
         return $this->getWidgetService()->get_option(
             $this->getOptionName($this->getWidgetService()->id, [
-                $setting->name
+                $setting->name,
             ]),
             $setting->getDefault()
         );
     }
 
-    public function getWidgetPaymentWalletDescription(): string
+    public function getWidgetPaymentWalletDescription(WalletPaymentMethods $methods): string
     {
-        $setting = WidgetSettings::PAYMENT_WALLET_DESCRIPTION();
+        switch ($methods->name) {
+            case WalletPaymentMethods::APPLE_PAY()->name:
+                $setting = WidgetSettings::PAYMENT_WALLET_APPLE_PAY_DESCRIPTION();
+                break;
+            case WalletPaymentMethods::GOOGLE_PAY()->name:
+                $setting = WidgetSettings::PAYMENT_WALLET_GOOGLE_PAY_DESCRIPTION();
+                break;
+            case WalletPaymentMethods::PAY_PAL_SMART_BUTTON()->name:
+                $setting = WidgetSettings::PAYMENT_WALLET_PAYPAL_DESCRIPTION();
+                break;
+            case WalletPaymentMethods::AFTERPAY()->name:
+                $setting = WidgetSettings::PAYMENT_WALLET_AFTERPAY_V2_DESCRIPTION();
+                break;
+        }
 
         return $this->getWidgetService()->get_option(
             $this->getOptionName($this->getWidgetService()->id, [
-                $setting->name
+                $setting->name,
             ]),
             $setting->getDefault()
         );
     }
 
-    public function getWidgetPaymentAPMTitle(): string
+    public function getWidgetPaymentAPMTitle(OtherPaymentMethods $methods): string
     {
-        $setting = WidgetSettings::PAYMENT_A_P_M_S_TITLE();
+        switch ($methods->name) {
+            case OtherPaymentMethods::AFTERPAY()->name:
+                $setting = WidgetSettings::PAYMENT_A_P_M_S_AFTERPAY_V1_TITLE();
+                break;
+            case OtherPaymentMethods::ZIPPAY()->name:
+                $setting = WidgetSettings::PAYMENT_A_P_M_S_ZIP_TITLE();
+                break;
+        }
 
         return $this->getWidgetService()->get_option(
             $this->getOptionName($this->getWidgetService()->id, [
-                $setting->name
+                $setting->name,
             ]),
             $setting->getDefault()
         );
     }
 
-    public function getWidgetPaymentAPMDescription(): string
+    public function getWidgetPaymentAPMDescription(OtherPaymentMethods $methods): string
     {
-        $setting = WidgetSettings::PAYMENT_A_P_M_S_DESCRIPTION();
+        switch ($methods->name) {
+            case OtherPaymentMethods::AFTERPAY()->name:
+                $setting = WidgetSettings::PAYMENT_A_P_M_S_AFTERPAY_V1_DESCRIPTION();
+                break;
+            case OtherPaymentMethods::ZIPPAY()->name:
+                $setting = WidgetSettings::PAYMENT_A_P_M_S_ZIP_DESCRIPTION();
+                break;
+        }
 
         return $this->getWidgetService()->get_option(
             $this->getOptionName($this->getWidgetService()->id, [
-                $setting->name
+                $setting->name,
             ]),
             $setting->getDefault()
         );
@@ -609,40 +718,54 @@ final class SettingsService
     {
         $data = [
             'background_color' => $this->getWidgetService()
-                ->get_option($this->getOptionName(
-                    $this->getWidgetService()->id,
-                    [WidgetSettings::STYLE_BACKGROUND_COLOR()->name]
-                )),
-            'text_color' => $this->getWidgetService()
-                ->get_option($this->getOptionName(
-                    $this->getWidgetService()->id,
-                    [WidgetSettings::STYLE_TEXT_COLOR()->name]
-                )),
-            'border_color' => $this->getWidgetService()
-                ->get_option($this->getOptionName(
-                    $this->getWidgetService()->id,
-                    [WidgetSettings::STYLE_BORDER_COLOR()->name]
-                )),
-            'error_color' => $this->getWidgetService()
-                ->get_option($this->getOptionName(
-                    $this->getWidgetService()->id,
-                    [WidgetSettings::STYLE_ERROR_COLOR()->name]
-                )),
-            'success_color' => $this->getWidgetService()
-                ->get_option($this->getOptionName(
-                    $this->getWidgetService()->id,
-                    [WidgetSettings::STYLE_SUCCESS_COLOR()->name]
-                )),
-            'font_size' => $this->getWidgetService()
-                ->get_option($this->getOptionName(
-                    $this->getWidgetService()->id,
-                    [WidgetSettings::STYLE_FONT_SIZE()->name]
-                )),
-            'font_family' => $this->getWidgetService()
-                ->get_option($this->getOptionName(
-                    $this->getWidgetService()->id,
-                    [WidgetSettings::STYLE_FONT_FAMILY()->name]
-                )),
+                ->get_option(
+                    $this->getOptionName(
+                        $this->getWidgetService()->id,
+                        [WidgetSettings::STYLE_BACKGROUND_COLOR()->name]
+                    )
+                ),
+            'text_color'       => $this->getWidgetService()
+                ->get_option(
+                    $this->getOptionName(
+                        $this->getWidgetService()->id,
+                        [WidgetSettings::STYLE_TEXT_COLOR()->name]
+                    )
+                ),
+            'border_color'     => $this->getWidgetService()
+                ->get_option(
+                    $this->getOptionName(
+                        $this->getWidgetService()->id,
+                        [WidgetSettings::STYLE_BORDER_COLOR()->name]
+                    )
+                ),
+            'error_color'      => $this->getWidgetService()
+                ->get_option(
+                    $this->getOptionName(
+                        $this->getWidgetService()->id,
+                        [WidgetSettings::STYLE_ERROR_COLOR()->name]
+                    )
+                ),
+            'success_color'    => $this->getWidgetService()
+                ->get_option(
+                    $this->getOptionName(
+                        $this->getWidgetService()->id,
+                        [WidgetSettings::STYLE_SUCCESS_COLOR()->name]
+                    )
+                ),
+            'font_size'        => $this->getWidgetService()
+                ->get_option(
+                    $this->getOptionName(
+                        $this->getWidgetService()->id,
+                        [WidgetSettings::STYLE_FONT_SIZE()->name]
+                    )
+                ),
+            'font_family'      => $this->getWidgetService()
+                ->get_option(
+                    $this->getOptionName(
+                        $this->getWidgetService()->id,
+                        [WidgetSettings::STYLE_FONT_FAMILY()->name]
+                    )
+                ),
         ];
 
         if ((
@@ -658,54 +781,32 @@ final class SettingsService
     public function getWidgetCustomStyles(): ?string
     {
         return $this->getWidgetService()
-            ->get_option($this->getOptionName(
-                $this->getWidgetService()->id,
-                [WidgetSettings::STYLE_CUSTOM()->name]
-            ));
+            ->get_option(
+                $this->getOptionName(
+                    $this->getWidgetService()->id,
+                    [WidgetSettings::STYLE_CUSTOM()->name]
+                )
+            );
     }
 
-    public function getOptionName(string $id, array $fragments): string
+    public function getWidgetScriptUrl(): string
     {
-        return implode('_', array_merge([$id], $fragments));
-    }
-
-    private function getWidgetService(): WidgetSettingService
-    {
-        if (is_null($this->widgetService)) {
-            $this->widgetService = new WidgetSettingService();
+        if($this->isSandbox){
+            $sdkUrl = 'https://widget.preproduction.powerboard.commbank.com.au/sdk/{version}/widget.umd.js';
+        }else{
+            $sdkUrl = ' https://widget.powerboard.commbank.com.au/sdk/{version}/widget.umd.js';
         }
 
-        return $this->widgetService;
-    }
-
-    private function getSettingsService(): AbstractSettingService
-    {
-        if (!is_null($this->settingService)) {
-            return $this->settingService;
-        }
-
-        $this->settingService = new SandboxConnectionSettingService();
-
-        $this->isSandbox = self::ENABLED_CONDITION == $this->settingService
-                ->get_option($this->getOptionName($this->settingService->id, [
-                    SettingGroups::CREDENTIALS()->name,
-                    CredentialSettings::SANDBOX()->name,
-                ]));
-
-        if (!$this->isSandbox) {
-            $this->settingService = new LiveConnectionSettingService();
-        }
-
-        return $this->settingService;
+        return preg_replace('{version}', SettingsService::getInstance()->getVersion(), $sdkUrl);
     }
 
     public function getVersion(): string
     {
         $versionKey = $this->getOptionName($this->getWidgetService()->id, [
-            WidgetSettings::VERSION()->name
+            WidgetSettings::VERSION()->name,
         ]);
         $customVersionKey = $this->getOptionName($this->getWidgetService()->id, [
-            WidgetSettings::CUSTOM_VERSION()->name
+            WidgetSettings::CUSTOM_VERSION()->name,
         ]);
 
         $version = $this->getWidgetService()->get_option($versionKey);
@@ -717,14 +818,12 @@ final class SettingsService
         return $this->getWidgetService()->get_option($customVersionKey) ?? $version;
     }
 
-    public function getWidgetScriptUrl(): string
+    public static function getInstance(): self
     {
-        if($this->isSandbox){
-            $sdkUrl = 'https://widget.preproduction.powerboard.commbank.com.au/sdk/{version}/widget.umd.js';
-        }else{
-           $sdkUrl = ' https://widget.powerboard.commbank.com.au/sdk/{version}/widget.umd.js';
+        if (is_null(self::$instance)) {
+            self::$instance = new self();
         }
 
-        return preg_replace('{version}', SettingsService::getInstance()->getVersion(), $sdkUrl);
+        return self::$instance;
     }
 }

@@ -1,5 +1,5 @@
 <script type="text/javascript">
-    function power_boardPaymentCapture(orderId, operation) {
+    function powerBoardPaymentCapture(orderId, operation) {
         jQuery.blockUI({
             message: '',
             overlayCSS: {backgroundColor: '#fff', opacity: 0.6, cursor: 'wait'}
@@ -24,11 +24,13 @@
         });
     }
 </script>
-<button type="button" onclick="power_boardPaymentCapture(<?php echo $order->get_id(); ?>, 'power_board-capture-charge')"
-        class="button">
-    Capture charge
-</button>
-<button type="button" onclick="power_boardPaymentCapture(<?php echo $order->get_id(); ?>, 'power_board-cancel-authorised')"
+<?php if ($order->get_status() == 'pb-authorize'): ?>
+    <button type="button" onclick="powerBoardPaymentCapture(<?php echo $order->get_id(); ?>, 'pb-capture-charge')"
+            class="button">
+        Capture charge
+    </button>
+<?php endif; ?>
+<button type="button" onclick="powerBoardPaymentCapture(<?php echo $order->get_id(); ?>, 'pb-cancel-authorised')"
         class="button">
     Cancel charge
 </button>

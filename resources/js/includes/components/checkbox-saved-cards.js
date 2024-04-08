@@ -1,5 +1,5 @@
-import { createElement } from 'react';
-import { getSetting } from '@woocommerce/settings';
+import {createElement} from 'react';
+import {getSetting} from '@woocommerce/settings';
 
 export default (saveCardLabel = 'Save card') => {
     const settings = getSetting('power_board_data', {});
@@ -9,7 +9,7 @@ export default (saveCardLabel = 'Save card') => {
     }
 
     return createElement("div",
-        { class: 'wc-block-components-checkbox power_board-save-card' },
+        {class: 'wc-block-components-checkbox card-save-card'},
         createElement("label",
             {
                 for: 'card_save_card',
@@ -32,10 +32,10 @@ export default (saveCardLabel = 'Save card') => {
                     xmlns: 'http://www.w3.org/2000/svg',
                     "viewBox": '0 0 24 20'
                 },
-                createElement("path", { d: 'M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z' })
+                createElement("path", {d: 'M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z'})
             ),
             createElement("span",
-                { class: 'wc-block-components-checkbox__label' },
+                {class: 'wc-block-components-checkbox__label'},
                 saveCardLabel
             )
         )

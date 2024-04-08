@@ -1,36 +1,35 @@
-import { __ } from '@wordpress/i18n';
-import { registerPaymentMethod } from '@woocommerce/blocks-registry';
-import { decodeEntities } from '@wordpress/html-entities';
-import { getSetting } from '@woocommerce/settings';
-import { useEffect } from 'react';
+import {__} from '@wordpress/i18n';
+import {registerPaymentMethod} from '@woocommerce/blocks-registry';
+import {decodeEntities} from '@wordpress/html-entities';
+import {getSetting} from '@woocommerce/settings';
+import {useEffect} from 'react';
 import {
-    inBuild3Ds,
-    standalone3Ds,
-    selectSavedCardsComponent,
-    cvvCode,
     checkboxSavedCardsComponent,
-    sleep
-} from '../includes/wc-power_board';
+    inBuild3Ds,
+    selectSavedCardsComponent,
+    sleep,
+    standalone3Ds
+} from '../includes/wc-power-board';
 
 const settings = getSetting('power_board_data', {});
 
 const textDomain = 'power_board';
 const labels = {
-    defaultLabel: __('PowerBoard Payments', textDomain),
-    saveCardLabel: __('Save card', textDomain),
-    selectTokenLabel: __('Saved cards', textDomain),
-    cvvCodeLabel: __('Security number', textDomain),
-    placeOrderButtonLabel: __('Place Order by PowerBoard', textDomain),
-    fillDataError: __('Please fill card data', textDomain),
-    requiredDataError: __('Please fill required fields of the form to display payment methods', textDomain)
+    defaultLabel: __('Power Board Payments', textDomain),
+    saveCardLabel: __('Save payment details', textDomain),
+    selectTokenLabel: __('Saved payment details', textDomain),
+    placeOrderButtonLabel: __('Place Order by Power Board', textDomain),
+    fillDataError: __('Please fill in the card data.', textDomain),
+    requiredDataError: __('Please fill in the required fields of the form to display payment methods', textDomain),
+    additionalDataRejected: __('Payment has been rejected by PowerBoard. Please try again in a few minutes', textDomain)
 }
 
 const label = decodeEntities(settings.title) || labels.defaultLabel;
 
 let formSubmittedAlready = false;
 const Content = (props) => {
-    const { eventRegistration, emitResponse } = props;
-    const { onPaymentSetup, onCheckoutValidation } = eventRegistration;
+    const {eventRegistration, emitResponse} = props;
+    const {onPaymentSetup, onCheckoutValidation} = eventRegistration;
 
     useEffect(() => {
         const validation = onCheckoutValidation(async () => {
@@ -44,13 +43,6 @@ const Content = (props) => {
             }
 
             if (settings.selectedToken.length > 0) {
-                if (settings.cvv.trim().length === 0) {
-                    return {
-                        type: emitResponse.responseTypes.ERROR,
-                        errorMessage: labels.fillDataError,
-                    }
-                }
-
                 const selectedToken = settings.tokens.find(item => item.vault_token === settings.selectedToken)
                 if (typeof selectedToken !== undefined && selectedToken.hasOwnProperty('customer_id')) {
                     return true;
@@ -63,6 +55,14 @@ const Content = (props) => {
                                 errorMessage: labels.fillDataError,
                             }
                         }
+
+                        if ('error' === settings.charge3dsId) {
+                            return {
+                                type: emitResponse.responseTypes.ERROR,
+                                errorMessage: labels.additionalDataRejected,
+                            }
+                        }
+
                     }
                 }
 
@@ -81,19 +81,20 @@ const Content = (props) => {
             if (document.getElementById('billing-phone') !== null) {
                 phoneValue = document.getElementById('billing-phone').value
             }
-            window.widget2.updateFormValues({
+
+            window.widgetPowerBoard.updateFormValues({
                 email: document.getElementById('email').value,
                 phone: phoneValue
             });
 
-            window.widget2.trigger(window.cba.TRIGGER.SUBMIT_FORM);
+            window.widgetPowerBoard.trigger(window.cba.TRIGGER.SUBMIT_FORM);
 
             let result = false;
-            window.widget2.on(window.cba.EVENT.FINISH, (event) => {
+            window.widgetPowerBoard.on(window.cba.EVENT.FINISH, (event) => {
                 result = true
 
-                const savedCards = document.querySelector('.power_board-select-saved-cards')
-                if(savedCards !== null) {
+                const savedCards = document.querySelector('.power-board-select-saved-cards')
+                if (savedCards !== null) {
                     savedCards.style = 'display: none'
                 }
             })
@@ -101,8 +102,13 @@ const Content = (props) => {
             const paymentSourceToken = document.querySelector('[name="payment_source_token"]')
             for (let second = 1; second <= 100; second++) {
                 await sleep(100);
-
                 if (paymentSourceToken !== null && paymentSourceToken.value.length) {
+                    if (paymentSourceToken.value === 'error') {
+                        return {
+                            type: emitResponse.responseTypes.ERROR,
+                            errorMessage: labels.additionalDataRejected,
+                        }
+                    }
                     if (settings.paymentSourceToken.length === 0) {
                         settings.paymentSourceToken = paymentSourceToken.value
                     }
@@ -118,10 +124,18 @@ const Content = (props) => {
             if (result) {
                 if (['IN_BUILD', 'STANDALONE'].includes(settings.card3DS)) {
                     settings.charge3dsId = settings.card3DS == 'IN_BUILD' ? await inBuild3Ds() : await standalone3Ds()
+
                     if (settings.charge3dsId === false) {
                         return {
                             type: emitResponse.responseTypes.ERROR,
-                            errorMessage: labels.fillDataError,
+                            errorMessage: labels.fillDataError + ' charge3dsId',
+                        }
+                    }
+
+                    if ('error' === settings.charge3dsId) {
+                        return {
+                            type: emitResponse.responseTypes.ERROR,
+                            errorMessage: labels.additionalDataRejected,
                         }
                     }
                 }
@@ -143,7 +157,7 @@ const Content = (props) => {
 
             settings.paymentSourceToken = paymentSourceToken.value;
             if (settings.paymentSourceToken.length > 0 || settings.selectedToken.length > 0) {
-                const data = { ...settings }
+                const data = {...settings}
                 data.tokens = '';
                 data.styles = '';
                 data.supports = '';
@@ -180,21 +194,20 @@ const Content = (props) => {
         ),
         createElement(
             "div",
-            { class: 'logo-comm-bank' },
+            {class: 'logo-comm-bank'},
             createElement(
                 "img",
-                { src: '/wp-content/plugins/power_board/assets/images/logo.png' }
+                {src: '/wp-content/plugins/power_board/assets/images/logo.png'}
             ),
         ),
         selectSavedCardsComponent(labels.selectTokenLabel),
-        cvvCode(labels.cvvCodeLabel),
         createElement(
             "div",
-            { id: 'powerBoardWidgetCard_wrapper' }
+            {id: 'powerBoardWidgetCard_wrapper'}
         ),
         createElement(
             "div",
-            { id: 'powerBoardWidget3ds' }
+            {id: 'powerBoardWidget3ds'}
         ),
         createElement(
             "input",
@@ -208,15 +221,15 @@ const Content = (props) => {
 };
 
 const Label = (props) => {
-    const { PaymentMethodLabel } = props.components;
-    return <PaymentMethodLabel text={label} />;
+    const {PaymentMethodLabel} = props.components;
+    return <PaymentMethodLabel text={label}/>;
 };
 
 const Paydok = {
     name: "power_board_gateway",
-    label: <Label />,
-    content: <Content />,
-    edit: <Content />,
+    label: <Label/>,
+    content: <Content/>,
+    edit: <Content/>,
     placeOrderButtonLabel: labels.placeOrderButtonLabel,
     canMakePayment: () => true,
     ariaLabel: label,

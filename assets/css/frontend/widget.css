@@ -1,9 +1,10 @@
-#power_boardWidgetCard, #power_boardWidgetCard_wrapper {
+#powerBoardWidgetCard, #powerBoardWidgetCard_wrapper {
     min-height: 260px;
     scrollbar-width: thin;
     position: relative;
 }
-#power_boardWidgetCard_wrapper:before, #power_boardWidgetBankAccount_wrapper:before {
+
+#powerBoardWidgetCard_wrapper:before, #powerBoardWidgetBankAccount_wrapper:before {
     content: 'loading...';
     font-size: 12px;
     position: absolute;
@@ -13,13 +14,18 @@
     z-index: -1;
 }
 
-#power_boardWidgetCard::-webkit-scrollbar-thumb {
+#powerBoardWidgetCard::-webkit-scrollbar-thumb {
     border: 1px solid black; /* creates padding around scroll thumb */
 }
 
-#power_boardWidgetBankAccount, #power_boardWidgetBankAccount_wrapper {
+#powerBoardWidgetBankAccount, #powerBoardWidgetBankAccount_wrapper {
     min-height: 200px;
     position: relative;
+}
+
+#powerBoardWalletPayPalButton {
+    align-items: center;
+    display: flex;
 }
 
 .logo-comm-bank {
@@ -30,13 +36,13 @@
     height: 50px;
 }
 
-#power_boardWidgetCard iframe {
+#powerBoardWidgetCard iframe {
     border: 0;
     width: 100%;
     height: 280px;
 }
 
-#power_boardWidgetBankAccount iframe {
+#powerBoardWidgetBankAccount iframe {
     border: 0;
     width: 100%;
     height: 200px;
@@ -46,47 +52,45 @@
     overflow: hidden;
 }
 
-#power_boardWidget3ds iframe {
+#powerBoardWidget3ds iframe {
     border: 0;
     width: 100%;
     height: 360px;
 }
 
-#power_boardWidgetApm {
-    margin-top: 25px;
-}
-
-#power_boardWidgetApm img {
+#powerBoardWidgetApm img {
     margin-top: 50px;
 }
 
-#power_boardWidgetApm img {
+#powerBoardWidgetApm img {
     margin: 0 50px;
 }
 
 .btn-apm {
     all: unset;
     cursor: pointer;
+}
+
+.apms-button-wrapper {
+    justify-content: center;
+    display: flex;
     margin-bottom: 20px;
 }
 
-.power_board-validation-error {
-    color: red;
-    padding: 20px;
-    text-align: center;
-}
-.power_board-country-available-afterpay {
-    color: red;
-    padding: 20px;
-    text-align: center;
-}
-.power_board-country-available-zippay {
+.power-board-validation-error {
     color: red;
     padding: 20px;
     text-align: center;
 }
 
-.power_board-cvv-code input {
+.power-board-country-available {
+    color: red;
+    padding: 20px;
+    text-align: center;
+}
+
+
+.power-board-cvv-code input {
     -webkit-text-security: disc;
     text-security: disc;
 }
@@ -100,30 +104,30 @@
 }
 
 .paudock-wallets-buttons {
-    height: 55px;
     margin-bottom: 20px;
 }
+
 .paudock-wallets-buttons button {
     width: 150px;
 }
 
-#power_boardWidgetWallets {
+#powerBoardWidgetWallets {
     -webkit-display: flex;
     -webkit-flex-wrap: wrap;
     -webkit-justify-content: space-between;
-    -webkit-align-items: flex-start;
+    -webkit-align-items: center;
     -moz-display: flex;
     -moz-flex-wrap: wrap;
     -moz-justify-content: space-between;
-    -moz-align-items: flex-start;
+    -moz-align-items: center;
     -o-display: flex;
     -o-flex-wrap: wrap;
     -o-justify-content: space-between;
-    -o-align-items: flex-start;
+    -o-align-items: center;
     -ms-display: flex;
     -ms-flex-wrap: wrap;
     -ms-justify-content: space-between;
-    -ms-align-items: flex-start;
+    -ms-align-items: center;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
@@ -134,27 +138,20 @@
     margin-left: auto;
 }
 
-#power_boardWidgetWallets #paymentCompleted {
+#powerBoardWidgetWallets #paymentCompleted {
     display: none !important;
 }
 
-@media (min-width: 1100px) {
-    #power_boardWidgetWallets {
-        flex-direction: row;
-    }
-    .paudock-wallets-buttons {
-        height: 55px;
-        margin-bottom: 75px;
-    }
-}
-@media (max-width: 1099px) {
-    #power_boardWalletsPaypal {
-        margin-bottom: 75px;
-    }
+#powerBoardWidgetWallets {
+    flex-direction: column;
 }
 
-.power_board-apple-container {
-    display:block;
+#powerBoardWalletGooglePayButton{
+    height: 55px;
+}
+
+.power-board-apple-container {
+    display: block;
     width: 150px !important;
     height: 55px !important;
     box-sizing: border-box;

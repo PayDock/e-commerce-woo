@@ -2,7 +2,7 @@
 
 namespace PowerBoard\API;
 
-use PowerBoard\Abstract\AbstractApiService;
+use PowerBoard\Abstracts\AbstractApiService;
 
 class ChargeService extends AbstractApiService
 {
@@ -12,19 +12,21 @@ class ChargeService extends AbstractApiService
     const STANDALONE_3DS_ENDPOINT = 'standalone-3ds';
     const CAPTURE_ENDPOINT = 'capture';
     const REFUNDS_ENDPOINT = 'refunds';
+    const FRAUD_ATTACH_ENDPOINT = 'fraud/attach';
 
     protected ?bool $directCharge = null;
 
     protected ?string $id = null;
     protected array $allowedAction = [
-        'create' => self::METHOD_POST,
-        'update' => self::METHOD_POST,
+        'create'            => self::METHOD_POST,
+        'update'            => self::METHOD_POST,
         'wallet-initialize' => self::METHOD_POST,
-        'standalone-fraud' => self::METHOD_POST,
-        'standalone-3ds' => self::METHOD_POST,
-        'capture' => self::METHOD_POST,
-        'refunds' => self::METHOD_POST,
+        'standalone-fraud'  => self::METHOD_POST,
+        'standalone-3ds'    => self::METHOD_POST,
+        'capture'           => self::METHOD_POST,
+        'refunds'           => self::METHOD_POST,
         'cancel-authorised' => self::METHOD_DELETE,
+        'fraud-attach'      => self::METHOD_POST,
     ];
 
     public function create(array $params): self
@@ -103,29 +105,39 @@ class ChargeService extends AbstractApiService
         return $this;
     }
 
+    public function fraudAttach(string $id, array $params): self
+    {
+        $this->id = $id;
+        $this->parameters = $params;
+
+        $this->setAction('fraud-attach');
+
+        return $this;
+    }
+
     protected function buildEndpoint(): ?string
     {
         switch ($this->action) {
             case 'create':
                 $result = self::ENDPOINT;
                 if (isset($this->parameters['capture'])) {
-                    $result .= '?capture=' . ($this->parameters['capture'] ? 'true' : 'false');
+                    $result .= '?capture='.($this->parameters['capture'] ? 'true' : 'false');
                     unset($this->parameters['capture']);
                 }
                 break;
             case 'standalone-fraud':
-                $result = self::ENDPOINT . '/' . self::STANDALONE_FRAUD_ENDPOINT;
+                $result = self::ENDPOINT.'/'.self::STANDALONE_FRAUD_ENDPOINT;
                 break;
             case 'standalone-3ds':
-                $result = self::ENDPOINT . '/' . self::STANDALONE_3DS_ENDPOINT;
+                $result = self::ENDPOINT.'/'.self::STANDALONE_3DS_ENDPOINT;
                 break;
             case 'refunds':
-                $result = self::ENDPOINT . '/' . $this->parameters['charge_id'] . '/' . self::REFUNDS_ENDPOINT;
+                $result = self::ENDPOINT.'/'.$this->parameters['charge_id'].'/'.self::REFUNDS_ENDPOINT;
                 unset($this->parameters['charge_id']);
                 break;
             case 'capture':
             case 'cancel-authorised':
-                $result = self::ENDPOINT . '/' . $this->parameters['charge_id'] . '/' . self::CAPTURE_ENDPOINT;
+                $result = self::ENDPOINT.'/'.$this->parameters['charge_id'].'/'.self::CAPTURE_ENDPOINT;
                 unset($this->parameters['charge_id']);
                 break;
             case 'wallet-initialize':
@@ -133,6 +145,9 @@ class ChargeService extends AbstractApiService
                 break;
             case 'update':
                 $result = self::ENDPOINT.'/'.$this->id;
+                break;
+            case 'fraud-attach':
+                $result = self::ENDPOINT.'/'.$this->id.'/'.self::FRAUD_ATTACH_ENDPOINT;
                 break;
             default:
                 $result = self::ENDPOINT;

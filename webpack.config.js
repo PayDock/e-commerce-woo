@@ -30,8 +30,12 @@ module.exports = {
     entry: {
         'frontend/blocks': '/resources/js/frontend/index.js',
         'frontend/bank-account-form': '/resources/js/frontend/bank-account-form.js',
-        'frontend/wallets-form': '/resources/js/frontend/wallets-form.js',
-        'frontend/apms': '/resources/js/frontend/apms.js',
+        'frontend/pay-pal-wallet': '/resources/js/frontend/pay-pal-wallet.js',
+        'frontend/google-pay-wallet': '/resources/js/frontend/google-pay-wallet.js',
+        'frontend/apple-pay-wallet': '/resources/js/frontend/apple-pay-wallet.js',
+        'frontend/afterpay-wallet': '/resources/js/frontend/afterpay-wallet.js',
+        'frontend/afterpay-a-p-m-s': '/resources/js/frontend/afterpay-a-p-m-s.js',
+        'frontend/zip-a-p-m-s': '/resources/js/frontend/zip-a-p-m-s.js',
     },
     output: {
         path: path.resolve(__dirname, 'assets/build/js'),

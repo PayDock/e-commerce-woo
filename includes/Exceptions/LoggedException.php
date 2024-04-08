@@ -8,7 +8,7 @@ class LoggedException extends Exception
 {
     public array $response = [];
 
-    public function __construct(string $message = "", int $code = 0, ?Throwable $previous = null, array $response = [])
+    public function __construct(string $message = "", int $code = 0, $previous = null, array $response = [])
     {
         $this->response = $response;
 
@@ -20,7 +20,11 @@ class LoggedException extends Exception
      */
     public static function throw(array $response = []): void
     {
-        throw new self(__('Something want wrong. Check data, refresh page and try again.', POWER_BOARD_TEXT_DOMAIN), 0,
-            null, $response);
+        throw new self(
+            __('Oops! Something went wrong. Please check the information provided and try again. ', POWER_BOARD_TEXT_DOMAIN),
+            0,
+            null,
+            $response
+        );
     }
 }

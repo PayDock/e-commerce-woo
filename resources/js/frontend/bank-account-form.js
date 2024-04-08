@@ -1,27 +1,25 @@
-import { __ } from '@wordpress/i18n';
-import { registerPaymentMethod } from '@woocommerce/blocks-registry';
-import { decodeEntities } from '@wordpress/html-entities';
-import { getSetting } from '@woocommerce/settings';
-import { useEffect } from 'react';
-import {
-    selectSavedBankAccountsComponent,
-    checkboxSavedBankAccountComponent
-} from '../includes/wc-power_board';
+import {__} from '@wordpress/i18n';
+import {registerPaymentMethod} from '@woocommerce/blocks-registry';
+import {decodeEntities} from '@wordpress/html-entities';
+import {getSetting} from '@woocommerce/settings';
+import {useEffect} from 'react';
+import {checkboxSavedBankAccountComponent, selectSavedBankAccountsComponent} from '../includes/wc-power-board';
 
 const settings = getSetting('power_board_bank_account_block_data', {});
 
 const textDomain = 'power_board';
 const labels = {
-    defaultLabel: __('PowerBoard Payments', textDomain),
-    saveBankAcoountLabel: __('Save bank account', textDomain),
-    selectTokenLabel: __('Saved bank accounts', textDomain),
-    placeOrderButtonLabel: __('Place Order by PowerBoard', textDomain),
-    fillDataError: __('Please fill card data', textDomain)
+    defaultLabel: __('Power Board Payments', textDomain),
+    saveBankAcoountLabel: __('Save payment details', textDomain),
+    selectTokenLabel: __('Saved payment details', textDomain),
+    placeOrderButtonLabel: __('Place Order by Power Board', textDomain),
+    fillDataError: __('Please fill in the card data.', textDomain)
 }
 
 const label = decodeEntities(settings.title) || label.defaultLabel;
 
 let sleepSetTimeout_ctrl;
+
 function sleep(ms) {
     clearInterval(sleepSetTimeout_ctrl);
     return new Promise(resolve => sleepSetTimeout_ctrl = setTimeout(resolve, ms));
@@ -29,8 +27,8 @@ function sleep(ms) {
 
 let formSubmittedAlready = false;
 const Content = (props) => {
-    const { eventRegistration, emitResponse } = props;
-    const { onPaymentSetup, onCheckoutValidation } = eventRegistration;
+    const {eventRegistration, emitResponse} = props;
+    const {onPaymentSetup, onCheckoutValidation} = eventRegistration;
 
     useEffect(() => {
         const validation = onCheckoutValidation(async () => {
@@ -51,10 +49,10 @@ const Content = (props) => {
                 return true;
             }
 
-            window.widget2BankAccount.trigger(window.cba.TRIGGER.SUBMIT_FORM);
+            window.widgetPowerBoardBankAccount.trigger(window.cba.TRIGGER.SUBMIT_FORM);
             let result = false;
 
-            window.widget2BankAccount.on(window.cba.EVENT.FINISH, (data) => {
+            window.widgetPowerBoardBankAccount.on(window.cba.EVENT.FINISH, (data) => {
                 result = true;
             })
 
@@ -83,7 +81,7 @@ const Content = (props) => {
             }
             settings.paymentSourceToken = paymentSourceToken.value;
             if (settings.paymentSourceToken.length > 0 || settings.selectedToken.length > 0) {
-                const data = { ...settings }
+                const data = {...settings}
                 data.tokens = '';
                 data.styles = '';
                 data.supports = '';
@@ -120,16 +118,16 @@ const Content = (props) => {
         ),
         createElement(
             "div",
-            { class: 'logo-comm-bank' },
+            {class: 'logo-comm-bank'},
             createElement(
                 "img",
-                { src: '/wp-content/plugins/power_board/assets/images/logo.png' }
+                {src: '/wp-content/plugins/power_board/assets/images/logo.png'}
             ),
         ),
         selectSavedBankAccountsComponent(labels.selectTokenLabel),
         createElement(
             "div",
-            { id: 'powerBoardWidgetBankAccount_wrapper' }
+            {id: 'powerBoardWidgetBankAccount_wrapper'}
         ),
         createElement(
             "input",
@@ -144,15 +142,15 @@ const Content = (props) => {
 
 
 const Label = (props) => {
-    const { PaymentMethodLabel } = props.components;
-    return <PaymentMethodLabel text={label} />;
+    const {PaymentMethodLabel} = props.components;
+    return <PaymentMethodLabel text={label}/>;
 };
 
 const PaydokBankAccountBlock = {
     name: "power_board_bank_account_gateway",
-    label: <Label />,
-    content: <Content />,
-    edit: <Content />,
+    label: <Label/>,
+    content: <Content/>,
+    edit: <Content/>,
     placeOrderButtonLabel: labels.placeOrderButtonLabel,
     canMakePayment: () => true,
     ariaLabel: label,

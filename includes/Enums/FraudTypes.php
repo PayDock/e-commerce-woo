@@ -2,14 +2,13 @@
 
 namespace PowerBoard\Enums;
 
-use PowerBoard\Abstract\AbstractEnum;
+use PowerBoard\Abstracts\AbstractEnum;
 
 class FraudTypes extends AbstractEnum
 {
     protected const  DISABLE = 'Disable';
     protected const  STANDALONE = 'Standalone Fraud';
     protected const  IN_BUILD = 'In-built Fraud';
-
 
     public static function toArray(): array
     {

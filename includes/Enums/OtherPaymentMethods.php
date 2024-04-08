@@ -2,7 +2,7 @@
 
 namespace PowerBoard\Enums;
 
-use PowerBoard\Abstract\AbstractEnum;
+use PowerBoard\Abstracts\AbstractEnum;
 
 class OtherPaymentMethods extends AbstractEnum
 {
@@ -11,9 +11,25 @@ class OtherPaymentMethods extends AbstractEnum
 
     public function getLabel(): string
     {
-        return match ($this->name) {
-            self::ZIPPAY => 'Zippay',
-            self::AFTERPAY => 'Afterpay v1',
-        };
+        switch ($this->name) {
+            case self::ZIPPAY:
+                return 'Zip';
+            case self::AFTERPAY:
+                return 'Afterpay v1';
+            default:
+                return '';
+        }
+    }
+
+    public function getId(): string
+    {
+        switch ($this->name) {
+            case self::ZIPPAY:
+                return 'zip';
+            case self::AFTERPAY:
+                return 'afterpay';
+            default:
+                return '';
+        }
     }
 }

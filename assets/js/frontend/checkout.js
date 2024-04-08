@@ -1,36 +1,38 @@
-const power_boardSettings = window.wc.wcSettings.getSetting('power_board_data', {});
-const power_boardLabel = window.wp.htmlEntities.decodeEntities(power_boardSettings.title) || window.wp.i18n.__('PowerBoard', 'power_board_gateway');
+const powerBoardSettings = window.wc.wcSettings.getSetting('power_board_data', {});
+const powerBoardLabel = window.wp.htmlEntities.decodeEntities(powerBoardSettings.title)
+    || window.wp.i18n.__('Power Board', 'power_board_gateway');
 
-const power_boardContent = () => {
-    return wp.element.createElement('div', null,
+const powerBoardContent = () => {
+    return wp.element.createElement(
+        'div',
+        null,
         wp.element.createElement(
             "div",
             null,
-            window.wp.htmlEntities.decodeEntities(power_boardSettings.description || '')
-        ), wp.element.createElement(
-            "div",
-            {
-                id: 'power_boardWidgetCard',
+            window.wp.htmlEntities.decodeEntities(powerBoardSettings.description || '')),
+        wp.element.createElement(
+            "div", {
+                id: 'powerBoardWidgetCard',
             }
         ), wp.element.createElement(
-            "input",
-            {
+            "input", {
                 type: 'hidden',
                 name: 'payment_source_tokenzz'
             }
-        ));
+        )
+    );
 };
 
 const Block_PowerBoard_Gateway = {
     name: 'power_board_gateway',
-    label: power_boardLabel,
-    content: Object(window.wp.element.createElement)(power_boardContent, null),
-    edit: Object(window.wp.element.createElement)(power_boardContent, null),
-    placeOrderButtonLabel: 'Place Order by PowerBoard',
+    label: powerBoardLabel,
+    content: Object(window.wp.element.createElement)(powerBoardContent, null),
+    edit: Object(window.wp.element.createElement)(powerBoardContent, null),
+    placeOrderButtonLabel: 'Place Order by Power Board',
     canMakePayment: () => true,
-    ariaLabel: power_boardLabel,
+    ariaLabel: powerBoardLabel,
     supports: {
-        features: power_boardSettings.supports,
+        features: powerBoardSettings.supports,
     },
 };
 

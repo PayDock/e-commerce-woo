@@ -1,6 +1,6 @@
 <?php
 
-namespace PowerBoard\Controller\Admin;
+namespace PowerBoard\Controllers\Admin;
 
 class SettingsController
 {

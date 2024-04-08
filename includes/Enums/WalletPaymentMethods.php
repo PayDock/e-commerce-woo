@@ -2,7 +2,7 @@
 
 namespace PowerBoard\Enums;
 
-use PowerBoard\Abstract\AbstractEnum;
+use PowerBoard\Abstracts\AbstractEnum;
 
 class WalletPaymentMethods extends AbstractEnum
 {
@@ -13,11 +13,33 @@ class WalletPaymentMethods extends AbstractEnum
 
     public function getLabel(): string
     {
-        return match ($this->name) {
-            self::APPLE_PAY => 'Apple Pay',
-            self::GOOGLE_PAY => 'Google Pay',
-            self::PAY_PAL_SMART_BUTTON => 'PayPal Smart Button',
-            self::AFTERPAY => 'Afterpay v2',
-        };
+        switch ($this->name) {
+            case self::APPLE_PAY:
+                return 'Apple Pay';
+            case self::GOOGLE_PAY:
+                return 'Google Pay';
+            case self::PAY_PAL_SMART_BUTTON:
+                return 'PayPal Smart Button';
+            case self::AFTERPAY:
+                return 'Afterpay v2';
+            default:
+                return '';
+        }
+    }
+
+    public function getId(): string
+    {
+        switch ($this->name) {
+            case self::APPLE_PAY:
+                return 'apple-pay';
+            case self::GOOGLE_PAY:
+                return 'google-pay';
+            case self::PAY_PAL_SMART_BUTTON:
+                return 'pay-pal';
+            case self::AFTERPAY:
+                return 'afterpay';
+            default:
+                return '';
+        }
     }
 }

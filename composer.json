@@ -1,6 +1,6 @@
 {
-    "name": "power_board/sp-woocommerce",
-    "description": "PowerBoard simplify how you manage your payments. Reduce costs, technical headaches & streamline compliance using PowerBoard's payment orchestration.",
+    "name": "powerBoard/sp-woocommerce",
+    "description": "Power Board simplify how you manage your payments. Reduce costs, technical headaches & streamline compliance using Power Board's payment orchestration.",
     "type": "project",
     "license": "MIT",
     "minimum-stability": "dev",

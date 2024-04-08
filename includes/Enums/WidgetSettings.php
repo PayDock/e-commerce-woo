@@ -2,22 +2,28 @@
 
 namespace PowerBoard\Enums;
 
-use PowerBoard\Abstract\AbstractEnum;
+use PowerBoard\Abstracts\AbstractEnum;
 
 class WidgetSettings extends AbstractEnum
 {
-    // protected const TITLE = 'TITLE';
-    // protected const DESCRIPTION = 'DESCRIPTION';
     protected const VERSION = 'VERSION';
     protected const CUSTOM_VERSION = 'CUSTOM_VERSION';
     protected const PAYMENT_CARD_TITLE = 'PAYMENT_CARD_TITLE';
     protected const PAYMENT_CARD_DESCRIPTION = 'PAYMENT_CARD_DESCRIPTION';
     protected const PAYMENT_BANK_ACCOUNT_TITLE = 'PAYMENT_BANK_ACCOUNT_TITLE';
     protected const PAYMENT_BANK_ACCOUNT_DESCRIPTION = 'PAYMENT_BANK_ACCOUNT_DESCRIPTION';
-    protected const PAYMENT_WALLET_TITLE = 'PAYMENT_WALLET_TITLE';
-    protected const PAYMENT_WALLET_DESCRIPTION = 'PAYMENT_WALLET_DESCRIPTION';
-    protected const PAYMENT_A_P_M_S_TITLE = 'PAYMENT_A_P_M_S_TITLE';
-    protected const PAYMENT_A_P_M_S_DESCRIPTION = 'PAYMENT_A_P_M_S_DESCRIPTION';
+    protected const PAYMENT_WALLET_APPLE_PAY_TITLE = 'PAYMENT_WALLET_APPLE_PAY_TITLE';
+    protected const PAYMENT_WALLET_APPLE_PAY_DESCRIPTION = 'PAYMENT_WALLET_APPLE_PAY_DESCRIPTION';
+    protected const PAYMENT_WALLET_GOOGLE_PAY_TITLE = 'PAYMENT_WALLET_GOOGLE_PAY_TITLE';
+    protected const PAYMENT_WALLET_GOOGLE_PAY_DESCRIPTION = 'PAYMENT_WALLET_GOOGLE_PAY_DESCRIPTION';
+    protected const PAYMENT_WALLET_AFTERPAY_V2_TITLE = 'PAYMENT_WALLET_AFTERPAY_V2_TITLE';
+    protected const PAYMENT_WALLET_AFTERPAY_V2_DESCRIPTION = 'PAYMENT_WALLET_AFTERPAY_V2_DESCRIPTION';
+    protected const PAYMENT_WALLET_PAYPAL_TITLE = 'PAYMENT_WALLET_PAYPAL_TITLE';
+    protected const PAYMENT_WALLET_PAYPAL_DESCRIPTION = 'PAYMENT_WALLET_PAYPAL_DESCRIPTION';
+    protected const PAYMENT_A_P_M_S_AFTERPAY_V1_TITLE = 'PAYMENT_A_P_M_S_AFTERPAY_V1_TITLE';
+    protected const PAYMENT_A_P_M_S_AFTERPAY_V1_DESCRIPTION = 'PAYMENT_A_P_M_S_AFTERPAY_V1_DESCRIPTION';
+    protected const PAYMENT_A_P_M_S_ZIP_TITLE = 'PAYMENT_A_P_M_S_ZIP_TITLE';
+    protected const PAYMENT_A_P_M_S_ZIP_DESCRIPTION = 'PAYMENT_A_P_M_S_ZIP_DESCRIPTION';
     protected const STYLE_BACKGROUND_COLOR = 'STYLE_BACKGROUND_COLOR';
     protected const STYLE_TEXT_COLOR = 'STYLE_TEXT_COLOR';
     protected const STYLE_BORDER_COLOR = 'STYLE_BORDER_COLOR';
@@ -26,6 +32,17 @@ class WidgetSettings extends AbstractEnum
     protected const STYLE_FONT_SIZE = 'STYLE_FONT_SIZE';
     protected const STYLE_FONT_FAMILY = 'STYLE_FONT_FAMILY';
     protected const STYLE_CUSTOM = 'STYLE_CUSTOM';
+
+    public static function cases(): array
+    {
+        return parent::cases();
+        $items = parent::cases();
+
+        return array_filter($items, fn(self $item) => !in_array($item->name, [
+            self::PAYMENT_BANK_ACCOUNT_DESCRIPTION,
+            self::PAYMENT_BANK_ACCOUNT_TITLE,
+        ]));
+    }
 
     public function getTitle(): string
     {
@@ -41,7 +58,7 @@ class WidgetSettings extends AbstractEnum
             'a',
             'p',
             'm',
-            's'
+            's',
         ]));
 
         return implode(' ', $result);
@@ -57,32 +74,51 @@ class WidgetSettings extends AbstractEnum
 
     public function getInputType(): string
     {
-        return match ($this->name) {
-            self::CUSTOM_VERSION,
-            self::PAYMENT_CARD_TITLE,
-            self::PAYMENT_CARD_DESCRIPTION,
-            self::PAYMENT_A_P_M_S_TITLE,
-            self::PAYMENT_A_P_M_S_DESCRIPTION,
-            self::PAYMENT_BANK_ACCOUNT_TITLE,
-            self::PAYMENT_BANK_ACCOUNT_DESCRIPTION,
-            self::PAYMENT_WALLET_TITLE,
-            self::PAYMENT_WALLET_DESCRIPTION => 'text',
-            self::VERSION,
-            self::STYLE_FONT_FAMILY,
-            self::STYLE_FONT_SIZE => 'select',
-            self::STYLE_CUSTOM => 'textarea',
-            default => 'color_picker',
-        };
+        switch ($this->name) {
+            case self::CUSTOM_VERSION:
+            case self::PAYMENT_CARD_TITLE:
+            case self::PAYMENT_CARD_DESCRIPTION:
+            case self::PAYMENT_BANK_ACCOUNT_TITLE:
+            case self::PAYMENT_BANK_ACCOUNT_DESCRIPTION:
+            case self::PAYMENT_WALLET_APPLE_PAY_TITLE:
+            case self::PAYMENT_WALLET_APPLE_PAY_DESCRIPTION:
+            case self::PAYMENT_WALLET_GOOGLE_PAY_TITLE:
+            case self::PAYMENT_WALLET_GOOGLE_PAY_DESCRIPTION:
+            case self::PAYMENT_WALLET_AFTERPAY_V2_TITLE:
+            case self::PAYMENT_WALLET_AFTERPAY_V2_DESCRIPTION:
+            case self::PAYMENT_WALLET_PAYPAL_TITLE:
+            case self::PAYMENT_WALLET_PAYPAL_DESCRIPTION:
+            case self::PAYMENT_A_P_M_S_AFTERPAY_V1_TITLE:
+            case self::PAYMENT_A_P_M_S_AFTERPAY_V1_DESCRIPTION:
+            case self::PAYMENT_A_P_M_S_ZIP_TITLE:
+            case self::PAYMENT_A_P_M_S_ZIP_DESCRIPTION:
+                return 'text';
+
+            case self::VERSION:
+            case self::STYLE_FONT_FAMILY:
+            case self::STYLE_FONT_SIZE:
+                return 'select';
+
+            case self::STYLE_CUSTOM:
+                return 'textarea';
+
+            default:
+                return 'color_picker';
+        }
     }
 
     public function getOptions(): array
     {
-        return match ($this->name) {
-            self::STYLE_FONT_SIZE => $this->getFontSizes(),
-            self::VERSION => $this->getVersions(),
-            self::STYLE_FONT_FAMILY => $this->getFontFamily(),
-            default => [],
-        };
+        switch ($this->name) {
+            case self::STYLE_FONT_SIZE:
+                return $this->getFontSizes();
+            case self::VERSION:
+                return $this->getVersions();
+            case self::STYLE_FONT_FAMILY:
+                return $this->getFontFamily();
+            default:
+                return [];
+        }
     }
 
     public function getFontSizes(): array
@@ -90,7 +126,7 @@ class WidgetSettings extends AbstractEnum
         $result = [];
 
         for ($i = 8; $i <= 32; $i += 2) {
-            $result[$i . 'px'] = $i;
+            $result[$i.'px'] = $i;
         }
 
         return $result;
@@ -100,7 +136,7 @@ class WidgetSettings extends AbstractEnum
     {
         return [
             'latest' => 'latest',
-            'custom' => 'custom'
+            'custom' => 'custom',
         ];
     }
 
@@ -110,7 +146,6 @@ class WidgetSettings extends AbstractEnum
             'Inter Regular',
             'serif',
             'sans-serif',
-            'serif',
             'monospace',
             'cursive',
             'fantasy',
@@ -127,25 +162,56 @@ class WidgetSettings extends AbstractEnum
         return array_combine($fonts, $fonts);
     }
 
-    public function getDefault(): mixed
+    public function getDefault()
     {
-        return match ($this->name) {
-            self::STYLE_FONT_SIZE => '18px',
-            self::VERSION => 'latest',
-            self::PAYMENT_CARD_TITLE => 'Cards',
-            self::PAYMENT_CARD_DESCRIPTION => 'Pay by cards',
-            self::PAYMENT_A_P_M_S_TITLE => 'APMs',
-            self::PAYMENT_A_P_M_S_DESCRIPTION => 'Pay by APMs',
-            self::PAYMENT_BANK_ACCOUNT_TITLE => 'Bank Accounts',
-            self::PAYMENT_BANK_ACCOUNT_DESCRIPTION => 'Pay by Bank Accounts',
-            self::PAYMENT_WALLET_TITLE => 'Wallets',
-            self::PAYMENT_WALLET_DESCRIPTION => 'Google Pay, Apple Pay, PayPal',
-            self::STYLE_BACKGROUND_COLOR => 'rgb(235,235,235)',
-            self::STYLE_TEXT_COLOR => '#1E1E1E',
-            self::STYLE_BORDER_COLOR => '#B5B5B5',
-            self::STYLE_ERROR_COLOR => '#e1001a',
-            self::STYLE_SUCCESS_COLOR => '#00A000',
-            default => null,
-        };
+        switch ($this->name) {
+            case self::STYLE_FONT_SIZE:
+                return '18px';
+            case self::VERSION:
+                return 'latest';
+            case self::PAYMENT_CARD_TITLE:
+                return 'Cards';
+            case self::PAYMENT_CARD_DESCRIPTION:
+                return 'Pay by cards';
+            case self::PAYMENT_BANK_ACCOUNT_TITLE:
+                return 'Bank Accounts';
+            case self::PAYMENT_BANK_ACCOUNT_DESCRIPTION:
+                return 'Pay by Bank Accounts';
+            case self::PAYMENT_WALLET_APPLE_PAY_TITLE:
+                return 'Apple Pay';
+            case self::PAYMENT_WALLET_APPLE_PAY_DESCRIPTION:
+                return 'Apple Pay is a safe, secure, and private way to pay.';
+            case self::PAYMENT_WALLET_GOOGLE_PAY_TITLE:
+                return 'Google Pay';
+            case self::PAYMENT_WALLET_GOOGLE_PAY_DESCRIPTION:
+                return 'Google Pay is a quick, easy, and secure way to pay online in store.';
+            case self::PAYMENT_WALLET_AFTERPAY_V2_TITLE:
+                return 'Afterpay v2';
+            case self::PAYMENT_WALLET_AFTERPAY_V2_DESCRIPTION:
+            case self::PAYMENT_A_P_M_S_AFTERPAY_V1_DESCRIPTION:
+                return 'Shop as usual, then choose Afterpay as your payment method at checkout.';
+            case self::PAYMENT_WALLET_PAYPAL_TITLE:
+                return 'PayPal';
+            case self::PAYMENT_WALLET_PAYPAL_DESCRIPTION:
+                return 'PayPal is the faster, safer way to make an online payment.';
+            case self::PAYMENT_A_P_M_S_AFTERPAY_V1_TITLE:
+                return 'Afterpay v1';
+            case self::PAYMENT_A_P_M_S_ZIP_TITLE:
+                return 'Zip';
+            case self::PAYMENT_A_P_M_S_ZIP_DESCRIPTION:
+                return 'Zip Pay is an interest-free buy-now-pay-later service.';
+            case self::STYLE_BACKGROUND_COLOR:
+                return 'rgb(246, 240, 235)';
+            case self::STYLE_TEXT_COLOR:
+                return '#191919';
+            case self::STYLE_BORDER_COLOR:
+                return '#C9BCB9';
+            case self::STYLE_ERROR_COLOR:
+                return '#CD0000';
+            case self::STYLE_SUCCESS_COLOR:
+                return '#0B7F3B';
+            default:
+                return null;
+        }
     }
 }

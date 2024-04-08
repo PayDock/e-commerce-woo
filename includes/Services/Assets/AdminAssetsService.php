@@ -44,6 +44,16 @@ class AdminAssetsService
         }
     }
 
+    private function getScriptName(string $script): string
+    {
+        return implode('_', [PowerBoardPlugin::PLUGIN_PREFIX, self::PREFIX, self::SCRIPT_PREFIX, $script]);
+    }
+
+    private function getScriptPath(string $script): string
+    {
+        return self::URL_SCRIPT_PREFIX.$script.self::URL_SCRIPT_POSTFIX;
+    }
+
     public function loadScripts(): void
     {
         foreach (self::SCRIPTS as $script) {
@@ -61,16 +71,6 @@ class AdminAssetsService
         }
     }
 
-    private function getScriptName(string $script): string
-    {
-        return implode('_', [PowerBoardPlugin::PLUGIN_PREFIX, self::PREFIX, self::SCRIPT_PREFIX, $script]);
-    }
-
-    private function getScriptPath(string $script): string
-    {
-        return self::URL_SCRIPT_PREFIX . $script . self::URL_SCRIPT_POSTFIX;
-    }
-
     private function getStyleName(string $script): string
     {
         return implode('_', [PowerBoardPlugin::PLUGIN_PREFIX, self::PREFIX, self::STYLE_PREFIX, $script]);
@@ -78,7 +78,7 @@ class AdminAssetsService
 
     private function getStylePath(string $script): string
     {
-        return self::URL_STYLE_PREFIX . $script . self::URL_STYLE_POSTFIX;
+        return self::URL_STYLE_PREFIX.$script.self::URL_STYLE_POSTFIX;
     }
 
 }

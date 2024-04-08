@@ -1,4 +1,4 @@
-import { getSetting } from '@woocommerce/settings';
+import {getSetting} from '@woocommerce/settings';
 import getVaultToken from './get-vault-token';
 import sleep from './sleep';
 
@@ -25,8 +25,8 @@ export default async (forcePermanentVault = false) => {
         preAuthData.token = settings.paymentSourceToken
     }
 
-    const envVal = settings.isSandbox ? 'sandbox' : 'production'
-    const preAuthResp = await new window.power_board.Api(settings.publicKey)
+    const envVal = settings.isSandbox ? 'preproduction_cba' : 'production_cba'
+    const preAuthResp = await new window.cba.Api(settings.publicKey)
         .setEnv(envVal)
         .charge()
         .preAuth(preAuthData);
@@ -35,17 +35,23 @@ export default async (forcePermanentVault = false) => {
         return false;
     }
 
-    const canvas = new window.power_board.Canvas3ds('#power_boardWidget3ds', preAuthResp._3ds.token);
+    const canvas = new window.cba.Canvas3ds('#powerBoardWidget3ds', preAuthResp._3ds.token);
     canvas.load();
 
-    document.getElementById('power_boardWidgetCard_wrapper').setAttribute('style', 'display: none')
+    document.getElementById('powerBoardWidgetCard_wrapper').setAttribute('style', 'display: none')
 
     let result = false;
     canvas.on('chargeAuth', (chargeAuthEvent) => {
         result = chargeAuthEvent.charge_3ds_id
     })
+    canvas.on('additionalDataCollectReject', (chargeAuthSuccessEvent) => {
+        result = 'error';
+    })
+    canvas.on('chargeAuthReject', function (data) {
+        result = 'error';
+    });
 
-    for (let second = 1; second <= 100; second++) {
+    for (let second = 1; second <= 10000; second++) {
         await sleep(100);
 
         if (result !== false) {
