@@ -20,27 +20,6 @@ class UserTokenRepository
         $this->userId = get_current_user_id();
     }
 
-    public function getUserTokens(): array
-    {
-        if ($this->cache === null) {
-            $userMeta = get_user_meta($this->userId, self::CARD_TOKENS_KEY, true);
-
-            foreach ($userMeta as $index => $item){
-                if(!empty($item['vault_token'])){
-                    $userMeta[$index]['vault_token'] = HashService::decrypt($item['vault_token']);
-                }
-            }
-
-            $this->cache = array_values(is_array($userMeta) ? $userMeta : []);
-
-            if (empty($this->cache)) {
-                $this->cache = [];
-            }
-        }
-
-        return $this->cache;
-    }
-
     public function getUserToken(string $token): array
     {
         $tokens = $this->getUserTokens();
@@ -57,7 +36,30 @@ class UserTokenRepository
         return $vaultToken;
     }
 
-    public function saveUserToken(array $token): int|bool
+    public function getUserTokens(): array
+    {
+        if ($this->cache === null) {
+            $userMeta = get_user_meta($this->userId, self::CARD_TOKENS_KEY, true);
+
+            if (!empty($userMeta)) {
+                foreach ($userMeta as $index => $item) {
+                    if (!empty($item['vault_token'])) {
+                        $userMeta[$index]['vault_token'] = HashService::decrypt($item['vault_token']);
+                    }
+                }
+            }
+
+            $this->cache = array_values(is_array($userMeta) ? $userMeta : []);
+
+            if (empty($this->cache)) {
+                $this->cache = [];
+            }
+        }
+
+        return $this->cache;
+    }
+
+    public function saveUserToken(array $token)
     {
         $tokens = $this->getUserTokens();
         if (!empty($tokens)) {
@@ -78,46 +80,13 @@ class UserTokenRepository
 
         $tokens[] = $token;
 
-        foreach ($tokens as $index => $item){
-            if(!empty($item['vault_token'])){
+        foreach ($tokens as $index => $item) {
+            if (!empty($item['vault_token'])) {
                 $tokens[$index]['vault_token'] = HashService::encrypt($item['vault_token']);
             }
         }
 
         $result = update_user_meta($this->userId, self::CARD_TOKENS_KEY, $tokens);
-
-        $this->cleanCache();
-
-        return $result;
-    }
-
-    public function updateUserToken(string $token, $data): int|bool
-    {
-        $tokens = $this->getUserTokens();
-
-        $tokens = array_map(function ($value) use ($token, $data) {
-            if ($value['vault_token'] === $token) {
-                $value = array_merge($value, $data);
-            }
-            return $value;
-        }, $tokens);
-
-        foreach ($tokens as $index => $item){
-            if(!empty($item['vault_token'])){
-                $tokens[$index]['vault_token'] = HashService::encrypt($item['vault_token']);
-            }
-        }
-
-        $result = update_user_meta($this->userId, self::CARD_TOKENS_KEY, $tokens);
-
-        $this->cleanCache();
-
-        return $result;
-    }
-
-    public function deleteAllUserTokens(): int|bool
-    {
-        $result = delete_user_meta($this->userId, self::CARD_TOKENS_KEY);
 
         $this->cleanCache();
 
@@ -127,5 +96,39 @@ class UserTokenRepository
     private function cleanCache(): void
     {
         $this->cache = null;
+    }
+
+    public function updateUserToken(string $token, $data)
+    {
+        $tokens = $this->getUserTokens();
+
+        $tokens = array_map(function ($value) use ($token, $data) {
+            if ($value['vault_token'] === $token) {
+                $value = array_merge($value, $data);
+            }
+
+            return $value;
+        }, $tokens);
+
+        foreach ($tokens as $index => $item) {
+            if (!empty($item['vault_token'])) {
+                $tokens[$index]['vault_token'] = HashService::encrypt($item['vault_token']);
+            }
+        }
+
+        $result = update_user_meta($this->userId, self::CARD_TOKENS_KEY, $tokens);
+
+        $this->cleanCache();
+
+        return $result;
+    }
+
+    public function deleteAllUserTokens()
+    {
+        $result = delete_user_meta($this->userId, self::CARD_TOKENS_KEY);
+
+        $this->cleanCache();
+
+        return $result;
     }
 }

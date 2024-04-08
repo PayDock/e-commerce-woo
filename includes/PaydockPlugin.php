@@ -2,14 +2,12 @@
 
 namespace Paydock;
 
-use Paydock\Abstract\AbstractSingleton;
+use Paydock\Abstracts\AbstractSingleton;
 use Paydock\Hooks\ActivationHook;
 use Paydock\Hooks\DeactivationHook;
 use Paydock\Repositories\LogRepository;
 use Paydock\Services\ActionsService;
-use Paydock\Services\Assets\AdminAssetsService;
 use Paydock\Services\FiltersService;
-use Paydock\Services\Settings\LiveConnectionSettingService;
 
 if (!class_exists('\Paydock\PaydockPlugin')) {
     final class PaydockPlugin extends AbstractSingleton
@@ -22,9 +20,9 @@ if (!class_exists('\Paydock\PaydockPlugin')) {
 
         public const VERSION = '1.0.0';
 
-        protected static ?PaydockPlugin $instance = null;
+        protected static $instance = null;
 
-        protected LiveConnectionSettingService|null $paymentService = null;
+        protected $paymentService = null;
 
         protected function __construct()
         {
@@ -33,8 +31,6 @@ if (!class_exists('\Paydock\PaydockPlugin')) {
 
             ActionsService::getInstance();
             FiltersService::getInstance();
-
-
         }
     }
 }

@@ -19,6 +19,15 @@ class HashService
         return base64_encode($iv.$hmac.$ciphertext_raw);
     }
 
+    private static function getKey(): string
+    {
+        if (defined('AUTH_KEY')) {
+            return AUTH_KEY;
+        }
+
+        return PaydockPlugin::PLUGIN_PREFIX;
+    }
+
     public static function decrypt(string $string): string
     {
         $c = base64_decode($string);
@@ -33,15 +42,6 @@ class HashService
             return $original_plaintext;
         }
 
-       return $string;
-    }
-
-    private static function getKey(): string
-    {
-        if (defined('AUTH_KEY')) {
-            return AUTH_KEY;
-        }
-
-        return PaydockPlugin::PLUGIN_PREFIX;
+        return $string;
     }
 }

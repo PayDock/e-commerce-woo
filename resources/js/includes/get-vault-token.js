@@ -1,11 +1,11 @@
-import { getSetting } from '@woocommerce/settings';
+import {getSetting} from '@woocommerce/settings';
 
 export default async () => {
-    const data = { ...getSetting('paydock_data', {}) }
+    const data = {...getSetting('paydock_data', {})}
     data.action = 'get_vault_token';
     data.tokens = '';
     data.styles = '';
     data.supports = '';
-    
+
     return jQuery.post(PaydockAjax.url, data).then();
 }

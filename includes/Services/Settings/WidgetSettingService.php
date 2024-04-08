@@ -2,7 +2,7 @@
 
 namespace Paydock\Services\Settings;
 
-use Paydock\Abstract\AbstractSettingService;
+use Paydock\Abstracts\AbstractSettingService;
 use Paydock\Enums\SettingsTabs;
 use Paydock\Enums\WidgetSettings;
 use Paydock\PaydockPlugin;
@@ -61,11 +61,6 @@ class WidgetSettingService extends AbstractSettingService
     }
 }';
 
-    protected function getId(): string
-    {
-        return SettingsTabs::WIDGET()->value;
-    }
-
     public function init_form_fields(): void
     {
         $service = SettingsService::getInstance();
@@ -75,40 +70,38 @@ class WidgetSettingService extends AbstractSettingService
             ]);
 
             if (WidgetSettings::PAYMENT_CARD_TITLE()->name === $case->name) {
-                $this->form_fields[$key . '_big_label'] = [
-                    'type' => 'big_label',
+                $this->form_fields[$key.'_big_label'] = [
+                    'type'  => 'big_label',
                     'title' => __('Payment Methods:', PaydockPlugin::PLUGIN_PREFIX),
                 ];
-                $this->form_fields[$key . '_label'] = [
-                    'type' => 'label',
+                $this->form_fields[$key.'_label'] = [
+                    'type'  => 'label',
                     'title' => __('Cards', PaydockPlugin::PLUGIN_PREFIX),
                 ];
-            } elseif (WidgetSettings::PAYMENT_BANK_ACCOUNT_TITLE()->name === $case->name) {
-                $this->form_fields[$key . '_label'] = [
-                    'type' => 'label',
-                    'title' => __('Bank Accounts', PaydockPlugin::PLUGIN_PREFIX),
-                ];
-            } elseif (WidgetSettings::PAYMENT_WALLET_TITLE()->name === $case->name) {
-                $this->form_fields[$key . '_label'] = [
-                    'type' => 'label',
+            } elseif (WidgetSettings::PAYMENT_BANK_ACCOUNT_TITLE()->name === $case->name || 
+                      WidgetSettings::PAYMENT_BANK_ACCOUNT_DESCRIPTION()->name === $case->name) {
+                continue;
+            } elseif (WidgetSettings::PAYMENT_WALLET_APPLE_PAY_TITLE()->name === $case->name) {
+                $this->form_fields[$key.'_label'] = [
+                    'type'  => 'label',
                     'title' => __('Wallets', PaydockPlugin::PLUGIN_PREFIX),
                 ];
-            } elseif (WidgetSettings::PAYMENT_A_P_M_S_TITLE()->name === $case->name) {
-                $this->form_fields[$key . '_label'] = [
-                    'type' => 'label',
+            } elseif (WidgetSettings::PAYMENT_A_P_M_S_AFTERPAY_V1_TITLE()->name === $case->name) {
+                $this->form_fields[$key.'_label'] = [
+                    'type'  => 'label',
                     'title' => __('APMs', PaydockPlugin::PLUGIN_PREFIX),
                 ];
-            }  elseif (WidgetSettings::STYLE_BACKGROUND_COLOR()->name === $case->name) {
-                $this->form_fields[$key . '_label'] = [
-                    'type' => 'big_label',
+            } elseif (WidgetSettings::STYLE_BACKGROUND_COLOR()->name === $case->name) {
+                $this->form_fields[$key.'_label'] = [
+                    'type'  => 'big_label',
                     'title' => __('Widget Styles:', PaydockPlugin::PLUGIN_PREFIX),
                 ];
             }
 
             $this->form_fields[$key] = [
-                'type' => $case->getInputType(),
-                'title' => __($case->getTitle(), PaydockPlugin::PLUGIN_PREFIX),
-                'default' => $case->getDefault()
+                'type'    => $case->getInputType(),
+                'title'   => __($case->getTitle(), PaydockPlugin::PLUGIN_PREFIX),
+                'default' => $case->getDefault(),
             ];
 
             if (!empty($options = $case->getOptions()) && ('select' == $case->getInputType())) {
@@ -119,7 +112,6 @@ class WidgetSettingService extends AbstractSettingService
             }
         }
     }
-
 
     public function generate_color_picker_html($key, $data)
     {
@@ -134,14 +126,14 @@ class WidgetSettingService extends AbstractSettingService
     {
         $field_key = $this->get_field_key($key);
         $defaults = [
-            'title' => '',
-            'disabled' => false,
-            'class' => '',
-            'css' => '',
-            'placeholder' => '',
-            'type' => 'text',
-            'desc_tip' => false,
-            'description' => '',
+            'title'             => '',
+            'disabled'          => false,
+            'class'             => '',
+            'css'               => '',
+            'placeholder'       => '',
+            'type'              => 'text',
+            'desc_tip'          => false,
+            'description'       => '',
             'custom_attributes' => [],
         ];
 
@@ -167,8 +159,13 @@ class WidgetSettingService extends AbstractSettingService
 
         return update_option(
             $option_key,
-            apply_filters('woocommerce_settings_api_sanitized_fields_' . $this->id, $this->settings),
+            apply_filters('woocommerce_settings_api_sanitized_fields_'.$this->id, $this->settings),
             'yes'
         );
+    }
+
+    protected function getId(): string
+    {
+        return SettingsTabs::WIDGET()->value;
     }
 }

@@ -1,7 +1,7 @@
 import Select from 'react-select'
-import { getSetting } from '@woocommerce/settings';
+import {getSetting} from '@woocommerce/settings';
 
-export default (selectTokenLabel = 'Saved cards') => {
+export default (selectTokenLabel = 'Saved cards', newCardLabel = 'New card') => {
     const settings = getSetting('paydock_data', {});
 
     if (!settings.hasOwnProperty('tokens') || typeof settings.tokens !== "object") {
@@ -14,7 +14,7 @@ export default (selectTokenLabel = 'Saved cards') => {
     }
 
     const options = [{
-        label: '-',
+        label: newCardLabel,
         value: ''
     }];
 
@@ -42,25 +42,24 @@ export default (selectTokenLabel = 'Saved cards') => {
                 label={selectTokenLabel}
                 styles={
                     {
-                        control: styles => ({ ...styles, marginBottom: '20px' })
+                        control: styles => ({...styles, marginBottom: '20px'})
                     }
                 }
                 options={options}
                 onChange={(option) => {
                     const value = option.value.trim()
+                    const $saveCard = jQuery('.card-save-card')
                     settings.selectedToken = value
 
-                    document.getElementById('card_save_card').disabled = false
-                    jQuery('#paydockWidgetCard').show()
-                    jQuery('.paydock-cvv-code').hide()
+                    $saveCard.show()
+                    jQuery('#paydockWidgetCard_wrapper').show()
 
                     if (value !== '') {
                         const token = settings.tokens.find(token => token.vault_token === value)
                         if (token !== undefined) {
                             jQuery('#paydockWidgetCard_wrapper').hide()
-                            jQuery('.paydock-cvv-code').show()
 
-                            document.getElementById('card_save_card').disabled = true
+                            $saveCard.hide()
                         }
                     }
 

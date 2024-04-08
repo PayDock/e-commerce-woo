@@ -2,13 +2,12 @@
 
 namespace Paydock\Enums;
 
-use Paydock\Abstract\AbstractEnum;
+use Paydock\Abstracts\AbstractEnum;
 
 class TypeExchangeOTT extends AbstractEnum
 {
     protected const PERMANENT_VAULT = 'With vault';
     protected const SESSION_VAULT = 'With OTT';
-//    protected const WITHOUT_VAULT = 'pre-auth with 3DS';
 
     public static function toArray(): array
     {

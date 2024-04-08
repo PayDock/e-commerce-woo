@@ -2,7 +2,7 @@
 
 namespace PayDock\Enums;
 
-use Paydock\Abstract\AbstractEnum;
+use Paydock\Abstracts\AbstractEnum;
 
 class ConfigAPI extends AbstractEnum
 {

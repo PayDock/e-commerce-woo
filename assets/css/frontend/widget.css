@@ -3,6 +3,7 @@
     scrollbar-width: thin;
     position: relative;
 }
+
 #paydockWidgetCard_wrapper:before, #paydockWidgetBankAccount_wrapper:before {
     content: 'loading...';
     font-size: 12px;
@@ -20,6 +21,11 @@
 #paydockWidgetBankAccount, #paydockWidgetBankAccount_wrapper {
     min-height: 200px;
     position: relative;
+}
+
+#paydockWalletPayPalButton {
+    align-items: center;
+    display: flex;
 }
 
 .logo-comm-bank {
@@ -52,10 +58,6 @@
     height: 360px;
 }
 
-#paydockWidgetApm {
-    margin-top: 25px;
-}
-
 #paydockWidgetApm img {
     margin-top: 50px;
 }
@@ -67,6 +69,11 @@
 .btn-apm {
     all: unset;
     cursor: pointer;
+}
+
+.apms-button-wrapper {
+    justify-content: center;
+    display: flex;
     margin-bottom: 20px;
 }
 
@@ -76,13 +83,7 @@
     text-align: center;
 }
 
-.paydock-country-available-afterpay {
-    color: red;
-    padding: 20px;
-    text-align: center;
-}
-
-.paydock-country-available-zippay {
+.paydock-country-available {
     color: red;
     padding: 20px;
     text-align: center;
@@ -103,9 +104,9 @@
 }
 
 .paudock-wallets-buttons {
-    height: 55px;
     margin-bottom: 20px;
 }
+
 .paudock-wallets-buttons button {
     width: 150px;
 }
@@ -114,19 +115,19 @@
     -webkit-display: flex;
     -webkit-flex-wrap: wrap;
     -webkit-justify-content: space-between;
-    -webkit-align-items: flex-start;
+    -webkit-align-items: center;
     -moz-display: flex;
     -moz-flex-wrap: wrap;
     -moz-justify-content: space-between;
-    -moz-align-items: flex-start;
+    -moz-align-items: center;
     -o-display: flex;
     -o-flex-wrap: wrap;
     -o-justify-content: space-between;
-    -o-align-items: flex-start;
+    -o-align-items: center;
     -ms-display: flex;
     -ms-flex-wrap: wrap;
     -ms-justify-content: space-between;
-    -ms-align-items: flex-start;
+    -ms-align-items: center;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
@@ -141,23 +142,16 @@
     display: none !important;
 }
 
-@media (min-width: 1100px) {
-    #paydockWidgetWallets {
-        flex-direction: row;
-    }
-    .paudock-wallets-buttons {
-        height: 55px;
-        margin-bottom: 75px;
-    }
+#paydockWidgetWallets {
+    flex-direction: column;
 }
-@media (max-width: 1099px) {
-    #paydockWalletsPaypal {
-        margin-bottom: 75px;
-    }
+
+#paydockWalletGooglePayButton{
+    height: 55px;
 }
 
 .paydock-apple-container {
-    display:block;
+    display: block;
     width: 150px !important;
     height: 55px !important;
     box-sizing: border-box;

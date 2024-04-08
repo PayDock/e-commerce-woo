@@ -6,23 +6,17 @@ use Paydock\Enums\CredentialSettings;
 use Paydock\Enums\SettingGroups;
 use Paydock\Enums\SettingsTabs;
 use Paydock\PaydockPlugin;
-use Paydock\Services\HashService;
 use Paydock\Services\SettingsService;
 
 class SandboxConnectionSettingService extends LiveConnectionSettingService
 {
-    protected function getId(): string
-    {
-        return SettingsTabs::SANDBOX_CONNECTION()->value;
-    }
-
     public function init_form_fields(): void
     {
         $sandBoxOptionKey = SettingsService::getInstance()
             ->getOptionName($this->id, [SettingGroups::CREDENTIALS()->name, CredentialSettings::SANDBOX()->name]);
 
         $this->form_fields[$sandBoxOptionKey] = [
-            'type' => CredentialSettings::SANDBOX()->getInputType(),
+            'type'  => CredentialSettings::SANDBOX()->getInputType(),
             'label' => __(
                 'To test your Paydock for WooCommerce Plugin, you can use the sandbox mode.',
                 PaydockPlugin::PLUGIN_PREFIX
@@ -30,5 +24,10 @@ class SandboxConnectionSettingService extends LiveConnectionSettingService
             'title' => __(CredentialSettings::SANDBOX()->getLabel(), PaydockPlugin::PLUGIN_PREFIX),
         ];
         parent::init_form_fields();
+    }
+
+    protected function getId(): string
+    {
+        return SettingsTabs::SANDBOX_CONNECTION()->value;
     }
 }

@@ -18,27 +18,13 @@ class UserCustomerRepository
         $this->userId = get_current_user_id();
     }
 
-    public function getUserCustomers(): array
-    {
-        if ($this->cache === null) {
-            $this->cache = get_user_meta($this->userId, self::USER_CUSTOMERS_KEY, true);
-            
-            if (empty($this->cache)) {
-                $this->cache = [];
-            }
-        }
-
-        return $this->cache;
-    }
-
     public function getUserCustomer(string $customers): array
     {
         $customers = $this->getUserCustomers();
 
         $customer = [];
 
-        foreach($customers as $item)
-        {
+        foreach ($customers as $item) {
             if ($item['_id'] === $customers) {
                 $customer = $item;
                 break;
@@ -48,7 +34,20 @@ class UserCustomerRepository
         return $customer;
     }
 
-    public function saveUserCustomer(array $customer): int|bool
+    public function getUserCustomers(): array
+    {
+        if ($this->cache === null) {
+            $this->cache = get_user_meta($this->userId, self::USER_CUSTOMERS_KEY, true);
+
+            if (empty($this->cache)) {
+                $this->cache = [];
+            }
+        }
+
+        return $this->cache;
+    }
+
+    public function saveUserCustomer(array $customer)
     {
         $customers = $this->getUserCustomers();
         $customers[] = $customer;
@@ -60,14 +59,20 @@ class UserCustomerRepository
         return $result;
     }
 
-    public function updateUserCustomer(string $customerId, $data): int|bool
+    private function cleanCache(): void
+    {
+        $this->cache = null;
+    }
+
+    public function updateUserCustomer(string $customerId, $data)
     {
         $customers = $this->getUserCustomers();
 
-        $customers = array_map(function($value) use ($customerId, $data) {
+        $customers = array_map(function ($value) use ($customerId, $data) {
             if ($value['_id'] === $customerId) {
                 $value = array_merge($value, $data);
             }
+
             return $value;
         }, $customers);
 
@@ -78,17 +83,12 @@ class UserCustomerRepository
         return $result;
     }
 
-    public function deleteAllUserCustomers(): int|bool
+    public function deleteAllUserCustomers()
     {
         $result = delete_user_meta($this->userId, self::USER_CUSTOMERS_KEY);
 
         $this->cleanCache();
 
         return $result;
-    }
-
-    private function cleanCache(): void
-    {
-        $this->cache = null;
     }
 }

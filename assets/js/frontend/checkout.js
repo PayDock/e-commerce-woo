@@ -1,24 +1,26 @@
 const paydockSettings = window.wc.wcSettings.getSetting('paydock_data', {});
-const paydockLabel = window.wp.htmlEntities.decodeEntities(paydockSettings.title) || window.wp.i18n.__('Paydock', 'paydock_gateway');
+const paydockLabel = window.wp.htmlEntities.decodeEntities(paydockSettings.title)
+    || window.wp.i18n.__('Paydock', 'paydock_gateway');
 
 const paydockContent = () => {
-    return wp.element.createElement('div', null,
+    return wp.element.createElement(
+        'div',
+        null,
         wp.element.createElement(
             "div",
             null,
-            window.wp.htmlEntities.decodeEntities(paydockSettings.description || '')
-        ), wp.element.createElement(
-            "div",
-            {
+            window.wp.htmlEntities.decodeEntities(paydockSettings.description || '')),
+        wp.element.createElement(
+            "div", {
                 id: 'paydockWidgetCard',
             }
         ), wp.element.createElement(
-            "input",
-            {
+            "input", {
                 type: 'hidden',
                 name: 'payment_source_tokenzz'
             }
-        ));
+        )
+    );
 };
 
 const Block_Paydock_Gateway = {

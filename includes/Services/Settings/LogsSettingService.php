@@ -2,17 +2,12 @@
 
 namespace Paydock\Services\Settings;
 
-use Paydock\Abstract\AbstractSettingService;
+use Paydock\Abstracts\AbstractSettingService;
 use Paydock\Enums\SettingsTabs;
 use Paydock\Repositories\LogRepository;
 
 class LogsSettingService extends AbstractSettingService
 {
-    protected function getId(): string
-    {
-        return SettingsTabs::LOG()->value;
-    }
-
     public function generate_settings_html($form_fields = [], $echo = true): ?string
     {
         $page = $_GET['page_number'] ?? 1;
@@ -31,5 +26,10 @@ class LogsSettingService extends AbstractSettingService
         }
 
         return null;
+    }
+
+    protected function getId(): string
+    {
+        return SettingsTabs::LOG()->value;
     }
 }

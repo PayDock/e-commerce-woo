@@ -11,14 +11,22 @@ use Paydock\Services\SettingsService;
 class WidgetValidationService
 {
     private const VALIDATED_FIELDS = [
-        // 'TITLE',
-        // 'DESCRIPTION',
         'PAYMENT_CARD_TITLE',
         'PAYMENT_CARD_DESCRIPTION',
         'PAYMENT_BANK_ACCOUNT_TITLE',
         'PAYMENT_BANK_ACCOUNT_DESCRIPTION',
-        'PAYMENT_WALLET_TITLE',
-        'PAYMENT_WALLET_DESCRIPTION',
+        'PAYMENT_WALLET_APPLE_PAY_DESCRIPTION',
+        'PAYMENT_WALLET_APPLE_PAY_DESCRIPTION',
+        'PAYMENT_WALLET_GOOGLE_PAY_TITLE',
+        'PAYMENT_WALLET_GOOGLE_PAY_DESCRIPTION',
+        'PAYMENT_WALLET_AFTERPAY_V2_TITLE',
+        'PAYMENT_WALLET_AFTERPAY_V2_DESCRIPTION',
+        'PAYMENT_WALLET_PAYPAL_TITLE',
+        'PAYMENT_WALLET_PAYPAL_DESCRIPTION',
+        'PAYMENT_A_P_M_S_AFTERPAY_V1_TITLE',
+        'PAYMENT_A_P_M_S_AFTERPAY_V1_DESCRIPTION',
+        'PAYMENT_A_P_M_S_ZIP_TITLE',
+        'PAYMENT_A_P_M_S_ZIP_DESCRIPTION',
     ];
 
 
@@ -42,19 +50,9 @@ class WidgetValidationService
 
         return update_option(
             $option_key,
-            apply_filters('woocommerce_settings_api_sanitized_fields_' . $service->id, $service->settings),
+            apply_filters('woocommerce_settings_api_sanitized_fields_'.$service->id, $service->settings),
             'yes'
         );
-    }
-
-    public function getResult(): array
-    {
-        return $this->result;
-    }
-
-    public function getErrors(): array
-    {
-        return $this->errors;
     }
 
     private function prepareFormData(): void
@@ -67,8 +65,8 @@ class WidgetValidationService
 
                 if ('select' === $field['type'] || 'checkbox' === $field['type']) {
                     do_action('woocommerce_update_non_option_setting', [
-                        'id' => $key,
-                        'type' => $field['type'],
+                        'id'    => $key,
+                        'type'  => $field['type'],
                         'value' => $this->data[$key],
                     ]);
                 }
@@ -81,20 +79,21 @@ class WidgetValidationService
     private function validate(): void
     {
         $versionKey = SettingsService::getInstance()->getOptionName($this->service->id, [
-            WidgetSettings::VERSION()->name
+            WidgetSettings::VERSION()->name,
         ]);
         $customVersionKey = SettingsService::getInstance()->getOptionName($this->service->id, [
-            WidgetSettings::CUSTOM_VERSION()->name
+            WidgetSettings::CUSTOM_VERSION()->name,
         ]);
         $customStyleKey = SettingsService::getInstance()->getOptionName($this->service->id, [
-            WidgetSettings::STYLE_CUSTOM()->name
+            WidgetSettings::STYLE_CUSTOM()->name,
         ]);
         $validated = $this->getValidatedKeys();
         foreach ($this->data as $key => $value) {
             if (($settingName = array_search($key, $validated)) && empty($value)) {
                 $this->errors[] = __(
-                    WidgetSettings::{$settingName}()->getFullTitle() . " can`t be empty."
-                    , PaydockPlugin::PLUGIN_PREFIX
+                    WidgetSettings::{$settingName}()->getFullTitle()." can`t be empty."
+                    ,
+                    PaydockPlugin::PLUGIN_PREFIX
                 );
             }
             if (
@@ -117,6 +116,20 @@ class WidgetValidationService
         }
     }
 
+    private function getValidatedKeys(): array
+    {
+        $service = SettingsService::getInstance();
+        $result = [];
+
+        foreach (self::VALIDATED_FIELDS as $field) {
+            $result[$field] = $service->getOptionName($this->service->id, [
+                WidgetSettings::{$field}()->name,
+            ]);
+        }
+
+        return $result;
+    }
+
     private function validateCustomStyles(array $customStyles): bool
     {
         $elements = CustomStylesElements::getElements();
@@ -135,17 +148,13 @@ class WidgetValidationService
         return true;
     }
 
-    private function getValidatedKeys(): array
+    public function getResult(): array
     {
-        $service = SettingsService::getInstance();
-        $result = [];
+        return $this->result;
+    }
 
-        foreach (self::VALIDATED_FIELDS as $field) {
-            $result[$field] = $service->getOptionName($this->service->id, [
-                WidgetSettings::{$field}()->name
-            ]);
-        }
-
-        return $result;
+    public function getErrors(): array
+    {
+        return $this->errors;
     }
 }

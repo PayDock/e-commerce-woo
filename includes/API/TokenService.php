@@ -2,7 +2,7 @@
 
 namespace Paydock\API;
 
-use Paydock\Abstract\AbstractApiService;
+use Paydock\Abstracts\AbstractApiService;
 
 class TokenService extends AbstractApiService
 {

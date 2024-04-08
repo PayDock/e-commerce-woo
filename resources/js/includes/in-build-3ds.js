@@ -1,4 +1,4 @@
-import { getSetting } from '@woocommerce/settings';
+import {getSetting} from '@woocommerce/settings';
 import getVaultToken from './get-vault-token';
 import sleep from './sleep';
 
@@ -44,8 +44,14 @@ export default async (forcePermanentVault = false) => {
     canvas.on('chargeAuth', (chargeAuthEvent) => {
         result = chargeAuthEvent.charge_3ds_id
     })
+    canvas.on('additionalDataCollectReject', (chargeAuthSuccessEvent) => {
+        result = 'error';
+    })
+    canvas.on('chargeAuthReject', function (data) {
+        result = 'error';
+    });
 
-    for (let second = 1; second <= 100; second++) {
+    for (let second = 1; second <= 10000; second++) {
         await sleep(100);
 
         if (result !== false) {

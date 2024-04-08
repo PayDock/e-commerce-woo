@@ -2,7 +2,7 @@
 
 namespace Paydock\API;
 
-use Paydock\Abstract\AbstractApiService;
+use Paydock\Abstracts\AbstractApiService;
 
 class NotificationService extends AbstractApiService
 {
@@ -10,7 +10,7 @@ class NotificationService extends AbstractApiService
 
     protected array $allowedAction = [
         'create' => self::METHOD_POST,
-        'search' => self::METHOD_GET
+        'search' => self::METHOD_GET,
     ];
 
     private string $id;
@@ -38,7 +38,7 @@ class NotificationService extends AbstractApiService
                 $result = self::ENDPOINT;
                 break;
             default:
-                $result = self::ENDPOINT . '?limit=-1';
+                $result = self::ENDPOINT.'?limit=-1';
         }
 
         return $result;

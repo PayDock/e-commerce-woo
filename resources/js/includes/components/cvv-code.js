@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { __ } from '@wordpress/i18n';
-import { getSetting } from '@woocommerce/settings';
+import {useState} from 'react';
+import {__} from '@wordpress/i18n';
+import {getSetting} from '@woocommerce/settings';
 
 export default (label = 'Security number') => {
     const settings = getSetting('paydock_data', {});
@@ -12,7 +12,7 @@ export default (label = 'Security number') => {
     return (
         <div
             className={wrapperClassName + ' paydock-cvv-code' + (hasError ? ' has-error' : '') + (isActive ? ' is-active' : '')}
-            style={{ display: 'none' }}>
+            style={{display: 'none'}}>
             <input
                 id="cvv"
                 name="cvv"
@@ -51,7 +51,7 @@ export default (label = 'Security number') => {
                 style={{
                     display: hasError ? 'block' : 'none'
                 }}>
-                <p>{__('Please enter a valid cvv code')}</p>
+                <p>{__('Please enter a valid CVV code.')}</p>
             </div>
         </div>
     )

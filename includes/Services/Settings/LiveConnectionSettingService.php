@@ -2,7 +2,7 @@
 
 namespace Paydock\Services\Settings;
 
-use Paydock\Abstract\AbstractSettingService;
+use Paydock\Abstracts\AbstractSettingService;
 use Paydock\Enums\APMsSettings;
 use Paydock\Enums\BankAccountSettings;
 use Paydock\Enums\CardSettings;
@@ -43,11 +43,6 @@ class LiveConnectionSettingService extends AbstractSettingService
         }
     }
 
-    protected function getId(): string
-    {
-        return SettingsTabs::LIVE_CONNECTION()->value;
-    }
-
     public function init_form_fields(): void
     {
         $service = SettingsService::getInstance();
@@ -60,23 +55,38 @@ class LiveConnectionSettingService extends AbstractSettingService
 
             if (SettingGroups::CARD() == $settingGroup) {
                 $this->form_fields[$key.'_label'] = [
-                    'type' => 'big_label',
+                    'type'  => 'big_label',
                     'title' => __('Payment Methods:', PaydockPlugin::PLUGIN_PREFIX),
                 ];
             }
 
             $this->form_fields[$key] = [
-                'type' => 'big_label',
+                'type'  => 'big_label',
                 'title' => __($settingGroup->getLabel(), PaydockPlugin::PLUGIN_PREFIX),
             ];
 
-            $this->form_fields = array_merge($this->form_fields, match ($settingGroup->name) {
-                SettingGroups::CREDENTIALS()->name => $this->getCredentialOptions(),
-                SettingGroups::CARD()->name => $this->getCardOptions(),
-                SettingGroups::BANK_ACCOUNT()->name => $this->getBankAccountOptions(),
-                SettingGroups::WALLETS()->name => $this->getWalletsOptions(),
-                SettingGroups::A_P_M_S()->name => $this->getAPMsOptions()
-            });
+            switch ($settingGroup->name) {
+                case SettingGroups::CREDENTIALS()->name:
+                    $mergedOptions = $this->getCredentialOptions();
+                    break;
+                case SettingGroups::CARD()->name:
+                    $mergedOptions = $this->getCardOptions();
+                    break;
+                case SettingGroups::BANK_ACCOUNT()->name:
+                    $mergedOptions = $this->getBankAccountOptions();
+                    break;
+                case SettingGroups::WALLETS()->name:
+                    $mergedOptions = $this->getWalletsOptions();
+                    break;
+                case SettingGroups::A_P_M_S()->name:
+                    $mergedOptions = $this->getAPMsOptions();
+                    break;
+                default:
+                    $mergedOptions = [];
+                    break;
+            }
+
+            $this->form_fields = array_merge($this->form_fields, $mergedOptions);
         }
     }
 
@@ -92,7 +102,7 @@ class LiveConnectionSettingService extends AbstractSettingService
                     $credentialSettings->name,
                 ]);
                 $fields[$key] = [
-                    'type' => $credentialSettings->getInputType(),
+                    'type'  => $credentialSettings->getInputType(),
                     'title' => __($credentialSettings->getLabel(), PaydockPlugin::PLUGIN_PREFIX),
                 ];
                 if ($description = $credentialSettings->getDescription()) {
@@ -117,8 +127,8 @@ class LiveConnectionSettingService extends AbstractSettingService
         foreach (CardSettings::cases() as $cardSettings) {
             $key = $service->getOptionName($this->id, [SettingGroups::CARD()->name, $cardSettings->name]);
             $fields[$key] = [
-                'type' => $cardSettings->getInputType(),
-                'title' => __(preg_replace(['/ Id/', '/ id/'], ' ID', $cardSettings->getLabel()),
+                'type'    => $cardSettings->getInputType(),
+                'title'   => __(preg_replace(['/ Id/', '/ id/'], ' ID', $cardSettings->getLabel()),
                     PaydockPlugin::PLUGIN_PREFIX),
                 'default' => $cardSettings->getDefault(),
             ];
@@ -128,13 +138,23 @@ class LiveConnectionSettingService extends AbstractSettingService
                 $fields[$key]['desc_tip'] = true;
             }
 
-            $fields[$key]['options'] = match ($cardSettings->name) {
-                CardSettings::DS()->name => DSTypes::toArray(),
-                CardSettings::FRAUD()->name => FraudTypes::toArray(),
-                CardSettings::SAVE_CARD_OPTION()->name => SaveCardOptions::toArray(),
-                CardSettings::TYPE_EXCHANGE_OTT()->name => TypeExchangeOTT::toArray(),
-                default => []
-            };
+            switch ($cardSettings->name) {
+                case CardSettings::DS()->name:
+                    $fields[$key]['options'] = DSTypes::toArray();
+                    break;
+                case CardSettings::FRAUD()->name:
+                    $fields[$key]['options'] = FraudTypes::toArray();
+                    break;
+                case CardSettings::SAVE_CARD_OPTION()->name:
+                    $fields[$key]['options'] = SaveCardOptions::toArray();
+                    break;
+                case CardSettings::TYPE_EXCHANGE_OTT()->name:
+                    $fields[$key]['options'] = TypeExchangeOTT::toArray();
+                    break;
+                default:
+                    $fields[$key]['options'] = [];
+                    break;
+            }
         }
 
         return $fields;
@@ -152,7 +172,7 @@ class LiveConnectionSettingService extends AbstractSettingService
             ]);
 
             $fields[$key] = [
-                'type' => $bankAccountSettings->getInputType(),
+                'type'  => $bankAccountSettings->getInputType(),
                 'title' => __($bankAccountSettings->getLabel(), PaydockPlugin::PLUGIN_PREFIX),
             ];
 
@@ -180,7 +200,7 @@ class LiveConnectionSettingService extends AbstractSettingService
                 $walletPaymentMethods->name,
                 'label',
             ])] = [
-                'type' => 'label',
+                'type'  => 'label',
                 'title' => __($walletPaymentMethods->getLabel(), PaydockPlugin::PLUGIN_PREFIX),
             ];
 
@@ -192,7 +212,7 @@ class LiveConnectionSettingService extends AbstractSettingService
                 ]);
 
                 $fields[$key] = [
-                    'type' => $walletSettings->getInputType(),
+                    'type'  => $walletSettings->getInputType(),
                     'title' => __(preg_replace(['/ Id/', '/ id/'], ' ID', $walletSettings->getLabel()),
                         PaydockPlugin::PLUGIN_PREFIX),
                 ];
@@ -210,7 +230,7 @@ class LiveConnectionSettingService extends AbstractSettingService
                     'pay_later',
                 ]);
                 $fields[$key] = [
-                    'type' => 'checkbox',
+                    'type'  => 'checkbox',
                     'title' => __('Pay Later', PaydockPlugin::PLUGIN_PREFIX),
                 ];
             }
@@ -230,7 +250,7 @@ class LiveConnectionSettingService extends AbstractSettingService
                 $otherPaymentMethods->name,
                 'label',
             ])] = [
-                'type' => 'label',
+                'type'  => 'label',
                 'title' => __($otherPaymentMethods->getLabel(), PaydockPlugin::PLUGIN_PREFIX),
             ];
 
@@ -247,7 +267,7 @@ class LiveConnectionSettingService extends AbstractSettingService
                 ]);
 
                 $fields[$key] = [
-                    'type' => $APMsSettings->getInputType(),
+                    'type'  => $APMsSettings->getInputType(),
                     'title' => __($APMsSettings->getLabel(), PaydockPlugin::PLUGIN_PREFIX),
                 ];
 
@@ -292,10 +312,16 @@ class LiveConnectionSettingService extends AbstractSettingService
 
         $option_key = $this->get_option_key();
         do_action('woocommerce_update_option', ['id' => $option_key]);
+
         return update_option(
             $option_key,
             apply_filters('woocommerce_settings_api_sanitized_fields_'.$this->id, $this->settings),
             'yes'
         );
+    }
+
+    protected function getId(): string
+    {
+        return SettingsTabs::LIVE_CONNECTION()->value;
     }
 }

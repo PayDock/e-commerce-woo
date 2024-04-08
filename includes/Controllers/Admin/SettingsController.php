@@ -1,6 +1,6 @@
 <?php
 
-namespace Paydock\Controller\Admin;
+namespace Paydock\Controllers\Admin;
 
 class SettingsController
 {

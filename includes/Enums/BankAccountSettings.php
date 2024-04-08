@@ -2,7 +2,7 @@
 
 namespace Paydock\Enums;
 
-use Paydock\Abstract\AbstractEnum;
+use Paydock\Abstracts\AbstractEnum;
 
 class BankAccountSettings extends AbstractEnum
 {
@@ -13,30 +13,40 @@ class BankAccountSettings extends AbstractEnum
 
     public function getLabel(): string
     {
-        return match ($this->name) {
-            self::ENABLE => ucfirst(strtolower($this->name)),
-            self::GATEWAY_ID => 'Gateway ID',
-            self::SAVE_CARD => 'Save bank account',
-            self::SAVE_CARD_OPTION => 'Save bank account option',
-        };
+        switch ($this->name) {
+            case self::ENABLE:
+                return ucfirst(strtolower($this->name));
+            case self::GATEWAY_ID:
+                return 'Gateway ID';
+            case self::SAVE_CARD:
+                return 'Save bank account';
+            case self::SAVE_CARD_OPTION:
+                return 'Save bank account option';
+            default:
+                return '';
+        }
     }
 
     public function getInputType(): string
     {
-        return match ($this->name) {
-            self::GATEWAY_ID => 'text',
-            self::ENABLE,
-            self::SAVE_CARD => 'checkbox',
-            default => 'select'
-        };
+        switch ($this->name) {
+            case self::GATEWAY_ID:
+                return 'text';
+            case self::ENABLE:
+            case self::SAVE_CARD:
+                return 'checkbox';
+            default:
+                return 'select';
+        }
     }
 
     public function getDescription(): string
     {
-        return match ($this->name) {
-            self::SAVE_CARD => 'Offer your customer the option to permanently save the bank account information at '
-                . 'Paydock for further usage',
-            default => ''
-        };
+        switch ($this->name) {
+            case self::SAVE_CARD:
+                return 'Offer your customer the option to permanently save the bank account information at Paydock for further usage';
+            default:
+                return '';
+        }
     }
 }

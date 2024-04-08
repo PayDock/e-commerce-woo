@@ -24,10 +24,12 @@
         });
     }
 </script>
-<button type="button" onclick="paydockPaymentCapture(<?php echo $order->get_id(); ?>, 'paydock-capture-charge')"
-        class="button">
-    Capture charge
-</button>
+<?php if ($order->get_status() == 'paydock-authorize'): ?>
+    <button type="button" onclick="paydockPaymentCapture(<?php echo $order->get_id(); ?>, 'paydock-capture-charge')"
+            class="button">
+        Capture charge
+    </button>
+<?php endif; ?>
 <button type="button" onclick="paydockPaymentCapture(<?php echo $order->get_id(); ?>, 'paydock-cancel-authorised')"
         class="button">
     Cancel charge

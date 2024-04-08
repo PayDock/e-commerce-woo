@@ -2,7 +2,7 @@
 
 namespace Paydock\Services\Settings;
 
-use Paydock\Abstract\AbstractSettingService;
+use Paydock\Abstracts\AbstractSettingService;
 use Paydock\Enums\SettingsTabs;
 
 class WebHooksSettingService extends AbstractSettingService

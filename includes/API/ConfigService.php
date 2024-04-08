@@ -26,17 +26,17 @@ class ConfigService
         self::$publicKey = $publicKey;
     }
 
-    public static function buildApiUrl(?string $endpoint = null): string
-    {
-        if (self::$environment === ConfigAPI::PRODUCTION_ENVIRONMENT()->value) {
-            return ConfigAPI::PRODUCTION_API_URL()->value . $endpoint;
-        }
-
-        return ConfigAPI::SANDBOX_API_URL()->value . $endpoint;
-    }
-
     public static function isAccessToken(string $token): bool
     {
         return count(explode('.', $token)) === 3;
+    }
+
+    public static function buildApiUrl(?string $endpoint = null): string
+    {
+        if (self::$environment === ConfigAPI::PRODUCTION_ENVIRONMENT()->value) {
+            return ConfigAPI::PRODUCTION_API_URL()->value.$endpoint;
+        }
+
+        return ConfigAPI::SANDBOX_API_URL()->value.$endpoint;
     }
 }

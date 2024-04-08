@@ -1,7 +1,7 @@
 import Select from 'react-select'
-import { getSetting } from '@woocommerce/settings';
+import {getSetting} from '@woocommerce/settings';
 
-export default (selectTokenLabel = 'Saved bank accounts') => {
+export default (selectTokenLabel = 'Saved bank accounts', newCardLabel = 'New Account') => {
     const settings = getSetting('paydock_bank_account_block_data', {});
 
     if (!settings.hasOwnProperty('tokens') || typeof settings.tokens !== "object") {
@@ -14,7 +14,7 @@ export default (selectTokenLabel = 'Saved bank accounts') => {
     }
 
     const options = [{
-        label: '-',
+        label: newCardLabel,
         value: ''
     }];
 
@@ -42,32 +42,33 @@ export default (selectTokenLabel = 'Saved bank accounts') => {
                 label={selectTokenLabel}
                 styles={
                     {
-                        control: styles => ({ ...styles, marginBottom: '20px' })
+                        control: styles => ({...styles, marginBottom: '20px'})
                     }
                 }
                 options={options}
                 onChange={(option) => {
                     const value = option.value
+                    const $saveCard = jQuery('.bank-account-save-card')
                     settings.selectedToken = value
 
-                    window.widgetBankAccount.updateFormValues({
+                    window.widgetPaydockBankAccount.updateFormValues({
                         account_name: '',
                         account_number: '',
                         account_routing: ''
                     });
 
-                    document.getElementById('bank_account_save').disabled = false
-    
+                    $saveCard.show()
+
                     if (value !== '') {
                         const token = settings.tokens.find(token => token.vault_token === value)
                         if (token !== undefined) {
-                            window.widgetBankAccount.updateFormValues({
+                            window.widgetPaydockBankAccount.updateFormValues({
                                 account_name: token.account_name,
                                 account_number: token.account_number,
                                 account_routing: token.account_routing
                             });
-    
-                            document.getElementById('bank_account_save').disabled = true
+
+                            $saveCard.hide()
                         }
                     }
                 }}

@@ -2,7 +2,7 @@
 
 namespace Paydock\Enums;
 
-use Paydock\Abstract\AbstractEnum;
+use Paydock\Abstracts\AbstractEnum;
 
 class CustomInputStyles extends AbstractEnum
 {

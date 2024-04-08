@@ -1,15 +1,14 @@
-import { __ } from '@wordpress/i18n';
-import { registerPaymentMethod } from '@woocommerce/blocks-registry';
-import { decodeEntities } from '@wordpress/html-entities';
-import { getSetting } from '@woocommerce/settings';
-import { useEffect } from 'react';
+import {__} from '@wordpress/i18n';
+import {registerPaymentMethod} from '@woocommerce/blocks-registry';
+import {decodeEntities} from '@wordpress/html-entities';
+import {getSetting} from '@woocommerce/settings';
+import {useEffect} from 'react';
 import {
-    inBuild3Ds,
-    standalone3Ds,
-    selectSavedCardsComponent,
-    cvvCode,
     checkboxSavedCardsComponent,
-    sleep
+    inBuild3Ds,
+    selectSavedCardsComponent,
+    sleep,
+    standalone3Ds
 } from '../includes/wc-paydock';
 
 const settings = getSetting('paydock_data', {});
@@ -17,20 +16,20 @@ const settings = getSetting('paydock_data', {});
 const textDomain = 'pay_dock';
 const labels = {
     defaultLabel: __('Paydock Payments', textDomain),
-    saveCardLabel: __('Save card', textDomain),
-    selectTokenLabel: __('Saved cards', textDomain),
-    cvvCodeLabel: __('Security number', textDomain),
+    saveCardLabel: __('Save payment details', textDomain),
+    selectTokenLabel: __('Saved payment details', textDomain),
     placeOrderButtonLabel: __('Place Order by Paydock', textDomain),
-    fillDataError: __('Please fill card data', textDomain),
-    requiredDataError: __('Please fill required fields of the form to display payment methods', textDomain)
+    fillDataError: __('Please fill in the card data.', textDomain),
+    requiredDataError: __('Please fill in the required fields of the form to display payment methods', textDomain),
+    additionalDataRejected: __('Payment has been rejected by Paydock. Please try again in a few minutes', textDomain)
 }
 
 const label = decodeEntities(settings.title) || labels.defaultLabel;
 
 let formSubmittedAlready = false;
 const Content = (props) => {
-    const { eventRegistration, emitResponse } = props;
-    const { onPaymentSetup, onCheckoutValidation } = eventRegistration;
+    const {eventRegistration, emitResponse} = props;
+    const {onPaymentSetup, onCheckoutValidation} = eventRegistration;
 
     useEffect(() => {
         const validation = onCheckoutValidation(async () => {
@@ -44,13 +43,6 @@ const Content = (props) => {
             }
 
             if (settings.selectedToken.length > 0) {
-                if (settings.cvv.trim().length === 0) {
-                    return {
-                        type: emitResponse.responseTypes.ERROR,
-                        errorMessage: labels.fillDataError,
-                    }
-                }
-
                 const selectedToken = settings.tokens.find(item => item.vault_token === settings.selectedToken)
                 if (typeof selectedToken !== undefined && selectedToken.hasOwnProperty('customer_id')) {
                     return true;
@@ -63,6 +55,14 @@ const Content = (props) => {
                                 errorMessage: labels.fillDataError,
                             }
                         }
+
+                        if ('error' === settings.charge3dsId) {
+                            return {
+                                type: emitResponse.responseTypes.ERROR,
+                                errorMessage: labels.additionalDataRejected,
+                            }
+                        }
+
                     }
                 }
 
@@ -82,15 +82,15 @@ const Content = (props) => {
                 phoneValue = document.getElementById('billing-phone').value
             }
 
-            window.widget.updateFormValues({
+            window.widgetPaydock.updateFormValues({
                 email: document.getElementById('email').value,
                 phone: phoneValue
             });
 
-            window.widget.trigger(window.paydock.TRIGGER.SUBMIT_FORM);
+            window.widgetPaydock.trigger(window.paydock.TRIGGER.SUBMIT_FORM);
 
             let result = false;
-            window.widget.on(window.paydock.EVENT.FINISH, (event) => {
+            window.widgetPaydock.on(window.paydock.EVENT.FINISH, (event) => {
                 result = true
 
                 const savedCards = document.querySelector('.paydock-select-saved-cards')
@@ -102,8 +102,13 @@ const Content = (props) => {
             const paymentSourceToken = document.querySelector('[name="payment_source_token"]')
             for (let second = 1; second <= 100; second++) {
                 await sleep(100);
-
                 if (paymentSourceToken !== null && paymentSourceToken.value.length) {
+                    if (paymentSourceToken.value === 'error') {
+                        return {
+                            type: emitResponse.responseTypes.ERROR,
+                            errorMessage: labels.additionalDataRejected,
+                        }
+                    }
                     if (settings.paymentSourceToken.length === 0) {
                         settings.paymentSourceToken = paymentSourceToken.value
                     }
@@ -119,10 +124,18 @@ const Content = (props) => {
             if (result) {
                 if (['IN_BUILD', 'STANDALONE'].includes(settings.card3DS)) {
                     settings.charge3dsId = settings.card3DS == 'IN_BUILD' ? await inBuild3Ds() : await standalone3Ds()
+
                     if (settings.charge3dsId === false) {
                         return {
                             type: emitResponse.responseTypes.ERROR,
-                            errorMessage: labels.fillDataError,
+                            errorMessage: labels.fillDataError + ' charge3dsId',
+                        }
+                    }
+
+                    if ('error' === settings.charge3dsId) {
+                        return {
+                            type: emitResponse.responseTypes.ERROR,
+                            errorMessage: labels.additionalDataRejected,
                         }
                     }
                 }
@@ -144,7 +157,7 @@ const Content = (props) => {
 
             settings.paymentSourceToken = paymentSourceToken.value;
             if (settings.paymentSourceToken.length > 0 || settings.selectedToken.length > 0) {
-                const data = { ...settings }
+                const data = {...settings}
                 data.tokens = '';
                 data.styles = '';
                 data.supports = '';
@@ -181,21 +194,20 @@ const Content = (props) => {
         ),
         createElement(
             "div",
-            { class: 'logo-comm-bank' },
+            {class: 'logo-comm-bank'},
             createElement(
                 "img",
-                { src: '/wp-content/plugins/paydock/assets/images/logo.png' }
+                {src: '/wp-content/plugins/paydock/assets/images/logo.png'}
             ),
         ),
         selectSavedCardsComponent(labels.selectTokenLabel),
-        cvvCode(labels.cvvCodeLabel),
         createElement(
             "div",
-            { id: 'paydockWidgetCard_wrapper' }
+            {id: 'paydockWidgetCard_wrapper'}
         ),
         createElement(
             "div",
-            { id: 'paydockWidget3ds' }
+            {id: 'paydockWidget3ds'}
         ),
         createElement(
             "input",
@@ -209,15 +221,15 @@ const Content = (props) => {
 };
 
 const Label = (props) => {
-    const { PaymentMethodLabel } = props.components;
-    return <PaymentMethodLabel text={label} />;
+    const {PaymentMethodLabel} = props.components;
+    return <PaymentMethodLabel text={label}/>;
 };
 
 const Paydok = {
     name: "paydock_gateway",
-    label: <Label />,
-    content: <Content />,
-    edit: <Content />,
+    label: <Label/>,
+    content: <Content/>,
+    edit: <Content/>,
     placeOrderButtonLabel: labels.placeOrderButtonLabel,
     canMakePayment: () => true,
     ariaLabel: label,

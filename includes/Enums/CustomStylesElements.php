@@ -2,39 +2,58 @@
 
 namespace Paydock\Enums;
 
-use Paydock\Abstract\AbstractEnum;
+use Paydock\Abstracts\AbstractEnum;
 
 class CustomStylesElements extends AbstractEnum
 {
-    protected const INPUT = 'input';
-    protected const LABEL = 'label';
-    protected const TITLE = 'title';
-    protected const DESCRIPTION = 'title_description';
+    const INPUT = 'input';
+    const LABEL = 'label';
+    const TITLE = 'title';
+    const DESCRIPTION = 'title_description';
 
     public static function getElements(): array
     {
-        return array_map(fn(self $element) => $element->value, self::cases());
+        return array_map(function (self $element) {
+            return $element->value;
+        }, self::cases());
     }
 
-    public static function getElementFor(string $value): self
+    public static function getElementFor(string $value)
     {
-        return match ($value) {
-            self::INPUT => self::INPUT(),
-            self::LABEL => self::LABEL(),
-            self::TITLE => self::TITLE(),
-            self::DESCRIPTION => self::DESCRIPTION(),
-        };
+        switch ($value) {
+            case self::INPUT:
+                return self::INPUT;
+            case self::LABEL:
+                return self::LABEL;
+            case self::TITLE:
+                return self::TITLE;
+            case self::DESCRIPTION:
+                return self::DESCRIPTION;
+            default:
+                break;
+        }
     }
 
     public function getStyleKeys(): array
     {
-        $styles = match ($this->value) {
-            self::INPUT => CustomInputStyles::cases(),
-            self::LABEL => CustomLabelStyles::cases(),
-            self::TITLE => CustomTitleStyles::cases(),
-            self::DESCRIPTION => CustomDescriptionStyles::cases(),
-        };
+        $styles = [];
+        switch ($this->value) {
+            case self::INPUT:
+                $styles = CustomInputStyles::cases();
+                break;
+            case self::LABEL:
+                $styles = CustomLabelStyles::cases();
+                break;
+            case self::TITLE:
+                $styles = CustomTitleStyles::cases();
+                break;
+            case self::DESCRIPTION:
+                $styles = CustomDescriptionStyles::cases();
+                break;
+        }
 
-        return array_map(fn($elemnt) => $elemnt->value, $styles);
+        return array_map(function ($element) {
+            return $element->value;
+        }, $styles);
     }
 }

@@ -23,6 +23,68 @@ class SDKAdapterService
     private const SANDBOX_ENV = 'sandbox';
     private static ?SDKAdapterService $instance = null;
 
+    public function __construct()
+    {
+        $this->initialise();
+    }
+
+    public function initialise(?bool $forcedEnv = null): void
+    {
+        $isProd = $this->isProd($forcedEnv);
+
+        $settingsService = SettingsService::getInstance();
+
+        if ($isProd) {
+            $settings = new LiveConnectionSettingService();
+
+        } else {
+            $settings = new SandboxConnectionSettingService();
+        }
+
+        $isAccessToken = CredentialsTypes::ACCESS_KEY()->name == $settings->get_option(
+                $settingsService->getOptionName($settings->id, [
+                    SettingGroups::CREDENTIALS()->name,
+                    CredentialSettings::TYPE()->name,
+                ])
+            );
+
+        if ($isAccessToken) {
+            $secretKey = $settings->get_option($settingsService->getOptionName($settings->id, [
+                SettingGroups::CREDENTIALS()->name,
+                CredentialSettings::ACCESS_KEY()->name,
+            ]));
+        } else {
+            $publicKey = $settings->get_option($settingsService->getOptionName($settings->id, [
+                SettingGroups::CREDENTIALS()->name,
+                CredentialSettings::PUBLIC_KEY()->name,
+            ]));
+            $secretKey = $settings->get_option($settingsService->getOptionName($settings->id, [
+                SettingGroups::CREDENTIALS()->name,
+                CredentialSettings::SECRET_KEY()->name,
+            ]));
+        }
+
+        $env = $isProd ? self::PROD_ENV : self::SANDBOX_ENV;
+
+        ConfigService::init($env, $secretKey, $publicKey ?? null);
+    }
+
+    private function isProd(?bool $forcedProdEnv = null): bool
+    {
+        if (is_null($forcedProdEnv)) {
+            $settings = new SandboxConnectionSettingService();
+
+            return self::ENABLED_CONDITION !== $settings->get_option(
+                    SettingsService::getInstance()->getOptionName($settings->id, [
+                        SettingGroups::CREDENTIALS()->name,
+                        CredentialSettings::SANDBOX()->name,
+                    ])
+                );
+        }
+
+        return $forcedProdEnv;
+    }
+
     public static function getInstance(): self
     {
         if (is_null(self::$instance)) {
@@ -30,11 +92,6 @@ class SDKAdapterService
         }
 
         return self::$instance;
-    }
-
-    public function __construct()
-    {
-        $this->initialise();
     }
 
     /**
@@ -93,6 +150,10 @@ class SDKAdapterService
     {
         $customerService = new CustomerService;
 
+        if (isset($params['reference'])) {
+            unset($params['reference']);
+        }
+
         return $customerService->create($params)->call();
     }
 
@@ -115,6 +176,13 @@ class SDKAdapterService
         $chargeService = new ChargeService;
 
         return $chargeService->standaloneFraud($params)->call();
+    }
+
+    public function fraudAttach(string $id, array $params): array
+    {
+        $chargeService = new ChargeService;
+
+        return $chargeService->fraudAttach($id, $params)->call();
     }
 
     public function standalone3DsCharge(array $params): array
@@ -145,51 +213,16 @@ class SDKAdapterService
         return $chargeService->refunds($params)->call();
     }
 
-    public function initialise(?bool $forcedEnv = null): void
-    {
-        $isProd = $this->isProd($forcedEnv);
-
-        $settingsService = SettingsService::getInstance();
-
-        if ($isProd) {
-            $settings = new LiveConnectionSettingService();
-
-        } else {
-            $settings = new SandboxConnectionSettingService();
-        }
-
-        $isAccessToken = CredentialsTypes::ACCESS_KEY()->name == $settings->get_option(
-                $settingsService->getOptionName($settings->id, [
-                    SettingGroups::CREDENTIALS()->name,
-                    CredentialSettings::TYPE()->name,
-                ])
-            );
-
-        if ($isAccessToken) {
-            $secretKey = $settings->get_option($settingsService->getOptionName($settings->id, [
-                SettingGroups::CREDENTIALS()->name,
-                CredentialSettings::ACCESS_KEY()->name,
-            ]));
-        } else {
-            $publicKey = $settings->get_option($settingsService->getOptionName($settings->id, [
-                SettingGroups::CREDENTIALS()->name,
-                CredentialSettings::PUBLIC_KEY()->name,
-            ]));
-            $secretKey = $settings->get_option($settingsService->getOptionName($settings->id, [
-                SettingGroups::CREDENTIALS()->name,
-                CredentialSettings::SECRET_KEY()->name,
-            ]));
-        }
-
-        $env = $isProd ? self::PROD_ENV : self::SANDBOX_ENV;
-
-        ConfigService::init($env, $secretKey, $publicKey ?? null);
-    }
-
     public function errorMessageToString(array $responce): string
     {
         $result = !empty($responce['error']['message']) ? ' '.$responce['error']['message'] : '';
         if (isset($responce['error']['details'])) {
+            if (!empty($responce['error']['details']['messages'])) {
+                $firstMessage = reset($responce['error']['details']['messages']);
+
+                return $firstMessage;
+            }
+
             $firstDetail = reset($responce['error']['details']);
             if (is_array($firstDetail)) {
                 $result .= ' '.implode(',', $firstDetail);
@@ -199,21 +232,5 @@ class SDKAdapterService
         }
 
         return $result;
-    }
-
-    private function isProd(?bool $forcedProdEnv = null): bool
-    {
-        if (is_null($forcedProdEnv)) {
-            $settings = new SandboxConnectionSettingService();
-
-            return self::ENABLED_CONDITION !== $settings->get_option(
-                    SettingsService::getInstance()->getOptionName($settings->id, [
-                        SettingGroups::CREDENTIALS()->name,
-                        CredentialSettings::SANDBOX()->name,
-                    ])
-                );
-        }
-
-        return $forcedProdEnv;
     }
 }
