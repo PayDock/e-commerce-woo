@@ -581,7 +581,7 @@ class ConnectionValidationService
                     $this->errors[] = __(
                             'Can\'t create webhook',
                             PAY_DOCK_TEXT_DOMAIN
-                        ).(!empty($result['error']) ? ' '.$result['error'] : '');
+                        ).(!empty($result['error']) ? ' '.json_encode($result['error']) : '');
 
                     return;
                 }

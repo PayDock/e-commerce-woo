@@ -108,6 +108,10 @@ class PaymentController
 
     public function refundProcess($refund, $args)
     {
+        if (!empty($args['from_webhook']) && $args['from_webhook'] === true) {
+            return;
+        }
+
         $orderId = $args['order_id'];
         $amount = $args['amount'];
         $order = wc_get_order($orderId);
@@ -123,7 +127,6 @@ class PaymentController
         foreach ($refunds as $refund) {
             $totalRefunded += $refund->get_amount();
         }
-        $orderTotal = $order->get_total();
         $paydockChargeId = get_post_meta($orderId, 'paydock_charge_id', true);
         $result = SDKAdapterService::getInstance()->refunds(['charge_id' => $paydockChargeId, 'amount' => $amount]);
         if (!empty($result['resource']['data']['status']) && in_array(
@@ -131,7 +134,7 @@ class PaymentController
                 ['refunded', 'refund_requested']
             )) {
             $newRefundedId = $result['resource']['data']['_id'];
-            $status = $totalRefunded < $orderTotal ? 'wc-paydock-p-refund' : 'wc-paydock-refunded';
+            $status = $totalRefunded < $order->get_total() ? 'wc-paydock-p-refund' : 'wc-paydock-refunded';
             update_post_meta($orderId, 'paydock_refunded_status', $status);
             $order->set_status($status);
             $order->update_status(
@@ -140,6 +143,7 @@ class PaymentController
             );
             $order->payment_complete();
             $order->save();
+            update_post_meta($orderId, 'api_refunded_id', $newRefundedId);
             $loggerRepository->createLogRecord($newRefundedId, 'Refunded', $status, '', LogRepository::SUCCESS);
         } else {
             if (!empty($result['error'])) {
@@ -236,7 +240,7 @@ class PaymentController
 
         $order = wc_get_order($orderId);
 
-        if ($order === false) {
+        if ($order === false || $order->get_status() === 'checkout-draft') {
             return false;
         }
 
@@ -425,6 +429,8 @@ class PaymentController
 
     private function refundSuccessProcess(array $input): bool
     {
+        sleep(2);
+
         $data = $input['data'];
 
         if (empty($data['transaction'])) {
@@ -440,7 +446,7 @@ class PaymentController
 
         $order = wc_get_order($orderId);
 
-        if ($order === false) {
+        if ($order === false || get_post_meta($orderId, 'api_refunded_id', true) === $data['_id']) {
             return false;
         }
 
@@ -480,6 +486,7 @@ class PaymentController
                 ),
             'order_id'       => $orderId,
             'refund_payment' => true,
+            'from_webhook' => true
         ]);
 
         $loggerRepository = new LogRepository();
