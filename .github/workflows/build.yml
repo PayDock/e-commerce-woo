@@ -24,15 +24,15 @@ jobs:
       - name: Upload plugin artifact
         uses: actions/upload-artifact@v4
         with:
-          name: paydock_for_woocommerce
+          name: paydock
           path: artifacts/
 
 #      - name: Zip the plugin
-#        run: zip -r paydock_for_woocommerce.zip artifacts/
+#        run: zip -r paydock.zip artifacts/
 
 #      - name: Upload a file to Google Drive
 #        uses: willo32/google-drive-upload-action@v1.1.0
 #        with:
-#          target: paydock_for_woocommerce.zip
+#          target: paydock.zip
 #          credentials: ${{ secrets.<YOUR_SERVICE_ACCOUNT_CREDENTIALS> }}
 #          parent_folder_id: <YOUR_DRIVE_FOLDER_ID>
