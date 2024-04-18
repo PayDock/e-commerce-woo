@@ -1,0 +1,35 @@
+name: Build and Upload Paydock WooCommerce Plugin
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Zip the plugin
+        run: zip -r paydock.zip . -x ".git" -x ".gitignore" -x "*.zip"
+
+      - name: Upload plugin artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: paydock-plugin-artifact
+          path: paydock.zip
+
+#     - name: Upload to Google Drive
+#       uses: futuratrepadeira/google-drive-upload@v0.2.0
+#       with:
+#         clientId: ${{ secrets.GDRIVE_CLIENT_ID }}
+#         clientSecret: ${{ secrets.GDRIVE_CLIENT_SECRET }}
+#         refreshToken: ${{ secrets.GDRIVE_REFRESH_TOKEN }}
+#         file: paydock.zip
+#         folderId: 'FOLDER_ID_ON_DRIVE'
