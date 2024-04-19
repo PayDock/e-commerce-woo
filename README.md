@@ -26,13 +26,13 @@ https://github.com/PayDock/jsp-woocommerce/blob/power_board/power_board_v1.0.1.z
 
 To download the latest version of our plugin, you can manually trigger a build and download the generated artifact directly from GitHub:
 
-Step 1: Trigger the Build
-  a. Visit the Actions tab in our GitHub repository (https://github.com/PayDock/jsp-woocommerce/tree/power_board).
-  b. Under Workflows, find the workflow named Build and upload.
-  c. Click on Run workflow.
-  d. Select the branch and click the green Run workflow button.
+Step 1: Trigger the Build  
+a. Visit the Actions tab in our GitHub repository (https://github.com/PayDock/jsp-woocommerce/tree/power_board).  
+b. Under Workflows, find the workflow named Build and upload.  
+c. Click on Run workflow.  
+d. Select the branch and click the green Run workflow button.  
 
-Step 2: Download the Plugin
-  a. Once the workflow completes, click on the run that you just triggered.
-  b. Scroll down to the Artifacts at the bottom of the page.
-  c. Click on the link to download the ZIP file.
+Step 2: Download the Plugin  
+a. Once the workflow completes, click on the run that you just triggered.  
+b. Scroll down to the Artifacts at the bottom of the page.  
+c. Click on the link to download the ZIP file.  
