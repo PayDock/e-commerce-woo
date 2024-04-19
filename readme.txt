@@ -27,13 +27,13 @@ https://github.com/PayDock/jsp-woocommerce/blob/main/paydock_v1.0.1.zip
 
 To download the latest version of our WooCommerce plugin, you can manually trigger a build and download the generated artifact directly from GitHub:
 
-Step 1: Trigger the Build
-  a. Visit the Actions tab in our GitHub repository (https://github.com/PayDock/jsp-woocommerce).
-  b. Under Workflows, find the workflow named Build and upload Paydock plugin.
-  c. Click on Run workflow.
-  d. Select the branch and click the green Run workflow button.
+Step 1: Trigger the Build  
+a. Visit the Actions tab in our GitHub repository (https://github.com/PayDock/jsp-woocommerce).  
+b. Under Workflows, find the workflow named Build and upload Paydock plugin.  
+c. Click on Run workflow.  
+d. Select the branch and click the green Run workflow button.  
 
-Step 2: Download the Plugin
-  a. Once the workflow completes, click on the run that you just triggered.
-  b. Scroll down to the Artifacts at the bottom of the page.
-  c. Click on the link to download the ZIP file.
+Step 2: Download the Plugin  
+a. Once the workflow completes, click on the run that you just triggered.  
+b. Scroll down to the Artifacts at the bottom of the page.  
+c. Click on the link to download the ZIP file.  
