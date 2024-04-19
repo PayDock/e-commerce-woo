@@ -1,0 +1,38 @@
+name: Build and upload Paydock for WooCommerce plugin
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Prepare files for upload
+        run: |
+          mkdir artifacts
+          rsync -av --exclude='.git/' --exclude='.github/' --exclude='.gitignore' --exclude='*.zip' ./ artifacts/
+
+      - name: Upload plugin artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: power_board
+          path: artifacts/
+
+#      - name: Zip the plugin
+#        run: zip -r power_board.zip artifacts/
+
+#      - name: Upload a file to Google Drive
+#        uses: willo32/google-drive-upload-action@v1.1.0
+#        with:
+#          target: power_board.zip
+#          credentials: ${{ secrets.<YOUR_SERVICE_ACCOUNT_CREDENTIALS> }}
+#          parent_folder_id: <YOUR_DRIVE_FOLDER_ID>
