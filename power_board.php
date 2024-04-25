@@ -10,7 +10,7 @@
  * Description: PowerBoard simplify how you manage your payments. Reduce costs, technical headaches & streamline compliance using PowerBoard's payment orchestration.
  * Author: PowerBoard
  * Author URI: https://www.power_board.com/
- * Version: 1.0.1
+ * Version: 1.0.6
  * Requires at least: 6.4.2
  * Text Domain: power-board-for-woo
  * Tested up to: 6.4.2
@@ -35,7 +35,7 @@ if (!defined('POWER_BOARD_PLUGIN_URL')) {
 }
 
 if (!defined('POWER_BOARD_PLUGIN_VERSION')) {
-    define('POWER_BOARD_PLUGIN_VERSION', '1.0.1');
+    define('POWER_BOARD_PLUGIN_VERSION', '1.0.6');
 }
 
 if (!defined('POWER_BOARD_TEXT_DOMAIN')) {

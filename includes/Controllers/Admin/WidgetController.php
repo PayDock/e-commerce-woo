@@ -4,6 +4,7 @@ namespace PowerBoard\Controllers\Admin;
 
 use PowerBoard\Abstracts\AbstractWalletBlock;
 use PowerBoard\Enums\WalletPaymentMethods;
+use Paydock\Helpers\ShippingHelper;
 use PowerBoard\Repositories\LogRepository;
 use PowerBoard\Services\SDKAdapterService;
 use PowerBoard\Services\SettingsService;
@@ -41,6 +42,25 @@ class WidgetController
         if ($settings->isWalletEnabled($payment)) {
             $reference = $request['order_id'];
 
+            $items = [];
+            foreach ($request['items'] as $item) {
+                $image = wp_get_attachment_image_url(get_post_thumbnail_id($item['id']), 'full');
+
+                $itemData = [
+                    'amount' => round($item['prices']['price'] / 100, 2),
+                    'name' => $item['name'],
+                    'type' => $item['type'],
+                    'quantity' => $item['quantity'],
+                    'item_uri' => $item['permalink']
+                ];
+
+                if (!empty($image)) {
+                    $itemData['image_uri'] = $image;
+                }
+
+                $items[] = $itemData;
+            }
+
             $chargeRequest = [
                 'amount'    => round($request['total']['total_price'] / 100, 2),
                 'currency'  => $request['total']['currency_code'],
@@ -52,12 +72,56 @@ class WidgetController
                     'phone'          => $request['address']['phone'],
                     'payment_source' => [
                         'gateway_id' => $settings->getWalletGatewayId($payment),
+                        'address_line1' => $request['address']['address_1'],
+                        'address_line2' => !empty(trim($request['address']['address_2']))
+                            ? $request['address']['address_2']
+                            : $request['address']['address_1'],
+                        'address_city' => $request['address']['city'],
+                        'address_state' => $request['address']['state'],
+                        'address_country' => $request['address']['country'],
+                        'address_postcode' => $request['address']['postcode']
                     ],
                 ],
                 'meta'      => [
                     'store_name' => get_bloginfo('name'),
                 ],
+                'items' => $items,
+                'shipping' => [
+                    'amount'    => round($request['total']['total_shipping'] / 100, 2),
+                    'currency'  => $request['total']['currency_code'],
+                    'address_line1' => $request['shipping_address']['address_1'],
+                    'address_line2' => $request['shipping_address']['address_2'],
+                    'address_city' => $request['shipping_address']['city'],
+                    'address_state' => $request['shipping_address']['state'],
+                    'address_country' => $request['shipping_address']['country'],
+                    'address_postcode' => $request['shipping_address']['postcode'],
+                    'contact' => [
+                        'first_name' => $request['shipping_address']['first_name'],
+                        'last_name' => $request['shipping_address']['last_name'],
+                        'phone' => $request['shipping_address']['phone']
+                    ]
+                ]
             ];
+
+            if (!empty($request['shipping_rates'])) {
+                $shippingRates = reset($request['shipping_rates']);
+                foreach ($shippingRates['shipping_rates'] as $shippingRate) {
+                    if ($shippingRate['selected']) {
+                        if ($shippingRate['method_id'] === 'pickup_location') {
+                            $location = ShippingHelper::getPickupLocationByKey($shippingRate['rate_id']);
+                            if ($location !== false) {
+                                $chargeRequest['shipping']['address_line1'] = $location['address']['address_1'];
+                                $chargeRequest['shipping']['address_city'] = $location['address']['city'];
+                                $chargeRequest['shipping']['address_state'] = $location['address']['state'];
+                                $chargeRequest['shipping']['address_country'] = $location['address']['country'];
+                                $chargeRequest['shipping']['address_postcode'] = $location['address']['postcode'];
+                                unset($chargeRequest['shipping']['address_line2']);
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
 
             if ($payment->name === WalletPaymentMethods::APPLE_PAY()->name) {
                 $chargeRequest['customer']['payment_source']['wallet_type'] = 'apple';
@@ -75,22 +139,11 @@ class WidgetController
 
             if ($isAfterPay) {
                 $chargeRequest['meta']['success_url'] = wc_get_checkout_url()
-                    .'?afterpay_success=true&&direct_charge='
-                    .($settings->isWalletDirectCharge($payment) ? 'true' : 'false');
+                    . '?afterpay_success=true&direct_charge='
+                    . ($settings->isWalletDirectCharge($payment) ? 'true' : 'false');
                 $chargeRequest['meta']['error_url'] = wc_get_checkout_url()
-                    .'?afterpay_success=false&&direct_charge='
-                    .($settings->isWalletDirectCharge($payment) ? 'true' : 'false');
-
-                $chargeRequest['customer']['payment_source']['address_line1'] = $request['address']['address_1'];
-                $chargeRequest['customer']['payment_source']['address_line2'] =
-                    !empty(trim($request['address']['address_2']))
-                        ? $request['address']['address_2']
-                        : $request['address']['address_1'];
-                $chargeRequest['customer']['payment_source']['address_line3'] = $request['address']['address_1'];
-                $chargeRequest['customer']['payment_source']['address_city'] = $request['address']['city'];
-                $chargeRequest['customer']['payment_source']['address_state'] = $request['address']['state'];
-                $chargeRequest['customer']['payment_source']['address_country'] = $request['address']['country'];
-                $chargeRequest['customer']['payment_source']['address_postcode'] = $request['address']['postcode'];
+                    . '?afterpay_success=false&direct_charge='
+                    . ($settings->isWalletDirectCharge($payment) ? 'true' : 'false');
             }
 
             $result = SDKAdapterService::getInstance()
@@ -114,7 +167,6 @@ class WidgetController
                 $loggerRepository->createLogRecord('', $operation, $status, $message, LogRepository::ERROR);
             }
         }
-
 
         return rest_ensure_response($result);
     }

@@ -91,7 +91,6 @@ class ConnectionValidationService
     {
         if ($this->validateCredential()) {
             $this->validateCard();
-//            $this->validateBankAccount();
             $this->validateWallets();
             $this->validateAPMs();
             $this->setWebhooks();
@@ -169,6 +168,10 @@ class ConnectionValidationService
 
         $this->restoreCredential();
 
+        if ($result) {
+            ConfigService::$accessToken = $accessToken;
+        }
+
         return $result;
     }
     private function saveOldCredential()
@@ -202,6 +205,9 @@ class ConnectionValidationService
 
     private function checkCredentialConnection(?string $public, ?string $secret): bool
     {
+        ConfigService::$publicKey = $public;
+        ConfigService::$secretKey = $secret;
+
         return $this->checkPublicKey($public) && $this->checkSecretKey($secret);
     }
 

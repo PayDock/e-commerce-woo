@@ -213,8 +213,12 @@ class SDKAdapterService
         return $chargeService->refunds($params)->call();
     }
 
-    public function errorMessageToString(array $responce): string
+    public function errorMessageToString($responce): string
     {
+        if ($responce instanceof \WP_Error) {
+            return $responce->get_error_message();
+        }
+
         $result = !empty($responce['error']['message']) ? ' '.$responce['error']['message'] : '';
         if (isset($responce['error']['details'])) {
             if (!empty($responce['error']['details']['messages'])) {

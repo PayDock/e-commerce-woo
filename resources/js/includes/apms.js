@@ -5,7 +5,7 @@ import {getSetting} from "@woocommerce/settings";
 import validateData from "./wallets/validate-form";
 import {registerPaymentMethod} from '@woocommerce/blocks-registry';
 import {select} from '@wordpress/data';
-import {CART_STORE_KEY, CHECKOUT_STORE_KEY} from '@woocommerce/block-data';
+import {CART_STORE_KEY} from '@woocommerce/block-data';
 
 const textDomain = 'power_board';
 const labels = {
@@ -24,11 +24,12 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
     const label = decodeEntities(settings.title) || __(defaultLabel, textDomain);
     const Content = (props) => {
         const cart = select(CART_STORE_KEY);
-        const store = select(CHECKOUT_STORE_KEY);
         const {eventRegistration, emitResponse} = props;
         const {onPaymentSetup, onCheckoutValidation} = eventRegistration;
 
         const billingAddress = cart.getCustomerData().billingAddress;
+        const shippingAddress = cart.getCustomerData().shippingAddress;
+        const shippingRates = cart.getShippingRates();
         const countriesError = jQuery('.power-board-country-available');
         const validationError = jQuery('.power-board-validation-error');
         const buttonElement = jQuery('#' + buttonId);
@@ -40,11 +41,12 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
             (element) => element === billingAddress.country.toLowerCase()
         );
         let button = null;
-        let meta = null
+        let meta = {}
         let data = {...settings};
         data.customers = '';
         data.styles = '';
         data.supports = '';
+        data.pickupLocations = '';
 
         validationError.hide();
         countriesError.hide();
@@ -64,13 +66,6 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
                 wasInit = true;
                 button = new window.cba.ZipmoneyCheckoutButton('#' + buttonId, settings.publicKey, settings.gatewayId);
 
-                meta = {
-                    charge: {
-                        amount: settings.amount,
-                        currency: settings.currency,
-                    }
-                }
-
                 data.gatewayType = 'zippay'
             } else if ((validationSuccess && 'afterpay' === id) && !wasInit) {
                 wasInit = true;
@@ -80,14 +75,92 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
                     currency: settings.currency,
                     email: billingAddress.email,
                     first_name: billingAddress.first_name,
-                    last_name: billingAddress.last_name
+                    last_name: billingAddress.last_name,
+                    address_line: billingAddress.address_1,
+                    address_line2: billingAddress.address_2,
+                    address_city: billingAddress.city,
+                    address_state: billingAddress.state,
+                    address_postcode: billingAddress.postcode,
+                    address_country: billingAddress.country,
+                    phone: billingAddress.phone
                 }
 
                 data.gatewayType = 'afterpay'
             }
 
+
             if (button) {
                 button.onFinishInsert('input[name="payment_source_apm_token"]', 'payment_source_token');
+
+                const shipping_address = {
+                    first_name: shippingAddress.first_name,
+                    last_name: shippingAddress.last_name,
+                    line1: shippingAddress.address_1,
+                    line2: shippingAddress.address_2,
+                    country: shippingAddress.country,
+                    postcode: shippingAddress.postcode,
+                    city: shippingAddress.city,
+                    state: shippingAddress.state
+                };
+
+                if(shippingRates.length && shippingRates[0].shipping_rates.length) {
+                    shippingRates[0].shipping_rates.forEach((rate, key) => {
+                        if (!rate.selected) {
+                            return;
+                        }
+
+                        shipping_address.amount = Number((rate.price / 100).toFixed(3)).toFixed(2)
+                        shipping_address.currency = rate.currency_code
+
+                        if (rate.method_id !== 'pickup_location') {
+                            return
+                        }
+
+                        const rateId = rate.rate_id.split(':')
+                        const pickupLocation = settings.pickupLocations[rateId[1]]
+
+                        shipping_address.line1 = pickupLocation.address.address_1
+                        shipping_address.line2 = ''
+                        shipping_address.country = pickupLocation.address.country
+                        shipping_address.postcode = pickupLocation.address.postcode
+                        shipping_address.city = pickupLocation.address.city
+                        shipping_address.state = pickupLocation.address.state
+                    });
+                }
+
+                meta.charge = {
+                    amount: settings.amount,
+                    currency: settings.currency,
+                    email: billingAddress.email,
+                    first_name: billingAddress.first_name,
+                    last_name: billingAddress.last_name,
+                    shipping_address: shipping_address,
+                    billing_address: {
+                        first_name: billingAddress.first_name,
+                        last_name: billingAddress.last_name,
+                        line1: billingAddress.address_1,
+                        line2: billingAddress.address_2,
+                        country: billingAddress.country,
+                        postcode: billingAddress.postcode,
+                        city: billingAddress.city,
+                        state: billingAddress.state
+                    },
+                    items: cart.getCartData().items.map(item => {
+                        const result = {
+                            name: item.name,
+                            amount: item.prices.price / 100,
+                            quantity: item.quantity,
+                            reference: item.short_description,
+                        };
+
+                        if (item.images.length > 0)
+                        {
+                            result.image_uri = item.images[0].src
+                        }
+
+                        return result
+                    })
+                }
                 button.setMeta(meta);
                 button.on('finish', () => {
                     if (settings.directCharge) {

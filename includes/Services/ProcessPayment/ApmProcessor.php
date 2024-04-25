@@ -5,6 +5,7 @@ namespace PowerBoard\Services\ProcessPayment;
 use Exception;
 use PowerBoard\Enums\OtherPaymentMethods;
 use PowerBoard\Helpers\ArgsForProcessPayment;
+use Paydock\Helpers\ShippingHelper;
 use PowerBoard\Repositories\LogRepository;
 use PowerBoard\Repositories\UserCustomerRepository;
 use PowerBoard\Services\SDKAdapterService;
@@ -78,7 +79,10 @@ class ApmProcessor
                 'last_name'  => $this->order->get_billing_last_name(),
                 'email'      => $this->order->get_billing_email(),
                 'phone'      => $this->order->get_billing_phone(),
+                'payment_source' => $this->getAdditionalFields('amount')
             ],
+            'shipping' => $this->getShippingFields(),
+            'items' => $this->getOrderItems(),
         ];
 
         return SDKAdapterService::getInstance()->createCharge($chargeArgs);
@@ -92,12 +96,13 @@ class ApmProcessor
             'email'      => $this->order->get_billing_email(),
             'phone'      => $this->order->get_billing_phone(),
             'token'      => $this->args['paymentsourcetoken'],
+            'payment_source' => $this->getAdditionalFields('amount')
         ], $this->getAdditionalFields('amount'));
 
         $customer = SDKAdapterService::getInstance()->createCustomer($customerArgs);
 
         if (!empty($customer['error']) || empty($customer['resource']['data']['_id'])) {
-            $message = !empty($customer['error']['message']) ? ' '.$customer['error']['message'] : '';
+            $message = !empty($customer['error']['message']) ? ' ' . $customer['error']['message'] : '';
 
             $this->logger->createLogRecord(
                 '',
@@ -131,37 +136,9 @@ class ApmProcessor
             'capture'     => $this->args['gatewaytype'] === strtolower(
                 OtherPaymentMethods::AFTERPAY()->name
             ) ?: $this->args['directcharge'],
+            'shipping' => $this->getShippingFields(),
+            'items' => $this->getOrderItems()
         ]);
-    }
-
-    protected function getAdditionalFields($exclude = []): array
-    {
-        if (!$this->order) {
-            return [];
-        }
-
-        $address1 = $this->order->get_billing_address_1();
-        $address2 = $this->order->get_billing_address_2();
-
-        $result = [
-            'amount'           => (float) $this->order->get_total(),
-            'address_country'  => $this->order->get_billing_country(),
-            'address_postcode' => $this->order->get_billing_postcode(),
-            'address_city'     => $this->order->get_billing_city(),
-            'address_state'    => $this->order->get_billing_state(),
-            'address_line1'    => $address1,
-            'address_line2'    => empty($address2) ? $address1 : $address2,
-        ];
-
-        if (!empty($exclude)) {
-            if (!is_array($exclude)) {
-                $exclude = [$exclude];
-            }
-
-            $result = array_diff_key($result, array_flip($exclude));
-        }
-
-        return $result;
     }
 
     private function fraudCharge(): array
@@ -183,7 +160,135 @@ class ApmProcessor
                 'last_name'  => $this->order->get_billing_last_name(),
                 'email'      => $this->order->get_billing_email(),
                 'phone'      => $this->order->get_billing_phone(),
+                'payment_source' => $this->getAdditionalFields('amount')
             ],
+            'shipping' => $this->getShippingFields(),
+            'items' => $this->getOrderItems()
         ]);
+    }
+
+
+    protected function getAdditionalFields($exclude = []): array
+    {
+        if (!$this->order) {
+            return [];
+        }
+
+        $address1 = $this->order->get_billing_address_1();
+        $address2 = $this->order->get_billing_address_2();
+
+        $result = [
+            'amount'           => (float) $this->order->get_total(),
+            'address_country'  => $this->order->get_billing_country(),
+            'address_postcode' => $this->order->get_billing_postcode(),
+            'address_city'     => $this->order->get_billing_city(),
+            'address_state'    => $this->order->get_billing_state(),
+            'address_line1'    => $address1,
+            'address_line2'    => empty($address2) ? $address1 : $address2,
+            'address_line2'    => empty(trim($address2)) ? $address1 : $address2,
+        ];
+
+        if (!empty($exclude)) {
+            if (!is_array($exclude)) {
+                $exclude = [$exclude];
+            }
+
+            $result = array_diff_key($result, array_flip($exclude));
+        }
+
+        return $result;
+    }
+
+    protected function getShippingFields($exclude = []): array
+    {
+        if (!$this->order) {
+            return [];
+        }
+
+        $orderData = $this->order->get_data();
+
+        $result = [
+            'amount'    => round($orderData['shipping_total'], 2),
+            'currency'  => $orderData['currency'],
+            'contact' => [
+                'first_name' => $this->order->get_shipping_first_name(),
+                'last_name' => $this->order->get_shipping_last_name(),
+                'phone' => $this->order->get_shipping_phone()
+            ]
+        ];
+
+        $location = false;
+        $shippingMethod = reset($this->order->get_shipping_methods());
+        if ($shippingMethod->get_method_id() === 'pickup_location') {
+            $metaDatas = $shippingMethod->get_meta_data();
+            foreach ($metaDatas as $metaData) {
+                $metaDataArray = $metaData->get_data();
+                if ($metaDataArray['key'] === 'pickup_location') {
+                    $location = ShippingHelper::getPickupLocationByName($metaDataArray['value']);
+                    break;
+                }
+            }
+
+            if ($location) {
+                $result['address_line1'] = $location['address']['address_1'];
+                $result['address_city'] = $location['address']['city'];
+                $result['address_state'] = $location['address']['state'];
+                $result['address_country'] = $location['address']['country'];
+                $result['address_postcode'] = $location['address']['postcode'];
+            }
+        }
+
+        if ($location === false) {
+            $address1 = $this->order->get_shipping_address_1();
+            $address2 = $this->order->get_shipping_address_2();
+
+            $result['address_line1'] = $address1;
+            $result['address_line2'] = empty(trim($address2)) ? $address1 : $address2;
+            $result['address_city'] = $this->order->get_shipping_city();
+            $result['address_state'] = $this->order->get_shipping_state();
+            $result['address_country'] = $this->order->get_shipping_country();
+            $result['address_postcode'] = $this->order->get_shipping_postcode();
+        }
+
+        if (!empty($exclude)) {
+            if (!is_array($exclude)) {
+                $exclude = [$exclude];
+            }
+
+            $result = array_diff_key($result, array_flip($exclude));
+        }
+
+        return $result;
+    }
+
+    protected function getOrderItems(): array
+    {
+        $result = [];
+
+        if (!$this->order) {
+            return $result;
+        }
+
+        $items = $this->order->get_items();
+        foreach ($items as $item) {
+            $product = $item->get_product();
+            $productId = $item->get_product_id();
+            $image = wp_get_attachment_image_url(get_post_thumbnail_id($productId), 'full');
+            $itemData = [
+                'amount' => $product->get_price(),
+                'name' => $item->get_name(),
+                'type' => $item->get_type(),
+                'quantity' => $item->get_quantity(),
+                'item_uri' => get_permalink($productId)
+            ];
+
+            if (!empty($image)) {
+                $itemData['image_uri'] = $image;
+            }
+
+            $result[] = $itemData;
+        }
+
+        return $result;
     }
 }
