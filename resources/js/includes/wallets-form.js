@@ -56,7 +56,10 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
                 type: id,
                 order_id: store.getOrderId(),
                 total: cart.getCartTotals(),
-                address: cart.getCustomerData().billingAddress
+                address: cart.getCustomerData().billingAddress,
+                shipping_address: cart.getCustomerData().shippingAddress,
+                shipping_rates: cart.getShippingRates(),
+                items: cart.getCartData().items
             }
 
             axios.post('/wp-json/paydock/v1/wallets/charge', billingData).then((response) => {

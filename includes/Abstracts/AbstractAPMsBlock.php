@@ -60,6 +60,7 @@ abstract class AbstractAPMsBlock extends AbstractBlock
             'fraudServiceId'     => $settingsService->getAPMsFraudServiceId($payment),
             // Other
             'supports'           => array_filter($this->gateway->supports, [$this->gateway, 'supports']),
+            'pickupLocations'    => get_option('pickup_location_pickup_locations')
         ]);
     }
 

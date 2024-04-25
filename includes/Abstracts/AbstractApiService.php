@@ -43,7 +43,7 @@ abstract class AbstractApiService
 
         switch ($this->allowedAction[$this->action]) {
             case 'POST':
-                $args['body'] = json_encode($this->parameters);
+                $args['body'] = json_encode($this->parameters, JSON_PRETTY_PRINT);
                 $parsed_args = wp_parse_args($args, [
                     'method'  => 'POST',
                     'timeout' => 10,
