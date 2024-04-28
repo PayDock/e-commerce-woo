@@ -15,10 +15,10 @@ const settings = getSetting('power_board_data', {});
 
 const textDomain = 'power_board';
 const labels = {
-    defaultLabel: __('Power Board Payments', textDomain),
+    defaultLabel: __('PowerBoard Payments', textDomain),
     saveCardLabel: __('Save payment details', textDomain),
     selectTokenLabel: __('Saved payment details', textDomain),
-    placeOrderButtonLabel: __('Place Order by Power Board', textDomain),
+    placeOrderButtonLabel: __('Place Order by PowerBoard', textDomain),
     fillDataError: __('Please fill in the card data.', textDomain),
     requiredDataError: __('Please fill in the required fields of the form to display payment methods', textDomain),
     additionalDataRejected: __('Payment has been rejected by PowerBoard. Please try again in a few minutes', textDomain)
@@ -197,7 +197,7 @@ const Content = (props) => {
             {class: 'logo-comm-bank'},
             createElement(
                 "img",
-                {src: '/wp-content/plugins/power_board/assets/images/logo.png'}
+                {src: '/wp-content/plugins/power-board/assets/images/commBank_logo.png'}
             ),
         ),
         selectSavedCardsComponent(labels.selectTokenLabel),

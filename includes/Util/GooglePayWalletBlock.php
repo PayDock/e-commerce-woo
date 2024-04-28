@@ -6,18 +6,12 @@ use PowerBoard\Abstracts\AbstractWalletBlock;
 use PowerBoard\Enums\WalletPaymentMethods;
 use PowerBoard\Services\Checkout\GooglePayWalletService;
 
-final class GooglePayWalletBlock extends AbstractWalletBlock
-{
-    public function getType(): WalletPaymentMethods
-    {
-        return WalletPaymentMethods::GOOGLE_PAY();
-    }
+final class GooglePayWalletBlock extends AbstractWalletBlock {
+	public function getType(): WalletPaymentMethods {
+		return WalletPaymentMethods::GOOGLE_PAY();
+	}
 
-    /**
-     * @inheritDoc
-     */
-    public function initialize()
-    {
-        $this->gateway = new GooglePayWalletService();
-    }
+	public function initialize() {
+		$this->gateway = new GooglePayWalletService();
+	}
 }

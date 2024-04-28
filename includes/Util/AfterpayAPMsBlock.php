@@ -6,19 +6,13 @@ use PowerBoard\Abstracts\AbstractAPMsBlock;
 use PowerBoard\Enums\OtherPaymentMethods;
 use PowerBoard\Services\Checkout\AfterpayAPMsPaymentServiceService;
 
-class AfterpayAPMsBlock extends AbstractAPMsBlock
-{
+class AfterpayAPMsBlock extends AbstractAPMsBlock {
 
-    public function getType(): OtherPaymentMethods
-    {
-        return OtherPaymentMethods::AFTERPAY();
-    }
+	public function getType(): OtherPaymentMethods {
+		return OtherPaymentMethods::AFTERPAY();
+	}
 
-    /**
-     * @inheritDoc
-     */
-    public function initialize()
-    {
-        $this->gateway = new AfterpayAPMsPaymentServiceService();
-    }
+	public function initialize() {
+		$this->gateway = new AfterpayAPMsPaymentServiceService();
+	}
 }

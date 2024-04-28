@@ -114,11 +114,13 @@ setTimeout(() => jQuery(function ($) {
         bankAccount.setFormFields(['account_routing']);
 
         powerBoardValidation.createWidgetDiv('powerBoardWidgetBankAccount');
-        const widget = new cba.HtmlMultiWidget(
-            '#powerBoardWidgetBankAccount',
-            powerBoardBankAccountSettings.publicKey,
-            [bankAccount]
-        );
+        const widget = new cba.HtmlWidget('#powerBoardWidgetBankAccount', powerBoardBankAccountSettings.publicKey, 'not_configured', 'bank_account', 'payment_source');
+        widget.setFormFields(['account_routing']);
+        // const widget = new cba.HtmlMultiWidget(
+        //     '#powerBoardWidgetBankAccount',
+        //     powerBoardBankAccountSettings.publicKey,
+        //     [bankAccount]
+        // );
 
         window.widgetPowerBoardBankAccount = widget;
         if (powerBoardBankAccountSettings.hasOwnProperty('styles'))
@@ -138,7 +140,7 @@ setTimeout(() => jQuery(function ($) {
         widget.interceptSubmitForm('#widget');
         widget.load();
 
-        widget.on(window.powerBoard.EVENT.AFTER_LOAD, () => {
+        widget.on(window.cba.EVENT.AFTER_LOAD, () => {
             if ($('#powerBoardWidgetBankAccount_wrapper').length > 0) {
                 powerBoardValidation.passWidgetToWrapper('powerBoardWidgetBankAccount')
             }
@@ -263,8 +265,9 @@ setTimeout(() => jQuery(function ($) {
                 setPaymentMethodWatcher();
             }
         } catch (e) {
-            console.log(e)
+            console.log(e);
         }
+
     }, 100)
 
 }), 1000)

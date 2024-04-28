@@ -1,9 +1,10 @@
 import {getSetting} from '@woocommerce/settings';
 
 export default async () => {
-    const data = getSetting('power_board_data', {});
+    const data = {...getSetting('power_board_data', {})};
     data.action = 'get_vault_token';
     data.type = 'standalone-3ds-token';
+    data._wpnonce = PowerBoardAjax.wpnonce;
 
     if (document.querySelector('#shipping-first_name') !== null) {
         data.first_name = document.querySelector('#shipping-first_name').value

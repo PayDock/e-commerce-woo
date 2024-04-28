@@ -28,6 +28,7 @@ export default (id, buttonId, data, isSandbox) => {
         button.setEnv('production_cba')
     }
 
+
     button.onPaymentSuccessful((result) => {
         result.payment = id.replace('-','_')
         paymentSourceElement.val(JSON.stringify(result))

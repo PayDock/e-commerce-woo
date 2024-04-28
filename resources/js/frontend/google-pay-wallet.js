@@ -2,7 +2,7 @@ import walletsForm from "../includes/wallets-form";
 
 walletsForm(
     'google-pay',
-    'Power Board Google Pay',
+    'PowerBoard Google Pay',
     'powerBoardWalletGooglePayButton',
     [
         'first_name',
@@ -15,3 +15,4 @@ walletsForm(
         'postcode',
     ]
 );
+

@@ -9,10 +9,10 @@ const settings = getSetting('power_board_bank_account_block_data', {});
 
 const textDomain = 'power_board';
 const labels = {
-    defaultLabel: __('Power Board Payments', textDomain),
+    defaultLabel: __('PowerBoard Payments', textDomain),
     saveBankAcoountLabel: __('Save payment details', textDomain),
     selectTokenLabel: __('Saved payment details', textDomain),
-    placeOrderButtonLabel: __('Place Order by Power Board', textDomain),
+    placeOrderButtonLabel: __('Place Order by PowerBoard', textDomain),
     fillDataError: __('Please fill in the card data.', textDomain)
 }
 
@@ -121,7 +121,7 @@ const Content = (props) => {
             {class: 'logo-comm-bank'},
             createElement(
                 "img",
-                {src: '/wp-content/plugins/power_board/assets/images/logo.png'}
+                {src: '/wp-content/plugins/power-board/assets/images/commBank_logo.png'}
             ),
         ),
         selectSavedBankAccountsComponent(labels.selectTokenLabel),

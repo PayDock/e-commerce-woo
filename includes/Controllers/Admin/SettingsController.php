@@ -2,7 +2,6 @@
 
 namespace PowerBoard\Controllers\Admin;
 
-class SettingsController
-{
+class SettingsController {
 
 }

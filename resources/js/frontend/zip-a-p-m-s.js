@@ -2,7 +2,7 @@ import walletsForm from "../includes/apms";
 
 walletsForm(
     'zip',
-    'Power Board Zip',
+    'PowerBoard Zip',
     'powerBoardAPMsZipButton',
     [
         'first_name',

@@ -2,7 +2,7 @@ import walletsForm from "../includes/wallets-form";
 
 walletsForm(
     'pay-pal',
-    'Power Board PayPal',
+    'PowerBoard PayPal',
     'powerBoardWalletPayPalButton',
     [
         'first_name',
@@ -15,3 +15,4 @@ walletsForm(
         'postcode',
     ]
 );
+

@@ -13,239 +13,241 @@ use PowerBoard\Services\SDKAdapterService;
 use PowerBoard\Services\SettingsService;
 use WC_Payment_Gateway;
 
-class CardPaymentService extends WC_Payment_Gateway
-{
-    /**
-     * Constructor
-     */
-    public function __construct()
-    {
-        $this->id = 'power_board_gateway';
-        $this->icon = apply_filters('woocommerce_power_board_gateway_icon', '');
-        $this->has_fields = true;
-        $this->supports = [
-            'products',
-            'subscriptions',
-            'subscription_cancellation',
-            'subscription_suspension',
-            'subscription_reactivation',
-            'subscription_amount_changes',
-            'subscription_date_changes',
-            'multiple_subscriptions',
-            'default_credit_card_form',
-        ];
+class CardPaymentService extends WC_Payment_Gateway {
+	/**
+	 * Constructor
+	 */
+	public function __construct() {
+		$this->id = 'power_board_gateway';
+		$this->icon = apply_filters( 'woocommerce_power_board_gateway_icon', '' );
+		$this->has_fields = true;
+		$this->supports = [ 
+			'products',
+			'subscriptions',
+			'subscription_cancellation',
+			'subscription_suspension',
+			'subscription_reactivation',
+			'subscription_amount_changes',
+			'subscription_date_changes',
+			'multiple_subscriptions',
+			'default_credit_card_form',
+		];
 
-        $this->method_title = _x('PowerBoard payment', 'PowerBoard payment method', 'woocommerce-gateway-power-board');
-        $this->method_description = __('Allows PowerBoard payments.', 'woocommerce-gateway-power-board');
+		$this->method_title = _x( 'PowerBoard payment', 'PowerBoard payment method', 'woocommerce-gateway-ppwer-board' );
+		$this->method_description = __( 'Allows PowerBoard payments.', 'woocommerce-gateway-ppwer-board' );
 
-        // Load the settings.
-        $this->init_settings();
+		// Load the settings.
+		$this->init_settings();
 
-        // Define user set variables.
-        $service = SettingsService::getInstance();
-        $keyTitle = $service->getOptionName(SettingsTabs::WIDGET()->value, [
-            WidgetSettings::PAYMENT_CARD_TITLE()->name,
-        ]);
-        $keyDescription = $service->getOptionName(
-            SettingsTabs::WIDGET()->value,
-            [WidgetSettings::PAYMENT_CARD_DESCRIPTION()->name]
-        );
+		// Define user set variables.
+		$service = SettingsService::getInstance();
+		$keyTitle = $service->getOptionName( SettingsTabs::WIDGET()->value, [ 
+			WidgetSettings::PAYMENT_CARD_TITLE()->name,
+		] );
+		$keyDescription = $service->getOptionName(
+			SettingsTabs::WIDGET()->value,
+			[ WidgetSettings::PAYMENT_CARD_DESCRIPTION()->name ]
+		);
 
-        $this->title = get_option($keyTitle);
-        $this->description = get_option($keyDescription);
-        // Actions.
-        add_action('woocommerce_update_options_payment_gateways_'.$this->id, [$this, 'process_admin_options']);
-        add_action(
-            'woocommerce_scheduled_subscription_payment_power_board',
-            [$this, 'process_subscription_payment'],
-            10,
-            2
-        );
+		$this->title = get_option( $keyTitle );
+		$this->description = get_option( $keyDescription );
+		// Actions.
+		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, [ $this, 'process_admin_options' ] );
+		add_action(
+			'woocommerce_scheduled_subscription_payment_power_board',
+			[ $this, 'process_subscription_payment' ],
+			10,
+			2
+		);
 
-        add_action('wp_enqueue_scripts', [$this, 'payment_scripts']);
+		add_action( 'wp_enqueue_scripts', [ $this, 'payment_scripts' ] );
 
-        add_action('wp_ajax_get_vault_token', [$this, 'get_vault_token']);
+		add_action( 'wp_ajax_get_vault_token', [ $this, 'get_vault_token' ] );
 
-        add_action('woocommerce_after_checkout_billing_form', [$this, 'woocommerce_before_checkout_form'], 10, 1);
-    }
+		add_action( 'woocommerce_after_checkout_billing_form', [ $this, 'woocommerce_before_checkout_form' ], 10, 1 );
+	}
 
-    public function payment_scripts()
-    {
-        if (!is_checkout() || !$this->is_available()) {
-            return '';
-        }
+	public function payment_scripts() {
+		if ( ! is_checkout() || ! $this->is_available() ) {
+			return '';
+		}
 
-        wp_enqueue_script('power-board-form', POWER_BOARD_PLUGIN_URL.'/assets/js/frontend/form.js', [], time(), true);
-        wp_localize_script('power-board-form', 'powerBoardCardWidgetSettings', [
-            'suportedCard' => 'Visa, Mastercard, Adex',
-        ]);
-        wp_enqueue_style('power-board-widget-css', POWER_BOARD_PLUGIN_URL.'/assets/css/frontend/widget.css', [], time());
+		wp_enqueue_script( 'power-board-form', POWER_BOARD_PLUGIN_URL . '/assets/js/frontend/form.js', [], time(), true );
+		wp_localize_script( 'power-board-form', 'powerBoardCardWidgetSettings', [ 
+			'suportedCard' => 'Visa, Mastercard, Adex',
+		] );
+		wp_enqueue_style( 'power-board-widget-css', POWER_BOARD_PLUGIN_URL . '/assets/css/frontend/widget.css', [], time() );
 
-        wp_localize_script('power-board-form', 'PowerBoardAjax', [
-            'url' => admin_url('admin-ajax.php'),
-        ]);
+		wp_localize_script( 'power-board-form', 'PowerBoardAjax', [ 
+			'url' => admin_url( 'admin-ajax.php' ),
+			'wpnonce' => wp_create_nonce( 'get_vault_token' )
+		] );
 
-        return "";
-    }
+		return '';
+	}
 
-    /**
-     * Check If The Gateway Is Available For Use
-     *
-     * @access public
-     * @return bool
-     */
-    function is_available()
-    {
-        return SettingsService::getInstance()->isEnabledPayment()
-            && SettingsService::getInstance()->isCardEnabled();
-    }
+	public function is_available() {
+		return SettingsService::getInstance()->isEnabledPayment()
+			&& SettingsService::getInstance()->isCardEnabled();
+	}
 
-    /**
-     * Process the payment and return the result.
-     *
-     * @since 1.0.0
-     */
-    public function process_payment($order_id, $retry = true, $force_customer = false)
-    {
-        $order = wc_get_order($order_id);
+	/**
+	 * Process the payment and return the result.
+	 *
+	 * @since 1.0.0
+	 */
+	public function process_payment( $order_id, $retry = true, $force_customer = false ) {
+		$wpNonce = ! empty( $_POST['_wpnonce'] ) ? sanitize_text_field( $_POST['_wpnonce'] ) : null;
+		if ( ! wp_verify_nonce( $wpNonce, 'process_payment' ) ) {
+			throw new RouteException(
+				'woocommerce_rest_checkout_process_payment_error',
+				__( 'Error: Security check', 'power_board' )
+			);
+		}
 
-        $siteName = remove_accents(wp_specialchars_decode(get_bloginfo('name'), ENT_QUOTES));
-        $description = sprintf(
-            __('Order №%s from %s.', 'power-board-for-woocommerce'),
-            $order->get_order_number(),
-            $siteName
-        );
+		$order = wc_get_order( $order_id );
 
-        $loggerRepository = new LogRepository();
-        $chargeId = '';
+		$siteName = remove_accents( wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) );
+		$description = sprintf(
+			// Translators: %s: number of orders
+			__( 'Order №%1$s from %2$s.', 'power-board-for-woocommerce' ),
+			$order->get_order_number(),
+			$siteName
+		);
 
-        try {
-            $cardProcessor = new CardProcessor(array_merge([
-                'amount'      => (float) $order->get_total(),
-                'description' => $description,
-            ], $_POST));
+		$loggerRepository = new LogRepository();
+		$chargeId = '';
 
-            $response = $cardProcessor->run($order);
+		try {
+			$cardProcessor = new CardProcessor( array_merge( [ 
+				'amount' => (float) $order->get_total(),
+				'description' => $description,
+			], $_POST ) );
 
-            if (!empty($response['error'])) {
-                $message = SDKAdapterService::getInstance()->errorMessageToString($response);
-                throw new Exception(__('Oops! We\'re experiencing some technical difficulties at the moment. Please try again later.', POWER_BOARD_TEXT_DOMAIN));
-            }
+			$response = $cardProcessor->run( $order );
 
-            $chargeId = !empty($response['resource']['data']['_id']) ? $response['resource']['data']['_id'] : '';
-        } catch (Exception $e) {
-            $loggerRepository->createLogRecord(
-                $chargeId ?? '',
-                'Charge',
-                'UnfulfilledCondition',
-                $e->getMessage(),
-                LogRepository::ERROR
-            );
-            throw new RouteException(
-                'woocommerce_rest_checkout_process_payment_error',
-                __('Error:', POWER_BOARD_TEXT_DOMAIN).' '.$e->getMessage()
-            );
-        }
+			if ( ! empty( $response['error'] ) ) {
+				$message = SDKAdapterService::getInstance()->errorMessageToString( $response );
+				throw new Exception( __( 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later. ', 'power_board' ) );
+			}
 
-        try {
-            $cardProcessor->createCustomer();
-        } catch (Exception $e) {
-            $loggerRepository->createLogRecord(
-                $chargeId ?? '',
-                'Create customer',
-                'UnfulfilledCondition',
-                $e->getMessage(),
-                LogRepository::ERROR
-            );
-            throw new RouteException(
-                'woocommerce_rest_checkout_process_payment_error',
-                __('Error:', POWER_BOARD_TEXT_DOMAIN).' '.$e->getMessage()
-            );
-        }
+			$chargeId = ! empty( $response['resource']['data']['_id'] ) ? $response['resource']['data']['_id'] : '';
+		} catch (Exception $e) {
+			$loggerRepository->createLogRecord(
+				$chargeId ?? '',
+				'Charge',
+				'UnfulfilledCondition',
+				$e->getMessage(),
+				LogRepository::ERROR
+			);
+			throw new RouteException(
+				'woocommerce_rest_checkout_process_payment_error',
+				__( 'Error:', 'power_board' ) . ' ' . $e->getMessage()
+			);
+		}
 
-        $status = ucfirst(strtolower($response['resource']['data']['status'] ?? 'undefined'));
-        $operation = ucfirst(strtolower($response['resource']['type'] ?? 'undefined'));
-        $isAuthorization = $response['resource']['data']['authorization'] ?? 0;
-        $isCompleted = false;
-        $markAsSuccess = false;
-        if (
-            $status === 'Pre_authentication_pending' &&
-            $cardProcessor->getRunMethod() === CardProcessor::FRAUD_IN_BUILD_CHARGE_METHOD
-        ) {
-            $status = 'wc-pb-pending';
-        } else {
-            if ($isAuthorization && in_array($status, ['Pending', 'Pre_authentication_pending'])) {
-                $status = 'wc-pb-authorize';
-            } else {
-                $markAsSuccess = true;
-                $isCompleted = 'Complete' === $status;
-                $status = $isCompleted ? 'wc-pb-paid' : 'wc-pb-pending';
-            }
-        }
+		try {
+			$cardProcessor->createCustomer();
+		} catch (Exception $e) {
+			$loggerRepository->createLogRecord(
+				$chargeId ?? '',
+				'Create customer',
+				'UnfulfilledCondition',
+				$e->getMessage(),
+				LogRepository::ERROR
+			);
+			throw new RouteException(
+				'woocommerce_rest_checkout_process_payment_error',
+				__( 'Error:', 'power_board' ) . ' ' . $e->getMessage()
+			);
+		}
 
-        $order->set_status($status);
-        $order->payment_complete();
-        $order->save();
-        update_post_meta($order->get_id(), 'power_board_charge_id', $chargeId);
-        WC()->cart->empty_cart();
+		$status = ucfirst( strtolower( $response['resource']['data']['status'] ?? 'undefined' ) );
+		$operation = ucfirst( strtolower( $response['resource']['type'] ?? 'undefined' ) );
+		$isAuthorization = $response['resource']['data']['authorization'] ?? 0;
+		$isCompleted = false;
+		$markAsSuccess = false;
+		if (
+			'Pre_authentication_pending' === $status &&
+			$cardProcessor->getRunMethod() === CardProcessor::FRAUD_IN_BUILD_CHARGE_METHOD
+		) {
+			$status = 'wc-pb-pending';
+		} else {
+			if ( $isAuthorization && in_array( $status, [ 'Pending', 'Pre_authentication_pending' ] ) ) {
+				$status = 'wc-pb-authorize';
+			} else {
+				$markAsSuccess = true;
+				$isCompleted = 'Complete' === $status;
+				$status = $isCompleted ? 'wc-pb-paid' : 'wc-pb-pending';
+			}
+		}
 
-        $loggerRepository->createLogRecord(
-            $chargeId,
-            $operation,
-            $status,
-            '',
-            $markAsSuccess ? LogRepository::SUCCESS : LogRepository::DEFAULT
-        );
+		$order->set_status( $status );
+		$order->payment_complete();
+		$order->save();
+		update_post_meta( $order->get_id(), 'power_board_charge_id', $chargeId );
+		WC()->cart->empty_cart();
 
-        return [
-            'result'   => 'success',
-            'redirect' => $this->get_return_url($order),
-        ];
-    }
+		$loggerRepository->createLogRecord(
+			$chargeId,
+			$operation,
+			$status,
+			'',
+			$markAsSuccess ? LogRepository::SUCCESS : LogRepository::DEFAULT
+		);
 
-    /**
-     * Ajax function
-     */
-    public function get_vault_token(): void
-    {
-        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower(
-                $_SERVER['HTTP_X_REQUESTED_WITH']
-            ) == 'xmlhttprequest') {
-            $cardProcessor = new CardProcessor($_POST);
-            $type = !empty($_POST['type']) ? $_POST['type'] : null;
-            try {
-                switch ($type) {
-                    case 'clear-user-tokens':
-                        (new UserTokenRepository())->deleteAllUserTokens();
-                        break;
-                    case 'standalone-3ds-token':
-                        echo $cardProcessor->getStandalone3dsToken();
-                        break;
-                    default:
-                        echo $cardProcessor->getVaultToken();
-                }
-            } catch (Exception $e) {
-                (new LogRepository())->createLogRecord(
-                    '',
-                    'Charges',
-                    'UnfulfilledCondition',
-                    $e->getMessage(),
-                    LogRepository::ERROR
-                );
-                throw new RouteException(
-                    'woocommerce_rest_checkout_process_payment_error',
-                    __('Error:', POWER_BOARD_TEXT_DOMAIN).' '.$e->getMessage()
-                );
-            }
-        } else {
-            header("Location: ".$_SERVER["HTTP_REFERER"]);
-        }
+		return [ 
+			'result' => 'success',
+			'redirect' => $this->get_return_url( $order ),
+		];
+	}
 
-        die();
-    }
-    
-    public function woocommerce_before_checkout_form($arg)
-    {
+	/**
+	 * Ajax function
+	 */
+	public function get_vault_token(): void {
+		$wpNonce = ! empty( $_POST['_wpnonce'] ) ? sanitize_text_field( $_POST['_wpnonce'] ) : null;
+		if ( ! wp_verify_nonce( $wpNonce, 'get_vault_token' ) ) {
+			die( 'Security check' );
+		}
 
-    }
+		if ( ! empty( $_SERVER['HTTP_X_REQUESTED_WITH'] ) && strtolower(
+			sanitize_text_field( $_SERVER['HTTP_X_REQUESTED_WITH'] )
+		) == 'xmlhttprequest' ) {
+			$cardProcessor = new CardProcessor( $_POST );
+			$type = ! empty( $_POST['type'] ) ? sanitize_text_field( $_POST['type'] ) : null;
+			try {
+				switch ( $type ) {
+					case 'clear-user-tokens':
+						( new UserTokenRepository() )->deleteAllUserTokens();
+						break;
+					case 'standalone-3ds-token':
+						echo esc_html( $cardProcessor->getStandalone3dsToken() );
+						break;
+					default:
+						echo esc_html( $cardProcessor->getVaultToken() );
+				}
+			} catch (Exception $e) {
+				( new LogRepository() )->createLogRecord(
+					'',
+					'Charges',
+					'UnfulfilledCondition',
+					$e->getMessage(),
+					LogRepository::ERROR
+				);
+				throw new RouteException(
+					'woocommerce_rest_checkout_process_payment_error',
+					__( 'Error:', 'power_board' ) . ' ' . $e->getMessage()
+				);
+			}
+		} else {
+			$referer = ! empty( $_SERVER['HTTP_REFERER'] ) ? sanitize_text_field( $_SERVER['HTTP_REFERER'] ) : '/';
+			header( 'Location: ' . $referer );
+		}
+
+		die();
+	}
+
+	public function woocommerce_before_checkout_form( $arg ) {
+	}
 }

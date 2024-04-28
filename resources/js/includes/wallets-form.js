@@ -62,7 +62,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
                 items: cart.getCartData().items
             }
 
-            axios.post('/wp-json/power_board/v1/wallets/charge', billingData).then((response) => {
+            axios.post('/wp-json/power-board/v1/wallets/charge', billingData).then((response) => {
                 localState.initData = response.data
                 setTimeout(() => {
                     initButton(id, '#' + buttonId, localState.initData, settings.isSandbox)
@@ -102,7 +102,8 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
                         type: emitResponse.responseTypes.SUCCESS, meta: {
                             paymentMethodData: {
                                 payment_response: document.getElementById('paymentSourceWalletsToken').value,
-                                wallets: JSON.stringify(settings.wallets)
+                                wallets: JSON.stringify(settings.wallets),
+                                _wpnonce: settings._wpnonce
                             }
                         },
                     };
@@ -146,7 +147,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
                 {class: 'logo-comm-bank'},
                 createElement(
                     "img",
-                    {src: '/wp-content/plugins/power_board/assets/images/logo.png'}
+                    {src: '/wp-content/plugins/power-board/assets/images/commBank_logo.png'}
                 ),
             ),
             paymentWasSuccessElement,

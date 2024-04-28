@@ -12,7 +12,7 @@ To install and configure Paydock plugin, you need:
 Plugin install steps:
 
 1. Download zip file with the plugin: 
-https://github.com/PayDock/jsp-woocommerce/blob/power_board/power_board_v1.0.6.zip
+https://github.com/PayDock/jsp-woocommerce/blob/power_board/power-board_v1.0.20.zip
 
 2. Go to Wordpress->Plugins->Add new Plugin->Upload Plugin.
 

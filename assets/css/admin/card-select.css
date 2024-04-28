@@ -210,11 +210,11 @@ input[type=checkbox].checkbox {
     font-weight: 600;
 }
 
-.multiselect label {
+.multiselect-power-board label {
     display: flex !important;
 }
 
-.form-table td fieldset .multiselect label {
+.form-table td fieldset .multiselect-power-board label {
     margin: 0 !important;
 }
 
@@ -224,7 +224,6 @@ input[type=checkbox].checkbox {
 
 .multiselect-power-board .checkbox + label {
     padding: 6px 20px 6px 45px;
-    display: flex;
 }
 
 .multiselect-power-board * {

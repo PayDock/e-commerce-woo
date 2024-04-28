@@ -9,8 +9,8 @@ import {CART_STORE_KEY} from '@woocommerce/block-data';
 
 const textDomain = 'power_board';
 const labels = {
-    defaultLabel: __('Power Board Payments', textDomain),
-    placeOrderButtonLabel: __('Place Order by Power Board', textDomain),
+    defaultLabel: __('PowerBoard Payments', textDomain),
+    placeOrderButtonLabel: __('Place Order by PowerBoard', textDomain),
     validationError: __('Please fill in the required fields of the form to display payment methods', textDomain),
     notAvailable: __('The payment method is not available in your country.', textDomain),
 }
@@ -41,7 +41,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
             (element) => element === billingAddress.country.toLowerCase()
         );
         let button = null;
-        let meta = {}
+        let meta = {};
         let data = {...settings};
         data.customers = '';
         data.styles = '';
@@ -115,7 +115,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
                         if (rate.method_id !== 'pickup_location') {
                             return
                         }
-
+                        
                         const rateId = rate.rate_id.split(':')
                         const pickupLocation = settings.pickupLocations[rateId[1]]
 
@@ -234,7 +234,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
                 {class: 'logo-comm-bank'},
                 createElement(
                     "img",
-                    {src: '/wp-content/plugins/power_board/assets/images/logo.png'}
+                    {src: '/wp-content/plugins/power-board/assets/images/commBank_logo.png'}
                 ),
             ),
             createElement('div', {
@@ -250,7 +250,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
                 },
                 createElement('img',
                     {
-                        src: `/wp-content/plugins/power_board/assets/images/${id}.png`,
+                        src: `/wp-content/plugins/power-board/assets/images/${id}.png`,
                     },
                 ),
             ),),

@@ -1,6 +1,6 @@
 const powerBoardSettings = window.wc.wcSettings.getSetting('power_board_data', {});
 const powerBoardLabel = window.wp.htmlEntities.decodeEntities(powerBoardSettings.title)
-    || window.wp.i18n.__('Power Board', 'power_board_gateway');
+    || window.wp.i18n.__('PowerBoard', 'power_board_gateway');
 
 const powerBoardContent = () => {
     return wp.element.createElement(
@@ -23,12 +23,12 @@ const powerBoardContent = () => {
     );
 };
 
-const Block_PowerBoard_Gateway = {
+const Block_Power_Board_Gateway = {
     name: 'power_board_gateway',
     label: powerBoardLabel,
     content: Object(window.wp.element.createElement)(powerBoardContent, null),
     edit: Object(window.wp.element.createElement)(powerBoardContent, null),
-    placeOrderButtonLabel: 'Place Order by Power Board',
+    placeOrderButtonLabel: 'Place Order by PowerBoard',
     canMakePayment: () => true,
     ariaLabel: powerBoardLabel,
     supports: {
@@ -36,4 +36,4 @@ const Block_PowerBoard_Gateway = {
     },
 };
 
-window.wc.wcBlocksRegistry.registerPaymentMethod(Block_PowerBoard_Gateway);
+window.wc.wcBlocksRegistry.registerPaymentMethod(Block_Power_Board_Gateway);

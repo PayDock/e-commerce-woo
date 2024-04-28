@@ -4,25 +4,22 @@ namespace PowerBoard\API;
 
 use PowerBoard\Abstracts\AbstractApiService;
 
-class CustomerService extends AbstractApiService
-{
-    const ENDPOINT = 'customers';
+class CustomerService extends AbstractApiService {
+	const ENDPOINT = 'customers';
 
-    protected array $allowedAction = [
-        'create' => self::METHOD_POST,
-    ];
+	protected $allowedAction = [ 
+		'create' => self::METHOD_POST,
+	];
 
-    public function create(array $params): CustomerService
-    {
-        $this->parameters = $params;
+	public function create( array $params ): CustomerService {
+		$this->parameters = $params;
 
-        $this->setAction('create');
+		$this->setAction( 'create' );
 
-        return $this;
-    }
+		return $this;
+	}
 
-    protected function buildEndpoint(): ?string
-    {
-        return self::ENDPOINT;
-    }
+	protected function buildEndpoint(): ?string {
+		return self::ENDPOINT;
+	}
 }

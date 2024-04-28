@@ -2,7 +2,7 @@ import walletsForm from "../includes/wallets-form";
 
 walletsForm(
     'afterpay',
-    'Power Board Afterpay',
+    'PowerBoard Afterpay',
     'powerBoardWalletAfterpayButton',
     [
         'first_name',
@@ -15,3 +15,4 @@ walletsForm(
         'postcode',
     ]
 );
+
