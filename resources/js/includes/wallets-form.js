@@ -102,7 +102,8 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
                         type: emitResponse.responseTypes.SUCCESS, meta: {
                             paymentMethodData: {
                                 payment_response: document.getElementById('paymentSourceWalletsToken').value,
-                                wallets: JSON.stringify(settings.wallets)
+                                wallets: JSON.stringify(settings.wallets),
+                                _wpnonce: settings._wpnonce
                             }
                         },
                     };

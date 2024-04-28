@@ -6,18 +6,12 @@ use Paydock\Abstracts\AbstractWalletBlock;
 use Paydock\Enums\WalletPaymentMethods;
 use Paydock\Services\Checkout\AfterpayWalletService;
 
-final class AfterpayWalletBlock extends AbstractWalletBlock
-{
-    public function getType(): WalletPaymentMethods
-    {
-        return WalletPaymentMethods::AFTERPAY();
-    }
+final class AfterpayWalletBlock extends AbstractWalletBlock {
+	public function getType(): WalletPaymentMethods {
+		return WalletPaymentMethods::AFTERPAY();
+	}
 
-    /**
-     * @inheritDoc
-     */
-    public function initialize()
-    {
-        $this->gateway = new AfterpayWalletService();
-    }
+	public function initialize() {
+		$this->gateway = new AfterpayWalletService();
+	}
 }

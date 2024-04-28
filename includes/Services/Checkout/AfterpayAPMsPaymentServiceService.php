@@ -5,11 +5,9 @@ namespace Paydock\Services\Checkout;
 use Paydock\Abstracts\AbstractAPMsPaymentService;
 use Paydock\Enums\OtherPaymentMethods;
 
-class AfterpayAPMsPaymentServiceService extends AbstractAPMsPaymentService
-{
+class AfterpayAPMsPaymentServiceService extends AbstractAPMsPaymentService {
 
-    protected function getAPMsType(): OtherPaymentMethods
-    {
-        return OtherPaymentMethods::AFTERPAY();
-    }
+	protected function getAPMsType(): OtherPaymentMethods {
+		return OtherPaymentMethods::AFTERPAY();
+	}
 }

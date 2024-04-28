@@ -2,7 +2,6 @@
 
 namespace Paydock\Contracts;
 
-interface Hook
-{
-    public static function handle(): void;
+interface Hook {
+	public static function handle(): void;
 }

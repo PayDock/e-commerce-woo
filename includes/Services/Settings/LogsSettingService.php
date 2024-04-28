@@ -6,30 +6,26 @@ use Paydock\Abstracts\AbstractSettingService;
 use Paydock\Enums\SettingsTabs;
 use Paydock\Repositories\LogRepository;
 
-class LogsSettingService extends AbstractSettingService
-{
-    public function generate_settings_html($form_fields = [], $echo = true): ?string
-    {
-        $page = $_GET['page_number'] ?? 1;
-        $perPage = $_GET['per_page'] ?? 50;
-        $order = $_GET['order'] ?? 'desc';
-        $orderBy = $_GET['orderBy'] ?? 'created_at';
+class LogsSettingService extends AbstractSettingService {
+	public function generate_settings_html( $form_fields = [], $echo = true ): ?string {
+		$page = ! empty( $_GET['page_number'] ) ? sanitize_text_field( $_GET['page_number'] ) : 1;
+		$perPage = ! empty( $_GET['per_page'] ) ? sanitize_text_field( $_GET['per_page'] ) : 50;
+		$order = ! empty( $_GET['order'] ) ? sanitize_text_field( $_GET['order'] ) : 'desc';
+		$orderBy = ! empty( $_GET['orderBy'] ) ? sanitize_text_field( $_GET['orderBy'] ) : 'created_at';
 
-        $tabs = $this->getTabs();
-        $records = (new LogRepository())->getLogs($page, $perPage, $orderBy, $order);
-        $html = $this->templateService->getAdminHtml('admin', compact('tabs', 'records'));
+		$tabs = $this->getTabs();
+		$records = ( new LogRepository() )->getLogs( $page, $perPage, $orderBy, $order );
 
-        if ($echo) {
-            echo $html;
-        } else {
-            return $html;
-        }
+		if ( $echo ) {
+			$this->templateService->includeAdminHtml( 'admin', compact( 'tabs', 'records' ) );
+		} else {
+			return $this->templateService->getAdminHtml( 'admin', compact( 'tabs', 'records' ) );
+		}
 
-        return null;
-    }
+		return null;
+	}
 
-    protected function getId(): string
-    {
-        return SettingsTabs::LOG()->value;
-    }
+	protected function getId(): string {
+		return SettingsTabs::LOG()->value;
+	}
 }

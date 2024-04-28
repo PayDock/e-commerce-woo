@@ -4,25 +4,22 @@ namespace Paydock\API;
 
 use Paydock\Abstracts\AbstractApiService;
 
-class VaultService extends AbstractApiService
-{
-    const ENDPOINT = 'vault/payment_sources';
+class VaultService extends AbstractApiService {
+	const ENDPOINT = 'vault/payment_sources';
 
-    protected array $allowedAction = [
-        'create' => self::METHOD_POST,
-    ];
+	protected $allowedAction = [ 
+		'create' => self::METHOD_POST,
+	];
 
-    public function create(array $params): self
-    {
-        $this->parameters = $params;
+	public function create( array $params ): self {
+		$this->parameters = $params;
 
-        $this->setAction('create');
+		$this->setAction( 'create' );
 
-        return $this;
-    }
+		return $this;
+	}
 
-    protected function buildEndpoint(): ?string
-    {
-        return self::ENDPOINT;
-    }
+	protected function buildEndpoint(): ?string {
+		return self::ENDPOINT;
+	}
 }

@@ -2,7 +2,6 @@
 
 namespace Paydock\Controllers\Admin;
 
-class SettingsController
-{
+class SettingsController {
 
 }

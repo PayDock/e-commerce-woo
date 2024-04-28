@@ -9,28 +9,26 @@ use Paydock\Repositories\LogRepository;
 use Paydock\Services\ActionsService;
 use Paydock\Services\FiltersService;
 
-if (!class_exists('\Paydock\PaydockPlugin')) {
-    final class PaydockPlugin extends AbstractSingleton
-    {
-        public const REPOSITORIES = [
-            LogRepository::class,
-        ];
+if ( ! class_exists( '\Paydock\PaydockPlugin' ) ) {
+	final class PaydockPlugin extends AbstractSingleton {
+		public const REPOSITORIES = [ 
+			LogRepository::class,
+		];
 
-        public const PLUGIN_PREFIX = 'pay_dock';
+		public const PLUGIN_PREFIX = 'pay_dock';
 
-        public const VERSION = '1.0.0';
+		public const VERSION = '1.0.0';
 
-        protected static $instance = null;
+		protected static $instance = null;
 
-        protected $paymentService = null;
+		protected $paymentService = null;
 
-        protected function __construct()
-        {
-            register_activation_hook(PAY_DOCK_PLUGIN_FILE, [ActivationHook::class, 'handle']);
-            register_deactivation_hook(PAY_DOCK_PLUGIN_FILE, [DeactivationHook::class, 'handle']);
+		protected function __construct() {
+			register_activation_hook( PAY_DOCK_PLUGIN_FILE, [ ActivationHook::class, 'handle' ] );
+			register_deactivation_hook( PAY_DOCK_PLUGIN_FILE, [ DeactivationHook::class, 'handle' ] );
 
-            ActionsService::getInstance();
-            FiltersService::getInstance();
-        }
-    }
+			ActionsService::getInstance();
+			FiltersService::getInstance();
+		}
+	}
 }

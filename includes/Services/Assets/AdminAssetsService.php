@@ -4,81 +4,72 @@ namespace Paydock\Services\Assets;
 
 use Paydock\PaydockPlugin;
 
-class AdminAssetsService
-{
-    private const SCRIPTS = [
-        'tabs',
-        'connections',
-        'card-select',
-        'deactivation-confirmation',
-    ];
-    private const STYLES = [
-        'card-select',
-    ];
+class AdminAssetsService {
+	private const SCRIPTS = [ 
+		'tabs',
+		'connections',
+		'card-select',
+		'deactivation-confirmation',
+	];
+	private const STYLES = [ 
+		'card-select',
+	];
 
-    private const PREFIX = 'admin';
+	private const PREFIX = 'admin';
 
-    private const SCRIPT_PREFIX = 'script';
-    private const STYLE_PREFIX = 'style';
+	private const SCRIPT_PREFIX = 'script';
+	private const STYLE_PREFIX = 'style';
 
-    private const URL_SCRIPT_PREFIX = 'assets/js/admin/';
-    private const URL_SCRIPT_POSTFIX = '.js?27012024';
+	private const URL_SCRIPT_PREFIX = 'assets/js/admin/';
+	private const URL_SCRIPT_POSTFIX = '.js?27012024';
 
-    private const URL_STYLE_PREFIX = 'assets/css/admin/';
-    private const URL_STYLE_POSTFIX = '.css';
+	private const URL_STYLE_PREFIX = 'assets/css/admin/';
+	private const URL_STYLE_POSTFIX = '.css';
 
-    public function __construct()
-    {
-        $this->registerScripts();
-        $this->loadScripts();
-        $this->addStyles();
-    }
+	public function __construct() {
+		$this->registerScripts();
+		$this->loadScripts();
+		$this->addStyles();
+	}
 
-    public function registerScripts(): void
-    {
-        foreach (self::SCRIPTS as $script) {
-            wp_register_script(
-                $this->getScriptName($script),
-                plugins_url($this->getScriptPath($script), PAY_DOCK_PLUGIN_FILE)
-            );
-        }
-    }
+	public function registerScripts(): void {
+		foreach ( self::SCRIPTS as $script ) {
+			wp_register_script(
+				$this->getScriptName( $script ),
+				plugins_url( $this->getScriptPath( $script ), PAY_DOCK_PLUGIN_FILE )
+			);
+		}
+	}
 
-    private function getScriptName(string $script): string
-    {
-        return implode('_', [PaydockPlugin::PLUGIN_PREFIX, self::PREFIX, self::SCRIPT_PREFIX, $script]);
-    }
+	private function getScriptName( string $script ): string {
+		return implode( '_', [ PaydockPlugin::PLUGIN_PREFIX, self::PREFIX, self::SCRIPT_PREFIX, $script ] );
+	}
 
-    private function getScriptPath(string $script): string
-    {
-        return self::URL_SCRIPT_PREFIX.$script.self::URL_SCRIPT_POSTFIX;
-    }
+	private function getScriptPath( string $script ): string {
+		return self::URL_SCRIPT_PREFIX . $script . self::URL_SCRIPT_POSTFIX;
+	}
 
-    public function loadScripts(): void
-    {
-        foreach (self::SCRIPTS as $script) {
-            wp_enqueue_script($this->getScriptName($script));
-        }
-    }
+	public function loadScripts(): void {
+		foreach ( self::SCRIPTS as $script ) {
+			wp_enqueue_script( $this->getScriptName( $script ) );
+		}
+	}
 
-    private function addStyles(): void
-    {
-        foreach (self::STYLES as $style) {
-            wp_enqueue_style(
-                $this->getStyleName($style),
-                plugins_url($this->getStylePath($style), PAY_DOCK_PLUGIN_FILE)
-            );
-        }
-    }
+	private function addStyles(): void {
+		foreach ( self::STYLES as $style ) {
+			wp_enqueue_style(
+				$this->getStyleName( $style ),
+				plugins_url( $this->getStylePath( $style ), PAY_DOCK_PLUGIN_FILE )
+			);
+		}
+	}
 
-    private function getStyleName(string $script): string
-    {
-        return implode('_', [PaydockPlugin::PLUGIN_PREFIX, self::PREFIX, self::STYLE_PREFIX, $script]);
-    }
+	private function getStyleName( string $script ): string {
+		return implode( '_', [ PaydockPlugin::PLUGIN_PREFIX, self::PREFIX, self::STYLE_PREFIX, $script ] );
+	}
 
-    private function getStylePath(string $script): string
-    {
-        return self::URL_STYLE_PREFIX.$script.self::URL_STYLE_POSTFIX;
-    }
+	private function getStylePath( string $script ): string {
+		return self::URL_STYLE_PREFIX . $script . self::URL_STYLE_POSTFIX;
+	}
 
 }

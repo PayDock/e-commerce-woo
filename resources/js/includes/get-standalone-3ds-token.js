@@ -1,9 +1,10 @@
 import {getSetting} from '@woocommerce/settings';
 
 export default async () => {
-    const data = getSetting('paydock_data', {});
+    const data = {...getSetting('paydock_data', {})};
     data.action = 'get_vault_token';
     data.type = 'standalone-3ds-token';
+    data._wpnonce = PaydockAjax.wpnonce;
 
     if (document.querySelector('#shipping-first_name') !== null) {
         data.first_name = document.querySelector('#shipping-first_name').value

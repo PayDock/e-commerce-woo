@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright (c) Paydock, Inc. and its affiliates. All Rights Reserved
  *
@@ -10,7 +11,7 @@
  * Description: Paydock simplify how you manage your payments. Reduce costs, technical headaches & streamline compliance using Paydock's payment orchestration.
  * Author: Paydock
  * Author URI: https://www.paydock.com/
- * Version: 1.0.6
+ * Version: 1.0.20
  * Requires at least: 6.4.2
  * Text Domain: paydock-for-woo
  * Tested up to: 6.4.2
@@ -18,30 +19,30 @@
  * WC tested up to: 8.5
  */
 
-if (!defined('ABSPATH')) {
-    exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
 }
 
-if (!defined('PAY_DOCK_PLUGIN_FILE')) {
-    define('PAY_DOCK_PLUGIN_FILE', __FILE__);
+if ( ! defined( 'PAY_DOCK_PLUGIN_FILE' ) ) {
+	define( 'PAY_DOCK_PLUGIN_FILE', __FILE__ );
 }
 
-if (!defined('PAY_DOCK_PLUGIN_PATH')) {
-    define('PAY_DOCK_PLUGIN_PATH', dirname(__FILE__));
+if ( ! defined( 'PAY_DOCK_PLUGIN_PATH' ) ) {
+	define( 'PAY_DOCK_PLUGIN_PATH', dirname( __FILE__ ) );
 }
 
-if (!defined('PAY_DOCK_PLUGIN_URL')) {
-    define('PAY_DOCK_PLUGIN_URL', plugin_dir_url(__FILE__));
+if ( ! defined( 'PAY_DOCK_PLUGIN_URL' ) ) {
+	define( 'PAY_DOCK_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 }
 
-if (!defined('PAY_DOCK_PLUGIN_VERSION')) {
-    define('PAY_DOCK_PLUGIN_VERSION', '1.0.6');
+if ( ! defined( 'PAY_DOCK_PLUGIN_VERSION' ) ) {
+	define( 'PAY_DOCK_PLUGIN_VERSION', '1.0.20' );
 }
 
-if (!defined('PAY_DOCK_TEXT_DOMAIN')) {
-    define('PAY_DOCK_TEXT_DOMAIN', 'pay_dock');
+if ( ! defined( 'PAY_DOCK_TEXT_DOMAIN' ) ) {
+	define( 'PAY_DOCK_TEXT_DOMAIN', 'pay_dock' );
 }
 
-require_once "vendor/autoload.php";
+require_once 'vendor/autoload.php';
 
 Paydock\PaydockPlugin::getInstance();

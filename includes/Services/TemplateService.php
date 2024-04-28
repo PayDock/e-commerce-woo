@@ -2,46 +2,52 @@
 
 namespace Paydock\Services;
 
-class TemplateService
-{
-    private const TEMPLATE_DIR = 'templates';
-    private const ADMIN_TEMPLATE_DIR = 'admin';
-    private const TEMPLATE_END = '.php';
-    protected $currentSection = '';
-    private $settingService = null;
+class TemplateService {
+	private const TEMPLATE_DIR = 'templates';
+	private const ADMIN_TEMPLATE_DIR = 'admin';
+	private const TEMPLATE_END = '.php';
+	protected $currentSection = '';
+	private $settingService = null;
 
-    private string $templateAdminDir = '';
+	private $templateAdminDir = '';
 
-    public function __construct($service = null)
-    {
-        $this->settingService = $service;
-        if (isset($this->settingService->currentSection)) {
-            $this->currentSection = $this->settingService->currentSection ?? $_GET['section'];
-        }
-        $this->templateAdminDir = implode(DIRECTORY_SEPARATOR, [self::TEMPLATE_DIR, self::ADMIN_TEMPLATE_DIR]);
-    }
+	public function __construct( $service = null ) {
+		$this->settingService = $service;
+		if ( isset( $this->settingService->currentSection ) ) {
+			$section = !empty($_GET['section']) ? sanitize_text_field($_GET['section']) : null;
+			$this->currentSection = $this->settingService->currentSection ?? $section;
+		}
+		$this->templateAdminDir = implode( DIRECTORY_SEPARATOR, [ self::TEMPLATE_DIR, self::ADMIN_TEMPLATE_DIR ] );
+	}
 
-    public function getAdminHtml(string $template, array $data = []): string
-    {
-        ob_start();
+	public function includeAdminHtml( string $template, array $data = [] ): void {
+		$data['templateService'] = $this;
 
-        if (!empty($data)) {
-            extract($data);
-        }
+		if ( ! empty( $data ) ) {
+			extract( $data );
+		}
 
-        include $this->getAdminPath($template);
+		$path = $this->getAdminPath( $template );
 
-        return ob_get_clean();
-    }
+		if ( file_exists( $path ) ) {
+			include $path; // nosemgrep: audit.php.lang.security.file.inclusion-arg  --  the following require is safe because we are checking if the file exists and it is not a user input.
+		}
+	}
 
-    private function getAdminPath(string $template): string
-    {
+	public function getAdminHtml( string $template, array $data = [] ): string {
+		ob_start();
 
-        return $this->getTemplatePath($this->templateAdminDir.DIRECTORY_SEPARATOR.$template);
-    }
+		$this->includeAdminHtml( $template, $data );
 
-    private function getTemplatePath(string $template): string
-    {
-        return plugin_dir_path(PAY_DOCK_PLUGIN_FILE).$template.self::TEMPLATE_END;
-    }
+		return ob_get_clean();
+	}
+
+	private function getAdminPath( string $template ): string {
+
+		return $this->getTemplatePath( $this->templateAdminDir . DIRECTORY_SEPARATOR . $template );
+	}
+
+	private function getTemplatePath( string $template ): string {
+		return plugin_dir_path( PAY_DOCK_PLUGIN_FILE ) . $template . self::TEMPLATE_END;
+	}
 }
