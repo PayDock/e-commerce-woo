@@ -12,8 +12,8 @@ To install and configure Paydock plugin, you need:
 
 Plugin install steps:
 
-1. Download zip file with the plugin: 
-https://github.com/PayDock/jsp-woocommerce/blob/main/paydock_v1.0.20.zip
+1. Download zip file with the plugin:  
+https://github.com/PayDock/e-commerce-woo/blob/main/paydock_v1.0.20.zip
 
 2. Go to Wordpress->Plugins->Add new Plugin->Upload Plugin.
 
@@ -28,7 +28,7 @@ https://github.com/PayDock/jsp-woocommerce/blob/main/paydock_v1.0.20.zip
 To download the latest version of our WooCommerce plugin, you can manually trigger a build and download the generated artifact directly from GitHub:
 
 Step 1: Trigger the Build  
-a. Visit the Actions tab in our GitHub repository (https://github.com/PayDock/jsp-woocommerce).  
+a. Visit the Actions tab in our GitHub repository (https://github.com/PayDock/e-commerce-woo).  
 b. Under Workflows, find the workflow named Build and upload Paydock plugin.  
 c. Click on Run workflow.  
 d. Select the branch and click the green Run workflow button.  
