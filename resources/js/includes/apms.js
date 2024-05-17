@@ -229,14 +229,6 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
                 null,
                 decodeEntities(settings.description || '')
             ),
-            createElement(
-                "div",
-                {class: 'logo-comm-bank'},
-                createElement(
-                    "img",
-                    {src: '/wp-content/plugins/paydock/assets/images/logo.png'}
-                ),
-            ),
             createElement('div', {
                 class: 'apms-button-wrapper',
             }, createElement('button',
@@ -287,7 +279,20 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
 
     const PaydokApms = {
         name: paymentName,
-        label: <Label/>,
+        label: createElement(() =>
+            createElement(
+                "div",
+                {
+                    className: 'paydock-payment-method-label'
+                },
+                createElement("img", {
+                    src: `/wp-content/plugins/paydock/assets/images/icons/${id}.png`,
+                    alt: label,
+                    className: `paydock-payment-method-label-icon ${id}`
+                }),
+                "  " + label,
+            )
+        ),
         content: <Content/>,
         edit: <Content/>,
         placeOrderButtonLabel: labels.placeOrderButtonLabel,

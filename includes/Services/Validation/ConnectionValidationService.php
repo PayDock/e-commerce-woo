@@ -9,6 +9,7 @@ use Paydock\Enums\BankAccountSettings;
 use Paydock\Enums\CardSettings;
 use Paydock\Enums\CredentialSettings;
 use Paydock\Enums\CredentialsTypes;
+use Paydock\Enums\DSTypes;
 use Paydock\Enums\FraudTypes;
 use Paydock\Enums\NotificationEvents;
 use Paydock\Enums\OtherPaymentMethods;
@@ -78,7 +79,7 @@ class ConnectionValidationService {
 						'value' => $this->data[ $key ],
 					] );
 				}
-			} catch (Exception $e) {
+			} catch ( Exception $e ) {
 				$this->service->add_error( $e->getMessage() );
 			}
 		}
@@ -317,6 +318,8 @@ class ConnectionValidationService {
 				}
 
 			} else {
+				$a = $this->data[ $gatewayIdKey ];
+				$b = array_map(fn($item)=> $item['_id'],$this->getawayIds['resource']['data']);
 				$this->errors[] = 'Incorrect Gateway ID for the card: ' . $this->data[ $gatewayIdKey ];
 			}
 
@@ -330,7 +333,7 @@ class ConnectionValidationService {
 
 			if (
 				$isValidGateway
-				&& ( FraudTypes::DISABLE()->name !== $this->data[ $_3DSEnableServiceKey ] )
+				&& ( DSTypes::STANDALONE()->name === $this->data[ $_3DSEnableServiceKey ] )
 				&& ! $this->validateId( $this->data[ $_3DSGatewayIdKey ] )
 			) {
 				$this->errors[] = 'Incorrect 3DS Service ID: ' . $this->data[ $_3DSGatewayIdKey ];
@@ -405,6 +408,10 @@ class ConnectionValidationService {
 
 	private function validateWallets(): void {
 		foreach ( WalletPaymentMethods::cases() as $method ) {
+			if ( WalletPaymentMethods::AFTERPAY()->name === $method->name ) {
+				continue;
+			}
+
 			$result = true;
 			$enabledKey = SettingsService::getInstance()
 				->getOptionName( $this->service->id, [ 

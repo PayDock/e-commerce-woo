@@ -25,7 +25,8 @@ class OrderService {
 		}
 		if ( in_array( $orderStatus, [ 
 			'paydock-authorize',
-			'paydock-paid'
+			'paydock-paid',
+			'paydock-p-paid'
 		] ) ) {
 			$this->templateService->includeAdminHtml( 'paydock-capture-block', compact( 'order', 'order' ) );
 		}
@@ -46,10 +47,20 @@ class OrderService {
 				'paydock-failed',
 				'paydock-pending',
 			],
-			'paydock-refunded' => [ 'paydock-paid', 'cancelled', 'paydock-failed', 'refunded' ],
-			'paydock-p-refund' => [ 'paydock-paid', 'paydock-refunded', 'refunded', 'cancelled', 'paydock-failed' ],
+			'paydock-p-paid' => [
+				'paydock-refunded',
+				'paydock-p-refund',
+				'cancelled',
+				'paydock-cancelled',
+				'refunded',
+				'paydock-failed',
+				'paydock-pending',
+			],
+			'paydock-refunded' => [ 'paydock-paid', 'paydock-p-paid','cancelled', 'paydock-failed', 'refunded' ],
+			'paydock-p-refund' => [ 'paydock-paid', 'paydock-p-paid','paydock-refunded', 'refunded', 'cancelled', 'paydock-failed' ],
 			'paydock-authorize' => [ 
 				'paydock-paid',
+				'paydock-p-paid',
 				'paydock-cancelled',
 				'paydock-failed',
 				'cancelled',
@@ -58,6 +69,7 @@ class OrderService {
 			'paydock-cancelled' => [ 'paydock-failed', 'cancelled' ],
 			'paydock-requested' => [ 
 				'paydock-paid',
+				'paydock-p-paid',
 				'paydock-failed',
 				'cancelled',
 				'paydock-pending',
@@ -77,6 +89,26 @@ class OrderService {
 				update_option( 'paydock_status_change_error', $error );
 				unset( $GLOBALS['is_updating_paydock_order_status'] );
 				throw new \Exception( $error );
+			}
+		}
+	}
+
+	public function informationAboutPartialCaptured( $orderId ) {
+		$capturedAmount = get_post_meta( $orderId, 'capture_amount' );
+		$order = wc_get_order( $orderId );
+		if ( $capturedAmount && is_array( $capturedAmount ) && in_array( $order->get_status(), [
+				'paydock-failed',
+				'paydock-pending',
+				'paydock-paid',
+				'paydock-authorize',
+				'paydock-cancelled',
+				'paydock-p-refund',
+				'paydock-requested',
+				'paydock-p-paid',
+			] ) ) {
+			$capturedAmount = reset( $capturedAmount );
+			if ( $order->get_total() > $capturedAmount ) {
+				$this->templateService->includeAdminHtml( 'information-about-partial-captured', compact( 'order', 'capturedAmount' ) );
 			}
 		}
 	}

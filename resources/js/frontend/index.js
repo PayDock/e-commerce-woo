@@ -2,7 +2,7 @@ import {__} from '@wordpress/i18n';
 import {registerPaymentMethod} from '@woocommerce/blocks-registry';
 import {decodeEntities} from '@wordpress/html-entities';
 import {getSetting} from '@woocommerce/settings';
-import {useEffect} from 'react';
+import {createElement, useEffect} from 'react';
 import {
     checkboxSavedCardsComponent,
     inBuild3Ds,
@@ -18,7 +18,6 @@ const labels = {
     defaultLabel: __('Paydock Payments', textDomain),
     saveCardLabel: __('Save payment details', textDomain),
     selectTokenLabel: __('Saved payment details', textDomain),
-    placeOrderButtonLabel: __('Place Order by Paydock', textDomain),
     fillDataError: __('Please fill in the card data.', textDomain),
     requiredDataError: __('Please fill in the required fields of the form to display payment methods', textDomain),
     additionalDataRejected: __('Payment has been rejected by Paydock. Please try again in a few minutes', textDomain)
@@ -192,14 +191,6 @@ const Content = (props) => {
             null,
             decodeEntities(settings.description || '')
         ),
-        createElement(
-            "div",
-            {class: 'logo-comm-bank'},
-            createElement(
-                "img",
-                {src: '/wp-content/plugins/paydock/assets/images/logo.png'}
-            ),
-        ),
         selectSavedCardsComponent(labels.selectTokenLabel),
         createElement(
             "div",
@@ -227,10 +218,27 @@ const Label = (props) => {
 
 const Paydok = {
     name: "paydock_gateway",
-    label: <Label/>,
+    label: createElement(() =>
+        createElement(
+            "div",
+            {
+                className: 'paydock-payment-method-label'
+            },
+            createElement("img", {
+                src: '/wp-content/plugins/paydock/assets/images/icons/card.png',
+                alt: label,
+                className: 'paydock-payment-method-label-icon card'
+            }),
+            "  " + label,
+            createElement("img", {
+                src: '/wp-content/plugins/paydock/assets/images/logo.png',
+                alt: label,
+                className: 'paydock-payment-method-label-logo'
+            })
+        )
+    ),
     content: <Content/>,
     edit: <Content/>,
-    placeOrderButtonLabel: labels.placeOrderButtonLabel,
     canMakePayment: () => true,
     ariaLabel: label,
     supports: {

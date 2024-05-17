@@ -20,6 +20,14 @@ export default (id, buttonId, data, isSandbox) => {
         };
     }
 
+    if ('#paydockWalletAfterpayButton' === buttonId) {
+        jQuery('#paydockWalletAfterpayButton').each((index, element) => element.addEventListener("click", (event) => {
+            data.payment = id.replace('-', '_')
+            paymentSourceElement.val(JSON.stringify(data))
+            orderButton.click();
+        }, true))
+    }
+
     let button = new window.paydock.WalletButtons(buttonId, data.resource.data.token, config)
 
     if (isSandbox) {
@@ -27,7 +35,7 @@ export default (id, buttonId, data, isSandbox) => {
     }
 
     button.onPaymentSuccessful((result) => {
-        result.payment = id.replace('-','_')
+        result.payment = id.replace('-', '_')
         paymentSourceElement.val(JSON.stringify(result))
         paymentCompleted.show();
         jQuery(buttonId).hide();
@@ -40,7 +48,7 @@ export default (id, buttonId, data, isSandbox) => {
     });
 
     button.onPaymentInReview((result) => {
-        result.payment = id.replace('-','_')
+        result.payment = id.replace('-', '_')
         paymentSourceElement.val(JSON.stringify(result))
         paymentCompleted.show();
         jQuery(buttonId).hide();

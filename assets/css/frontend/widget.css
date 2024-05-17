@@ -156,3 +156,46 @@
     height: 55px !important;
     box-sizing: border-box;
 }
+
+.paydock-payment-method-label-logo {
+    margin: -6px 1em -6px auto;
+    height: 36px !important;
+    max-height: 36px !important;
+}
+
+.paydock-payment-method-label {
+    display: flex;
+    align-content: center;
+    box-sizing: content-box;
+    width: 100%;
+}
+.paydock-payment-method-label-icon {
+    margin-right: 5px;
+}
+.paydock-payment-method-label-icon.pay-pal{
+    height: 20px !important;
+    max-height: 20px !important;
+    margin-top: 2px;
+}
+.paydock-payment-method-label-icon.zip{
+    height: 20px !important;
+    max-height: 20px !important;
+    margin: -1px 13px;
+}
+.paydock-payment-method-label-icon.afterpay{
+    margin: auto 6px;
+}
+.paydock-payment-method-label-icon.google-pay{
+    margin: -1px 17px;
+}
+.paydock-payment-method-label-icon.apple-pay{
+    margin: -1px 11px;
+}
+.paydock-payment-method-label-icon.card{
+    margin: -1px 25px;
+}
+.paydock-payment-method-label-logo {
+    margin: -6px 1em -6px auto;
+    height: 36px !important;
+    max-height: 36px !important;
+}

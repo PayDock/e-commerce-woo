@@ -5,6 +5,7 @@ namespace Paydock\Services\Checkout;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Exception;
 use Paydock\Abstracts\AbstractPaymentService;
+use Paydock\Enums\OrderListColumns;
 use Paydock\Exceptions\LoggedException;
 use Paydock\Repositories\LogRepository;
 use Paydock\Services\ProcessPayment\BankAccountProcessor;
@@ -83,6 +84,11 @@ class BankAccountPaymentService extends AbstractPaymentService {
 		$order->payment_complete();
 		$order->save();
 		update_post_meta( $order->get_id(), 'paydock_charge_id', $chargeId );
+		add_post_meta(
+			$order->get_id(),
+			OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(),
+			'Bank'
+		);
 		WC()->cart->empty_cart();
 
 		$loggerRepository->createLogRecord(

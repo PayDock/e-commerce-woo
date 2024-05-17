@@ -201,7 +201,7 @@ class ApmProcessor {
 
 		$location = false;
 		$shippingMethod = reset( $this->order->get_shipping_methods() );
-		if ( 'pickup_location' === $shippingMethod->get_method_id() ) {
+		if ( $shippingMethod && 'pickup_location' === $shippingMethod->get_method_id() ) {
 			$metaDatas = $shippingMethod->get_meta_data();
 			foreach ( $metaDatas as $metaData ) {
 				$metaDataArray = $metaData->get_data();

@@ -25,21 +25,25 @@ class PaymentController {
 				$error = __( 'The order should be have status "paydock-authorize"', 'woocommerce' );
 			}
 		}
+		$orderTotal =  $order->get_total();
+		$amount = ! empty( $_POST['amount'] ) ? wc_format_decimal( $_POST['amount'] ) : $order->get_total();
 		$loggerRepository = new LogRepository();
 		$paydockChargeId = get_post_meta( $orderId, 'paydock_charge_id', true );
 		if ( ! $error ) {
-			$charge = SDKAdapterService::getInstance()->capture( [ 'charge_id' => $paydockChargeId ] );
+			$charge = SDKAdapterService::getInstance()->capture( [ 'charge_id' => $paydockChargeId, 'amount' => $amount ] );
 			if ( ! empty( $charge['resource']['data']['status'] ) && 'complete' == $charge['resource']['data']['status'] ) {
 				$newChargeId = $charge['resource']['data']['_id'];
+				$newStatus = $orderTotal > $amount ? 'wc-paydock-p-paid' : 'wc-paydock-paid';
 				$loggerRepository->createLogRecord(
 					$newChargeId,
 					'Capture',
-					'wc-paydock-paid',
+					$newStatus,
 					'',
 					LogRepository::SUCCESS
 				);
+				update_post_meta( $orderId, 'capture_amount', $amount );
 				update_post_meta( $orderId, 'paydock_charge_id', $newChargeId );
-				$order->set_status( 'wc-paydock-paid' );
+				$order->set_status( $newStatus);
 				$order->payment_complete();
 				$order->save();
 				wp_send_json_success( [ 'message' => __( 'The capture process has been successfully.', 'woocommerce' ) ] );
@@ -124,7 +128,7 @@ class PaymentController {
 		$amount = $args['amount'];
 		$order = wc_get_order( $orderId );
 
-		if ( ! in_array( $order->get_status(), [ 'paydock-paid', 'paydock-p-refund', 'wc-paydock-refunded' ] ) ) {
+		if ( ! in_array( $order->get_status(), [ 'paydock-paid', 'paydock-p-paid', 'paydock-p-refund', 'paydock-refunded' ] ) ) {
 			return;
 		}
 
@@ -136,6 +140,10 @@ class PaymentController {
 			$totalRefunded += $refund->get_amount();
 		}
 		$paydockChargeId = get_post_meta( $orderId, 'paydock_charge_id', true );
+		$captureAmount =  get_post_meta( $orderId, 'capture_amount', true );
+		if( $captureAmount && $totalRefunded > $captureAmount ) {
+			$totalRefunded = $captureAmount ;
+        }
 		$result = SDKAdapterService::getInstance()->refunds( [ 'charge_id' => $paydockChargeId, 'amount' => $amount ] );
 		if ( ! empty( $result['resource']['data']['status'] ) && in_array(
 			$result['resource']['data']['status'],
@@ -253,10 +261,13 @@ class PaymentController {
 		$status = ucfirst( strtolower( $data['status'] ?? 'undefined' ) );
 		$operation = ucfirst( strtolower( $data['type'] ?? 'undefined' ) );
 		$isAuthorization = $data['authorization'] ?? 0;
+		$orderTotal =  $order->get_total();
 
 		switch ( strtoupper( $status ) ) {
 			case ChargeStatuses::COMPLETE()->name:
-				$orderStatus = 'wc-paydock-paid';
+				$captureAmount = wc_format_decimal( $data['transaction']['amount'] );
+				$orderStatus = $orderTotal > $captureAmount ? 'wc-paydock-p-paid' : 'wc-paydock-paid';
+				update_post_meta( $orderId, 'capture_amount', $captureAmount );
 				break;
 			case ChargeStatuses::PENDING()->name:
 			case ChargeStatuses::PRE_AUTHENTICATION_PENDING()->name:
@@ -289,7 +300,7 @@ class PaymentController {
 			$operation,
 			$orderStatus,
 			'',
-			in_array( $orderStatus, [ 'wc-paydock-paid', 'wc-paydock-authorize', 'wc-paydock-pending' ]
+			in_array( $orderStatus, [ 'wc-paydock-paid','wc-paydock-p-paid', 'wc-paydock-authorize', 'wc-paydock-pending' ]
 			) ? LogRepository::SUCCESS : LogRepository::DEFAULT
 		);
 
@@ -455,6 +466,11 @@ class PaymentController {
 		}
 
 		$orderTotal = $order->get_total();
+		$captureAmount =  get_post_meta( $orderId, 'capture_amount', true );
+		if( $captureAmount && $orderTotal > $captureAmount ) {
+            $orderTotal = $captureAmount ;
+		}
+
 		$chargeId = $data['_id'] ?? '';
 		$status = ucfirst( strtolower( $data['status'] ?? 'undefined' ) );
 		$operation = ucfirst( strtolower( $data['type'] ?? 'undefined' ) );

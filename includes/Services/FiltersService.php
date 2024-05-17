@@ -3,6 +3,7 @@
 namespace Paydock\Services;
 
 use Paydock\Abstracts\AbstractSingleton;
+use Paydock\Enums\OrderListColumns;
 use Paydock\Enums\SettingsTabs;
 use Paydock\PaydockPlugin;
 use Paydock\Services\Checkout\AfterpayAPMsPaymentServiceService;
@@ -22,8 +23,58 @@ class FiltersService extends AbstractSingleton {
 	protected static $instance = null;
 
 	protected function __construct() {
-		$this->addWooCommerceFilters();
-		$this->addSettingsLink();
+	$this->addWooCommerceFilters();
+	$this->addSettingsLink();
+	}
+
+
+	public function ordersListNewColumn( $columns ) {
+		$new_columns = [];
+	
+		foreach ( $columns as $column_name => $column_info ) {
+			$new_columns[ $column_name ] = $column_info;
+	
+			if ( OrderListColumns::AFTER_COLUMN === $column_name ) {
+			$new_columns[OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey()] = __(
+				OrderListColumns::PAYMENT_SOURCE_TYPE()->getLabel(),
+				PAY_DOCK_TEXT_DOMAIN
+			);
+			}
+		}
+	
+		return $new_columns;
+	}
+
+	public function ordersListNewColumnContent( $column, $order ) {
+		if ( OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey() === $column ){
+			$status = get_post_meta( $order->get_id(), OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey() );
+
+			echo is_array($status) ? reset( $status ) :  $status;
+		}
+	}
+
+	public function changeOrderAmount($formatted_total, $order) {
+		if ( isset($_GET['page']) && 'wc-orders' === $_GET['page'] ){
+			$capturedAmount = get_post_meta($order->get_id(), 'capture_amount');
+			if ( 'paydock-p-paid' === $order->get_status()  && $capturedAmount && is_array( $capturedAmount ) ) {
+				$capturedAmount = reset($capturedAmount);
+				$originalPrice = wc_price($order->get_total(), array('currency' => $order->get_currency()));
+				$price = wc_price($capturedAmount , array('currency' => $order->get_currency()));
+
+				$formatted_total = sprintf(
+					'<del aria-hidden="true">%1$s</del><ins>%2$s</ins>',
+					$originalPrice,
+					$price
+				);
+			}
+		}
+		return $formatted_total;
+	}
+
+	public function addCaptureAmountCustomColumn( $columns ) {
+		$new_columns = ( is_array( $columns ) ) ? $columns : array();
+		$new_columns['capture_amount'] = 'Capture Amount';
+		return $new_columns;
 	}
 
 	protected function addWooCommerceFilters(): void {
@@ -31,6 +82,10 @@ class FiltersService extends AbstractSingleton {
 		add_filter( 'woocommerce_register_shop_order_post_statuses', [ $this, 'addCustomOrderStatuses' ] );
 		add_filter( 'wc_order_statuses', [ $this, 'addCustomOrderSingleStatusesStatuses' ] );
 		add_filter( 'woocommerce_thankyou_order_received_text', [ $this, 'woocommerceThankyouOrderReceivedText' ] );
+		add_filter( 'manage_woocommerce_page_wc-orders_columns', [ $this, 'ordersListNewColumn' ] );
+		add_filter( 'manage_woocommerce_page_wc-orders_custom_column', [ $this, 'ordersListNewColumnContent' ], 10, 2 );
+		add_filter( 'woocommerce_get_formatted_order_total', [ $this, 'changeOrderAmount' ], 10, 2 );
+		add_filter( 'manage_edit-shop_order_columns', [ $this, 'addCaptureAmountCustomColumn'], 20 );
 	}
 
 	protected function addSettingsLink(): void {
@@ -40,17 +95,17 @@ class FiltersService extends AbstractSingleton {
 	public function registerInWooCommercePaymentClass( array $methods ): array {
 		global $current_section;
 		global $current_tab;
-
+	
 		$methods[] = LiveConnectionSettingService::class;
 		if ( 'checkout' != $current_tab
 			|| in_array(
-				$current_section,
-				array_map(
-					function (SettingsTabs $tab) {
-						return $tab->value;
-					},
-					SettingsTabs::secondary()
-				)
+			$current_section,
+			array_map(
+				function (SettingsTabs $tab) {
+				return $tab->value;
+				},
+				SettingsTabs::secondary()
+			)
 			) ) {
 			$methods[] = SandboxConnectionSettingService::class;
 			$methods[] = WidgetSettingService::class;
@@ -64,18 +119,20 @@ class FiltersService extends AbstractSingleton {
 			$methods[] = AfterpayAPMsPaymentServiceService::class;
 			$methods[] = ZipAPMsPaymentServiceService::class;
 		}
-
-
+	
+	
 		return $methods;
 	}
 
 	public function woocommerceThankyouOrderReceivedText( $text ) {
 		$orderId = absint( get_query_var( 'order-received' ) );
 		$options = get_option( "paydock_fraud_{$orderId}" );
-		if ( false === $options ) {
+		$order = wc_get_order( $orderId );
+	
+		if ( false === $options && 'processing' !== $order->get_status()) {
 			return $text;
 		}
-
+	
 		return __( 'Your order is being processed. We\'ll get back to you shortly', 'pay_dock' );
 	}
 
@@ -83,12 +140,12 @@ class FiltersService extends AbstractSingleton {
 		array_unshift(
 			$links,
 			sprintf(
-				'<a href="%1$s">%2$s</a>',
-				admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . PaydockPlugin::PLUGIN_PREFIX ),
-				__( 'Settings', 'pay_dock' )
+			'<a href="%1$s">%2$s</a>',
+			admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . PaydockPlugin::PLUGIN_PREFIX ),
+			__( 'Settings', 'pay_dock' )
 			)
 		);
-
+	
 		return $links;
 	}
 
@@ -101,9 +158,22 @@ class FiltersService extends AbstractSingleton {
 			'show_in_admin_status_list' => true,
 			// Translators: %s is the number of orders.
 			'label_count' => _n_noop(
-				'Paid via Paydock <span class="count">(%s)</span>',
-				'Paid via Paydock <span class="count">(%s)</span>',
-				'woocommerce'
+			'Paid via Paydock <span class="count">(%s)</span>',
+			'Paid via Paydock <span class="count">(%s)</span>',
+			'woocommerce'
+			),
+		];
+		$order_statuses['wc-paydock-p-paid'] = [
+			'label' => 'Partial paid via Paydock',
+			'public' => true,
+			'exclude_from_search' => true,
+			'show_in_admin_all_list' => true,
+			'show_in_admin_status_list' => true,
+			// Translators: %s is the number of orders.
+			'label_count' => _n_noop(
+			'Partial paid via Paydock <span class="count">(%s)</span>',
+			'Partial paid via Paydock <span class="count">(%s)</span>',
+			'woocommerce'
 			),
 		];
 		$order_statuses['wc-paydock-pending'] = [
@@ -114,9 +184,9 @@ class FiltersService extends AbstractSingleton {
 			'show_in_admin_status_list' => true,
 			// Translators: %s is the number of orders.
 			'label_count' => _n_noop(
-				'Panding via Paydock <span class="count">(%s)</span>',
-				'Panding via Paydock <span class="count">(%s)</span>',
-				'woocommerce'
+			'Panding via Paydock <span class="count">(%s)</span>',
+			'Panding via Paydock <span class="count">(%s)</span>',
+			'woocommerce'
 			),
 		];
 		$order_statuses['wc-paydock-failed'] = [
@@ -127,9 +197,9 @@ class FiltersService extends AbstractSingleton {
 			'show_in_admin_status_list' => true,
 			// Translators: %s is the number of orders.
 			'label_count' => _n_noop(
-				'Failed via Paydock <span class="count">(%s)</span>',
-				'Failed via Paydock <span class="count">(%s)</span>',
-				'woocommerce'
+			'Failed via Paydock <span class="count">(%s)</span>',
+			'Failed via Paydock <span class="count">(%s)</span>',
+			'woocommerce'
 			),
 		];
 		$order_statuses['wc-paydock-authorize'] = [
@@ -140,9 +210,9 @@ class FiltersService extends AbstractSingleton {
 			'show_in_admin_status_list' => true,
 			// Translators: %s is the number of orders.
 			'label_count' => _n_noop(
-				'Authorized via Paydock <span class="count">(%s)</span>',
-				'Authorized via Paydock <span class="count">(%s)</span>',
-				'woocommerce'
+			'Authorized via Paydock <span class="count">(%s)</span>',
+			'Authorized via Paydock <span class="count">(%s)</span>',
+			'woocommerce'
 			),
 		];
 		$order_statuses['wc-paydock-cancelled'] = [
@@ -153,9 +223,9 @@ class FiltersService extends AbstractSingleton {
 			'show_in_admin_status_list' => true,
 			// Translators: %s is the number of orders.
 			'label_count' => _n_noop(
-				'Cancelled via Paydock <span class="count">(%s)</span>',
-				'Cancelled via Paydock <span class="count">(%s)</span>',
-				'woocommerce'
+			'Cancelled via Paydock <span class="count">(%s)</span>',
+			'Cancelled via Paydock <span class="count">(%s)</span>',
+			'woocommerce'
 			),
 		];
 		$order_statuses['wc-paydock-refunded'] = [
@@ -166,12 +236,12 @@ class FiltersService extends AbstractSingleton {
 			'show_in_admin_status_list' => true,
 			// Translators: %s is the number of orders.
 			'label_count' => _n_noop(
-				'Refunded via Paydock <span class="count">(%s)</span>',
-				'Refunded via Paydock <span class="count">(%s)</span>',
-				'woocommerce'
+			'Refunded via Paydock <span class="count">(%s)</span>',
+			'Refunded via Paydock <span class="count">(%s)</span>',
+			'woocommerce'
 			),
 		];
-		$order_statuses['wc-paydock-p-refund'] = [ 
+		$order_statuses['wc-paydock-p-refund'] = [
 			'label' => 'Partial refunded via Paydock',
 			'public' => true,
 			'exclude_from_search' => true,
@@ -179,9 +249,9 @@ class FiltersService extends AbstractSingleton {
 			'show_in_admin_status_list' => true,
 			// Translators: %s is the number of orders.
 			'label_count' => _n_noop(
-				'Partial refunded via Paydock <span class="count">(%s)</span>',
-				'Partial refunded via Paydock <span class="count">(%s)</span>',
-				'woocommerce'
+			'Partial refunded via Paydock <span class="count">(%s)</span>',
+			'Partial refunded via Paydock <span class="count">(%s)</span>',
+			'woocommerce'
 			),
 		];
 		$order_statuses['wc-paydock-requested'] = [
@@ -192,12 +262,12 @@ class FiltersService extends AbstractSingleton {
 			'show_in_admin_status_list' => true,
 			// Translators: %s is the number of orders.
 			'label_count' => _n_noop(
-				'Requested via Paydock <span class="count">(%s)</span>',
-				'Requested via Paydock <span class="count">(%s)</span>',
-				'woocommerce'
+			'Requested via Paydock <span class="count">(%s)</span>',
+			'Requested via Paydock <span class="count">(%s)</span>',
+			'woocommerce'
 			),
 		];
-
+	
 		return $order_statuses;
 	}
 
@@ -210,7 +280,7 @@ class FiltersService extends AbstractSingleton {
 		$order_statuses['wc-paydock-refunded'] = 'Refunded via Paydock';
 		$order_statuses['wc-paydock-p-refund'] = 'Partial refunded via Paydock';
 		$order_statuses['wc-paydock-requested'] = 'Requested via Paydock';
-
+		$order_statuses['wc-paydock-p-paid'] = 'Partial paid via  Paydock';
 		return $order_statuses;
 	}
 }

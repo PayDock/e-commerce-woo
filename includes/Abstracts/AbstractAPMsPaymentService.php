@@ -4,6 +4,7 @@ namespace Paydock\Abstracts;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Exception;
+use Paydock\Enums\OrderListColumns;
 use Paydock\Enums\OtherPaymentMethods;
 use Paydock\Repositories\LogRepository;
 use Paydock\Services\ProcessPayment\ApmProcessor;
@@ -89,7 +90,11 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 		$order->save();
 
 		update_post_meta( $order->get_id(), 'paydock_charge_id', $chargeId );
-
+		add_post_meta(
+			$order->get_id(),
+			OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(),
+			$this->getAPMsType()->getLabel()
+		);
 
 		WC()->cart->empty_cart();
 

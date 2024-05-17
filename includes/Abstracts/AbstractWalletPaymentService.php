@@ -3,6 +3,7 @@
 namespace Paydock\Abstracts;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
+use Paydock\Enums\OrderListColumns;
 use Paydock\Enums\WalletPaymentMethods;
 use Paydock\Repositories\LogRepository;
 use Paydock\Services\SettingsService;
@@ -36,14 +37,6 @@ abstract class AbstractWalletPaymentService extends AbstractPaymentService {
 			throw new RouteException(
 				'woocommerce_rest_checkout_process_payment_error',
 				__( 'Error: Security check', 'pay_dock' )
-			);
-		}
-		
-		if ( ! empty( $_GET['afterpay_success'] ) && ( 'false' == $_GET['afterpay_success'] ) ) {
-			throw new RouteException(
-				'woocommerce_rest_checkout_process_payment_error',
-				__( 'Error:', 'pay_dock' ) . ' ' . __( 'Afterpay returned a failure status.' ),
-				'pay_dock'
 			);
 		}
 
@@ -88,9 +81,12 @@ abstract class AbstractWalletPaymentService extends AbstractPaymentService {
 		$order->payment_complete();
 		$order->save();
 
-		unset( $_SESSION[ AbstractWalletBlock::AFTERPAY_SESSION_KEY ] );
-
 		update_post_meta( $order_id, 'paydock_charge_id', $chargeId );
+		add_post_meta(
+			$order_id,
+			OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(),
+			$this->getWalletType()->getLabel()
+		);
 
 		WC()->cart->empty_cart();
 

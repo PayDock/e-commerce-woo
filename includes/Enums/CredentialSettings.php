@@ -13,7 +13,7 @@ class CredentialSettings extends AbstractEnum {
 	protected const WIDGET_KEY = 'WIDGET_KEY';
 
 	public static function getHashed(): array {
-		return [ 
+		return [
 			self::PUBLIC_KEY()->name,
 			self::SECRET_KEY()->name,
 			self::ACCESS_KEY()->name,
@@ -59,21 +59,17 @@ class CredentialSettings extends AbstractEnum {
 	public function getDescription(): string {
 		switch ( $this->name ) {
 			case self::PUBLIC_KEY:
-				return 'Enter the API public key for the live environment.
-						This key is used for authentication to ensure secure communication
-						with the Payment Gateway.';
+				return 'Enter the API Public key for authentication. This key is used for authentication to ensure'
+				       . ' secure communication with the payment gateway.';
 			case self::SECRET_KEY:
-				return 'Enter the API secret key for the live environment.
-						This key is used for authentication to ensure secure communication
-						with the Payment Gateway.';
+				return 'Enter the API Secret key for authentication. This key is used for authentication to ensure'
+				       . ' secure communication with the payment gateway.';
 			case self::ACCESS_KEY:
-				return 'Enter the API access token for authentication.
-						This token is used to authorize transactions.
-						It needs to be filled in only if API Public Key & API Secret Key is not entered.';
+				return 'Enter the API Access Token for authentication. This key is used for authentication to ensure'
+				       . ' secure communication with the payment gateway.';
 			case self::WIDGET_KEY:
-				return 'Enter the widget access token for authentication.
-						This token is used to authorize widget transactions.
-						It needs to be filled in only if API Public Key & API Secret Key is not entered.';
+				return 'Enter the Widget Access Token for authentication. This key is used for authentication to ensure'
+				       . ' secure communication with the payment gateway.';
 			default:
 				return '';
 		}

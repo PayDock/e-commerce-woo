@@ -3,11 +3,9 @@
 namespace Paydock\Abstracts;
 
 use Paydock\Enums\WalletPaymentMethods;
-use Paydock\PaydockPlugin;
 use Paydock\Services\SettingsService;
 
 abstract class AbstractWalletBlock extends AbstractBlock {
-	public const AFTERPAY_SESSION_KEY = PaydockPlugin::PLUGIN_PREFIX . '_afterpay_payment_session_token';
 
 	protected $gateway;
 
@@ -34,13 +32,6 @@ abstract class AbstractWalletBlock extends AbstractBlock {
 			'isSandbox' => $settings->isSandbox(),
 			'styles' => $settings->getWidgetStyles(),
 		];
-
-		if (
-			( WalletPaymentMethods::AFTERPAY()->name === $payment->name )
-			&& ! empty( $_SESSION[ self::AFTERPAY_SESSION_KEY ] )
-		) {
-			$result['afterpayChargeId'] = sanitize_text_field( $_SESSION[ self::AFTERPAY_SESSION_KEY ] );
-		}
 
 		$result['wallets'][ strtolower( $payment->name ) ] = [ 
 			'gatewayId' => $settings->getWalletGatewayId( $payment ),

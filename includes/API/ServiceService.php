@@ -39,7 +39,7 @@ class ServiceService extends AbstractApiService {
 				$result = self::ENDPOINT . '/' . urlencode( $this->id );
 				break;
 			default:
-				$result = self::ENDPOINT;
+				$result = self::ENDPOINT . '?limit=1000';
 		}
 
 		return $result;

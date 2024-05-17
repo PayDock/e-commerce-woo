@@ -128,6 +128,7 @@ class ActionsService extends AbstractSingleton {
 		$paymentController = new PaymentController();
 		add_action( 'woocommerce_order_item_add_action_buttons', [ $orderService, 'iniPaydockOrderButtons' ], 10, 2 );
 		add_action( 'woocommerce_order_status_changed', [ $orderService, 'statusChangeVerification' ], 20, 4 );
+		add_action( 'woocommerce_admin_order_totals_after_total',[ $orderService, 'informationAboutPartialCaptured' ]);
 		add_action( 'admin_notices', [ $orderService, 'displayStatusChangeError' ] );
 		add_action( 'wp_ajax_paydock-capture-charge', [ $paymentController, 'capturePayment' ] );
 		add_action( 'wp_ajax_paydock-cancel-authorised', [ $paymentController, 'cancelAuthorised' ] );
