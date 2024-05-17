@@ -9,6 +9,7 @@ use PowerBoard\Enums\BankAccountSettings;
 use PowerBoard\Enums\CardSettings;
 use PowerBoard\Enums\CredentialSettings;
 use PowerBoard\Enums\CredentialsTypes;
+use PowerBoard\Enums\DSTypes;
 use PowerBoard\Enums\FraudTypes;
 use PowerBoard\Enums\NotificationEvents;
 use PowerBoard\Enums\OtherPaymentMethods;
@@ -330,7 +331,7 @@ class ConnectionValidationService {
 
 			if (
 				$isValidGateway
-				&& ( FraudTypes::DISABLE()->name !== $this->data[ $_3DSEnableServiceKey ] )
+				&& ( DSTypes::STANDALONE()->name === $this->data[ $_3DSEnableServiceKey ] )
 				&& ! $this->validateId( $this->data[ $_3DSGatewayIdKey ] )
 			) {
 				$this->errors[] = 'Incorrect 3DS Service ID: ' . $this->data[ $_3DSGatewayIdKey ];
@@ -405,6 +406,9 @@ class ConnectionValidationService {
 
 	private function validateWallets(): void {
 		foreach ( WalletPaymentMethods::cases() as $method ) {
+			if ( WalletPaymentMethods::AFTERPAY()->name === $method->name ) {
+				continue;
+			}
 			$result = true;
 			$enabledKey = SettingsService::getInstance()
 				->getOptionName( $this->service->id, [ 

@@ -5,6 +5,7 @@ namespace PowerBoard\Services\Checkout;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Exception;
 use PowerBoard\Abstracts\AbstractPaymentService;
+use PowerBoard\Enums\OrderListColumns;
 use PowerBoard\Exceptions\LoggedException;
 use PowerBoard\Repositories\LogRepository;
 use PowerBoard\Services\ProcessPayment\BankAccountProcessor;
@@ -83,6 +84,8 @@ class BankAccountPaymentService extends AbstractPaymentService {
 		$order->payment_complete();
 		$order->save();
 		update_post_meta( $order->get_id(), 'power_board_charge_id', $chargeId );
+		add_post_meta( $order->get_id(), OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(), 'Bank' );
+
 		WC()->cart->empty_cart();
 
 		$loggerRepository->createLogRecord(

@@ -191,6 +191,9 @@ class LiveConnectionSettingService extends AbstractSettingService {
 		$service = SettingsService::getInstance();
 
 		foreach ( WalletPaymentMethods::cases() as $walletPaymentMethods ) {
+			if ( WalletPaymentMethods::AFTERPAY()->name === $walletPaymentMethods->name ) {
+				continue;
+			}
 			$fields[ $service->getOptionName( $this->id, [ 
 				SettingGroups::WALLETS()->name,
 				$walletPaymentMethods->name,

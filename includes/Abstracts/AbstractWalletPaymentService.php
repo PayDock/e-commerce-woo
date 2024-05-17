@@ -3,6 +3,7 @@
 namespace PowerBoard\Abstracts;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
+use PowerBoard\Enums\OrderListColumns;
 use PowerBoard\Enums\WalletPaymentMethods;
 use PowerBoard\Repositories\LogRepository;
 use PowerBoard\Services\SettingsService;
@@ -36,14 +37,6 @@ abstract class AbstractWalletPaymentService extends AbstractPaymentService {
 			throw new RouteException(
 				'woocommerce_rest_checkout_process_payment_error',
 				__( 'Error: Security check', 'power_board' )
-			);
-		}
-		
-		if ( ! empty( $_GET['afterpay_success'] ) && ( 'false' == $_GET['afterpay_success'] ) ) {
-			throw new RouteException(
-				'woocommerce_rest_checkout_process_payment_error',
-				__( 'Error:', 'power_board' ) . ' ' . __( 'Afterpay returned a failure status.' ),
-				'power_board'
 			);
 		}
 
@@ -88,9 +81,13 @@ abstract class AbstractWalletPaymentService extends AbstractPaymentService {
 		$order->payment_complete();
 		$order->save();
 
-		unset( $_SESSION[ AbstractWalletBlock::AFTERPAY_SESSION_KEY ] );
-
 		update_post_meta( $order_id, 'power_board_charge_id', $chargeId );
+
+		add_post_meta(
+			$order->get_id(),
+			OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(),
+			$this->getWalletType()->getLabel()
+		);
 
 		WC()->cart->empty_cart();
 

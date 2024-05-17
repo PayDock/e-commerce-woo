@@ -36,16 +36,13 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
         const {onPaymentSetup, onCheckoutValidation} = eventRegistration;
         const billingAddress = cart.getCustomerData().billingAddress;
         const afterpayCountriesError = jQuery('.power-board-country-available');
-        const completed = jQuery("#paymentCompleted");
 
         let validationSuccess = validateData(billingAddress, dataFieldsRequired);
 
         jQuery('.wc-block-components-checkout-place-order-button').hide();
         let button = jQuery('#' + buttonId).length
 
-        if ((new URLSearchParams(window.location.search)).get('afterpay_success') === 'true') {
-            completed.show();
-        } else if (('powerBoardWalletAfterpayButton' === buttonId)
+        if (('powerBoardWalletAfterpayButton' === buttonId)
             && validationSuccess
             && !afterpayCountries.find((element) => element === billingAddress.country.toLowerCase())) {
             afterpayCountriesError.show()
@@ -85,8 +82,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
                     }
                 }
 
-                if (document.getElementById('paymentSourceWalletsToken').value
-                    && (new URLSearchParams(window.location.search)).get('afterpay_success') !== 'false') {
+                if (document.getElementById('paymentSourceWalletsToken').value) {
                     return true;
                 }
 
@@ -96,8 +92,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
             });
 
             const unsubscribe = onPaymentSetup(async (data) => {
-                if (document.getElementById('paymentSourceWalletsToken').value
-                    && (new URLSearchParams(window.location.search)).get('afterpay_success') !== 'false') {
+                if (document.getElementById('paymentSourceWalletsToken').value) {
                     return {
                         type: emitResponse.responseTypes.SUCCESS, meta: {
                             paymentMethodData: {
@@ -142,14 +137,6 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
             'div',
             null,
             description,
-            createElement(
-                "div",
-                {class: 'logo-comm-bank'},
-                createElement(
-                    "img",
-                    {src: '/wp-content/plugins/power-board/assets/images/commBank_logo.png'}
-                ),
-            ),
             paymentWasSuccessElement,
             createElement(
                 'div',
@@ -168,15 +155,22 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
         );
     };
 
-
-    const Label = (props) => {
-        const {PaymentMethodLabel} = props.components;
-        return <PaymentMethodLabel text={label}/>;
-    };
-
     const PaydokWalletBlock = {
         name: paymentName,
-        label: <Label/>,
+        label: createElement(() =>
+            createElement(
+                "div",
+                {
+                    className: 'power-board-payment-method-label'
+                },
+                createElement("img", {
+                    src: `/wp-content/plugins/power-board/assets/images/icons/${id}.png`,
+                    alt: label,
+                    className: `power-board-payment-method-label-icon ${id}`
+                }),
+                "  " + label,
+            )
+        ),
         content: <Content/>,
         edit: <Content/>,
         canMakePayment: () => true,

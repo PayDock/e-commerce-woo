@@ -2,7 +2,7 @@ import {__} from '@wordpress/i18n';
 import {registerPaymentMethod} from '@woocommerce/blocks-registry';
 import {decodeEntities} from '@wordpress/html-entities';
 import {getSetting} from '@woocommerce/settings';
-import {useEffect} from 'react';
+import {createElement, useEffect} from 'react';
 import {
     checkboxSavedCardsComponent,
     inBuild3Ds,
@@ -18,7 +18,6 @@ const labels = {
     defaultLabel: __('PowerBoard Payments', textDomain),
     saveCardLabel: __('Save payment details', textDomain),
     selectTokenLabel: __('Saved payment details', textDomain),
-    placeOrderButtonLabel: __('Place Order by PowerBoard', textDomain),
     fillDataError: __('Please fill in the card data.', textDomain),
     requiredDataError: __('Please fill in the required fields of the form to display payment methods', textDomain),
     additionalDataRejected: __('Payment has been rejected by PowerBoard. Please try again in a few minutes', textDomain)
@@ -192,14 +191,6 @@ const Content = (props) => {
             null,
             decodeEntities(settings.description || '')
         ),
-        createElement(
-            "div",
-            {class: 'logo-comm-bank'},
-            createElement(
-                "img",
-                {src: '/wp-content/plugins/power-board/assets/images/commBank_logo.png'}
-            ),
-        ),
         selectSavedCardsComponent(labels.selectTokenLabel),
         createElement(
             "div",
@@ -220,17 +211,29 @@ const Content = (props) => {
     );
 };
 
-const Label = (props) => {
-    const {PaymentMethodLabel} = props.components;
-    return <PaymentMethodLabel text={label}/>;
-};
-
 const Paydok = {
     name: "power_board_gateway",
-    label: <Label/>,
+    label: createElement(() =>
+        createElement(
+            "div",
+            {
+                className: 'power-board-payment-method-label'
+            },
+            createElement("img", {
+                src: '/wp-content/plugins/power-board/assets/images/icons/card.png',
+                alt: label,
+                className: 'power-board-payment-method-label-icon card'
+            }),
+            "  " + label,
+            createElement("img", {
+                src: '/wp-content/plugins/power-board/assets/images/commBank_logo.png',
+                alt: label,
+                className: 'power-board-payment-method-label-logo'
+            })
+        )
+    ),
     content: <Content/>,
     edit: <Content/>,
-    placeOrderButtonLabel: labels.placeOrderButtonLabel,
     canMakePayment: () => true,
     ariaLabel: label,
     supports: {

@@ -154,5 +154,45 @@
     display: block;
     width: 150px !important;
     height: 55px !important;
-    box-sizing: border-box;
+}
+
+.power-board-payment-method-label {
+    display: flex;
+    align-content: center;
+    box-sizing: content-box;
+    width: 100%;
+}
+.power-board-payment-method-label-icon {
+    margin-right: 5px;
+}
+.power-board-payment-method-label-icon.pay-pal{
+    height: 20px !important;
+    max-height: 20px !important;
+    margin-top: 2px;
+}
+
+.power-board-payment-method-label-icon.zip{
+    height: 20px !important;
+    max-height: 20px !important;
+    margin: -1px 13px;
+}
+.power-board-payment-method-label-icon.afterpay{
+    margin: auto 6px;
+}
+.power-board-payment-method-label-icon.google-pay{
+    margin: -1px 17px;
+}
+.power-board-payment-method-label-icon.apple-pay{
+    margin: -1px 11px;
+}
+.power-board-payment-method-label-icon.card{
+    margin: -1px 25px;
+}
+.power-board-payment-method-label-logo {
+    margin: -6px 1em -6px auto;
+    height: 36px !important;
+    max-height: 36px !important;
+}
+.wc-orders-list-table .status-paydock-p-paid .order_total>span {
+    display: none;
 }

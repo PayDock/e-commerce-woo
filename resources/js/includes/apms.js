@@ -229,14 +229,6 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
                 null,
                 decodeEntities(settings.description || '')
             ),
-            createElement(
-                "div",
-                {class: 'logo-comm-bank'},
-                createElement(
-                    "img",
-                    {src: '/wp-content/plugins/power-board/assets/images/commBank_logo.png'}
-                ),
-            ),
             createElement('div', {
                 class: 'apms-button-wrapper',
             }, createElement('button',
@@ -280,14 +272,23 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
             ),
         )
     }
-    const Label = (props) => {
-        const {PaymentMethodLabel} = props.components;
-        return <PaymentMethodLabel text={label}/>;
-    };
 
     const PaydokApms = {
         name: paymentName,
-        label: <Label/>,
+        label: createElement(() =>
+            createElement(
+                "div",
+                {
+                    className: 'power-board-payment-method-label'
+                },
+                createElement("img", {
+                    src: `/wp-content/plugins/power-board/assets/images/icons/${id}.png`,
+                    alt: label,
+                    className: `power-board-payment-method-label-icon ${id}`
+                }),
+                "  " + label,
+            )
+        ),
         content: <Content/>,
         edit: <Content/>,
         placeOrderButtonLabel: labels.placeOrderButtonLabel,

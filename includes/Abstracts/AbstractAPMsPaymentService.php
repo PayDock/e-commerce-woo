@@ -4,6 +4,7 @@ namespace PowerBoard\Abstracts;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Exception;
+use PowerBoard\Enums\OrderListColumns;
 use PowerBoard\Enums\OtherPaymentMethods;
 use PowerBoard\Repositories\LogRepository;
 use PowerBoard\Services\ProcessPayment\ApmProcessor;
@@ -99,6 +100,12 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 			$status,
 			'',
 			'wc-pb-paid' == $status ? LogRepository::SUCCESS : LogRepository::DEFAULT
+		);
+
+		add_post_meta(
+			$order->get_id(),
+			OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(),
+			$this->getAPMsType()->getLabel()
 		);
 
 		return [ 

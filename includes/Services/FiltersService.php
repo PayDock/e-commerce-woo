@@ -3,6 +3,7 @@
 namespace PowerBoard\Services;
 
 use PowerBoard\Abstracts\AbstractSingleton;
+use PowerBoard\Enums\OrderListColumns;
 use PowerBoard\Enums\SettingsTabs;
 use PowerBoard\PowerBoardPlugin;
 use PowerBoard\Services\Checkout\AfterpayAPMsPaymentServiceService;
@@ -26,11 +27,64 @@ class FiltersService extends AbstractSingleton {
 		$this->addSettingsLink();
 	}
 
+	public function ordersListNewColumn( $columns ) {
+		$new_columns = [];
+
+		foreach ( $columns as $column_name => $column_info ) {
+			$new_columns[ $column_name ] = $column_info;
+
+			if ( OrderListColumns::AFTER_COLUMN === $column_name ) {
+				$new_columns[OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey()] = __(
+					OrderListColumns::PAYMENT_SOURCE_TYPE()->getLabel(),
+					PAY_DOCK_TEXT_DOMAIN
+				);
+			}
+		}
+
+		return $new_columns;
+	}
+
+	public function ordersListNewColumnContent( $column, $order ) {
+		if ( OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey() === $column ){
+			$status = get_post_meta( $order->get_id(), OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey() );
+
+			echo is_array($status) ? reset( $status ) :  $status;
+		}
+	}
+
+	public function changeOrderAmount($formatted_total, $order) {
+		if ( isset($_GET['page']) && 'wc-orders' === $_GET['page'] ){
+			$capturedAmount = get_post_meta($order->get_id(), 'capture_amount');
+			if ( 'paydock-p-paid' === $order->get_status()  && $capturedAmount && is_array( $capturedAmount ) ) {
+				$capturedAmount = reset($capturedAmount);
+				$originalPrice = wc_price($order->get_total(), array('currency' => $order->get_currency()));
+				$price = wc_price($capturedAmount , array('currency' => $order->get_currency()));
+
+				$formatted_total = sprintf(
+					'<del aria-hidden="true">%1$s</del><ins>%2$s</ins>',
+					$originalPrice,
+					$price
+				);
+			}
+		}
+		return $formatted_total;
+	}
+
+	public function addCaptureAmountCustomColumn( $columns ) {
+		$new_columns = ( is_array( $columns ) ) ? $columns : array();
+		$new_columns['capture_amount'] = 'Capture Amount';
+		return $new_columns;
+	}
+
 	protected function addWooCommerceFilters(): void {
 		add_filter( 'woocommerce_payment_gateways', [ $this, 'registerInWooCommercePaymentClass' ] );
 		add_filter( 'woocommerce_register_shop_order_post_statuses', [ $this, 'addCustomOrderStatuses' ] );
 		add_filter( 'wc_order_statuses', [ $this, 'addCustomOrderSingleStatusesStatuses' ] );
 		add_filter( 'woocommerce_thankyou_order_received_text', [ $this, 'woocommerceThankyouOrderReceivedText' ] );
+		add_filter( 'manage_woocommerce_page_wc-orders_columns', [ $this, 'ordersListNewColumn' ] );
+		add_filter( 'manage_woocommerce_page_wc-orders_custom_column', [ $this, 'ordersListNewColumnContent' ], 10, 2 );
+		add_filter( 'woocommerce_get_formatted_order_total', [ $this, 'changeOrderAmount' ], 10, 2 );
+		add_filter( 'manage_edit-shop_order_columns', [ $this, 'addCaptureAmountCustomColumn'], 20 );
 	}
 
 	protected function addSettingsLink(): void {
@@ -72,7 +126,8 @@ class FiltersService extends AbstractSingleton {
 	public function woocommerceThankyouOrderReceivedText( $text ) {
 		$orderId = absint( get_query_var( 'order-received' ) );
 		$options = get_option( "power_board_fraud_{$orderId}" );
-		if ( false === $options ) {
+		$order = wc_get_order( $orderId );
+		if ( false === $options && 'processing' !== $order->get_status()) {
 			return $text;
 		}
 
@@ -103,6 +158,19 @@ class FiltersService extends AbstractSingleton {
 			'label_count' => _n_noop(
 				'Paid via PowerBoard <span class="count">(%s)</span>',
 				'Paid via PowerBoard <span class="count">(%s)</span>',
+				'woocommerce'
+			),
+		];
+		$order_statuses['wc-pb-p-paid'] = [
+			'label' => 'Partial paid via PowerBoard',
+			'public' => true,
+			'exclude_from_search' => true,
+			'show_in_admin_all_list' => true,
+			'show_in_admin_status_list' => true,
+			// Translators: %s is the number of orders.
+			'label_count' => _n_noop(
+				'Partial paid via PowerBoard <span class="count">(%s)</span>',
+				'Partial paid via PowerBoard <span class="count">(%s)</span>',
 				'woocommerce'
 			),
 		];
@@ -210,6 +278,7 @@ class FiltersService extends AbstractSingleton {
 		$order_statuses['wc-pb-refunded'] = 'Refunded via PowerBoard';
 		$order_statuses['wc-pb-p-refund'] = 'Partial refunded via PowerBoard';
 		$order_statuses['wc-pb-requested'] = 'Requested via PowerBoard';
+		$order_statuses['wc-pb-p-paid'] = 'Partial paid via  PowerBoard';
 
 		return $order_statuses;
 	}

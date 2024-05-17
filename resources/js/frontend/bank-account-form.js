@@ -12,7 +12,6 @@ const labels = {
     defaultLabel: __('PowerBoard Payments', textDomain),
     saveBankAcoountLabel: __('Save payment details', textDomain),
     selectTokenLabel: __('Saved payment details', textDomain),
-    placeOrderButtonLabel: __('Place Order by PowerBoard', textDomain),
     fillDataError: __('Please fill in the card data.', textDomain)
 }
 
@@ -151,7 +150,6 @@ const PaydokBankAccountBlock = {
     label: <Label/>,
     content: <Content/>,
     edit: <Content/>,
-    placeOrderButtonLabel: labels.placeOrderButtonLabel,
     canMakePayment: () => true,
     ariaLabel: label,
     supports: {

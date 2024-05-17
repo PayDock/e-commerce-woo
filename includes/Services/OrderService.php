@@ -25,7 +25,8 @@ class OrderService {
 		}
 		if ( in_array( $orderStatus, [ 
 			'pb-authorize',
-			'pb-paid'
+			'pb-paid',
+			'pb-p-paid'
 		] ) ) {
 			$this->templateService->includeAdminHtml( 'power-board-capture-block', compact( 'order', 'order' ) );
 		}
@@ -46,10 +47,20 @@ class OrderService {
 				'pb-failed',
 				'pb-pending',
 			],
-			'pb-refunded' => [ 'pb-paid', 'cancelled', 'pb-failed', 'refunded' ],
-			'pb-p-refund' => [ 'pb-paid', 'pb-refunded', 'refunded', 'cancelled', 'pb-failed' ],
+			'pb-p-paid' => [
+				'pb-refunded',
+				'pb-p-refund',
+				'cancelled',
+				'pb-cancelled',
+				'refunded',
+				'pb-failed',
+				'pb-pending',
+			],
+			'pb-refunded' => [ 'pb-paid', 'pb-p-paid', 'cancelled', 'pb-failed', 'refunded' ],
+			'pb-p-refund' => [ 'pb-paid', 'pb-p-paid', 'pb-refunded', 'refunded', 'cancelled', 'pb-failed' ],
 			'pb-authorize' => [ 
 				'pb-paid',
+				'pb-p-paid',
 				'pb-cancelled',
 				'pb-failed',
 				'cancelled',
@@ -58,6 +69,7 @@ class OrderService {
 			'pb-cancelled' => [ 'pb-failed', 'cancelled' ],
 			'pb-requested' => [ 
 				'pb-paid',
+				'pb-p-paid',
 				'pb-failed',
 				'cancelled',
 				'pb-pending',
@@ -80,6 +92,27 @@ class OrderService {
 			}
 		}
 	}
+
+	public function informationAboutPartialCaptured($orderId){
+		$capturedAmount = get_post_meta($orderId, 'capture_amount');
+		$order = wc_get_order( $orderId );
+		if ($capturedAmount && is_array( $capturedAmount )  && in_array( $order->get_status(), [
+				'pb-failed',
+				'pb-pending',
+				'pb-paid',
+				'pb-authorize',
+				'pb-cancelled',
+				'pb-p-refund',
+				'pb-requested',
+				'pb-p-paid',
+			] ) ) {
+			$capturedAmount = reset($capturedAmount );
+			if($order->get_total() > $capturedAmount) {
+				$this->templateService->includeAdminHtml('information-about-partial-captured', compact('order', 'capturedAmount'));
+			}
+		}
+	}
+
 
 	public function displayStatusChangeError() {
 		$screen = get_current_screen();

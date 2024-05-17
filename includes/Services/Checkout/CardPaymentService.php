@@ -4,6 +4,7 @@ namespace PowerBoard\Services\Checkout;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Exception;
+use PowerBoard\Enums\OrderListColumns;
 use PowerBoard\Enums\SettingsTabs;
 use PowerBoard\Enums\WidgetSettings;
 use PowerBoard\Repositories\LogRepository;
@@ -186,6 +187,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 		$order->payment_complete();
 		$order->save();
 		update_post_meta( $order->get_id(), 'power_board_charge_id', $chargeId );
+		add_post_meta( $order->get_id(), OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(), 'Card' );
 		WC()->cart->empty_cart();
 
 		$loggerRepository->createLogRecord(

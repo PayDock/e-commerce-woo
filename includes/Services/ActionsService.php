@@ -128,9 +128,10 @@ class ActionsService extends AbstractSingleton {
 		$paymentController = new PaymentController();
 		add_action( 'woocommerce_order_item_add_action_buttons', [ $orderService, 'iniPowerBoardOrderButtons' ], 10, 2 );
 		add_action( 'woocommerce_order_status_changed', [ $orderService, 'statusChangeVerification' ], 20, 4 );
+		add_action( 'woocommerce_admin_order_totals_after_total',[ $orderService, 'informationAboutPartialCaptured' ]);
 		add_action( 'admin_notices', [ $orderService, 'displayStatusChangeError' ] );
-		add_action( 'wp_ajax_pb-capture-charge', [ $paymentController, 'capturePayment' ] );
-		add_action( 'wp_ajax_pb-cancel-authorised', [ $paymentController, 'cancelAuthorised' ] );
+		add_action( 'wp_ajax_power-board-capture-charge', [ $paymentController, 'capturePayment' ] );
+		add_action( 'wp_ajax_power-board-cancel-authorised', [ $paymentController, 'cancelAuthorised' ] );
 		add_action( 'woocommerce_create_refund', [ $paymentController, 'refundProcess' ], 10, 2 );
 		add_action( 'woocommerce_order_refunded', [ $paymentController, 'afterRefundProcess' ], 10, 2 );
 		add_action( 'woocommerce_api_power-board-webhook', [ $paymentController, 'webhook' ] );

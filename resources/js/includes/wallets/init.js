@@ -20,6 +20,14 @@ export default (id, buttonId, data, isSandbox) => {
         };
     }
 
+    if ('#powerBoardkWalletAfterpayButton' === buttonId) {
+        jQuery('#powerBoardWalletAfterpayButton').each((index, element) => element.addEventListener("click", (event) => {
+            data.payment = id.replace('-', '_')
+            paymentSourceElement.val(JSON.stringify(data))
+            orderButton.click();
+        }, true))
+    }
+
     let button = new window.cba.WalletButtons(buttonId, data.resource.data.token, config)
 
     if (isSandbox) {

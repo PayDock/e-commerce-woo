@@ -3,12 +3,9 @@
 namespace PowerBoard\Abstracts;
 
 use PowerBoard\Enums\WalletPaymentMethods;
-use PowerBoard\PowerBoardPlugin;
 use PowerBoard\Services\SettingsService;
 
 abstract class AbstractWalletBlock extends AbstractBlock {
-	public const AFTERPAY_SESSION_KEY = PowerBoardPlugin::PLUGIN_PREFIX . '_afterpay_payment_session_token';
-
 	protected $gateway;
 
 	public function __construct() {
@@ -35,12 +32,6 @@ abstract class AbstractWalletBlock extends AbstractBlock {
 			'styles' => $settings->getWidgetStyles(),
 		];
 
-		if (
-			( WalletPaymentMethods::AFTERPAY()->name === $payment->name )
-			&& ! empty( $_SESSION[ self::AFTERPAY_SESSION_KEY ] )
-		) {
-			$result['afterpayChargeId'] = sanitize_text_field( $_SESSION[ self::AFTERPAY_SESSION_KEY ] );
-		}
 
 		$result['wallets'][ strtolower( $payment->name ) ] = [ 
 			'gatewayId' => $settings->getWalletGatewayId( $payment ),

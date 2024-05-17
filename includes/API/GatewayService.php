@@ -39,7 +39,7 @@ class GatewayService extends AbstractApiService {
 				$result = self::ENDPOINT . '/' . urlencode( $this->id );
 				break;
 			default:
-				$result = self::ENDPOINT . '?limit=-1';
+				$result = self::ENDPOINT . '?limit=1000';
 		}
 
 		return $result;
