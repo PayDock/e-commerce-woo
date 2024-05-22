@@ -150,7 +150,12 @@ class PaymentController {
 			[ 'refunded', 'refund_requested' ]
 		) ) {
 			$newRefundedId = end($result['resource']['data']['transactions'])['_id'];
-			$status = $totalRefunded < $order->get_total() ? 'wc-paydock-p-refund' : 'wc-paydock-refunded';
+            if( $captureAmount ){
+                $status = $totalRefunded < $captureAmount ? 'wc-paydock-p-refund' : 'wc-paydock-refunded';
+            }else{
+                $status = $totalRefunded < $order->get_total() ? 'wc-paydock-p-refund' : 'wc-paydock-refunded';
+            }
+
 			update_post_meta( $orderId, 'paydock_refunded_status', $status );
 			$order->set_status( $status );
 			$order->update_status(
@@ -465,8 +470,8 @@ class PaymentController {
 			return false;
 		}
 
-		$orderTotal = $order->get_total();
-		$captureAmount =  get_post_meta( $orderId, 'capture_amount', true );
+        $captureAmount = get_post_meta( $order->get_id(), 'capture_amount' ,true );
+        $orderTotal = $order->get_total();
 		if( $captureAmount && $orderTotal > $captureAmount ) {
             $orderTotal = $captureAmount ;
 		}
