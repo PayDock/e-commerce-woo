@@ -406,9 +406,6 @@ class ConnectionValidationService {
 
 	private function validateWallets(): void {
 		foreach ( WalletPaymentMethods::cases() as $method ) {
-			if ( WalletPaymentMethods::AFTERPAY()->name === $method->name ) {
-				continue;
-			}
 			$result = true;
 			$enabledKey = SettingsService::getInstance()
 				->getOptionName( $this->service->id, [ 

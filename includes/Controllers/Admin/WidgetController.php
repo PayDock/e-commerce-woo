@@ -76,7 +76,6 @@ class WidgetController {
 					'first_name'     => $billingAdress['first_name'],
 					'last_name'      => $billingAdress['last_name'],
 					'email'          => $billingAdress['email'],
-					'phone'          => $billingAdress['phone'],
 					'payment_source' => [
 						'gateway_id'       => $settings->getWalletGatewayId( $payment ),
 						'address_line1'    => $billingAdress['address_1'],
@@ -101,14 +100,21 @@ class WidgetController {
 					'contact'          => [
 						'first_name' => $shippingAddress['first_name'],
 						'last_name'  => $shippingAddress['last_name'],
-						'phone'      => $shippingAddress['phone']
 					]
 				]
 			];
 
+            if ( ! empty( $billingAdress['phone'] ) ) {
+                $chargeRequest['customer']['phone'] = $billingAdress['phone'];
+            }
+
 			if ( ! empty( $billingAdress['address_2'] ) ) {
 				$chargeRequest['customer']['payment_source']['address_line2'] = $billingAdress['address_2'];
 			}
+
+            if ( ! empty( $shippingAddress['phone'] ) ) {
+                $chargeRequest['shipping']['contact']['phone'] = $shippingAddress['phone'];
+            }
 
 			if ( ! empty( $shippingAddress['address_2'] ) ) {
 				$chargeRequest['shipping']['address_line2'] = $shippingAddress['address_2'];

@@ -21,7 +21,15 @@
 			captureAmountBtn.text(availableToCapture);
 			return false;
 		}
-		elem.val(captureAmount);
+
+        if(captureAmount <= 0){
+            alert("This field should be positive");
+            elem.val(availableToCapture);
+            captureAmountBtn.text(availableToCapture);
+            return false;
+        }
+
+        elem.val(captureAmount);
 		captureAmountBtn.text(captureAmount);
 		return true;
 	}
@@ -78,7 +86,7 @@
 	<table class="wc-order-totals">
 		<tr>
 			<td class="label"><?php esc_html_e('Total available to capture', 'woocommerce'); ?>:</td>
-			<td class="total available-to-capture" data-value="<?php echo $order->get_total(); ?>">
+			<td class="total available-to-capture" data-value="<?php echo esc_html( $order->get_total() ); ?>">
 				<?php echo wc_price($order->get_total(), array('currency' => $order->get_currency())); ?>
 			</td>
 		</tr>
@@ -104,7 +112,12 @@
 		<button type="button"
 				onclick="handlePowerBoardPaymentCapture(<?php echo esc_attr($order->get_id()); ?>, 'power-board-capture-charge')"
 				class="button button-primary">
-			<?php esc_html_e('Capture ', 'woocommerce'); ?><?php echo esc_html_e(get_woocommerce_currency_symbol($order->get_currency()))?><span class="capture-amount-btn"><?php echo esc_attr($order->get_total()); ?></span><?php esc_html_e(' manually', 'woocommerce'); ?>
+			<?php esc_html_e('Capture ', 'woocommerce'); ?>
+            <?php esc_html_e(get_woocommerce_currency_symbol($order->get_currency()))?>
+            <span class="capture-amount-btn">
+                <?php echo esc_attr($order->get_total()); ?>
+            </span>
+            <?php esc_html_e(' manually', 'woocommerce'); ?>
 		</button>
 		<button type="button" class="button cancel-action"
 				onclick="cancelActionManualCapture()"><?php esc_html_e('Cancel', 'woocommerce'); ?></button>

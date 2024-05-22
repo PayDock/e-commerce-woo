@@ -9,9 +9,6 @@ use PowerBoard\Enums\WalletPaymentMethods;
 use PowerBoard\Repositories\LogRepository;
 
 class AfterpayWalletService extends AbstractWalletPaymentService {
-	public function is_available() {
-		return false;
-	}
 
 	protected function getWalletType(): WalletPaymentMethods {
 		return WalletPaymentMethods::AFTERPAY();
@@ -57,7 +54,6 @@ class AfterpayWalletService extends AbstractWalletPaymentService {
 		$loggerRepository = new LogRepository();
 
 		$order->set_status( 'wc-pending' );
-		$order->payment_complete();
 		$order->save();
 
 		update_post_meta( $order_id, 'power_board_charge_id', $chargeId );
@@ -66,8 +62,6 @@ class AfterpayWalletService extends AbstractWalletPaymentService {
 			OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(),
 			$this->getWalletType()->getLabel()
 		);
-
-		WC()->cart->empty_cart();
 
 		$loggerRepository->createLogRecord(
 			$data['data']['id'] ?? '',

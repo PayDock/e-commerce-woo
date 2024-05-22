@@ -48,27 +48,31 @@ class FiltersService extends AbstractSingleton {
 		if ( OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey() === $column ){
 			$status = get_post_meta( $order->get_id(), OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey() );
 
-			echo is_array($status) ? reset( $status ) :  $status;
+			echo esc_html( is_array($status) ? reset( $status ) :  $status );
 		}
 	}
 
-	public function changeOrderAmount($formatted_total, $order) {
-		if ( isset($_GET['page']) && 'wc-orders' === $_GET['page'] ){
-			$capturedAmount = get_post_meta($order->get_id(), 'capture_amount');
-			if ( 'paydock-p-paid' === $order->get_status()  && $capturedAmount && is_array( $capturedAmount ) ) {
-				$capturedAmount = reset($capturedAmount);
-				$originalPrice = wc_price($order->get_total(), array('currency' => $order->get_currency()));
-				$price = wc_price($capturedAmount , array('currency' => $order->get_currency()));
+    public function changeOrderAmount($formatted_total, $order) {
+        if ( isset($_GET['page']) && 'wc-orders' === $_GET['page'] ){
+            $capturedAmount = get_post_meta($order->get_id(), 'capture_amount');
+            if ( $capturedAmount && is_array( $capturedAmount ) ) {
+                $capturedAmount = reset($capturedAmount);
 
-				$formatted_total = sprintf(
-					'<del aria-hidden="true">%1$s</del><ins>%2$s</ins>',
-					$originalPrice,
-					$price
-				);
-			}
-		}
-		return $formatted_total;
-	}
+                if( $capturedAmount == $order->get_total() ){
+                    return $formatted_total;
+                }
+
+                $price = wc_price(($capturedAmount  - $order->get_total_refunded()), array('currency' => $order->get_currency()));
+                $originalPrice = wc_price($order->get_total(), array('currency' => $order->get_currency()));
+                $formatted_total = sprintf(
+                    '<del aria-hidden="true">%1$s</del><ins>%2$s</ins>',
+                    $originalPrice,
+                    $price
+                );
+            }
+        }
+        return $formatted_total;
+    }
 
 	public function addCaptureAmountCustomColumn( $columns ) {
 		$new_columns = ( is_array( $columns ) ) ? $columns : array();

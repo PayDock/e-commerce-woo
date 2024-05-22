@@ -139,7 +139,8 @@ class PaymentController {
 		foreach ( $refunds as $refund ) {
 			$totalRefunded += $refund->get_amount();
 		}
-		$powerBoardChargeId = get_post_meta( $orderId, 'power_board_charge_id', true );$captureAmount =  get_post_meta( $orderId, 'capture_amount', true );
+		$powerBoardChargeId = get_post_meta( $orderId, 'power_board_charge_id', true );
+        $captureAmount =  get_post_meta( $orderId, 'capture_amount', true );
 		if( $captureAmount && $totalRefunded > $captureAmount ) {
 			$totalRefunded = $captureAmount ;
 		}
@@ -150,7 +151,12 @@ class PaymentController {
 			[ 'refunded', 'refund_requested' ]
 		) ) {
 			$newRefundedId = end($result['resource']['data']['transactions'])['_id'];
-			$status = $totalRefunded < $order->get_total() ? 'wc-pb-p-refund' : 'wc-pb-refunded';
+            if( $captureAmount ){
+                $status = $totalRefunded < $captureAmount ? 'wc-pb-p-refund' : 'wc-pb-refunded';
+            } else {
+                $status = $totalRefunded < $order->get_total() ? 'wc-pb-p-refund' : 'wc-pb-refunded';
+            }
+
 			update_post_meta( $orderId, 'power_board_refunded_status', $status );
 			$order->set_status( $status );
 			$order->update_status(
@@ -467,7 +473,7 @@ class PaymentController {
 
 		$orderTotal = $order->get_total();
 		$captureAmount =  get_post_meta( $orderId, 'capture_amount', true );
-		if( $captureAmount && $orderTotal > $captureAmount ) {
+		if( $captureAmount && ( $orderTotal > $captureAmount ) ) {
 			$orderTotal = $captureAmount ;
 		}
 
