@@ -36,7 +36,7 @@ class FiltersService extends AbstractSingleton {
 			if ( OrderListColumns::AFTER_COLUMN === $column_name ) {
 				$new_columns[OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey()] = __(
 					OrderListColumns::PAYMENT_SOURCE_TYPE()->getLabel(),
-					PAY_DOCK_TEXT_DOMAIN
+					POWER_BOARD_TEXT_DOMAIN
 				);
 			}
 		}
