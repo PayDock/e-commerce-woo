@@ -67,7 +67,7 @@ class AfterpayWalletService extends AbstractWalletPaymentService {
 			$data['data']['id'] ?? '',
 			'Charge',
 			'wc-pending',
-			'Successful',
+			'Successful'
 		);
 
 		return [

@@ -9,18 +9,55 @@ export default async (forcePermanentVault = false) => {
         settings.selectedToken = await getVaultToken()
     }
 
+    const cart = select(CART_STORE_KEY);
+    const billingAddress = cart.getCustomerData().billingAddress;
+    const shippingAddress = cart.getCustomerData().shippingAddress;
+
     const preAuthData = {
         amount: settings.amount,
-        currency: settings.currency
-    };
-
-    if (settings.card3DSFlow === 'PERMANENT_VAULT' || forcePermanentVault) {
-        preAuthData.customer = {
+        currency: settings.currency,
+        customer: {
+            first_name: billingAddress.first_name,
+            last_name: billingAddress.last_name,
+            email: billingAddress.email,
             payment_source: {
-                vault_token: settings.selectedToken,
-                gateway_id: settings.gatewayId
+                address_country: billingAddress.country,
+                address_state: billingAddress.state,
+                address_city: billingAddress.city,
+                address_postcode: billingAddress.postcode,
+                address_line1: billingAddress.address_1,
+            }
+        },
+        shipping: {
+            address_country: shippingAddress.country,
+            address_state: shippingAddress.state,
+            address_city: shippingAddress.city,
+            address_postcode: shippingAddress.postcode,
+            address_line1: shippingAddress.address_1,
+            contact: {
+                first_name: shippingAddress.first_name,
+                last_name: shippingAddress.last_name,
+                email: shippingAddress.email ?? billingAddress.email,
             }
         }
+    };
+    if (billingAddress.address_2) {
+        preAuthData.customer.payment_source.address_line2 = billingAddress.address_2;
+    }
+    if (shippingAddress.address_2) {
+        preAuthData.shipping.address_line2 = shippingAddress.address_2;
+    }
+    if (billingAddress.phone) {
+        preAuthData.shipping.contact.phone = billingAddress.phone;
+        preAuthData.customer.phone = billingAddress.phone;
+    }
+    if (shippingAddress.phone) {
+        preAuthData.shipping.contact.phone = shippingAddress.phone;
+    }
+
+    if (settings.card3DSFlow === 'PERMANENT_VAULT' || forcePermanentVault) {
+        preAuthData.customer.payment_source.vault_token = settings.selectedToken;
+        preAuthData.customer.payment_source.gateway_id = settings.gatewayId;
     } else {
         preAuthData.token = settings.paymentSourceToken
     }

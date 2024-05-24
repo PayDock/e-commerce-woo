@@ -34,7 +34,7 @@ class FiltersService extends AbstractSingleton {
 			$new_columns[ $column_name ] = $column_info;
 
 			if ( OrderListColumns::AFTER_COLUMN === $column_name ) {
-				$new_columns[OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey()] = __(
+				$new_columns[ OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey() ] = __(
 					OrderListColumns::PAYMENT_SOURCE_TYPE()->getLabel(),
 					POWER_BOARD_TEXT_DOMAIN
 				);
@@ -45,38 +45,41 @@ class FiltersService extends AbstractSingleton {
 	}
 
 	public function ordersListNewColumnContent( $column, $order ) {
-		if ( OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey() === $column ){
+		if ( OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey() === $column ) {
 			$status = get_post_meta( $order->get_id(), OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey() );
 
-			echo esc_html( is_array($status) ? reset( $status ) :  $status );
+			echo esc_html( is_array( $status ) ? reset( $status ) : $status );
 		}
 	}
 
-    public function changeOrderAmount($formatted_total, $order) {
-        if ( isset($_GET['page']) && 'wc-orders' === $_GET['page'] ){
-            $capturedAmount = get_post_meta($order->get_id(), 'capture_amount');
-            if ( $capturedAmount && is_array( $capturedAmount ) ) {
-                $capturedAmount = reset($capturedAmount);
+	public function changeOrderAmount( $formatted_total, $order ) {
+		if ( isset( $_GET['page'] ) && 'wc-orders' === $_GET['page'] ) {
+			$capturedAmount = get_post_meta( $order->get_id(), 'capture_amount' );
+			if ( $capturedAmount && is_array( $capturedAmount ) ) {
+				$capturedAmount = reset( $capturedAmount );
 
-                if( $capturedAmount == $order->get_total() ){
-                    return $formatted_total;
-                }
+				if ( $capturedAmount == $order->get_total() ) {
+					return $formatted_total;
+				}
 
-                $price = wc_price(($capturedAmount  - $order->get_total_refunded()), array('currency' => $order->get_currency()));
-                $originalPrice = wc_price($order->get_total(), array('currency' => $order->get_currency()));
-                $formatted_total = sprintf(
-                    '<del aria-hidden="true">%1$s</del><ins>%2$s</ins>',
-                    $originalPrice,
-                    $price
-                );
-            }
-        }
-        return $formatted_total;
-    }
+				$price           = wc_price( ( $capturedAmount - $order->get_total_refunded() ),
+					[ 'currency' => $order->get_currency() ] );
+				$originalPrice   = wc_price( $order->get_total(), [ 'currency' => $order->get_currency() ] );
+				$formatted_total = sprintf(
+					'<del aria-hidden="true">%1$s</del><ins>%2$s</ins>',
+					$originalPrice,
+					$price
+				);
+			}
+		}
+
+		return $formatted_total;
+	}
 
 	public function addCaptureAmountCustomColumn( $columns ) {
-		$new_columns = ( is_array( $columns ) ) ? $columns : array();
+		$new_columns                   = ( is_array( $columns ) ) ? $columns : [];
 		$new_columns['capture_amount'] = 'Capture Amount';
+
 		return $new_columns;
 	}
 
@@ -88,7 +91,7 @@ class FiltersService extends AbstractSingleton {
 		add_filter( 'manage_woocommerce_page_wc-orders_columns', [ $this, 'ordersListNewColumn' ] );
 		add_filter( 'manage_woocommerce_page_wc-orders_custom_column', [ $this, 'ordersListNewColumnContent' ], 10, 2 );
 		add_filter( 'woocommerce_get_formatted_order_total', [ $this, 'changeOrderAmount' ], 10, 2 );
-		add_filter( 'manage_edit-shop_order_columns', [ $this, 'addCaptureAmountCustomColumn'], 20 );
+		add_filter( 'manage_edit-shop_order_columns', [ $this, 'addCaptureAmountCustomColumn' ], 20 );
 	}
 
 	protected function addSettingsLink(): void {
@@ -101,15 +104,15 @@ class FiltersService extends AbstractSingleton {
 
 		$methods[] = LiveConnectionSettingService::class;
 		if ( 'checkout' != $current_tab
-			|| in_array(
-				$current_section,
-				array_map(
-					function (SettingsTabs $tab) {
-						return $tab->value;
-					},
-					SettingsTabs::secondary()
-				)
-			) ) {
+		     || in_array(
+			     $current_section,
+			     array_map(
+				     function ( SettingsTabs $tab ) {
+					     return $tab->value;
+				     },
+				     SettingsTabs::secondary()
+			     )
+		     ) ) {
 			$methods[] = SandboxConnectionSettingService::class;
 			$methods[] = WidgetSettingService::class;
 			$methods[] = LogsSettingService::class;
@@ -130,8 +133,8 @@ class FiltersService extends AbstractSingleton {
 	public function woocommerceThankyouOrderReceivedText( $text ) {
 		$orderId = absint( get_query_var( 'order-received' ) );
 		$options = get_option( "power_board_fraud_{$orderId}" );
-		$order = wc_get_order( $orderId );
-		if ( false === $options && 'processing' !== $order->get_status()) {
+		$order   = wc_get_order( $orderId );
+		if ( false === $options && 'processing' !== $order->get_status() ) {
 			return $text;
 		}
 
@@ -152,118 +155,118 @@ class FiltersService extends AbstractSingleton {
 	}
 
 	public function addCustomOrderStatuses( $order_statuses ) {
-		$order_statuses['wc-pb-paid'] = [
-			'label' => 'Paid via PowerBoard',
-			'public' => true,
-			'exclude_from_search' => true,
-			'show_in_admin_all_list' => true,
+		$order_statuses['wc-pb-paid']      = [
+			'label'                     => 'Paid via PowerBoard',
+			'public'                    => true,
+			'exclude_from_search'       => true,
+			'show_in_admin_all_list'    => true,
 			'show_in_admin_status_list' => true,
 			// Translators: %s is the number of orders.
-			'label_count' => _n_noop(
+			'label_count'               => _n_noop(
 				'Paid via PowerBoard <span class="count">(%s)</span>',
 				'Paid via PowerBoard <span class="count">(%s)</span>',
 				'woocommerce'
 			),
 		];
-		$order_statuses['wc-pb-p-paid'] = [
-			'label' => 'Partial paid via PowerBoard',
-			'public' => true,
-			'exclude_from_search' => true,
-			'show_in_admin_all_list' => true,
+		$order_statuses['wc-pb-p-paid']    = [
+			'label'                     => 'Partial paid via PowerBoard',
+			'public'                    => true,
+			'exclude_from_search'       => true,
+			'show_in_admin_all_list'    => true,
 			'show_in_admin_status_list' => true,
 			// Translators: %s is the number of orders.
-			'label_count' => _n_noop(
+			'label_count'               => _n_noop(
 				'Partial paid via PowerBoard <span class="count">(%s)</span>',
 				'Partial paid via PowerBoard <span class="count">(%s)</span>',
 				'woocommerce'
 			),
 		];
-		$order_statuses['wc-pb-pending'] = [
-			'label' => 'Pending via PowerBoard',
-			'public' => true,
-			'exclude_from_search' => true,
-			'show_in_admin_all_list' => true,
+		$order_statuses['wc-pb-pending']   = [
+			'label'                     => 'Pending via PowerBoard',
+			'public'                    => true,
+			'exclude_from_search'       => true,
+			'show_in_admin_all_list'    => true,
 			'show_in_admin_status_list' => true,
 			// Translators: %s is the number of orders.
-			'label_count' => _n_noop(
+			'label_count'               => _n_noop(
 				'Panding via PowerBoard <span class="count">(%s)</span>',
 				'Panding via PowerBoard <span class="count">(%s)</span>',
 				'woocommerce'
 			),
 		];
-		$order_statuses['wc-pb-failed'] = [
-			'label' => 'Failed via PowerBoard',
-			'public' => true,
-			'exclude_from_search' => true,
-			'show_in_admin_all_list' => true,
+		$order_statuses['wc-pb-failed']    = [
+			'label'                     => 'Failed via PowerBoard',
+			'public'                    => true,
+			'exclude_from_search'       => true,
+			'show_in_admin_all_list'    => true,
 			'show_in_admin_status_list' => true,
 			// Translators: %s is the number of orders.
-			'label_count' => _n_noop(
+			'label_count'               => _n_noop(
 				'Failed via PowerBoard <span class="count">(%s)</span>',
 				'Failed via PowerBoard <span class="count">(%s)</span>',
 				'woocommerce'
 			),
 		];
 		$order_statuses['wc-pb-authorize'] = [
-			'label' => 'Authorized via PowerBoard',
-			'public' => true,
-			'exclude_from_search' => true,
-			'show_in_admin_all_list' => true,
+			'label'                     => 'Authorized via PowerBoard',
+			'public'                    => true,
+			'exclude_from_search'       => true,
+			'show_in_admin_all_list'    => true,
 			'show_in_admin_status_list' => true,
 			// Translators: %s is the number of orders.
-			'label_count' => _n_noop(
+			'label_count'               => _n_noop(
 				'Authorized via PowerBoard <span class="count">(%s)</span>',
 				'Authorized via PowerBoard <span class="count">(%s)</span>',
 				'woocommerce'
 			),
 		];
 		$order_statuses['wc-pb-cancelled'] = [
-			'label' => 'Cancelled via PowerBoard',
-			'public' => true,
-			'exclude_from_search' => true,
-			'show_in_admin_all_list' => true,
+			'label'                     => 'Cancelled via PowerBoard',
+			'public'                    => true,
+			'exclude_from_search'       => true,
+			'show_in_admin_all_list'    => true,
 			'show_in_admin_status_list' => true,
 			// Translators: %s is the number of orders.
-			'label_count' => _n_noop(
+			'label_count'               => _n_noop(
 				'Cancelled via PowerBoard <span class="count">(%s)</span>',
 				'Cancelled via PowerBoard <span class="count">(%s)</span>',
 				'woocommerce'
 			),
 		];
-		$order_statuses['wc-pb-refunded'] = [
-			'label' => 'Refunded via PowerBoard',
-			'public' => true,
-			'exclude_from_search' => true,
-			'show_in_admin_all_list' => true,
+		$order_statuses['wc-pb-refunded']  = [
+			'label'                     => 'Refunded via PowerBoard',
+			'public'                    => true,
+			'exclude_from_search'       => true,
+			'show_in_admin_all_list'    => true,
 			'show_in_admin_status_list' => true,
 			// Translators: %s is the number of orders.
-			'label_count' => _n_noop(
+			'label_count'               => _n_noop(
 				'Refunded via PowerBoard <span class="count">(%s)</span>',
 				'Refunded via PowerBoard <span class="count">(%s)</span>',
 				'woocommerce'
 			),
 		];
-		$order_statuses['wc-pb-p-refund'] = [ 
-			'label' => 'Partial refunded via PowerBoard',
-			'public' => true,
-			'exclude_from_search' => true,
-			'show_in_admin_all_list' => true,
+		$order_statuses['wc-pb-p-refund']  = [
+			'label'                     => 'Partial refunded via PowerBoard',
+			'public'                    => true,
+			'exclude_from_search'       => true,
+			'show_in_admin_all_list'    => true,
 			'show_in_admin_status_list' => true,
 			// Translators: %s is the number of orders.
-			'label_count' => _n_noop(
+			'label_count'               => _n_noop(
 				'Partial refunded via PowerBoard <span class="count">(%s)</span>',
 				'Partial refunded via PowerBoard <span class="count">(%s)</span>',
 				'woocommerce'
 			),
 		];
 		$order_statuses['wc-pb-requested'] = [
-			'label' => 'Requested via PowerBoard',
-			'public' => true,
-			'exclude_from_search' => true,
-			'show_in_admin_all_list' => true,
+			'label'                     => 'Requested via PowerBoard',
+			'public'                    => true,
+			'exclude_from_search'       => true,
+			'show_in_admin_all_list'    => true,
 			'show_in_admin_status_list' => true,
 			// Translators: %s is the number of orders.
-			'label_count' => _n_noop(
+			'label_count'               => _n_noop(
 				'Requested via PowerBoard <span class="count">(%s)</span>',
 				'Requested via PowerBoard <span class="count">(%s)</span>',
 				'woocommerce'
@@ -274,15 +277,15 @@ class FiltersService extends AbstractSingleton {
 	}
 
 	public function addCustomOrderSingleStatusesStatuses( $order_statuses ) {
-		$order_statuses['wc-pb-failed'] = 'Failed via PowerBoard';
-		$order_statuses['wc-pb-pending'] = 'Pending via PowerBoard';
-		$order_statuses['wc-pb-paid'] = 'Paid via PowerBoard';
+		$order_statuses['wc-pb-failed']    = 'Failed via PowerBoard';
+		$order_statuses['wc-pb-pending']   = 'Pending via PowerBoard';
+		$order_statuses['wc-pb-paid']      = 'Paid via PowerBoard';
 		$order_statuses['wc-pb-authorize'] = 'Authorized via PowerBoard';
 		$order_statuses['wc-pb-cancelled'] = 'Cancelled via PowerBoard';
-		$order_statuses['wc-pb-refunded'] = 'Refunded via PowerBoard';
-		$order_statuses['wc-pb-p-refund'] = 'Partial refunded via PowerBoard';
+		$order_statuses['wc-pb-refunded']  = 'Refunded via PowerBoard';
+		$order_statuses['wc-pb-p-refund']  = 'Partial refunded via PowerBoard';
 		$order_statuses['wc-pb-requested'] = 'Requested via PowerBoard';
-		$order_statuses['wc-pb-p-paid'] = 'Partial paid via  PowerBoard';
+		$order_statuses['wc-pb-p-paid']    = 'Partial paid via  PowerBoard';
 
 		return $order_statuses;
 	}
