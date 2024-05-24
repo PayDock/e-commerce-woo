@@ -23,8 +23,8 @@ class AfterpayWalletService extends AbstractWalletPaymentService {
 			);
 		}
 
-		$order = wc_get_order( $order_id );
-		$data = [];
+		$order    = wc_get_order( $order_id );
+		$data     = [];
 		$chargeId = null;
 
 		if ( ! empty( $_POST['payment_response'] ) ) {
@@ -44,7 +44,7 @@ class AfterpayWalletService extends AbstractWalletPaymentService {
 			}
 		}
 
-		$wallet = reset( $wallets );
+		$wallet  = reset( $wallets );
 		$isFraud = ! empty( $wallet['fraud'] ) && $wallet['fraud'];
 		if ( $isFraud ) {
 			update_option( 'paydock_fraud_' . (string) $order->get_id(), [] );
@@ -65,12 +65,12 @@ class AfterpayWalletService extends AbstractWalletPaymentService {
 		$loggerRepository->createLogRecord(
 			$data['data']['id'] ?? '',
 			'Charge',
-				'wc-pending',
-			'Successful',
+			'wc-pending',
+			'Successful'
 		);
 
 		return [
-			'result' => 'success'
+			'result' => 'success',
 		];
 	}
 }

@@ -12,11 +12,12 @@ class PaymentController {
 		$wpNonce = ! empty( $_POST['_wpnonce'] ) ? sanitize_text_field( $_POST['_wpnonce'] ) : null;
 		if ( ! wp_verify_nonce( $wpNonce, 'capture-or-cancel' ) ) {
 			wp_send_json_error( [ 'message' => __( 'Error: Security check', 'pay_dock' ) ] );
+
 			return;
 		}
 
 		$orderId = ! empty( $_POST['order_id'] ) ? sanitize_text_field( $_POST['order_id'] ) : null;
-		$error = null;
+		$error   = null;
 		if ( ! $orderId ) {
 			$error = __( 'The order is not found.' );
 		} else {
@@ -25,15 +26,18 @@ class PaymentController {
 				$error = __( 'The order should be have status "paydock-authorize"', 'woocommerce' );
 			}
 		}
-		$orderTotal =  $order->get_total();
-		$amount = ! empty( $_POST['amount'] ) ? wc_format_decimal( $_POST['amount'] ) : $order->get_total();
+		$orderTotal       = $order->get_total();
+		$amount           = ! empty( $_POST['amount'] ) ? wc_format_decimal( $_POST['amount'] ) : $order->get_total();
 		$loggerRepository = new LogRepository();
-		$paydockChargeId = get_post_meta( $orderId, 'paydock_charge_id', true );
+		$paydockChargeId  = get_post_meta( $orderId, 'paydock_charge_id', true );
 		if ( ! $error ) {
-			$charge = SDKAdapterService::getInstance()->capture( [ 'charge_id' => $paydockChargeId, 'amount' => $amount ] );
+			$charge = SDKAdapterService::getInstance()->capture( [
+				'charge_id' => $paydockChargeId,
+				'amount'    => $amount,
+			] );
 			if ( ! empty( $charge['resource']['data']['status'] ) && 'complete' == $charge['resource']['data']['status'] ) {
 				$newChargeId = $charge['resource']['data']['_id'];
-				$newStatus = $orderTotal > $amount ? 'wc-paydock-p-paid' : 'wc-paydock-paid';
+				$newStatus   = $orderTotal > $amount ? 'wc-paydock-p-paid' : 'wc-paydock-paid';
 				$loggerRepository->createLogRecord(
 					$newChargeId,
 					'Capture',
@@ -43,10 +47,12 @@ class PaymentController {
 				);
 				update_post_meta( $orderId, 'capture_amount', $amount );
 				update_post_meta( $orderId, 'paydock_charge_id', $newChargeId );
-				$order->set_status( $newStatus);
+				$order->set_status( $newStatus );
 				$order->payment_complete();
 				$order->save();
-				wp_send_json_success( [ 'message' => __( 'The capture process has been successfully.', 'woocommerce' ) ] );
+				wp_send_json_success( [
+					'message' => __( 'The capture process has been successfully.', 'woocommerce' ),
+				] );
 			} else {
 				if ( ! empty( $result['error'] ) ) {
 					if ( is_array( $result['error'] ) ) {
@@ -68,17 +74,18 @@ class PaymentController {
 		$wpNonce = ! empty( $_POST['_wpnonce'] ) ? sanitize_text_field( $_POST['_wpnonce'] ) : null;
 		if ( ! wp_verify_nonce( $wpNonce, 'capture-or-cancel' ) ) {
 			wp_send_json_error( [ 'message' => __( 'Error: Security check', 'pay_dock' ) ] );
+
 			return;
 		}
 
 		$orderId = ! empty( $_POST['order_id'] ) ? sanitize_text_field( $_POST['order_id'] ) : null;
-		$error = null;
-		$order = wc_get_order( $orderId );
+		$error   = null;
+		$order   = wc_get_order( $orderId );
 		if ( ! $order ) {
 			$error = __( 'The order is not found.', 'woocommerce' );
 		}
 		$loggerRepository = new LogRepository();
-		$paydockChargeId = get_post_meta( $orderId, 'paydock_charge_id', true );
+		$paydockChargeId  = get_post_meta( $orderId, 'paydock_charge_id', true );
 		if ( ! $error ) {
 			$result = SDKAdapterService::getInstance()->cancelAuthorised( [ 'charge_id' => $paydockChargeId ] );
 
@@ -125,36 +132,37 @@ class PaymentController {
 		}
 
 		$orderId = $args['order_id'];
-		$amount = $args['amount'];
-		$order = wc_get_order( $orderId );
+		$amount  = $args['amount'];
+		$order   = wc_get_order( $orderId );
 
-		if ( ! in_array( $order->get_status(), [ 'paydock-paid', 'paydock-p-paid', 'paydock-p-refund', 'paydock-refunded' ] ) ) {
+		if ( ! in_array( $order->get_status(),
+			[ 'paydock-paid', 'paydock-p-paid', 'paydock-p-refund', 'paydock-refunded' ] ) ) {
 			return;
 		}
 
 		$loggerRepository = new LogRepository();
 
 		$totalRefunded = 0;
-		$refunds = $order->get_refunds();
+		$refunds       = $order->get_refunds();
 		foreach ( $refunds as $refund ) {
 			$totalRefunded += $refund->get_amount();
 		}
 		$paydockChargeId = get_post_meta( $orderId, 'paydock_charge_id', true );
-		$captureAmount =  get_post_meta( $orderId, 'capture_amount', true );
-		if( $captureAmount && $totalRefunded > $captureAmount ) {
-			$totalRefunded = $captureAmount ;
-        }
+		$captureAmount   = get_post_meta( $orderId, 'capture_amount', true );
+		if ( $captureAmount && $totalRefunded > $captureAmount ) {
+			$totalRefunded = $captureAmount;
+		}
 		$result = SDKAdapterService::getInstance()->refunds( [ 'charge_id' => $paydockChargeId, 'amount' => $amount ] );
 		if ( ! empty( $result['resource']['data']['status'] ) && in_array(
-			$result['resource']['data']['status'],
-			[ 'refunded', 'refund_requested' ]
-		) ) {
-			$newRefundedId = end($result['resource']['data']['transactions'])['_id'];
-            if( $captureAmount ){
-                $status = $totalRefunded < $captureAmount ? 'wc-paydock-p-refund' : 'wc-paydock-refunded';
-            }else{
-                $status = $totalRefunded < $order->get_total() ? 'wc-paydock-p-refund' : 'wc-paydock-refunded';
-            }
+				$result['resource']['data']['status'],
+				[ 'refunded', 'refund_requested' ]
+			) ) {
+			$newRefundedId = end( $result['resource']['data']['transactions'] )['_id'];
+			if ( $captureAmount ) {
+				$status = $totalRefunded < $captureAmount ? 'wc-paydock-p-refund' : 'wc-paydock-refunded';
+			} else {
+				$status = $totalRefunded < $order->get_total() ? 'wc-paydock-p-refund' : 'wc-paydock-refunded';
+			}
 
 			update_post_meta( $orderId, 'paydock_refunded_status', $status );
 			$order->set_status( $status );
@@ -181,7 +189,8 @@ class PaymentController {
 				throw new \Exception( $result['error'] );
 			} else {
 				$error = __( 'The refund process has failed; please try again.', 'woocommerce' );
-				$loggerRepository->createLogRecord( $paydockChargeId, 'Refunded', 'error', $error, LogRepository::ERROR );
+				$loggerRepository->createLogRecord( $paydockChargeId, 'Refunded', 'error', $error,
+					LogRepository::ERROR );
 				throw new \Exception( $error );
 			}
 		}
@@ -253,7 +262,7 @@ class PaymentController {
 			$orderId = (int) $data['reference'];
 		} else {
 			$referenceArray = explode( '_', $data['reference'] );
-			$orderId = (int) reset( $referenceArray );
+			$orderId        = (int) reset( $referenceArray );
 		}
 
 		$order = wc_get_order( $orderId );
@@ -262,16 +271,16 @@ class PaymentController {
 			return false;
 		}
 
-		$chargeId = $data['_id'] ?? '';
-		$status = ucfirst( strtolower( $data['status'] ?? 'undefined' ) );
-		$operation = ucfirst( strtolower( $data['type'] ?? 'undefined' ) );
+		$chargeId        = $data['_id'] ?? '';
+		$status          = ucfirst( strtolower( $data['status'] ?? 'undefined' ) );
+		$operation       = ucfirst( strtolower( $data['type'] ?? 'undefined' ) );
 		$isAuthorization = $data['authorization'] ?? 0;
-		$orderTotal =  $order->get_total();
+		$orderTotal      = $order->get_total();
 
 		switch ( strtoupper( $status ) ) {
 			case ChargeStatuses::COMPLETE()->name:
 				$captureAmount = wc_format_decimal( $data['transaction']['amount'] );
-				$orderStatus = $orderTotal > $captureAmount ? 'wc-paydock-p-paid' : 'wc-paydock-paid';
+				$orderStatus   = $orderTotal > $captureAmount ? 'wc-paydock-p-paid' : 'wc-paydock-paid';
 				update_post_meta( $orderId, 'capture_amount', $captureAmount );
 				break;
 			case ChargeStatuses::PENDING()->name:
@@ -305,7 +314,8 @@ class PaymentController {
 			$operation,
 			$orderStatus,
 			'',
-			in_array( $orderStatus, [ 'wc-paydock-paid','wc-paydock-p-paid', 'wc-paydock-authorize', 'wc-paydock-pending' ]
+			in_array( $orderStatus,
+				[ 'wc-paydock-paid', 'wc-paydock-p-paid', 'wc-paydock-authorize', 'wc-paydock-pending' ]
 			) ? LogRepository::SUCCESS : LogRepository::DEFAULT
 		);
 
@@ -314,24 +324,24 @@ class PaymentController {
 
 	private function fraudProcess( array $input ): bool {
 		$loggerRepository = new LogRepository();
-		$data = $input['data'];
+		$data             = $input['data'];
 
 		if ( strpos( $data['reference'], '_' ) === false ) {
 			$orderId = (int) $data['reference'];
 		} else {
 			$referenceArray = explode( '_', $data['reference'] );
-			$orderId = (int) reset( $referenceArray );
+			$orderId        = (int) reset( $referenceArray );
 		}
 
-		$order = wc_get_order( $orderId );
-		$fraudId = $data['_id'];
+		$order       = wc_get_order( $orderId );
+		$fraudId     = $data['_id'];
 		$fraudStatus = $data['status'];
 
 		$optionName = "paydock_fraud_{$orderId}";
 
 		if ( 'complete' !== $fraudStatus ) {
 			$operation = ucfirst( strtolower( $data['type'] ?? 'undefined' ) );
-			$status = 'wc-paydock-failed';
+			$status    = 'wc-paydock-failed';
 
 			delete_option( $optionName );
 			$order->set_status( $status );
@@ -358,19 +368,19 @@ class PaymentController {
 			$paymentSource['gateway_id'] = $options['gateway_id'];
 		}
 
-		$chargeArgs = [ 
-			'amount' => (float) $order->get_total(),
-			'reference' => (string) $order->get_id(),
-			'currency' => strtoupper( $order->get_currency() ),
-			'customer' => [ 
-				'first_name' => $order->get_billing_first_name(),
-				'last_name' => $order->get_billing_last_name(),
-				'email' => $order->get_billing_email(),
-				'phone' => $order->get_billing_phone(),
+		$chargeArgs = [
+			'amount'          => (float) $order->get_total(),
+			'reference'       => (string) $order->get_id(),
+			'currency'        => strtoupper( $order->get_currency() ),
+			'customer'        => [
+				'first_name'     => $order->get_billing_first_name(),
+				'last_name'      => $order->get_billing_last_name(),
+				'email'          => $order->get_billing_email(),
+				'phone'          => $order->get_billing_phone(),
 				'payment_source' => $paymentSource,
 			],
 			'fraud_charge_id' => $fraudId,
-			'capture' => $options['capture'],
+			'capture'         => $options['capture'],
 		];
 
 		if ( ! empty( $options['charge3dsid'] ) ) {
@@ -404,7 +414,8 @@ class PaymentController {
 		}
 
 		if ( ! empty( $options['_3ds'] ) ) {
-			$attachResponse = SDKAdapterService::getInstance()->fraudAttach( $chargeId, [ 'fraud_charge_id' => $fraudId ] );
+			$attachResponse = SDKAdapterService::getInstance()->fraudAttach( $chargeId,
+				[ 'fraud_charge_id' => $fraudId ] );
 			if ( ! empty( $attachResponse['error'] ) ) {
 				$message = SDKAdapterService::getInstance()->errorMessageToString( $attachResponse );
 				$loggerRepository->createLogRecord(
@@ -419,18 +430,18 @@ class PaymentController {
 			}
 		}
 
-		$status = ucfirst( strtolower( $response['resource']['data']['status'] ?? 'undefined' ) );
-		$operation = ucfirst( strtolower( $response['resource']['data']['type'] ?? 'undefined' ) );
+		$status          = ucfirst( strtolower( $response['resource']['data']['status'] ?? 'undefined' ) );
+		$operation       = ucfirst( strtolower( $response['resource']['data']['type'] ?? 'undefined' ) );
 		$isAuthorization = $response['resource']['data']['authorization'] ?? 0;
-		$isCompleted = false;
-		$markAsSuccess = false;
+		$isCompleted     = false;
+		$markAsSuccess   = false;
 
 		if ( $isAuthorization && in_array( $status, [ 'Pending', 'Pre_authentication_pending' ] ) ) {
 			$status = 'wc-paydock-authorize';
 		} else {
 			$markAsSuccess = true;
-			$isCompleted = 'Complete' === $status;
-			$status = $isCompleted ? 'wc-paydock-paid' : 'wc-paydock-pending';
+			$isCompleted   = 'Complete' === $status;
+			$status        = $isCompleted ? 'wc-paydock-paid' : 'wc-paydock-pending';
 		}
 
 		$order->set_status( $status );
@@ -461,7 +472,7 @@ class PaymentController {
 			$orderId = (int) $data['reference'];
 		} else {
 			$referenceArray = explode( '_', $data['reference'] );
-			$orderId = (int) reset( $referenceArray );
+			$orderId        = (int) reset( $referenceArray );
 		}
 
 		$order = wc_get_order( $orderId );
@@ -470,15 +481,15 @@ class PaymentController {
 			return false;
 		}
 
-        $captureAmount = get_post_meta( $order->get_id(), 'capture_amount' ,true );
-        $orderTotal = $order->get_total();
-		if( $captureAmount && $orderTotal > $captureAmount ) {
-            $orderTotal = $captureAmount ;
+		$captureAmount = get_post_meta( $order->get_id(), 'capture_amount', true );
+		$orderTotal    = $order->get_total();
+		if ( $captureAmount && $orderTotal > $captureAmount ) {
+			$orderTotal = $captureAmount;
 		}
 
-		$chargeId = $data['_id'] ?? '';
-		$status = ucfirst( strtolower( $data['status'] ?? 'undefined' ) );
-		$operation = ucfirst( strtolower( $data['type'] ?? 'undefined' ) );
+		$chargeId     = $data['_id'] ?? '';
+		$status       = ucfirst( strtolower( $data['status'] ?? 'undefined' ) );
+		$operation    = ucfirst( strtolower( $data['type'] ?? 'undefined' ) );
 		$refundAmount = wc_format_decimal( $data['transaction']['amount'] );
 
 		switch ( strtoupper( $status ) ) {
@@ -504,14 +515,14 @@ class PaymentController {
 		$order->save();
 
 		$result = wc_create_refund( [
-			'amount' => $refundAmount,
-			'reason' => __( 'The refund', 'woocommerce' ) . " {$refundAmount} " . __(
-				'has been successfully.',
-				'woocommerce'
-			),
-			'order_id' => $orderId,
+			'amount'         => $refundAmount,
+			'reason'         => __( 'The refund', 'woocommerce' ) . " {$refundAmount} " . __(
+					'has been successfully.',
+					'woocommerce'
+				),
+			'order_id'       => $orderId,
 			'refund_payment' => false,
-			'from_webhook' => true
+			'from_webhook'   => true,
 		] );
 
 		$loggerRepository = new LogRepository();

@@ -49,7 +49,7 @@ class WidgetController {
 					'name'     => $item['name'],
 					'type'     => $item['type'],
 					'quantity' => $item['quantity'],
-					'item_uri' => $item['permalink']
+					'item_uri' => $item['permalink'],
 				];
 
 				if ( ! empty( $image ) ) {
@@ -81,7 +81,7 @@ class WidgetController {
 						'address_city'     => $billingAdress['city'],
 						'address_state'    => $billingAdress['state'],
 						'address_country'  => $billingAdress['country'],
-						'address_postcode' => $billingAdress['postcode']
+						'address_postcode' => $billingAdress['postcode'],
 					],
 				],
 				'meta'      => [
@@ -99,17 +99,17 @@ class WidgetController {
 					'contact'          => [
 						'first_name' => $shippingAddress['first_name'],
 						'last_name'  => $shippingAddress['last_name'],
-					]
-				]
+					],
+				],
 			];
 
-            if ( ! empty( $shippingAddress['phone'] ) ) {
-                $chargeRequest['shipping']['contact']['phone'] = $shippingAddress['phone'];
-            }
+			if ( ! empty( $shippingAddress['phone'] ) ) {
+				$chargeRequest['shipping']['contact']['phone'] = $shippingAddress['phone'];
+			}
 
-            if ( ! empty( $billingAdress['phone'] ) ) {
-                $chargeRequest['customer']['phone'] = $billingAdress['phone'];
-            }
+			if ( ! empty( $billingAdress['phone'] ) ) {
+				$chargeRequest['customer']['phone'] = $billingAdress['phone'];
+			}
 			if ( ! empty( $billingAdress['address_2'] ) ) {
 				$chargeRequest['customer']['payment_source']['address_line2'] = $billingAdress['address_2'];
 			}
@@ -159,7 +159,8 @@ class WidgetController {
 			}
 
 			$result = SDKAdapterService::getInstance()
-			                           ->createWalletCharge( $chargeRequest, $settings->isWalletDirectCharge( $payment ) );
+			                           ->createWalletCharge( $chargeRequest,
+				                           $settings->isWalletDirectCharge( $payment ) );
 
 			$result['county'] = $billingAdress['country'] ?? '';
 
