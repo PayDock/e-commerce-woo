@@ -9,7 +9,7 @@ Stable tag: 2.0.44
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
-Accept more payment methods with Paydock
+Accept more payment methods with Paydock. Connect multiple payment gateways with a central interface to manage the transactions.
 
 == Description ==
 

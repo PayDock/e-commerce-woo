@@ -8,7 +8,7 @@
  *
  * Plugin Name: Paydock for WooCommerce
  * Plugin URI: https://github.com/Paydock/jsp-woocommerce
- * Description: Paydock simplify how you manage your payments. Reduce costs, technical headaches & streamline compliance using Paydock's payment orchestration.
+ * Description: Accept more payment methods with Paydock. Connect multiple payment gateways with a central interface to manage the transactions.
  * Author: Paydock
  * Author URI: https://www.paydock.com/
  * Version: 2.0.44
