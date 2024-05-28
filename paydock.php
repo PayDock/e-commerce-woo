@@ -17,6 +17,8 @@
  * Tested up to: 6.4.2
  * WC requires at least: 6.4.2
  * WC tested up to: 8.5
+ * License: GPLv3 or later
+ * License URI: http://www.gnu.org/licenses/gpl-3.0.html
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
