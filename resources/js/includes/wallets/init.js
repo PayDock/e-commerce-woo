@@ -30,12 +30,7 @@ export default (id, buttonId, data, isSandbox) => {
 
     let button = new window.cba.WalletButtons(buttonId, data.resource.data.token, config)
 
-    if (isSandbox) {
-        button.setEnv('preproduction_cba')
-    }else{
-        button.setEnv('production_cba')
-    }
-
+    button.setEnv(isSandbox ? 'preproduction_cba' : 'production_cba')
 
     button.onPaymentSuccessful((result) => {
         result.payment = id.replace('-','_')

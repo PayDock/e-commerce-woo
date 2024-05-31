@@ -1,6 +1,8 @@
 import {getSetting} from '@woocommerce/settings';
 import getVaultToken from './get-vault-token';
 import sleep from './sleep';
+import {select} from '@wordpress/data';
+import {CART_STORE_KEY} from '@woocommerce/block-data';
 
 export default async (forcePermanentVault = false) => {
     const settings = getSetting('power_board_data', {});

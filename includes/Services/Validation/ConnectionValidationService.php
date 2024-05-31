@@ -529,10 +529,7 @@ class ConnectionValidationService {
 
 	private function setWebhooks(): void {
 		$webhookEvents = NotificationEvents::events();
-		$option = get_option( self::IS_WEBHOOK_SET_OPTION, false );
-		if ( false !== strpos( get_site_url(), 'localhost' ) || ( false !== $option && count( (array) $option ) === count(
-			$webhookEvents
-		) ) ) {
+		if ( false !== strpos( get_site_url(), 'localhost' ) ) {
 			return;
 		}
 

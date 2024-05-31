@@ -778,7 +778,7 @@ final class SettingsService {
 		if ( $this->isSandbox ) {
 			$sdkUrl = 'https://widget.preproduction.powerboard.commbank.com.au/sdk/{version}/widget.umd.js';
 		} else {
-			$sdkUrl = ' https://widget.powerboard.commbank.com.au/sdk/{version}/widget.umd.js';
+			$sdkUrl = 'https://widget.powerboard.commbank.com.au/sdk/{version}/widget.umd.js';
 		}
 
 		return strtr( $sdkUrl, [ '{version}' => self::getInstance()->getVersion() ] );
