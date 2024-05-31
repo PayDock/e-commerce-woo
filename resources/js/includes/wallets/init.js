@@ -30,9 +30,7 @@ export default (id, buttonId, data, isSandbox) => {
 
     let button = new window.paydock.WalletButtons(buttonId, data.resource.data.token, config)
 
-    if (isSandbox) {
-        button.setEnv('sandbox')
-    }
+    button.setEnv(isSandbox ? 'sandbox' : 'production')
 
     button.onPaymentSuccessful((result) => {
         result.payment = id.replace('-', '_')

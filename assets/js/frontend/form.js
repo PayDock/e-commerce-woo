@@ -184,7 +184,7 @@ setTimeout(() => jQuery(function ($) {
             supportedCard = paydockCardSettings.cardSupportedCardTypes.replaceAll(' ', '').split(',')
             widget.setSupportedCardIcons(supportedCard);
         }
-
+        widget.setEnv(paydockCardSettings.isSandbox ? 'sandbox' : 'production');
         widget.setFormFields(['email', 'phone']);
         widget.onFinishInsert('input[name="payment_source_token"]', 'payment_source');
         widget.interceptSubmitForm('#widget');

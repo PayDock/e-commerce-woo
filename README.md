@@ -33,7 +33,7 @@ To install and configure the Paydock plugin, you need:
 The plugin installation steps are as follows:
 
 1. Download the zip file with the plugin:  
-https://github.com/PayDock/e-commerce-woo/blob/main/paydock_v1.0.37.zip
+https://github.com/PayDock/e-commerce-woo/blob/main/paydock_v2.0.46.zip
 
 2. Go to Wordpress -> Plugins -> Add new Plugin -> Upload Plugin.
 
