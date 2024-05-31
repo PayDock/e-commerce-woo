@@ -3,9 +3,9 @@ Contributors: paydock
 Donate link: https://paydock.com/
 Tags: paydock, woocommerce, payment, gateways, payment gateways
 Requires PHP: 7.4
-Requires at least: 6.4
-Tested up to: 6.5.2
-Stable tag: 2.0.44
+Requires at least: 6.0
+Tested up to: 6.5.3
+Stable tag: 2.0.46
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -33,7 +33,7 @@ To install and configure the Paydock plugin, you need:
 The plugin installation steps are as follows:
 
 1. Download the zip file with the plugin:  
-https://github.com/PayDock/e-commerce-woo/blob/main/paydock_v2.0.46.zip
+https://github.com/PayDock/e-commerce-woo/blob/main/paydock_v1.0.37.zip
 
 2. Go to Wordpress -> Plugins -> Add new Plugin -> Upload Plugin.
 
@@ -73,11 +73,14 @@ c. Click on the link to download the ZIP file.
 = 1.4.0 =
 * First release on the plugins store
 
-= 1.5.7 = 
+= 1.5.7 =
 * Bug fixes
 
-= 2.0.37 = 
+= 2.0.37 =
 * Completely new plugin. This version includes new code, supports new versions of PHP, MySQL, WordPress, WooCommerce, and v2 API of the Paydock app.
 
-= 2.0.44 = 
+= 2.0.44 =
 * New features, readme, changelog, etc.
+
+= 2.0.46 =
+* Fixes, updates, tweaks

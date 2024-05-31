@@ -1,22 +1,19 @@
 <?php
-
 /**
  * Copyright (c) Paydock, Inc. and its affiliates. All Rights Reserved
- *
- * This source code is licensed under the license found in the
- * LICENSE file in the root directory of this source tree.
- *
  * Plugin Name: Paydock for WooCommerce
- * Plugin URI: https://github.com/Paydock/jsp-woocommerce
- * Description: Paydock simplify how you manage your payments. Reduce costs, technical headaches & streamline compliance using Paydock's payment orchestration.
+ * Plugin URI: https://github.com/PayDock/e-commerce-woo
+ * Description: Accept more payment methods with Paydock. Connect multiple payment gateways with a central interface to manage the transactions.
  * Author: Paydock
  * Author URI: https://www.paydock.com/
  * Version: 2.0.46
- * Requires at least: 6.4.2
+ * Requires at least: 6.0
  * Text Domain: paydock-for-woo
- * Tested up to: 6.4.2
- * WC requires at least: 6.4.2
- * WC tested up to: 8.5
+ * Tested up to: 6.5.3
+ * WC requires at least: 8.0.0
+ * WC tested up to: 8.9.1
+ * License: GPLv3 or later
+ * License URI: http://www.gnu.org/licenses/gpl-3.0.html
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
