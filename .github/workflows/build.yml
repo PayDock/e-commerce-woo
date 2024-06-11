@@ -20,7 +20,7 @@ jobs:
       - name: Prepare files for upload
         run: |
           mkdir artifacts
-          rsync -av --exclude='.git/' --exclude='.github/' --exclude='.gitignore' --exclude='*.zip' ./ artifacts/
+          rsync -av --exclude='.git/' --exclude='.github/' --exclude='.gitignore' --exclude='node.sh' --exclude='*.zip' ./ artifacts/
 
       - name: Upload plugin artifact
         uses: actions/upload-artifact@v4
