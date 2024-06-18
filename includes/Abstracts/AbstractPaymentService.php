@@ -10,9 +10,9 @@ abstract class AbstractPaymentService extends WC_Payment_Gateway {
 	 * Constructor
 	 */
 	public function __construct() {
-		$this->icon = apply_filters( 'woocommerce_power_board_gateway_icon', '' );
+		$this->icon       = apply_filters( 'woocommerce_power_board_gateway_icon', '' );
 		$this->has_fields = true;
-		$this->supports = [ 
+		$this->supports   = [
 			'products',
 			'subscriptions',
 			'subscription_cancellation',
@@ -24,7 +24,8 @@ abstract class AbstractPaymentService extends WC_Payment_Gateway {
 			'default_credit_card_form',
 		];
 
-		$this->method_title = _x( 'PowerBoard payment', 'PowerBoard payment method', 'woocommerce-gateway-ppwer-board' );
+		$this->method_title       = _x( 'PowerBoard payment', 'PowerBoard payment method',
+			'woocommerce-gateway-ppwer-board' );
 		$this->method_description = __( 'Allows PowerBoard payments.', 'woocommerce-gateway-ppwer-board' );
 
 		$this->init_settings();
@@ -40,7 +41,8 @@ abstract class AbstractPaymentService extends WC_Payment_Gateway {
 			return '';
 		}
 
-		wp_enqueue_script( 'power-board-form', POWER_BOARD_PLUGIN_URL . '/assets/js/frontend/form.js', [], time(), true );
+		wp_enqueue_script( 'power-board-form', POWER_BOARD_PLUGIN_URL . '/assets/js/frontend/form.js', [], time(),
+			true );
 		wp_enqueue_style(
 			'power-board-widget-css',
 			POWER_BOARD_PLUGIN_URL . '/assets/css/frontend/widget.css',

@@ -134,7 +134,12 @@ class FiltersService extends AbstractSingleton {
 		$orderId = absint( get_query_var( 'order-received' ) );
 		$options = get_option( "power_board_fraud_{$orderId}" );
 		$order   = wc_get_order( $orderId );
-		if ( false === $options && 'processing' !== $order->get_status() ) {
+		$status  = $order->get_status();
+
+		if ( isset( $_GET['afterpay-error'] ) && ( 'true' === $_GET['afterpay-error'] ) ) {
+			return __( 'Order has been cancelled', 'power_board' );
+		}
+		if ( false === $options && 'processing' !== $status ) {
 			return $text;
 		}
 

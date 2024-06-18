@@ -92,6 +92,10 @@ class CardPaymentService extends WC_Payment_Gateway {
 			&& SettingsService::getInstance()->isCardEnabled();
 	}
 
+	public function  get_title(){
+        return trim($this->title) ? $this->title : 'Card';
+	}
+
 	/**
 	 * Process the payment and return the result.
 	 *

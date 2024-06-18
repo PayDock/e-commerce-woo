@@ -1,19 +1,22 @@
 <?php
+
 /**
  * Copyright (c) PowerBoard, Inc. and its affiliates. All Rights Reserved
+ *
+ * This source code is licensed under the license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
  * Plugin Name: PowerBoard for WooCommerce
- * Plugin URI: https://github.com/PayDock/e-commerce-woo/tree/power_board
- * Description: Accept more payment methods with PowerBoard. Connect multiple payment gateways with a central interface to manage the transactions.
+ * Plugin URI: https://github.com/PayDock/jsp-woocommerce/tree/power_board
+ * Description: PowerBoard simplify how you manage your payments. Reduce costs, technical headaches & streamline compliance using PowerBoard's payment orchestration.
  * Author: PowerBoard
  * Author URI: https://www.commbank.com.au/
- * Version: 2.0.46
- * Requires at least: 6.0
+ * Version: 2.0.52
+ * Requires at least: 6.4.2
  * Text Domain: power-board-for-woo
- * Tested up to: 6.5.3
- * WC requires at least: 8.0.0
- * WC tested up to: 8.9.1
- * License: GPLv3 or later
- * License URI: http://www.gnu.org/licenses/gpl-3.0.html
+ * Tested up to: 6.4.2
+ * WC requires at least: 6.4.2
+ * WC tested up to: 8.5
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -33,7 +36,7 @@ if ( ! defined( 'POWER_BOARD_PLUGIN_URL' ) ) {
 }
 
 if ( ! defined( 'POWER_BOARD_PLUGIN_VERSION' ) ) {
-	define( 'POWER_BOARD_PLUGIN_VERSION', '2.0.46' );
+	define( 'POWER_BOARD_PLUGIN_VERSION', '2.0.52' );
 }
 
 if ( ! defined( 'POWER_BOARD_TEXT_DOMAIN' ) ) {

@@ -156,7 +156,8 @@ class WidgetController {
 
 			if ( $isAfterPay ) {
 				$chargeRequest['meta']['success_url'] = $order->get_checkout_order_received_url();
-				$chargeRequest['meta']['error_url']   = $order->get_checkout_order_received_url();
+				$chargeRequest['meta']['error_url']   = add_query_arg( 'afterpay-error', 'true',
+					$order->get_checkout_order_received_url() );
 			}
 
 			$result = SDKAdapterService::getInstance()

@@ -12,7 +12,7 @@ abstract class AbstractAPMsBlock extends AbstractBlock {
 	public function __construct() {
 		$aPMsTypeId = $this->getType()->getId();
 
-		$this->name = 'power_board_' . $aPMsTypeId . '_a_p_m_s_block';
+		$this->name   = 'power_board_' . $aPMsTypeId . '_a_p_m_s_block';
 		$this->script = $aPMsTypeId . '-a-p-m-s';
 
 		parent::__construct();
@@ -22,43 +22,44 @@ abstract class AbstractAPMsBlock extends AbstractBlock {
 
 	public function get_payment_method_data(): array {
 		$settingsService = SettingsService::getInstance();
-		$payment = $this->getType();
+		$payment         = $this->getType();
 
 		$userCustomers = [];
 		if ( is_user_logged_in() ) {
-			$userCustomers = [ 
+			$userCustomers = [
 				'customers' => ( new UserCustomerRepository() )->getUserCustomers(),
 			];
 		}
 
-		return array_merge( $userCustomers, [ 
+		return array_merge( $userCustomers, [
 			// Wordpress data
-			'_wpnonce' => wp_create_nonce( 'process_payment' ),
-			'isUserLoggedIn' => is_user_logged_in(),
-			'isSandbox' => $settingsService->isSandbox(),
+			'_wpnonce'           => wp_create_nonce( 'process_payment' ),
+			'isUserLoggedIn'     => is_user_logged_in(),
+			'isSandbox'          => $settingsService->isSandbox(),
 			// Woocommerce data
-			'amount' => WC()->cart->total,
-			'currency' => strtoupper( get_woocommerce_currency() ),
+			'amount'             => WC()->cart->total,
+			'currency'           => strtoupper( get_woocommerce_currency() ),
 			// Widget
-			'title' => $settingsService->getWidgetPaymentAPMTitle( $payment ),
-			'description' => $settingsService->getWidgetPaymentAPMDescription( $payment ),
-			'styles' => $settingsService->getWidgetStyles(),
+			'title'              => $settingsService->getWidgetPaymentAPMTitle( $payment ),
+			'description'        => $settingsService->getWidgetPaymentAPMDescription( $payment ),
+			'styles'             => $settingsService->getWidgetStyles(),
 			// Apms
-			'enable' => $settingsService->isAPMsEnabled( $payment ),
-			'gatewayId' => $settingsService->getAPMsGatewayId( $payment ),
+			'enable'             => $settingsService->isAPMsEnabled( $payment ),
+			'gatewayId'          => $settingsService->getAPMsGatewayId( $payment ),
 			// Tokens & keys
-			'publicKey' => $settingsService->getPublicKey(),
+			'publicKey'          => $settingsService->getPublicKey(),
 			'paymentSourceToken' => '',
 			// SaveCard
-			'saveCard' => $settingsService->isAPMsSaveCard( $payment ),
+			'saveCard'           => $settingsService->isAPMsSaveCard( $payment ),
 			// DirectCharge
-			'directCharge' => $settingsService->isAPMsDirectCharge( $payment ),
+			'directCharge'       => $settingsService->isAPMsDirectCharge( $payment ),
 			// Fraud
-			'fraud' => $settingsService->isAPMsFraud( $payment ),
-			'fraudServiceId' => $settingsService->getAPMsFraudServiceId( $payment ),
+			'fraud'              => $settingsService->isAPMsFraud( $payment ),
+			'fraudServiceId'     => $settingsService->getAPMsFraudServiceId( $payment ),
 			// Other
-			'supports' => array_filter( $this->gateway->supports, [ $this->gateway, 'supports' ] ),
-			'pickupLocations' => get_option( 'pickup_location_pickup_locations' )
+			'supports'           => array_filter( $this->gateway->supports, [ $this->gateway, 'supports' ] ),
+			'pickupLocations'    => get_option( 'pickup_location_pickup_locations' ),
+			'total_limitation'   => $settingsService->getWidgetPaymentAPMsMinMax( $payment ),
 		] );
 	}
 

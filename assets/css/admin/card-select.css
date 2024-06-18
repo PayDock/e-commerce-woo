@@ -261,3 +261,7 @@ input[type=checkbox].checkbox {
 .multiselect-power-board ul li {
     position: relative;
 }
+
+.woocommerce table.form-table input.input-text.regular-input.powerboard {
+    width: 198px
+}

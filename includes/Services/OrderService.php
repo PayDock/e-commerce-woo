@@ -36,9 +36,9 @@ class OrderService {
 		if ( ( $oldStatusKey == $newStatusKey ) || ! empty( $GLOBALS['is_updating_power_board_order_status'] ) || null === $orderId ) {
 			return;
 		}
-
+		$this->customHandleStockReduction($order, $oldStatusKey, $newStatusKey);
 		$rulesForStatuses = [
-			'pb-paid'      => [
+			'pb-paid'	  => [
 				'pb-refunded',
 				'pb-p-refund',
 				'cancelled',
@@ -47,7 +47,7 @@ class OrderService {
 				'pb-failed',
 				'pb-pending',
 			],
-			'pb-p-paid'    => [
+			'pb-p-paid'	=> [
 				'pb-refunded',
 				'pb-p-refund',
 				'cancelled',
@@ -78,9 +78,9 @@ class OrderService {
 		];
 		if ( ! empty( $rulesForStatuses[ $oldStatusKey ] ) ) {
 			if ( ! in_array( $newStatusKey, $rulesForStatuses[ $oldStatusKey ] ) ) {
-				$newStatusName                                   = wc_get_order_status_name( $newStatusKey );
-				$oldStatusName                                   = wc_get_order_status_name( $oldStatusKey );
-				$error                                           = __(
+				$newStatusName								   = wc_get_order_status_name( $newStatusKey );
+				$oldStatusName								   = wc_get_order_status_name( $oldStatusKey );
+				$error										   = __(
 					'You can not change status from "' . $oldStatusName . '"  to "' . $newStatusName . '"',
 					'woocommerce'
 				);
@@ -95,7 +95,7 @@ class OrderService {
 
 	public function informationAboutPartialCaptured( $orderId ) {
 		$capturedAmount = get_post_meta( $orderId, 'capture_amount' );
-		$order          = wc_get_order( $orderId );
+		$order		  = wc_get_order( $orderId );
 		if ( $capturedAmount && is_array( $capturedAmount ) && in_array( $order->get_status(), [
 				'pb-failed',
 				'pb-pending',
@@ -122,6 +122,23 @@ class OrderService {
 			if ( ! empty( $message ) ) {
 				echo '<div class=\'notice notice-error is-dismissible\'><p>' . esc_html( $message ) . '</p></div>';
 				delete_option( 'power_board_status_change_error' );
+			}
+		}
+	}
+	function customHandleStockReduction($order, $oldStatusKey, $newStatusKey) {
+		$statusesWithDecreaseQuantityProduct =[
+			'pb-pending',
+			'pb-paid',
+			'pb-authorize',
+			'pb-requested',
+			'pb-p-paid',
+			'completed'
+		];
+		if (in_array( $newStatusKey, $statusesWithDecreaseQuantityProduct ) && !in_array( $oldStatusKey, $statusesWithDecreaseQuantityProduct )) {
+			foreach ($order->get_items() as $item) {
+				if ($product = $item->get_product()) {
+					wc_update_product_stock($product, $item->get_quantity(), 'decrease');
+				}
 			}
 		}
 	}

@@ -33,7 +33,7 @@ To install and configure the PowerBoard plugin, you need:
 
 1. **Download the Plugin**
    - Download the zip file with the plugin:  
-     [PowerBoard WooCommerce Plugin] (https://github.com/PayDock/e-commerce-woo/blob/power_board/power-board_v2.0.46.zip)
+     [PowerBoard WooCommerce Plugin] (https://github.com/PayDock/e-commerce-woo/blob/power_board/power-board_v2.0.52.zip)
 
 2. **Install the Plugin**
    - Go to WordPress -> Plugins -> Add new Plugin -> Upload Plugin

@@ -1,14 +1,5 @@
 *** PowerBoard for WooCommerce Changelog ***
 
-2024-05-30 - version 2.0.46
-* Fixes, updates, tweaks
-
-2024-05-28 - version 2.0.44
-* Add screenshots, update readme, changelog, etc.
-
-2024-05-22 - version 2.0.37
-* Completely new version
-
 2024-04-28 - version 1.0.28
 * Fix bugs
 

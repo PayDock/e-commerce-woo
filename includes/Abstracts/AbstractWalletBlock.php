@@ -11,7 +11,7 @@ abstract class AbstractWalletBlock extends AbstractBlock {
 	public function __construct() {
 		$walletTypeId = $this->getType()->getId();
 
-		$this->name = 'power_board_' . $walletTypeId . '_wallet_block';
+		$this->name   = 'power_board_' . $walletTypeId . '_wallet_block';
 		$this->script = $walletTypeId . '-wallet';
 
 		parent::__construct();
@@ -21,23 +21,24 @@ abstract class AbstractWalletBlock extends AbstractBlock {
 
 	public function get_payment_method_data(): array {
 		$settings = SettingsService::getInstance();
-		$payment = $this->getType();
+		$payment  = $this->getType();
 
 		$result = [
-			'_wpnonce' => wp_create_nonce( 'process_payment' ),
-			'title' => $settings->getWidgetPaymentWalletTitle( $payment ),
-			'description' => $settings->getWidgetPaymentWalletDescription( $payment ),
-			'publicKey' => $settings->getPublicKey(),
-			'isSandbox' => $settings->isSandbox(),
-			'styles' => $settings->getWidgetStyles(),
+			'_wpnonce'         => wp_create_nonce( 'process_payment' ),
+			'title'            => $settings->getWidgetPaymentWalletTitle( $payment ),
+			'description'      => $settings->getWidgetPaymentWalletDescription( $payment ),
+			'publicKey'        => $settings->getPublicKey(),
+			'isSandbox'        => $settings->isSandbox(),
+			'styles'           => $settings->getWidgetStyles(),
+			'total_limitation' => $settings->getWidgetPaymentWalletMinMax( $payment ),
 		];
 
 
-		$result['wallets'][ strtolower( $payment->name ) ] = [ 
-			'gatewayId' => $settings->getWalletGatewayId( $payment ),
-			'fraud' => $settings->isWalletFraud( $payment ),
+		$result['wallets'][ strtolower( $payment->name ) ] = [
+			'gatewayId'      => $settings->getWalletGatewayId( $payment ),
+			'fraud'          => $settings->isWalletFraud( $payment ),
 			'fraudServiceId' => $settings->getWalletFraudServiceId( $payment ),
-			'directCharge' => $settings->getWalletFraudServiceId( $payment ),
+			'directCharge'   => $settings->getWalletFraudServiceId( $payment ),
 		];
 
 		if ( WalletPaymentMethods::PAY_PAL_SMART_BUTTON()->name === $payment->name ) {

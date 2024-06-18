@@ -13,7 +13,9 @@ class AfterpayWalletService extends AbstractWalletPaymentService {
 	protected function getWalletType(): WalletPaymentMethods {
 		return WalletPaymentMethods::AFTERPAY();
 	}
-
+	public function  get_title(){
+        return trim($this->title) ? $this->title :  'Afterpay v1';
+	}
 	public function process_payment( $order_id, $retry = true, $force_customer = false ) {
 		$wpNonce = ! empty( $_POST['_wpnonce'] ) ? sanitize_text_field( $_POST['_wpnonce'] ) : null;
 

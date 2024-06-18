@@ -1,3 +1,4 @@
+let buttons = {};
 export default (id, buttonId, data, isSandbox) => {
     const paymentSourceElement = jQuery('#paymentSourceWalletsToken');
     const paymentCompleted = jQuery('#paymentCompleted');
@@ -20,7 +21,7 @@ export default (id, buttonId, data, isSandbox) => {
         };
     }
 
-    if ('#powerBoardkWalletAfterpayButton' === buttonId) {
+    if ('#powerBoardWalletAfterpayButton' === buttonId) {
         jQuery('#powerBoardWalletAfterpayButton').each((index, element) => element.addEventListener("click", (event) => {
             data.payment = id.replace('-', '_')
             paymentSourceElement.val(JSON.stringify(data))
@@ -28,11 +29,14 @@ export default (id, buttonId, data, isSandbox) => {
         }, true))
     }
 
-    let button = new window.cba.WalletButtons(buttonId, data.resource.data.token, config)
+    if(buttons.current){
+        delete buttons.current;
+    }
+    buttons.current = new window.cba.WalletButtons(buttonId, data.resource.data.token, config)
 
-    button.setEnv(isSandbox ? 'preproduction_cba' : 'production_cba')
+    buttons.current.setEnv(isSandbox ? 'preproduction_cba' : 'production_cba')
 
-    button.onPaymentSuccessful((result) => {
+    buttons.current.onPaymentSuccessful((result) => {
         result.payment = id.replace('-','_')
         paymentSourceElement.val(JSON.stringify(result))
         paymentCompleted.show();
@@ -41,11 +45,11 @@ export default (id, buttonId, data, isSandbox) => {
         orderButton.click();
     })
 
-    button.onPaymentError((data) => {
+    buttons.current.onPaymentError((data) => {
         orderButton.click();
     });
 
-    button.onPaymentInReview((result) => {
+    buttons.current.onPaymentInReview((result) => {
         result.payment = id.replace('-','_')
         paymentSourceElement.val(JSON.stringify(result))
         paymentCompleted.show();
@@ -55,5 +59,5 @@ export default (id, buttonId, data, isSandbox) => {
         orderButton.click();
     });
 
-    button.load();
+    buttons.current.load();
 }
