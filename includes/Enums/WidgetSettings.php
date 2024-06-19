@@ -51,13 +51,7 @@ class WidgetSettings extends AbstractEnum {
 	}
 
 	public function getTitle(): string {
-		if ( false !== strpos( $this->name, 'MIN' ) ) {
-			$text = $this->name . '_-_MAX_VALUE';
-		} elseif ( false !== strpos( $this->name, 'MAX' ) ) {
-			$text = '';
-		} else {
-			$text = $this->name;
-		}
+		$text = str_replace( [ '_MIN', '_MAX' ], '', $this->name );
 
 		$result = explode( '_', $text );
 		$result = array_map( function ( $item ) {
