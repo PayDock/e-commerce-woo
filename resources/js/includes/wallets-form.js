@@ -197,7 +197,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
         ),
         content: <Content/>,
         edit: <Content/>,
-        canMakePayment: () => canMakePayment(settings.total_limitation, cart.getCartTotals()?.total_price),
+        canMakePayment: () => true,
         ariaLabel: label,
         supports: {
             features: settings.supports,

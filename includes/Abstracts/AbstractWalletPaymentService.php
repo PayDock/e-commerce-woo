@@ -6,6 +6,7 @@ use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use PowerBoard\Enums\OrderListColumns;
 use PowerBoard\Enums\WalletPaymentMethods;
 use PowerBoard\Repositories\LogRepository;
+use PowerBoard\Services\OrderService;
 use PowerBoard\Services\SettingsService;
 
 abstract class AbstractWalletPaymentService extends AbstractPaymentService {
@@ -77,7 +78,7 @@ abstract class AbstractWalletPaymentService extends AbstractPaymentService {
 			$status = 'wc-pb-paid';
 		}
 
-		$order->set_status( $status );
+		OrderService::updateStatus( $order_id, $status );
 		$order->payment_complete();
 		$order->save();
 

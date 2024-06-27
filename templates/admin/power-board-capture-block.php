@@ -69,7 +69,10 @@
     }
 </script>
 <span class="power-board-order-actions">
-	<?php if ( 'pb-authorize' == $order->get_status() ) : ?>
+	<?php if ( in_array( $order->get_meta( \PowerBoard\Hooks\ActivationHook::CUSTOM_STATUS_META_KEY ), [
+		'pb-authorize',
+		'wc-pb-authorize'
+	] ) ) : ?>
         <button type="button"
                 onclick="powerBoardPaymentCapture(<?php echo esc_attr( $order->get_id() ); ?>, 'power-board-capture-charge')"
                 class="button">

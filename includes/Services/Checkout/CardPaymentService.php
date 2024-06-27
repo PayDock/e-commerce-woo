@@ -9,6 +9,7 @@ use PowerBoard\Enums\SettingsTabs;
 use PowerBoard\Enums\WidgetSettings;
 use PowerBoard\Repositories\LogRepository;
 use PowerBoard\Repositories\UserTokenRepository;
+use PowerBoard\Services\OrderService;
 use PowerBoard\Services\ProcessPayment\CardProcessor;
 use PowerBoard\Services\SDKAdapterService;
 use PowerBoard\Services\SettingsService;
@@ -19,10 +20,10 @@ class CardPaymentService extends WC_Payment_Gateway {
 	 * Constructor
 	 */
 	public function __construct() {
-		$this->id = 'power_board_gateway';
-		$this->icon = apply_filters( 'woocommerce_power_board_gateway_icon', '' );
+		$this->id         = 'power_board_gateway';
+		$this->icon       = apply_filters( 'woocommerce_power_board_gateway_icon', '' );
 		$this->has_fields = true;
-		$this->supports = [ 
+		$this->supports   = [
 			'products',
 			'subscriptions',
 			'subscription_cancellation',
@@ -34,15 +35,15 @@ class CardPaymentService extends WC_Payment_Gateway {
 			'default_credit_card_form',
 		];
 
-		$this->method_title = _x( 'PowerBoard payment', 'PowerBoard payment method', 'woocommerce-gateway-ppwer-board' );
+		$this->method_title       = _x( 'PowerBoard payment', 'PowerBoard payment method', 'woocommerce-gateway-ppwer-board' );
 		$this->method_description = __( 'Allows PowerBoard payments.', 'woocommerce-gateway-ppwer-board' );
 
 		// Load the settings.
 		$this->init_settings();
 
 		// Define user set variables.
-		$service = SettingsService::getInstance();
-		$keyTitle = $service->getOptionName( SettingsTabs::WIDGET()->value, [ 
+		$service        = SettingsService::getInstance();
+		$keyTitle       = $service->getOptionName( SettingsTabs::WIDGET()->value, [
 			WidgetSettings::PAYMENT_CARD_TITLE()->name,
 		] );
 		$keyDescription = $service->getOptionName(
@@ -50,7 +51,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 			[ WidgetSettings::PAYMENT_CARD_DESCRIPTION()->name ]
 		);
 
-		$this->title = get_option( $keyTitle );
+		$this->title       = get_option( $keyTitle );
 		$this->description = get_option( $keyDescription );
 		// Actions.
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, [ $this, 'process_admin_options' ] );
@@ -74,13 +75,13 @@ class CardPaymentService extends WC_Payment_Gateway {
 		}
 
 		wp_enqueue_script( 'power-board-form', POWER_BOARD_PLUGIN_URL . '/assets/js/frontend/form.js', [], time(), true );
-		wp_localize_script( 'power-board-form', 'powerBoardCardWidgetSettings', [ 
+		wp_localize_script( 'power-board-form', 'powerBoardCardWidgetSettings', [
 			'suportedCard' => 'Visa, Mastercard, Adex',
 		] );
 		wp_enqueue_style( 'power-board-widget-css', POWER_BOARD_PLUGIN_URL . '/assets/css/frontend/widget.css', [], time() );
 
-		wp_localize_script( 'power-board-form', 'PowerBoardAjax', [ 
-			'url' => admin_url( 'admin-ajax.php' ),
+		wp_localize_script( 'power-board-form', 'PowerBoardAjax', [
+			'url'     => admin_url( 'admin-ajax.php' ),
 			'wpnonce' => wp_create_nonce( 'get_vault_token' )
 		] );
 
@@ -89,11 +90,11 @@ class CardPaymentService extends WC_Payment_Gateway {
 
 	public function is_available() {
 		return SettingsService::getInstance()->isEnabledPayment()
-			&& SettingsService::getInstance()->isCardEnabled();
+		       && SettingsService::getInstance()->isCardEnabled();
 	}
 
-	public function  get_title(){
-        return trim($this->title) ? $this->title : 'Card';
+	public function get_title() {
+		return trim( $this->title ) ? $this->title : 'Card';
 	}
 
 	/**
@@ -112,20 +113,20 @@ class CardPaymentService extends WC_Payment_Gateway {
 
 		$order = wc_get_order( $order_id );
 
-		$siteName = remove_accents( wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) );
+		$siteName    = remove_accents( wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) );
 		$description = sprintf(
-			// Translators: %s: number of orders
+		// Translators: %s: number of orders
 			__( 'Order №%1$s from %2$s.', 'power-board-for-woocommerce' ),
 			$order->get_order_number(),
 			$siteName
 		);
 
 		$loggerRepository = new LogRepository();
-		$chargeId = '';
+		$chargeId         = '';
 
 		try {
-			$cardProcessor = new CardProcessor( array_merge( [ 
-				'amount' => (float) $order->get_total(),
+			$cardProcessor = new CardProcessor( array_merge( [
+				'amount'      => (float) $order->get_total(),
 				'description' => $description,
 			], $_POST ) );
 
@@ -137,7 +138,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 			}
 
 			$chargeId = ! empty( $response['resource']['data']['_id'] ) ? $response['resource']['data']['_id'] : '';
-		} catch (Exception $e) {
+		} catch ( Exception $e ) {
 			$loggerRepository->createLogRecord(
 				$chargeId ?? '',
 				'Charge',
@@ -153,7 +154,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 
 		try {
 			$cardProcessor->createCustomer();
-		} catch (Exception $e) {
+		} catch ( Exception $e ) {
 			$loggerRepository->createLogRecord(
 				$chargeId ?? '',
 				'Create customer',
@@ -167,11 +168,10 @@ class CardPaymentService extends WC_Payment_Gateway {
 			);
 		}
 
-		$status = ucfirst( strtolower( $response['resource']['data']['status'] ?? 'undefined' ) );
-		$operation = ucfirst( strtolower( $response['resource']['type'] ?? 'undefined' ) );
+		$status          = ucfirst( strtolower( $response['resource']['data']['status'] ?? 'undefined' ) );
+		$operation       = ucfirst( strtolower( $response['resource']['type'] ?? 'undefined' ) );
 		$isAuthorization = $response['resource']['data']['authorization'] ?? 0;
-		$isCompleted = false;
-		$markAsSuccess = false;
+		$markAsSuccess   = false;
 		if (
 			'Pre_authentication_pending' === $status &&
 			$cardProcessor->getRunMethod() === CardProcessor::FRAUD_IN_BUILD_CHARGE_METHOD
@@ -182,13 +182,15 @@ class CardPaymentService extends WC_Payment_Gateway {
 				$status = 'wc-pb-authorize';
 			} else {
 				$markAsSuccess = true;
-				$isCompleted = 'Complete' === $status;
-				$status = $isCompleted ? 'wc-pb-paid' : 'wc-pb-pending';
+				$isCompleted   = 'Complete' === $status;
+				$status        = $isCompleted ? 'wc-pb-paid' : 'wc-pb-pending';
 			}
 		}
 
-		$order->set_status( $status );
-		$order->payment_complete();
+		OrderService::updateStatus( $order->get_id(), $status );
+		if ( ! in_array( $status, [ 'wc-pb-pending' ] ) ) {
+			$order->payment_complete();
+		}
 		$order->save();
 		update_post_meta( $order->get_id(), 'power_board_charge_id', $chargeId );
 		add_post_meta( $order->get_id(), OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(), 'Card' );
@@ -202,8 +204,8 @@ class CardPaymentService extends WC_Payment_Gateway {
 			$markAsSuccess ? LogRepository::SUCCESS : LogRepository::DEFAULT
 		);
 
-		return [ 
-			'result' => 'success',
+		return [
+			'result'   => 'success',
 			'redirect' => $this->get_return_url( $order ),
 		];
 	}
@@ -218,10 +220,10 @@ class CardPaymentService extends WC_Payment_Gateway {
 		}
 
 		if ( ! empty( $_SERVER['HTTP_X_REQUESTED_WITH'] ) && strtolower(
-			sanitize_text_field( $_SERVER['HTTP_X_REQUESTED_WITH'] )
-		) == 'xmlhttprequest' ) {
+			                                                     sanitize_text_field( $_SERVER['HTTP_X_REQUESTED_WITH'] )
+		                                                     ) == 'xmlhttprequest' ) {
 			$cardProcessor = new CardProcessor( $_POST );
-			$type = ! empty( $_POST['type'] ) ? sanitize_text_field( $_POST['type'] ) : null;
+			$type          = ! empty( $_POST['type'] ) ? sanitize_text_field( $_POST['type'] ) : null;
 			try {
 				switch ( $type ) {
 					case 'clear-user-tokens':
@@ -233,7 +235,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 					default:
 						echo esc_html( $cardProcessor->getVaultToken() );
 				}
-			} catch (Exception $e) {
+			} catch ( Exception $e ) {
 				( new LogRepository() )->createLogRecord(
 					'',
 					'Charges',

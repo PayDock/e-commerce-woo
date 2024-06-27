@@ -7,8 +7,8 @@ use Exception;
 use PowerBoard\Enums\OrderListColumns;
 use PowerBoard\Enums\OtherPaymentMethods;
 use PowerBoard\Repositories\LogRepository;
+use PowerBoard\Services\OrderService;
 use PowerBoard\Services\ProcessPayment\ApmProcessor;
-use PowerBoard\Services\SDKAdapterService;
 use PowerBoard\Services\SettingsService;
 
 abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
@@ -16,11 +16,11 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 	 * Constructor
 	 */
 	public function __construct() {
-		$settings = SettingsService::getInstance();
+		$settings      = SettingsService::getInstance();
 		$paymentMethod = $this->getAPMsType();
 
-		$this->id = 'power_board_' . $paymentMethod->getId() . '_a_p_m_s_gateway';
-		$this->title = $settings->getWidgetPaymentAPMTitle( $paymentMethod );
+		$this->id          = 'power_board_' . $paymentMethod->getId() . '_a_p_m_s_gateway';
+		$this->title       = $settings->getWidgetPaymentAPMTitle( $paymentMethod );
 		$this->description = $settings->getWidgetPaymentAPMDescription( $paymentMethod );
 
 		parent::__construct();
@@ -30,7 +30,7 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 
 	public function is_available() {
 		return SettingsService::getInstance()->isEnabledPayment()
-			&& SettingsService::getInstance()->isAPMsEnabled( $this->getAPMsType() );
+		       && SettingsService::getInstance()->isAPMsEnabled( $this->getAPMsType() );
 	}
 
 	/**
@@ -46,11 +46,11 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 				__( 'Error: Security check', 'power_board' )
 			);
 		}
-		
+
 		$order = wc_get_order( $order_id );
 
 		$loggerRepository = new LogRepository();
-		$chargeId = '';
+		$chargeId         = '';
 
 		try {
 			$processor = new ApmProcessor( $_POST );
@@ -58,11 +58,12 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 			$response = $processor->run( $order );
 
 			if ( ! empty( $response['error'] ) || empty( $response['resource']['data']['_id'] ) ) {
-				throw new Exception( __( 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later.', 'power_board' ) );
+				throw new Exception( __( 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later.',
+					'power_board' ) );
 			}
 
 			$chargeId = $response['resource']['data']['_id'];
-		} catch (Exception $e) {
+		} catch ( Exception $e ) {
 			$loggerRepository->createLogRecord(
 				$chargeId ?? '',
 				'Charges',
@@ -76,16 +77,16 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 			);
 		}
 
-		$status = ucfirst( strtolower( $response['resource']['data']['transactions'][0]['status'] ?? 'undefined' ) );
-		$operation = ucfirst( strtolower( $response['resource']['type'] ?? 'undefined' ) );
+		$status          = ucfirst( strtolower( $response['resource']['data']['transactions'][0]['status'] ?? 'undefined' ) );
+		$operation       = ucfirst( strtolower( $response['resource']['type'] ?? 'undefined' ) );
 		$isAuthorization = $response['resource']['data']['authorization'] ?? 0;
 		if ( $isAuthorization && 'Pending' == $status ) {
 			$status = 'wc-pb-authorize';
 		} else {
 			$isCompleted = 'complete' === strtolower( $status );
-			$status = $isCompleted ? 'wc-pb-paid' : 'wc-pb-pending';
+			$status      = $isCompleted ? 'wc-pb-paid' : 'wc-pb-pending';
 		}
-		$order->set_status( $status );
+		OrderService::updateStatus( $order_id, $status );
 		$order->payment_complete();
 		$order->save();
 
@@ -108,8 +109,8 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 			$this->getAPMsType()->getLabel()
 		);
 
-		return [ 
-			'result' => 'success',
+		return [
+			'result'   => 'success',
 			'redirect' => $this->get_return_url( $order ),
 		];
 	}

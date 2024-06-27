@@ -35,7 +35,7 @@
             <span class="woocommerce-Price-amount">
                 <bdi>
                     <span class="woocommerce-Price-currencySymbol">
-                        <?php echo esc_html_e( get_woocommerce_currency_symbol( $order->get_currency() ) ); ?>
+                        <?php esc_html_e( get_woocommerce_currency_symbol( $order->get_currency() ) ); ?>
                     </span>
                     <span class="amount"><?php echo number_format( (float) $capturedAmount, 2, '.', '' ); ?></span>
                     <span class="available-to-refund-amount hidden"><?php echo number_format( $capturedAmount - $order->get_total_refunded(),

@@ -2,6 +2,8 @@
 
 namespace PowerBoard\Services;
 
+use PowerBoard\Hooks\ActivationHook;
+
 class OrderService {
 
 	protected $templateService;
@@ -13,22 +15,32 @@ class OrderService {
 	}
 
 	public function iniPowerBoardOrderButtons( $order ) {
-		$orderStatus = $order->get_status();
+		$orderCustomStatus = $order->get_meta( ActivationHook::CUSTOM_STATUS_META_KEY );
+		$orderStatus       = $order->get_status();
+
 		if ( in_array( $orderStatus, [
-			'pb-pending',
-			'pb-failed',
-			'pb-refunded',
-			'pb-authorize',
-			'pb-cancelled',
-		] ) ) {
+				'pending',
+				'failed',
+				'cancelled',
+			] ) || in_array( $orderCustomStatus, [
+				'pb-requested',
+				'wc-pb-requested',
+				'pb-authorize',
+				'wc-pb-authorize'
+			] ) || ( $order->get_total() == $order->get_total_refunded() ) ) {
 			$this->templateService->includeAdminHtml( 'hide-refund-button' );
 		}
 		if ( in_array( $orderStatus, [
-			'pb-authorize',
-			'pb-paid',
-			'pb-p-paid',
-		] ) ) {
-			$this->templateService->includeAdminHtml( 'power-board-capture-block', compact( 'order', 'order' ) );
+				'processing',
+			] ) && in_array( $orderCustomStatus, [
+				'pb-authorize',
+				'wc-pb-authorize',
+				'pb-paid',
+				'wc-pb-paid',
+				'wc-pb-p-paid',
+				'pb-p-paid'
+			] ) ) {
+			$this->templateService->includeAdminHtml( 'power-board-capture-block', compact( 'order' ) );
 		}
 	}
 
@@ -36,51 +48,22 @@ class OrderService {
 		if ( ( $oldStatusKey == $newStatusKey ) || ! empty( $GLOBALS['is_updating_power_board_order_status'] ) || null === $orderId ) {
 			return;
 		}
-		$this->customHandleStockReduction($order, $oldStatusKey, $newStatusKey);
+		$this->customHandleStockReduction( $order, $oldStatusKey, $newStatusKey );
 		$rulesForStatuses = [
-			'pb-paid'	  => [
-				'pb-refunded',
-				'pb-p-refund',
-				'cancelled',
-				'pb-cancelled',
+			'processing' => [
 				'refunded',
-				'pb-failed',
-				'pb-pending',
-			],
-			'pb-p-paid'	=> [
-				'pb-refunded',
-				'pb-p-refund',
 				'cancelled',
-				'pb-cancelled',
-				'refunded',
-				'pb-failed',
-				'pb-pending',
+				'failed',
+				'pending',
 			],
-			'pb-refunded'  => [ 'pb-paid', 'pb-p-paid', 'cancelled', 'pb-failed', 'refunded' ],
-			'pb-p-refund'  => [ 'pb-paid', 'pb-p-paid', 'pb-refunded', 'refunded', 'cancelled', 'pb-failed' ],
-			'pb-authorize' => [
-				'pb-paid',
-				'pb-p-paid',
-				'pb-cancelled',
-				'pb-failed',
-				'cancelled',
-				'pb-pending',
-			],
-			'pb-cancelled' => [ 'pb-failed', 'cancelled' ],
-			'pb-requested' => [
-				'pb-paid',
-				'pb-p-paid',
-				'pb-failed',
-				'cancelled',
-				'pb-pending',
-				'pb-authorize',
-			],
+			'refunded'   => [ 'processing', 'cancelled', 'failed', 'refunded' ],
+			'cancelled'  => [ 'failed', 'cancelled' ],
 		];
 		if ( ! empty( $rulesForStatuses[ $oldStatusKey ] ) ) {
 			if ( ! in_array( $newStatusKey, $rulesForStatuses[ $oldStatusKey ] ) ) {
-				$newStatusName								   = wc_get_order_status_name( $newStatusKey );
-				$oldStatusName								   = wc_get_order_status_name( $oldStatusKey );
-				$error										   = __(
+				$newStatusName                                   = wc_get_order_status_name( $newStatusKey );
+				$oldStatusName                                   = wc_get_order_status_name( $oldStatusKey );
+				$error                                           = __(
 					'You can not change status from "' . $oldStatusName . '"  to "' . $newStatusName . '"',
 					'woocommerce'
 				);
@@ -95,16 +78,12 @@ class OrderService {
 
 	public function informationAboutPartialCaptured( $orderId ) {
 		$capturedAmount = get_post_meta( $orderId, 'capture_amount' );
-		$order		  = wc_get_order( $orderId );
+		$order          = wc_get_order( $orderId );
 		if ( $capturedAmount && is_array( $capturedAmount ) && in_array( $order->get_status(), [
-				'pb-failed',
-				'pb-pending',
-				'pb-paid',
-				'pb-authorize',
-				'pb-cancelled',
-				'pb-p-refund',
-				'pb-requested',
-				'pb-p-paid',
+				'failed',
+				'pending',
+				'processing',
+				'refunded',
 			] ) ) {
 			$capturedAmount = reset( $capturedAmount );
 			if ( $order->get_total() > $capturedAmount ) {
@@ -125,21 +104,28 @@ class OrderService {
 			}
 		}
 	}
-	function customHandleStockReduction($order, $oldStatusKey, $newStatusKey) {
-		$statusesWithDecreaseQuantityProduct =[
-			'pb-pending',
-			'pb-paid',
-			'pb-authorize',
-			'pb-requested',
-			'pb-p-paid',
-			'completed'
+
+	public function customHandleStockReduction( $order, $oldStatusKey, $newStatusKey ) {
+		$statusesWithDecreaseQuantityProduct = [
+			'pending',
+			'processing',
+			'completed',
 		];
-		if (in_array( $newStatusKey, $statusesWithDecreaseQuantityProduct ) && !in_array( $oldStatusKey, $statusesWithDecreaseQuantityProduct )) {
-			foreach ($order->get_items() as $item) {
-				if ($product = $item->get_product()) {
-					wc_update_product_stock($product, $item->get_quantity(), 'decrease');
+		if ( in_array( $newStatusKey, $statusesWithDecreaseQuantityProduct ) && ! in_array( $oldStatusKey,
+				$statusesWithDecreaseQuantityProduct ) ) {
+			foreach ( $order->get_items() as $item ) {
+				if ( $product = $item->get_product() ) {
+					wc_update_product_stock( $product, $item->get_quantity(), 'decrease' );
 				}
 			}
 		}
+	}
+
+	public static function updateStatus( $id, $custom_status, $status_note = null ) {
+		$order = wc_get_order( $id );
+
+		$order->set_status( ActivationHook::CUSTOM_STATUSES[ $custom_status ], $status_note );
+		$order->update_meta_data( ActivationHook::CUSTOM_STATUS_META_KEY, $custom_status );
+		$order->save();
 	}
 }
