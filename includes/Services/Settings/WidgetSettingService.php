@@ -5,7 +5,6 @@ namespace Paydock\Services\Settings;
 use Paydock\Abstracts\AbstractSettingService;
 use Paydock\Enums\SettingsTabs;
 use Paydock\Enums\WidgetSettings;
-use Paydock\PaydockPlugin;
 use Paydock\Services\SettingsService;
 use Paydock\Services\Validation\WidgetValidationService;
 
@@ -63,58 +62,59 @@ class WidgetSettingService extends AbstractSettingService {
 	public function init_form_fields(): void {
 		$service = SettingsService::getInstance();
 		foreach ( WidgetSettings::cases() as $case ) {
-			$key = $service->getOptionName( $this->id, [ 
+			$key = $service->getOptionName( $this->id, [
 				$case->name,
 			] );
 
 			if ( WidgetSettings::PAYMENT_CARD_TITLE()->name === $case->name ) {
-				$this->form_fields[ $key . '_big_label' ] = [ 
-					'type' => 'big_label',
+				$this->form_fields[ $key . '_big_label' ] = [
+					'type'  => 'big_label',
 					'title' => __( 'Payment Methods:', 'pay_dock' ),
 				];
-				$this->form_fields[ $key . '_label' ] = [ 
-					'type' => 'label',
+				$this->form_fields[ $key . '_label' ]     = [
+					'type'  => 'label',
 					'title' => __( 'Cards', 'pay_dock' ),
 				];
 			} elseif ( WidgetSettings::PAYMENT_BANK_ACCOUNT_TITLE()->name === $case->name ||
-				WidgetSettings::PAYMENT_BANK_ACCOUNT_DESCRIPTION()->name === $case->name ) {
+			           WidgetSettings::PAYMENT_BANK_ACCOUNT_DESCRIPTION()->name === $case->name ) {
 				continue;
 			} elseif ( WidgetSettings::PAYMENT_WALLET_APPLE_PAY_TITLE()->name === $case->name ) {
-				$this->form_fields[ $key . '_label' ] = [ 
-					'type' => 'label',
+				$this->form_fields[ $key . '_label' ] = [
+					'type'  => 'label',
 					'title' => __( 'Wallets', 'pay_dock' ),
 				];
 			} elseif ( WidgetSettings::PAYMENT_A_P_M_S_AFTERPAY_V1_TITLE()->name === $case->name ) {
-				$this->form_fields[ $key . '_label' ] = [ 
-					'type' => 'label',
+				$this->form_fields[ $key . '_label' ] = [
+					'type'  => 'label',
 					'title' => __( 'APMs', 'pay_dock' ),
 				];
 			} elseif ( WidgetSettings::STYLE_BACKGROUND_COLOR()->name === $case->name ) {
-				$this->form_fields[ $key . '_label' ] = [ 
-					'type' => 'big_label',
+				$this->form_fields[ $key . '_label' ] = [
+					'type'  => 'big_label',
 					'title' => __( 'Widget Styles:', 'pay_dock' ),
 				];
 			}
 
-			$this->form_fields[ $key ] = [ 
-				'type' => $case->getInputType(),
-				'title' => __( $case->getTitle(), 'pay_dock' ),
+			$this->form_fields[ $key ] = [
+				'type'    => $case->getInputType(),
+				'title'   => __( $case->getTitle(), 'pay_dock' ),
 				'default' => $case->getDefault(),
 			];
 
 			$options = $case->getOptions();
+
 			if ( ! empty( $options ) && ( 'select' == $case->getInputType() ) ) {
 				$this->form_fields[ $key ]['options'] = $options;
 			} elseif ( 'textarea' == $case->getInputType() ) {
 				$this->form_fields[ $key ]['placeholder'] = self::CUSTOM_STYLES_PLACEHOLDER;
-				$this->form_fields[ $key ]['class'] = 'custom-textarea';
+				$this->form_fields[ $key ]['class']       = 'custom-textarea';
 			}
 		}
 	}
 
 	public function generate_color_picker_html( $key, $data ) {
 		$value = $this->get_option( $key );
-		$key = $this->get_field_key( $key );
+		$key   = $this->get_field_key( $key );
 
 		$data['desc_tip'] = ! empty( $data['desc_tip'] ) ? $data['desc_tip'] : '';
 
@@ -122,17 +122,51 @@ class WidgetSettingService extends AbstractSettingService {
 			->getAdminHtml( 'color-picker', compact( 'key', 'data', 'value' ) );
 	}
 
+	public function generate_min_max_html( $key, $data ) {
+		if ( false !== strpos( $key, 'MAX' ) ) {
+			return '';
+		}
+
+		$max_key = str_replace( 'MIN', 'MAX', $key );
+
+		$keys = [
+			'min' => $this->get_field_key( $key ),
+			'max' => $this->get_field_key( $max_key ),
+		];
+
+		$min = $this->get_option( $key );
+		$max = $this->get_option( $max_key );
+
+		if ( empty( $min ) ) {
+			$min = $data['default'];
+		}
+
+		if ( empty( $max ) ) {
+			$max = '';
+		}
+
+		$value = [
+			'min' => $min,
+			'max' => $max,
+		];
+
+		$data['desc_tip'] = ! empty( $data['desc_tip'] ) ? $data['desc_tip'] : '';
+
+		return $this->templateService
+			->getAdminHtml( 'min-max', compact( 'keys', 'data', 'value' ) );
+	}
+
 	public function generate_textarea_html( $key, $data ) {
 		$field_key = $this->get_field_key( $key );
-		$defaults = [ 
-			'title' => '',
-			'disabled' => false,
-			'class' => '',
-			'css' => '',
-			'placeholder' => '',
-			'type' => 'text',
-			'desc_tip' => false,
-			'description' => '',
+		$defaults  = [
+			'title'             => '',
+			'disabled'          => false,
+			'class'             => '',
+			'css'               => '',
+			'placeholder'       => '',
+			'type'              => 'text',
+			'desc_tip'          => false,
+			'description'       => '',
 			'custom_attributes' => [],
 		];
 
@@ -145,7 +179,7 @@ class WidgetSettingService extends AbstractSettingService {
 	public function process_admin_options() {
 		$this->init_settings();
 		$validationService = new WidgetValidationService( $this );
-		$this->settings = array_merge( $this->settings, $validationService->getResult() );
+		$this->settings    = array_merge( $this->settings, $validationService->getResult() );
 
 		foreach ( $validationService->getErrors() as $error ) {
 			$this->add_error( $error );

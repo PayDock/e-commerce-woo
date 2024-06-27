@@ -10,8 +10,12 @@ import {
     sleep,
     standalone3Ds
 } from '../includes/wc-paydock';
+import {select} from '@wordpress/data';
+import {CART_STORE_KEY} from '@woocommerce/block-data';
+import canMakePayment from "../includes/canMakePayment";
 
 const settings = getSetting('paydock_data', {});
+const cart = select(CART_STORE_KEY);
 
 const textDomain = 'pay_dock';
 const labels = {
@@ -29,6 +33,7 @@ let formSubmittedAlready = false;
 const Content = (props) => {
     const {eventRegistration, emitResponse} = props;
     const {onPaymentSetup, onCheckoutValidation} = eventRegistration;
+    jQuery('.wc-block-components-checkout-place-order-button').show();
 
     useEffect(() => {
         const validation = onCheckoutValidation(async () => {
@@ -161,6 +166,10 @@ const Content = (props) => {
                 data.styles = '';
                 data.supports = '';
 
+                if(data.total_limitation){
+                    delete data.total_limitation;
+                }
+
                 return {
                     type: emitResponse.responseTypes.SUCCESS,
                     meta: {
@@ -239,7 +248,7 @@ const Paydok = {
     ),
     content: <Content/>,
     edit: <Content/>,
-    canMakePayment: () => true,
+    canMakePayment: () => canMakePayment(settings.total_limitation, cart.getCartTotals()?.total_price),
     ariaLabel: label,
     supports: {
         features: settings.supports,

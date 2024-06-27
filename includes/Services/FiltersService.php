@@ -93,6 +93,7 @@ class FiltersService extends AbstractSingleton {
 		add_filter( 'manage_woocommerce_page_wc-orders_custom_column', [ $this, 'ordersListNewColumnContent' ], 10, 2 );
 		add_filter( 'woocommerce_get_formatted_order_total', [ $this, 'changeOrderAmount' ], 10, 2 );
 		add_filter( 'manage_edit-shop_order_columns', [ $this, 'addCaptureAmountCustomColumn' ], 20 );
+
 	}
 
 	protected function addSettingsLink(): void {
@@ -136,6 +137,9 @@ class FiltersService extends AbstractSingleton {
 		$options = get_option( "paydock_fraud_{$orderId}" );
 		$order   = wc_get_order( $orderId );
 
+		if ( isset( $_GET['afterpay-error'] ) && ( 'true' === $_GET['afterpay-error'] ) ) {
+			return __( 'Order has been cancelled', 'pay_dock' );
+		}
 		if ( false === $options && 'processing' !== $order->get_status() ) {
 			return $text;
 		}

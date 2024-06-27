@@ -36,7 +36,7 @@ class OrderService {
 		if ( ( $oldStatusKey == $newStatusKey ) || ! empty( $GLOBALS['is_updating_paydock_order_status'] ) || null === $orderId ) {
 			return;
 		}
-
+		$this->customHandleStockReduction($order, $oldStatusKey, $newStatusKey);
 		$rulesForStatuses = [ 
 			'paydock-paid' => [ 
 				'paydock-refunded',
@@ -120,6 +120,24 @@ class OrderService {
 			if ( ! empty( $message ) ) {
 				echo '<div class=\'notice notice-error is-dismissible\'><p>' . esc_html( $message ) . '</p></div>';
 				delete_option( 'paydock_status_change_error' );
+			}
+		}
+	}
+
+	function customHandleStockReduction($order, $oldStatusKey, $newStatusKey) {
+		$statusesWithDecreaseQuantityProduct =[
+			'paydock-pending',
+			'paydock-paid',
+			'paydock-authorize',
+			'paydock-requested',
+			'paydock-p-paid',
+			'completed'
+		];
+		if (in_array( $newStatusKey, $statusesWithDecreaseQuantityProduct ) && !in_array( $oldStatusKey, $statusesWithDecreaseQuantityProduct )) {
+			foreach ($order->get_items() as $item) {
+				if ($product = $item->get_product()) {
+					wc_update_product_stock($product, $item->get_quantity(), 'decrease');
+				}
 			}
 		}
 	}

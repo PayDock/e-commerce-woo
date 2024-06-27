@@ -1,4 +1,5 @@
-export default (id, buttonId, data, isSandbox) => {
+let buttons = {};
+export default (id, buttonId, data, isSandbox, reload = false) => {
     const paymentSourceElement = jQuery('#paymentSourceWalletsToken');
     const paymentCompleted = jQuery('#paymentCompleted');
     const orderButton = jQuery('.wc-block-components-checkout-place-order-button');
@@ -28,11 +29,15 @@ export default (id, buttonId, data, isSandbox) => {
         }, true))
     }
 
-    let button = new window.paydock.WalletButtons(buttonId, data.resource.data.token, config)
+    if(buttons.current){
+        delete buttons.current;
+    }
 
-    button.setEnv(isSandbox ? 'sandbox' : 'production')
+    buttons.current = new window.paydock.WalletButtons(buttonId, data.resource.data.token, config)
 
-    button.onPaymentSuccessful((result) => {
+    buttons.current.setEnv(isSandbox ? 'sandbox' : 'production')
+
+    buttons.current.onPaymentSuccessful((result) => {
         result.payment = id.replace('-', '_')
         paymentSourceElement.val(JSON.stringify(result))
         paymentCompleted.show();
@@ -41,11 +46,11 @@ export default (id, buttonId, data, isSandbox) => {
         orderButton.click();
     })
 
-    button.onPaymentError((data) => {
+    buttons.current.onPaymentError((data) => {
         orderButton.click();
     });
 
-    button.onPaymentInReview((result) => {
+    buttons.current.onPaymentInReview((result) => {
         result.payment = id.replace('-', '_')
         paymentSourceElement.val(JSON.stringify(result))
         paymentCompleted.show();
@@ -55,5 +60,5 @@ export default (id, buttonId, data, isSandbox) => {
         orderButton.click();
     });
 
-    button.load();
+    buttons.current.load();
 }

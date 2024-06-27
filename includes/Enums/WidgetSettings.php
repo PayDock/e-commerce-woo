@@ -9,20 +9,34 @@ class WidgetSettings extends AbstractEnum {
 	protected const CUSTOM_VERSION = 'CUSTOM_VERSION';
 	protected const PAYMENT_CARD_TITLE = 'PAYMENT_CARD_TITLE';
 	protected const PAYMENT_CARD_DESCRIPTION = 'PAYMENT_CARD_DESCRIPTION';
+	protected const PAYMENT_CARD_MIN = 'PAYMENT_CARD_MIN';
+	protected const PAYMENT_CARD_MAX = 'PAYMENT_CARD_MAX';
 	protected const PAYMENT_BANK_ACCOUNT_TITLE = 'PAYMENT_BANK_ACCOUNT_TITLE';
 	protected const PAYMENT_BANK_ACCOUNT_DESCRIPTION = 'PAYMENT_BANK_ACCOUNT_DESCRIPTION';
 	protected const PAYMENT_WALLET_APPLE_PAY_TITLE = 'PAYMENT_WALLET_APPLE_PAY_TITLE';
 	protected const PAYMENT_WALLET_APPLE_PAY_DESCRIPTION = 'PAYMENT_WALLET_APPLE_PAY_DESCRIPTION';
+	protected const PAYMENT_WALLET_APPLE_PAY_MIN = 'PAYMENT_WALLET_APPLE_PAY_MIN';
+	protected const PAYMENT_WALLET_APPLE_PAY_MAX = 'PAYMENT_WALLET_APPLE_PAY_MAX';
 	protected const PAYMENT_WALLET_GOOGLE_PAY_TITLE = 'PAYMENT_WALLET_GOOGLE_PAY_TITLE';
 	protected const PAYMENT_WALLET_GOOGLE_PAY_DESCRIPTION = 'PAYMENT_WALLET_GOOGLE_PAY_DESCRIPTION';
+	protected const PAYMENT_WALLET_GOOGLE_PAY_MIN = 'PAYMENT_WALLET_GOOGLE_PAY_MIN';
+	protected const PAYMENT_WALLET_GOOGLE_PAY_MAX = 'PAYMENT_WALLET_GOOGLE_PAY_MAX';
 	protected const PAYMENT_WALLET_AFTERPAY_V2_TITLE = 'PAYMENT_WALLET_AFTERPAY_V2_TITLE';
 	protected const PAYMENT_WALLET_AFTERPAY_V2_DESCRIPTION = 'PAYMENT_WALLET_AFTERPAY_V2_DESCRIPTION';
+	protected const PAYMENT_WALLET_AFTERPAY_V2_MIN = 'PAYMENT_WALLET_AFTERPAY_V2_MIN';
+	protected const PAYMENT_WALLET_AFTERPAY_V2_MAX = 'PAYMENT_WALLET_AFTERPAY_V2_MAX';
 	protected const PAYMENT_WALLET_PAYPAL_TITLE = 'PAYMENT_WALLET_PAYPAL_TITLE';
 	protected const PAYMENT_WALLET_PAYPAL_DESCRIPTION = 'PAYMENT_WALLET_PAYPAL_DESCRIPTION';
+	protected const PAYMENT_WALLET_PAYPAL_MIN = 'PAYMENT_WALLET_PAYPAL_MIN';
+	protected const PAYMENT_WALLET_PAYPAL_MAX = 'PAYMENT_WALLET_PAYPAL_MAX';
 	protected const PAYMENT_A_P_M_S_AFTERPAY_V1_TITLE = 'PAYMENT_A_P_M_S_AFTERPAY_V1_TITLE';
 	protected const PAYMENT_A_P_M_S_AFTERPAY_V1_DESCRIPTION = 'PAYMENT_A_P_M_S_AFTERPAY_V1_DESCRIPTION';
+	protected const PAYMENT_A_P_M_S_AFTERPAY_V1_MIN = 'PAYMENT_A_P_M_S_AFTERPAY_V1_MIN';
+	protected const PAYMENT_A_P_M_S_AFTERPAY_V1_MAX = 'PAYMENT_A_P_M_S_AFTERPAY_V1_MAX';
 	protected const PAYMENT_A_P_M_S_ZIP_TITLE = 'PAYMENT_A_P_M_S_ZIP_TITLE';
 	protected const PAYMENT_A_P_M_S_ZIP_DESCRIPTION = 'PAYMENT_A_P_M_S_ZIP_DESCRIPTION';
+	protected const PAYMENT_A_P_M_S_ZIP_MIN = 'PAYMENT_A_P_M_S_ZIP_MIN';
+	protected const PAYMENT_A_P_M_S_ZIP_MAX = 'PAYMENT_A_P_M_S_ZIP_MAX';
 	protected const STYLE_BACKGROUND_COLOR = 'STYLE_BACKGROUND_COLOR';
 	protected const STYLE_TEXT_COLOR = 'STYLE_TEXT_COLOR';
 	protected const STYLE_BORDER_COLOR = 'STYLE_BORDER_COLOR';
@@ -37,13 +51,15 @@ class WidgetSettings extends AbstractEnum {
 	}
 
 	public function getTitle(): string {
-		$result = explode( '_', $this->name );
-		$result = array_map( function ($item) {
+		$text = str_replace( [ '_MIN', '_MAX' ], '', $this->name );
+
+		$result = explode( '_', $text );
+		$result = array_map( function ( $item ) {
 			return ucfirst( strtolower( $item ) );
 		}, $result );
 
-		$result = array_filter( $result, function ($item) {
-			return ! in_array( strtolower( $item ), [ 
+		$result = array_filter( $result, function ( $item ) {
+			return ! in_array( strtolower( $item ), [
 				'style',
 				'payment',
 				'card',
@@ -62,7 +78,7 @@ class WidgetSettings extends AbstractEnum {
 
 	public function getFullTitle(): string {
 		$result = explode( '_', $this->name );
-		$result = array_map( function ($item) {
+		$result = array_map( function ( $item ) {
 			return ucfirst( strtolower( $item ) );
 		}, $result );
 
@@ -97,6 +113,22 @@ class WidgetSettings extends AbstractEnum {
 				break;
 			case self::STYLE_CUSTOM:
 				$result = 'textarea';
+				break;
+			case self::PAYMENT_CARD_MIN:
+			case self::PAYMENT_CARD_MAX:
+			case self::PAYMENT_WALLET_APPLE_PAY_MIN:
+			case self::PAYMENT_WALLET_APPLE_PAY_MAX:
+			case self::PAYMENT_WALLET_GOOGLE_PAY_MIN:
+			case self::PAYMENT_WALLET_GOOGLE_PAY_MAX:
+			case self::PAYMENT_WALLET_AFTERPAY_V2_MIN:
+			case self::PAYMENT_WALLET_AFTERPAY_V2_MAX:
+			case self::PAYMENT_WALLET_PAYPAL_MIN:
+			case self::PAYMENT_WALLET_PAYPAL_MAX:
+			case self::PAYMENT_A_P_M_S_AFTERPAY_V1_MIN:
+			case self::PAYMENT_A_P_M_S_AFTERPAY_V1_MAX:
+			case self::PAYMENT_A_P_M_S_ZIP_MIN:
+			case self::PAYMENT_A_P_M_S_ZIP_MAX:
+				$result = 'min_max';
 				break;
 			default:
 				$result = 'color_picker';
@@ -136,14 +168,14 @@ class WidgetSettings extends AbstractEnum {
 	}
 
 	public function getVersions(): array {
-		return [ 
+		return [
 			'latest' => 'latest',
 			'custom' => 'custom',
 		];
 	}
 
 	public function getFontFamily(): array {
-		$fonts = [ 
+		$fonts = [
 			'Inter Regular',
 			'serif',
 			'sans-serif',
@@ -231,6 +263,15 @@ class WidgetSettings extends AbstractEnum {
 				break;
 			case self::STYLE_SUCCESS_COLOR:
 				$result = '#0B7F3B';
+				break;
+			case self::PAYMENT_CARD_MIN:
+			case self::PAYMENT_WALLET_APPLE_PAY_MIN:
+			case self::PAYMENT_WALLET_GOOGLE_PAY_MIN:
+			case self::PAYMENT_WALLET_AFTERPAY_V2_MIN:
+			case self::PAYMENT_WALLET_PAYPAL_MIN:
+			case self::PAYMENT_A_P_M_S_AFTERPAY_V1_MIN:
+			case self::PAYMENT_A_P_M_S_ZIP_MIN:
+				$result = 0;
 				break;
 			default:
 				$result = null;

@@ -10,9 +10,9 @@ abstract class AbstractPaymentService extends WC_Payment_Gateway {
 	 * Constructor
 	 */
 	public function __construct() {
-		$this->icon = apply_filters( 'woocommerce_paydock_gateway_icon', '' );
+		$this->icon       = apply_filters( 'woocommerce_paydock_gateway_icon', '' );
 		$this->has_fields = true;
-		$this->supports = [ 
+		$this->supports   = [
 			'products',
 			'subscriptions',
 			'subscription_cancellation',
@@ -24,7 +24,7 @@ abstract class AbstractPaymentService extends WC_Payment_Gateway {
 			'default_credit_card_form',
 		];
 
-		$this->method_title = _x( 'Paydock payment', 'Paydock payment method', 'woocommerce-gateway-paydock' );
+		$this->method_title       = _x( 'Paydock payment', 'Paydock payment method', 'woocommerce-gateway-paydock' );
 		$this->method_description = __( 'Allows Paydock payments.', 'woocommerce-gateway-paydock' );
 
 		$this->init_settings();

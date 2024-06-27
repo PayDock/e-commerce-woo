@@ -6,6 +6,7 @@ import validateData from "./wallets/validate-form";
 import {registerPaymentMethod} from '@woocommerce/blocks-registry';
 import {select} from '@wordpress/data';
 import {CART_STORE_KEY} from '@woocommerce/block-data';
+import canMakePayment from "./canMakePayment";
 
 const textDomain = 'pay_dock';
 const labels = {
@@ -16,14 +17,13 @@ const labels = {
 }
 let wasInit = false;
 export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
-
     const settingKey = `paydock_${id}_a_p_m_s_block_data`;
     const paymentName = `paydock_${id}_a_p_m_s_gateway`;
 
     const settings = getSetting(settingKey, {});
     const label = decodeEntities(settings.title) || __(defaultLabel, textDomain);
+    const cart = select(CART_STORE_KEY);
     const Content = (props) => {
-        const cart = select(CART_STORE_KEY);
         const {eventRegistration, emitResponse} = props;
         const {onPaymentSetup, onCheckoutValidation} = eventRegistration;
 
@@ -47,6 +47,10 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
         data.styles = '';
         data.supports = '';
         data.pickupLocations = '';
+
+        if(data.total_limitation){
+            delete data.total_limitation;
+        }
 
         validationError.hide();
         countriesError.hide();
@@ -103,7 +107,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
                     state: shippingAddress.state
                 };
 
-                if(shippingRates.length && shippingRates[0].shipping_rates.length) {
+                if (shippingRates.length && shippingRates[0].shipping_rates.length) {
                     shippingRates[0].shipping_rates.forEach((rate, key) => {
                         if (!rate.selected) {
                             return;
@@ -115,7 +119,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
                         if (rate.method_id !== 'pickup_location') {
                             return
                         }
-                        
+
                         const rateId = rate.rate_id.split(':')
                         const pickupLocation = settings.pickupLocations[rateId[1]]
 
@@ -153,8 +157,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
                             reference: item.short_description,
                         };
 
-                        if (item.images.length > 0)
-                        {
+                        if (item.images.length > 0) {
                             result.image_uri = item.images[0].src
                         }
 
@@ -297,7 +300,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
         content: <Content/>,
         edit: <Content/>,
         placeOrderButtonLabel: labels.placeOrderButtonLabel,
-        canMakePayment: () => true,
+        canMakePayment: () => canMakePayment(settings.total_limitation, cart.getCartTotals()?.total_price),
         ariaLabel: label,
         supports: {
             features: settings.supports,

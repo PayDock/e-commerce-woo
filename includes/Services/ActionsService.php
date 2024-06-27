@@ -137,5 +137,5 @@ class ActionsService extends AbstractSingleton {
 		add_action( 'woocommerce_create_refund', [ $paymentController, 'refundProcess' ], 10, 2 );
 		add_action( 'woocommerce_order_refunded', [ $paymentController, 'afterRefundProcess' ], 10, 2 );
 		add_action( 'woocommerce_api_paydock-webhook', [ $paymentController, 'webhook' ] );
-	}
+    }
 }

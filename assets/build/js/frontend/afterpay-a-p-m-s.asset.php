@@ -1,1 +1,1 @@
-<?php return array('dependencies' => array('react', 'wc-blocks-data-store', 'wc-blocks-registry', 'wc-settings', 'wp-data', 'wp-html-entities', 'wp-i18n'), 'version' => 'a31e5f2697b6c61c071f');
+<?php return array('dependencies' => array('react', 'wc-blocks-data-store', 'wc-blocks-registry', 'wc-settings', 'wp-data', 'wp-html-entities', 'wp-i18n'), 'version' => '2c05b0b8c344eeb5ed0a');

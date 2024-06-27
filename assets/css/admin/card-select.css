@@ -261,3 +261,12 @@ input[type=checkbox].checkbox {
 .multiselect-paydock ul li {
     position: relative;
 }
+
+.woocommerce table.form-table input.input-text.regular-input.paydock {
+    width: 154px;
+    margin: auto 8px;
+}
+.woocommerce table.form-table .forminp fieldset {
+    line-height: 30px;
+
+}

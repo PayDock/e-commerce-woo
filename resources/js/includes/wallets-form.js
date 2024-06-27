@@ -8,7 +8,7 @@ import {createElement, useEffect} from 'react';
 import validateData from './wallets/validate-form';
 import initButton from './wallets/init';
 import axios from 'axios';
-
+import canMakePayment from "./canMakePayment";
 
 const textDomain = 'pay_dock';
 const labels = {
@@ -21,53 +21,71 @@ const afterpayCountries = ['au', 'nz', 'us', 'ca', 'uk', 'gb', 'fr', 'it', 'es',
 
 let localState = {
     initData: null,
-    wasInit: false
+    total: 0,
 }
+
 export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
     const settingKey = `paydock_${id}_wallet_block_data`;
     const paymentName = `paydock_${id}_wallets_gateway`;
 
     const settings = getSetting(settingKey, {});
     const label = decodeEntities(settings.title) || __(defaultLabel, textDomain);
+
+    const store = select(CHECKOUT_STORE_KEY);
+    const cart = select(CART_STORE_KEY);
+
+    let button;
+
+    const initWallet = () => {
+        if (!button.length || localState.total === cart.getCartTotals()?.total_price) {
+            return;
+        }
+        jQuery('#' + buttonId).each((index, element) => {
+            element.innerHTML = '';
+        })
+        localState.total = cart.getCartTotals()?.total_price;
+
+        button.each((index, element) => element.innerHTML = '')
+
+        let billingData = {
+            type: id,
+            order_id: store.getOrderId(),
+            total: cart.getCartTotals(),
+            address: cart.getCustomerData().billingAddress,
+            shipping_address: cart.getCustomerData().shippingAddress,
+            shipping_rates: cart.getShippingRates(),
+            items: cart.getCartData().items
+        }
+
+        axios.post('/wp-json/paydock/v1/wallets/charge', billingData).then((response) => {
+            localState.initData = response.data
+            setTimeout(() => {
+                initButton(id, '#' + buttonId, localState.initData, settings.isSandbox, localState.reload)
+            }, 100)
+        }).catch((e) => {
+            localState.wasInit = false;
+        })
+    }
     const Content = (props) => {
-        const store = select(CHECKOUT_STORE_KEY);
-        const cart = select(CART_STORE_KEY);
+        button = jQuery('#' + buttonId)
+
         const {eventRegistration, emitResponse} = props;
-        const {onPaymentSetup, onCheckoutValidation} = eventRegistration;
+        const {onPaymentSetup, onCheckoutValidation, onShippingRateSelectSuccess} = eventRegistration;
         const billingAddress = cart.getCustomerData().billingAddress;
         const afterpayCountriesError = jQuery('.paydock-country-available');
 
         let validationSuccess = validateData(billingAddress, dataFieldsRequired);
 
         jQuery('.wc-block-components-checkout-place-order-button').hide();
-        let button = jQuery('#' + buttonId).length
 
         if (('paydockWalletAfterpayButton' === buttonId)
             && validationSuccess
             && !afterpayCountries.find((element) => element === billingAddress.country.toLowerCase())) {
             afterpayCountriesError.show()
-        } else if (validationSuccess && !localState.initData && !localState.wasInit) {
+        } else if (validationSuccess && !localState.initData) {
             afterpayCountriesError.hide()
-            localState.wasInit = true;
-            let billingData = {
-                type: id,
-                order_id: store.getOrderId(),
-                total: cart.getCartTotals(),
-                address: cart.getCustomerData().billingAddress,
-                shipping_address: cart.getCustomerData().shippingAddress,
-                shipping_rates: cart.getShippingRates(),
-                items: cart.getCartData().items
-            }
-
-            axios.post('/wp-json/paydock/v1/wallets/charge', billingData).then((response) => {
-                localState.initData = response.data
-                setTimeout(() => {
-                    initButton(id, '#' + buttonId, localState.initData, settings.isSandbox)
-                }, 100)
-            }).catch((e) => {
-                localState.wasInit = false;
-            })
-        } else if (validationSuccess && localState.initData && !button) {
+            initWallet();
+        } else if (validationSuccess && localState.initData && !button.length) {
             afterpayCountriesError.hide()
             setTimeout(() => {
                 initButton(id, '#' + buttonId, localState.initData, settings.isSandbox)
@@ -75,6 +93,12 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
         }
 
         useEffect(() => {
+            const onShipping = onShippingRateSelectSuccess(async () => {
+                if ((localState.total !== cart.getCartTotals()?.total_price)
+                    && canMakePayment(settings.total_limitation, cart.getCartTotals()?.total_price)) {
+                    initWallet();
+                }
+            })
             const oncheckout = onCheckoutValidation(async (data) => {
                 if (!validationSuccess) {
                     return {
@@ -109,7 +133,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
                 }
             });
             return () => {
-                unsubscribe() && oncheckout() && onEmitter;
+                unsubscribe() && oncheckout() && onShipping();
             };
         }, [emitResponse.responseTypes.ERROR, emitResponse.responseTypes.SUCCESS, onPaymentSetup,]);
 
@@ -173,7 +197,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
         ),
         content: <Content/>,
         edit: <Content/>,
-        canMakePayment: () => true,
+        canMakePayment: () => canMakePayment(settings.total_limitation, cart.getCartTotals()?.total_price),
         ariaLabel: label,
         supports: {
             features: settings.supports,
