@@ -37,7 +37,7 @@ class BankAccountPaymentService extends AbstractPaymentService {
 		if ( ! wp_verify_nonce( $wpNonce, 'process_payment' ) ) {
 			throw new RouteException(
 				'woocommerce_rest_checkout_process_payment_error',
-				__( 'Error: Security check', 'power_board' )
+				esc_html( __( 'Error: Security check', 'power-board' ) )
 			);
 		}
 
@@ -60,12 +60,14 @@ class BankAccountPaymentService extends AbstractPaymentService {
 			$loggerRepository->createLogRecord( $chargeId, $operation, $status, $message, LogRepository::ERROR );
 			throw new RouteException(
 				'woocommerce_rest_checkout_process_payment_error',
-				__( 'Error:', 'power_board' ) . ' ' . $exception->getMessage()
+				/* Translators: %s Exception message. */
+				esc_html( sprintf( __( 'Error: %s', 'power-board' ), $exception->getMessage() ) )
 			);
 		} catch ( Exception $exception ) {
 			throw new RouteException(
 				'woocommerce_rest_checkout_process_payment_error',
-				__( 'Error:', 'power_board' ) . ' ' . $exception->getMessage()
+				/* Translators: %s Exception message. */
+				esc_html( sprintf( __( 'Error: %s', 'power-board' ), $exception->getMessage() ) )
 			);
 		}
 

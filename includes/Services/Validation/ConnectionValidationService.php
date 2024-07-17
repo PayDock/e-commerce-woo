@@ -566,8 +566,8 @@ class ConnectionValidationService {
 				} else {
 					$this->errors[] = __(
 						'Can\'t create webhook',
-						'power_board'
-					) . ( ! empty( $result['error'] ) ? ' ' . json_encode( $result['error'] ) : '' );
+						'power-board'
+					) . ( ! empty( $result['error'] ) ? ' ' . wp_json_encode( $result['error'] ) : '' );
 
 					return;
 				}

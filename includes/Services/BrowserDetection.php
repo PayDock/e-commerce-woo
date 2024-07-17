@@ -97,7 +97,7 @@ class BrowserDetection {
 		];
 
 		if ( strtolower( $result_format ) === 'json' ) {
-			$result = json_encode( $result );
+			$result = wp_json_encode( $result );
 		}
 
 		return $result;
@@ -2034,7 +2034,7 @@ class BrowserDetection {
 		];
 
 		if ( strtolower( $result_format ) === 'json' ) {
-			$result = json_encode( $result );
+			$result = wp_json_encode( $result );
 		}
 
 		return $result;
@@ -2070,7 +2070,7 @@ class BrowserDetection {
 		];
 
 		if ( strtolower( $result_format ) === 'json' ) {
-			$result = json_encode( $result );
+			$result = wp_json_encode( $result );
 		}
 
 		return $result;
@@ -2093,7 +2093,7 @@ class BrowserDetection {
 		$result = [ 'device_type' => $this->result_device_type ];
 
 		if ( strtolower( $result_format ) === 'json' ) {
-			$result = json_encode( $result );
+			$result = wp_json_encode( $result );
 		}
 
 		return $result;

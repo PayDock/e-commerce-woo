@@ -15,17 +15,17 @@ class VaultTokenHelper {
 
 	public function get( $additionalFields = [] ) {
 		$vaultToken = ! empty( $this->args['selectedtoken'] ) ? $this->args['selectedtoken'] : null;
-		$OTTtoken = ! empty( $this->args['paymentsourcetoken'] ) ? $this->args['paymentsourcetoken'] : null;
+		$OTTtoken   = ! empty( $this->args['paymentsourcetoken'] ) ? $this->args['paymentsourcetoken'] : null;
 
 		if ( null !== $vaultToken ) {
 			return $vaultToken;
 		}
 
 		if ( empty( $OTTtoken ) ) {
-			throw new Exception( __( 'The token wasn\'t generated correctly.', 'power_board' ) );
+			throw new Exception( esc_html( __( 'The token wasn\'t generated correctly.', 'power-board' ) ) );
 		}
 
-		$vaultTokenData = [ 
+		$vaultTokenData = [
 			'token' => $OTTtoken,
 		];
 
@@ -41,7 +41,9 @@ class VaultTokenHelper {
 
 		if ( ! empty( $responce['error'] ) || empty( $responce['resource']['data']['vault_token'] ) ) {
 			$message = ! empty( $responce['error']['message'] ) ? ' ' . $responce['error']['message'] : '';
-			throw new Exception( __( 'Can\'t create PowerBoard vault token.' . $message, 'power_board' ) );
+
+			/* translators: %s: Detailed message from PowerBoard API. */
+			throw new Exception( esc_html( sprintf( __( 'Can\'t create PowerBoard vault token. %s', 'power-board' ), $message ) ) );
 		}
 
 		if ( $this->shouldSaveVaultToken() ) {
@@ -54,7 +56,7 @@ class VaultTokenHelper {
 	}
 
 	public function shouldSaveVaultToken(): bool {
-		$isCardSaveCard = $this->args['cardsavecard'] && $this->args['cardsavecardchecked'];
+		$isCardSaveCard    = $this->args['cardsavecard'] && $this->args['cardsavecardchecked'];
 		$isBankAccountSave = $this->args['bankaccountsaveaccount'] && $this->args['bankaccountsavechecked'];
 
 		return $this->args['isuserloggedin'] && ( $isCardSaveCard || $isBankAccountSave );

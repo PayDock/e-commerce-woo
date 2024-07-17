@@ -106,29 +106,25 @@ class WidgetValidationService {
 				( $settingName && $isMin && ( $value != (string) floatval( $value ) ) )
 				|| ( $settingName && $isMax && ! empty( $value ) && ( $value != (string) floatval( $value ) ) )
 			) {
-				$this->errors[] = __(
-					WidgetSettings::{$settingName}()->getFullTitle() . " must be numeric.",
-					'power_board'
-				);
+				/* translators: %s: Title of form field. */
+				$this->errors[] = sprintf( __( "%s must be numeric.", 'power-board' ),
+					WidgetSettings::{$settingName}()->getFullTitle() );
 			} elseif ( $settingName && $isMin && ( 0 > (float) $value ) ) {
-				$this->errors[] = __(
-					WidgetSettings::{$settingName}()->getFullTitle() . " cannot be negative.",
-					'power_board'
-				);
+				/* translators: %s: Title of form field. */
+				$this->errors[] = sprintf( __( "%s cannot be negative.", 'power-board' ),
+					WidgetSettings::{$settingName}()->getFullTitle() );
 			} elseif (
 				$settingName
 				&& $isMax
 				&& ! empty( $value )
 				&& ( (float) $value < (float) $this->data[ str_replace( 'MAX', 'MIN', $key ) ] ) ) {
-				$this->errors[] = __(
-					WidgetSettings::{$settingName}()->getFullTitle() . " cannot be less than the min value.",
-					'power_board'
-				);
+				/* translators: %s: Title of form field. */
+				$this->errors[] = sprintf( __( "%s cannot be less than the min value.", 'power-board' ),
+					WidgetSettings::{$settingName}()->getFullTitle() );
 			} elseif ( $settingName && empty( $value ) && ! $isMin && ! $isMax ) {
-				$this->errors[] = __(
-					WidgetSettings::{$settingName}()->getFullTitle() . " can't be empty.",
-					'power_board'
-				);
+				/* translators: %s: Title of form field. */
+				$this->errors[] = sprintf( __( "%s can't be empty.", 'power-board' ),
+					WidgetSettings::{$settingName}()->getFullTitle() );
 			}
 
 			$decoded = json_decode( $value, true );
@@ -144,12 +140,12 @@ class WidgetValidationService {
 					|| ! $this->validateCustomStyles( $decoded )
 				)
 			) {
-				$this->errors[] = __( 'Custom styles must be a valid JSON.', 'power_board' );
+				$this->errors[] = __( 'Custom styles must be a valid JSON.', 'power-board' );
 			}
 		}
 
 		if ( 'custom' == $this->data[ $versionKey ] && empty( $this->data[ $customVersionKey ] ) ) {
-			$this->errors[] = __( "Version can't be empty.", 'power_board' );
+			$this->errors[] = __( "Version can't be empty.", 'power-board' );
 		}
 	}
 

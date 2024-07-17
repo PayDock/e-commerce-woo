@@ -91,8 +91,6 @@ setTimeout(() => jQuery(function ($) {
     const idPowerBoardWidgetBankAccount = 'radio-control-wc-payment-method-options-power_board_bank_account_gateway';
 
     const searchParams = new URLSearchParams(window.location.search);
-    const powerBoardAfterpayWalletsSettings = window.wc.wcSettings.getSetting('power_board_afterpay_wallet_block_data', {});
-
     function initPowerBoardWidgetBankAccount() {
         lastInit = idPowerBoardWidgetBankAccount;
         const powerBoardBankAccountSettings = window.wc.wcSettings.getSetting('power_board_bank_account_block_data', {});
@@ -116,11 +114,6 @@ setTimeout(() => jQuery(function ($) {
         powerBoardValidation.createWidgetDiv('powerBoardWidgetBankAccount');
         const widget = new cba.HtmlWidget('#powerBoardWidgetBankAccount', powerBoardBankAccountSettings.publicKey, 'not_configured', 'bank_account', 'payment_source');
         widget.setFormFields(['account_routing']);
-        // const widget = new cba.HtmlMultiWidget(
-        //     '#powerBoardWidgetBankAccount',
-        //     powerBoardBankAccountSettings.publicKey,
-        //     [bankAccount]
-        // );
 
         window.widgetPowerBoardBankAccount = widget;
         if (powerBoardBankAccountSettings.hasOwnProperty('styles'))
@@ -230,12 +223,14 @@ setTimeout(() => jQuery(function ($) {
 
     setInterval(() => {
         try {
+            const powerBoardAfterpayWalletsSettings = window.wc?.wcSettings?.getSetting('power_board_afterpay_wallet_block_data', {});
             const $radioWidgetCard = $('#' + idPowerBoardWidgetCard);
             const $radioWidgetBankAccount = $('#' + idPowerBoardWidgetBankAccount);
             const $orderButton = $('.wc-block-components-checkout-place-order-button');
             const $afterpayRadiobatton = $('#radio-control-wc-payment-method-options-power_board_afterpay_wallets_gateway');
             if (
-                powerBoardAfterpayWalletsSettings.hasOwnProperty('afterpayChargeId')
+                powerBoardAfterpayWalletsSettings
+                && powerBoardAfterpayWalletsSettings.hasOwnProperty('afterpayChargeId')
                 && (powerBoardAfterpayWalletsSettings.afterpayChargeId.length > 0)
                 && searchParams.has('afterpay_success')
                 && !wasClick

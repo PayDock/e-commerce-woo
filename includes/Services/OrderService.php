@@ -17,17 +17,25 @@ class OrderService {
 	public function iniPowerBoardOrderButtons( $order ) {
 		$orderCustomStatus = $order->get_meta( ActivationHook::CUSTOM_STATUS_META_KEY );
 		$orderStatus       = $order->get_status();
-
+		$capturedAmount    = get_post_meta( $order->get_id(), 'capture_amount' );
+		$capturedAmount    = is_array( $capturedAmount ) ? reset( $capturedAmount ) : $capturedAmount;
+		$totalRefaund      = $order->get_total_refunded();
 		if ( in_array( $orderStatus, [
 				'pending',
 				'failed',
 				'cancelled',
-			] ) || in_array( $orderCustomStatus, [
+			] )
+		     || in_array( $orderCustomStatus, [
 				'pb-requested',
 				'wc-pb-requested',
+				'pb-refunded',
+				'WC-pb-refunded',
 				'pb-authorize',
 				'wc-pb-authorize'
-			] ) || ( $order->get_total() == $order->get_total_refunded() ) ) {
+			] )
+		     || ( $order->get_total() == $totalRefaund )
+		     || ( $capturedAmount == $totalRefaund )
+		) {
 			$this->templateService->includeAdminHtml( 'hide-refund-button' );
 		}
 		if ( in_array( $orderStatus, [
@@ -45,17 +53,15 @@ class OrderService {
 	}
 
 	public function statusChangeVerification( $orderId, $oldStatusKey, $newStatusKey, $order ) {
-		if ( ( $oldStatusKey == $newStatusKey ) || ! empty( $GLOBALS['is_updating_power_board_order_status'] ) || null === $orderId ) {
+		if ( ( $oldStatusKey == $newStatusKey ) || ! empty( $GLOBALS['power_board_is_updating_order_status'] ) || null === $orderId ) {
 			return;
 		}
-		$this->customHandleStockReduction( $order, $oldStatusKey, $newStatusKey );
 		$rulesForStatuses = [
 			'processing' => [
 				'refunded',
 				'cancelled',
 				'failed',
 				'pending',
-				'completed',
 			],
 			'refunded'   => [ 'processing', 'cancelled', 'failed', 'refunded' ],
 			'cancelled'  => [ 'failed', 'cancelled' ],
@@ -64,15 +70,19 @@ class OrderService {
 			if ( ! in_array( $newStatusKey, $rulesForStatuses[ $oldStatusKey ] ) ) {
 				$newStatusName                                   = wc_get_order_status_name( $newStatusKey );
 				$oldStatusName                                   = wc_get_order_status_name( $oldStatusKey );
-				$error                                           = __(
-					'You can not change status from "' . $oldStatusName . '"  to "' . $newStatusName . '"',
-					'woocommerce'
+				$error                                           = sprintf(
+				/* translators: %1$s: Old status of processing order.
+				 * translators: %2$s: New status of processing order.
+				 */
+					__( 'You can not change status from "%1$s"  to "%2$s"', 'power-board' ),
+					$oldStatusName,
+					$newStatusName
 				);
-				$GLOBALS['is_updating_power_board_order_status'] = true;
+				$GLOBALS['power_board_is_updating_order_status'] = true;
 				$order->update_status( $oldStatusKey, $error );
 				update_option( 'power_board_status_change_error', $error );
-				unset( $GLOBALS['is_updating_power_board_order_status'] );
-				throw new \Exception( $error );
+				unset( $GLOBALS['power_board_is_updating_order_status'] );
+				throw new \Exception( esc_html( $error ) );
 			}
 		}
 	}
@@ -102,22 +112,6 @@ class OrderService {
 			if ( ! empty( $message ) ) {
 				echo '<div class=\'notice notice-error is-dismissible\'><p>' . esc_html( $message ) . '</p></div>';
 				delete_option( 'power_board_status_change_error' );
-			}
-		}
-	}
-
-	public function customHandleStockReduction( $order, $oldStatusKey, $newStatusKey ) {
-		$statusesWithDecreaseQuantityProduct = [
-			'pending',
-			'processing',
-			'completed',
-		];
-		if ( in_array( $newStatusKey, $statusesWithDecreaseQuantityProduct ) && ! in_array( $oldStatusKey,
-				$statusesWithDecreaseQuantityProduct ) ) {
-			foreach ( $order->get_items() as $item ) {
-				if ( $product = $item->get_product() ) {
-					wc_update_product_stock( $product, $item->get_quantity(), 'decrease' );
-				}
 			}
 		}
 	}

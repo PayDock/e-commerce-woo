@@ -11,14 +11,9 @@ import {
     standalone3Ds
 } from '../includes/wc-power-board';
 
-import {select} from '@wordpress/data';
-import {CART_STORE_KEY} from '@woocommerce/block-data';
-import canMakePayment from "../includes/canMakePayment";
-
 const settings = getSetting('power_board_data', {});
-const cart = select(CART_STORE_KEY);
 
-const textDomain = 'power_board';
+const textDomain = 'power-board';
 const labels = {
     defaultLabel: __('PowerBoard Payments', textDomain),
     saveCardLabel: __('Save payment details', textDomain),
@@ -54,7 +49,7 @@ const Content = (props) => {
                     return true;
                 } else {
                     if (['IN_BUILD', 'STANDALONE'].includes(settings.card3DS)) {
-                        settings.charge3dsId = settings.card3DS == 'IN_BUILD' ? await inBuild3Ds(true) : await standalone3Ds()
+                        settings.charge3dsId = settings.card3DS === 'IN_BUILD' ? await inBuild3Ds(true) : await standalone3Ds()
                         if (settings.charge3dsId === false) {
                             return {
                                 type: emitResponse.responseTypes.ERROR,
@@ -92,7 +87,6 @@ const Content = (props) => {
                 email: document.getElementById('email').value,
                 phone: phoneValue
             });
-
             window.widgetPowerBoard.trigger(window.cba.TRIGGER.SUBMIT_FORM);
 
             let result = false;

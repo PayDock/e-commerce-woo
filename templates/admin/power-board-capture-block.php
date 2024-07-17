@@ -1,3 +1,6 @@
+<?php if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+} // Exit if accessed directly ?>
 <script type="text/javascript">
     function powerBoardPaymentCapture() {
         jQuery('span.power-board-order-actions').hide();
@@ -115,8 +118,10 @@
         <button type="button"
                 onclick="handlePowerBoardPaymentCapture(<?php echo esc_attr( $order->get_id() ); ?>, 'power-board-capture-charge')"
                 class="button button-primary">
-			<?php esc_html_e( 'Capture ', 'woocommerce' ); ?>
-			<?php esc_html_e( get_woocommerce_currency_symbol( $order->get_currency() ) ); ?>
+			<?php esc_html_e( 'Capture ', 'woocommerce' );
+			$currency_symbol = get_woocommerce_currency_symbol( $order->get_currency() );;
+			echo esc_html( $currency_symbol );
+			?>
             <span class="capture-amount-btn">
                 <?php echo esc_attr( $order->get_total() ); ?>
             </span>

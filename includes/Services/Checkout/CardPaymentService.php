@@ -35,8 +35,8 @@ class CardPaymentService extends WC_Payment_Gateway {
 			'default_credit_card_form',
 		];
 
-		$this->method_title       = _x( 'PowerBoard payment', 'PowerBoard payment method', 'woocommerce-gateway-ppwer-board' );
-		$this->method_description = __( 'Allows PowerBoard payments.', 'woocommerce-gateway-ppwer-board' );
+		$this->method_title       = _x( 'PowerBoard payment', 'PowerBoard payment method', 'power-board' );
+		$this->method_description = __( 'Allows PowerBoard payments.', 'power-board' );
 
 		// Load the settings.
 		$this->init_settings();
@@ -107,7 +107,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 		if ( ! wp_verify_nonce( $wpNonce, 'process_payment' ) ) {
 			throw new RouteException(
 				'woocommerce_rest_checkout_process_payment_error',
-				__( 'Error: Security check', 'power_board' )
+				esc_html( __( 'Error: Security check', 'power-board' ) )
 			);
 		}
 
@@ -115,8 +115,10 @@ class CardPaymentService extends WC_Payment_Gateway {
 
 		$siteName    = remove_accents( wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) );
 		$description = sprintf(
-		// Translators: %s: number of orders
-			__( 'Order №%1$s from %2$s.', 'power-board-for-woocommerce' ),
+		/* Translators: %1$s: number of orders
+		*  Translators: %2$s: Site name
+		*/
+			__( 'Order №%1$s from %2$s.', 'power-board' ),
 			$order->get_order_number(),
 			$siteName
 		);
@@ -133,8 +135,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 			$response = $cardProcessor->run( $order );
 
 			if ( ! empty( $response['error'] ) ) {
-				$message = SDKAdapterService::getInstance()->errorMessageToString( $response );
-				throw new Exception( __( 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later. ', 'power_board' ) );
+				throw new Exception( esc_html( __( 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later. ', 'power-board' ) ) );
 			}
 
 			$chargeId = ! empty( $response['resource']['data']['_id'] ) ? $response['resource']['data']['_id'] : '';
@@ -148,7 +149,8 @@ class CardPaymentService extends WC_Payment_Gateway {
 			);
 			throw new RouteException(
 				'woocommerce_rest_checkout_process_payment_error',
-				__( 'Error:', 'power_board' ) . ' ' . $e->getMessage()
+				/* Translators: %s Error message from API. */
+				esc_html( sprintf( __( 'Error: %s', 'power-board' ), $e->getMessage() ) )
 			);
 		}
 
@@ -164,7 +166,8 @@ class CardPaymentService extends WC_Payment_Gateway {
 			);
 			throw new RouteException(
 				'woocommerce_rest_checkout_process_payment_error',
-				__( 'Error:', 'power_board' ) . ' ' . $e->getMessage()
+				/* Translators: %s Error message from API. */
+				esc_html( sprintf( __( 'Error: %s', 'power-board' ), $e->getMessage() ) )
 			);
 		}
 
@@ -245,7 +248,8 @@ class CardPaymentService extends WC_Payment_Gateway {
 				);
 				throw new RouteException(
 					'woocommerce_rest_checkout_process_payment_error',
-					__( 'Error:', 'power_board' ) . ' ' . $e->getMessage()
+					/* Translators: %s Error message from API. */
+					esc_html( sprintf( __( 'Error: %s', 'power-board' ), $e->getMessage() ) )
 				);
 			}
 		} else {

@@ -2,6 +2,8 @@
 
 namespace PowerBoard\Services;
 
+use PowerBoard\Enums\SettingsTabs;
+
 class TemplateService {
 	private const TEMPLATE_DIR = 'templates';
 	private const ADMIN_TEMPLATE_DIR = 'admin';
@@ -13,8 +15,11 @@ class TemplateService {
 
 	public function __construct( $service = null ) {
 		$this->settingService = $service;
-		if ( isset( $this->settingService->currentSection ) ) {
-			$section = !empty($_GET['section']) ? sanitize_text_field($_GET['section']) : null;
+		$section              = filter_input( INPUT_GET, 'section', FILTER_SANITIZE_STRING );
+		$available_sections   = array_map( function ( $item ) {
+			return strtolower( $item->value );
+		}, SettingsTabs::allCases() );
+		if ( isset( $this->settingService->currentSection ) || in_array( $section, $available_sections ) ) {
 			$this->currentSection = $this->settingService->currentSection ?? $section;
 		}
 		$this->templateAdminDir = implode( DIRECTORY_SEPARATOR, [ self::TEMPLATE_DIR, self::ADMIN_TEMPLATE_DIR ] );

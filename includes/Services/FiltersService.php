@@ -35,10 +35,7 @@ class FiltersService extends AbstractSingleton {
 			$new_columns[ $column_name ] = $column_info;
 
 			if ( OrderListColumns::AFTER_COLUMN === $column_name ) {
-				$new_columns[ OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey() ] = __(
-					OrderListColumns::PAYMENT_SOURCE_TYPE()->getLabel(),
-					POWER_BOARD_TEXT_DOMAIN
-				);
+				$new_columns[ OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey() ] = OrderListColumns::PAYMENT_SOURCE_TYPE()->getLabel();
 			}
 		}
 
@@ -54,7 +51,8 @@ class FiltersService extends AbstractSingleton {
 	}
 
 	public function changeOrderAmount( $formatted_total, $order ) {
-		if ( isset( $_GET['page'] ) && 'wc-orders' === $_GET['page'] ) {
+		$page = filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRING );
+		if ( ! empty( $page ) && 'wc-orders' === $page ) {
 			$capturedAmount = get_post_meta( $order->get_id(), 'capture_amount' );
 			if ( $capturedAmount && is_array( $capturedAmount ) ) {
 				$capturedAmount = reset( $capturedAmount );
@@ -131,18 +129,19 @@ class FiltersService extends AbstractSingleton {
 
 	public function woocommerceThankyouOrderReceivedText( $text ) {
 		$orderId = absint( get_query_var( 'order-received' ) );
-		$options = get_option( "power_board_fraud_{$orderId}" );
-		$order   = wc_get_order( $orderId );
-		$status  = $order->get_meta( ActivationHook::CUSTOM_STATUS_META_KEY );
+		$options  = get_option( "power_board_fraud_{$orderId}" );
+		$order    = wc_get_order( $orderId );
+		$status   = $order->get_meta( ActivationHook::CUSTOM_STATUS_META_KEY );
+		$afterpay = filter_input( INPUT_GET, 'afterpay-error', FILTER_SANITIZE_STRING );
 
-		if ( isset( $_GET['afterpay-error'] ) && ( 'true' === $_GET['afterpay-error'] ) ) {
-			return __( 'Order has been cancelled', 'power_board' );
+		if ( ! empty( $afterpay ) && ( 'true' === $afterpay ) ) {
+			return __( 'Order has been cancelled', 'power-board' );
 		}
 		if ( false === $options && 'processing' !== $status ) {
 			return __( 'Thank you. Your order has been received.' );
 		}
 
-		return __( 'Your order is being processed. We\'ll get back to you shortly', 'power_board' );
+		return __( 'Your order is being processed. We\'ll get back to you shortly', 'power-board' );
 	}
 
 	public function getSettingLink( array $links ): array {
@@ -151,7 +150,7 @@ class FiltersService extends AbstractSingleton {
 			sprintf(
 				'<a href="%1$s">%2$s</a>',
 				admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . PowerBoardPlugin::PLUGIN_PREFIX ),
-				__( 'Settings', 'power_board' )
+				__( 'Settings', 'power-board' )
 			)
 		);
 

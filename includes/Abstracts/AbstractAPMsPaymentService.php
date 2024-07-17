@@ -43,7 +43,7 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 		if ( ! wp_verify_nonce( $wpNonce, 'process_payment' ) ) {
 			throw new RouteException(
 				'woocommerce_rest_checkout_process_payment_error',
-				__( 'Error: Security check', 'power_board' )
+				esc_html( __( 'Error: Security check', 'power-board' ) )
 			);
 		}
 
@@ -59,7 +59,7 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 
 			if ( ! empty( $response['error'] ) || empty( $response['resource']['data']['_id'] ) ) {
 				throw new Exception( __( 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later.',
-					'power_board' ) );
+					'power-board' ) );
 			}
 
 			$chargeId = $response['resource']['data']['_id'];
@@ -73,7 +73,8 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 			);
 			throw new RouteException(
 				'woocommerce_rest_checkout_process_payment_error',
-				__( 'Error:', 'power_board' ) . ' ' . $e->getMessage()
+				/* translators: %s: Error message */
+				esc_html( sprintf( __( 'Error: %s', 'power-board' ), $e->getMessage() ) )
 			);
 		}
 

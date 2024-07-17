@@ -13,21 +13,23 @@ class AfterpayWalletService extends AbstractWalletPaymentService {
 	protected function getWalletType(): WalletPaymentMethods {
 		return WalletPaymentMethods::AFTERPAY();
 	}
-	public function  get_title(){
-        return trim($this->title) ? $this->title :  'Afterpay v1';
+
+	public function get_title() {
+		return trim( $this->title ) ? $this->title : 'Afterpay v2';
 	}
+
 	public function process_payment( $order_id, $retry = true, $force_customer = false ) {
 		$wpNonce = ! empty( $_POST['_wpnonce'] ) ? sanitize_text_field( $_POST['_wpnonce'] ) : null;
 
 		if ( ! wp_verify_nonce( $wpNonce, 'process_payment' ) ) {
 			throw new RouteException(
 				'woocommerce_rest_checkout_process_payment_error',
-				__( 'Error: Security check', 'power-board' )
+				esc_html( __( 'Error: Security check', 'power-board' ) )
 			);
 		}
 
-		$order = wc_get_order( $order_id );
-		$data = [];
+		$order    = wc_get_order( $order_id );
+		$data     = [];
 		$chargeId = null;
 
 		if ( ! empty( $_POST['payment_response'] ) ) {
@@ -47,7 +49,7 @@ class AfterpayWalletService extends AbstractWalletPaymentService {
 			}
 		}
 
-		$wallet = reset( $wallets );
+		$wallet  = reset( $wallets );
 		$isFraud = ! empty( $wallet['fraud'] ) && $wallet['fraud'];
 		if ( $isFraud ) {
 			update_option( 'power_board_fraud_' . (string) $order->get_id(), [] );

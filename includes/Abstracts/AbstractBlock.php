@@ -26,29 +26,36 @@ abstract class AbstractBlock extends AbstractPaymentMethodType {
 				'power-board-form',
 				POWER_BOARD_PLUGIN_URL . '/assets/js/frontend/form.js',
 				[],
-				time(),
+				POWER_BOARD_PLUGIN_VERSION,
 				true
 			);
 			wp_enqueue_style(
 				'power-board-widget-css',
 				POWER_BOARD_PLUGIN_URL . '/assets/css/frontend/widget.css',
 				[],
-				time()
+				POWER_BOARD_PLUGIN_VERSION,
+				true
 			);
 
-			wp_enqueue_script( 'power-board-api', SettingsService::getInstance()->getWidgetScriptUrl() );
+			wp_enqueue_script(
+				'power-board-api',
+				SettingsService::getInstance()->getWidgetScriptUrl(),
+				[],
+				POWER_BOARD_PLUGIN_VERSION,
+				true
+			);
 
 			self::$isLoad = true;
 		}
 
-		$scriptPath = 'assets/build/js/frontend/' . $this->script . '.js';
+		$scriptPath      = 'assets/build/js/frontend/' . $this->script . '.js';
 		$scriptAssetPath = 'assets/build/js/frontend/' . $this->script . '.asset.php';
-		$scriptUrl = plugins_url( $scriptPath, POWER_BOARD_PLUGIN_FILE );
-		$scriptName = PowerBoardPlugin::PLUGIN_PREFIX . '-' . $this->script;
+		$scriptUrl       = plugins_url( $scriptPath, POWER_BOARD_PLUGIN_FILE );
+		$scriptName      = PowerBoardPlugin::PLUGIN_PREFIX . '-' . $this->script;
 
-		$scriptAsset = file_exists( $scriptAssetPath ) ? require ( $scriptAssetPath ) : [ 
+		$scriptAsset = file_exists( $scriptAssetPath ) ? require( $scriptAssetPath ) : [
 			'dependencies' => [],
-			'version' => POWER_BOARD_PLUGIN_VERSION,
+			'version'      => POWER_BOARD_PLUGIN_VERSION,
 		];
 		wp_register_script( $scriptName, $scriptUrl, $scriptAsset['dependencies'], $scriptAsset['version'], true );
 

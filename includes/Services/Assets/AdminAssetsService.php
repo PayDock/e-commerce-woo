@@ -5,13 +5,14 @@ namespace PowerBoard\Services\Assets;
 use PowerBoard\PowerBoardPlugin;
 
 class AdminAssetsService {
-	private const SCRIPTS = [ 
+	private const SCRIPTS = [
 		'tabs',
 		'connections',
 		'card-select',
 		'deactivation-confirmation',
+		'admin-helpers'
 	];
-	private const STYLES = [ 
+	private const STYLES = [
 		'card-select',
 	];
 
@@ -21,7 +22,7 @@ class AdminAssetsService {
 	private const STYLE_PREFIX = 'style';
 
 	private const URL_SCRIPT_PREFIX = 'assets/js/admin/';
-	private const URL_SCRIPT_POSTFIX = '.js?27012024';
+	private const URL_SCRIPT_POSTFIX = '.js';
 
 	private const URL_STYLE_PREFIX = 'assets/css/admin/';
 	private const URL_STYLE_POSTFIX = '.css';
@@ -36,7 +37,10 @@ class AdminAssetsService {
 		foreach ( self::SCRIPTS as $script ) {
 			wp_register_script(
 				$this->getScriptName( $script ),
-				plugins_url( $this->getScriptPath( $script ), POWER_BOARD_PLUGIN_FILE )
+				plugins_url( $this->getScriptPath( $script ), POWER_BOARD_PLUGIN_FILE ),
+				[],
+				POWER_BOARD_PLUGIN_VERSION,
+				true
 			);
 		}
 	}
@@ -51,7 +55,7 @@ class AdminAssetsService {
 
 	public function loadScripts(): void {
 		foreach ( self::SCRIPTS as $script ) {
-			wp_enqueue_script( $this->getScriptName( $script ) );
+			wp_enqueue_script( $this->getScriptName( $script ),'',[],POWER_BOARD_PLUGIN_VERSION,true );
 		}
 	}
 
@@ -59,7 +63,9 @@ class AdminAssetsService {
 		foreach ( self::STYLES as $style ) {
 			wp_enqueue_style(
 				$this->getStyleName( $style ),
-				plugins_url( $this->getStylePath( $style ), POWER_BOARD_PLUGIN_FILE )
+				plugins_url( $this->getStylePath( $style ), POWER_BOARD_PLUGIN_FILE ),
+				[],
+				POWER_BOARD_PLUGIN_VERSION
 			);
 		}
 	}

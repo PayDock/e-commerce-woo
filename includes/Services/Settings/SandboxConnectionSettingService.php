@@ -11,15 +11,18 @@ use PowerBoard\Services\SettingsService;
 class SandboxConnectionSettingService extends LiveConnectionSettingService {
 	public function init_form_fields(): void {
 		$sandBoxOptionKey = SettingsService::getInstance()
-			->getOptionName( $this->id, [ SettingGroups::CREDENTIALS()->name, CredentialSettings::SANDBOX()->name ] );
+		                                   ->getOptionName( $this->id, [
+			                                   SettingGroups::CREDENTIALS()->name,
+			                                   CredentialSettings::SANDBOX()->name
+		                                   ] );
 
-		$this->form_fields[ $sandBoxOptionKey ] = [ 
+		$this->form_fields[ $sandBoxOptionKey ] = [
 			'type' => CredentialSettings::SANDBOX()->getInputType(),
 			'label' => __(
 				'To test your PowerBoard for WooCommerce Plugin, you can use the sandbox mode.',
-				'power_board'
+				'power-board'
 			),
-			'title' => __( CredentialSettings::SANDBOX()->getLabel(), 'power_board' ),
+			'title' => CredentialSettings::SANDBOX()->getLabel(),
 		];
 		parent::init_form_fields();
 	}
