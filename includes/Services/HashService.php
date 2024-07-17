@@ -9,6 +9,11 @@ class HashService {
 	private const OPTION = OPENSSL_RAW_DATA;
 
 	public static function encrypt( string $string ): string {
+
+		if ( ! function_exists( 'openssl_encrypt' ) ) {
+			return base64_encode( $string );
+		}
+
 		$ivlen = openssl_cipher_iv_length( self::CIPHER );
 		$iv = openssl_random_pseudo_bytes( $ivlen );
 		$ciphertext_raw = openssl_encrypt( $string, self::CIPHER, self::getKey(), self::OPTION, $iv );
@@ -26,6 +31,11 @@ class HashService {
 	}
 
 	public static function decrypt( string $string ): string {
+
+		if ( ! function_exists( 'openssl_decrypt' ) ) {
+			return base64_decode( $string );
+		}
+
 		$c = base64_decode( $string );
 		$ivlen = openssl_cipher_iv_length( self::CIPHER );
 		$iv = substr( $c, 0, $ivlen );
