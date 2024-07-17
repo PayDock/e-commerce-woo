@@ -35,10 +35,7 @@ class FiltersService extends AbstractSingleton {
 			$new_columns[ $column_name ] = $column_info;
 
 			if ( OrderListColumns::AFTER_COLUMN === $column_name ) {
-				$new_columns[ OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey() ] = __(
-					OrderListColumns::PAYMENT_SOURCE_TYPE()->getLabel(),
-					PAY_DOCK_TEXT_DOMAIN
-				);
+				$new_columns[ OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey() ] = OrderListColumns::PAYMENT_SOURCE_TYPE()->getLabel();
 			}
 		}
 
@@ -54,7 +51,8 @@ class FiltersService extends AbstractSingleton {
 	}
 
 	public function changeOrderAmount( $formatted_total, $order ) {
-		if ( isset( $_GET['page'] ) && 'wc-orders' === $_GET['page'] ) {
+		$page = filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRING );
+		if ( ! empty( $page ) && 'wc-orders' === $page ) {
 			$capturedAmount = get_post_meta( $order->get_id(), 'capture_amount' );
 			if ( $capturedAmount && is_array( $capturedAmount ) ) {
 				$capturedAmount = reset( $capturedAmount );
@@ -97,7 +95,7 @@ class FiltersService extends AbstractSingleton {
 	}
 
 	protected function addSettingsLink(): void {
-		add_filter( 'plugin_action_links_' . plugin_basename( PAY_DOCK_PLUGIN_FILE ), [ $this, 'getSettingLink' ] );
+		add_filter( 'plugin_action_links_' . plugin_basename( PAYDOCK_PLUGIN_FILE ), [ $this, 'getSettingLink' ] );
 	}
 
 	public function registerInWooCommercePaymentClass( array $methods ): array {
@@ -136,15 +134,16 @@ class FiltersService extends AbstractSingleton {
 		$orderId = absint( get_query_var( 'order-received' ) );
 		$options = get_option( "paydock_fraud_{$orderId}" );
 		$order   = wc_get_order( $orderId );
+		$afterpay = filter_input( INPUT_GET, 'afterpay-error', FILTER_SANITIZE_STRING );
 
-		if ( isset( $_GET['afterpay-error'] ) && ( 'true' === $_GET['afterpay-error'] ) ) {
-			return __( 'Order has been cancelled', 'pay_dock' );
+		if ( ! empty( $afterpay ) && ( 'true' === $afterpay ) ) {
+			return __( 'Order has been cancelled', 'paydock' );
 		}
 		if ( false === $options && 'processing' !== $order->get_status() ) {
 			return $text;
 		}
 
-		return __( 'Your order is being processed. We\'ll get back to you shortly', 'pay_dock' );
+		return __( 'Your order is being processed. We\'ll get back to you shortly', 'paydock' );
 	}
 
 	public function getSettingLink( array $links ): array {
@@ -153,7 +152,7 @@ class FiltersService extends AbstractSingleton {
 			sprintf(
 				'<a href="%1$s">%2$s</a>',
 				admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . PaydockPlugin::PLUGIN_PREFIX ),
-				__( 'Settings', 'pay_dock' )
+				__( 'Settings', 'paydock' )
 			)
 		);
 

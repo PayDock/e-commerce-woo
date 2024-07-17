@@ -11,7 +11,7 @@ class PaymentController {
 	public function capturePayment() {
 		$wpNonce = ! empty( $_POST['_wpnonce'] ) ? sanitize_text_field( $_POST['_wpnonce'] ) : null;
 		if ( ! wp_verify_nonce( $wpNonce, 'capture-or-cancel' ) ) {
-			wp_send_json_error( [ 'message' => __( 'Error: Security check', 'pay_dock' ) ] );
+			wp_send_json_error( [ 'message' => __( 'Error: Security check', 'paydock' ) ] );
 
 			return;
 		}
@@ -56,7 +56,7 @@ class PaymentController {
 			} else {
 				if ( ! empty( $result['error'] ) ) {
 					if ( is_array( $result['error'] ) ) {
-						$result['error'] = json_encode( $result['error'] );
+						$result['error'] = wp_json_encode( $result['error'] );
 					}
 					$error = $result['error'];
 				} else {
@@ -73,7 +73,7 @@ class PaymentController {
 	public function cancelAuthorised() {
 		$wpNonce = ! empty( $_POST['_wpnonce'] ) ? sanitize_text_field( $_POST['_wpnonce'] ) : null;
 		if ( ! wp_verify_nonce( $wpNonce, 'capture-or-cancel' ) ) {
-			wp_send_json_error( [ 'message' => __( 'Error: Security check', 'pay_dock' ) ] );
+			wp_send_json_error( [ 'message' => __( 'Error: Security check', 'paydock' ) ] );
 
 			return;
 		}
@@ -106,7 +106,7 @@ class PaymentController {
 			} else {
 				if ( ! empty( $result['error'] ) ) {
 					if ( is_array( $result['error'] ) ) {
-						$result['error'] = json_encode( $result['error'] );
+						$result['error'] = wp_json_encode( $result['error'] );
 					}
 					$error = $result['error'];
 				} else {
@@ -177,7 +177,7 @@ class PaymentController {
 		} else {
 			if ( ! empty( $result['error'] ) ) {
 				if ( is_array( $result['error'] ) ) {
-					$result['error'] = json_encode( $result['error'] );
+					$result['error'] = wp_json_encode( $result['error'] );
 				}
 				$loggerRepository->createLogRecord(
 					$paydockChargeId,
@@ -186,12 +186,12 @@ class PaymentController {
 					$result['error'],
 					LogRepository::ERROR
 				);
-				throw new \Exception( $result['error'] );
+				throw new \Exception( esc_html( $result['error'] ) );
 			} else {
 				$error = __( 'The refund process has failed; please try again.', 'woocommerce' );
 				$loggerRepository->createLogRecord( $paydockChargeId, 'Refunded', 'error', $error,
 					LogRepository::ERROR );
-				throw new \Exception( $error );
+				throw new \Exception( esc_html( $error ) );
 			}
 		}
 	}
@@ -406,7 +406,7 @@ class PaymentController {
 				$chargeId ?? '',
 				'Charge',
 				'UnfulfilledCondition',
-				__( 'Can\'t charge.', 'pay_dock' ) . $message,
+				__( 'Can\'t charge.', 'paydock' ) . $message,
 				LogRepository::ERROR
 			);
 
@@ -422,7 +422,7 @@ class PaymentController {
 					$chargeId ?? '',
 					'Fraud Attach',
 					'UnfulfilledCondition',
-					__( 'Can\'t fraud attach.', 'pay_dock' ) . $message,
+					__( 'Can\'t fraud attach.', 'paydock' ) . $message,
 					LogRepository::ERROR
 				);
 

@@ -5,13 +5,14 @@ namespace Paydock\Services\Assets;
 use Paydock\PaydockPlugin;
 
 class AdminAssetsService {
-	private const SCRIPTS = [ 
+	private const SCRIPTS = [
 		'tabs',
 		'connections',
 		'card-select',
 		'deactivation-confirmation',
+		'admin-helpers'
 	];
-	private const STYLES = [ 
+	private const STYLES = [
 		'card-select',
 	];
 
@@ -36,7 +37,10 @@ class AdminAssetsService {
 		foreach ( self::SCRIPTS as $script ) {
 			wp_register_script(
 				$this->getScriptName( $script ),
-				plugins_url( $this->getScriptPath( $script ), PAY_DOCK_PLUGIN_FILE )
+				plugins_url( $this->getScriptPath( $script ), PAYDOCK_PLUGIN_FILE ),
+				[],
+				PAYDOCK_PLUGIN_VERSION,
+				true
 			);
 		}
 	}
@@ -51,7 +55,7 @@ class AdminAssetsService {
 
 	public function loadScripts(): void {
 		foreach ( self::SCRIPTS as $script ) {
-			wp_enqueue_script( $this->getScriptName( $script ) );
+			wp_enqueue_script( $this->getScriptName( $script ), '', [], PAYDOCK_PLUGIN_VERSION, true );
 		}
 	}
 
@@ -59,7 +63,9 @@ class AdminAssetsService {
 		foreach ( self::STYLES as $style ) {
 			wp_enqueue_style(
 				$this->getStyleName( $style ),
-				plugins_url( $this->getStylePath( $style ), PAY_DOCK_PLUGIN_FILE )
+				plugins_url( $this->getStylePath( $style ), PAYDOCK_PLUGIN_FILE ),
+				[],
+				PAYDOCK_PLUGIN_VERSION
 			);
 		}
 	}

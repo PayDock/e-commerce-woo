@@ -16,11 +16,11 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 	 * Constructor
 	 */
 	public function __construct() {
-		$settings = SettingsService::getInstance();
+		$settings      = SettingsService::getInstance();
 		$paymentMethod = $this->getAPMsType();
 
-		$this->id = 'paydock_' . $paymentMethod->getId() . '_a_p_m_s_gateway';
-		$this->title = $settings->getWidgetPaymentAPMTitle( $paymentMethod );
+		$this->id          = 'paydock_' . $paymentMethod->getId() . '_a_p_m_s_gateway';
+		$this->title       = $settings->getWidgetPaymentAPMTitle( $paymentMethod );
 		$this->description = $settings->getWidgetPaymentAPMDescription( $paymentMethod );
 
 		parent::__construct();
@@ -30,7 +30,7 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 
 	public function is_available() {
 		return SettingsService::getInstance()->isEnabledPayment()
-			&& SettingsService::getInstance()->isAPMsEnabled( $this->getAPMsType() );
+		       && SettingsService::getInstance()->isAPMsEnabled( $this->getAPMsType() );
 	}
 
 	/**
@@ -43,14 +43,14 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 		if ( ! wp_verify_nonce( $wpNonce, 'process_payment' ) ) {
 			throw new RouteException(
 				'woocommerce_rest_checkout_process_payment_error',
-				__( 'Error: Security check', 'pay_dock' )
+				esc_html( __( 'Error: Security check', 'paydock' ) )
 			);
 		}
-		
+
 		$order = wc_get_order( $order_id );
 
 		$loggerRepository = new LogRepository();
-		$chargeId = '';
+		$chargeId         = '';
 
 		try {
 			$processor = new ApmProcessor( $_POST );
@@ -58,11 +58,12 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 			$response = $processor->run( $order );
 
 			if ( ! empty( $response['error'] ) || empty( $response['resource']['data']['_id'] ) ) {
-				throw new Exception( __( 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later.', 'pay_dock' ) );
+				throw new Exception( __( 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later.',
+					'paydock' ) );
 			}
 
 			$chargeId = $response['resource']['data']['_id'];
-		} catch (Exception $e) {
+		} catch ( Exception $e ) {
 			$loggerRepository->createLogRecord(
 				$chargeId ?? '',
 				'Charges',
@@ -72,18 +73,19 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 			);
 			throw new RouteException(
 				'woocommerce_rest_checkout_process_payment_error',
-				__( 'Error:', 'pay_dock' ) . ' ' . $e->getMessage()
+				/* translators: %s: Error message */
+				esc_html( sprintf( __( 'Error: %s', 'paydock' ), $e->getMessage() ) )
 			);
 		}
 
-		$status = ucfirst( strtolower( $response['resource']['data']['transactions'][0]['status'] ?? 'undefined' ) );
-		$operation = ucfirst( strtolower( $response['resource']['type'] ?? 'undefined' ) );
+		$status          = ucfirst( strtolower( $response['resource']['data']['transactions'][0]['status'] ?? 'undefined' ) );
+		$operation       = ucfirst( strtolower( $response['resource']['type'] ?? 'undefined' ) );
 		$isAuthorization = $response['resource']['data']['authorization'] ?? 0;
 		if ( $isAuthorization && 'Pending' == $status ) {
 			$status = 'wc-paydock-authorize';
 		} else {
 			$isCompleted = 'complete' === strtolower( $status );
-			$status = $isCompleted ? 'wc-paydock-paid' : 'wc-paydock-pending';
+			$status      = $isCompleted ? 'wc-paydock-paid' : 'wc-paydock-pending';
 		}
 		$order->set_status( $status );
 		$order->payment_complete();
@@ -106,8 +108,8 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 			'wc-paydock-paid' == $status ? LogRepository::SUCCESS : LogRepository::DEFAULT
 		);
 
-		return [ 
-			'result' => 'success',
+		return [
+			'result'   => 'success',
 			'redirect' => $this->get_return_url( $order ),
 		];
 	}

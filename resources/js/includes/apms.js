@@ -8,7 +8,7 @@ import {select} from '@wordpress/data';
 import {CART_STORE_KEY} from '@woocommerce/block-data';
 import canMakePayment from "./canMakePayment";
 
-const textDomain = 'pay_dock';
+const textDomain = 'paydock';
 const labels = {
     defaultLabel: __('Paydock Payments', textDomain),
     placeOrderButtonLabel: __('Place Order by Paydock', textDomain),

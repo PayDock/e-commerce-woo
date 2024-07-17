@@ -8,20 +8,28 @@ use Paydock\Services\Assets\AdminAssetsService;
 use Paydock\Services\TemplateService;
 
 abstract class AbstractSettingService extends \WC_Payment_Gateway {
-	private const TITLE = 'Paydock Gateway';
-	private const DESCRIPTION = 'Paydock simplify how you manage your payments. Reduce costs, technical'
-		. ' headaches & streamline compliance using Paydock\'s payment orchestration.';
 	public $currentSection = null;
 	protected $templateService;
 
 	public function __construct() {
-		$this->currentSection = ! empty( $_GET['section'] ) ? sanitize_text_field( $_GET['section'] ) : '';
-		$this->id = $this->getId();
-		$this->enabled = $this->get_option( 'enabled' );
-		$this->method_title = __( self::TITLE, 'pay_dock' );
-		$this->method_description = __( self::DESCRIPTION, 'pay_dock' );
+		$available_sections = array_map( function ( $item ) {
+			return strtolower( $item->value );
+		}, SettingsTabs::allCases() );
 
-		$this->title = __( self::TITLE, 'pay_dock' );
+		$section = filter_input( INPUT_GET, 'section', FILTER_SANITIZE_STRING );
+
+		if ( in_array( $section, $available_sections ) ) {
+			$this->currentSection = $section;
+		}
+		$this->id                 = $this->getId();
+		$this->enabled            = $this->get_option( 'enabled' );
+		$this->method_title       = __( 'Paydock Gateway', 'paydock' );
+		$this->method_description = __(
+			'Paydock simplify how you manage your payments. Reduce costs, technical headaches & streamline compliance using Paydock\'s payment orchestration.',
+			'paydock'
+		);
+
+		$this->title = __( 'Paydock Gateway', 'paydock' );
 
 		$this->icon = plugins_url( 'assets/images/logo.svg' );
 
@@ -58,21 +66,21 @@ abstract class AbstractSettingService extends \WC_Payment_Gateway {
 	}
 
 	protected function getTabs(): array {
-		return [ 
-			SettingsTabs::LIVE_CONNECTION()->value => [ 
-				'label' => __( 'Live Connection' ),
+		return [
+			SettingsTabs::LIVE_CONNECTION()->value    => [
+				'label'  => __( 'Live Connection' ),
 				'active' => SettingsTabs::LIVE_CONNECTION()->value == $this->currentSection,
 			],
-			SettingsTabs::SANDBOX_CONNECTION()->value => [ 
-				'label' => __( 'Sandbox Connection' ),
+			SettingsTabs::SANDBOX_CONNECTION()->value => [
+				'label'  => __( 'Sandbox Connection' ),
 				'active' => SettingsTabs::SANDBOX_CONNECTION()->value == $this->currentSection,
 			],
-			SettingsTabs::WIDGET()->value => [ 
-				'label' => __( 'Widget Configuration' ),
+			SettingsTabs::WIDGET()->value             => [
+				'label'  => __( 'Widget Configuration' ),
 				'active' => SettingsTabs::WIDGET()->value == $this->currentSection,
 			],
-			SettingsTabs::LOG()->value => [ 
-				'label' => __( 'Logs' ),
+			SettingsTabs::LOG()->value                => [
+				'label'  => __( 'Logs' ),
 				'active' => SettingsTabs::LOG()->value == $this->currentSection,
 			],
 		];
@@ -89,20 +97,20 @@ abstract class AbstractSettingService extends \WC_Payment_Gateway {
 	public function generate_card_select_html( $key, $data ) {
 		$field_key = $this->get_field_key( $key );
 
-		$defaults = [ 
-			'title' => '',
-			'disabled' => false,
-			'class' => '',
-			'css' => '',
-			'placeholder' => '',
-			'type' => 'text',
-			'desc_tip' => false,
-			'description' => '',
+		$defaults = [
+			'title'             => '',
+			'disabled'          => false,
+			'class'             => '',
+			'css'               => '',
+			'placeholder'       => '',
+			'type'              => 'text',
+			'desc_tip'          => false,
+			'description'       => '',
 			'custom_attributes' => [],
-			'options' => [],
+			'options'           => [],
 		];
 
-		$data = wp_parse_args( $data, $defaults );
+		$data  = wp_parse_args( $data, $defaults );
 		$value = $this->get_option( $key );
 
 		return $this->templateService->getAdminHtml(

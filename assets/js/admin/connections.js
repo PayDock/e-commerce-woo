@@ -4,9 +4,9 @@ jQuery(document).ready(function ($) {
         select: 'select', checkbox: 'checkbox'
     };
     const prefixes = [
-        'woocommerce_pay_dock_pay_dock_',
-        'woocommerce_pay_dock_sandbox_pay_dock_sandbox_',
-        'woocommerce_pay_dock_widget_pay_dock_widget_'
+        'woocommerce_paydock_paydock_',
+        'woocommerce_paydock_sandbox_paydock_sandbox_',
+        'woocommerce_paydock_widget_paydock_widget_'
     ];
 
     const conditions = [{

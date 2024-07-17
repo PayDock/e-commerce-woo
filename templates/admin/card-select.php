@@ -1,3 +1,6 @@
+<?php if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+} // Exit if accessed directly ?>
 <tr valign="top">
 	<th scope="row" class="titledesc">
 		<label for="<?php echo esc_html( $field_key ); ?>">

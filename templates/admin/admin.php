@@ -1,3 +1,6 @@
+<?php if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+} // Exit if accessed directly ?>
 <nav class="nav-tab-wrapper woo-nav-tab-wrapper">
 	<?php foreach ( $tabs as $key => $value ) : ?>
 		<a href="/wp-admin/admin.php?page=wc-settings&tab=checkout&section=<?php echo esc_attr( $key ); ?>"
@@ -6,7 +9,7 @@
 		</a>
 	<?php endforeach; ?>
 </nav>
-<?php if ( 'pay_dock_log' !== $this->currentSection ) : ?>
+<?php if ( 'paydock_log' !== $this->currentSection ) : ?>
 	<?php $templateService->settingService->parentGenerateSettingsHtml( $form_fields, true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped  --  the following require is safe it is not a user input. ?>
 <?php else : ?>
 	<table

@@ -11,9 +11,9 @@
  * Description: Paydock simplify how you manage your payments. Reduce costs, technical headaches & streamline compliance using Paydock's payment orchestration.
  * Author: Paydock
  * Author URI: https://www.paydock.com/
- * Version: 2.0.53
+ * Version: 3.0.4
  * Requires at least: 6.4.2
- * Text Domain: paydock-for-woo
+ * Text Domain: paydock
  * Tested up to: 6.4.2
  * WC requires at least: 6.4.2
  * WC tested up to: 8.5
@@ -23,24 +23,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( ! defined( 'PAY_DOCK_PLUGIN_FILE' ) ) {
-	define( 'PAY_DOCK_PLUGIN_FILE', __FILE__ );
+if ( ! defined( 'PAYDOCK_PLUGIN_FILE' ) ) {
+	define( 'PAYDOCK_PLUGIN_FILE', __FILE__ );
 }
 
-if ( ! defined( 'PAY_DOCK_PLUGIN_PATH' ) ) {
-	define( 'PAY_DOCK_PLUGIN_PATH', dirname( __FILE__ ) );
+if ( ! defined( 'PAYDOCK_PLUGIN_PATH' ) ) {
+	define( 'PAYDOCK_PLUGIN_PATH', dirname( __FILE__ ) );
 }
 
-if ( ! defined( 'PAY_DOCK_PLUGIN_URL' ) ) {
-	define( 'PAY_DOCK_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+if ( ! defined( 'PAYDOCK_PLUGIN_URL' ) ) {
+	define( 'PAYDOCK_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 }
 
-if ( ! defined( 'PAY_DOCK_PLUGIN_VERSION' ) ) {
-	define( 'PAY_DOCK_PLUGIN_VERSION', '2.0.53' );
-}
-
-if ( ! defined( 'PAY_DOCK_TEXT_DOMAIN' ) ) {
-	define( 'PAY_DOCK_TEXT_DOMAIN', 'pay_dock' );
+if ( ! defined( 'PAYDOCK_PLUGIN_VERSION' ) ) {
+	define( 'PAYDOCK_PLUGIN_VERSION', '3.0.4' );
 }
 
 require_once 'vendor/autoload.php';

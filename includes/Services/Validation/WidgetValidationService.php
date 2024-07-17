@@ -41,8 +41,6 @@ class WidgetValidationService {
 		'PAYMENT_A_P_M_S_ZIP_MAX',
 	];
 
-
-	private const ENABLED_CONDITION = 'yes';
 	private $errors = [];
 
 	private $result = [];
@@ -116,29 +114,25 @@ class WidgetValidationService {
 				( $settingName && $isMin && ( $value != (string) floatval( $value ) ) )
 				|| ( $settingName && $isMax && ! empty( $value ) && ( $value != (string) floatval( $value ) ) )
 			) {
-				$this->errors[] = __(
-					WidgetSettings::{$settingName}()->getFullTitle() . " must be numeric.",
-					'pay_dock'
-				);
+				/* translators: %s: Title of form field. */
+				$this->errors[] = sprintf( __( "%s must be numeric.", 'paydock' ),
+					WidgetSettings::{$settingName}()->getFullTitle() );
 			} elseif ( $settingName && $isMin && ( 0 > (float) $value ) ) {
-				$this->errors[] = __(
-					WidgetSettings::{$settingName}()->getFullTitle() . " cannot be negative.",
-					'pay_dock'
-				);
+				/* translators: %s: Title of form field. */
+				$this->errors[] = sprintf( __( "%s cannot be negative.", 'paydock' ),
+					WidgetSettings::{$settingName}()->getFullTitle() );
 			} elseif (
 				$settingName
 				&& $isMax
 				&& ! empty( $value )
 				&& ( (float) $value < (float) $this->data[ str_replace( 'MAX', 'MIN', $key ) ] ) ) {
-				$this->errors[] = __(
-					WidgetSettings::{$settingName}()->getFullTitle() . " cannot be less than the min value.",
-					'pay_dock'
-				);
+				/* translators: %s: Title of form field. */
+				$this->errors[] = sprintf( __( "%s cannot be less than the min value.", 'paydock' ),
+					WidgetSettings::{$settingName}()->getFullTitle() );
 			} elseif ( $settingName && empty( $value ) && ! $isMin && ! $isMax ) {
-				$this->errors[] = __(
-					WidgetSettings::{$settingName}()->getFullTitle() . " can't be empty.",
-					'pay_dock'
-				);
+				/* translators: %s: Title of form field. */
+				$this->errors[] = sprintf( __( "%s can't be empty.", 'paydock' ),
+					WidgetSettings::{$settingName}()->getFullTitle() );
 			}
 
 			$decoded = json_decode( $value, true );
@@ -154,12 +148,12 @@ class WidgetValidationService {
 					|| ! $this->validateCustomStyles( $decoded )
 				)
 			) {
-				$this->errors[] = __( 'Custom styles must be a valid JSON.', 'pay_dock' );
+				$this->errors[] = __( 'Custom styles must be a valid JSON.', 'paydock' );
 			}
 		}
 
 		if ( 'custom' == $this->data[ $versionKey ] && empty( $this->data[ $customVersionKey ] ) ) {
-			$this->errors[] = __( "Version can't be empty.", 'pay_dock' );
+			$this->errors[] = __( "Version can't be empty.", 'paydock' );
 		}
 	}
 

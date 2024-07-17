@@ -11,15 +11,18 @@ use Paydock\Services\SettingsService;
 class SandboxConnectionSettingService extends LiveConnectionSettingService {
 	public function init_form_fields(): void {
 		$sandBoxOptionKey = SettingsService::getInstance()
-			->getOptionName( $this->id, [ SettingGroups::CREDENTIALS()->name, CredentialSettings::SANDBOX()->name ] );
+		                                   ->getOptionName( $this->id, [
+			                                   SettingGroups::CREDENTIALS()->name,
+			                                   CredentialSettings::SANDBOX()->name
+		                                   ] );
 
-		$this->form_fields[ $sandBoxOptionKey ] = [ 
+		$this->form_fields[ $sandBoxOptionKey ] = [
 			'type' => CredentialSettings::SANDBOX()->getInputType(),
 			'label' => __(
 				'To test your Paydock for WooCommerce Plugin, you can use the sandbox mode.',
-				'pay_dock'
+				'paydock'
 			),
-			'title' => __( CredentialSettings::SANDBOX()->getLabel(), 'pay_dock' ),
+			'title' => CredentialSettings::SANDBOX()->getLabel(),
 		];
 		parent::init_form_fields();
 	}

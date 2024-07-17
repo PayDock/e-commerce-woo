@@ -85,7 +85,12 @@ class BankAccountProcessor {
 					$response['error']['message'],
 					LogRepository::ERROR
 				);
-				LoggedException::throw( $response );
+				new LoggedException(
+					__( 'Oops! Something went wrong. Please check the information provided and try again. ', 'paydock' ),
+					0,
+					null,
+					$response
+				);
 			}
 
 			$this->logger->createLogRecord(
@@ -182,7 +187,12 @@ class BankAccountProcessor {
 		$response = SDKAdapterService::getInstance()->createCharge( $request );
 
 		if ( ! empty( $response['error'] ) ) {
-			LoggedException::throw( $response );
+			new LoggedException(
+				__( 'Oops! Something went wrong. Please check the information provided and try again. ', 'power-board' ),
+				0,
+				null,
+				$response
+			);
 		}
 
 		return $response;

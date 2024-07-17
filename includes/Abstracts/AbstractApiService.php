@@ -15,9 +15,9 @@ abstract class AbstractApiService {
 	protected $allowedAction = [];
 
 	public function call(): array {
-		$url = ConfigService::buildApiUrl( $this->buildEndpoint() );
-		$args = [ 
-			'headers' => [ 
+		$url  = ConfigService::buildApiUrl( $this->buildEndpoint() );
+		$args = [
+			'headers' => [
 				'content-type' => 'application/json',
 			],
 		];
@@ -34,28 +34,28 @@ abstract class AbstractApiService {
 			$args['headers']['x-user-public-key'] = ConfigService::$publicKey;
 		}
 
-		$args['headers'][ 'X-' . PAY_DOCK_TEXT_DOMAIN . '-Meta' ] = 'V'
-			. PAY_DOCK_PLUGIN_VERSION
-			. '_woocommerce_'
-			. WC()->version;
+		$args['headers']['X-paydock-Meta'] = 'V'
+		                                     . PAYDOCK_PLUGIN_VERSION
+		                                     . '_woocommerce_'
+		                                     . WC()->version;
 
 		switch ( $this->allowedAction[ $this->action ] ) {
 			case 'POST':
-				$args['body'] = json_encode( $this->parameters, JSON_PRETTY_PRINT );
-				$parsed_args = wp_parse_args( $args, [ 
-					'method' => 'POST',
+				$args['body'] = wp_json_encode( $this->parameters, JSON_PRETTY_PRINT );
+				$parsed_args  = wp_parse_args( $args, [
+					'method'  => 'POST',
 					'timeout' => 10,
 				] );
 				break;
 			case 'DELETE':
-				$parsed_args = wp_parse_args( $args, [ 
-					'method' => 'DELETE',
+				$parsed_args = wp_parse_args( $args, [
+					'method'  => 'DELETE',
 					'timeout' => 10,
 				] );
 				break;
 			default:
-				$parsed_args = wp_parse_args( $args, [ 
-					'method' => 'GET',
+				$parsed_args = wp_parse_args( $args, [
+					'method'  => 'GET',
 					'timeout' => 10,
 				] );
 		}
@@ -69,7 +69,11 @@ abstract class AbstractApiService {
 		$body = json_decode( $request['body'], true );
 
 		if ( null === $body && json_last_error() !== JSON_ERROR_NONE ) {
-			return [ 'status' => 403, 'error' => [ 'message' => 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later. ' ], 'body' => $request['body'] ];
+			return [
+				'status' => 403,
+				'error'  => [ 'message' => 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later. ' ],
+				'body'   => $request['body']
+			];
 		}
 
 		return $body;
@@ -77,7 +81,8 @@ abstract class AbstractApiService {
 
 	protected function setAction( $action ): void {
 		if ( empty( $this->allowedAction[ $action ] ) ) {
-			throw new \LogicException( __( 'Not allowed action ' . $action ) );
+			/* translators: %s: Missing action name. */
+			throw new \LogicException( esc_html( sprintf( __( 'Not allowed action: %s', 'paydock' ), $action ) ) );
 		}
 
 		$this->action = $action;

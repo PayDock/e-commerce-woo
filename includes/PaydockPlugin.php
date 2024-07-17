@@ -15,7 +15,7 @@ if ( ! class_exists( '\Paydock\PaydockPlugin' ) ) {
 			LogRepository::class,
 		];
 
-		public const PLUGIN_PREFIX = 'pay_dock';
+		public const PLUGIN_PREFIX = 'paydock';
 
 		public const VERSION = '1.0.0';
 
@@ -24,8 +24,8 @@ if ( ! class_exists( '\Paydock\PaydockPlugin' ) ) {
 		protected $paymentService = null;
 
 		protected function __construct() {
-			register_activation_hook( PAY_DOCK_PLUGIN_FILE, [ ActivationHook::class, 'handle' ] );
-			register_deactivation_hook( PAY_DOCK_PLUGIN_FILE, [ DeactivationHook::class, 'handle' ] );
+			register_activation_hook( PAYDOCK_PLUGIN_FILE, [ ActivationHook::class, 'handle' ] );
+			register_deactivation_hook( PAYDOCK_PLUGIN_FILE, [ DeactivationHook::class, 'handle' ] );
 
 			ActionsService::getInstance();
 			FiltersService::getInstance();

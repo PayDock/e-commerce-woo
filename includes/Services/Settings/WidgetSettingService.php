@@ -69,11 +69,11 @@ class WidgetSettingService extends AbstractSettingService {
 			if ( WidgetSettings::PAYMENT_CARD_TITLE()->name === $case->name ) {
 				$this->form_fields[ $key . '_big_label' ] = [
 					'type'  => 'big_label',
-					'title' => __( 'Payment Methods:', 'pay_dock' ),
+					'title' => __( 'Payment Methods:', 'paydock' ),
 				];
 				$this->form_fields[ $key . '_label' ]     = [
 					'type'  => 'label',
-					'title' => __( 'Cards', 'pay_dock' ),
+					'title' => __( 'Cards', 'paydock' ),
 				];
 			} elseif ( WidgetSettings::PAYMENT_BANK_ACCOUNT_TITLE()->name === $case->name ||
 			           WidgetSettings::PAYMENT_BANK_ACCOUNT_DESCRIPTION()->name === $case->name ) {
@@ -81,23 +81,23 @@ class WidgetSettingService extends AbstractSettingService {
 			} elseif ( WidgetSettings::PAYMENT_WALLET_APPLE_PAY_TITLE()->name === $case->name ) {
 				$this->form_fields[ $key . '_label' ] = [
 					'type'  => 'label',
-					'title' => __( 'Wallets', 'pay_dock' ),
+					'title' => __( 'Wallets', 'paydock' ),
 				];
 			} elseif ( WidgetSettings::PAYMENT_A_P_M_S_AFTERPAY_V1_TITLE()->name === $case->name ) {
 				$this->form_fields[ $key . '_label' ] = [
 					'type'  => 'label',
-					'title' => __( 'APMs', 'pay_dock' ),
+					'title' => __( 'APMs', 'paydock' ),
 				];
 			} elseif ( WidgetSettings::STYLE_BACKGROUND_COLOR()->name === $case->name ) {
 				$this->form_fields[ $key . '_label' ] = [
 					'type'  => 'big_label',
-					'title' => __( 'Widget Styles:', 'pay_dock' ),
+					'title' => __( 'Widget Styles:', 'paydock' ),
 				];
 			}
 
 			$this->form_fields[ $key ] = [
 				'type'    => $case->getInputType(),
-				'title'   => __( $case->getTitle(), 'pay_dock' ),
+				'title'   => $case->getTitle(),
 				'default' => $case->getDefault(),
 			];
 

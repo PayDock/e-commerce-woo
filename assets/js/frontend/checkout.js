@@ -17,7 +17,7 @@ const paydockContent = () => {
         ), wp.element.createElement(
             "input", {
                 type: 'hidden',
-                name: 'payment_source_tokenzz'
+                name: 'paydock_payment_source_token'
             }
         )
     );

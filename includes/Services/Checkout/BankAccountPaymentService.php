@@ -15,8 +15,8 @@ class BankAccountPaymentService extends AbstractPaymentService {
 	public function __construct() {
 		$settings = SettingsService::getInstance();
 
-		$this->id = 'paydock_bank_account_gateway';
-		$this->title = $settings->getWidgetPaymentBankAccountTitle();
+		$this->id          = 'paydock_bank_account_gateway';
+		$this->title       = $settings->getWidgetPaymentBankAccountTitle();
 		$this->description = $settings->getWidgetPaymentBankAccountDescription();
 
 		parent::__construct();
@@ -24,7 +24,7 @@ class BankAccountPaymentService extends AbstractPaymentService {
 
 	public function is_available() {
 		return SettingsService::getInstance()->isEnabledPayment()
-			&& SettingsService::getInstance()->isBankAccountEnabled();
+		       && SettingsService::getInstance()->isBankAccountEnabled();
 	}
 
 	public function payment_scripts() {
@@ -36,49 +36,51 @@ class BankAccountPaymentService extends AbstractPaymentService {
 		if ( ! wp_verify_nonce( $wpNonce, 'process_payment' ) ) {
 			throw new RouteException(
 				'woocommerce_rest_checkout_process_payment_error',
-				__( 'Error: Security check', 'pay_dock' )
+				esc_html( __( 'Error: Security check', 'paydock' ) )
 			);
 		}
-		
+
 		$order = wc_get_order( $order_id );
 
 		$loggerRepository = new LogRepository();
-		$chargeId = '';
+		$chargeId         = '';
 
 		try {
 			$processor = new BankAccountProcessor( $order, $_POST );
 
 			$response = $processor->run( $order_id );
 			$chargeId = ! empty( $response['resource']['data']['_id'] ) ? $response['resource']['data']['_id'] : '';
-		} catch (LoggedException $exception) {
+		} catch ( LoggedException $exception ) {
 
 			$operation = ucfirst( strtolower( $exception->response['resource']['type'] ?? 'undefined' ) );
-			$status = $exception->response['error']['message'] ?? 'empty status';
-			$message = $exception->response['error']['details'][0]['gateway_specific_description'] ?? 'empty message';
+			$status    = $exception->response['error']['message'] ?? 'empty status';
+			$message   = $exception->response['error']['details'][0]['gateway_specific_description'] ?? 'empty message';
 
 			$loggerRepository->createLogRecord( $chargeId, $operation, $status, $message, LogRepository::ERROR );
 			throw new RouteException(
 				'woocommerce_rest_checkout_process_payment_error',
-				__( 'Error:', 'pay_dock' ) . ' ' . $exception->getMessage()
+				/* Translators: %s Exception message. */
+				esc_html( sprintf( __( 'Error: %s', 'paydock' ), $exception->getMessage() ) )
 			);
-		} catch (Exception $exception) {
+		} catch ( Exception $exception ) {
 			throw new RouteException(
 				'woocommerce_rest_checkout_process_payment_error',
-				__( 'Error:', 'pay_dock' ) . ' ' . $exception->getMessage()
+				/* Translators: %s Exception message. */
+				esc_html( sprintf( __( 'Error: %s', 'paydock' ), $exception->getMessage() ) )
 			);
 		}
 
-		$status = ucfirst( strtolower( $response['resource']['data']['transactions'][0]['status'] ?? 'undefined' ) );
-		$operation = ucfirst( strtolower( $response['resource']['type'] ?? 'undefined' ) );
+		$status          = ucfirst( strtolower( $response['resource']['data']['transactions'][0]['status'] ?? 'undefined' ) );
+		$operation       = ucfirst( strtolower( $response['resource']['type'] ?? 'undefined' ) );
 		$isAuthorization = $response['resource']['data']['authorization'] ?? 0;
-		$isCompleted = false;
-		$markAsSuccess = false;
+		$isCompleted     = false;
+		$markAsSuccess   = false;
 		if ( $isAuthorization && 'Pending' == $status ) {
 			$status = 'wc-paydock-authorize';
 		} else {
 			$markAsSuccess = true;
-			$isCompleted = 'Complete' === $status;
-			$status = $isCompleted ? 'wc-paydock-paid' : 'wc-paydock-requested';
+			$isCompleted   = 'Complete' === $status;
+			$status        = $isCompleted ? 'wc-paydock-paid' : 'wc-paydock-requested';
 		}
 		$order->set_status( $status );
 		$order->payment_complete();
@@ -99,8 +101,8 @@ class BankAccountPaymentService extends AbstractPaymentService {
 			$markAsSuccess ? LogRepository::SUCCESS : LogRepository::DEFAULT
 		);
 
-		return [ 
-			'result' => 'success',
+		return [
+			'result'   => 'success',
 			'redirect' => $this->get_return_url( $order ),
 		];
 	}

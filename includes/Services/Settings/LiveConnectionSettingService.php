@@ -53,13 +53,13 @@ class LiveConnectionSettingService extends AbstractSettingService {
 			if ( SettingGroups::CARD() == $settingGroup ) {
 				$this->form_fields[ $key . '_label' ] = [ 
 					'type' => 'big_label',
-					'title' => __( 'Payment Methods:', 'pay_dock' ),
+					'title' => __( 'Payment Methods:', 'paydock' ),
 				];
 			}
 
 			$this->form_fields[ $key ] = [ 
 				'type' => 'big_label',
-				'title' => __( $settingGroup->getLabel(), 'pay_dock' ),
+				'title' => $settingGroup->getLabel(),
 			];
 
 			switch ( $settingGroup->name ) {
@@ -99,7 +99,7 @@ class LiveConnectionSettingService extends AbstractSettingService {
 				] );
 				$fields[ $key ] = [ 
 					'type' => $credentialSettings->getInputType(),
-					'title' => __( $credentialSettings->getLabel(), 'pay_dock' ),
+					'title' => $credentialSettings->getLabel(),
 				];
 				$description = $credentialSettings->getDescription();
 				if ( $description ) {
@@ -124,8 +124,7 @@ class LiveConnectionSettingService extends AbstractSettingService {
 			$key = $service->getOptionName( $this->id, [ SettingGroups::CARD()->name, $cardSettings->name ] );
 			$fields[ $key ] = [ 
 				'type' => $cardSettings->getInputType(),
-				'title' => __( preg_replace( [ '/ Id/', '/ id/' ], ' ID', $cardSettings->getLabel() ),
-					'pay_dock' ),
+				'title' => preg_replace( [ '/ Id/', '/ id/' ], ' ID', $cardSettings->getLabel() ),
 				'default' => $cardSettings->getDefault(),
 			];
 
@@ -169,7 +168,7 @@ class LiveConnectionSettingService extends AbstractSettingService {
 
 			$fields[ $key ] = [ 
 				'type' => $bankAccountSettings->getInputType(),
-				'title' => __( $bankAccountSettings->getLabel(), 'pay_dock' ),
+				'title' => $bankAccountSettings->getLabel(),
 			];
 
 			$description = $bankAccountSettings->getDescription();
@@ -197,7 +196,7 @@ class LiveConnectionSettingService extends AbstractSettingService {
 				'label',
 			] ) ] = [ 
 					'type' => 'label',
-					'title' => __( $walletPaymentMethods->getLabel(), 'pay_dock' ),
+					'title' => $walletPaymentMethods->getLabel(),
 				];
 
 			foreach ( WalletSettings::cases() as $walletSettings ) {
@@ -209,8 +208,7 @@ class LiveConnectionSettingService extends AbstractSettingService {
 
 				$fields[ $key ] = [ 
 					'type' => $walletSettings->getInputType(),
-					'title' => __( preg_replace( [ '/ Id/', '/ id/' ], ' ID', $walletSettings->getLabel() ),
-						'pay_dock' ),
+					'title' => preg_replace( [ '/ Id/', '/ id/' ], ' ID', $walletSettings->getLabel() ),
 				];
 
 				$description = $walletSettings->getDescription();
@@ -228,7 +226,7 @@ class LiveConnectionSettingService extends AbstractSettingService {
 				] );
 				$fields[ $key ] = [ 
 					'type' => 'checkbox',
-					'title' => __( 'Pay Later', 'pay_dock' ),
+					'title' => __( 'Pay Later', 'paydock' ),
 				];
 			}
 		}
@@ -247,7 +245,7 @@ class LiveConnectionSettingService extends AbstractSettingService {
 				'label',
 			] ) ] = [ 
 					'type' => 'label',
-					'title' => __( $otherPaymentMethods->getLabel(), 'pay_dock' ),
+					'title' => $otherPaymentMethods->getLabel(),
 				];
 
 			foreach ( APMsSettings::cases() as $APMsSettings ) {
@@ -264,7 +262,7 @@ class LiveConnectionSettingService extends AbstractSettingService {
 
 				$fields[ $key ] = [ 
 					'type' => $APMsSettings->getInputType(),
-					'title' => __( $APMsSettings->getLabel(), 'pay_dock' ),
+					'title' => $APMsSettings->getLabel(),
 				];
 
 				$description = $APMsSettings->getDescription();

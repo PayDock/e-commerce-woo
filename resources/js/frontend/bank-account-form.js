@@ -7,7 +7,7 @@ import {checkboxSavedBankAccountComponent, selectSavedBankAccountsComponent} fro
 
 const settings = getSetting('paydock_bank_account_block_data', {});
 
-const textDomain = 'pay_dock';
+const textDomain = 'paydock';
 const labels = {
     defaultLabel: __('Paydock Payments', textDomain),
     saveBankAcoountLabel: __('Save payment details', textDomain),

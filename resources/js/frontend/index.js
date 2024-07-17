@@ -17,7 +17,7 @@ import canMakePayment from "../includes/canMakePayment";
 const settings = getSetting('paydock_data', {});
 const cart = select(CART_STORE_KEY);
 
-const textDomain = 'pay_dock';
+const textDomain = 'paydock';
 const labels = {
     defaultLabel: __('Paydock Payments', textDomain),
     saveCardLabel: __('Save payment details', textDomain),
@@ -103,7 +103,7 @@ const Content = (props) => {
                 }
             })
 
-            const paymentSourceToken = document.querySelector('[name="payment_source_token"]')
+            const paymentSourceToken = document.querySelector('[name="paydock_payment_source_token"]')
             for (let second = 1; second <= 100; second++) {
                 await sleep(100);
                 if (paymentSourceToken !== null && paymentSourceToken.value.length) {
@@ -146,7 +146,6 @@ const Content = (props) => {
 
                 return true;
             }
-
             return {
                 type: emitResponse.responseTypes.ERROR,
                 errorMessage: labels.fillDataError,
@@ -154,7 +153,7 @@ const Content = (props) => {
         });
 
         const unsubscribe = onPaymentSetup(async () => {
-            const paymentSourceToken = document.querySelector('[name="payment_source_token"]')
+            const paymentSourceToken = document.querySelector('[name="paydock_payment_source_token"]')
             if (paymentSourceToken === null) {
                 return;
             }
@@ -177,7 +176,6 @@ const Content = (props) => {
                     },
                 };
             }
-
             return {
                 type: emitResponse.responseTypes.ERROR,
                 message: labels.fillDataError,
@@ -213,7 +211,7 @@ const Content = (props) => {
             "input",
             {
                 type: 'hidden',
-                name: 'payment_source_token'
+                name: 'paydock_payment_source_token'
             }
         ),
         checkboxSavedCardsComponent(labels.saveCardLabel)

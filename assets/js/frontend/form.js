@@ -91,7 +91,7 @@ setTimeout(() => jQuery(function ($) {
     const idPaydockWidgetBankAccount = 'radio-control-wc-payment-method-options-paydock_bank_account_gateway';
 
     const searchParams = new URLSearchParams(window.location.search);
-    const paydockAfterpayWalletsSettings = window.wc.wcSettings.getSetting('paydock_afterpay_wallet_block_data', {});
+    const paydockAfterpayWalletsSettings = window.wc?.wcSettings?.getSetting('paydock_afterpay_wallet_block_data', {});
 
     function initPaydockWidgetBankAccount() {
         lastInit = idPaydockWidgetBankAccount;
@@ -116,11 +116,6 @@ setTimeout(() => jQuery(function ($) {
         paydockValidation.createWidgetDiv('paydockWidgetBankAccount');
         const widget = new paydock.HtmlWidget('#paydockWidgetBankAccount', paydockBankAccountSettings.publicKey, 'not_configured', 'bank_account', 'payment_source');
         widget.setFormFields(['account_routing']);
-        // const widget = new paydock.HtmlMultiWidget(
-        //     '#paydockWidgetBankAccount',
-        //     paydockBankAccountSettings.publicKey,
-        //     [bankAccount]
-        // );
 
         window.widgetPaydockBankAccount = widget;
         if (paydockBankAccountSettings.hasOwnProperty('styles'))
@@ -186,7 +181,7 @@ setTimeout(() => jQuery(function ($) {
         }
         widget.setEnv(paydockCardSettings.isSandbox ? 'sandbox' : 'production');
         widget.setFormFields(['email', 'phone']);
-        widget.onFinishInsert('input[name="payment_source_token"]', 'payment_source');
+        widget.onFinishInsert('input[name="paydock_payment_source_token"]', 'payment_source');
         widget.interceptSubmitForm('#widget');
         widget.load();
 

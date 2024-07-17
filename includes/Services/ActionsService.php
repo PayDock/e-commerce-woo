@@ -44,7 +44,7 @@ class ActionsService extends AbstractSingleton {
 
 	protected function addCompatibilityWithWooCommerce(): void {
 		if ( class_exists( FeaturesUtil::class ) ) {
-			FeaturesUtil::declare_compatibility( 'custom_order_tables', PAY_DOCK_PLUGIN_FILE );
+			FeaturesUtil::declare_compatibility( 'custom_order_tables', PAYDOCK_PLUGIN_FILE );
 		}
 	}
 
@@ -79,7 +79,7 @@ class ActionsService extends AbstractSingleton {
 		add_action( 'before_woocommerce_init', function () {
 			FeaturesUtil::declare_compatibility(
 				'cart_checkout_blocks',
-				PAY_DOCK_PLUGIN_FILE,
+				PAYDOCK_PLUGIN_FILE,
 				true
 			);
 		} );

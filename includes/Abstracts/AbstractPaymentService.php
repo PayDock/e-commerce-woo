@@ -40,10 +40,10 @@ abstract class AbstractPaymentService extends WC_Payment_Gateway {
 			return '';
 		}
 
-		wp_enqueue_script( 'paydock-form', PAY_DOCK_PLUGIN_URL . '/assets/js/frontend/form.js', [], time(), true );
+		wp_enqueue_script( 'paydock-form', PAYDOCK_PLUGIN_URL . '/assets/js/frontend/form.js', [], time(), true );
 		wp_enqueue_style(
 			'paydock-widget-css',
-			PAY_DOCK_PLUGIN_URL . '/assets/css/frontend/widget.css',
+			PAYDOCK_PLUGIN_URL . '/assets/css/frontend/widget.css',
 			[],
 			time()
 		);

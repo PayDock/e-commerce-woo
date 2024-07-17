@@ -10,7 +10,7 @@ import initButton from './wallets/init';
 import axios from 'axios';
 import canMakePayment from "./canMakePayment";
 
-const textDomain = 'pay_dock';
+const textDomain = 'paydock';
 const labels = {
     validationError: __('Please fill in the required fields of the form to display payment methods', textDomain),
     fillDataError: __('The payment service does not accept payment. Please try again later or choose another payment method.', textDomain),

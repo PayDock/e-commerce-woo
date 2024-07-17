@@ -24,31 +24,38 @@ abstract class AbstractBlock extends AbstractPaymentMethodType {
 		if ( ! self::$isLoad && is_checkout() ) {
 			wp_enqueue_script(
 				'paydock-form',
-				PAY_DOCK_PLUGIN_URL . '/assets/js/frontend/form.js',
+				PAYDOCK_PLUGIN_URL . '/assets/js/frontend/form.js',
 				[],
-				time(),
+				PAYDOCK_PLUGIN_VERSION,
 				true
 			);
 			wp_enqueue_style(
 				'paydock-widget-css',
-				PAY_DOCK_PLUGIN_URL . '/assets/css/frontend/widget.css',
+				PAYDOCK_PLUGIN_URL . '/assets/css/frontend/widget.css',
 				[],
-				time()
+				PAYDOCK_PLUGIN_VERSION,
+				true
 			);
 
-			wp_enqueue_script( 'paydock-api', SettingsService::getInstance()->getWidgetScriptUrl() );
+			wp_enqueue_script(
+				'paydock-api',
+				SettingsService::getInstance()->getWidgetScriptUrl(),
+				[],
+				PAYDOCK_PLUGIN_VERSION,
+				true
+			);
 
 			self::$isLoad = true;
 		}
 
-		$scriptPath = 'assets/build/js/frontend/' . $this->script . '.js';
+		$scriptPath      = 'assets/build/js/frontend/' . $this->script . '.js';
 		$scriptAssetPath = 'assets/build/js/frontend/' . $this->script . '.asset.php';
-		$scriptUrl = plugins_url( $scriptPath, PAY_DOCK_PLUGIN_FILE );
-		$scriptName = PaydockPlugin::PLUGIN_PREFIX . '-' . $this->script;
+		$scriptUrl       = plugins_url( $scriptPath, PAYDOCK_PLUGIN_FILE );
+		$scriptName      = PaydockPlugin::PLUGIN_PREFIX . '-' . $this->script;
 
-		$scriptAsset = file_exists( $scriptAssetPath ) ? require ( $scriptAssetPath ) : [ 
+		$scriptAsset = file_exists( $scriptAssetPath ) ? require( $scriptAssetPath ) : [
 			'dependencies' => [],
-			'version' => PAY_DOCK_PLUGIN_VERSION,
+			'version'      => PAYDOCK_PLUGIN_VERSION,
 		];
 		wp_register_script( $scriptName, $scriptUrl, $scriptAsset['dependencies'], $scriptAsset['version'], true );
 
