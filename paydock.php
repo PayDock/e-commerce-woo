@@ -11,7 +11,7 @@
  * Description: Paydock simplify how you manage your payments. Reduce costs, technical headaches & streamline compliance using Paydock's payment orchestration.
  * Author: Paydock
  * Author URI: https://www.paydock.com/
- * Version: 3.0.4
+ * Version: 3.0.5
  * Requires at least: 6.4.2
  * Text Domain: paydock
  * Tested up to: 6.4.2
@@ -36,7 +36,7 @@ if ( ! defined( 'PAYDOCK_PLUGIN_URL' ) ) {
 }
 
 if ( ! defined( 'PAYDOCK_PLUGIN_VERSION' ) ) {
-	define( 'PAYDOCK_PLUGIN_VERSION', '3.0.4' );
+	define( 'PAYDOCK_PLUGIN_VERSION', '3.0.5' );
 }
 
 require_once 'vendor/autoload.php';
