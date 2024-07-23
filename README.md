@@ -6,7 +6,7 @@ Tags: powerboard, woocommerce, payment, gateways, payment gateways
 Requires PHP: 7.4
 Requires at least: 6.0
 Tested up to: 6.5.3
-Stable tag: 2.0.46
+Stable tag: 3.0.5
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -58,6 +58,20 @@ To download the latest version of PowerBoard's WooCommerce plugin, you can manua
    - Scroll down to the Artifacts at the bottom of the page
    - Click on the link to download the ZIP file
 
+## Third Party API and libraries
+
+this plugin provides the ability to use payment methods through the PowerBoard API:
+* for sandbox https://api.preproduction.powerboard.commbank.com.au/v1/
+* for live https://api.powerboard.commbank.com.au/v1/
+
+We also use a PowerBoard widget to implement front-end features ([More here](https://developer.powerboard.commbank.com.au/reference/powerboard-widget))
+
+## Source
+
+This plugin contains compile and non compile js code, if you need customize something. Code that need compile for working with woocommerce block in `/resource` path.
+In root dir you can find `webpack.config.js` file, its default config for compile front-end js, but you can use it as a starting point to create your own configuration.
+Also we use helper code that not need compile what contained in assets path.
+
 == Screenshots ==
 
 1. Frontend
@@ -85,4 +99,13 @@ To download the latest version of PowerBoard's WooCommerce plugin, you can manua
 * New features, readme, changelog, etc.
 
 = 2.0.46 =
+* Patch, small fixes
+
+= 2.0.53 =
+* Min-max feature
+
+= 3.0.4 =
 * Fixes, updates, tweaks
+
+= 3.0.5 =
+* Statuses, openssl, paths
