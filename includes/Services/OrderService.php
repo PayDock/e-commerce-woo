@@ -65,7 +65,7 @@ class OrderService {
 				'hide-refund-button-styles',
 				paydock_PLUGIN_URL . 'assets/css/admin/hide-refund-button.css',
 				[],
-				paydock_PLUGIN_VERSION
+				PAYDOCK_PLUGIN_VERSION
 			);
 		}
 		if ( in_array( $orderStatus, [

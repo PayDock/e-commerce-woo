@@ -29,8 +29,11 @@ final class PaydockGatewayBlocks extends AbstractBlock {
 		if ( is_user_logged_in() ) {
 			$userTokens['tokens'] = ( new UserTokenRepository() )->getUserTokens();
 		}
-
-		WC()->cart->calculate_totals();
+		$total = 0;
+		if ( WC()->cart ) {
+			WC()->cart->calculate_totals();
+			$total = WC()->cart->total;
+		}
 
 		return array_merge( $userTokens, [
 			// Wordpress data
@@ -38,7 +41,7 @@ final class PaydockGatewayBlocks extends AbstractBlock {
 			'isUserLoggedIn'         => is_user_logged_in(),
 			'isSandbox'              => $settingsService->isSandbox(),
 			// Woocommerce data
-			'amount'                 => WC()->cart->total,
+			'amount'                 => $total,
 			'currency'               => strtoupper( get_woocommerce_currency() ),
 			// Widget
 			'title'                  => $settingsService->getWidgetPaymentCardTitle(),
@@ -68,7 +71,6 @@ final class PaydockGatewayBlocks extends AbstractBlock {
 			'cardSaveCardChecked'    => false,
 			// Other
 			'supports'               => array_filter( $this->gateway->supports, [ $this->gateway, 'supports' ] ),
-			'total_limitation'       => $settingsService->getWidgetPaymentCardMinMax(),
 		] );
 	}
 }

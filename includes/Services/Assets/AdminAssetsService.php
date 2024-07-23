@@ -53,9 +53,9 @@ class AdminAssetsService {
 		foreach ( $this->scripts as $script ) {
 			wp_register_script(
 				$this->getScriptName( $script ),
-				plugins_url( $this->getScriptPath( $script ), paydock_PLUGIN_FILE ),
+				plugins_url( $this->getScriptPath( $script ), PAYDOCK_PLUGIN_FILE ),
 				[],
-				paydock_PLUGIN_VERSION,
+				PAYDOCK_PLUGIN_VERSION,
 				true
 			);
 		}
@@ -72,7 +72,7 @@ class AdminAssetsService {
 	public function loadScripts(): void {
 		foreach ( $this->scripts as $script ) {
 			$scriptName = $this->getScriptName( $script );
-			wp_enqueue_script( $this->getScriptName( $script ), '', [], paydock_PLUGIN_VERSION, true );
+			wp_enqueue_script( $this->getScriptName( $script ), '', [], PAYDOCK_PLUGIN_VERSION, true );
 			wp_localize_script( $scriptName, 'paydockWidgetSettings', [
 				'pluginUrlPrefix' => paydock_PLUGIN_URL
 			] );
@@ -83,9 +83,9 @@ class AdminAssetsService {
 		foreach ( $this->styles as $style ) {
 			wp_enqueue_style(
 				$this->getStyleName( $style ),
-				plugins_url( $this->getStylePath( $style ), paydock_PLUGIN_FILE ),
+				plugins_url( $this->getStylePath( $style ), PAYDOCK_PLUGIN_FILE ),
 				[],
-				paydock_PLUGIN_VERSION
+				PAYDOCK_PLUGIN_VERSION
 			);
 		}
 	}

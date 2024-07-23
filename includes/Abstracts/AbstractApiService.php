@@ -34,8 +34,8 @@ abstract class AbstractApiService {
 			$args['headers']['x-user-public-key'] = ConfigService::$publicKey;
 		}
 
-		$args['headers']['X-Power-Board-Meta'] = 'V'
-		                                         . paydock_PLUGIN_VERSION
+		$args['headers']['X-Paydock-Meta'] = 'V'
+		                                         . PAYDOCK_PLUGIN_VERSION
 		                                         . '_woocommerce_'
 		                                         . WC()->version;
 

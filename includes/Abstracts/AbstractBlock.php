@@ -26,7 +26,7 @@ abstract class AbstractBlock extends AbstractPaymentMethodType {
 				'paydock-form',
 				paydock_PLUGIN_URL . 'assets/js/frontend/form.js',
 				[],
-				paydock_PLUGIN_VERSION,
+				PAYDOCK_PLUGIN_VERSION,
 				true
 			);
 
@@ -37,7 +37,7 @@ abstract class AbstractBlock extends AbstractPaymentMethodType {
 				'paydock-widget-css',
 				paydock_PLUGIN_URL . 'assets/css/frontend/widget.css',
 				[],
-				paydock_PLUGIN_VERSION,
+				PAYDOCK_PLUGIN_VERSION,
 				true
 			);
 
@@ -45,7 +45,7 @@ abstract class AbstractBlock extends AbstractPaymentMethodType {
 				'paydock-api',
 				SettingsService::getInstance()->getWidgetScriptUrl(),
 				[],
-				paydock_PLUGIN_VERSION,
+				PAYDOCK_PLUGIN_VERSION,
 				true
 			);
 			wp_localize_script( 'paydock-api', 'paydockWidgetSettings', [
@@ -57,12 +57,12 @@ abstract class AbstractBlock extends AbstractPaymentMethodType {
 
 		$scriptPath      = 'assets/build/js/frontend/' . $this->script . '.js';
 		$scriptAssetPath = 'assets/build/js/frontend/' . $this->script . '.asset.php';
-		$scriptUrl       = plugins_url( $scriptPath, paydock_PLUGIN_FILE );
+		$scriptUrl       = plugins_url( $scriptPath, PAYDOCK_PLUGIN_FILE );
 		$scriptName      = PaydockPlugin::PLUGIN_PREFIX . '-' . $this->script;
 
 		$scriptAsset = file_exists( $scriptAssetPath ) ? require( $scriptAssetPath ) : [
 			'dependencies' => [],
-			'version'      => paydock_PLUGIN_VERSION,
+			'version'      => PAYDOCK_PLUGIN_VERSION,
 		];
 		wp_register_script( $scriptName, $scriptUrl, $scriptAsset['dependencies'], $scriptAsset['version'], true );
 		wp_localize_script( $scriptName, 'paydockWidgetSettings', [

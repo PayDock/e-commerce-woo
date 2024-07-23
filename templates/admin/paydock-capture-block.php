@@ -1,89 +1,24 @@
 <?php if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 } // Exit if accessed directly ?>
-<script type="text/javascript">
-    function paydockPaymentCapture() {
-        jQuery('span.paydock-order-actions').hide();
-        jQuery('div.wc-order-totals-items').slideUp();
-        jQuery('#woocommerce-order-items').find('div.wc-order-partial-paid-items').show();
-    }
-
-    function cancelActionManualCapture() {
-        jQuery('span.paydock-order-actions').show();
-        jQuery('div.wc-order-totals-items').slideDown();
-        jQuery('#woocommerce-order-items').find('div.wc-order-partial-paid-items').hide();
-    }
-
-    function validationManualCapture(elem) {
-        const captureAmount = Number(jQuery('#capture_amount').val());
-        const captureAmountBtn = jQuery('#woocommerce-order-items').find('div.wc-order-partial-paid-items .capture-amount-btn')
-        const availableToCapture = Number(jQuery('div.wc-order-partial-paid-items').find('.available-to-capture').data('value'));
-        if (captureAmount > availableToCapture) {
-            alert("You cannot capture be greater than order total " + availableToCapture);
-            elem.val(availableToCapture);
-            captureAmountBtn.text(availableToCapture);
-            return false;
-        }
-
-        if (captureAmount <= 0) {
-            alert("This field should be positive");
-            elem.val(availableToCapture);
-            captureAmountBtn.text(availableToCapture);
-            return false;
-        }
-
-        elem.val(captureAmount);
-        captureAmountBtn.text(captureAmount);
-        return true;
-    }
-
-    function handlePaydockPaymentCapture(orderId, operation) {
-        if (operation === 'paydock-capture-charge') {
-            let validSumManualCapture = validationManualCapture(jQuery('#capture_amount'));
-            if (!validSumManualCapture) {
-                return;
-            }
-        }
-        const captureAmount = Number(jQuery('#capture_amount').val());
-        jQuery.blockUI({
-            message: '',
-            overlayCSS: {backgroundColor: '#fff', opacity: 0.6, cursor: 'wait'}
-        });
-        jQuery.ajax({
-            url: '/wp-admin/admin-ajax.php',
-            type: 'POST',
-            data: {
-                action: operation,
-                order_id: orderId,
-                amount: captureAmount,
-                _wpnonce: '<?php echo esc_attr( wp_create_nonce( 'capture-or-cancel' ) ); ?>'
-            },
-            success: function (response) {
-                if (response.data.message !== undefined) {
-                    alert(response.data.message);
-                }
-                if (response.success == 1) {
-                    location.reload();
-                } else {
-                    jQuery.unblockUI();
-                }
-            }
-        });
-    }
-</script>
 <span class="paydock-order-actions">
-	<?php if ( 'paydock-authorize' == $order->get_status() ) : ?>
+    <?php
+        $pb_charge_meta = $order->get_meta( 'pb_directly_charged' );
+        $order_directly_charged = ! empty( $pb_charge_meta ) ? $pb_charge_meta : false;
+
+        if ( $order_directly_charged == false ) :
+    ?>
         <button type="button"
                 onclick="paydockPaymentCapture(<?php echo esc_attr( $order->get_id() ); ?>, 'paydock-capture-charge')"
                 class="button">
 			Capture charge
 		</button>
-	<?php endif; ?>
-	<button type="button"
-            onclick="handlePaydockPaymentCapture(<?php echo esc_attr( $order->get_id() ); ?>, 'paydock-cancel-authorised')"
-            class="button">
-		Cancel charge
-	</button>
+    <button type="button"
+              onclick="handlePaydockPaymentCapture(<?php echo esc_attr( $order->get_id() ); ?>, 'paydock-cancel-authorised')"
+              class="button">
+      Cancel charge
+    </button>
+  <?php endif; ?>
 </span>
 <div class="wc-order-data-row wc-order-partial-paid-items wc-order-data-row-toggle" style="display: none;">
     <table class="wc-order-totals">

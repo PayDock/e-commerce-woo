@@ -91,7 +91,7 @@ class FiltersService extends AbstractSingleton {
 	}
 
 	protected function addSettingsLink(): void {
-		add_filter( 'plugin_action_links_' . plugin_basename( paydock_PLUGIN_FILE ), [ $this, 'getSettingLink' ] );
+		add_filter( 'plugin_action_links_' . plugin_basename( PAYDOCK_PLUGIN_FILE ), [ $this, 'getSettingLink' ] );
 	}
 
 	public function registerInWooCommercePaymentClass( array $methods ): array {

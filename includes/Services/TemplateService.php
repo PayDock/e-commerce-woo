@@ -58,6 +58,6 @@ class TemplateService {
 	}
 
 	private function getTemplatePath( string $template ): string {
-		return plugin_dir_path( paydock_PLUGIN_FILE ) . $template . self::TEMPLATE_END;
+		return plugin_dir_path( PAYDOCK_PLUGIN_FILE ) . $template . self::TEMPLATE_END;
 	}
 }

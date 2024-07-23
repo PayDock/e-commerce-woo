@@ -37,7 +37,7 @@ class ActionsService extends AbstractSingleton {
 
 	protected function addCompatibilityWithWooCommerce(): void {
 		if ( class_exists( FeaturesUtil::class ) ) {
-			FeaturesUtil::declare_compatibility( 'custom_order_tables', paydock_PLUGIN_FILE );
+			FeaturesUtil::declare_compatibility( 'custom_order_tables', PAYDOCK_PLUGIN_FILE );
 		}
 	}
 
@@ -72,7 +72,7 @@ class ActionsService extends AbstractSingleton {
 		add_action( 'before_woocommerce_init', function () {
 			FeaturesUtil::declare_compatibility(
 				'cart_checkout_blocks',
-				paydock_PLUGIN_FILE,
+				PAYDOCK_PLUGIN_FILE,
 				true
 			);
 		} );
@@ -126,10 +126,10 @@ class ActionsService extends AbstractSingleton {
 		add_action( 'woocommerce_admin_order_totals_after_total',
 			[ $orderService, 'informationAboutPartialCaptured' ] );
 		add_action( 'admin_notices', [ $orderService, 'displayStatusChangeError' ] );
-		add_action( 'wp_ajax_power-board-capture-charge', [ $paymentController, 'capturePayment' ] );
-		add_action( 'wp_ajax_power-board-cancel-authorised', [ $paymentController, 'cancelAuthorised' ] );
+		add_action( 'wp_ajax_paydock-capture-charge', [ $paymentController, 'capturePayment' ] );
+		add_action( 'wp_ajax_paydock-cancel-authorised', [ $paymentController, 'cancelAuthorised' ] );
 		add_action( 'woocommerce_create_refund', [ $paymentController, 'refundProcess' ], 10, 2 );
 		add_action( 'woocommerce_order_refunded', [ $paymentController, 'afterRefundProcess' ], 10, 2 );
-		add_action( 'woocommerce_api_power-board-webhook', [ $paymentController, 'webhook' ] );
+		add_action( 'woocommerce_api_paydock-webhook', [ $paymentController, 'webhook' ] );
     }
 }
