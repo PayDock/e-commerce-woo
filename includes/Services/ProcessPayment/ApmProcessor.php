@@ -61,7 +61,7 @@ class ApmProcessor {
 
 	private function charge(): array {
 		$chargeArgs = [
-			'amount'    => $this->args['amount'],
+			'amount'    => $this->order->get_total(),
 			'currency'  => strtoupper( get_woocommerce_currency() ),
 			'token'     => $this->args['paymentsourcetoken'],
 			'capture'   => strtolower( OtherPaymentMethods::AFTERPAY()->name ) === $this->args['gatewaytype'] ? true : $this->args['directcharge'],
@@ -120,7 +120,7 @@ class ApmProcessor {
 		$customer_id = $customer['resource']['data']['_id'];
 
 		return SDKAdapterService::getInstance()->createCharge( [
-			'amount'      => $this->args['amount'],
+			'amount'      => $this->order->get_total(),
 			'currency'    => strtoupper( get_woocommerce_currency() ),
 			'customer_id' => $customer_id,
 			'reference'   => (string) $this->order->get_id(),
@@ -132,7 +132,7 @@ class ApmProcessor {
 
 	private function fraudCharge(): array {
 		return SDKAdapterService::getInstance()->createCharge( [
-			'amount'    => $this->args['amount'],
+			'amount'    => $this->order->get_total(),
 			'currency'  => strtoupper( get_woocommerce_currency() ),
 			'capture'   => strtolower( OtherPaymentMethods::AFTERPAY()->name ) === $this->args['gatewaytype'] ? true : $this->args['directcharge'],
 			'token'     => $this->args['paymentsourcetoken'],
@@ -158,11 +158,13 @@ class ApmProcessor {
 			return [];
 		}
 
+		WC()->cart->calculate_totals();
+
 		$address1 = $this->order->get_billing_address_1();
 		$address2 = $this->order->get_billing_address_2();
 
 		$result = [
-			'amount'           => (float) $this->order->get_total(),
+			'amount'           => $this->order->get_total(),
 			'address_country'  => $this->order->get_billing_country(),
 			'address_postcode' => $this->order->get_billing_postcode(),
 			'address_city'     => $this->order->get_billing_city(),

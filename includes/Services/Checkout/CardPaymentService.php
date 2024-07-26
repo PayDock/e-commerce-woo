@@ -128,7 +128,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 
 		try {
 			$cardProcessor = new CardProcessor( array_merge( [
-				'amount'      => (float) $order->get_total(),
+				'amount'      => $order->get_total(),
 				'description' => $description,
 			], $_POST ) );
 
