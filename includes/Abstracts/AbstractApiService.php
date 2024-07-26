@@ -66,6 +66,8 @@ abstract class AbstractApiService {
 			return [ 'status' => 403, 'error' => $request ];
 		}
 
+		// update_option( 'pd_debug_1', $parsed_args );
+
 		$body = json_decode( $request['body'], true );
 
 		if ( null === $body && json_last_error() !== JSON_ERROR_NONE ) {
