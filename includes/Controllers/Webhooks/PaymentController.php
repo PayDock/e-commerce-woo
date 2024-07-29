@@ -33,14 +33,21 @@ class PaymentController {
 			] ) ) {
 				$error = __( 'The order has been authorized and is awaiting approval.', 'woocommerce' );
 			}
-
-			if ( ! empty( $order ) ) {
-				$order->calculate_totals();
-			}
-
 		}
-		$orderTotal         = $order->get_total();
-		$amount             = $orderTotal;
+
+		if ( is_object( $order ) ) {
+			$order->calculate_totals();
+			$orderTotal = $order->get_total();
+		} else {
+			$orderTotal = false;
+		}
+
+		if ( ! empty( $orderTotal ) ) {
+			$amount = $orderTotal;
+		} else {
+			$amount = wc_format_decimal( $_POST['amount'] );
+		}
+
 		$loggerRepository   = new LogRepository();
 		$powerBoardChargeId = get_post_meta( $orderId, 'power_board_charge_id', true );
 		if ( ! $error ) {
@@ -144,7 +151,13 @@ class PaymentController {
 
 		$orderId       = $args['order_id'];
 		$order         = wc_get_order( $orderId );
-		$amount        = $order->get_total();
+
+		if ( is_object( $order ) ) {
+			$amount = $order->get_total();
+		} else {
+			$amount = $args['amount'];
+		}
+
 		$captureAmount = get_post_meta( $orderId, 'capture_amount', true );
 
 		$totalRefunded = (float) $order->get_total_refunded();
@@ -383,8 +396,8 @@ class PaymentController {
 		}
 
 		$chargeArgs = [
-			'amount'          => $order->get_total(),
-			'reference'       => $order->get_id(),
+			'amount'          => (float) $order->get_total(),
+			'reference'       => (string) $order->get_id(),
 			'currency'        => strtoupper( $order->get_currency() ),
 			'customer'        => [
 				'first_name'     => $order->get_billing_first_name(),

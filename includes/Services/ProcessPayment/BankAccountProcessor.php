@@ -56,7 +56,7 @@ class BankAccountProcessor {
 
 	public function chargeWithCustomerId(): array {
 		$request = [
-			'reference'      => $this->orderId,
+			'reference'      => (string) $this->orderId,
 			'first_name'     => $this->order->get_billing_first_name(),
 			'last_name'      => $this->order->get_billing_last_name(),
 			'email'          => $this->order->get_billing_email(),
@@ -137,7 +137,7 @@ class BankAccountProcessor {
 		$address2 = $this->order->get_billing_address_2();
 
 		$result = [
-			'amount'           => $this->order->get_total(),
+			'amount'           => (float) $this->order->get_total(),
 			'address_country'  => $this->order->get_billing_country(),
 			'address_postcode' => $this->order->get_billing_postcode(),
 			'address_city'     => $this->order->get_billing_city(),
@@ -170,7 +170,7 @@ class BankAccountProcessor {
 		}
 
 		$request = [
-			'reference' => $this->orderId,
+			'reference' => (string) $this->orderId,
 			'amount'    => $this->order->get_total(),
 			'currency'  => strtoupper( get_woocommerce_currency() ),
 			'customer'  => [
