@@ -25,14 +25,21 @@ class PaymentController {
 			if ( 'paydock-authorize' != $order->get_status() ) {
 				$error = __( 'The order should be have status "paydock-authorize"', 'woocommerce' );
 			}
-
-			if ( ! empty( $order ) ) {
-				$order->calculate_totals();
-			}
-
 		}
-		$orderTotal       = $order->get_total();
-		$amount           = $orderTotal;
+
+		if ( is_object( $order ) ) {
+			$order->calculate_totals();
+			$orderTotal = $order->get_total();
+		} else {
+			$orderTotal = false;
+		}
+
+		if ( ! empty( $orderTotal ) ) {
+			$amount = $orderTotal;
+		} else {
+			$amount = wc_format_decimal( $_POST['amount'] );
+		}
+
 		$loggerRepository = new LogRepository();
 		$paydockChargeId  = get_post_meta( $orderId, 'paydock_charge_id', true );
 		if ( ! $error ) {
@@ -139,6 +146,12 @@ class PaymentController {
 		$orderId = $args['order_id'];
 		$order   = wc_get_order( $orderId );
 
+		if ( is_object( $order ) ) {
+			$amount = $order->get_total();
+		} else {
+			$amount = $args['amount'];
+		}
+
 		if ( ! in_array( $order->get_status(),
 			[ 'paydock-paid', 'paydock-p-paid', 'paydock-p-refund', 'paydock-refunded' ] ) ) {
 			return;
@@ -156,7 +169,10 @@ class PaymentController {
 		if ( $captureAmount && $totalRefunded > $captureAmount ) {
 			$totalRefunded = $captureAmount;
 		}
-		$result = SDKAdapterService::getInstance()->refunds( [ 'charge_id' => $paydockChargeId, 'amount' => $args['amount'] ] );
+		$result = SDKAdapterService::getInstance()->refunds( [
+			'charge_id' => $paydockChargeId,
+			'amount'    => $amount ],
+		);
 		if ( ! empty( $result['resource']['data']['status'] ) && in_array(
 				$result['resource']['data']['status'],
 				[ 'refunded', 'refund_requested' ]
@@ -373,8 +389,8 @@ class PaymentController {
 		}
 
 		$chargeArgs = [
-			'amount'          => $order->get_total(),
-			'reference'       => $order->get_id(),
+			'amount'          => (float) $order->get_total(),
+			'reference'       => (string) $order->get_id(),
 			'currency'        => strtoupper( $order->get_currency() ),
 			'customer'        => [
 				'first_name'     => $order->get_billing_first_name(),

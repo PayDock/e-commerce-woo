@@ -45,7 +45,7 @@ class WidgetController {
 				$image = wp_get_attachment_image_url( get_post_thumbnail_id( $item['id'] ), 'full' );
 
 				$itemData = [
-					'amount'   => $item['prices']['price'],
+					'amount'   => round( $item['prices']['price'] / 100, 2 ),
 					'name'     => $item['name'],
 					'type'     => $item['type'],
 					'quantity' => $item['quantity'],
@@ -68,7 +68,7 @@ class WidgetController {
 			}
 
 			$chargeRequest = [
-				'amount'    => $request['total']['total_price'],
+				'amount'    => round( $request['total']['total_price'] / 100, 2 ),
 				'currency'  => $request['total']['currency_code'],
 				'reference' => (string) $reference,
 				'customer'  => [
@@ -89,7 +89,7 @@ class WidgetController {
 				],
 				'items'     => $items,
 				'shipping'  => [
-					'amount'           => $request['total']['total_shipping'],
+					'amount'           => round( $request['total']['total_shipping'] / 100, 2 ),
 					'currency'         => $request['total']['currency_code'],
 					'address_line1'    => $shippingAddress['address_1'],
 					'address_city'     => $shippingAddress['city'],
