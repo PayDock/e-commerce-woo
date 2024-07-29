@@ -192,7 +192,7 @@ class ApmProcessor {
 		$orderData = $this->order->get_data();
 
 		$result = [
-			'amount'   => $orderData['shipping_total'],
+			'amount'   => round( $orderData['shipping_total'], 2 ),
 			'currency' => $orderData['currency'],
 			'contact'  => [
 				'first_name' => $this->order->get_shipping_first_name(),
