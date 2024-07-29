@@ -118,7 +118,7 @@ class CardProcessor {
 		}
 
 		$args = [
-			'amount'    => $this->args['amount'],
+			'amount'    => $this->order->get_total(),
 			'reference' => '',
 			'currency'  => strtoupper( get_woocommerce_currency() ),
 			'customer'  => [
@@ -180,11 +180,13 @@ class CardProcessor {
 			return [];
 		}
 
+		WC()->cart->calculate_totals();
+
 		$address1 = $this->order->get_billing_address_1();
 		$address2 = $this->order->get_billing_address_2();
 
 		$result = [
-			'amount'           => (float) $this->order->get_total(),
+			'amount'           => $this->order->get_total(),
 			'address_country'  => $this->order->get_billing_country(),
 			'address_postcode' => $this->order->get_billing_postcode(),
 			'address_city'     => $this->order->get_billing_city(),
@@ -231,8 +233,8 @@ class CardProcessor {
 		}
 
 		$chargeArgs = [
-			'amount'    => $this->args['amount'],
-			'reference' => (string) $this->order->get_id(),
+			'amount'    => $this->order->get_total(),
+			'reference' => $this->order->get_id(),
 			'currency'  => strtoupper( get_woocommerce_currency() ),
 			'customer'  => [
 				'first_name'     => $this->order->get_billing_first_name(),
@@ -279,9 +281,9 @@ class CardProcessor {
 		}
 
 		$response = SDKAdapterService::getInstance()->standaloneFraudCharge( [
-			'amount'    => $this->args['amount'],
+			'amount'    => $this->order->get_total(),
 			'currency'  => strtoupper( get_woocommerce_currency() ),
-			'reference' => (string) $this->order->get_id(),
+			'reference' => $this->order->get_id(),
 			'customer'  => [
 				'first_name'     => $this->order->get_billing_first_name(),
 				'last_name'      => $this->order->get_billing_last_name(),
@@ -301,7 +303,7 @@ class CardProcessor {
 		] );
 
 		if ( empty( $response['error'] ) && ! empty( $response['resource']['data']['_id'] ) ) {
-			update_option( 'power_board_fraud_' . (string) $this->order->get_id(), $options );
+			update_option( 'power_board_fraud_' . $this->order->get_id(), $options );
 		}
 
 		return $response;
@@ -330,8 +332,8 @@ class CardProcessor {
 		}
 
 		$response = SDKAdapterService::getInstance()->standaloneFraudCharge( [
-			'amount'    => $this->args['amount'],
-			'reference' => (string) $this->order->get_id(),
+			'amount'    => $this->order->get_total(),
+			'reference' => $this->order->get_id(),
 			'currency'  => strtoupper( get_woocommerce_currency() ),
 			'customer'  => [
 				'first_name'     => $this->order->get_billing_first_name(),
@@ -347,7 +349,7 @@ class CardProcessor {
 		] );
 
 		if ( empty( $response['error'] ) && ! empty( $response['resource']['data']['_id'] ) ) {
-			update_option( 'power_board_fraud_' . (string) $this->order->get_id(), $options );
+			update_option( 'power_board_fraud_' . $this->order->get_id(), $options );
 		}
 
 		return $response;
@@ -362,8 +364,8 @@ class CardProcessor {
 		}
 
 		$chargeArgs = [
-			'amount'         => $this->args['amount'],
-			'reference'      => (string) $this->order->get_id(),
+			'amount'         => $this->order->get_total(),
+			'reference'      => $this->order->get_id(),
 			'currency'       => strtoupper( get_woocommerce_currency() ),
 			'customer'       => [
 				'first_name'     => $this->order->get_billing_first_name(),
@@ -401,8 +403,8 @@ class CardProcessor {
 		}
 
 		$chargeArgs = [
-			'amount'    => $this->args['amount'],
-			'reference' => (string) $this->order->get_id(),
+			'amount'    => $this->order->get_total(),
+			'reference' => $this->order->get_id(),
 			'currency'  => strtoupper( get_woocommerce_currency() ),
 			'customer'  => [
 				'first_name'     => $this->order->get_billing_first_name(),
@@ -434,8 +436,8 @@ class CardProcessor {
 		}
 
 		$chargeArgs = [
-			'amount'         => $this->args['amount'],
-			'reference'      => (string) $this->order->get_id(),
+			'amount'         => $this->order->get_total(),
+			'reference'      => $this->order->get_id(),
 			'currency'       => strtoupper( get_woocommerce_currency() ),
 			'customer'       => [
 				'first_name'     => $this->order->get_billing_first_name(),
@@ -477,8 +479,8 @@ class CardProcessor {
 		$address2 = $this->order->get_billing_address_2();
 
 		$chargeArgs = [
-			'amount'    => $this->args['amount'],
-			'reference' => (string) $this->order->get_id(),
+			'amount'    => $this->order->get_total(),
+			'reference' => $this->order->get_id(),
 			'currency'  => strtoupper( get_woocommerce_currency() ),
 			'customer'  => [
 				'first_name'     => $this->order->get_billing_first_name(),
@@ -537,8 +539,8 @@ class CardProcessor {
 
 		$response = SDKAdapterService::getInstance()->standaloneFraudCharge( [
 			'capture'   => $this->args['carddirectcharge'],
-			'amount'    => $this->args['amount'],
-			'reference' => (string) $this->order->get_id(),
+			'amount'    => $this->order->get_total(),
+			'reference' => $this->order->get_id(),
 			'currency'  => strtoupper( get_woocommerce_currency() ),
 			'customer'  => [
 				'first_name'     => $this->order->get_billing_first_name(),
@@ -554,7 +556,7 @@ class CardProcessor {
 		] );
 
 		if ( empty( $response['error'] ) && ! empty( $response['resource']['data']['_id'] ) ) {
-			update_option( 'power_board_fraud_' . (string) $this->order->get_id(), $options );
+			update_option( 'power_board_fraud_' . $this->order->get_id(), $options );
 		}
 
 		return $response;
@@ -570,7 +572,7 @@ class CardProcessor {
 				'email'          => $this->order->get_billing_email(),
 				'phone'          => $this->order->get_billing_phone(),
 				'payment_source' => [
-					'amount'      => $this->args['amount'],
+					'amount'      => $this->order->get_total(),
 					'vault_token' => $vaultToken,
 				],
 			], $this->getAdditionalFields( 'amount' ) );
@@ -616,8 +618,8 @@ class CardProcessor {
 		}
 
 		$params = [
-			'amount'      => $this->args['amount'],
-			'reference'   => (string) $this->order->get_id(),
+			'amount'      => $this->order->get_total(),
+			'reference'   => $this->order->get_id(),
 			'currency'    => strtoupper( get_woocommerce_currency() ),
 			'customer_id' => $customerId,
 			'capture'     => $this->args['carddirectcharge'],
@@ -659,7 +661,7 @@ class CardProcessor {
 			'email'          => $this->order->get_billing_email(),
 			'phone'          => $this->order->get_billing_phone(),
 			'payment_source' => array_merge( [
-				'amount'      => $this->args['amount'],
+				'amount'      => $this->order->get_total(),
 				'vault_token' => $this->args['selectedtoken'],
 			], $this->getAdditionalFields( 'amount' ) ),
 		], $this->getAdditionalFields( 'amount' ) );
@@ -716,8 +718,8 @@ class CardProcessor {
 		}
 
 		$chargeArgs = [
-			'amount'    => $this->args['amount'],
-			'reference' => (string) $this->order->get_id(),
+			'amount'    => $this->order->get_total(),
+			'reference' => $this->order->get_id(),
 			'currency'  => strtoupper( get_woocommerce_currency() ),
 			'customer'  => [
 				'first_name'     => $this->order->get_billing_first_name(),

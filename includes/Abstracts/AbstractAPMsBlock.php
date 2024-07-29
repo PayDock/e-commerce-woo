@@ -31,6 +31,8 @@ abstract class AbstractAPMsBlock extends AbstractBlock {
 			];
 		}
 
+		WC()->cart->calculate_totals();
+
 		return array_merge( $userCustomers, [
 			// Wordpress data
 			'_wpnonce'           => wp_create_nonce( 'process_payment' ),

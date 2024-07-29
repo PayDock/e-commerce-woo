@@ -1,4 +1,4 @@
-
+/*
 jQuery(document).ready(function () {
     const capturedAmount = jQuery('.wc-order-totals .captured-amount');
 
@@ -24,3 +24,4 @@ jQuery(document).ready(function () {
         updateAmountValues(capturedAmount, netPaymentHtml);
     }
 });
+*/
