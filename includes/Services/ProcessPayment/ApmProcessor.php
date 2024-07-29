@@ -164,7 +164,7 @@ class ApmProcessor {
 		$address2 = $this->order->get_billing_address_2();
 
 		$result = [
-			'amount'           => $this->order->get_total(),
+			'amount'           => (float) $this->order->get_total(),
 			'address_country'  => $this->order->get_billing_country(),
 			'address_postcode' => $this->order->get_billing_postcode(),
 			'address_city'     => $this->order->get_billing_city(),
