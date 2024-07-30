@@ -62,7 +62,6 @@ class OrderService {
 				'cancelled',
 				'failed',
 				'pending',
-				'completed',
 			],
 			'refunded'   => [ 'processing', 'cancelled', 'failed', 'refunded' ],
 			'cancelled'  => [ 'failed', 'cancelled' ],

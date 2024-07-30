@@ -180,7 +180,7 @@ setTimeout(() => jQuery(function ($) {
 
         widget.setEnv(powerBoardCardSettings.isSandbox ? 'preproduction_cba' : 'production_cba');
         widget.setFormFields(['email', 'phone']);
-        widget.onFinishInsert('input[name="payment_source_token"]', 'payment_source');
+        widget.onFinishInsert('input[name="power_board_payment_source_token"]', 'payment_source');
         widget.interceptSubmitForm('#widget');
         widget.load();
 

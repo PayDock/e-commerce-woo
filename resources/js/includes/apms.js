@@ -16,6 +16,7 @@ const labels = {
     notAvailable: __('The payment method is not available in your country.', textDomain),
 }
 let wasInit = false;
+let button = null;
 export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
     const settingKey = `power_board_${id}_a_p_m_s_block_data`;
     const paymentName = `power_board_${id}_a_p_m_s_gateway`;
@@ -40,7 +41,6 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
         let isAvailableCountry = !!countries.find(
             (element) => element === billingAddress.country.toLowerCase()
         );
-        let button = null;
         let meta = {};
         let data = {...settings};
         data.customers = '';
@@ -74,8 +74,12 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
             } else if ((validationSuccess && 'afterpay' === id) && !wasInit) {
                 wasInit = true;
                 button = new window.cba.AfterpayCheckoutButton('#' + buttonId, settings.publicKey, settings.gatewayId);
+
+                data.gatewayType = 'afterpay'
+            }
+            if(validationSuccess && 'afterpay' === id){
                 meta = {
-                    amount: settings.amount,
+                    amount: Number((cart.getCartTotals().total_price / 100).toFixed(3)).toFixed(2),
                     currency: settings.currency,
                     email: billingAddress.email,
                     first_name: billingAddress.first_name,
@@ -88,8 +92,6 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
                     address_country: billingAddress.country,
                     phone: billingAddress.phone
                 }
-
-                data.gatewayType = 'afterpay'
             }
 
 
@@ -133,7 +135,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
                 }
 
                 meta.charge = {
-                    amount: settings.amount,
+                    amount: Number((cart.getCartTotals().total_price / 100).toFixed(3)).toFixed(2),
                     currency: settings.currency,
                     email: billingAddress.email,
                     first_name: billingAddress.first_name,
@@ -193,6 +195,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
                 }
 
                 data.paymentSourceToken = paymentSourceToken.value;
+                data.amount = Number((cart.getCartTotals().total_price / 100).toFixed(3)).toFixed(2)
                 if (data.paymentSourceToken.length > 0 || settings.selectedToken.length > 0) {
                     return {
                         type: emitResponse.responseTypes.SUCCESS,

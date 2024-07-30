@@ -62,7 +62,7 @@ class BankAccountProcessor {
 			'email'          => $this->order->get_billing_email(),
 			'phone'          => $this->order->get_billing_phone(),
 			'payment_source' => array_merge( [
-				'amount'      => $this->order->get_total(),
+				'amount'      => $this->args['amount'],
 				'type'        => 'bank_account',
 				'vault_token' => $this->getVaultToken(),
 			], $this->getAdditionalFields( 'amount' ) ),
@@ -130,9 +130,6 @@ class BankAccountProcessor {
 	}
 
 	protected function getAdditionalFields( $exclude = [] ): array {
-
-		WC()->cart->calculate_totals();
-
 		$address1 = $this->order->get_billing_address_1();
 		$address2 = $this->order->get_billing_address_2();
 
@@ -171,7 +168,7 @@ class BankAccountProcessor {
 
 		$request = [
 			'reference' => (string) $this->orderId,
-			'amount'    => $this->order->get_total(),
+			'amount'    => $this->args['amount'],
 			'currency'  => strtoupper( get_woocommerce_currency() ),
 			'customer'  => [
 				'first_name'     => $this->order->get_billing_first_name(),

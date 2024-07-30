@@ -4,10 +4,10 @@ namespace PowerBoard\Helpers;
 
 use PowerBoard\Enums\DSTypes;
 use PowerBoard\Enums\FraudTypes;
+use PowerBoard\Services\SettingsService;
 
 class ArgsForProcessPayment {
 	public static function prepare( array $args = [] ): array {
-
 		$args = array_change_key_case( $args, CASE_LOWER );
 
 		foreach ( $args as $key => $arg ) {
@@ -34,19 +34,31 @@ class ArgsForProcessPayment {
 		}
 
 		$args['directcharge'] = ! empty( $args['directcharge'] ) ? true : false;
-		$args['fraud'] = ! empty( $args['fraud'] ) ? true : false;
+		$args['fraud']        = ! empty( $args['fraud'] ) ? true : false;
 
-		$args['carddirectcharge'] = ! empty( $args['carddirectcharge'] ) ? true : false;
-		$args['cardsavecard'] = ! empty( $args['cardsavecard'] ) ? true : false;
+		$args['carddirectcharge']    = SettingsService::getInstance()->getCardDirectCharge();
+		$args['cardsavecard']        = SettingsService::getInstance()->getCardSaveCard();
 		$args['cardsavecardchecked'] = ! empty( $args['cardsavecardchecked'] ) ? true : false;
-		$args['cardsavecardoption'] = isset( $args['cardsavecardoption'] ) ? $args['cardsavecardoption'] : '';
+		$args['cardsavecardoption']  = isset( $args['cardsavecardoption'] ) ?
+			$args['cardsavecardoption'] :
+			SettingsService::getInstance()->getCardSaveCardOption();
 
-		$args['bankaccountsaveaccount'] = ! empty( $args['bankaccountsaveaccount'] ) ? true : false;
-		$args['bankaccountsavechecked'] = ! empty( $args['bankaccountsavechecked'] ) ? true : false;
+		$args['bankaccountsaveaccount']       = ! empty( $args['bankaccountsaveaccount'] ) ? true : false;
+		$args['bankaccountsavechecked']       = ! empty( $args['bankaccountsavechecked'] ) ? true : false;
 		$args['bankaccountsaveaccountoption'] = isset( $args['bankaccountsaveaccountoption'] ) ? $args['bankaccountsaveaccountoption'] : '';
 
-		$args['apmsavecard'] = ! empty( $args['apmsavecard'] ) ? true : false;
+		$args['apmsavecard']        = ! empty( $args['apmsavecard'] ) ? true : false;
 		$args['apmsavecardchecked'] = ! empty( $args['apmsavecardchecked'] ) ? true : false;
+
+		if ( ! empty( $args['payment_source'] ) && is_array( $args['payment_source'] ) ) {
+			$value                      = array_filter( $args['payment_source'] );
+			$args['paymentsourcetoken'] = reset( $value );
+		}
+
+		if ( ! empty( $args['payment_source'] ) && is_array( $args['payment_source'] ) ) {
+			$value                      = array_filter( $args['payment_source'] );
+			$args['paymentsourcetoken'] = reset( $value );
+		}
 
 		return $args;
 	}

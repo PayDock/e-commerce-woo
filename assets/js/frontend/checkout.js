@@ -17,7 +17,7 @@ const powerBoardContent = () => {
         ), wp.element.createElement(
             "input", {
                 type: 'hidden',
-                name: 'payment_source_tokenzz'
+                name: 'power_board_payment_source_token'
             }
         )
     );

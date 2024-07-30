@@ -25,8 +25,6 @@ final class BankAccountBlock extends AbstractBlock {
 			$userTokens['tokens'] = ( new UserTokenRepository() )->getUserTokens();
 		}
 
-		WC()->cart->calculate_totals();
-
 		return array_merge( $userTokens, [ 
 			'isActive' => $this->is_active(),
 			// Wordpress data
