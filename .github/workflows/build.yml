@@ -3,10 +3,10 @@ name: Build and upload Paydock for WooCommerce plugin
 on:
   push:
     branches:
-      - power_board
+      - power_board_staging_cba
   pull_request:
     branches:
-      - power_board
+      - power_board_staging_cba
   workflow_dispatch:
 
 jobs:
