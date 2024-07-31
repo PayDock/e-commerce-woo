@@ -94,7 +94,8 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
 
         useEffect(() => {
             const onShipping = onShippingRateSelectSuccess(async () => {
-                if (localState.total !== cart.getCartTotals()?.total_price) {
+                if ((localState.total !== cart.getCartTotals()?.total_price)
+                    && canMakePayment(settings.total_limitation, cart.getCartTotals()?.total_price)) {
                     initWallet();
                 }
             })

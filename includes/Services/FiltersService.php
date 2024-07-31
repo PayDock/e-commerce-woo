@@ -20,174 +20,140 @@ use PowerBoard\Services\Settings\LogsSettingService;
 use PowerBoard\Services\Settings\SandboxConnectionSettingService;
 use PowerBoard\Services\Settings\WidgetSettingService;
 
-class FiltersService extends AbstractSingleton
-{
-    protected static $instance = null;
+class FiltersService extends AbstractSingleton {
+	protected static $instance = null;
 
-    protected function __construct()
-    {
-        $this->addWooCommerceFilters();
-        $this->addSettingsLink();
-    }
+	protected function __construct() {
+		$this->addWooCommerceFilters();
+		$this->addSettingsLink();
+	}
 
-    function saveCartUpdatedInfo($cart_updated)
-    {
-        $cart = WC()->cart;
-        $a = [
-            'total' => $cart->get_total(false)
-        ];
-        update_option('paydock_clasic_'.$cart->get_cart_hash(),[
-            'total' => $cart->get_total(false)
-        ]);
+	public function ordersListNewColumn( $columns ) {
+		$new_columns = [];
 
-        $data = WC()->cart->get_cart();
+		foreach ( $columns as $column_name => $column_info ) {
+			$new_columns[ $column_name ] = $column_info;
 
-        return $cart_updated;
-    }
+			if ( OrderListColumns::AFTER_COLUMN === $column_name ) {
+				$new_columns[ OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey() ] = OrderListColumns::PAYMENT_SOURCE_TYPE()->getLabel();
+			}
+		}
 
-    public function ordersListNewColumn($columns)
-    {
-        $new_columns = [];
+		return $new_columns;
+	}
 
-        foreach ($columns as $column_name => $column_info) {
-            $new_columns[$column_name] = $column_info;
+	public function ordersListNewColumnContent( $column, $order ) {
+		if ( OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey() === $column ) {
+			$status = get_post_meta( $order->get_id(), OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey() );
 
-            if (OrderListColumns::AFTER_COLUMN === $column_name) {
-                $new_columns[OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey()] = OrderListColumns::PAYMENT_SOURCE_TYPE()->getLabel();
-            }
-        }
+			echo esc_html( is_array( $status ) ? reset( $status ) : $status );
+		}
+	}
 
-        return $new_columns;
-    }
+	public function changeOrderAmount( $formatted_total, $order ) {
+		$page = filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRING );
+		if ( ! empty( $page ) && 'wc-orders' === $page ) {
+			$capturedAmount = get_post_meta( $order->get_id(), 'capture_amount' );
+			if ( $capturedAmount && is_array( $capturedAmount ) ) {
+				$capturedAmount = reset( $capturedAmount );
 
-    public function ordersListNewColumnContent($column, $order)
-    {
-        if (OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey() === $column) {
-            $status = get_post_meta($order->get_id(), OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey());
+				if ( $capturedAmount == $order->get_total() ) {
+					return $formatted_total;
+				}
 
-            echo esc_html(is_array($status) ? reset($status) : $status);
-        }
-    }
+				$price           = wc_price( ( $capturedAmount - $order->get_total_refunded() ),
+					[ 'currency' => $order->get_currency() ] );
+				$originalPrice   = wc_price( $order->get_total(), [ 'currency' => $order->get_currency() ] );
+				$formatted_total = sprintf(
+					'<del aria-hidden="true">%1$s</del><ins>%2$s</ins>',
+					$originalPrice,
+					$price
+				);
+			}
+		}
 
-    public function changeOrderAmount($formatted_total, $order)
-    {
-        $page = filter_input(INPUT_GET, 'page', FILTER_SANITIZE_STRING);
-        if (!empty($page) && 'wc-orders' === $page) {
-            $capturedAmount = get_post_meta($order->get_id(), 'capture_amount');
-            if ($capturedAmount && is_array($capturedAmount)) {
-                $capturedAmount = reset($capturedAmount);
+		return $formatted_total;
+	}
 
-                if ($capturedAmount == $order->get_total()) {
-                    return $formatted_total;
-                }
+	public function addCaptureAmountCustomColumn( $columns ) {
+		$new_columns                   = ( is_array( $columns ) ) ? $columns : [];
+		$new_columns['capture_amount'] = 'Capture Amount';
 
-                $price = wc_price(($capturedAmount - $order->get_total_refunded()),
-                    ['currency' => $order->get_currency()]);
-                $originalPrice = wc_price($order->get_total(), ['currency' => $order->get_currency()]);
-                $formatted_total = sprintf(
-                    '<del aria-hidden="true">%1$s</del><ins>%2$s</ins>',
-                    $originalPrice,
-                    $price
-                );
-            }
-        }
+		return $new_columns;
+	}
 
-        return $formatted_total;
-    }
+	protected function addWooCommerceFilters(): void {
+		add_filter( 'woocommerce_payment_gateways', [ $this, 'registerInWooCommercePaymentClass' ] );
+		add_filter( 'woocommerce_thankyou_order_received_text', [ $this, 'woocommerceThankyouOrderReceivedText' ] );
+		add_filter( 'manage_woocommerce_page_wc-orders_columns', [ $this, 'ordersListNewColumn' ] );
+		add_filter( 'manage_woocommerce_page_wc-orders_custom_column', [ $this, 'ordersListNewColumnContent' ], 10, 2 );
+		add_filter( 'woocommerce_get_formatted_order_total', [ $this, 'changeOrderAmount' ], 10, 2 );
+		add_filter( 'manage_edit-shop_order_columns', [ $this, 'addCaptureAmountCustomColumn' ], 20 );
+	}
 
-    public function addCaptureAmountCustomColumn($columns)
-    {
-        $new_columns = (is_array($columns)) ? $columns : [];
-        $new_columns['capture_amount'] = 'Capture Amount';
+	protected function addSettingsLink(): void {
+		add_filter( 'plugin_action_links_' . plugin_basename( POWER_BOARD_PLUGIN_FILE ), [ $this, 'getSettingLink' ] );
+	}
 
-        return $new_columns;
-    }
+	public function registerInWooCommercePaymentClass( array $methods ): array {
+		global $current_section;
+		global $current_tab;
 
-    protected function addWooCommerceFilters(): void
-    {
-        add_filter('woocommerce_payment_gateways', [$this, 'registerInWooCommercePaymentClass']);
-        add_filter('woocommerce_thankyou_order_received_text', [$this, 'woocommerceThankyouOrderReceivedText']);
-        add_filter('manage_woocommerce_page_wc-orders_columns', [$this, 'ordersListNewColumn']);
-        add_filter('manage_woocommerce_page_wc-orders_custom_column', [$this, 'ordersListNewColumnContent'], 10, 2);
-        add_filter('woocommerce_get_formatted_order_total', [$this, 'changeOrderAmount'], 10, 2);
-        add_filter('manage_edit-shop_order_columns', [$this, 'addCaptureAmountCustomColumn'], 20);
-        add_filter('wc_ajax_update_order_review', [$this, 'saveCartUpdatedInfo'], 90);
-    }
-
-    protected function addSettingsLink(): void
-    {
-        add_filter('plugin_action_links_' . plugin_basename(POWER_BOARD_PLUGIN_FILE), [$this, 'getSettingLink']);
-    }
-
-    public function registerInWooCommercePaymentClass(array $methods): array
-    {
-        global $current_section;
-        global $current_tab;
-
-        if (!is_checkout()) {
-            $methods[] = LiveConnectionSettingService::class;
-        }
+		$methods[] = LiveConnectionSettingService::class;
+		if ( 'checkout' != $current_tab
+		     || in_array(
+			     $current_section,
+			     array_map(
+				     function ( SettingsTabs $tab ) {
+					     return $tab->value;
+				     },
+				     SettingsTabs::secondary()
+			     )
+		     ) ) {
+			$methods[] = SandboxConnectionSettingService::class;
+			$methods[] = WidgetSettingService::class;
+			$methods[] = LogsSettingService::class;
+			$methods[] = CardPaymentService::class;
+			$methods[] = BankAccountPaymentService::class;
+			$methods[] = ApplePayWalletService::class;
+			$methods[] = GooglePayWalletService::class;
+			$methods[] = AfterpayWalletService::class;
+			$methods[] = PayPalWalletService::class;
+			$methods[] = AfterpayAPMsPaymentServiceService::class;
+			$methods[] = ZipAPMsPaymentServiceService::class;
+		}
 
 
-        if ('checkout' != $current_tab
-            || in_array(
-                $current_section,
-                array_map(
-                    function (SettingsTabs $tab) {
-                        return $tab->value;
-                    },
-                    SettingsTabs::secondary()
-                )
-            )) {
-            if (!is_checkout()) {
-                $methods[] = SandboxConnectionSettingService::class;
-                $methods[] = WidgetSettingService::class;
-                $methods[] = LogsSettingService::class;
-            }
+		return $methods;
+	}
 
-            $methods[] = CardPaymentService::class;
-            $methods[] = BankAccountPaymentService::class;
-            $methods[] = ApplePayWalletService::class;
-            $methods[] = GooglePayWalletService::class;
-            $methods[] = AfterpayWalletService::class;
-            $methods[] = PayPalWalletService::class;
-            $methods[] = AfterpayAPMsPaymentServiceService::class;
-            $methods[] = ZipAPMsPaymentServiceService::class;
-        }
+	public function woocommerceThankyouOrderReceivedText( $text ) {
+		$orderId = absint( get_query_var( 'order-received' ) );
+		$options  = get_option( "power_board_fraud_{$orderId}" );
+		$order    = wc_get_order( $orderId );
+		$status   = $order->get_meta( ActivationHook::CUSTOM_STATUS_META_KEY );
+		$afterpay = filter_input( INPUT_GET, 'afterpay-error', FILTER_SANITIZE_STRING );
 
+		if ( ! empty( $afterpay ) && ( 'true' === $afterpay ) ) {
+			return __( 'Order has been cancelled', 'power-board' );
+		}
+		if ( false === $options && 'processing' !== $status ) {
+			return __( 'Thank you. Your order has been received.' );
+		}
 
-        return $methods;
-    }
+		return __( 'Your order is being processed. We\'ll get back to you shortly', 'power-board' );
+	}
 
-    public function woocommerceThankyouOrderReceivedText($text)
-    {
-        $orderId = absint(get_query_var('order-received'));
-        $options = get_option("power_board_fraud_{$orderId}");
-        $order = wc_get_order($orderId);
-        $status = $order->get_meta(ActivationHook::CUSTOM_STATUS_META_KEY);
-        $afterpay = filter_input(INPUT_GET, 'afterpay-error', FILTER_SANITIZE_STRING);
+	public function getSettingLink( array $links ): array {
+		array_unshift(
+			$links,
+			sprintf(
+				'<a href="%1$s">%2$s</a>',
+				admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . PowerBoardPlugin::PLUGIN_PREFIX ),
+				__( 'Settings', 'power-board' )
+			)
+		);
 
-        if (!empty($afterpay) && ('true' === $afterpay)) {
-            return __('Order has been cancelled', 'power-board');
-        }
-        if (false === $options && 'processing' !== $status) {
-            return __('Thank you. Your order has been received.');
-        }
-
-        return __('Your order is being processed. We\'ll get back to you shortly', 'power-board');
-    }
-
-    public function getSettingLink(array $links): array
-    {
-        array_unshift(
-            $links,
-            sprintf(
-                '<a href="%1$s">%2$s</a>',
-                admin_url('admin.php?page=wc-settings&tab=checkout&section=' . PowerBoardPlugin::PLUGIN_PREFIX),
-                __('Settings', 'power-board')
-            )
-        );
-
-        return $links;
-    }
+		return $links;
+	}
 }

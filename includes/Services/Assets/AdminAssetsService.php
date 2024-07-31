@@ -10,7 +10,7 @@ class AdminAssetsService {
 		'connections',
 		'card-select',
 		'deactivation-confirmation',
-		'admin-helpers'
+		// 'admin-helpers'
 	];
 	private const STYLES = [
 		'card-select',
@@ -55,7 +55,7 @@ class AdminAssetsService {
 
 	public function loadScripts(): void {
 		foreach ( self::SCRIPTS as $script ) {
-			wp_enqueue_script( $this->getScriptName( $script ),'', [],POWER_BOARD_PLUGIN_VERSION,true );
+			wp_enqueue_script( $this->getScriptName( $script ),'',[],POWER_BOARD_PLUGIN_VERSION,true );
 		}
 	}
 

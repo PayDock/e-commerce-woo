@@ -6,7 +6,7 @@ Tags: powerboard, woocommerce, payment, gateways, payment gateways
 Requires PHP: 7.4
 Requires at least: 6.0
 Tested up to: 6.5.3
-Stable tag: 3.0.15
+Stable tag: 3.0.5
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -33,7 +33,7 @@ To install and configure the PowerBoard plugin, you need:
 
 1. **Download the Plugin**
    - Download the zip file with the plugin:  
-     [PowerBoard WooCommerce Plugin] (https://github.com/PayDock/e-commerce-woo/blob/power_board/power-board_v3.0.15.zip)
+     [PowerBoard WooCommerce Plugin] (https://github.com/PayDock/e-commerce-woo/blob/power_board/power-board_v3.0.3.zip)
 
 2. **Install the Plugin**
    - Go to WordPress -> Plugins -> Add new Plugin -> Upload Plugin
@@ -109,6 +109,3 @@ Also we use helper code that not need compile what contained in assets path.
 
 = 3.0.5 =
 * Statuses, openssl, paths
-
-= 3.0.15 =
-* Fixed problem with display on classic checkout
