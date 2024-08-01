@@ -49,6 +49,11 @@ class CardProcessor {
 	public function run( $order ): array {
 		$this->order = $order;
 
+		if ( empty( $this->order->get_billing_phone() ) ) {
+			$placeholder = '+123456789';
+			$this->order->set_billing_phone( $placeholder );
+		}
+
 		$this->setRunMethod();
 
 		if ( ! in_array( $this->runMethod, self::ALLOWED_METHODS ) ) {
