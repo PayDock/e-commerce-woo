@@ -10,7 +10,7 @@ class AdminAssetsService {
 		'connections',
 		'card-select',
 		'deactivation-confirmation',
-		'admin-helpers'
+		// 'admin-helpers'
 	];
 	private const STYLES = [
 		'card-select',
