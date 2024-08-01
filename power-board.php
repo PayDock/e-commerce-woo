@@ -10,7 +10,7 @@
  * Plugin URI: https://github.com/PayDock/jsp-woocommerce/tree/power_board
  * Description: PowerBoard simplify how you manage your payments. Reduce costs, technical headaches & streamline compliance using PowerBoard's payment orchestration.
  * Author: PowerBoard
- * Author URI: https://www.commbank.com.au/
+ * Author URI: https://www.commbank.com.au/business/payments/take-online-payments/powerboard.html#getting-started
  * Version: 3.0.5
  * Requires at least: 6.4.2
  * Text Domain: power-board
