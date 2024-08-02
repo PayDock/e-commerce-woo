@@ -31,7 +31,9 @@ abstract class AbstractAPMsBlock extends AbstractBlock {
 			];
 		}
 
-		WC()->cart->calculate_totals();
+		if ( ! is_admin() ) {
+			WC()->cart->calculate_totals();
+		}
 
 		return array_merge( $userCustomers, [
 			// Wordpress data
