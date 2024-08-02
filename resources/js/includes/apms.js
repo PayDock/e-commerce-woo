@@ -247,7 +247,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
                 },
                 createElement('img',
                     {
-                        src: `/wp-content/plugins/power-board/assets/images/${id}.png`,
+                        src: `${window.powerBoardWidgetSettings.pluginUrlPrefix}assets/images/${id}.png`,
                     },
                 ),
             ),),
@@ -287,7 +287,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
                     className: 'power-board-payment-method-label'
                 },
                 createElement("img", {
-                    src: `/wp-content/plugins/power-board/assets/images/icons/${id}.png`,
+                    src: `${window.powerBoardWidgetSettings.pluginUrlPrefix}assets/images/icons/${id}.png`,
                     alt: label,
                     className: `power-board-payment-method-label-icon ${id}`
                 }),

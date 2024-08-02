@@ -24,14 +24,14 @@ class PaymentController {
 		$orderId = ! empty( $_POST['order_id'] ) ? sanitize_text_field( $_POST['order_id'] ) : null;
 		$error   = null;
 		if ( ! $orderId ) {
-			$error = __( 'The order is not found.' );
+			$error = __( 'The order is not found.', 'power-board'  );
 		} else {
 			$order = wc_get_order( $orderId );
 			if ( ! in_array( $order->get_meta( ActivationHook::CUSTOM_STATUS_META_KEY ), [
 				'pb-authorize',
 				'wc-pb-authorize'
 			] ) ) {
-				$error = __( 'The order has been authorized and is awaiting approval.', 'woocommerce' );
+				$error = __( 'The order has been authorized and is awaiting approval.', 'power-board'  );
 			}
 		}
 
@@ -152,7 +152,7 @@ class PaymentController {
 		$orderId       = $args['order_id'];
 		$order         = wc_get_order( $orderId );
 
-		if ( is_object( $order ) ) {
+		if ( empty($args['amount']) && is_object( $order ) ) {
 			$amount = $order->get_total();
 		} else {
 			$amount = $args['amount'];

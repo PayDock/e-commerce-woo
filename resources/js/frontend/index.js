@@ -225,13 +225,13 @@ const Paydok = {
                 className: 'power-board-payment-method-label'
             },
             createElement("img", {
-                src: '/wp-content/plugins/power-board/assets/images/icons/card.png',
+                src: `${window.powerBoardWidgetSettings.pluginUrlPrefix}assets/images/icons/card.png`,
                 alt: label,
                 className: 'power-board-payment-method-label-icon card'
             }),
             "  " + label,
             createElement("img", {
-                src: '/wp-content/plugins/power-board/assets/images/commBank_logo.png',
+                src: `${window.powerBoardWidgetSettings.pluginUrlPrefix}assets/images/commBank_logo.png`,
                 alt: label,
                 className: 'power-board-payment-method-label-logo'
             })

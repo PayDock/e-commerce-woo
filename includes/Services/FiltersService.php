@@ -138,7 +138,7 @@ class FiltersService extends AbstractSingleton {
 			return __( 'Order has been cancelled', 'power-board' );
 		}
 		if ( false === $options && 'processing' !== $status ) {
-			return __( 'Thank you. Your order has been received.' );
+			return __( 'Thank you. Your order has been received.', 'power-board' );
 		}
 
 		return __( 'Your order is being processed. We\'ll get back to you shortly', 'power-board' );

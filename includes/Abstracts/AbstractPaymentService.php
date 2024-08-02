@@ -41,15 +41,24 @@ abstract class AbstractPaymentService extends WC_Payment_Gateway {
 			return '';
 		}
 
-		wp_enqueue_script( 'power-board-form', POWER_BOARD_PLUGIN_URL . '/assets/js/frontend/form.js', [], time(),
+		wp_enqueue_script( 'power-board-form', POWER_BOARD_PLUGIN_URL . 'assets/js/frontend/form.js', [], time(),
 			true );
+		wp_localize_script( 'power-board-form', 'powerBoardCardWidgetSettings', [
+			'suportedCard'    => 'Visa, Mastercard, Adex',
+		] );
+		wp_localize_script( 'power-board-form', 'powerBoardWidgetSettings', [
+			'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL
+		] );
 		wp_enqueue_style(
 			'power-board-widget-css',
-			POWER_BOARD_PLUGIN_URL . '/assets/css/frontend/widget.css',
+			POWER_BOARD_PLUGIN_URL . 'assets/css/frontend/widget.css',
 			[],
 			time()
 		);
 
 		wp_enqueue_script( 'power-board-api', SettingsService::getInstance()->getWidgetScriptUrl(), [], time(), true );
+		wp_localize_script( 'power-board-api', 'powerBoardWidgetSettings', [
+			'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL
+		] );
 	}
 }

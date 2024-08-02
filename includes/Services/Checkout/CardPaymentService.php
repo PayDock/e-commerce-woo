@@ -11,7 +11,6 @@ use PowerBoard\Repositories\LogRepository;
 use PowerBoard\Repositories\UserTokenRepository;
 use PowerBoard\Services\OrderService;
 use PowerBoard\Services\ProcessPayment\CardProcessor;
-use PowerBoard\Services\SDKAdapterService;
 use PowerBoard\Services\SettingsService;
 use WC_Payment_Gateway;
 
@@ -74,15 +73,21 @@ class CardPaymentService extends WC_Payment_Gateway {
 			return '';
 		}
 
-		wp_enqueue_script( 'power-board-form', POWER_BOARD_PLUGIN_URL . '/assets/js/frontend/form.js', [], time(), true );
+		wp_enqueue_script( 'power-board-form', POWER_BOARD_PLUGIN_URL . 'assets/js/frontend/form.js', [], time(), true );
 		wp_localize_script( 'power-board-form', 'powerBoardCardWidgetSettings', [
-			'suportedCard' => 'Visa, Mastercard, Adex',
+			'suportedCard'    => 'Visa, Mastercard, Adex',
 		] );
-		wp_enqueue_style( 'power-board-widget-css', POWER_BOARD_PLUGIN_URL . '/assets/css/frontend/widget.css', [], time() );
+		wp_localize_script( 'power-board-form', 'powerBoardWidgetSettings', [
+			'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL
+		] );
+		wp_enqueue_style( 'power-board-widget-css', POWER_BOARD_PLUGIN_URL . 'assets/css/frontend/widget.css', [], time() );
 
 		wp_localize_script( 'power-board-form', 'PowerBoardAjax', [
 			'url'     => admin_url( 'admin-ajax.php' ),
 			'wpnonce' => wp_create_nonce( 'get_vault_token' )
+		] );
+		wp_localize_script( 'power-board-form', 'powerBoardWidgetSettings', [
+			'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL
 		] );
 
 		return '';
