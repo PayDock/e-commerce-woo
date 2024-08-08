@@ -174,6 +174,13 @@ const Content = (props) => {
                 };
             }
 
+            const powerBoardCardSettings = window.wc.wcSettings.getSetting('power_board_data', {});
+            widget = new cba.HtmlWidget('#powerBoardWidgetCard', powerBoardCardSettings.publicKey, powerBoardCardSettings.gatewayId);
+
+            if (widget && typeof widget.reload === 'function') {
+                widget.reload();
+            }
+
             return {
                 type: emitResponse.responseTypes.ERROR,
                 message: labels.fillDataError,
