@@ -17,6 +17,8 @@ echo wpautop( wp_kses_post( esc_attr( $description ) ) );
                     <option value="<?php echo esc_attr( $option['vault_token'] ) ?>">
 						<?php echo esc_html(
 							ucfirst( $option['card_scheme'] ) .
+							' '
+                            . ucfirst( $option['card_number_last4'] ) .
 							' ' .
 							str_pad( $option['expire_month'], 2, '0', STR_PAD_LEFT ) .
 							'/' .
