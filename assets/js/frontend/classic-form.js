@@ -56,14 +56,9 @@ jQuery(function ($) {
                     prefixes.push('shipping_')
                 }
 
-                prefixes.map((prefix) => {
-                    fieldsNames.map((field) => {
-                        if ('shipping_' === prefix && ['email', 'phone'].includes(field)) {
-                            return;
-                        }
-                        result.push(`${prefix}${field}`)
-                    })
-                })
+                prefixes.map((prefix) => fieldsNames.map((field) => {
+                    result.push(`${prefix}${field}`)
+                }))
 
                 return result;
             },
@@ -297,7 +292,7 @@ jQuery(function ($) {
 
                 let checkbox = document.getElementById("card_save_card");
 
-                if (checkbox.checked) {
+                if(checkbox.checked){
                     data.cardsavecardchecked = 'true'
                 }
 
@@ -584,12 +579,12 @@ jQuery(function ($) {
             init() {
                 setInterval(() => {
                     let paymentMethod = $('input[name="payment_method"]:checked').val();
-                    if (paymentMethod && !this.paymentMethod) {
+                    if(paymentMethod && !this.paymentMethod){
                         this.setPaymentMethod(paymentMethod)
                     }
 
                     let orderButton = document.getElementById('place_order');
-                    if (orderButton) {
+                    if(orderButton){
                         orderButton.addEventListener('click', (event) => {
                             this.customSubmitForm(event)
                         })

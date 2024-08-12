@@ -11,7 +11,7 @@
  * Description: PowerBoard simplify how you manage your payments. Reduce costs, technical headaches & streamline compliance using PowerBoard's payment orchestration.
  * Author: PowerBoard
  * Author URI: https://www.commbank.com.au/
- * Version: 3.0.16
+ * Version: 3.0.5
  * Requires at least: 6.4.2
  * Text Domain: power-board
  * Tested up to: 6.4.2
@@ -36,7 +36,7 @@ if ( ! defined( 'POWER_BOARD_PLUGIN_URL' ) ) {
 }
 
 if ( ! defined( 'POWER_BOARD_PLUGIN_VERSION' ) ) {
-	define( 'POWER_BOARD_PLUGIN_VERSION', '3.0.16' );
+	define( 'POWER_BOARD_PLUGIN_VERSION', '3.0.5' );
 }
 
 require_once 'vendor/autoload.php';
