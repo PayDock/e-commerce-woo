@@ -198,9 +198,11 @@ setTimeout(() => jQuery(function ($) {
             let counter = 0;
             const widgetErrorInterval = setInterval(() => {
                 const errorInput = document.querySelectorAll("#widget_error")[0]
-                if (!!errorInput || counter === 50) {
+                if (!!errorInput) {
                     reloadWidget();
                     errorInput?.remove();
+                    clearInterval(widgetErrorInterval);
+                } else if(counter  === 50) {
                     clearInterval(widgetErrorInterval);
                 } else {
                     counter++;
