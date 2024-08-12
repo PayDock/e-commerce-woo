@@ -2,21 +2,16 @@
 	exit;
 } // Exit if accessed directly ?>
 <span class="power-board-order-actions">
-	<?php if ( in_array( $order->get_meta( \PowerBoard\Hooks\ActivationHook::CUSTOM_STATUS_META_KEY ), [
-		'pb-authorize',
-		'wc-pb-authorize'
-	] ) ) : ?>
-        <button type="button"
-                onclick="powerBoardPaymentCapture(<?php echo esc_attr( $order->get_id() ); ?>, 'power-board-capture-charge')"
-                class="button">
-			Capture charge
-		</button>
-	<?php endif; ?>
-	<button type="button"
+    <button type="button"
+            onclick="powerBoardPaymentCapture(<?php echo esc_attr( $order->get_id() ); ?>, 'power-board-capture-charge')"
+            class="button">
+        Capture charge
+    </button>
+    <button type="button"
             onclick="handlePowerBoardPaymentCapture(<?php echo esc_attr( $order->get_id() ); ?>, 'power-board-cancel-authorised')"
             class="button">
-		Cancel charge
-	</button>
+        Cancel charge
+    </button>
 </span>
 <div class="wc-order-data-row wc-order-partial-paid-items wc-order-data-row-toggle" style="display: none;">
     <table class="wc-order-totals">

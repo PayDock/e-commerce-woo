@@ -25,7 +25,7 @@ class PaymentController {
 		$error   = null;
 		if ( ! $orderId ) {
 			$error = __( 'The order is not found.', 'power-board'  );
-		} else {
+		} /*else {
 			$order = wc_get_order( $orderId );
 			if ( ! in_array( $order->get_meta( ActivationHook::CUSTOM_STATUS_META_KEY ), [
 				'pb-authorize',
@@ -33,7 +33,7 @@ class PaymentController {
 			] ) ) {
 				$error = __( 'The order has been authorized and is awaiting approval.', 'power-board'  );
 			}
-		}
+		}*/
 
 		if ( is_object( $order ) ) {
 			$order->calculate_totals();

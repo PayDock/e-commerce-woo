@@ -50,14 +50,14 @@ class OrderService {
 				'failed',
 				'cancelled',
 			] )
-		     || in_array( $orderCustomStatus, [
+		     /*|| in_array( $orderCustomStatus, [
 				'pb-requested',
 				'wc-pb-requested',
 				'pb-refunded',
 				'WC-pb-refunded',
 				'pb-authorize',
 				'wc-pb-authorize'
-			] )
+			] )*/
 		     || ( $order->get_total() == $totalRefaund )
 		     || ( $capturedAmount == $totalRefaund )
 		) {
@@ -70,14 +70,14 @@ class OrderService {
 		}
 		if ( in_array( $orderStatus, [
 				'processing',
-			] ) && in_array( $orderCustomStatus, [
+			] ) /*&& in_array( $orderCustomStatus, [
 				'pb-authorize',
 				'wc-pb-authorize',
 				'pb-paid',
 				'wc-pb-paid',
 				'wc-pb-p-paid',
 				'pb-p-paid'
-			] ) ) {
+			] )*/ ) {
 			$this->templateService->includeAdminHtml( 'power-board-capture-block', compact( 'order' ) );
 			wp_enqueue_script(
 				'power-board-capture-block',
