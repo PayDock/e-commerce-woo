@@ -25,15 +25,15 @@ class PaymentController {
 		$error   = null;
 		if ( ! $orderId ) {
 			$error = __( 'The order is not found.', 'power-board'  );
-		} /*else {
+		} else {
 			$order = wc_get_order( $orderId );
-			if ( ! in_array( $order->get_meta( ActivationHook::CUSTOM_STATUS_META_KEY ), [
+			/*if ( ! in_array( $order->get_meta( ActivationHook::CUSTOM_STATUS_META_KEY ), [
 				'pb-authorize',
 				'wc-pb-authorize'
 			] ) ) {
 				$error = __( 'The order has been authorized and is awaiting approval.', 'power-board'  );
-			}
-		}*/
+			}*/
+		}
 
 		if ( is_object( $order ) ) {
 			$order->calculate_totals();
@@ -68,7 +68,7 @@ class PaymentController {
 				update_post_meta( $orderId, 'capture_amount', $amount );
 				update_post_meta( $orderId, 'power_board_charge_id', $newChargeId );
 				$order->payment_complete();
-				OrderService::updateStatus( $orderId, $newStatus );
+				$order->save();
 				wp_send_json_success( [
 					'message' => __( 'The capture process has been successfully.', 'woocommerce' ),
 				] );
