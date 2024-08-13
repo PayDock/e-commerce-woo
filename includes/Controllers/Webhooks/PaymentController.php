@@ -68,9 +68,9 @@ class PaymentController {
 				update_post_meta( $orderId, 'capture_amount', $amount );
 				update_post_meta( $orderId, 'power_board_charge_id', $newChargeId );
 				$order->payment_complete();
-				$order->save();
+				OrderService::updateStatus( $orderId, $newStatus );
 				wp_send_json_success( [
-					'message' => __( 'The capture process has been successfully.', 'woocommerce' ),
+					'message' => __( 'The capture process was successful.', 'woocommerce' ),
 				] );
 			} else {
 				if ( ! empty( $result['error'] ) ) {
