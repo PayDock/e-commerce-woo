@@ -2,11 +2,20 @@
 	exit;
 } // Exit if accessed directly ?>
 <span class="power-board-order-actions">
-    <button type="button"
-            onclick="powerBoardPaymentCapture(<?php echo esc_attr( $order->get_id() ); ?>, 'power-board-capture-charge')"
-            class="button">
-        Capture charge
-    </button>
+    <?php
+        $card_direct_charge = $settings->getCardDirectCharge();
+
+        $pb_charge_meta = get_post_meta( $order->get_id(), 'pb_directly_charged', true );
+        $order_directly_charged = ! empty( $pb_charge_meta ) ? $pb_charge_meta : false;
+
+        if ( $card_direct_charge == false && $order_directly_charged == false ) :
+    ?>
+        <button type="button"
+                onclick="powerBoardPaymentCapture(<?php echo esc_attr( $order->get_id() ); ?>, 'power-board-capture-charge')"
+                class="button">
+            Capture charge
+        </button>
+    <?php endif; ?>
     <button type="button"
             onclick="handlePowerBoardPaymentCapture(<?php echo esc_attr( $order->get_id() ); ?>, 'power-board-cancel-authorised')"
             class="button">

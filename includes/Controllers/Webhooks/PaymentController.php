@@ -67,6 +67,7 @@ class PaymentController {
 				);
 				update_post_meta( $orderId, 'capture_amount', $amount );
 				update_post_meta( $orderId, 'power_board_charge_id', $newChargeId );
+				update_post_meta( $orderId, 'pb_directly_charged', 1 );
 				$order->payment_complete();
 				OrderService::updateStatus( $orderId, $newStatus );
 				wp_send_json_success( [
