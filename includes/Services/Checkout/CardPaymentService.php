@@ -140,7 +140,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 
 			$response = $cardProcessor->run( $order );
 
-			if ( ! empty( $response['error'] ) ) {
+			if ( ! empty( $response['error'] ) && stripos( $response['error']['message'], '3d' ) === false) {
 				throw new Exception( esc_html( __( 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later. ', 'power-board' ) ) );
 			}
 

@@ -342,10 +342,30 @@ jQuery(function ($) {
                 const canvas = new window.cba.Canvas3ds("#power-board-3ds-container", threeDsToken);
                 canvas.setEnv(config.isSandbox ? 'preproduction_cba' : 'production_cba');
 
-                canvas.on('chargeAuthSuccess', (chargeAuthSuccessEvent) => {
-                    $('#charge3dsid').val(chargeAuthSuccessEvent.charge_3ds_id)
+                canvas.on('chargeAuthSuccess', (data) => {
+                    $('#charge3dsid').val(data.charge_3ds_id)
                     this.form.submit()
                 })
+                canvas3ds.on('chargeAuthReject', function (data) {
+                    $('#charge3dsid').val(data.charge_3ds_id)
+                    this.form.submit()
+                });
+                canvas3ds.on('chargeAuthCancelled', function (data) {
+                    $('#charge3dsid').val(data.charge_3ds_id)
+                    this.form.submit()
+                });
+                canvas3ds.on('additionalDataCollectSuccess', function (data) {
+                    $('#charge3dsid').val(data.charge_3ds_id)
+                    this.form.submit()
+                });
+                canvas3ds.on('additionalDataCollectReject', function (data) {
+                    $('#charge3dsid').val(data.charge_3ds_id)
+                    this.form.submit()
+                });
+                canvas3ds.on('chargeAuth', function (data) {
+                    $('#charge3dsid').val(data.charge_3ds_id)
+                    this.form.submit()
+                });
 
                 canvas.load()
             },
