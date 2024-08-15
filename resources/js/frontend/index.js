@@ -44,9 +44,9 @@ const Content = (props) => {
                 }
             }
 
-            if (!window.widgetReloaded && settings.selectedToken.length > 0) {
+            if (settings.selectedToken.length > 0) {
                 const selectedToken = settings.tokens.find(item => item.vault_token === settings.selectedToken)
-                if (!!selectedToken && selectedToken.hasOwnProperty('customer_id')) {
+                if (typeof selectedToken !== undefined && selectedToken.hasOwnProperty('customer_id')) {
                     return true;
                 } else {
                     if (['IN_BUILD', 'STANDALONE'].includes(settings.card3DS)) {
@@ -110,7 +110,7 @@ const Content = (props) => {
                             errorMessage: labels.additionalDataRejected,
                         }
                     }
-                    if (settings.paymentSourceToken.length === 0 || window.widgetReloaded) {
+                    if (settings.paymentSourceToken.length === 0) {
                         settings.paymentSourceToken = paymentSourceToken.value
                     }
                     result = true

@@ -119,7 +119,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
                         if (rate.method_id !== 'pickup_location') {
                             return
                         }
-
+                        
                         const rateId = rate.rate_id.split(':')
                         const pickupLocation = settings.pickupLocations[rateId[1]]
 
