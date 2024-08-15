@@ -89,10 +89,8 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 		}
 		OrderService::updateStatus( $order_id, $status );
 		$order->payment_complete();
+		$order->update_meta_data( 'power_board_charge_id', $chargeId );
 		$order->save();
-
-		update_post_meta( $order->get_id(), 'power_board_charge_id', $chargeId );
-
 
 		WC()->cart->empty_cart();
 
@@ -104,11 +102,8 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 			'wc-pb-paid' == $status ? LogRepository::SUCCESS : LogRepository::DEFAULT
 		);
 
-		add_post_meta(
-			$order->get_id(),
-			OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(),
-			$this->getAPMsType()->getLabel()
-		);
+		$order->update_meta_data( OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(), $this->getAPMsType()->getLabel() );
+		$order->save();
 
 		return [
 			'result'   => 'success',

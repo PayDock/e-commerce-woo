@@ -5,7 +5,7 @@
     <?php
         $card_direct_charge = $settings->getCardDirectCharge();
 
-        $pb_charge_meta = get_post_meta( $order->get_id(), 'pb_directly_charged', true );
+        $pb_charge_meta = $order->get_meta( 'pb_directly_charged' );
         $order_directly_charged = ! empty( $pb_charge_meta ) ? $pb_charge_meta : false;
 
         if ( $card_direct_charge == false && $order_directly_charged == false ) :
