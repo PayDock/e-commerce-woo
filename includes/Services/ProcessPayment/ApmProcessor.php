@@ -54,8 +54,8 @@ class ApmProcessor {
 			$value                            = array_filter( $this->args['payment_source'] );
 			$this->args['paymentsourcetoken'] = reset( $value );
 		}
-		if ( empty( $this->order->get_total() ) ) {
-			$this->order->get_total() = $order->get_total( false );
+		if ( empty( $this->args['amount'] ) ) {
+			$this->args['amount'] = $order->get_total( false );
 		}
 		$this->order = $order;
 		$this->setRunMethod();
@@ -86,7 +86,7 @@ class ApmProcessor {
 
 	private function charge(): array {
 		$chargeArgs = [
-			'amount'    => $this->order->get_total(),
+			'amount'    => $this->args['amount'],
 			'currency'  => strtoupper( get_woocommerce_currency() ),
 			'token'     => $this->args['paymentsourcetoken'],
 			'capture'   => ( strtolower( OtherPaymentMethods::AFTERPAY()->name ) === $this->args['gatewaytype'] ) ? true : $this->args['directcharge'],
@@ -265,7 +265,7 @@ class ApmProcessor {
 		$customer_id = $customer['resource']['data']['_id'];
 
 		return SDKAdapterService::getInstance()->createCharge( [
-			'amount'      => $this->order->get_total(),
+			'amount'      => $this->args['amount'],
 			'currency'    => strtoupper( get_woocommerce_currency() ),
 			'customer_id' => $customer_id,
 			'reference'   => (string) $this->order->get_id(),
@@ -277,7 +277,7 @@ class ApmProcessor {
 
 	private function fraudCharge(): array {
 		return SDKAdapterService::getInstance()->createCharge( [
-			'amount'    => $this->order->get_total(),
+			'amount'    => $this->args['amount'],
 			'currency'  => strtoupper( get_woocommerce_currency() ),
 			'capture'   => strtolower( OtherPaymentMethods::AFTERPAY()->name ) === $this->args['gatewaytype'] ? true : $this->args['directcharge'],
 			'token'     => $this->args['paymentsourcetoken'],
