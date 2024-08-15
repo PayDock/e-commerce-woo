@@ -257,7 +257,7 @@ final class SettingsService {
 			);
 		$isApple  = WalletPaymentMethods::APPLE_PAY()->name === $methods->name;
 		$isGoogle = WalletPaymentMethods::GOOGLE_PAY()->name === $methods->name;
-		if ( $result && $isApple && ! $this->isSafariOrIOS) {
+		if ( $result && $isApple && ! $this->isSafariOrIOS ) {
 			return false;
 		}
 		if ( $result && $isGoogle && $this->isSafariOrIOS ) {

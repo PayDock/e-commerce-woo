@@ -5,13 +5,13 @@ namespace PowerBoard\Services\Checkout;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Exception;
 use PowerBoard\Enums\OrderListColumns;
+use PowerBoard\Enums\SettingsTabs;
+use PowerBoard\Enums\WidgetSettings;
 use PowerBoard\Repositories\LogRepository;
 use PowerBoard\Repositories\UserTokenRepository;
 use PowerBoard\Services\OrderService;
 use PowerBoard\Services\ProcessPayment\CardProcessor;
-use PowerBoard\Services\SDKAdapterService;
 use PowerBoard\Services\SettingsService;
-use PowerBoard\Services\TemplateService;
 use WC_Payment_Gateway;
 
 class CardPaymentService extends WC_Payment_Gateway {
@@ -20,6 +20,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 	 */
 	public function __construct() {
 		$this->id         = 'power_board_gateway';
+		$this->icon       = apply_filters( 'woocommerce_power_board_gateway_icon', '' );
 		$this->has_fields = true;
 		$this->supports   = [
 			'products',
@@ -40,10 +41,17 @@ class CardPaymentService extends WC_Payment_Gateway {
 		$this->init_settings();
 
 		// Define user set variables.
-		$service = SettingsService::getInstance();
+		$service        = SettingsService::getInstance();
+		$keyTitle       = $service->getOptionName( SettingsTabs::WIDGET()->value, [
+			WidgetSettings::PAYMENT_CARD_TITLE()->name,
+		] );
+		$keyDescription = $service->getOptionName(
+			SettingsTabs::WIDGET()->value,
+			[ WidgetSettings::PAYMENT_CARD_DESCRIPTION()->name ]
+		);
 
-		$this->title       = SettingsService::getInstance()->getWidgetPaymentCardTitle();
-		$this->description = $service->getWidgetPaymentCardDescription();
+		$this->title       = get_option( $keyTitle );
+		$this->description = get_option( $keyDescription );
 		// Actions.
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, [ $this, 'process_admin_options' ] );
 		add_action(
@@ -55,7 +63,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 
 		add_action( 'wp_enqueue_scripts', [ $this, 'payment_scripts' ] );
 
-		add_action( 'wp_ajax_power_board_get_vault_token', [ $this, 'power_board_get_vault_token' ] );
+		add_action( 'wp_ajax_get_vault_token', [ $this, 'get_vault_token' ] );
 
 		add_action( 'woocommerce_after_checkout_billing_form', [ $this, 'woocommerce_before_checkout_form' ], 10, 1 );
 	}
@@ -65,36 +73,27 @@ class CardPaymentService extends WC_Payment_Gateway {
 			return '';
 		}
 
-		wp_enqueue_script( 'power-board-form', POWER_BOARD_PLUGIN_URL . '/assets/js/frontend/form.js', [], time(), true );
-		wp_enqueue_script( 'power-board-classic-form', POWER_BOARD_PLUGIN_URL . '/assets/js/frontend/classic-form.js', [], time(), true );
+		wp_enqueue_script( 'power-board-form', POWER_BOARD_PLUGIN_URL . 'assets/js/frontend/form.js', [], time(), true );
 		wp_localize_script( 'power-board-form', 'powerBoardCardWidgetSettings', [
-			'suportedCard' => 'Visa, Mastercard, Adex',
+			'suportedCard'    => 'Visa, Mastercard, Adex',
 		] );
-		wp_enqueue_style( 'power-board-widget-css', POWER_BOARD_PLUGIN_URL . '/assets/css/frontend/widget.css', [], time() );
+		wp_localize_script( 'power-board-form', 'powerBoardWidgetSettings', [
+			'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL
+		] );
+		wp_enqueue_style( 'power-board-widget-css', POWER_BOARD_PLUGIN_URL . 'assets/css/frontend/widget.css', [], time() );
 
 		wp_localize_script( 'power-board-form', 'PowerBoardAjax', [
-			'url'         => admin_url( 'admin-ajax.php' ),
-			'wpnonce'     => wp_create_nonce( 'power-board-create-wallet-charge' ),
-			'wpnonce_3ds' => wp_create_nonce( 'power_board_get_vault_token' ),
+			'url'     => admin_url( 'admin-ajax.php' ),
+			'wpnonce' => wp_create_nonce( 'get_vault_token' )
 		] );
-		wp_enqueue_script( 'axios', 'https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js', [], time(), true );
+		wp_localize_script( 'power-board-form', 'powerBoardWidgetSettings', [
+			'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL
+		] );
 
 		return '';
 	}
 
 	public function is_available() {
-		if ( is_checkout() && ! is_order_received_page() ) {
-			$this->title = '<img src="/wp-content/plugins/power-board/assets/images/icons/card.png"
-								  height="25"
-								  class="power-board-payment-method-label-icon card">
-							 <span class="power-board-payment-method-label-title card">' .
-			               SettingsService::getInstance()->getWidgetPaymentCardTitle() .
-			               '</span> <img class="power-board-payment-method-label-icon card logo"
-							  src="' . POWER_BOARD_PLUGIN_URL . 'assets/images/logo.png"
-		                     class="power-board-payment-method-label-logo"
-							 height="36">';
-		}
-
 		return SettingsService::getInstance()->isEnabledPayment()
 		       && SettingsService::getInstance()->isCardEnabled();
 	}
@@ -136,12 +135,12 @@ class CardPaymentService extends WC_Payment_Gateway {
 			$cardProcessor = new CardProcessor( array_merge( [
 				'amount'      => (float) $order->get_total(),
 				'description' => $description,
-			], $this->getSettings(), $_POST ) );
+			], $_POST ) );
 
 			$response = $cardProcessor->run( $order );
 
 			if ( ! empty( $response['error'] ) && stripos( $response['error']['message'], '3d' ) === false) {
-				throw new Exception( esc_html( __( 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later. ', 'power-board' ) ) );
+				throw new Exception( esc_html( __( 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later. <input id="widget_error" hidden type="text"/>', 'power-board' ) ) );
 			}
 
 			$chargeId = ! empty( $response['resource']['data']['_id'] ) ? $response['resource']['data']['_id'] : '';
@@ -200,7 +199,6 @@ class CardPaymentService extends WC_Payment_Gateway {
 		if ( ! in_array( $status, [ 'wc-pb-pending' ] ) ) {
 			$order->payment_complete();
 		}
-		$order->set_payment_method_title( SettingsService::getInstance()->getWidgetPaymentCardTitle() );
 		$order->save();
 		update_post_meta( $order->get_id(), 'power_board_charge_id', $chargeId );
 		add_post_meta( $order->get_id(), OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(), 'Card' );
@@ -220,60 +218,12 @@ class CardPaymentService extends WC_Payment_Gateway {
 		];
 	}
 
-	public function getSettings() {
-		$settingsService = SettingsService::getInstance();
-		$userTokens      = [];
-		if ( is_user_logged_in() ) {
-			$userTokens = ( new UserTokenRepository() )->getUserTokens();
-		}
-
-		return [
-			'tokens'                 => $userTokens,
-			// Wordpress data
-			'_wpnonce'               => wp_create_nonce( 'process_payment' ),
-			'isUserLoggedIn'         => is_user_logged_in(),
-			'isSandbox'              => $settingsService->isSandbox(),
-			// Woocommerce data
-			'amount'                 => WC()->cart->total,
-			'currency'               => strtoupper( get_woocommerce_currency() ),
-			// Widget
-			'title'                  => $settingsService->getWidgetPaymentCardTitle(),
-			'description'            => $settingsService->getWidgetPaymentCardDescription(),
-			'styles'                 => $settingsService->getWidgetStyles(),
-			// Tokens & keys
-			'publicKey'              => $settingsService->getPublicKey(),
-			'selectedToken'          => '',
-			'paymentSourceToken'     => '',
-			'cvv'                    => '',
-			// Card
-			'cardSupportedCardTypes' => $settingsService->getCardSupportedCardTypes(),
-			'gatewayId'              => $settingsService->getCardGatewayId(),
-			// 3DS
-			'card3DS'                => $settingsService->getCard3DS(),
-			'card3DSServiceId'       => $settingsService->getCard3DSServiceId(),
-			'card3DSFlow'            => $settingsService->getCardTypeExchangeOtt(),
-			'charge3dsId'            => '',
-			// Fraud
-			'cardFraud'              => $settingsService->getCardFraud(),
-			'cardFraudServiceId'     => $settingsService->getCardFraudServiceId(),
-			// DirectCharge
-			'cardDirectCharge'       => $settingsService->getCardDirectCharge(),
-			// SaveCard
-			'cardSaveCard'           => $settingsService->getCardSaveCard(),
-			'cardSaveCardOption'     => $settingsService->getCardSaveCardOption(),
-			'cardSaveCardChecked'    => false,
-			// Other
-			'supports'               => array_filter( $this->supports, [ $this, 'supports' ] ),
-		];
-	}
-
 	/**
 	 * Ajax function
 	 */
-	public function power_board_get_vault_token(): void {
+	public function get_vault_token(): void {
 		$wpNonce = ! empty( $_POST['_wpnonce'] ) ? sanitize_text_field( $_POST['_wpnonce'] ) : null;
-		if ( ! wp_verify_nonce( $wpNonce, 'power_board_get_vault_token' ) &&
-		     ! wp_verify_nonce( $wpNonce, 'power-board-create-wallet-charge' ) ) {
+		if ( ! wp_verify_nonce( $wpNonce, 'get_vault_token' ) ) {
 			die( 'Security check' );
 		}
 
@@ -316,23 +266,5 @@ class CardPaymentService extends WC_Payment_Gateway {
 	}
 
 	public function woocommerce_before_checkout_form( $arg ) {
-	}
-
-	public function payment_fields() {
-		$template = new TemplateService ( $this );
-		SDKAdapterService::getInstance();
-
-		$settings = $this->getSettings();
-
-		$template->includeCheckoutHtml( 'method-form', [
-			'description'      => $this->description,
-			'id'               => $this->id,
-			'card3DSFlow'      => $settings['card3DSFlow'],
-			'isSaveCardEnable' => $settings['cardSaveCard'],
-			'nonce'            => wp_create_nonce( 'process_payment' ),
-			'isUserLoggedIn'   => is_user_logged_in(),
-			'tokens'           => $settings['tokens'],
-			'settings'         => wp_json_encode( $settings )
-		] );
 	}
 }

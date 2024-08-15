@@ -14,6 +14,31 @@ class OrderService {
 		}
 	}
 
+	public static function updateStatus( $id, $custom_status, $status_note = null ) {
+
+		$order = wc_get_order( $id );
+
+		if ( is_object( $order ) ) {
+
+			$partial_refund = strpos( $custom_status, 'pb-p-refund' );
+
+			if ( $partial_refund === false ) {
+
+				$order->update_status( ActivationHook::CUSTOM_STATUSES[ $custom_status ], $status_note );
+				$order->update_meta_data( ActivationHook::CUSTOM_STATUS_META_KEY, $custom_status );
+
+			} else {
+
+				if ( ! empty( $status_note ) ) {
+					$order->add_order_note( $status_note );
+				}
+
+			}
+
+		}
+
+	}
+
 	public function iniPowerBoardOrderButtons( $order ) {
 		$orderCustomStatus = $order->get_meta( ActivationHook::CUSTOM_STATUS_META_KEY );
 		$orderStatus       = $order->get_status();
@@ -36,7 +61,12 @@ class OrderService {
 		     || ( $order->get_total() == $totalRefaund )
 		     || ( $capturedAmount == $totalRefaund )
 		) {
-			$this->templateService->includeAdminHtml( 'hide-refund-button' );
+			wp_enqueue_style(
+				'hide-refund-button-styles',
+				POWER_BOARD_PLUGIN_URL . 'assets/css/admin/hide-refund-button.css',
+				[],
+				POWER_BOARD_PLUGIN_VERSION
+			);
 		}
 		if ( in_array( $orderStatus, [
 				'processing',
@@ -49,6 +79,16 @@ class OrderService {
 				'pb-p-paid'
 			] ) ) {
 			$this->templateService->includeAdminHtml( 'power-board-capture-block', compact( 'order' ) );
+			wp_enqueue_script(
+				'power-board-capture-block',
+				POWER_BOARD_PLUGIN_URL . 'assets/js/admin/power-board-capture-block.js',
+				[],
+				time(),
+				true
+			);
+			wp_localize_script( 'power-board-capture-block', 'powerBoardCaptureBlockSettings', [
+				'wpnonce' => esc_attr( wp_create_nonce( 'capture-or-cancel' ) ),
+			] );
 		}
 	}
 
@@ -83,7 +123,7 @@ class OrderService {
 				$order->update_status( $oldStatusKey, $error );
 				update_option( 'power_board_status_change_error', $error );
 				unset( $GLOBALS['power_board_is_updating_order_status'] );
-				throw new \Exception( esc_html( $error ) );
+				throw new \Exception( esc_html( $error .  '<input id="widget_error" hidden type="text"/>' ) );
 			}
 		}
 	}
@@ -105,7 +145,6 @@ class OrderService {
 		}
 	}
 
-
 	public function displayStatusChangeError() {
 		$screen = get_current_screen();
 		if ( 'woocommerce_page_wc-orders' == $screen->id ) {
@@ -115,13 +154,5 @@ class OrderService {
 				delete_option( 'power_board_status_change_error' );
 			}
 		}
-	}
-
-	public static function updateStatus( $id, $custom_status, $status_note = null ) {
-		$order = wc_get_order( $id );
-
-		$order->set_status( ActivationHook::CUSTOM_STATUSES[ $custom_status ], $status_note );
-		$order->update_meta_data( ActivationHook::CUSTOM_STATUS_META_KEY, $custom_status );
-		$order->save();
 	}
 }

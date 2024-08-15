@@ -3,8 +3,6 @@ import {registerPaymentMethod} from '@woocommerce/blocks-registry';
 import {decodeEntities} from '@wordpress/html-entities';
 import {getSetting} from '@woocommerce/settings';
 import {createElement, useEffect} from 'react';
-import {select} from '@wordpress/data';
-import {CART_STORE_KEY} from '@woocommerce/block-data';
 import {
     checkboxSavedCardsComponent,
     inBuild3Ds,
@@ -29,7 +27,6 @@ const label = decodeEntities(settings.title) || labels.defaultLabel;
 
 let formSubmittedAlready = false;
 const Content = (props) => {
-    const cart = select(CART_STORE_KEY);
     const {eventRegistration, emitResponse} = props;
     const {onPaymentSetup, onCheckoutValidation} = eventRegistration;
 
@@ -37,6 +34,7 @@ const Content = (props) => {
 
     useEffect(() => {
         const validation = onCheckoutValidation(async () => {
+            formSubmittedAlready = window.widgetReloaded ? false : formSubmittedAlready
             if (window.hasOwnProperty('powerBoardValidation')) {
                 if (!powerBoardValidation.wcFormValidation()) {
                     return {
@@ -102,7 +100,7 @@ const Content = (props) => {
                 }
             })
 
-            const paymentSourceToken = document.querySelector('[name="power_board_payment_source_token"]')
+            const paymentSourceToken = document.querySelector('[name="payment_source_token"]')
             for (let second = 1; second <= 100; second++) {
                 await sleep(100);
                 if (paymentSourceToken !== null && paymentSourceToken.value.length) {
@@ -145,6 +143,7 @@ const Content = (props) => {
 
                 return true;
             }
+
             return {
                 type: emitResponse.responseTypes.ERROR,
                 errorMessage: labels.fillDataError,
@@ -152,7 +151,7 @@ const Content = (props) => {
         });
 
         const unsubscribe = onPaymentSetup(async () => {
-            const paymentSourceToken = document.querySelector('[name="power_board_payment_source_token"]')
+            const paymentSourceToken = document.querySelector('[name="payment_source_token"]')
             if (paymentSourceToken === null) {
                 return;
             }
@@ -163,7 +162,6 @@ const Content = (props) => {
                 data.tokens = '';
                 data.styles = '';
                 data.supports = '';
-                data.amount = Number((cart.getCartTotals().total_price / 100).toFixed(3)).toFixed(2)
 
                 if(data.total_limitation){
                     delete data.total_limitation;
@@ -212,7 +210,7 @@ const Content = (props) => {
             "input",
             {
                 type: 'hidden',
-                name: 'power_board_payment_source_token'
+                name: 'payment_source_token'
             }
         ),
         checkboxSavedCardsComponent(labels.saveCardLabel)
@@ -228,13 +226,13 @@ const Paydok = {
                 className: 'power-board-payment-method-label'
             },
             createElement("img", {
-                src: '/wp-content/plugins/power-board/assets/images/icons/card.png',
+                src: `${window.powerBoardWidgetSettings.pluginUrlPrefix}assets/images/icons/card.png`,
                 alt: label,
                 className: 'power-board-payment-method-label-icon card'
             }),
             "  " + label,
             createElement("img", {
-                src: '/wp-content/plugins/power-board/assets/images/commBank_logo.png',
+                src: `${window.powerBoardWidgetSettings.pluginUrlPrefix}assets/images/commBank_logo.png`,
                 alt: label,
                 className: 'power-board-payment-method-label-logo'
             })

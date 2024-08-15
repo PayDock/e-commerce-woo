@@ -13,9 +13,8 @@ abstract class AbstractWalletPaymentService extends AbstractPaymentService {
 	public function __construct() {
 		$settings      = SettingsService::getInstance();
 		$paymentMethod = $this->getWalletType();
-		$id            = $paymentMethod->getId();
 
-		$this->id          = 'power_board_' . $id . '_wallets_gateway';
+		$this->id          = 'power_board_' . $paymentMethod->getId() . '_wallets_gateway';
 		$this->title       = $settings->getWidgetPaymentWalletTitle( $paymentMethod );
 		$this->description = $settings->getWidgetPaymentWalletDescription( $paymentMethod );
 
@@ -25,18 +24,12 @@ abstract class AbstractWalletPaymentService extends AbstractPaymentService {
 	abstract protected function getWalletType(): WalletPaymentMethods;
 
 	public function is_available() {
-		if ( is_checkout() ) {
-			$paymentMethod = $this->getWalletType();
-			$this->title   = '<img src="/wp-content/plugins/power-board/assets/images/icons/' .
-			                 $paymentMethod->getId() .
-			                 '.png" height="25" class="power-board-payment-method-label-icon ' .
-			                 $paymentMethod->getId() .
-			                 '">' .
-			                 SettingsService::getInstance()->getWidgetPaymentWalletTitle( $paymentMethod );
-		}
-
 		return SettingsService::getInstance()->isEnabledPayment()
 		       && SettingsService::getInstance()->isWalletEnabled( $this->getWalletType() );
+	}
+
+	public function payment_scripts() {
+		return SettingsService::getInstance()->getWidgetScriptUrl();
 	}
 
 	public function process_payment( $order_id, $retry = true, $force_customer = false ) {
@@ -50,22 +43,13 @@ abstract class AbstractWalletPaymentService extends AbstractPaymentService {
 
 		$order    = wc_get_order( $order_id );
 		$data     = [];
-		$jsonData = '';
 		$chargeId = null;
 		if ( ! empty( $_POST['payment_response'] ) ) {
-			$jsonData = $_POST['payment_response'];
-		} elseif ( ! empty( $_POST['payment_source'] ) && is_array( $_POST['payment_source'] ) ) {
-			$jsonData = array_filter( $_POST['payment_source'] );
-			$jsonData = reset( $jsonData );
-			$jsonData = str_replace( '\\"', '"', $jsonData );
+			$data = json_decode( sanitize_text_field( $_POST['payment_response'] ), true );
 		}
 
-		if ( ! empty( $jsonData ) ) {
-			$data = json_decode( sanitize_text_field( $jsonData ), true );
-		}
-
-		if ( ( json_last_error() === JSON_ERROR_NONE ) && ! empty( $data ) ) {
-			$chargeId = $data['data']['id'] ?? $data['data']['data']['id'];
+		if ( ( json_last_error() === JSON_ERROR_NONE ) && ! empty( $_POST['payment_response'] ) ) {
+			$chargeId = $data['data']['id'];
 		}
 
 		$wallets = [];
@@ -116,10 +100,6 @@ abstract class AbstractWalletPaymentService extends AbstractPaymentService {
 			'wc-pb-authorize' === $status ? LogRepository::DEFAULT : LogRepository::SUCCESS
 		);
 
-
-		$order->set_payment_method_title( SettingsService::getInstance()->getWidgetPaymentWalletTitle( $this->getWalletType() ) );
-		$order->save();
-
 		return [
 			'result'   => 'success',
 			'redirect' => $this->get_return_url( $order ),
@@ -127,33 +107,5 @@ abstract class AbstractWalletPaymentService extends AbstractPaymentService {
 	}
 
 	public function webhook() {
-	}
-
-	public function get_payment_method_data(): array {
-		$settings = SettingsService::getInstance();
-		$payment  = $this->getWalletType();
-
-		$result = [
-			'title'       => $settings->getWidgetPaymentWalletTitle( $payment ),
-			'description' => $settings->getWidgetPaymentWalletDescription( $payment ),
-			'publicKey'   => $settings->getPublicKey(),
-			'isSandbox'   => $settings->isSandbox(),
-			'styles'      => $settings->getWidgetStyles(),
-		];
-
-
-		$result['wallets'][ strtolower( $payment->name ) ] = [
-			'gatewayId'      => $settings->getWalletGatewayId( $payment ),
-			'fraud'          => $settings->isWalletFraud( $payment ),
-			'fraudServiceId' => $settings->getWalletFraudServiceId( $payment ),
-			'directCharge'   => $settings->getWalletFraudServiceId( $payment ),
-		];
-
-		if ( WalletPaymentMethods::PAY_PAL_SMART_BUTTON()->name === $payment->name ) {
-			$result[ strtolower( $payment->name ) ]['payLater'] = $settings->isPayPallSmartButtonPayLater();
-		}
-
-
-		return $result;
 	}
 }

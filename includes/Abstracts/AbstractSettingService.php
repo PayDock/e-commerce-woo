@@ -3,7 +3,6 @@
 namespace PowerBoard\Abstracts;
 
 use PowerBoard\Enums\SettingsTabs;
-use PowerBoard\PowerBoardPlugin;
 use PowerBoard\Services\Assets\AdminAssetsService;
 use PowerBoard\Services\TemplateService;
 
@@ -32,12 +31,10 @@ abstract class AbstractSettingService extends \WC_Payment_Gateway {
 
 		$this->title = __( 'PowerBoard Gateway', 'power-board' );
 
-		$this->icon = POWER_BOARD_PLUGIN_URL . 'assets/images/logo.png';
+		$this->icon = plugins_url( 'assets/images/logo.svg' );
 
 		$this->init_settings();
 		$this->init_form_fields();
-
-		$this->has_fields = is_checkout() && \WC_Blocks_Utils::has_block_in_page( wc_get_page_id( 'checkout' ), 'woocommerce/checkout' );
 
 		if ( is_admin() ) {
 			new AdminAssetsService();
@@ -71,19 +68,19 @@ abstract class AbstractSettingService extends \WC_Payment_Gateway {
 	protected function getTabs(): array {
 		return [
 			SettingsTabs::LIVE_CONNECTION()->value    => [
-				'label'  => __( 'Live Connection' ),
+				'label'  => __( 'Live Connection', 'power-board' ),
 				'active' => SettingsTabs::LIVE_CONNECTION()->value == $this->currentSection,
 			],
 			SettingsTabs::SANDBOX_CONNECTION()->value => [
-				'label'  => __( 'Sandbox Connection' ),
+				'label'  => __( 'Sandbox Connection', 'power-board' ),
 				'active' => SettingsTabs::SANDBOX_CONNECTION()->value == $this->currentSection,
 			],
 			SettingsTabs::WIDGET()->value             => [
-				'label'  => __( 'Widget Configuration' ),
+				'label'  => __( 'Widget Configuration', 'power-board' ),
 				'active' => SettingsTabs::WIDGET()->value == $this->currentSection,
 			],
 			SettingsTabs::LOG()->value                => [
-				'label'  => __( 'Logs' ),
+				'label'  => __( 'Logs', 'power-board' ),
 				'active' => SettingsTabs::LOG()->value == $this->currentSection,
 			],
 		];
