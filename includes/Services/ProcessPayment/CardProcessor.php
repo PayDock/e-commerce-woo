@@ -106,7 +106,7 @@ class CardProcessor {
 		return $this->runMethod;
 	}
 
-	public function getStandalone3dsToken(): string {
+	public function getStandalone3dsToken( ): string {
 		$vaultToken = $this->getVaultToken();
 
 		$paymentSource = [
@@ -118,7 +118,7 @@ class CardProcessor {
 		}
 
 		$args = [
-			'amount'    => $this->order->get_total(),
+			'amount'    => $this->args['amount'],
 			'reference' => '',
 			'currency'  => strtoupper( get_woocommerce_currency() ),
 			'customer'  => [
@@ -180,9 +180,7 @@ class CardProcessor {
 			return [];
 		}
 
-		if ( ! is_admin() ) {
-			WC()->cart->calculate_totals();
-		}
+		WC()->cart->calculate_totals();
 
 		$address1 = $this->order->get_billing_address_1();
 		$address2 = $this->order->get_billing_address_2();
@@ -579,10 +577,6 @@ class CardProcessor {
 				],
 			], $this->getAdditionalFields( 'amount' ) );
 
-			if ( empty( $customerArgs['phone'] ) ) {
-				unset( $customerArgs['phone'] );
-			}
-
 			if ( SaveCardOptions::WITH_GATEWAY()->name === $this->args['cardsavecardoption'] && ! empty( $this->args['gatewayid'] ) ) {
 				$customerArgs['payment_source']['gateway_id'] = $this->args['gatewayid'];
 			}
@@ -638,10 +632,6 @@ class CardProcessor {
 			],
 		];
 
-		if ( empty( $params['customer']['phone'] ) ) {
-			unset( $params['customer']['phone'] );
-		}
-
 		if ( ! empty( $this->args['gatewayid'] ) ) {
 			$params['customer']['payment_source']['gateway_id'] = $this->args['gatewayid'];
 		}
@@ -654,7 +644,7 @@ class CardProcessor {
 
 		if ( ! empty( $responce['error'] ) ) {
 			$message = ! empty( $responce['error']['message'] ) ? ' ' . $responce['error']['message'] : '';
-			throw new Exception( esc_html( __( 'The charge could not be created successfully. <input id="widget_error" hidden type="text"/>', 'power-board' ) ) );
+			throw new Exception( esc_html( __( 'The charge could not be created successfully.', 'power-board' ) ) );
 		}
 
 		return $responce;
@@ -675,10 +665,6 @@ class CardProcessor {
 				'vault_token' => $this->args['selectedtoken'],
 			], $this->getAdditionalFields( 'amount' ) ),
 		], $this->getAdditionalFields( 'amount' ) );
-
-		if ( empty( $customerArgs['phone'] ) ) {
-			unset( $customerArgs['phone'] );
-		}
 
 		if ( SaveCardOptions::WITH_GATEWAY()->name === $this->args['cardsavecardoption'] && ! empty( $this->args['gatewayid'] ) ) {
 			$customerArgs['payment_source']['gateway_id'] = $this->args['gatewayid'];

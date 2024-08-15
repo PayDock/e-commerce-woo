@@ -25,9 +25,7 @@ final class BankAccountBlock extends AbstractBlock {
 			$userTokens['tokens'] = ( new UserTokenRepository() )->getUserTokens();
 		}
 
-		if ( ! is_admin() ) {
-			WC()->cart->calculate_totals();
-		}
+		WC()->cart->calculate_totals();
 
 		return array_merge( $userTokens, [ 
 			'isActive' => $this->is_active(),

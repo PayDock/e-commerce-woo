@@ -9,6 +9,7 @@ use PowerBoard\PowerBoardPlugin;
 use PowerBoard\Repositories\LogRepository;
 use PowerBoard\Services\OrderService;
 use PowerBoard\Services\SDKAdapterService;
+use PowerBoard\Services\Validation\ValidationHelperService;
 
 class PaymentController {
 	private $status_update_hooks = [];
@@ -24,14 +25,14 @@ class PaymentController {
 		$orderId = ! empty( $_POST['order_id'] ) ? sanitize_text_field( $_POST['order_id'] ) : null;
 		$error   = null;
 		if ( ! $orderId ) {
-			$error = __( 'The order is not found.', 'power-board'  );
+			$error = __( 'The order is not found.', 'power-board' );
 		} else {
 			$order = wc_get_order( $orderId );
 			if ( ! in_array( $order->get_meta( ActivationHook::CUSTOM_STATUS_META_KEY ), [
 				'pb-authorize',
 				'wc-pb-authorize'
 			] ) ) {
-				$error = __( 'The order has been authorized and is awaiting approval.', 'power-board'  );
+				$error = __( 'The order has been authorized and is awaiting approval.', 'power-board' );
 			}
 		}
 
@@ -45,7 +46,7 @@ class PaymentController {
 		if ( ! empty( $orderTotal ) ) {
 			$amount = $orderTotal;
 		} else {
-			$amount = wc_format_decimal( $_POST['amount'] );
+			$amount = wc_format_decimal( (float) $_POST['amount'] );
 		}
 
 		$loggerRepository   = new LogRepository();
@@ -149,10 +150,10 @@ class PaymentController {
 			return;
 		}
 
-		$orderId       = $args['order_id'];
-		$order         = wc_get_order( $orderId );
+		$orderId = $args['order_id'];
+		$order   = wc_get_order( $orderId );
 
-		if ( empty($args['amount']) && is_object( $order ) ) {
+		if ( empty( $args['amount'] ) && is_object( $order ) ) {
 			$amount = $order->get_total();
 		} else {
 			$amount = $args['amount'];
@@ -236,11 +237,16 @@ class PaymentController {
 	}
 
 	public function webhook(): void {
-		$input = json_decode( file_get_contents( 'php://input' ), true );
+		$input = $this->getValidatedInput();
 
-		if ( ( null === $input && json_last_error() !== JSON_ERROR_NONE ) || empty( $input['event'] ) ) {
+		if ( empty( $input ) ) {
 			return;
 		}
+
+		$input = [
+			'event' => sanitize_text_field( $input['event'] ),
+			'data'  => $input['data'],
+		];
 
 		( new LogRepository() )->createLogRecord(
 			'',
@@ -283,6 +289,43 @@ class PaymentController {
 		echo $result ? 'Ok' : 'Fail';
 
 		exit;
+	}
+
+	private function getValidatedInput(): array {
+		$input = json_decode( file_get_contents( 'php://input' ), true );
+
+		if ( ( null === $input && json_last_error() !== JSON_ERROR_NONE ) ) {
+			return [];
+		}
+		// The fields that can be checked in this step are checked, others will be checked when possible.
+		if ( empty( $input['event'] ) ||
+		     ! in_array( strtolower( $input['event'] ), NotificationEvents::events() ) ||
+		     empty( $input['data'] ) ||
+		     ! is_array( $input['data'] ) ||
+		     empty( $input['data']['reference'] ) ||
+		     empty( $input['data']['_id'] ) ||
+		     ! ( new ValidationHelperService( $input['data']['_id'] ) )->isServiceId() ) {
+			return [];
+		}
+
+		return [
+			'event' => sanitize_text_field( $input['event'] ),
+			'data'  => [
+				'reference'     => (int) $input['data']['reference'],
+				'_id'           => sanitize_text_field( $input['data']['_id'] ),
+				'status'        => sanitize_text_field( $input['data']['status'] ),
+				'authorization' => (bool) $input['data']['authorization'] ?? false,
+				'type'          => sanitize_text_field( $input['data']['type'] ),
+				'transaction'   => [
+					'_id'    => ( new ValidationHelperService( $input['data']['transaction']['_id'] ) )->isServiceId() ?
+						sanitize_text_field( $input['data']['transaction']['_id'] ) : '',
+					'amount' => (float) $input['data']['transaction']['amount']
+				],
+				'customer'      => [
+					'payment_source' => is_array( $input['data']['customer']['payment_source'] ) ? $input['data']['customer']['payment_source'] : [],
+				]
+			]
+		];
 	}
 
 	private function webhookProcess( array $input ): bool {

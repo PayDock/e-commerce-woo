@@ -1,8 +1,5 @@
 *** PowerBoard for WooCommerce Changelog ***
 
-2024-08-02 - version 3.1.2
-* Small fixes
-
 2024-07-23 - version 3.0.5
 * Statuses, openssl, paths
 

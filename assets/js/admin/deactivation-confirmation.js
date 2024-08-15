@@ -1,6 +1,6 @@
 jQuery(function ($) {
     $(document).ready(function () {
-        $('#deactivate-power-board-for-woocommerce').on('click', function (e) {
+        $('#deactivate-powerboard-for-woocommerce').on('click', function (e) {
             e.preventDefault();
 
             let urlRedirect = jQuery(this).attr('href');
