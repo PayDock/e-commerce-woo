@@ -123,7 +123,7 @@ class OrderService {
 				$order->update_status( $oldStatusKey, $error );
 				update_option( 'power_board_status_change_error', $error );
 				unset( $GLOBALS['power_board_is_updating_order_status'] );
-				throw new \Exception( esc_html( $error ) );
+				throw new \Exception( esc_html( $error .  '<input id="widget_error" hidden type="text"/>' ) );
 			}
 		}
 	}

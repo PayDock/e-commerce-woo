@@ -34,6 +34,7 @@ const Content = (props) => {
 
     useEffect(() => {
         const validation = onCheckoutValidation(async () => {
+            formSubmittedAlready = window.widgetReloaded ? false : formSubmittedAlready
             if (window.hasOwnProperty('powerBoardValidation')) {
                 if (!powerBoardValidation.wcFormValidation()) {
                     return {
