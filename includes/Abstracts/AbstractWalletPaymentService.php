@@ -27,7 +27,7 @@ abstract class AbstractWalletPaymentService extends AbstractPaymentService {
 	public function is_available() {
 		if ( is_checkout() ) {
 			$paymentMethod = $this->getWalletType();
-			$this->title   = '<img src="/wp-content/plugins/e-commerce-woo/assets/images/icons/' .
+			$this->title   = '<img src="/wp-content/plugins/power-board/assets/images/icons/' .
 			                 $paymentMethod->getId() .
 			                 '.png" height="25" class="power-board-payment-method-label-icon ' .
 			                 $paymentMethod->getId() .

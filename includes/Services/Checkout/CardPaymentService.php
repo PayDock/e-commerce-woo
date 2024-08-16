@@ -84,7 +84,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 
 	public function is_available() {
 		if ( is_checkout() && ! is_order_received_page() ) {
-			$this->title = '<img src="/wp-content/plugins/e-commerce-woo/assets/images/icons/card.png"
+			$this->title = '<img src="/wp-content/plugins/power-board/assets/images/icons/card.png"
 								  height="25"
 								  class="power-board-payment-method-label-icon card">
 							 <span class="power-board-payment-method-label-title card">' .
