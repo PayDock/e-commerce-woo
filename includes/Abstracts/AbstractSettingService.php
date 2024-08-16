@@ -31,10 +31,12 @@ abstract class AbstractSettingService extends \WC_Payment_Gateway {
 
 		$this->title = __( 'PowerBoard Gateway', 'power-board' );
 
-		$this->icon = plugins_url( 'assets/images/logo.svg' );
+		$this->icon = POWER_BOARD_PLUGIN_URL . 'assets/images/logo.png';
 
 		$this->init_settings();
 		$this->init_form_fields();
+
+		$this->has_fields = is_checkout() && \WC_Blocks_Utils::has_block_in_page( wc_get_page_id( 'checkout' ), 'woocommerce/checkout' );
 
 		if ( is_admin() ) {
 			new AdminAssetsService();

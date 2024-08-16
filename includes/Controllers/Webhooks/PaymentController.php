@@ -11,7 +11,6 @@ use PowerBoard\Services\OrderService;
 use PowerBoard\Services\SDKAdapterService;
 
 class PaymentController {
-	private $status_update_hooks = [];
 
 	public function capturePayment() {
 		$wpNonce = ! empty( $_POST['_wpnonce'] ) ? sanitize_text_field( $_POST['_wpnonce'] ) : null;

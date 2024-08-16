@@ -1,10 +1,15 @@
 import {getSetting} from '@woocommerce/settings';
+import {select} from '@wordpress/data';
+import {CART_STORE_KEY} from '@woocommerce/block-data';
+
 
 export default async () => {
+    const cart = select(CART_STORE_KEY);
     const data = {...getSetting('power_board_data', {})};
-    data.action = 'get_vault_token';
+    data.action = 'power_board_get_vault_token';
     data.type = 'standalone-3ds-token';
     data._wpnonce = PowerBoardAjax.wpnonce;
+    data.amount = Number((cart.getCartTotals().total_price / 100).toFixed(3)).toFixed(2);
 
     if (document.querySelector('#shipping-first_name') !== null) {
         data.first_name = document.querySelector('#shipping-first_name').value

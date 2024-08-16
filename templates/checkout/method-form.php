@@ -33,7 +33,7 @@ echo wpautop( wp_kses_post( esc_attr( $description ) ) );
     <div id="power-board-3ds-container"></div>
 	<?php if ( in_array( $id, [ 'power_board_afterpay_a_p_m_s_gateway', 'power_board_zip_a_p_m_s_gateway' ] ) ): ?>
         <button id="classic-<?php echo esc_attr( $id ) ?>" class="btn-apm" type="button">
-            <img src="/wp-content/plugins/power-board/assets/images/<?php echo esc_attr( str_replace( [
+            <img src="/wp-content/plugins/e-commerce-woo/assets/images/<?php echo esc_attr( str_replace( [
 				'power_board_',
 				'_a_p_m_s_gateway'
 			], '', $id ) ) ?>.png">

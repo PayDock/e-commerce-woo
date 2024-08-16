@@ -654,7 +654,8 @@ class CardProcessor {
 
 		if ( ! empty( $responce['error'] ) ) {
 			$message = ! empty( $responce['error']['message'] ) ? ' ' . $responce['error']['message'] : '';
-			throw new Exception( esc_html( __( 'The charge could not be created successfully. <input id="widget_error" hidden type="text"/>', 'power-board' ) ) );
+			/* translators: %s: Error message from PowerBoaRD API. */
+			throw new Exception( esc_html( sprintf( __( 'The charge could not be created successfully. %s', 'power-board' ), $message ) ) );
 		}
 
 		return $responce;

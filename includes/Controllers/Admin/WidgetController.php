@@ -10,7 +10,6 @@ use PowerBoard\Services\SettingsService;
 use WP_REST_Request;
 
 class WidgetController {
-
 	public function createWalletChargeClassic() {
 		$data    = [];
 		$wpNonce = ! empty( $_POST['_wpnonce'] ) ? sanitize_text_field( $_POST['_wpnonce'] ) : null;
@@ -37,15 +36,15 @@ class WidgetController {
 			$product         = wc_get_product( $item['product_id'] );
 			$data['items'][] = [
 				'id'        => $product->get_id(),
-				'prices'    => [ 'price' => (int) ($product->get_price( false ) * 100) ],
+				'prices'    => [ 'price' => (int) $product->get_price( false ) * 100 ],
 				'name'      => $product->get_name( false ),
 				'type'      => $product->get_type(),
 				'quantity'  => $item['quantity'],
 				'permalink' => $product->get_permalink(),
 			];
 		}
-		$data['total']['total_price']    = (int) ($cart->get_total( false ) * 100);
-		$data['total']['total_shipping'] = (int) ($cart->get_shipping_total() * 100);
+		$data['total']['total_price']    = (int) $cart->get_total( false ) * 100;
+		$data['total']['total_shipping'] = (int) $cart->get_shipping_total() * 100;
 		$data['total']['currency_code']  = get_woocommerce_currency();
 		$data['address']                 = $address['address'];
 		$data['shipping_address']        = $address['shipping_address'];
@@ -54,16 +53,20 @@ class WidgetController {
 	}
 
 	public function createWalletCharge( WP_REST_Request $request ) {
+		$request = $request->get_json_params();
+
+		return $this->getToken( $request['type'], $request, wc_get_order( $request['order_id'] ) );
+	}
+
+	private function getToken( string $type, array $data, $order ): \WP_REST_Response {
 		$settings = SettingsService::getInstance();
-		$order    = wc_get_order( $request['order_id'] );
 
 		$loggerRepository = new LogRepository();
 
-		$request    = $request->get_json_params();
 		$result     = [];
 		$isAfterPay = false;
 
-		switch ( $request['type'] ) {
+		switch ( $type ) {
 			case 'afterpay':
 				$isAfterPay = true;
 				$payment    = WalletPaymentMethods::AFTERPAY();
@@ -81,10 +84,10 @@ class WidgetController {
 
 		$key = strtolower( $payment->name );
 		if ( $settings->isWalletEnabled( $payment ) ) {
-			$reference = $request['order_id'];
+			$reference = $order->ID;
 
 			$items = [];
-			foreach ( $request['items'] as $item ) {
+			foreach ( $data['items'] as $item ) {
 				$image = wp_get_attachment_image_url( get_post_thumbnail_id( $item['id'] ), 'full' );
 
 				$itemData = [
@@ -101,8 +104,8 @@ class WidgetController {
 
 				$items[] = $itemData;
 			}
-			$billingAdress   = $request['address'];
-			$shippingAddress = $request['shipping_address'];
+			$billingAdress   = $data['address'];
+			$shippingAddress = $data['shipping_address'];
 
 			foreach ( $shippingAddress as $key => $value ) {
 				if ( empty( trim( $value ) ) ) {
@@ -111,8 +114,8 @@ class WidgetController {
 			}
 
 			$chargeRequest = [
-				'amount'    => round( $request['total']['total_price'] / 100, 2 ),
-				'currency'  => $request['total']['currency_code'],
+				'amount'    => round( $data['total']['total_price'] / 100, 2 ),
+				'currency'  => $data['total']['currency_code'],
 				'reference' => (string) $reference,
 				'customer'  => [
 					'first_name'     => $billingAdress['first_name'],
@@ -132,8 +135,8 @@ class WidgetController {
 				],
 				'items'     => $items,
 				'shipping'  => [
-					'amount'           => round( $request['total']['total_shipping'] / 100, 2 ),
-					'currency'         => $request['total']['currency_code'],
+					'amount'           => round( $data['total']['total_shipping'] / 100, 2 ),
+					'currency'         => $data['total']['currency_code'],
 					'address_line1'    => $shippingAddress['address_1'],
 					'address_city'     => $shippingAddress['city'],
 					'address_state'    => $shippingAddress['state'],
@@ -162,8 +165,8 @@ class WidgetController {
 				$chargeRequest['shipping']['address_line2'] = $shippingAddress['address_2'];
 			}
 
-			if ( ! empty( $request['shipping_rates'] ) ) {
-				$shippingRates = reset( $request['shipping_rates'] );
+			if ( ! empty( $data['shipping_rates'] ) ) {
+				$shippingRates = reset( $data['shipping_rates'] );
 				foreach ( $shippingRates['shipping_rates'] as $shippingRate ) {
 					if ( $shippingRate['selected'] ) {
 						if ( 'pickup_location' === $shippingRate['method_id'] ) {
@@ -207,7 +210,7 @@ class WidgetController {
 			                           ->createWalletCharge( $chargeRequest,
 				                           $settings->isWalletDirectCharge( $payment ) );
 
-			$result['county'] = $request['address']['country'] ?? '';
+			$result['county'] = $data['address']['country'] ?? '';
 
 			if ( WalletPaymentMethods::PAY_PAL_SMART_BUTTON()->name === $payment->name ) {
 				$result['pay_later'] = 'yes' === $settings->isPayPallSmartButtonPayLater();
