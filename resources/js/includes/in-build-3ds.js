@@ -72,6 +72,7 @@ export default async (forcePermanentVault = false, newAmount = null) => {
         .preAuth(preAuthData);
 
     if (typeof preAuthResp._3ds.token === "undefined") {
+        window.widgetPowerBoard.reload();
         return false;
     }
 
