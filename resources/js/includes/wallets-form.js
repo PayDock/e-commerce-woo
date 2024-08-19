@@ -94,10 +94,15 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
 
         useEffect(() => {
             const onShipping = onShippingRateSelectSuccess(async () => {
-                if (localState.total !== cart.getCartTotals()?.total_price) {
+
+                const storedTotalPrice = localState.total;
+                const currentTotalPrice = cart.getCartTotals()?.total_price;
+
+                if (storedTotalPrice !== currentTotalPrice &&
+                    canMakePayment(settings.total_limitation, currentTotalPrice)) {
                     initWallet();
                 }
-            })
+            });
             const oncheckout = onCheckoutValidation(async (data) => {
                 if (!validationSuccess) {
                     return {
