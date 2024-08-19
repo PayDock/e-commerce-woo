@@ -8,6 +8,7 @@ class TemplateService {
 	private const TEMPLATE_DIR = 'templates';
 	private const ADMIN_TEMPLATE_DIR = 'admin';
 	private const CHECKOUT_TEMPLATE_DIR = 'checkout';
+
 	private const TEMPLATE_END = '.php';
 	protected $currentSection = '';
 	private $settingService = null;

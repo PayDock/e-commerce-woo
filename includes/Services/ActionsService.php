@@ -126,7 +126,8 @@ class ActionsService extends AbstractSingleton {
 	protected function addOrderActions() {
 		$orderService      = new OrderService();
 		$paymentController = new PaymentController();
-        $widgetController = new WidgetController();
+		$widgetController = new WidgetController();
+
 		add_action( 'woocommerce_order_item_add_action_buttons', [ $orderService, 'iniPowerBoardOrderButtons' ], 10,
 			2 );
 		add_action( 'woocommerce_order_status_changed', [ $orderService, 'statusChangeVerification' ], 20, 4 );
@@ -138,6 +139,6 @@ class ActionsService extends AbstractSingleton {
 		add_action( 'woocommerce_create_refund', [ $paymentController, 'refundProcess' ], 10, 2 );
 		add_action( 'woocommerce_order_refunded', [ $paymentController, 'afterRefundProcess' ], 10, 2 );
 		add_action( 'woocommerce_api_power-board-webhook', [ $paymentController, 'webhook' ] );
-        add_action( 'wc_ajax_power-board-create-wallet-charge', [ $widgetController, 'createWalletChargeClassic' ] );
+		add_action( 'wc_ajax_power-board-create-wallet-charge', [ $widgetController, 'createWalletChargeClassic' ] );
     }
 }

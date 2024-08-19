@@ -23,18 +23,30 @@ class PaymentController {
 		$orderId = ! empty( $_POST['order_id'] ) ? sanitize_text_field( $_POST['order_id'] ) : null;
 		$error   = null;
 		if ( ! $orderId ) {
-			$error = __( 'The order is not found.' );
+			$error = __( 'The order is not found.', 'power-board'  );
 		} else {
 			$order = wc_get_order( $orderId );
 			if ( ! in_array( $order->get_meta( ActivationHook::CUSTOM_STATUS_META_KEY ), [
 				'pb-authorize',
 				'wc-pb-authorize'
 			] ) ) {
-				$error = __( 'The order has been authorized and is awaiting approval.', 'woocommerce' );
+				$error = __( 'The order has been authorized and is awaiting approval.', 'power-board'  );
 			}
 		}
-		$orderTotal         = $order->get_total();
-		$amount             = ! empty( $_POST['amount'] ) ? wc_format_decimal( $_POST['amount'] ) : $order->get_total();
+
+		if ( is_object( $order ) ) {
+			$order->calculate_totals();
+			$orderTotal = $order->get_total();
+		} else {
+			$orderTotal = false;
+		}
+
+		if ( ! empty( $orderTotal ) ) {
+			$amount = $orderTotal;
+		} else {
+			$amount = wc_format_decimal( $_POST['amount'] );
+		}
+
 		$loggerRepository   = new LogRepository();
 		$powerBoardChargeId = get_post_meta( $orderId, 'power_board_charge_id', true );
 		if ( ! $error ) {
@@ -137,8 +149,14 @@ class PaymentController {
 		}
 
 		$orderId       = $args['order_id'];
-		$amount        = $args['amount'];
 		$order         = wc_get_order( $orderId );
+
+		if ( empty($args['amount']) && is_object( $order ) ) {
+			$amount = $order->get_total();
+		} else {
+			$amount = $args['amount'];
+		}
+
 		$captureAmount = get_post_meta( $orderId, 'capture_amount', true );
 
 		$totalRefunded = (float) $order->get_total_refunded();

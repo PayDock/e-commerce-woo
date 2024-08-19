@@ -33,7 +33,6 @@ abstract class AbstractPaymentService extends WC_Payment_Gateway {
 		add_action( 'wp_enqueue_scripts', [ $this, 'payment_scripts' ] );
 	}
 
-
 	public function woocommerce_before_checkout_form( $arg ) {
 
 	}

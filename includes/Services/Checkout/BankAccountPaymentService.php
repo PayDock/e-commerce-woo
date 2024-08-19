@@ -109,8 +109,9 @@ class BankAccountPaymentService extends AbstractPaymentService {
 
 	}
 
-    public function get_payment_method_data(): array
+	public function get_payment_method_data(): array
     {
         return [];
     }
+
 }

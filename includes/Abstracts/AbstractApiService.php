@@ -82,7 +82,7 @@ abstract class AbstractApiService {
 	protected function setAction( $action ): void {
 		if ( empty( $this->allowedAction[ $action ] ) ) {
 			/* translators: %s: Missing action name. */
-			throw new \LogicException( esc_html( sprintf( __( 'Not allowed action: %s' ), $action ) ) );
+			throw new \LogicException( esc_html( sprintf( __( 'Not allowed action: %s', 'power-board' ), $action ) ) );
 		}
 
 		$this->action = $action;

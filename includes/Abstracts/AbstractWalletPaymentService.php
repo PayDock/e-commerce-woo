@@ -116,7 +116,6 @@ abstract class AbstractWalletPaymentService extends AbstractPaymentService {
 			'wc-pb-authorize' === $status ? LogRepository::DEFAULT : LogRepository::SUCCESS
 		);
 
-
 		$order->set_payment_method_title( SettingsService::getInstance()->getWidgetPaymentWalletTitle( $this->getWalletType() ) );
 		$order->save();
 
@@ -141,7 +140,6 @@ abstract class AbstractWalletPaymentService extends AbstractPaymentService {
 			'styles'      => $settings->getWidgetStyles(),
 		];
 
-
 		$result['wallets'][ strtolower( $payment->name ) ] = [
 			'gatewayId'      => $settings->getWalletGatewayId( $payment ),
 			'fraud'          => $settings->isWalletFraud( $payment ),
@@ -153,7 +151,7 @@ abstract class AbstractWalletPaymentService extends AbstractPaymentService {
 			$result[ strtolower( $payment->name ) ]['payLater'] = $settings->isPayPallSmartButtonPayLater();
 		}
 
-
 		return $result;
 	}
+
 }

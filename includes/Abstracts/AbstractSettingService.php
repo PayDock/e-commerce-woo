@@ -3,7 +3,6 @@
 namespace PowerBoard\Abstracts;
 
 use PowerBoard\Enums\SettingsTabs;
-use PowerBoard\PowerBoardPlugin;
 use PowerBoard\Services\Assets\AdminAssetsService;
 use PowerBoard\Services\TemplateService;
 
@@ -71,19 +70,19 @@ abstract class AbstractSettingService extends \WC_Payment_Gateway {
 	protected function getTabs(): array {
 		return [
 			SettingsTabs::LIVE_CONNECTION()->value    => [
-				'label'  => __( 'Live Connection' ),
+				'label'  => __( 'Live Connection', 'power-board' ),
 				'active' => SettingsTabs::LIVE_CONNECTION()->value == $this->currentSection,
 			],
 			SettingsTabs::SANDBOX_CONNECTION()->value => [
-				'label'  => __( 'Sandbox Connection' ),
+				'label'  => __( 'Sandbox Connection', 'power-board' ),
 				'active' => SettingsTabs::SANDBOX_CONNECTION()->value == $this->currentSection,
 			],
 			SettingsTabs::WIDGET()->value             => [
-				'label'  => __( 'Widget Configuration' ),
+				'label'  => __( 'Widget Configuration', 'power-board' ),
 				'active' => SettingsTabs::WIDGET()->value == $this->currentSection,
 			],
 			SettingsTabs::LOG()->value                => [
-				'label'  => __( 'Logs' ),
+				'label'  => __( 'Logs', 'power-board' ),
 				'active' => SettingsTabs::LOG()->value == $this->currentSection,
 			],
 		];

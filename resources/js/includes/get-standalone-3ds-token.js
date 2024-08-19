@@ -2,6 +2,7 @@ import {getSetting} from '@woocommerce/settings';
 import {select} from '@wordpress/data';
 import {CART_STORE_KEY} from '@woocommerce/block-data';
 
+
 export default async () => {
     const cart = select(CART_STORE_KEY);
     const data = {...getSetting('power_board_data', {})};

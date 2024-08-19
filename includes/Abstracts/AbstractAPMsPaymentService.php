@@ -121,7 +121,6 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 
 		update_post_meta( $order->get_id(), 'power_board_charge_id', $chargeId );
 
-
 		WC()->cart->empty_cart();
 
 		$loggerRepository->createLogRecord(

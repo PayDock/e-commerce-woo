@@ -30,6 +30,10 @@ final class PowerBoardGatewayBlocks extends AbstractBlock {
 			$userTokens['tokens'] = ( new UserTokenRepository() )->getUserTokens();
 		}
 
+		if ( ! is_admin() ) {
+			WC()->cart->calculate_totals();
+		}
+
 		return array_merge( $userTokens, [
 			// Wordpress data
 			'_wpnonce'               => wp_create_nonce( 'process_payment' ),

@@ -36,15 +36,15 @@ class WidgetController {
 			$product         = wc_get_product( $item['product_id'] );
 			$data['items'][] = [
 				'id'        => $product->get_id(),
-				'prices'    => [ 'price' => (int) ($product->get_price( false ) * 100) ],
+				'prices'    => [ 'price' => (int) $product->get_price( false ) * 100 ],
 				'name'      => $product->get_name( false ),
 				'type'      => $product->get_type(),
 				'quantity'  => $item['quantity'],
 				'permalink' => $product->get_permalink(),
 			];
 		}
-		$data['total']['total_price']    = (int) ($cart->get_total( false ) * 100);
-		$data['total']['total_shipping'] = (int) ($cart->get_shipping_total() * 100);
+		$data['total']['total_price']    = (int) $cart->get_total( false ) * 100;
+		$data['total']['total_shipping'] = (int) $cart->get_shipping_total() * 100;
 		$data['total']['currency_code']  = get_woocommerce_currency();
 		$data['address']                 = $address['address'];
 		$data['shipping_address']        = $address['shipping_address'];

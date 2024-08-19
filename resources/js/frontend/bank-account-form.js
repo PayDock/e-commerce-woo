@@ -120,7 +120,7 @@ const Content = (props) => {
             {class: 'logo-comm-bank'},
             createElement(
                 "img",
-                {src: '/wp-content/plugins/power-board/assets/images/commBank_logo.png'}
+                {src: `${window.powerBoardWidgetSettings.pluginUrlPrefix}assets/images/commBank_logo.png`}
             ),
         ),
         selectSavedBankAccountsComponent(labels.selectTokenLabel),

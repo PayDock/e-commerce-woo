@@ -94,10 +94,15 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
 
         useEffect(() => {
             const onShipping = onShippingRateSelectSuccess(async () => {
-                if (localState.total !== cart.getCartTotals()?.total_price) {
+
+                const storedTotalPrice = localState.total;
+                const currentTotalPrice = cart.getCartTotals()?.total_price;
+
+                if (storedTotalPrice !== currentTotalPrice &&
+                    canMakePayment(settings.total_limitation, currentTotalPrice)) {
                     initWallet();
                 }
-            })
+            });
             const oncheckout = onCheckoutValidation(async (data) => {
                 if (!validationSuccess) {
                     return {
@@ -187,7 +192,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
                     className: 'power-board-payment-method-label'
                 },
                 createElement("img", {
-                    src: `/wp-content/plugins/power-board/assets/images/icons/${id}.png`,
+                    src: `${window.powerBoardWidgetSettings.pluginUrlPrefix}assets/images/icons/${id}.png`,
                     alt: label,
                     className: `power-board-payment-method-label-icon ${id}`
                 }),

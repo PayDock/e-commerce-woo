@@ -9,7 +9,6 @@ use PowerBoard\Helpers\ShippingHelper;
 use PowerBoard\Repositories\LogRepository;
 use PowerBoard\Repositories\UserCustomerRepository;
 use PowerBoard\Services\SDKAdapterService;
-use PowerBoard\Services\SettingsService;
 
 class ApmProcessor {
 	const CHARGE_METHOD = 'charge';
@@ -57,6 +56,7 @@ class ApmProcessor {
 		if ( empty( $this->args['amount'] ) ) {
 			$this->args['amount'] = $order->get_total( false );
 		}
+
 		$this->order = $order;
 		$this->setRunMethod();
 
@@ -86,7 +86,7 @@ class ApmProcessor {
 
 	private function charge(): array {
 		$chargeArgs = [
-			'amount'    => $this->args['amount'],
+			'amount'    => $this->order->get_total(),
 			'currency'  => strtoupper( get_woocommerce_currency() ),
 			'token'     => $this->args['paymentsourcetoken'],
 			'capture'   => ( strtolower( OtherPaymentMethods::AFTERPAY()->name ) === $this->args['gatewaytype'] ) ? true : $this->args['directcharge'],
@@ -105,9 +105,86 @@ class ApmProcessor {
 		return SDKAdapterService::getInstance()->createCharge( $chargeArgs );
 	}
 
+	private function customerCharge(): array {
+		$customerArgs = array_merge( [
+			'first_name'     => $this->order->get_billing_first_name(),
+			'last_name'      => $this->order->get_billing_last_name(),
+			'email'          => $this->order->get_billing_email(),
+			'phone'          => $this->order->get_billing_phone(),
+			'token'          => $this->args['paymentsourcetoken'],
+			'payment_source' => $this->getAdditionalFields( 'amount' )
+		], $this->getAdditionalFields( 'amount' ) );
+
+		$customer = SDKAdapterService::getInstance()->createCustomer( $customerArgs );
+
+		if ( ! empty( $customer['error'] ) || empty( $customer['resource']['data']['_id'] ) ) {
+			$message = ! empty( $customer['error']['message'] ) ? ' ' . $customer['error']['message'] : '';
+
+			$this->logger->createLogRecord(
+				'',
+				'Create customer',
+				'error',
+				$message,
+				LogRepository::ERROR
+			);
+			throw new Exception( esc_html( __( 'The PowerBoard customer could not be created successfully.', 'power-board' ) ) );
+		}
+
+		$this->logger->createLogRecord(
+			$customer['resource']['data']['_id'],
+			'Create customer',
+			'Success',
+			'',
+			LogRepository::SUCCESS
+		);
+
+		if ( $this->args['apmsavecardchecked'] ) {
+			( new UserCustomerRepository() )->saveUserCustomer( $customer['resource']['data'] );
+		}
+
+		$customer_id = $customer['resource']['data']['_id'];
+
+		return SDKAdapterService::getInstance()->createCharge( [
+			'amount'      => $this->order->get_total(),
+			'currency'    => strtoupper( get_woocommerce_currency() ),
+			'customer_id' => $customer_id,
+			'reference'   => (string) $this->order->get_id(),
+			'capture'     => strtolower( OtherPaymentMethods::AFTERPAY()->name ) === $this->args['gatewaytype'] ? true : $this->args['directcharge'],
+			'shipping'    => $this->getShippingFields(),
+			'items'       => $this->getOrderItems()
+		] );
+	}
+
+	private function fraudCharge(): array {
+		return SDKAdapterService::getInstance()->createCharge( [
+			'amount'    => $this->order->get_total(),
+			'currency'  => strtoupper( get_woocommerce_currency() ),
+			'capture'   => strtolower( OtherPaymentMethods::AFTERPAY()->name ) === $this->args['gatewaytype'] ? true : $this->args['directcharge'],
+			'token'     => $this->args['paymentsourcetoken'],
+			'reference' => (string) $this->order->get_id(),
+			'fraud'     => [
+				'service_id' => $this->args['fraudserviceid'] ?? '',
+				'data'       => $this->getAdditionalFields(),
+			],
+			'customer'  => [
+				'first_name'     => $this->order->get_billing_first_name(),
+				'last_name'      => $this->order->get_billing_last_name(),
+				'email'          => $this->order->get_billing_email(),
+				'phone'          => $this->order->get_billing_phone(),
+				'payment_source' => $this->getAdditionalFields( 'amount' )
+			],
+			'shipping'  => $this->getShippingFields(),
+			'items'     => $this->getOrderItems()
+		] );
+	}
+
 	protected function getAdditionalFields( $exclude = [] ): array {
 		if ( ! $this->order ) {
 			return [];
+		}
+
+		if ( ! is_admin() ) {
+			WC()->cart->calculate_totals();
 		}
 
 		$address1 = $this->order->get_billing_address_1();
@@ -223,78 +300,5 @@ class ApmProcessor {
 		}
 
 		return $result;
-	}
-
-	private function customerCharge(): array {
-		$customerArgs = array_merge( [
-			'first_name'     => $this->order->get_billing_first_name(),
-			'last_name'      => $this->order->get_billing_last_name(),
-			'email'          => $this->order->get_billing_email(),
-			'phone'          => $this->order->get_billing_phone(),
-			'token'          => $this->args['paymentsourcetoken'],
-			'payment_source' => $this->getAdditionalFields( 'amount' )
-		], $this->getAdditionalFields( 'amount' ) );
-
-		$customer = SDKAdapterService::getInstance()->createCustomer( $customerArgs );
-
-		if ( ! empty( $customer['error'] ) || empty( $customer['resource']['data']['_id'] ) ) {
-			$message = ! empty( $customer['error']['message'] ) ? ' ' . $customer['error']['message'] : '';
-
-			$this->logger->createLogRecord(
-				'',
-				'Create customer',
-				'error',
-				$message,
-				LogRepository::ERROR
-			);
-			throw new Exception( esc_html( __( 'The PowerBoard customer could not be created successfully.', 'power-board' ) ) );
-		}
-
-		$this->logger->createLogRecord(
-			$customer['resource']['data']['_id'],
-			'Create customer',
-			'Success',
-			'',
-			LogRepository::SUCCESS
-		);
-
-		if ( $this->args['apmsavecardchecked'] ) {
-			( new UserCustomerRepository() )->saveUserCustomer( $customer['resource']['data'] );
-		}
-
-		$customer_id = $customer['resource']['data']['_id'];
-
-		return SDKAdapterService::getInstance()->createCharge( [
-			'amount'      => $this->args['amount'],
-			'currency'    => strtoupper( get_woocommerce_currency() ),
-			'customer_id' => $customer_id,
-			'reference'   => (string) $this->order->get_id(),
-			'capture'     => strtolower( OtherPaymentMethods::AFTERPAY()->name ) === $this->args['gatewaytype'] ? true : $this->args['directcharge'],
-			'shipping'    => $this->getShippingFields(),
-			'items'       => $this->getOrderItems()
-		] );
-	}
-
-	private function fraudCharge(): array {
-		return SDKAdapterService::getInstance()->createCharge( [
-			'amount'    => $this->args['amount'],
-			'currency'  => strtoupper( get_woocommerce_currency() ),
-			'capture'   => strtolower( OtherPaymentMethods::AFTERPAY()->name ) === $this->args['gatewaytype'] ? true : $this->args['directcharge'],
-			'token'     => $this->args['paymentsourcetoken'],
-			'reference' => (string) $this->order->get_id(),
-			'fraud'     => [
-				'service_id' => $this->args['fraudserviceid'] ?? '',
-				'data'       => $this->getAdditionalFields(),
-			],
-			'customer'  => [
-				'first_name'     => $this->order->get_billing_first_name(),
-				'last_name'      => $this->order->get_billing_last_name(),
-				'email'          => $this->order->get_billing_email(),
-				'phone'          => $this->order->get_billing_phone(),
-				'payment_source' => $this->getAdditionalFields( 'amount' )
-			],
-			'shipping'  => $this->getShippingFields(),
-			'items'     => $this->getOrderItems()
-		] );
 	}
 }
