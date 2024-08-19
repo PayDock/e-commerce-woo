@@ -32,10 +32,18 @@ const label = decodeEntities(settings.title) || labels.defaultLabel;
 let formSubmittedAlready = false;
 const Content = (props) => {
     const {eventRegistration, emitResponse} = props;
-    const {onPaymentSetup, onCheckoutValidation} = eventRegistration;
+    const {onPaymentSetup, onCheckoutValidation, onShippingRateSelectSuccess} = eventRegistration;
     jQuery('.wc-block-components-checkout-place-order-button').show();
 
     useEffect(() => {
+        let newAmount = null;
+
+        const unsubscribeFromShippingEvent = onShippingRateSelectSuccess(async () => {
+            const { total_price: currentTotalPrice } = cart.getCartTotals();
+
+            newAmount = Number(currentTotalPrice / 100).toFixed(2);
+        });
+
         const validation = onCheckoutValidation(async () => {
             if (window.hasOwnProperty('paydockValidation')) {
                 if (!paydockValidation.wcFormValidation()) {
@@ -52,7 +60,10 @@ const Content = (props) => {
                     return true;
                 } else {
                     if (['IN_BUILD', 'STANDALONE'].includes(settings.card3DS)) {
-                        settings.charge3dsId = settings.card3DS == 'IN_BUILD' ? await inBuild3Ds(true) : await standalone3Ds()
+                        settings.charge3dsId = settings.card3DS == 'IN_BUILD'
+                            ? await inBuild3Ds(true, newAmount)
+                            : await standalone3Ds();
+
                         if (settings.charge3dsId === false) {
                             return {
                                 type: emitResponse.responseTypes.ERROR,
@@ -127,7 +138,9 @@ const Content = (props) => {
 
             if (result) {
                 if (['IN_BUILD', 'STANDALONE'].includes(settings.card3DS)) {
-                    settings.charge3dsId = settings.card3DS == 'IN_BUILD' ? await inBuild3Ds() : await standalone3Ds()
+                    settings.charge3dsId = settings.card3DS === 'IN_BUILD'
+                        ? await inBuild3Ds(false, newAmount)
+                        : await standalone3Ds();
 
                     if (settings.charge3dsId === false) {
                         return {
@@ -182,7 +195,7 @@ const Content = (props) => {
             };
         });
         return () => {
-            validation() && unsubscribe();
+            validation() && unsubscribe() && unsubscribeFromShippingEvent();
         };
     }, [
         emitResponse.responseTypes.ERROR,

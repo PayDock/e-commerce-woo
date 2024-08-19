@@ -1,4 +1,8 @@
 export default function (total_limitation, total) {
+    const isObject = (value) => (value !== null && typeof value === 'object');
+
+    if (!isObject(total_limitation)) return true;
+
     let min = 0;
     let max = 0;
 

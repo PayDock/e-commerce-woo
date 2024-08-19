@@ -4,7 +4,7 @@ import sleep from './sleep';
 import {select} from '@wordpress/data';
 import {CART_STORE_KEY} from '@woocommerce/block-data';
 
-export default async (forcePermanentVault = false) => {
+export default async (forcePermanentVault = false, newAmount = null) => {
     const settings = getSetting('paydock_data', {});
 
     if (settings.selectedToken.trim().length === 0 && settings.card3DSFlow === 'PERMANENT_VAULT') {
@@ -16,7 +16,7 @@ export default async (forcePermanentVault = false) => {
     const shippingAddress = cart.getCustomerData().shippingAddress;
 
     const preAuthData = {
-        amount: settings.amount,
+        amount: newAmount || settings.amount,
         currency: settings.currency,
         customer: {
             first_name: billingAddress.first_name,

@@ -25,7 +25,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
     const cart = select(CART_STORE_KEY);
     const Content = (props) => {
         const {eventRegistration, emitResponse} = props;
-        const {onPaymentSetup, onCheckoutValidation} = eventRegistration;
+        const {onPaymentSetup, onCheckoutValidation, onShippingRateSelectSuccess} = eventRegistration;
 
         const billingAddress = cart.getCustomerData().billingAddress;
         const shippingAddress = cart.getCustomerData().shippingAddress;
@@ -185,7 +185,22 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
         }, 100)
 
         useEffect(() => {
-            const unsubscribe = onPaymentSetup(async () => {
+            const unsubscribeFromShippingEvent = onShippingRateSelectSuccess(async () => {
+                const { total_price: currentTotalPrice } = cart.getCartTotals();
+                const newAmount = Number(currentTotalPrice / 100).toFixed(2);
+                const updateAmount = (currentAmount, newAmount) => currentAmount !== undefined ? { amount: newAmount } : {};
+
+                button.setMeta({
+                    ...meta,
+                    ...updateAmount(meta.amount, newAmount),
+                    charge: {
+                        ...meta.charge,
+                        ...updateAmount(meta.charge.amount, newAmount),
+                    }
+                });
+            });
+
+            const unsubscribeFromPaymentSetup = onPaymentSetup(async () => {
                 const paymentSourceToken = document.querySelector('input[name="payment_source_apm_token"]')
                 if (paymentSourceToken === null) {
                     return;
@@ -207,7 +222,10 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
                 };
             });
             return () => {
-                unsubscribe();
+                const unsubscribeFn = (fn) => typeof fn === 'function' ? fn() : null;
+
+                unsubscribeFn(unsubscribeFromPaymentSetup);
+                unsubscribeFn(unsubscribeFromShippingEvent);
             };
         }, [
             emitResponse.responseTypes.ERROR,
