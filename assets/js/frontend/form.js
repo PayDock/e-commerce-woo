@@ -81,7 +81,7 @@ setTimeout(() => jQuery(function ($) {
                 clonnedHtmlWidget.setAttribute('style', '');
                 document.getElementById(id + '_wrapper').append(clonnedHtmlWidget);
             }
-            window.widgetPowerBoard.hideElements(['submit_button', 'email', 'phone']);
+            window.widgetPowerBoard.hideElements(['submit_button']);
         },
     }
 
@@ -141,11 +141,13 @@ setTimeout(() => jQuery(function ($) {
     }
 
     function initPowerBoardWidgetCard() {
+        window.widgetReloaded = lastInit === idPowerBoardWidgetCard;
         lastInit = idPowerBoardWidgetCard;
 
         const htmlWidget = document.getElementById('powerBoardWidgetCard')
         if (htmlWidget !== null && htmlWidget.innerHTML.trim().length > 0) {
-            powerBoardValidation.passWidgetToWrapper('powerBoardWidgetCard')
+            powerBoardValidation.passWidgetToWrapper('powerBoardWidgetCard');
+            reloadWidget();
             return;
         }
 
@@ -179,17 +181,41 @@ setTimeout(() => jQuery(function ($) {
         }
 
         widget.setEnv(powerBoardCardSettings.isSandbox ? 'preproduction_cba' : 'production_cba');
-        widget.setFormFields(['email', 'phone']);
         widget.onFinishInsert('input[name="payment_source_token"]', 'payment_source');
         widget.interceptSubmitForm('#widget');
+        widget.hideElements(['submit_button']);
         widget.load();
 
+        let performAfterLoadActions = true
         widget.on(window.cba.EVENT.AFTER_LOAD, () => {
-            widget.hideElements(['submit_button', 'email', 'phone']);
-            if ($('#powerBoardWidgetCard_wrapper').length > 0) {
-                powerBoardValidation.passWidgetToWrapper('powerBoardWidgetCard')
+            if (performAfterLoadActions && $('#powerBoardWidgetCard_wrapper').length > 0) {
+                powerBoardValidation.passWidgetToWrapper('powerBoardWidgetCard');
+                performAfterLoadActions = false;
             }
         })
+
+        widget.on(window.cba.EVENT.FINISH, () => {
+            let counter = 0;
+            const widgetErrorInterval = setInterval(() => {
+                const errorInput = document.querySelectorAll("#widget_error")[0]
+                if (!!errorInput) {
+                    reloadWidget();
+                    errorInput?.remove();
+                    clearInterval(widgetErrorInterval);
+                } else if(counter  === 50) {
+                    clearInterval(widgetErrorInterval);
+                } else {
+                    counter++;
+                }
+            }, 1000)
+        })
+    }
+
+    function reloadWidget() {
+        window.widgetPowerBoard.reload();
+        const paymentSourceToken = document.querySelector('[name="payment_source_token"]');
+        paymentSourceToken.value = null;
+        window.widgetReloaded = true
     }
 
     function setPaymentMethodWatcher() {

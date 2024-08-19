@@ -10,7 +10,10 @@ import {
     sleep,
     standalone3Ds
 } from '../includes/wc-power-board';
+import {select} from '@wordpress/data';
+import {CART_STORE_KEY} from '@woocommerce/block-data';
 
+const cart = select(CART_STORE_KEY);
 const settings = getSetting('power_board_data', {});
 
 const textDomain = 'power-board';
@@ -28,12 +31,21 @@ const label = decodeEntities(settings.title) || labels.defaultLabel;
 let formSubmittedAlready = false;
 const Content = (props) => {
     const {eventRegistration, emitResponse} = props;
-    const {onPaymentSetup, onCheckoutValidation} = eventRegistration;
+    const {onPaymentSetup, onCheckoutValidation, onShippingRateSelectSuccess} = eventRegistration;
 
     jQuery('.wc-block-components-checkout-place-order-button').show();
 
     useEffect(() => {
+        let newAmount = null;
+
+        const unsubscribeFromShippingEvent = onShippingRateSelectSuccess(async () => {
+            const { total_price: currentTotalPrice } = cart.getCartTotals();
+
+            newAmount = Number(currentTotalPrice / 100).toFixed(2);
+        });
+
         const validation = onCheckoutValidation(async () => {
+            formSubmittedAlready = window.widgetReloaded ? false : formSubmittedAlready
             if (window.hasOwnProperty('powerBoardValidation')) {
                 if (!powerBoardValidation.wcFormValidation()) {
                     return {
@@ -43,13 +55,16 @@ const Content = (props) => {
                 }
             }
 
-            if (settings.selectedToken.length > 0) {
+            if (!window.widgetReloaded && settings.selectedToken.length > 0) {
                 const selectedToken = settings.tokens.find(item => item.vault_token === settings.selectedToken)
-                if (typeof selectedToken !== undefined && selectedToken.hasOwnProperty('customer_id')) {
+                if (!!selectedToken && selectedToken.hasOwnProperty('customer_id')) {
                     return true;
                 } else {
                     if (['IN_BUILD', 'STANDALONE'].includes(settings.card3DS)) {
-                        settings.charge3dsId = settings.card3DS === 'IN_BUILD' ? await inBuild3Ds(true) : await standalone3Ds()
+                        settings.charge3dsId = settings.card3DS === 'IN_BUILD'
+                            ? await inBuild3Ds(true, newAmount)
+                            : await standalone3Ds();
+
                         if (settings.charge3dsId === false) {
                             return {
                                 type: emitResponse.responseTypes.ERROR,
@@ -109,7 +124,7 @@ const Content = (props) => {
                             errorMessage: labels.additionalDataRejected,
                         }
                     }
-                    if (settings.paymentSourceToken.length === 0) {
+                    if (settings.paymentSourceToken.length === 0 || window.widgetReloaded) {
                         settings.paymentSourceToken = paymentSourceToken.value
                     }
                     result = true
@@ -123,7 +138,9 @@ const Content = (props) => {
 
             if (result) {
                 if (['IN_BUILD', 'STANDALONE'].includes(settings.card3DS)) {
-                    settings.charge3dsId = settings.card3DS == 'IN_BUILD' ? await inBuild3Ds() : await standalone3Ds()
+                    settings.charge3dsId = settings.card3DS === 'IN_BUILD'
+                        ? await inBuild3Ds(false, newAmount)
+                        : await standalone3Ds();
 
                     if (settings.charge3dsId === false) {
                         return {
@@ -180,7 +197,7 @@ const Content = (props) => {
             };
         });
         return () => {
-            validation() && unsubscribe();
+            validation() && unsubscribe() && unsubscribeFromShippingEvent();
         };
     }, [
         emitResponse.responseTypes.ERROR,
