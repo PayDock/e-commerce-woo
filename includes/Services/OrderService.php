@@ -26,6 +26,7 @@ class OrderService {
 
 				$order->update_meta_data( ActivationHook::CUSTOM_STATUSES[ $custom_status ], $status_note );
 				$order->update_meta_data( ActivationHook::CUSTOM_STATUS_META_KEY, $custom_status );
+                $order->set_status( ActivationHook::CUSTOM_STATUSES[ $custom_status ] );
 				$order->save();
 
 			} else {
@@ -70,14 +71,15 @@ class OrderService {
 		}
 		if ( in_array( $orderStatus, [
 				'processing',
-			] ) /*&& in_array( $orderCustomStatus, [
+				'on-hold',
+			] ) && in_array( $orderCustomStatus, [
 				'pb-authorize',
 				'wc-pb-authorize',
 				'pb-paid',
 				'wc-pb-paid',
 				'wc-pb-p-paid',
 				'pb-p-paid'
-			] )*/ ) {
+			] ) ) {
 			$this->templateService->includeAdminHtml( 'power-board-capture-block', compact( 'order' ) );
 			wp_enqueue_script(
 				'power-board-capture-block',
@@ -123,7 +125,7 @@ class OrderService {
 				$order->update_status( $oldStatusKey, $error );
 				update_option( 'power_board_status_change_error', $error );
 				unset( $GLOBALS['power_board_is_updating_order_status'] );
-				throw new \Exception( esc_html( $error .  '<input id="widget_error" hidden type="text"/>' ) );
+				throw new \Exception( esc_html( $error ) );
 			}
 		}
 	}
