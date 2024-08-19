@@ -175,9 +175,22 @@ setTimeout(() => jQuery(function ($) {
             });
         }
 
+        /*
         if (powerBoardCardSettings.hasOwnProperty('styles') && powerBoardCardSettings.cardSupportedCardTypes !== '') {
             supportedCard = powerBoardCardSettings.cardSupportedCardTypes.replaceAll(' ', '').split(',')
             widget.setSupportedCardIcons(supportedCard);
+        }
+        */
+
+        if(powerBoardCardSettings.cardSupportedCardTypes !== '') {
+            var supportedCardTypes = [];
+
+            var supportedCards = powerBoardCardSettings.cardSupportedCardTypes.replaceAll(' ', '').split(',')
+            $.each(supportedCards, function(index, value) {
+                supportedCardTypes.push(value);
+            });
+
+            widget.setSupportedCardIcons(supportedCardTypes, true);
         }
 
         widget.setEnv(powerBoardCardSettings.isSandbox ? 'preproduction_cba' : 'production_cba');
