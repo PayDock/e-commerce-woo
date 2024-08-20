@@ -143,6 +143,7 @@ setTimeout(() => jQuery(function ($) {
     }
 
     function initPaydockWidgetCard() {
+        window.widgetReloaded = lastInit === idPaydockWidgetCard;
         lastInit = idPaydockWidgetCard;
 
         const htmlWidget = document.getElementById('paydockWidgetCard')
@@ -229,7 +230,7 @@ setTimeout(() => jQuery(function ($) {
             const $orderButton = $('.wc-block-components-checkout-place-order-button');
             const $afterpayRadiobatton = $('#radio-control-wc-payment-method-options-paydock_afterpay_wallets_gateway');
             if (
-                paydockAfterpayWalletsSettings.hasOwnProperty('afterpayChargeId')
+                paydockAfterpayWalletsSettings?.hasOwnProperty('afterpayChargeId')
                 && (paydockAfterpayWalletsSettings.afterpayChargeId.length > 0)
                 && searchParams.has('afterpay_success')
                 && !wasClick
