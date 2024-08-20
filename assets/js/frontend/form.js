@@ -177,7 +177,8 @@ setTimeout(() => jQuery(function ($) {
 
         if (powerBoardCardSettings.hasOwnProperty('styles') && powerBoardCardSettings.cardSupportedCardTypes !== '') {
             supportedCard = powerBoardCardSettings.cardSupportedCardTypes.replaceAll(' ', '').split(',')
-            widget.setSupportedCardIcons(supportedCard);
+
+            widget.setSupportedCardIcons(supportedCard, true);
         }
 
         widget.setEnv(powerBoardCardSettings.isSandbox ? 'preproduction_cba' : 'production_cba');
