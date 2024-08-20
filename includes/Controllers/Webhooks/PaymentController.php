@@ -240,7 +240,6 @@ class PaymentController {
 			if ( $powerBoardRefundedStatus ) {
 				remove_action( 'woocommerce_order_status_refunded', 'wc_order_fully_refunded' );
 				OrderService::updateStatus( $orderId, $powerBoardRefundedStatus );
-				$order->update_meta_data( 'power_board_refunded_status', '' );
 				$order->save();
 			}
 

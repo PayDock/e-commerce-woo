@@ -50,6 +50,8 @@ class OrderService {
 				'pending',
 				'failed',
 				'cancelled',
+				'refunded',
+				'on-hold',
 			] )
 		     || in_array( $orderCustomStatus, [
 				'pb-requested',
