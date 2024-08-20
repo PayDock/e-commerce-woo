@@ -141,6 +141,7 @@ setTimeout(() => jQuery(function ($) {
     }
 
     function initPowerBoardWidgetCard() {
+        window.widgetReloaded = lastInit === idPowerBoardWidgetCard;
         lastInit = idPowerBoardWidgetCard;
 
         const htmlWidget = document.getElementById('powerBoardWidgetCard')
