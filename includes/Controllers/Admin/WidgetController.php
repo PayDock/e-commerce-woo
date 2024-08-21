@@ -43,8 +43,8 @@ class WidgetController {
 				'permalink' => $product->get_permalink(),
 			];
 		}
-		$data['total']['total_price']    = (int) $cart->get_total( false ) * 100;
-		$data['total']['total_shipping'] = (int) $cart->get_shipping_total() * 100;
+		$data['total']['total_price']    = (float) $cart->get_total( false ) * 100;
+		$data['total']['total_shipping'] = $cart->get_shipping_total() * 100;
 		$data['total']['currency_code']  = get_woocommerce_currency();
 		$data['address']                 = $address['address'];
 		$data['shipping_address']        = $address['shipping_address'];
