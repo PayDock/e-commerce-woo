@@ -7,6 +7,7 @@ import {CART_STORE_KEY} from '@woocommerce/block-data';
 export default async (forcePermanentVault = false, newAmount = null) => {
     const settings = getSetting('paydock_data', {});
 
+    if (window.widgetReloaded) settings.selectedToken = ""
     if (settings.selectedToken.trim().length === 0 && settings.card3DSFlow === 'PERMANENT_VAULT') {
         settings.selectedToken = await getVaultToken()
     }
@@ -74,20 +75,26 @@ export default async (forcePermanentVault = false, newAmount = null) => {
         return false;
     }
 
+    document.getElementById('paydockWidget3ds').innerHTML = '';
+    document.getElementById('paydockWidget3ds').setAttribute('style', '');
+
     const canvas = new window.paydock.Canvas3ds('#paydockWidget3ds', preAuthResp._3ds.token);
     canvas.load();
 
     document.getElementById('paydockWidgetCard_wrapper').setAttribute('style', 'display: none')
 
     let result = false;
-    canvas.on('chargeAuth', (chargeAuthEvent) => {
+    canvas.on('chargeAuthSuccess', (chargeAuthEvent) => {
         result = chargeAuthEvent.charge_3ds_id
     })
     canvas.on('additionalDataCollectReject', (chargeAuthSuccessEvent) => {
         result = 'error';
     })
     canvas.on('chargeAuthReject', function (data) {
-        result = 'error';
+        if (data.status === 'not_authenticated') {
+            showCardWidget();
+        }
+        result = data.charge_3ds_id
     });
 
     for (let second = 1; second <= 10000; second++) {
@@ -98,5 +105,18 @@ export default async (forcePermanentVault = false, newAmount = null) => {
         }
     }
 
+    if (result === 'error') {
+        showCardWidget();
+        window.widgetPowerBoard.reload();
+        window.widgetReloaded = true;
+    }
+
     return result;
+}
+
+function showCardWidget() {
+    document.getElementById('paydockWidgetCard_wrapper').setAttribute('style', '');
+    const canvas3dsWrapper = document.getElementById('paydockWidget3ds');
+    canvas3dsWrapper.innerHTML = '';
+    canvas3dsWrapper.setAttribute('style', 'display: none');
 }
