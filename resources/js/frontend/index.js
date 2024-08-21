@@ -22,7 +22,7 @@ const labels = {
     saveCardLabel: __('Save payment details', textDomain),
     selectTokenLabel: __('Saved payment details', textDomain),
     fillDataError: __('Please fill in the card data.', textDomain),
-    fillCCDataError: __('Please fill in the required credit card form fields.', textDomain),
+    fillCCDataError: __('Please fill in the required credit card form fields', textDomain),
     requiredDataError: __('Please fill in the required fields of the form to display payment methods', textDomain),
     additionalDataRejected: __('Payment has been rejected by PowerBoard. Please try again in a few minutes', textDomain)
 }
@@ -49,11 +49,34 @@ const Content = (props) => {
             formSubmittedAlready = window.widgetReloaded ? false : formSubmittedAlready
 
             if (window.hasOwnProperty('powerBoardValidation')) {
-
+                var validationState = window.widgetPowerBoard.getValidationState();
+                
                 if (!powerBoardValidation.powerboardCCFormValidation()) {
+                    var validationState = window.widgetPowerBoard.getValidationState();
+
+                    var invalid_fields = [];
+                    validationState.invalid_fields.forEach(field => {
+                        switch(field) {
+                            case "card_name": 
+                                invalid_fields.push("Card Name");
+                                break;
+                            case "card_number": 
+                                invalid_fields.push("Card Number");
+                                break;
+                            case "expiry_date": 
+                                invalid_fields.push("Expiry Date");
+                                break;
+                            case "card_ccv": 
+                                invalid_fields.push("Card CCV");
+                                break;
+                        }
+                    });
+
+                    var errorMessage = labels.fillCCDataError + (invalid_fields.length ? `: ${invalid_fields.join(", ")}` : "");
+
                     return {
                         type: emitResponse.responseTypes.ERROR,
-                        errorMessage: labels.fillCCDataError
+                        errorMessage: errorMessage
                     }
                 }
 

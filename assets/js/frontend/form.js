@@ -30,6 +30,9 @@ setTimeout(() => jQuery(function ($) {
             })
         },
         lastWcFormValidation: false,
+        powerboardCCFormValidation() {
+            return window.widgetPowerBoard.isValidForm();
+        },
         wcFormValidation() {
             const checkoutFormElements = document.querySelectorAll('.wc-block-checkout__form input, .wc-block-checkout__form select');
             if (checkoutFormElements.length === 0) {
@@ -162,8 +165,8 @@ setTimeout(() => jQuery(function ($) {
 
         let gatewayId = isPermanent ? powerBoardCardSettings.gatewayId : 'not_configured';
 
-        widget = new cba.HtmlWidget('#powerBoardWidgetCard', powerBoardCardSettings.publicKey, gatewayId);
-
+        widget = new cba.HtmlWidget('#powerBoardWidgetCard', powerBoardCardSettings.publicKey, gatewayId, "card", "card_payment_source_with_cvv");
+       
         window.widgetPowerBoard = widget;
         if (powerBoardCardSettings.hasOwnProperty('styles')) {
             widget.setStyles(powerBoardCardSettings.styles);
@@ -193,6 +196,7 @@ setTimeout(() => jQuery(function ($) {
             widget.setSupportedCardIcons(supportedCardTypes, true);
         }
 
+        widget.setFormFields(["card_name*","card_number*", "card_ccv*"]);
         widget.setEnv(powerBoardCardSettings.isSandbox ? 'preproduction_cba' : 'production_cba');
         widget.onFinishInsert('input[name="payment_source_token"]', 'payment_source');
         widget.interceptSubmitForm('#widget');
