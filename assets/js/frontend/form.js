@@ -1,4 +1,55 @@
 setTimeout(() => jQuery(function ($) {
+
+    $(document).ready(function(){
+
+        var $shippingPhoneInput = $('#shipping-phone');
+        var $billingPhoneInput = $('#billing-phone');
+        var $submitButton = $('.wc-block-components-checkout-place-order-button');
+
+        function validatePhone($phoneInput) {
+            var phone = $phoneInput.val();
+            var phonePattern = /^\+[1-9]{1}[0-9]{3,14}$/;
+            var errorMessage = '<div class="wc-block-components-validation-error" role="alert"><p>Please enter your phone number in international format, starting with "+"</p></div>';
+
+            $phoneInput.next('.wc-block-components-validation-error').remove();
+
+            if (phone !== '' && !phonePattern.test(phone)) {
+                $phoneInput.after(errorMessage);
+                return false;
+            }
+
+            return true;
+        }
+
+        function updateOrderButton() {
+            var isShippingPhoneValid = validatePhone($shippingPhoneInput);
+            var isBillingPhoneValid = validatePhone($billingPhoneInput);
+
+            if (isShippingPhoneValid && isBillingPhoneValid) {
+                $submitButton.prop('disabled', false);
+            } else {
+                $submitButton.prop('disabled', true);
+            }
+        }
+
+        $shippingPhoneInput.on('blur input', function(){
+            updateOrderButton();
+        });
+
+        $billingPhoneInput.on('blur input', function(){
+            updateOrderButton();
+        });
+
+        $(document).ajaxSend(function(event, jqxhr, settings) {
+            updateOrderButton();
+        });
+
+        $(document).ajaxComplete(function(event, jqxhr, settings) {
+            updateOrderButton();
+        });
+
+    });
+
     let lastInit = '';
 
     const powerBoardValidation = {
