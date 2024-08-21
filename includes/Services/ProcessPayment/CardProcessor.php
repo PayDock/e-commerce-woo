@@ -645,7 +645,7 @@ class CardProcessor {
 		if ( ! empty( $responce['error'] ) ) {
 			$message = ! empty( $responce['error']['message'] ) ? ' ' . $responce['error']['message'] : '';
 			/* translators: %s: Error message from Paydock API. */
-			throw new Exception( esc_html( sprintf( __( 'The charge could not be created successfully. %s', 'paydock' ), $message ) ) );
+			throw new Exception( esc_html( sprintf( __( 'The charge could not be created successfully. %s <input id="widget_error" hidden type="text"/>', 'paydock' ), $message ) ) );
 		}
 
 		return $responce;

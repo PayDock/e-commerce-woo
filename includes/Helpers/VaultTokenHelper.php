@@ -22,7 +22,7 @@ class VaultTokenHelper {
 		}
 
 		if ( empty( $OTTtoken ) ) {
-			throw new Exception( esc_html( __( 'The token wasn\'t generated correctly.', 'paydock' ) ) );
+			throw new Exception( esc_html( __( 'The token wasn\'t generated correctly. <input id="widget_error" hidden type="text"/>', 'paydock' ) ) );
 		}
 
 		$vaultTokenData = [
@@ -43,7 +43,7 @@ class VaultTokenHelper {
 			$message = ! empty( $responce['error']['message'] ) ? ' ' . $responce['error']['message'] : '';
 
 			/* translators: %s: Detailed message from Paydock API. */
-			throw new Exception( esc_html( sprintf( __( 'Can\'t create Paydock vault token. %s', 'paydock' ), $message ) ) );
+			throw new Exception( esc_html( sprintf( __( 'Can\'t create Paydock vault token. %s <input id="widget_error" hidden type="text"/>', 'paydock' ), $message ) ) );
 		}
 
 		if ( $this->shouldSaveVaultToken() ) {
