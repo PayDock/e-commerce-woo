@@ -55,13 +55,13 @@ class BankAccountProcessor {
 	}
 
 	public function chargeWithCustomerId(): array {
-		$request = [ 
+		$request = [
 			'reference' => (string) $this->orderId,
 			'first_name' => $this->order->get_billing_first_name(),
 			'last_name' => $this->order->get_billing_last_name(),
 			'email' => $this->order->get_billing_email(),
 			'phone' => $this->order->get_billing_phone(),
-			'payment_source' => array_merge( [ 
+			'payment_source' => array_merge( [
 						'amount' => $this->order->get_total(),
 						'type' => 'bank_account',
 						'vault_token' => $this->getVaultToken(),
@@ -102,7 +102,7 @@ class BankAccountProcessor {
 			);
 
 			if ( $this->vaultTokenHelper->shouldSaveVaultToken() ) {
-				( new UserTokenRepository() )->updateUserToken( $this->args['selectedtoken'], [ 
+				( new UserTokenRepository() )->updateUserToken( $this->args['selectedtoken'], [
 					'customer_id' => $response['resource']['data']['_id'],
 				] );
 			}
@@ -136,14 +136,14 @@ class BankAccountProcessor {
 		$address1 = $this->order->get_billing_address_1();
 		$address2 = $this->order->get_billing_address_2();
 
-		$result = [ 
+		$result = [
 			'amount' => $this->order->get_total(),
 			'address_country' => $this->order->get_billing_country(),
 			'address_postcode' => $this->order->get_billing_postcode(),
 			'address_city' => $this->order->get_billing_city(),
 			'address_state' => $this->order->get_billing_state(),
 			'address_line1' => $address1,
-			'address_line2' => empty( $address2 ) ? $address1 : $address2,
+			'address_line2' => $address2,
 		];
 
 		if ( ! empty( $exclude ) ) {
@@ -160,7 +160,7 @@ class BankAccountProcessor {
 	protected function directCharge( $customerId = null ): array {
 		$addPaymentSource = $this->getAdditionalFields( 'amount' );
 
-		$paymentSource = [ 
+		$paymentSource = [
 			'vault_token' => ! empty( $this->args['selectedtoken'] ) ? $this->args['selectedtoken'] : $this->getVaultToken(
 			),
 			'type' => 'bank_account',
@@ -170,11 +170,11 @@ class BankAccountProcessor {
 			$paymentSource['gateway_id'] = $this->args['gatewayid'];
 		}
 
-		$request = [ 
+		$request = [
 			'reference' => (string) $this->orderId,
 			'amount' => $this->order->get_total(),
 			'currency' => strtoupper( get_woocommerce_currency() ),
-			'customer' => [ 
+			'customer' => [
 				'first_name' => $this->order->get_billing_first_name(),
 				'last_name' => $this->order->get_billing_last_name(),
 				'email' => $this->order->get_billing_email(),
