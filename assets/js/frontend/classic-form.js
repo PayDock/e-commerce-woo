@@ -135,6 +135,26 @@ jQuery(function ($) {
                         this.paymentMethod = null;
                 }
             },
+            initPaymentMethod() {
+                const paymentMethodInterval = setInterval(() => {
+                    let paymentMethod = $('input[name="payment_method"]:checked').val();
+                    if (paymentMethod && !this.paymentMethod) {
+                        this.setPaymentMethod(paymentMethod)
+                        clearInterval(paymentMethodInterval)
+                    }
+                }, 100)
+            },
+            initOrderBtnClickEventListener() {
+                const orderBtnInterval = setInterval(() => {
+                    let orderButton = document.getElementById('place_order');
+                    if (orderButton) {
+                        clearInterval(orderBtnInterval)
+                        orderButton.addEventListener('click', (event) => {
+                            this.customSubmitForm(event)
+                        })
+                    }
+                }, 100)
+            },
             showFormValidationError(paymentMethod) {
                 if (paymentMethod) {
                     $(`#classic-${paymentMethod}`).hide();
@@ -602,25 +622,13 @@ jQuery(function ($) {
                 })
             },
             init() {
-                setInterval(() => {
-                    let paymentMethod = $('input[name="payment_method"]:checked').val();
-                    if (paymentMethod && !this.paymentMethod) {
-                        this.setPaymentMethod(paymentMethod)
-                    }
-
-                    let orderButton = document.getElementById('place_order');
-                    if (orderButton) {
-                        orderButton.addEventListener('click', (event) => {
-                            this.customSubmitForm(event)
-                        })
-                    }
-
-                    this.form.submit((event) => {
-                        this.customSubmitForm(event)
-                    });
-                }, 100)
+                this.initPaymentMethod()
+                this.initOrderBtnClickEventListener()
 
                 this.form = $('form[name="checkout"]');
+                this.form.submit((event) => {
+                    this.customSubmitForm(event)
+                });
 
                 this.form.on('change', () => {
                     try {
