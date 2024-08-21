@@ -81,7 +81,7 @@ setTimeout(() => jQuery(function ($) {
                 clonnedHtmlWidget.setAttribute('style', '');
                 document.getElementById(id + '_wrapper').append(clonnedHtmlWidget);
             }
-            window.widgetPaydock.hideElements(['submit_button', 'email', 'phone']);
+            window.widgetPaydock.hideElements(['submit_button']);
         },
     }
 
@@ -143,12 +143,13 @@ setTimeout(() => jQuery(function ($) {
     }
 
     function initPaydockWidgetCard() {
-        window.widgetReloaded = lastInit === idPaydockWidgetCard;
+        window.widgetReloaded = lastInit !== idPaydockWidgetCard;
         lastInit = idPaydockWidgetCard;
 
         const htmlWidget = document.getElementById('paydockWidgetCard')
         if (htmlWidget !== null && htmlWidget.innerHTML.trim().length > 0) {
-            paydockValidation.passWidgetToWrapper('paydockWidgetCard')
+            paydockValidation.passWidgetToWrapper('paydockWidgetCard');
+            reloadWidget();
             return;
         }
 
@@ -181,17 +182,40 @@ setTimeout(() => jQuery(function ($) {
             widget.setSupportedCardIcons(supportedCard);
         }
         widget.setEnv(paydockCardSettings.isSandbox ? 'sandbox' : 'production');
-        widget.setFormFields(['email', 'phone']);
         widget.onFinishInsert('input[name="paydock_payment_source_token"]', 'payment_source');
         widget.interceptSubmitForm('#widget');
+        widget.hideElements(['submit_button']);
         widget.load();
 
+        let performAfterLoadActions = true
         widget.on(window.paydock.EVENT.AFTER_LOAD, () => {
-            widget.hideElements(['submit_button', 'email', 'phone']);
-            if ($('#paydockWidgetCard_wrapper').length > 0) {
+            if (performAfterLoadActions && $('#paydockWidgetCard_wrapper').length > 0) {
                 paydockValidation.passWidgetToWrapper('paydockWidgetCard')
             }
         })
+
+        widget.on(window.paydock.EVENT.FINISH, () => {
+            let counter = 0;
+            const widgetErrorInterval = setInterval(() => {
+                const errorInput = document.querySelectorAll("#widget_error")[0]
+                if (!!errorInput) {
+                    reloadWidget();
+                    errorInput?.remove();
+                    clearInterval(widgetErrorInterval);
+                } else if(counter  === 50) {
+                    clearInterval(widgetErrorInterval);
+                } else {
+                    counter++;
+                }
+            }, 1000)
+        })
+    }
+
+    function reloadWidget() {
+        window.widgetPaydock.reload();
+        const paymentSourceToken = document.querySelector('[name="paydock_payment_source_token"]');
+        paymentSourceToken.value = null;
+        window.widgetReloaded = true
     }
 
     function setPaymentMethodWatcher() {
@@ -230,7 +254,7 @@ setTimeout(() => jQuery(function ($) {
             const $orderButton = $('.wc-block-components-checkout-place-order-button');
             const $afterpayRadiobatton = $('#radio-control-wc-payment-method-options-paydock_afterpay_wallets_gateway');
             if (
-                paydockAfterpayWalletsSettings?.hasOwnProperty('afterpayChargeId')
+                paydockAfterpayWalletsSettings.hasOwnProperty('afterpayChargeId')
                 && (paydockAfterpayWalletsSettings.afterpayChargeId.length > 0)
                 && searchParams.has('afterpay_success')
                 && !wasClick

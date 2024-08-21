@@ -134,7 +134,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 			$response = $cardProcessor->run( $order );
 
 			if ( ! empty( $response['error'] ) ) {
-				throw new Exception( esc_html( __( 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later. ', 'paydock' ) ) );
+				throw new Exception( esc_html( __( 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later. <input id="widget_error" hidden type="text"/>', 'paydock' ) ) );
 			}
 
 			$chargeId = ! empty( $response['resource']['data']['_id'] ) ? $response['resource']['data']['_id'] : '';

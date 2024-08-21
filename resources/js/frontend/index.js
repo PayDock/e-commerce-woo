@@ -45,6 +45,7 @@ const Content = (props) => {
         });
 
         const validation = onCheckoutValidation(async () => {
+            formSubmittedAlready = window.widgetReloaded ? false : formSubmittedAlready
             if (window.hasOwnProperty('paydockValidation')) {
                 if (!paydockValidation.wcFormValidation()) {
                     return {
