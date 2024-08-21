@@ -27,12 +27,12 @@ class PaymentController {
 			$error = __( 'The order is not found.', 'power-board'  );
 		} else {
 			$order = wc_get_order( $orderId );
-			if ( ! in_array( $order->get_meta( ActivationHook::CUSTOM_STATUS_META_KEY ), [
+			/*if ( ! in_array( $order->get_meta( ActivationHook::CUSTOM_STATUS_META_KEY ), [
 				'pb-authorize',
 				'wc-pb-authorize'
 			] ) ) {
 				$error = __( 'The order has been authorized and is awaiting approval.', 'power-board'  );
-			}
+			}*/
 		}
 
 		if ( is_object( $order ) ) {
@@ -42,14 +42,14 @@ class PaymentController {
 			$orderTotal = false;
 		}
 
-		if ( ! empty( $orderTotal ) ) {
-			$amount = $orderTotal;
-		} else {
+		// if ( ! empty( $orderTotal ) ) {
+		// 	$amount = $orderTotal;
+		// } else {
 			$amount = wc_format_decimal( $_POST['amount'] );
-		}
+		// }
 
 		$loggerRepository   = new LogRepository();
-		$powerBoardChargeId = get_post_meta( $orderId, 'power_board_charge_id', true );
+		$powerBoardChargeId = $order->get_meta( 'power_board_charge_id' );
 		if ( ! $error ) {
 			$charge = SDKAdapterService::getInstance()->capture( [
 				'charge_id' => $powerBoardChargeId,
@@ -65,12 +65,15 @@ class PaymentController {
 					'',
 					LogRepository::SUCCESS
 				);
-				update_post_meta( $orderId, 'capture_amount', $amount );
-				update_post_meta( $orderId, 'power_board_charge_id', $newChargeId );
+				$order->update_meta_data( 'capture_amount', $amount );
+				$order->update_meta_data( 'power_board_charge_id', $newChargeId );
+				$order->update_meta_data( 'pb_directly_charged', 1 );
 				$order->payment_complete();
+				$order->save();
+
 				OrderService::updateStatus( $orderId, $newStatus );
 				wp_send_json_success( [
-					'message' => __( 'The capture process has been successfully.', 'woocommerce' ),
+					'message' => __( 'The capture process was successful.', 'woocommerce' ),
 				] );
 			} else {
 				if ( ! empty( $result['error'] ) ) {
@@ -104,7 +107,7 @@ class PaymentController {
 			$error = __( 'The order is not found.', 'woocommerce' );
 		}
 		$loggerRepository   = new LogRepository();
-		$powerBoardChargeId = get_post_meta( $orderId, 'power_board_charge_id', true );
+		$powerBoardChargeId = $order->get_meta( 'power_board_charge_id' );
 		if ( ! $error ) {
 			$result = SDKAdapterService::getInstance()->cancelAuthorised( [ 'charge_id' => $powerBoardChargeId ] );
 
@@ -158,7 +161,7 @@ class PaymentController {
 			$amount = $args['amount'];
 		}
 
-		$captureAmount = get_post_meta( $orderId, 'capture_amount', true );
+		$captureAmount = $order->get_meta( 'capture_amount' );
 
 		$totalRefunded = (float) $order->get_total_refunded();
 
@@ -171,7 +174,7 @@ class PaymentController {
 
 		$loggerRepository = new LogRepository();
 
-		$powerBoardChargeId = get_post_meta( $orderId, 'power_board_charge_id', true );
+		$powerBoardChargeId = $order->get_meta( 'power_board_charge_id' );
 		if ( $captureAmount && $totalRefunded > $captureAmount ) {
 			$totalRefunded = $captureAmount;
 		}
@@ -191,7 +194,7 @@ class PaymentController {
 				$status = $totalRefunded < $order->get_total() ? 'wc-pb-p-refund' : 'wc-pb-refunded';
 			}
 
-			update_post_meta( $orderId, 'power_board_refunded_status', $status );
+			$order->update_meta_data( 'power_board_refunded_status', $status );
 			$status_note = __( 'The refund', 'woocommerce' )
 			               . " {$amount} "
 			               . __( 'has been successfully.', 'woocommerce' );
@@ -201,7 +204,8 @@ class PaymentController {
 			remove_action( 'woocommerce_order_status_refunded', 'wc_order_fully_refunded' );
 			OrderService::updateStatus( $orderId, $status, $status_note );
 
-			update_post_meta( $orderId, 'api_refunded_id', $newRefundedId );
+			$order->update_meta_data( 'api_refunded_id', $newRefundedId );
+			$order->save();
 
 			$loggerRepository->createLogRecord( $newRefundedId, 'Refunded', $status, '', LogRepository::SUCCESS );
 		} else {
@@ -227,12 +231,21 @@ class PaymentController {
 	}
 
 	public function afterRefundProcess( $orderId, $refundId ) {
-		$powerBoardRefundedStatus = get_post_meta( $orderId, 'power_board_refunded_status', true );
-		if ( $powerBoardRefundedStatus ) {
-			remove_action( 'woocommerce_order_status_refunded', 'wc_order_fully_refunded' );
-			OrderService::updateStatus( $orderId, $powerBoardRefundedStatus );
-			delete_post_meta( $orderId, 'power_board_refunded_status' );
+
+		$order = wc_get_order( $orderId );
+
+		if ( is_object( $order ) ) {
+
+			$powerBoardRefundedStatus = $order->get_meta( 'power_board_refunded_status' );
+			if ( $powerBoardRefundedStatus ) {
+				remove_action( 'woocommerce_order_status_refunded', 'wc_order_fully_refunded' );
+				OrderService::updateStatus( $orderId, $powerBoardRefundedStatus );
+				$order->update_meta_data( 'power_board_refunded_status', '' );
+				$order->save();
+			}
+
 		}
+
 	}
 
 	public function webhook(): void {
@@ -311,7 +324,8 @@ class PaymentController {
 			case ChargeStatuses::COMPLETE()->name:
 				$captureAmount = wc_format_decimal( $data['transaction']['amount'] );
 				$orderStatus   = $orderTotal > $captureAmount ? 'wc-pb-p-paid' : 'wc-pb-paid';
-				update_post_meta( $orderId, 'capture_amount', $captureAmount );
+				$order->update_meta_data( 'capture_amount', $captureAmount );
+				$order->save();
 				break;
 			case ChargeStatuses::PENDING()->name:
 			case ChargeStatuses::PRE_AUTHENTICATION_PENDING()->name:
@@ -335,7 +349,8 @@ class PaymentController {
 		}
 
 		OrderService::updateStatus( $orderId, $orderStatus );
-		update_post_meta( $order->get_id(), 'power_board_charge_id', $chargeId );
+		$order->update_meta_data( 'power_board_charge_id', $chargeId );
+		$order->save();
 
 		$loggerRepository = new LogRepository();
 		$loggerRepository->createLogRecord(
@@ -471,7 +486,8 @@ class PaymentController {
 		}
 
 		OrderService::updateStatus( $orderId, $status );
-		update_post_meta( $order->get_id(), 'power_board_charge_id', $chargeId );
+		$order->update_meta_data( 'power_board_charge_id', $chargeId );
+		$order->save();
 
 		$loggerRepository->createLogRecord(
 			$chargeId,
@@ -502,12 +518,12 @@ class PaymentController {
 
 		$order = wc_get_order( $orderId );
 
-		if ( false === $order || get_post_meta( $orderId, 'api_refunded_id', true ) === $data['transaction']['_id'] ) {
+		if ( false === $order || $order->get_meta( 'api_refunded_id' ) === $data['transaction']['_id'] ) {
 			return false;
 		}
 
 		$orderTotal    = $order->get_total();
-		$captureAmount = get_post_meta( $orderId, 'capture_amount', true );
+		$captureAmount = $order->get_meta( 'capture_amount' );
 		if ( $captureAmount && ( $orderTotal > $captureAmount ) ) {
 			$orderTotal = $captureAmount;
 		}
@@ -525,7 +541,8 @@ class PaymentController {
 				} else {
 					$orderStatus = 'wc-pb-refunded';
 				}
-				update_post_meta( $orderId, 'power_board_refunded_status', $orderStatus );
+				$order->update_meta_data( 'power_board_refunded_status', $orderStatus );
+				$order->save();
 				break;
 			default:
 				$orderStatus = $order->get_status();

@@ -44,7 +44,7 @@ class FiltersService extends AbstractSingleton {
 
 	public function ordersListNewColumnContent( $column, $order ) {
 		if ( OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey() === $column ) {
-			$status = get_post_meta( $order->get_id(), OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey() );
+			$status = $order->get_meta( OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey() );
 
 			echo esc_html( is_array( $status ) ? reset( $status ) : $status );
 		}
@@ -53,9 +53,8 @@ class FiltersService extends AbstractSingleton {
 	public function changeOrderAmount( $formatted_total, $order ) {
 		$page = filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRING );
 		if ( ! empty( $page ) && 'wc-orders' === $page ) {
-			$capturedAmount = get_post_meta( $order->get_id(), 'capture_amount' );
-			if ( $capturedAmount && is_array( $capturedAmount ) ) {
-				$capturedAmount = reset( $capturedAmount );
+			$capturedAmount = $order->get_meta( 'capture_amount' );
+			if ( ! empty( $capturedAmount ) ) {
 
 				if ( $capturedAmount == $order->get_total() ) {
 					return $formatted_total;
