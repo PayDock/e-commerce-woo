@@ -1,53 +1,69 @@
 setTimeout(() => jQuery(function ($) {
 
     $(document).ready(function(){
+        const $formContainer = $('form.wc-block-components-form');
+        const $shippingPhoneInput = $('#shipping-phone');
+        const $billingPhoneInput = $('#billing-phone');
 
-        var $shippingPhoneInput = $('#shipping-phone');
-        var $billingPhoneInput = $('#billing-phone');
-        var $submitButton = $('.wc-block-components-checkout-place-order-button');
+        if ($formContainer.length) {
+            const billingFieldsObserver = new MutationObserver(function(mutationsList) {
+                mutationsList.forEach((mutation) => {
+                    mutation.addedNodes.forEach(function(node) {
+                        if (node.nodeType === 1 && node.id === 'billing-fields') {
+                            const billingPhoneInput = $('#billing-phone');
 
-        function validatePhone($phoneInput) {
-            var phone = $phoneInput.val();
-            var phonePattern = /^\+[1-9]{1}[0-9]{3,14}$/;
-            var errorMessage = '<div class="wc-block-components-validation-error" role="alert"><p>Please enter your phone number in international format, starting with "+"</p></div>';
+                            initPhoneNumbersValidation([
+                                billingPhoneInput,
+                            ]);
+                        }
+                    });
+                });
+            });
 
-            $phoneInput.next('.wc-block-components-validation-error').remove();
-
-            if (phone !== '' && !phonePattern.test(phone)) {
-                $phoneInput.after(errorMessage);
-                return false;
-            }
-
-            return true;
+            billingFieldsObserver.observe($formContainer[0], { childList: true, subtree: true });
         }
 
-        function updateOrderButton() {
-            var isShippingPhoneValid = validatePhone($shippingPhoneInput);
-            var isBillingPhoneValid = validatePhone($billingPhoneInput);
+        initPhoneNumbersValidation([
+            $shippingPhoneInput,
+            $billingPhoneInput,
+        ]);
 
-            if (isShippingPhoneValid && isBillingPhoneValid) {
-                $submitButton.prop('disabled', false);
-            } else {
-                $submitButton.prop('disabled', true);
+        function initPhoneNumbersValidation (phoneInputs = []) {
+            if (!phoneInputs.length) return;
+
+            const $submitButton = $('.wc-block-components-checkout-place-order-button');
+
+            function validatePhone($phoneInput) {
+                const phone = $phoneInput.val();
+                const phonePattern = /^\+[1-9]{1}[0-9]{3,14}$/;
+                const errorMessage = '<div class="wc-block-components-validation-error" role="alert"><p>Please enter your phone number in international format, starting with "+"</p></div>';
+
+                $phoneInput.next('.wc-block-components-validation-error').remove();
+
+                if (phone !== '' && !phonePattern.test(phone)) {
+                    $phoneInput.after(errorMessage);
+                    return false;
+                }
+
+                return true;
             }
+
+            function updateOrderButton($phoneInput) {
+                $submitButton.prop('disabled', !validatePhone($phoneInput));
+            }
+
+            phoneInputs.forEach(($phoneInput) => {
+                $phoneInput.on('blur input', () => updateOrderButton($phoneInput));
+
+                $(document).ajaxSend(function(event, jqxhr, settings) {
+                    updateOrderButton($phoneInput);
+                });
+
+                $(document).ajaxComplete(function(event, jqxhr, settings) {
+                    updateOrderButton($phoneInput);
+                });
+            });
         }
-
-        $shippingPhoneInput.on('blur input', function(){
-            updateOrderButton();
-        });
-
-        $billingPhoneInput.on('blur input', function(){
-            updateOrderButton();
-        });
-
-        $(document).ajaxSend(function(event, jqxhr, settings) {
-            updateOrderButton();
-        });
-
-        $(document).ajaxComplete(function(event, jqxhr, settings) {
-            updateOrderButton();
-        });
-
     });
 
     let lastInit = '';
