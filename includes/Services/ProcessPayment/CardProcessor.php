@@ -577,6 +577,10 @@ class CardProcessor {
 				],
 			], $this->getAdditionalFields( 'amount' ) );
 
+			if ( empty( $customerArgs['phone'] ) ) {
+				unset( $customerArgs['phone'] );
+			}
+
 			if ( SaveCardOptions::WITH_GATEWAY()->name === $this->args['cardsavecardoption'] && ! empty( $this->args['gatewayid'] ) ) {
 				$customerArgs['payment_source']['gateway_id'] = $this->args['gatewayid'];
 			}
@@ -632,6 +636,10 @@ class CardProcessor {
 			],
 		];
 
+		if ( empty( $params['customer']['phone'] ) ) {
+			unset( $params['customer']['phone'] );
+		}
+
 		if ( ! empty( $this->args['gatewayid'] ) ) {
 			$params['customer']['payment_source']['gateway_id'] = $this->args['gatewayid'];
 		}
@@ -666,6 +674,10 @@ class CardProcessor {
 				'vault_token' => $this->args['selectedtoken'],
 			], $this->getAdditionalFields( 'amount' ) ),
 		], $this->getAdditionalFields( 'amount' ) );
+
+		if ( empty( $customerArgs['phone'] ) ) {
+			unset( $customerArgs['phone'] );
+		}
 
 		if ( SaveCardOptions::WITH_GATEWAY()->name === $this->args['cardsavecardoption'] && ! empty( $this->args['gatewayid'] ) ) {
 			$customerArgs['payment_source']['gateway_id'] = $this->args['gatewayid'];
