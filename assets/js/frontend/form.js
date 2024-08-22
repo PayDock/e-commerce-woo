@@ -25,7 +25,10 @@ setTimeout(() => jQuery(function ($) {
             };
 
             const updateSubmitButtonVisibility = () => {
-                const allValid = phoneInputs.every($input => validatePhone($input));
+                const allValid = phoneInputs
+                    .map($input => validatePhone($input))
+                    .every(validationResult => validationResult === true);
+
                 $submitButton.css('visibility', allValid ? 'visible' : 'hidden');
             };
 
