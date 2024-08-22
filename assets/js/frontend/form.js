@@ -1,59 +1,46 @@
 setTimeout(() => jQuery(function ($) {
+    $(document).ready(function() {
+        const getPhoneInputs = () => [$('#shipping-phone'), $('#billing-phone')];
 
-    $(document).ready(function(){
-        const $shippingPhoneInput = $('#shipping-phone');
-        const $billingPhoneInput = $('#billing-phone');
+        const initPhoneNumbersValidation = (phoneInputs = []) => {
+            phoneInputs = phoneInputs.filter($input => $input.length);
 
-        initPhoneNumbersValidation([
-            $shippingPhoneInput,
-            $billingPhoneInput,
-        ]);
-
-        const checkboxContainer = document.querySelector('.wc-block-checkout__use-address-for-billing')
-        const checkbox = checkboxContainer.querySelector('input[type="checkbox"]')
-        checkbox.addEventListener("change", (event) => {
-            if (!event.target.checked) {
-                const $currentBillingPhoneInput = $('#billing-phone');
-                initPhoneNumbersValidation([$currentBillingPhoneInput]);
-            }
-        })
-
-        function initPhoneNumbersValidation (phoneInputs = []) {
             if (!phoneInputs.length) return;
 
-            const $submitButton = $('.wc-block-components-checkout-place-order-button');
+            const $submitButton = $('button.wc-block-components-checkout-place-order-button');
 
-            function validatePhone($phoneInput) {
+            const phonePattern = /^\+[1-9]{1}[0-9]{3,14}$/;
+            const errorMessage = '<div class="wc-block-components-validation-error" role="alert"><p>Please enter your phone number in international format, starting with "+"</p></div>';
+
+            const validatePhone = ($phoneInput) => {
                 const phone = $phoneInput.val();
-                const phonePattern = /^\+[1-9]{1}[0-9]{3,14}$/;
-                const errorMessage = '<div class="wc-block-components-validation-error" role="alert"><p>Please enter your phone number in international format, starting with "+"</p></div>';
-
                 $phoneInput.next('.wc-block-components-validation-error').remove();
 
-                if (phone !== '' && !phonePattern.test(phone)) {
+                if (phone && !phonePattern.test(phone)) {
                     $phoneInput.after(errorMessage);
                     return false;
                 }
 
                 return true;
-            }
+            };
 
-            function updateOrderButton($phoneInput) {
-                $submitButton.prop('disabled', !validatePhone($phoneInput));
-            }
+            const updateSubmitButtonVisibility = () => {
+                const allValid = phoneInputs.every($input => validatePhone($input));
+                $submitButton.css('visibility', allValid ? 'visible' : 'hidden');
+            };
 
-            phoneInputs.forEach(($phoneInput) => {
-                $phoneInput.on('blur input', () => updateOrderButton($phoneInput));
+            phoneInputs.forEach($phoneInput => $phoneInput.on('blur input', updateSubmitButtonVisibility));
 
-                $(document).ajaxSend(function(event, jqxhr, settings) {
-                    updateOrderButton($phoneInput);
-                });
+            updateSubmitButtonVisibility();
+        };
 
-                $(document).ajaxComplete(function(event, jqxhr, settings) {
-                    updateOrderButton($phoneInput);
-                });
-            });
-        }
+        initPhoneNumbersValidation(getPhoneInputs());
+
+        const checkboxContainer = document.querySelector('.wc-block-checkout__use-address-for-billing');
+        const checkbox = checkboxContainer.querySelector('input[type="checkbox"]');
+        checkbox.addEventListener("change", ({ target }) => {
+            if (!target.checked) initPhoneNumbersValidation(getPhoneInputs());
+        });
     });
 
     let lastInit = '';
