@@ -1,32 +1,22 @@
 setTimeout(() => jQuery(function ($) {
 
     $(document).ready(function(){
-        const $formContainer = $('form.wc-block-components-form');
         const $shippingPhoneInput = $('#shipping-phone');
         const $billingPhoneInput = $('#billing-phone');
-
-        if ($formContainer.length) {
-            const billingFieldsObserver = new MutationObserver(function(mutationsList) {
-                mutationsList.forEach((mutation) => {
-                    mutation.addedNodes.forEach(function(node) {
-                        if (node.nodeType === 1 && node.id === 'billing-fields') {
-                            const billingPhoneInput = $('#billing-phone');
-
-                            initPhoneNumbersValidation([
-                                billingPhoneInput,
-                            ]);
-                        }
-                    });
-                });
-            });
-
-            billingFieldsObserver.observe($formContainer[0], { childList: true, subtree: true });
-        }
 
         initPhoneNumbersValidation([
             $shippingPhoneInput,
             $billingPhoneInput,
         ]);
+
+        const checkboxContainer = document.querySelector('.wc-block-checkout__use-address-for-billing')
+        const checkbox = checkboxContainer.querySelector('input[type="checkbox"]')
+        checkbox.addEventListener("change", (event) => {
+            if (!event.target.checked) {
+                const $currentBillingPhoneInput = $('#billing-phone');
+                initPhoneNumbersValidation([$currentBillingPhoneInput]);
+            }
+        })
 
         function initPhoneNumbersValidation (phoneInputs = []) {
             if (!phoneInputs.length) return;
