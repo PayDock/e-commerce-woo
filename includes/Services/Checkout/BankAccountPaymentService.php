@@ -85,9 +85,9 @@ class BankAccountPaymentService extends AbstractPaymentService {
 
 		OrderService::updateStatus( $order->get_id(), $status );
 		$order->payment_complete();
+		$order->update_meta_data( 'power_board_charge_id', $chargeId );
+		$order->update_meta_data( OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(), 'Bank' );
 		$order->save();
-		update_post_meta( $order->get_id(), 'power_board_charge_id', $chargeId );
-		add_post_meta( $order->get_id(), OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(), 'Bank' );
 
 		WC()->cart->empty_cart();
 

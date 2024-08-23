@@ -24,8 +24,9 @@ class OrderService {
 
 			if ( $partial_refund === false ) {
 
-				$order->update_status( ActivationHook::CUSTOM_STATUSES[ $custom_status ], $status_note );
+				$order->update_meta_data( ActivationHook::CUSTOM_STATUSES[ $custom_status ], $status_note );
 				$order->update_meta_data( ActivationHook::CUSTOM_STATUS_META_KEY, $custom_status );
+				$order->save();
 
 			} else {
 
@@ -42,8 +43,7 @@ class OrderService {
 	public function iniPowerBoardOrderButtons( $order ) {
 		$orderCustomStatus = $order->get_meta( ActivationHook::CUSTOM_STATUS_META_KEY );
 		$orderStatus       = $order->get_status();
-		$capturedAmount    = get_post_meta( $order->get_id(), 'capture_amount' );
-		$capturedAmount    = is_array( $capturedAmount ) ? reset( $capturedAmount ) : $capturedAmount;
+		$capturedAmount    = $order->get_meta( 'capture_amount' );
 		$totalRefaund      = $order->get_total_refunded();
 		if ( in_array( $orderStatus, [
 				'pending',
@@ -70,14 +70,14 @@ class OrderService {
 		}
 		if ( in_array( $orderStatus, [
 				'processing',
-			] ) && in_array( $orderCustomStatus, [
+			] ) /*&& in_array( $orderCustomStatus, [
 				'pb-authorize',
 				'wc-pb-authorize',
 				'pb-paid',
 				'wc-pb-paid',
 				'wc-pb-p-paid',
 				'pb-p-paid'
-			] ) ) {
+			] )*/ ) {
 			$this->templateService->includeAdminHtml( 'power-board-capture-block', compact( 'order' ) );
 			wp_enqueue_script(
 				'power-board-capture-block',
@@ -129,20 +129,23 @@ class OrderService {
 	}
 
 	public function informationAboutPartialCaptured( $orderId ) {
-		$capturedAmount = get_post_meta( $orderId, 'capture_amount' );
-		$order          = wc_get_order( $orderId );
-		if ( $capturedAmount && is_array( $capturedAmount ) && in_array( $order->get_status(), [
-				'failed',
-				'pending',
-				'processing',
-				'refunded',
-			] ) ) {
-			$capturedAmount = reset( $capturedAmount );
-			if ( $order->get_total() > $capturedAmount ) {
-				$this->templateService->includeAdminHtml( 'information-about-partial-captured',
-					compact( 'order', 'capturedAmount' ) );
+
+		$order = wc_get_order( $orderId );
+
+		if ( is_object( $order ) ) {
+
+			$capturedAmount = $order->get_meta( 'capture_amount' );
+
+			if ( ! empty( $capturedAmount ) ) {
+
+				// if ( $order->get_total() > $capturedAmount ) {
+					$this->templateService->includeAdminHtml( 'information-about-partial-captured', compact( 'order', 'capturedAmount' ) );
+				// }
+
 			}
+
 		}
+
 	}
 
 	public function displayStatusChangeError() {

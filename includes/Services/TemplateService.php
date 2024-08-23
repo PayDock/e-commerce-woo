@@ -3,6 +3,7 @@
 namespace PowerBoard\Services;
 
 use PowerBoard\Enums\SettingsTabs;
+use PowerBoard\Services\SettingsService;
 
 class TemplateService {
 	private const TEMPLATE_DIR = 'templates';
@@ -29,6 +30,10 @@ class TemplateService {
 	}
 
 	public function includeAdminHtml( string $template, array $data = [] ): void {
+
+		$settings = SettingsService::getInstance();
+		$data['settings'] = $settings;
+
 		$data['templateService'] = $this;
 
 		if ( ! empty( $data ) ) {

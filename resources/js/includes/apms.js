@@ -232,6 +232,8 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
 
                 unsubscribeFn(unsubscribeFromPaymentSetup);
                 unsubscribeFn(unsubscribeFromShippingEvent);
+
+                wasInit = false;
             };
         }, [
             emitResponse.responseTypes.ERROR,

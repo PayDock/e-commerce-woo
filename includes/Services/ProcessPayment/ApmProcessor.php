@@ -197,7 +197,7 @@ class ApmProcessor {
 			'address_city'     => $this->order->get_billing_city(),
 			'address_state'    => $this->order->get_billing_state(),
 			'address_line1'    => $address1,
-			'address_line2'    => empty( trim( $address2 ) ) ? $address1 : $address2,
+			'address_line2'    => $address2,
 		];
 
 		if ( ! empty( $exclude ) ) {
@@ -254,7 +254,7 @@ class ApmProcessor {
 			$address2 = $this->order->get_shipping_address_2();
 
 			$result['address_line1']    = $address1;
-			$result['address_line2']    = empty( trim( $address2 ) ) ? $address1 : $address2;
+			$result['address_line2']    = $address2;
 			$result['address_city']     = $this->order->get_shipping_city();
 			$result['address_state']    = $this->order->get_shipping_state();
 			$result['address_country']  = $this->order->get_shipping_country();
