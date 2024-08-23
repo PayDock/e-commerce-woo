@@ -167,7 +167,11 @@ setTimeout(() => jQuery(function ($) {
         let gatewayId = isPermanent ? powerBoardCardSettings.gatewayId : 'not_configured';
 
         widget = new cba.HtmlWidget('#powerBoardWidgetCard', powerBoardCardSettings.publicKey, gatewayId, "card", "card_payment_source_with_cvv");
-       
+        widget.setFormPlaceholders({
+            card_number: 'Credit card number',
+            card_ccv: 'CCV',
+        })
+
         window.widgetPowerBoard = widget;
         if (powerBoardCardSettings.hasOwnProperty('styles')) {
             widget.setStyles(powerBoardCardSettings.styles);
