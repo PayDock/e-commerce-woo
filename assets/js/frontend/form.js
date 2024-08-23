@@ -168,8 +168,10 @@ setTimeout(() => jQuery(function ($) {
 
         widget = new cba.HtmlWidget('#powerBoardWidgetCard', powerBoardCardSettings.publicKey, gatewayId, "card", "card_payment_source_with_cvv");
         widget.setFormPlaceholders({
-            card_number: 'Credit card number',
-            card_ccv: 'CCV',
+            card_name: 'Card holders name *',
+            card_number: 'Credit card number *',
+            expire_month: 'MM/YY *',
+            card_ccv: 'CCV *',
         })
 
         window.widgetPowerBoard = widget;
