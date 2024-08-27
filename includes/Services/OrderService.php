@@ -105,8 +105,8 @@ class OrderService {
 	}
 
 	public function informationAboutPartialCaptured( $orderId ) {
-		$capturedAmount = get_post_meta( $orderId, 'capture_amount' );
 		$order          = wc_get_order( $orderId );
+		$capturedAmount = $order->get_meta( 'capture_amount' );
 		if ( $capturedAmount && is_array( $capturedAmount ) && in_array( $order->get_status(), [
 				'paydock-failed',
 				'paydock-pending',

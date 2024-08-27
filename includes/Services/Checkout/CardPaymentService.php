@@ -190,15 +190,12 @@ class CardPaymentService extends WC_Payment_Gateway {
 			}
 		}
 
+		$order->update_meta_data( 'paydock_charge_id', $chargeId );
+		$order->update_meta_data( OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(), 'Card' );
 		$order->set_status( $status );
 		$order->payment_complete();
 		$order->save();
-		update_post_meta( $order->get_id(), 'paydock_charge_id', $chargeId );
-		add_post_meta(
-			$order->get_id(),
-			OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(),
-			'Card'
-		);
+
 		WC()->cart->empty_cart();
 
 		$loggerRepository->createLogRecord(
