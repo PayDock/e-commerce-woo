@@ -188,7 +188,8 @@ setTimeout(() => jQuery(function ($) {
         /*
         if (powerBoardCardSettings.hasOwnProperty('styles') && powerBoardCardSettings.cardSupportedCardTypes !== '') {
             supportedCard = powerBoardCardSettings.cardSupportedCardTypes.replaceAll(' ', '').split(',')
-            widget.setSupportedCardIcons(supportedCard);
+
+            widget.setSupportedCardIcons(supportedCard, true);
         }
         */
 
