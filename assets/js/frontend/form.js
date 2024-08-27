@@ -30,6 +30,10 @@ setTimeout(() => jQuery(function ($) {
             })
         },
         lastWcFormValidation: false,
+        powerboardCCFormValidation() {
+            const { tokens, selectedToken } = window.wc.wcSettings.getSetting('power_board_data', {});
+            return (tokens.length > 0 && selectedToken !== "") || window.widgetPowerBoard.isValidForm();
+        },
         wcFormValidation() {
             const checkoutFormElements = document.querySelectorAll('.wc-block-checkout__form input, .wc-block-checkout__form select');
             if (checkoutFormElements.length === 0) {
@@ -162,7 +166,13 @@ setTimeout(() => jQuery(function ($) {
 
         let gatewayId = isPermanent ? powerBoardCardSettings.gatewayId : 'not_configured';
 
-        widget = new cba.HtmlWidget('#powerBoardWidgetCard', powerBoardCardSettings.publicKey, gatewayId);
+        widget = new cba.HtmlWidget('#powerBoardWidgetCard', powerBoardCardSettings.publicKey, gatewayId, "card", "card_payment_source_with_cvv");
+        widget.setFormPlaceholders({
+            card_name: 'Card holders name *',
+            card_number: 'Credit card number *',
+            expire_month: 'MM/YY *',
+            card_ccv: 'CCV *',
+        })
 
         window.widgetPowerBoard = widget;
         if (powerBoardCardSettings.hasOwnProperty('styles')) {
@@ -175,11 +185,25 @@ setTimeout(() => jQuery(function ($) {
             });
         }
 
+        /*
         if (powerBoardCardSettings.hasOwnProperty('styles') && powerBoardCardSettings.cardSupportedCardTypes !== '') {
             supportedCard = powerBoardCardSettings.cardSupportedCardTypes.replaceAll(' ', '').split(',')
             widget.setSupportedCardIcons(supportedCard);
         }
+        */
 
+        if(powerBoardCardSettings.cardSupportedCardTypes !== '') {
+            var supportedCardTypes = [];
+
+            var supportedCards = powerBoardCardSettings.cardSupportedCardTypes.replaceAll(' ', '').split(',')
+            $.each(supportedCards, function(index, value) {
+                supportedCardTypes.push(value);
+            });
+
+            widget.setSupportedCardIcons(supportedCardTypes, true);
+        }
+
+        widget.setFormFields(["card_name*","card_number*", "card_ccv*"]);
         widget.setEnv(powerBoardCardSettings.isSandbox ? 'preproduction_cba' : 'production_cba');
         widget.onFinishInsert('input[name="payment_source_token"]', 'payment_source');
         widget.interceptSubmitForm('#widget');
