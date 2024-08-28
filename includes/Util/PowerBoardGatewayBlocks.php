@@ -1,20 +1,20 @@
 <?php
 
-namespace PowerBoard\Util;
+namespace Paydock\Util;
 
-use PowerBoard\Abstracts\AbstractBlock;
-use PowerBoard\Repositories\UserTokenRepository;
-use PowerBoard\Services\Checkout\CardPaymentService;
-use PowerBoard\Services\SDKAdapterService;
-use PowerBoard\Services\SettingsService;
+use Paydock\Abstracts\AbstractBlock;
+use Paydock\Repositories\UserTokenRepository;
+use Paydock\Services\Checkout\CardPaymentService;
+use Paydock\Services\SDKAdapterService;
+use Paydock\Services\SettingsService;
 
-final class PowerBoardGatewayBlocks extends AbstractBlock {
+final class PaydockGatewayBlocks extends AbstractBlock {
 	protected const SCRIPT = 'blocks';
-	protected $name = 'power_board';
+	protected $name = 'paydock';
 	private $gateway;
 
 	public function initialize() {
-		$this->settings = get_option( 'woocommerce_power_board_settings', [] );
+		$this->settings = get_option( 'woocommerce_paydock_settings', [] );
 		$this->gateway  = new CardPaymentService();
 	}
 

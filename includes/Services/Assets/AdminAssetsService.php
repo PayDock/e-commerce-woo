@@ -1,8 +1,8 @@
 <?php
 
-namespace PowerBoard\Services\Assets;
+namespace Paydock\Services\Assets;
 
-use PowerBoard\PowerBoardPlugin;
+use Paydock\PaydockPlugin;
 
 class AdminAssetsService {
 	private const PREFIX = 'admin';
@@ -33,7 +33,7 @@ class AdminAssetsService {
 			$this->scripts[] = 'deactivation-confirmation';
 		} elseif ( 'wc-orders' === $page ) {
 			$this->scripts[] = 'admin-helpers';
-		} elseif ( $section && ( stripos( $section, 'power_board' ) !== false ) ) {
+		} elseif ( $section && ( stripos( $section, 'paydock' ) !== false ) ) {
 			$this->scripts = [
 				'tabs',
 				'connections',
@@ -44,7 +44,7 @@ class AdminAssetsService {
 
 	public function setActualStyles(): void {
 		$section = filter_input( INPUT_GET, 'section', FILTER_SANITIZE_STRING );
-		if ( $section && ( stripos( $section, 'power_board' ) !== false ) ) {
+		if ( $section && ( stripos( $section, 'paydock' ) !== false ) ) {
 			$this->styles = [ 'card-select' ];
 		}
 	}
@@ -53,16 +53,16 @@ class AdminAssetsService {
 		foreach ( $this->scripts as $script ) {
 			wp_register_script(
 				$this->getScriptName( $script ),
-				plugins_url( $this->getScriptPath( $script ), POWER_BOARD_PLUGIN_FILE ),
+				plugins_url( $this->getScriptPath( $script ), paydock_PLUGIN_FILE ),
 				[],
-				POWER_BOARD_PLUGIN_VERSION,
+				paydock_PLUGIN_VERSION,
 				true
 			);
 		}
 	}
 
 	private function getScriptName( string $script ): string {
-		return implode( '_', [ PowerBoardPlugin::PLUGIN_PREFIX, self::PREFIX, self::SCRIPT_PREFIX, $script ] );
+		return implode( '_', [ PaydockPlugin::PLUGIN_PREFIX, self::PREFIX, self::SCRIPT_PREFIX, $script ] );
 	}
 
 	private function getScriptPath( string $script ): string {
@@ -72,9 +72,9 @@ class AdminAssetsService {
 	public function loadScripts(): void {
 		foreach ( $this->scripts as $script ) {
 			$scriptName = $this->getScriptName( $script );
-			wp_enqueue_script( $this->getScriptName( $script ), '', [], POWER_BOARD_PLUGIN_VERSION, true );
-			wp_localize_script( $scriptName, 'powerBoardWidgetSettings', [
-				'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL
+			wp_enqueue_script( $this->getScriptName( $script ), '', [], paydock_PLUGIN_VERSION, true );
+			wp_localize_script( $scriptName, 'paydockWidgetSettings', [
+				'pluginUrlPrefix' => paydock_PLUGIN_URL
 			] );
 		}
 	}
@@ -83,15 +83,15 @@ class AdminAssetsService {
 		foreach ( $this->styles as $style ) {
 			wp_enqueue_style(
 				$this->getStyleName( $style ),
-				plugins_url( $this->getStylePath( $style ), POWER_BOARD_PLUGIN_FILE ),
+				plugins_url( $this->getStylePath( $style ), paydock_PLUGIN_FILE ),
 				[],
-				POWER_BOARD_PLUGIN_VERSION
+				paydock_PLUGIN_VERSION
 			);
 		}
 	}
 
 	private function getStyleName( string $script ): string {
-		return implode( '_', [ PowerBoardPlugin::PLUGIN_PREFIX, self::PREFIX, self::STYLE_PREFIX, $script ] );
+		return implode( '_', [ PaydockPlugin::PLUGIN_PREFIX, self::PREFIX, self::STYLE_PREFIX, $script ] );
 	}
 
 	private function getStylePath( string $script ): string {

@@ -1,24 +1,24 @@
 <?php
 
-namespace PowerBoard\Services;
+namespace Paydock\Services;
 
-use PowerBoard\Abstracts\AbstractSingleton;
-use PowerBoard\Enums\OrderListColumns;
-use PowerBoard\Enums\SettingsTabs;
-use PowerBoard\Hooks\ActivationHook;
-use PowerBoard\PowerBoardPlugin;
-use PowerBoard\Services\Checkout\AfterpayAPMsPaymentServiceService;
-use PowerBoard\Services\Checkout\AfterpayWalletService;
-use PowerBoard\Services\Checkout\ApplePayWalletService;
-use PowerBoard\Services\Checkout\BankAccountPaymentService;
-use PowerBoard\Services\Checkout\CardPaymentService;
-use PowerBoard\Services\Checkout\GooglePayWalletService;
-use PowerBoard\Services\Checkout\PayPalWalletService;
-use PowerBoard\Services\Checkout\ZipAPMsPaymentServiceService;
-use PowerBoard\Services\Settings\LiveConnectionSettingService;
-use PowerBoard\Services\Settings\LogsSettingService;
-use PowerBoard\Services\Settings\SandboxConnectionSettingService;
-use PowerBoard\Services\Settings\WidgetSettingService;
+use Paydock\Abstracts\AbstractSingleton;
+use Paydock\Enums\OrderListColumns;
+use Paydock\Enums\SettingsTabs;
+use Paydock\Hooks\ActivationHook;
+use Paydock\PaydockPlugin;
+use Paydock\Services\Checkout\AfterpayAPMsPaymentServiceService;
+use Paydock\Services\Checkout\AfterpayWalletService;
+use Paydock\Services\Checkout\ApplePayWalletService;
+use Paydock\Services\Checkout\BankAccountPaymentService;
+use Paydock\Services\Checkout\CardPaymentService;
+use Paydock\Services\Checkout\GooglePayWalletService;
+use Paydock\Services\Checkout\PayPalWalletService;
+use Paydock\Services\Checkout\ZipAPMsPaymentServiceService;
+use Paydock\Services\Settings\LiveConnectionSettingService;
+use Paydock\Services\Settings\LogsSettingService;
+use Paydock\Services\Settings\SandboxConnectionSettingService;
+use Paydock\Services\Settings\WidgetSettingService;
 
 class FiltersService extends AbstractSingleton {
 	protected static $instance = null;
@@ -91,7 +91,7 @@ class FiltersService extends AbstractSingleton {
 	}
 
 	protected function addSettingsLink(): void {
-		add_filter( 'plugin_action_links_' . plugin_basename( POWER_BOARD_PLUGIN_FILE ), [ $this, 'getSettingLink' ] );
+		add_filter( 'plugin_action_links_' . plugin_basename( paydock_PLUGIN_FILE ), [ $this, 'getSettingLink' ] );
 	}
 
 	public function registerInWooCommercePaymentClass( array $methods ): array {
@@ -128,19 +128,19 @@ class FiltersService extends AbstractSingleton {
 
 	public function woocommerceThankyouOrderReceivedText( $text ) {
 		$orderId = absint( get_query_var( 'order-received' ) );
-		$options  = get_option( "power_board_fraud_{$orderId}" );
+		$options  = get_option( "paydock_fraud_{$orderId}" );
 		$order    = wc_get_order( $orderId );
 		$status   = $order->get_meta( ActivationHook::CUSTOM_STATUS_META_KEY );
 		$afterpay = filter_input( INPUT_GET, 'afterpay-error', FILTER_SANITIZE_STRING );
 
 		if ( ! empty( $afterpay ) && ( 'true' === $afterpay ) ) {
-			return __( 'Order has been cancelled', 'power-board' );
+			return __( 'Order has been cancelled', 'paydock' );
 		}
 		if ( false === $options && 'processing' !== $status ) {
-			return __( 'Thank you. Your order has been received.', 'power-board' );
+			return __( 'Thank you. Your order has been received.', 'paydock' );
 		}
 
-		return __( 'Your order is being processed. We\'ll get back to you shortly', 'power-board' );
+		return __( 'Your order is being processed. We\'ll get back to you shortly', 'paydock' );
 	}
 
 	public function getSettingLink( array $links ): array {
@@ -148,8 +148,8 @@ class FiltersService extends AbstractSingleton {
 			$links,
 			sprintf(
 				'<a href="%1$s">%2$s</a>',
-				admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . PowerBoardPlugin::PLUGIN_PREFIX ),
-				__( 'Settings', 'power-board' )
+				admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . PaydockPlugin::PLUGIN_PREFIX ),
+				__( 'Settings', 'paydock' )
 			)
 		);
 

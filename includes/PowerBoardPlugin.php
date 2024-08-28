@@ -1,21 +1,21 @@
 <?php
 
-namespace PowerBoard;
+namespace Paydock;
 
-use PowerBoard\Abstracts\AbstractSingleton;
-use PowerBoard\Hooks\ActivationHook;
-use PowerBoard\Hooks\DeactivationHook;
-use PowerBoard\Repositories\LogRepository;
-use PowerBoard\Services\ActionsService;
-use PowerBoard\Services\FiltersService;
+use Paydock\Abstracts\AbstractSingleton;
+use Paydock\Hooks\ActivationHook;
+use Paydock\Hooks\DeactivationHook;
+use Paydock\Repositories\LogRepository;
+use Paydock\Services\ActionsService;
+use Paydock\Services\FiltersService;
 
-if ( ! class_exists( '\PowerBoard\PowerBoardPlugin' ) ) {
-	final class PowerBoardPlugin extends AbstractSingleton {
+if ( ! class_exists( '\Paydock\PaydockPlugin' ) ) {
+	final class PaydockPlugin extends AbstractSingleton {
 		public const REPOSITORIES = [ 
 			LogRepository::class,
 		];
 
-		public const PLUGIN_PREFIX = 'power_board';
+		public const PLUGIN_PREFIX = 'paydock';
 
 		public const VERSION = '1.0.0';
 
@@ -24,8 +24,8 @@ if ( ! class_exists( '\PowerBoard\PowerBoardPlugin' ) ) {
 		protected $paymentService = null;
 
 		protected function __construct() {
-			register_activation_hook( POWER_BOARD_PLUGIN_FILE, [ ActivationHook::class, 'handle' ] );
-			register_deactivation_hook( POWER_BOARD_PLUGIN_FILE, [ DeactivationHook::class, 'handle' ] );
+			register_activation_hook( paydock_PLUGIN_FILE, [ ActivationHook::class, 'handle' ] );
+			register_deactivation_hook( paydock_PLUGIN_FILE, [ DeactivationHook::class, 'handle' ] );
 
 			ActionsService::getInstance();
 			FiltersService::getInstance();

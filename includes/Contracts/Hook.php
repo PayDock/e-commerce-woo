@@ -1,6 +1,6 @@
 <?php
 
-namespace PowerBoard\Contracts;
+namespace Paydock\Contracts;
 
 interface Hook {
 	public static function handle(): void;

@@ -2,8 +2,8 @@ import walletsForm from "../includes/apms";
 
 walletsForm(
     'afterpay',
-    'PowerBoard Afterpay',
-    'powerBoardAPMsAfterpayButton',
+    'Paydock Afterpay',
+    'paydockAPMsAfterpayButton',
     [
         'first_name',
         'last_name',

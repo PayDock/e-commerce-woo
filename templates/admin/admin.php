@@ -9,7 +9,7 @@
         </a>
 	<?php endforeach; ?>
 </nav>
-<?php if ( 'power_board_log' !== $this->currentSection && isset( $form_fields ) ) : ?>
+<?php if ( 'paydock_log' !== $this->currentSection && isset( $form_fields ) ) : ?>
 	<?php $templateService->settingService->parentGenerateSettingsHtml( $form_fields, true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped  --  the following require is safe it is not a user input. ?>
 <?php else : ?>
     <table

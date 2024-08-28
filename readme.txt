@@ -1,8 +1,8 @@
-=== PowerBoard for WooCommerce ===
+=== Paydock for WooCommerce ===
 
-Contributors: PowerBoard
+Contributors: Paydock
 https://www.commbank.com.au/
-Tags: powerboard, woocommerce, payment, gateways, payment gateways
+Tags: paydock, woocommerce, payment, gateways, payment gateways
 Requires PHP: 7.4
 Requires at least: 6.0
 Tested up to: 6.6
@@ -10,21 +10,21 @@ Stable tag: 3.1.3
 License: GPL-3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
-Accept more payment methods with PowerBoard. Connect multiple payment gateways with a central interface to manage the transactions.
+Accept more payment methods with Paydock. Connect multiple payment gateways with a central interface to manage the transactions.
 
 == Description ==
 
-Accept more payment methods with PowerBoard. Connect multiple payment gateways with a central interface to manage the transactions.
+Accept more payment methods with Paydock. Connect multiple payment gateways with a central interface to manage the transactions.
 
-Use PowerBoard to add a payment gateway for credit cards, bank transfers, PayPal or even Buy now pay later gateways.
+Use Paydock to add a payment gateway for credit cards, bank transfers, PayPal or even Buy now pay later gateways.
 
 == Installation ==
 
-To install and configure the PowerBoard plugin, you need:
+To install and configure the Paydock plugin, you need:
 
 * Web Server - Nginx
 * PHP 8.1
-* MySQL version 8.0 or greater OR MariaDB 11.1 
+* MySQL version 8.0 or greater OR MariaDB 11.1
 * Support for HTTPS (SSL certificate)
 * PHP memory limit of 256MB
 * PHP Requirements (curl, gd2, mbstring, xml, json, and zip)
@@ -32,8 +32,8 @@ To install and configure the PowerBoard plugin, you need:
 ### Step-by-Step Installation
 
 1. **Download the Plugin**
-   - Download the zip file with the plugin:  
-     [PowerBoard WooCommerce Plugin] (https://github.com/PayDock/e-commerce-woo/blob/power_board/power-board_v3.1.3.zip)
+   - Download the zip file with the plugin:
+     [Paydock WooCommerce Plugin] (https://github.com/PayDock/e-commerce-woo/blob/paydock/power-board_v3.1.3.zip)
 
 2. **Install the Plugin**
    - Go to WordPress -> Plugins -> Add new Plugin -> Upload Plugin
@@ -45,11 +45,11 @@ To install and configure the PowerBoard plugin, you need:
 
 5. **Obtain Admin Credentials**
 
-To download the latest version of PowerBoard's WooCommerce plugin, you can manually trigger a build and download the generated artefact directly from GitHub:
+To download the latest version of Paydock's WooCommerce plugin, you can manually trigger a build and download the generated artefact directly from GitHub:
 
 1. **Trigger the Build**
-   - Visit the Actions tab in PowerBoard's GitHub repository: [PowerBoard GitHub] (https://github.com/PayDock/e-commerce-woo/tree/power_board)
-   - Under Workflows, find the workflow named "Build and upload the PowerBoard plugin"
+   - Visit the Actions tab in Paydock's GitHub repository: [Paydock GitHub] (https://github.com/PayDock/e-commerce-woo/tree/paydock)
+   - Under Workflows, find the workflow named "Build and upload the Paydock plugin"
    - Click on "Run workflow"
    - Select the branch and click the green "Run workflow" button
 
@@ -61,18 +61,18 @@ To download the latest version of PowerBoard's WooCommerce plugin, you can manua
 ## Third Party API and libraries
 
 
-this plugin provides the ability to use payment methods through the PowerBoard API:
-* for sandbox https://api.preproduction.powerboard.commbank.com.au/v1/
-* for live https://api.powerboard.commbank.com.au/v1/
+this plugin provides the ability to use payment methods through the Paydock API:
+* for sandbox https://api.preproduction.paydock.commbank.com.au/v1/
+* for live https://api.paydock.commbank.com.au/v1/
 
-We also use a PowerBoard widget to implement front-end features ([More here](https://developer.powerboard.commbank.com.au/reference/powerboard-widget))
+We also use a Paydock widget to implement front-end features ([More here](https://developer.paydock.commbank.com.au/reference/paydock-widget))
 
 ### Terms of Use and Privacy Policy
 
 You can find all relevant information here:
 
-- [Power Board Web site](https://www.commbank.com.au/business/payments/take-online-payments/powerboard.html)
-- [PowerBoard Terms and Conditions to supplement the Merchant Agreement](https://www.commbank.com.au/content/dam/commbank-assets/business/merchants/2022-09/powerboard-terms-and-conditions-july-2022.pdf)
+- [Power Board Web site](https://www.commbank.com.au/business/payments/take-online-payments/paydock.html)
+- [Paydock Terms and Conditions to supplement the Merchant Agreement](https://www.commbank.com.au/content/dam/commbank-assets/business/merchants/2022-09/paydock-terms-and-conditions-july-2022.pdf)
 - [Group Privacy Statement](https://www.commbank.com.au/support/privacy.html?ei=CB-footer_privacy)
 - [Important documents](https://www.commbank.com.au/important-info.html?ei=CB-footer_ImportantDocs)
 - [Cookies policy](https://www.commbank.com.au/important-info/cookies.html?ei=CB-footer_cookies)
@@ -111,7 +111,7 @@ Also we use helper code that not need compile what contained in assets path.
 * Bug fixes
 
 = 2.0.37 =
-* Completely new plugin. This version includes new code, supports new versions of PHP, MySQL, WordPress, WooCommerce, and v2 API of the PowerBoard app.
+* Completely new plugin. This version includes new code, supports new versions of PHP, MySQL, WordPress, WooCommerce, and v2 API of the Paydock app.
 
 = 2.0.44 =
 * New features, readme, changelog, etc.

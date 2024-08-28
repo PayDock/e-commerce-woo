@@ -1,8 +1,8 @@
 <?php
 
-namespace PowerBoard\Abstracts;
+namespace Paydock\Abstracts;
 
-use PowerBoard\API\ConfigService;
+use Paydock\API\ConfigService;
 use WP_Error;
 
 abstract class AbstractApiService {
@@ -35,7 +35,7 @@ abstract class AbstractApiService {
 		}
 
 		$args['headers']['X-Power-Board-Meta'] = 'V'
-		                                         . POWER_BOARD_PLUGIN_VERSION
+		                                         . paydock_PLUGIN_VERSION
 		                                         . '_woocommerce_'
 		                                         . WC()->version;
 
@@ -82,7 +82,7 @@ abstract class AbstractApiService {
 	protected function setAction( $action ): void {
 		if ( empty( $this->allowedAction[ $action ] ) ) {
 			/* translators: %s: Missing action name. */
-			throw new \LogicException( esc_html( sprintf( __( 'Not allowed action: %s', 'power-board' ), $action ) ) );
+			throw new \LogicException( esc_html( sprintf( __( 'Not allowed action: %s', 'paydock' ), $action ) ) );
 		}
 
 		$this->action = $action;

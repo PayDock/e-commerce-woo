@@ -1,8 +1,8 @@
 <?php
 
-namespace PowerBoard\Services\Validation;
+namespace Paydock\Services\Validation;
 
-use PowerBoard\Enums\OtherPaymentMethods;
+use Paydock\Enums\OtherPaymentMethods;
 
 class ValidationHelperService {
 	private $value;

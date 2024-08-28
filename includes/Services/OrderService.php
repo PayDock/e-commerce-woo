@@ -1,8 +1,8 @@
 <?php
 
-namespace PowerBoard\Services;
+namespace Paydock\Services;
 
-use PowerBoard\Hooks\ActivationHook;
+use Paydock\Hooks\ActivationHook;
 
 class OrderService {
 
@@ -39,7 +39,7 @@ class OrderService {
 
 	}
 
-	public function iniPowerBoardOrderButtons( $order ) {
+	public function iniPaydockOrderButtons( $order ) {
 		$orderCustomStatus = $order->get_meta( ActivationHook::CUSTOM_STATUS_META_KEY );
 		$orderStatus       = $order->get_status();
 		$capturedAmount    = $order->get_meta( 'capture_amount' );
@@ -63,9 +63,9 @@ class OrderService {
 		) {
 			wp_enqueue_style(
 				'hide-refund-button-styles',
-				POWER_BOARD_PLUGIN_URL . 'assets/css/admin/hide-refund-button.css',
+				paydock_PLUGIN_URL . 'assets/css/admin/hide-refund-button.css',
 				[],
-				POWER_BOARD_PLUGIN_VERSION
+				paydock_PLUGIN_VERSION
 			);
 		}
 		if ( in_array( $orderStatus, [
@@ -79,22 +79,22 @@ class OrderService {
 				'wc-pb-p-paid',
 				'pb-p-paid'
 			] ) ) {
-			$this->templateService->includeAdminHtml( 'power-board-capture-block', compact( 'order' ) );
+			$this->templateService->includeAdminHtml( 'paydock-capture-block', compact( 'order' ) );
 			wp_enqueue_script(
-				'power-board-capture-block',
-				POWER_BOARD_PLUGIN_URL . 'assets/js/admin/power-board-capture-block.js',
+				'paydock-capture-block',
+				paydock_PLUGIN_URL . 'assets/js/admin/paydock-capture-block.js',
 				[],
 				time(),
 				true
 			);
-			wp_localize_script( 'power-board-capture-block', 'powerBoardCaptureBlockSettings', [
+			wp_localize_script( 'paydock-capture-block', 'paydockCaptureBlockSettings', [
 				'wpnonce' => esc_attr( wp_create_nonce( 'capture-or-cancel' ) ),
 			] );
 		}
 	}
 
 	public function statusChangeVerification( $orderId, $oldStatusKey, $newStatusKey, $order ) {
-		if ( ( $oldStatusKey == $newStatusKey ) || ! empty( $GLOBALS['power_board_is_updating_order_status'] ) || null === $orderId ) {
+		if ( ( $oldStatusKey == $newStatusKey ) || ! empty( $GLOBALS['paydock_is_updating_order_status'] ) || null === $orderId ) {
 			return;
 		}
 		$rulesForStatuses = [
@@ -116,14 +116,14 @@ class OrderService {
 				/* translators: %1$s: Old status of processing order.
 				 * translators: %2$s: New status of processing order.
 				 */
-					__( 'You can not change status from "%1$s"  to "%2$s"', 'power-board' ),
+					__( 'You can not change status from "%1$s"  to "%2$s"', 'paydock' ),
 					$oldStatusName,
 					$newStatusName
 				);
-				$GLOBALS['power_board_is_updating_order_status'] = true;
+				$GLOBALS['paydock_is_updating_order_status'] = true;
 				$order->update_status( $oldStatusKey, $error );
-				update_option( 'power_board_status_change_error', $error );
-				unset( $GLOBALS['power_board_is_updating_order_status'] );
+				update_option( 'paydock_status_change_error', $error );
+				unset( $GLOBALS['paydock_is_updating_order_status'] );
 				throw new \Exception( esc_html( $error ) );
 			}
 		}
@@ -152,10 +152,10 @@ class OrderService {
 	public function displayStatusChangeError() {
 		$screen = get_current_screen();
 		if ( 'woocommerce_page_wc-orders' == $screen->id ) {
-			$message = get_option( 'power_board_status_change_error', '' );
+			$message = get_option( 'paydock_status_change_error', '' );
 			if ( ! empty( $message ) ) {
 				echo '<div class=\'notice notice-error is-dismissible\'><p>' . esc_html( $message ) . '</p></div>';
-				delete_option( 'power_board_status_change_error' );
+				delete_option( 'paydock_status_change_error' );
 			}
 		}
 	}

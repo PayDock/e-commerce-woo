@@ -1,9 +1,9 @@
 <?php
 
-namespace PowerBoard\Services\Checkout;
+namespace Paydock\Services\Checkout;
 
-use PowerBoard\Abstracts\AbstractWalletPaymentService;
-use PowerBoard\Enums\WalletPaymentMethods;
+use Paydock\Abstracts\AbstractWalletPaymentService;
+use Paydock\Enums\WalletPaymentMethods;
 
 class GooglePayWalletService extends AbstractWalletPaymentService {
 	protected function getWalletType(): WalletPaymentMethods {

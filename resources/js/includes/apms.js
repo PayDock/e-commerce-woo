@@ -8,17 +8,17 @@ import {select} from '@wordpress/data';
 import {CART_STORE_KEY} from '@woocommerce/block-data';
 import canMakePayment from "./canMakePayment";
 
-const textDomain = 'power_board';
+const textDomain = 'paydock';
 const labels = {
-    defaultLabel: __('PowerBoard Payments', textDomain),
-    placeOrderButtonLabel: __('Place Order by PowerBoard', textDomain),
+    defaultLabel: __('Paydock Payments', textDomain),
+    placeOrderButtonLabel: __('Place Order by Paydock', textDomain),
     validationError: __('Please fill in the required fields of the form to display payment methods', textDomain),
     notAvailable: __('The payment method is not available in your country.', textDomain),
 }
 let wasInit = false;
 export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
-    const settingKey = `power_board_${id}_a_p_m_s_block_data`;
-    const paymentName = `power_board_${id}_a_p_m_s_gateway`;
+    const settingKey = `paydock_${id}_a_p_m_s_block_data`;
+    const paymentName = `paydock_${id}_a_p_m_s_gateway`;
 
     const settings = getSetting(settingKey, {});
     const label = decodeEntities(settings.title) || __(defaultLabel, textDomain);
@@ -30,8 +30,8 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
         const billingAddress = cart.getCustomerData().billingAddress;
         const shippingAddress = cart.getCustomerData().shippingAddress;
         const shippingRates = cart.getShippingRates();
-        const countriesError = jQuery('.power-board-country-available');
-        const validationError = jQuery('.power-board-validation-error');
+        const countriesError = jQuery('.paydock-country-available');
+        const validationError = jQuery('.paydock-validation-error');
         const buttonElement = jQuery('#' + buttonId);
         const orderButton = jQuery('.wc-block-components-checkout-place-order-button');
         const paymentCompleteElement = jQuery('#paymentCompleted');
@@ -108,7 +108,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
                 };
 
                 if(shippingRates.length && shippingRates[0].shipping_rates.length) {
-                    shippingRates[0].shipping_rates.forEach((rate, key) => {
+                    shippingRates[0].shipping_rates.forEach((rate, _key) => {
                         if (!rate.selected) {
                             return;
                         }
@@ -240,7 +240,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
 
         return createElement(
             'div',
-            {id: 'powerBoardWidgetApm'},
+            {id: 'paydockWidgetApm'},
             createElement('div', {
                 id: 'paymentCompleted', style: {
                     display: 'none',
@@ -268,14 +268,14 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
                 },
                 createElement('img',
                     {
-                        src: `${window.powerBoardWidgetSettings.pluginUrlPrefix}assets/images/${id}.png`,
+                        src: `${window.paydockWidgetSettings.pluginUrlPrefix}assets/images/${id}.png`,
                     },
                 ),
             ),),
             createElement(
                 'div',
                 {
-                    class: 'power-board-validation-error',
+                    class: 'paydock-validation-error',
                 },
                 labels.validationError
             ),
@@ -289,7 +289,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
             createElement(
                 "div",
                 {
-                    class: 'power-board-country-available',
+                    class: 'paydock-country-available',
                     style: {
                         display: 'none'
                     }
@@ -305,12 +305,12 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
             createElement(
                 "div",
                 {
-                    className: 'power-board-payment-method-label'
+                    className: 'paydock-payment-method-label'
                 },
                 createElement("img", {
-                    src: `${window.powerBoardWidgetSettings.pluginUrlPrefix}assets/images/icons/${id}.png`,
+                    src: `${window.paydockWidgetSettings.pluginUrlPrefix}assets/images/icons/${id}.png`,
                     alt: label,
-                    className: `power-board-payment-method-label-icon ${id}`
+                    className: `paydock-payment-method-label-icon ${id}`
                 }),
                 "  " + label,
             )

@@ -1,9 +1,9 @@
 <?php
 
-namespace PowerBoard\Services\Checkout;
+namespace Paydock\Services\Checkout;
 
-use PowerBoard\Abstracts\AbstractAPMsPaymentService;
-use PowerBoard\Enums\OtherPaymentMethods;
+use Paydock\Abstracts\AbstractAPMsPaymentService;
+use Paydock\Enums\OtherPaymentMethods;
 
 class AfterpayAPMsPaymentServiceService extends AbstractAPMsPaymentService {
 

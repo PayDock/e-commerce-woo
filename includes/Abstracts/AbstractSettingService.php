@@ -1,10 +1,10 @@
 <?php
 
-namespace PowerBoard\Abstracts;
+namespace Paydock\Abstracts;
 
-use PowerBoard\Enums\SettingsTabs;
-use PowerBoard\Services\Assets\AdminAssetsService;
-use PowerBoard\Services\TemplateService;
+use Paydock\Enums\SettingsTabs;
+use Paydock\Services\Assets\AdminAssetsService;
+use Paydock\Services\TemplateService;
 
 abstract class AbstractSettingService extends \WC_Payment_Gateway {
 	public $currentSection = null;
@@ -23,13 +23,13 @@ abstract class AbstractSettingService extends \WC_Payment_Gateway {
 
 		$this->id                 = $this->getId();
 		$this->enabled            = $this->get_option( 'enabled' );
-		$this->method_title       = __( 'PowerBoard Gateway', 'power-board' );
+		$this->method_title       = __( 'Paydock Gateway', 'paydock' );
 		$this->method_description = __(
-			'PowerBoard simplify how you manage your payments. Reduce costs, technical headaches & streamline compliance using PowerBoard\'s payment orchestration.',
-			'power-board'
+			'Paydock simplify how you manage your payments. Reduce costs, technical headaches & streamline compliance using Paydock\'s payment orchestration.',
+			'paydock'
 		);
 
-		$this->title = __( 'PowerBoard Gateway', 'power-board' );
+		$this->title = __( 'Paydock Gateway', 'paydock' );
 
 		$this->icon = plugins_url( 'assets/images/logo.svg' );
 
@@ -68,19 +68,19 @@ abstract class AbstractSettingService extends \WC_Payment_Gateway {
 	protected function getTabs(): array {
 		return [
 			SettingsTabs::LIVE_CONNECTION()->value    => [
-				'label'  => __( 'Live Connection', 'power-board' ),
+				'label'  => __( 'Live Connection', 'paydock' ),
 				'active' => SettingsTabs::LIVE_CONNECTION()->value == $this->currentSection,
 			],
 			SettingsTabs::SANDBOX_CONNECTION()->value => [
-				'label'  => __( 'Sandbox Connection', 'power-board' ),
+				'label'  => __( 'Sandbox Connection', 'paydock' ),
 				'active' => SettingsTabs::SANDBOX_CONNECTION()->value == $this->currentSection,
 			],
 			SettingsTabs::WIDGET()->value             => [
-				'label'  => __( 'Widget Configuration', 'power-board' ),
+				'label'  => __( 'Widget Configuration', 'paydock' ),
 				'active' => SettingsTabs::WIDGET()->value == $this->currentSection,
 			],
 			SettingsTabs::LOG()->value                => [
-				'label'  => __( 'Logs', 'power-board' ),
+				'label'  => __( 'Logs', 'paydock' ),
 				'active' => SettingsTabs::LOG()->value == $this->currentSection,
 			],
 		];

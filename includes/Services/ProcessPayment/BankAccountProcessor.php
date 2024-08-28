@@ -1,14 +1,14 @@
 <?php
 
-namespace PowerBoard\Services\ProcessPayment;
+namespace Paydock\Services\ProcessPayment;
 
-use PowerBoard\Enums\SaveCardOptions;
-use PowerBoard\Exceptions\LoggedException;
-use PowerBoard\Helpers\ArgsForProcessPayment;
-use PowerBoard\Helpers\VaultTokenHelper;
-use PowerBoard\Repositories\LogRepository;
-use PowerBoard\Repositories\UserTokenRepository;
-use PowerBoard\Services\SDKAdapterService;
+use Paydock\Enums\SaveCardOptions;
+use Paydock\Exceptions\LoggedException;
+use Paydock\Helpers\ArgsForProcessPayment;
+use Paydock\Helpers\VaultTokenHelper;
+use Paydock\Repositories\LogRepository;
+use Paydock\Repositories\UserTokenRepository;
+use Paydock\Services\SDKAdapterService;
 
 class BankAccountProcessor {
 	protected $order;
@@ -86,7 +86,7 @@ class BankAccountProcessor {
 					LogRepository::ERROR
 				);
 				new LoggedException(
-					__( 'Oops! Something went wrong. Please check the information provided and try again. ', 'power-board' ),
+					__( 'Oops! Something went wrong. Please check the information provided and try again. ', 'paydock' ),
 					0,
 					null,
 					$response
@@ -192,7 +192,7 @@ class BankAccountProcessor {
 
 		if ( ! empty( $response['error'] ) ) {
 			new LoggedException(
-				__( 'Oops! Something went wrong. Please check the information provided and try again. ', 'power-board' ),
+				__( 'Oops! Something went wrong. Please check the information provided and try again. ', 'paydock' ),
 				0,
 				null,
 				$response

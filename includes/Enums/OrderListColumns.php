@@ -1,9 +1,9 @@
 <?php
 
-namespace PowerBoard\Enums;
+namespace Paydock\Enums;
 
-use PowerBoard\Abstracts\AbstractEnum;
-use PowerBoard\PowerBoardPlugin;
+use Paydock\Abstracts\AbstractEnum;
+use Paydock\PaydockPlugin;
 
 class OrderListColumns extends AbstractEnum {
 	public const AFTER_COLUMN = 'order_status';
@@ -12,7 +12,7 @@ class OrderListColumns extends AbstractEnum {
 	public function getLabel(): string {
 		switch ( $this->name ) {
 			case self::PAYMENT_SOURCE_TYPE:
-				return 'PowerBoard Payment Type';
+				return 'Paydock Payment Type';
 			default:
 				return '';
 		}
@@ -21,7 +21,7 @@ class OrderListColumns extends AbstractEnum {
 	public function getKey(): string {
 		switch ( $this->name ) {
 			case self::PAYMENT_SOURCE_TYPE:
-				return PowerBoardPlugin::PLUGIN_PREFIX . '_payment_source_type';
+				return PaydockPlugin::PLUGIN_PREFIX . '_payment_source_type';
 			default:
 				return '';
 		}

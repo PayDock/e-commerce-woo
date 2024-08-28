@@ -210,31 +210,31 @@ input[type=checkbox].checkbox {
     font-weight: 600;
 }
 
-.multiselect-power-board label {
+.multiselect-paydock label {
     display: flex !important;
 }
 
-.form-table td fieldset .multiselect-power-board label {
+.form-table td fieldset .multiselect-paydock label {
     margin: 0 !important;
 }
 
-.multiselect-power-board input[type=checkbox].checkbox {
+.multiselect-paydock input[type=checkbox].checkbox {
     margin-left: 15px;
 }
 
-.multiselect-power-board .checkbox + label {
+.multiselect-paydock .checkbox + label {
     padding: 6px 20px 6px 45px;
 }
 
-.multiselect-power-board * {
+.multiselect-paydock * {
     box-sizing: border-box;
 }
 
-.multiselect-power-board .checkbox {
+.multiselect-paydock .checkbox {
     margin-top: 1px;
 }
 
-.multiselect-power-board .value:after {
+.multiselect-paydock .value:after {
     border: none;
     background: #fff url(data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%206l5%205%205-5%202%201-7%207-7-7%202-1z%22%20fill%3D%22%23555%22%2F%3E%3C%2Fsvg%3E) no-repeat right 5px top 55%;
     width: 20px;
@@ -243,11 +243,11 @@ input[type=checkbox].checkbox {
     background-size: 16px 16px;
 }
 
-.multiselect-power-board.-open .value:after {
+.multiselect-paydock.-open .value:after {
     transform: rotate(-180deg) scale(1) skew(0deg) translate(5px);
 }
 
-.multiselect-power-board .checkbox {
+.multiselect-paydock .checkbox {
     position: absolute;
     margin: 0;
     width: 0;
@@ -258,11 +258,11 @@ input[type=checkbox].checkbox {
     margin: auto !important;
 }
 
-.multiselect-power-board ul li {
+.multiselect-paydock ul li {
     position: relative;
 }
 
-.woocommerce table.form-table input.input-text.regular-input.powerboard {
+.woocommerce table.form-table input.input-text.regular-input.paydock {
     width: 154px;
     margin: auto 8px;
 }

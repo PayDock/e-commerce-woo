@@ -30,7 +30,7 @@
  * @link          https://github.com/foroco/php-browser-detection
  */
 
-namespace PowerBoard\Services;
+namespace Paydock\Services;
 
 class BrowserDetection {
 	public $useragent;

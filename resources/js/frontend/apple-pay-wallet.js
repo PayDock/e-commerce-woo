@@ -2,8 +2,8 @@ import walletsForm from "../includes/wallets-form";
 
 walletsForm(
     'apple-pay',
-    'PowerBoard Apple Pay',
-    'powerBoardWalletApplePayButton',
+    'Paydock Apple Pay',
+    'paydockWalletApplePayButton',
     [
         'first_name',
         'last_name',

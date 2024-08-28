@@ -1,26 +1,26 @@
 <?php
 
-namespace PowerBoard\Services\Settings;
+namespace Paydock\Services\Settings;
 
-use PowerBoard\Abstracts\AbstractSettingService;
-use PowerBoard\Enums\APMsSettings;
-use PowerBoard\Enums\BankAccountSettings;
-use PowerBoard\Enums\CardSettings;
-use PowerBoard\Enums\CredentialSettings;
-use PowerBoard\Enums\CredentialsTypes;
-use PowerBoard\Enums\DSTypes;
-use PowerBoard\Enums\FraudTypes;
-use PowerBoard\Enums\OtherPaymentMethods;
-use PowerBoard\Enums\SaveCardOptions;
-use PowerBoard\Enums\SettingGroups;
-use PowerBoard\Enums\SettingsTabs;
-use PowerBoard\Enums\TypeExchangeOTT;
-use PowerBoard\Enums\WalletPaymentMethods;
-use PowerBoard\Enums\WalletSettings;
-use PowerBoard\PowerBoardPlugin;
-use PowerBoard\Services\HashService;
-use PowerBoard\Services\SettingsService;
-use PowerBoard\Services\Validation\ConnectionValidationService;
+use Paydock\Abstracts\AbstractSettingService;
+use Paydock\Enums\APMsSettings;
+use Paydock\Enums\BankAccountSettings;
+use Paydock\Enums\CardSettings;
+use Paydock\Enums\CredentialSettings;
+use Paydock\Enums\CredentialsTypes;
+use Paydock\Enums\DSTypes;
+use Paydock\Enums\FraudTypes;
+use Paydock\Enums\OtherPaymentMethods;
+use Paydock\Enums\SaveCardOptions;
+use Paydock\Enums\SettingGroups;
+use Paydock\Enums\SettingsTabs;
+use Paydock\Enums\TypeExchangeOTT;
+use Paydock\Enums\WalletPaymentMethods;
+use Paydock\Enums\WalletSettings;
+use Paydock\PaydockPlugin;
+use Paydock\Services\HashService;
+use Paydock\Services\SettingsService;
+use Paydock\Services\Validation\ConnectionValidationService;
 
 class LiveConnectionSettingService extends AbstractSettingService {
 	public function __construct() {
@@ -45,7 +45,7 @@ class LiveConnectionSettingService extends AbstractSettingService {
 		$service = SettingsService::getInstance();
 
 		foreach ( SettingGroups::cases() as $settingGroup ) {
-			$key = PowerBoardPlugin::PLUGIN_PREFIX . '_' . $service->getOptionName( $this->id, [
+			$key = PaydockPlugin::PLUGIN_PREFIX . '_' . $service->getOptionName( $this->id, [
 					$settingGroup->name,
 					'label',
 				] );
@@ -53,7 +53,7 @@ class LiveConnectionSettingService extends AbstractSettingService {
 			if ( SettingGroups::CARD() == $settingGroup ) {
 				$this->form_fields[ $key . '_label' ] = [
 					'type'  => 'big_label',
-					'title' => __( 'Payment Methods:', 'power-board' ),
+					'title' => __( 'Payment Methods:', 'paydock' ),
 				];
 			}
 
@@ -229,7 +229,7 @@ class LiveConnectionSettingService extends AbstractSettingService {
 				] );
 				$fields[ $key ] = [
 					'type'  => 'checkbox',
-					'title' => __( 'Pay Later', 'power-board' ),
+					'title' => __( 'Pay Later', 'paydock' ),
 				];
 			}
 		}

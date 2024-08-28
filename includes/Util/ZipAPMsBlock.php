@@ -1,10 +1,10 @@
 <?php
 
-namespace PowerBoard\Util;
+namespace Paydock\Util;
 
-use PowerBoard\Abstracts\AbstractAPMsBlock;
-use PowerBoard\Enums\OtherPaymentMethods;
-use PowerBoard\Services\Checkout\ZipAPMsPaymentServiceService;
+use Paydock\Abstracts\AbstractAPMsBlock;
+use Paydock\Enums\OtherPaymentMethods;
+use Paydock\Services\Checkout\ZipAPMsPaymentServiceService;
 
 class ZipAPMsBlock extends AbstractAPMsBlock {
 

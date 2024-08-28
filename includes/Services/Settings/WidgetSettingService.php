@@ -1,12 +1,12 @@
 <?php
 
-namespace PowerBoard\Services\Settings;
+namespace Paydock\Services\Settings;
 
-use PowerBoard\Abstracts\AbstractSettingService;
-use PowerBoard\Enums\SettingsTabs;
-use PowerBoard\Enums\WidgetSettings;
-use PowerBoard\Services\SettingsService;
-use PowerBoard\Services\Validation\WidgetValidationService;
+use Paydock\Abstracts\AbstractSettingService;
+use Paydock\Enums\SettingsTabs;
+use Paydock\Enums\WidgetSettings;
+use Paydock\Services\SettingsService;
+use Paydock\Services\Validation\WidgetValidationService;
 
 class WidgetSettingService extends AbstractSettingService {
 	private const CUSTOM_STYLES_PLACEHOLDER = '{
@@ -69,11 +69,11 @@ class WidgetSettingService extends AbstractSettingService {
 			if ( WidgetSettings::PAYMENT_CARD_TITLE()->name === $case->name ) {
 				$this->form_fields[ $key . '_big_label' ] = [
 					'type'  => 'big_label',
-					'title' => __( 'Payment Methods:', 'power-board' ),
+					'title' => __( 'Payment Methods:', 'paydock' ),
 				];
 				$this->form_fields[ $key . '_label' ]     = [
 					'type'  => 'label',
-					'title' => __( 'Cards', 'power-board' ),
+					'title' => __( 'Cards', 'paydock' ),
 				];
 			} elseif ( WidgetSettings::PAYMENT_BANK_ACCOUNT_TITLE()->name === $case->name ||
 			           WidgetSettings::PAYMENT_BANK_ACCOUNT_DESCRIPTION()->name === $case->name ) {
@@ -81,17 +81,17 @@ class WidgetSettingService extends AbstractSettingService {
 			} elseif ( WidgetSettings::PAYMENT_WALLET_APPLE_PAY_TITLE()->name === $case->name ) {
 				$this->form_fields[ $key . '_label' ] = [
 					'type'  => 'label',
-					'title' => __( 'Wallets', 'power-board' ),
+					'title' => __( 'Wallets', 'paydock' ),
 				];
 			} elseif ( WidgetSettings::PAYMENT_A_P_M_S_AFTERPAY_V1_TITLE()->name === $case->name ) {
 				$this->form_fields[ $key . '_label' ] = [
 					'type'  => 'label',
-					'title' => __( 'APMs', 'power-board' ),
+					'title' => __( 'APMs', 'paydock' ),
 				];
 			} elseif ( WidgetSettings::STYLE_BACKGROUND_COLOR()->name === $case->name ) {
 				$this->form_fields[ $key . '_label' ] = [
 					'type'  => 'big_label',
-					'title' => __( 'Widget Styles:', 'power-board' ),
+					'title' => __( 'Widget Styles:', 'paydock' ),
 				];
 			}
 

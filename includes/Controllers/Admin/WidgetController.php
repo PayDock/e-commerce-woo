@@ -1,12 +1,12 @@
 <?php
 
-namespace PowerBoard\Controllers\Admin;
+namespace Paydock\Controllers\Admin;
 
-use PowerBoard\Enums\WalletPaymentMethods;
-use PowerBoard\Helpers\ShippingHelper;
-use PowerBoard\Repositories\LogRepository;
-use PowerBoard\Services\SDKAdapterService;
-use PowerBoard\Services\SettingsService;
+use Paydock\Enums\WalletPaymentMethods;
+use Paydock\Helpers\ShippingHelper;
+use Paydock\Repositories\LogRepository;
+use Paydock\Services\SDKAdapterService;
+use Paydock\Services\SettingsService;
 use WP_REST_Request;
 
 class WidgetController {

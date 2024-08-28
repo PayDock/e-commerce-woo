@@ -1,11 +1,11 @@
 <?php
 
-namespace PowerBoard\Hooks;
+namespace Paydock\Hooks;
 
-use PowerBoard\Contracts\Hook;
-use PowerBoard\Contracts\Repository;
-use PowerBoard\PowerBoardPlugin;
-use PowerBoard\Plugin;
+use Paydock\Contracts\Hook;
+use Paydock\Contracts\Repository;
+use Paydock\PaydockPlugin;
+use Paydock\Plugin;
 
 class DeactivationHook implements Hook {
 
@@ -17,7 +17,7 @@ class DeactivationHook implements Hook {
 
 		$repositories = array_map( function ($className) {
 			return new $className();
-		}, PowerBoardPlugin::REPOSITORIES );
+		}, PaydockPlugin::REPOSITORIES );
 
 		array_map( [ $instance, 'runMigration' ], $repositories );
 	}

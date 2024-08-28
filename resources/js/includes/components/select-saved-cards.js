@@ -2,7 +2,7 @@ import Select from 'react-select'
 import {getSetting} from '@woocommerce/settings';
 
 export default (selectTokenLabel = 'Saved cards', newCardLabel = 'New card') => {
-    const settings = getSetting('power_board_data', {});
+    const settings = getSetting('paydock_data', {});
 
     if (!settings.hasOwnProperty('tokens') || typeof settings.tokens !== "object") {
         return '';
@@ -29,7 +29,7 @@ export default (selectTokenLabel = 'Saved cards', newCardLabel = 'New card') => 
     })
 
     return (
-        <div className="power-board-select-saved-cards">
+        <div className="paydock-select-saved-cards">
             <label style={{
                 fontSize: '1rem',
                 fontWeight: 'bold',
@@ -52,12 +52,12 @@ export default (selectTokenLabel = 'Saved cards', newCardLabel = 'New card') => 
                     settings.selectedToken = value
 
                     $saveCard.show()
-                    jQuery('#powerBoardWidgetCard_wrapper').show()
+                    jQuery('#paydockWidgetCard_wrapper').show()
 
                     if (value !== '') {
                         const token = settings.tokens.find(token => token.vault_token === value)
                         if (token !== undefined) {
-                            jQuery('#powerBoardWidgetCard_wrapper').hide()
+                            jQuery('#paydockWidgetCard_wrapper').hide()
 
                             $saveCard.hide()
                         }

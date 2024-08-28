@@ -3,10 +3,10 @@ name: Build and upload Paydock for WooCommerce plugin
 on:
   push:
     branches:
-      - power_board
+      - paydock
   pull_request:
     branches:
-      - power_board
+      - paydock
   workflow_dispatch:
 
 jobs:
@@ -25,15 +25,15 @@ jobs:
       - name: Upload plugin artifact
         uses: actions/upload-artifact@v4
         with:
-          name: power-board
+          name: paydock
           path: artifacts/
 
 #      - name: Zip the plugin
-#        run: zip -r power-board.zip artifacts/
+#        run: zip -r paydock.zip artifacts/
 
 #      - name: Upload to Google Drive
 #        uses: google-github-actions/upload-cloud-storage@v0.8.0
 #        with:
-#          path: power-board.zip
-#          destination: 1mwR5ruoRrGF4cYa1TMlSyy-FYm-m2ZmP/power-board.zip
+#          path: paydock.zip
+#          destination: 1mwR5ruoRrGF4cYa1TMlSyy-FYm-m2ZmP/paydock.zip
 #          credentials: ${{ secrets.GDRIVE_SA_KEY }}

@@ -1,8 +1,8 @@
 <?php
 
-namespace PowerBoard\Enums;
+namespace Paydock\Enums;
 
-use PowerBoard\Abstracts\AbstractEnum;
+use Paydock\Abstracts\AbstractEnum;
 
 class CustomStylesElements extends AbstractEnum {
 	const INPUT = 'input';

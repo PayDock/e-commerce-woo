@@ -1,8 +1,8 @@
 <?php
 
-namespace PowerBoard\API;
+namespace Paydock\API;
 
-use PowerBoard\Enums\ConfigAPI;
+use Paydock\Enums\ConfigAPI;
 
 class ConfigService {
 	public static $environment = null;

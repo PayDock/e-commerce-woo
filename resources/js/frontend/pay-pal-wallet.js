@@ -2,8 +2,8 @@ import walletsForm from "../includes/wallets-form";
 
 walletsForm(
     'pay-pal',
-    'PowerBoard PayPal',
-    'powerBoardWalletPayPalButton',
+    'Paydock PayPal',
+    'paydockWalletPayPalButton',
     [
         'first_name',
         'last_name',

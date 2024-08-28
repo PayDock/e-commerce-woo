@@ -1,16 +1,16 @@
 <?php
 
-namespace PowerBoard\Abstracts;
+namespace Paydock\Abstracts;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Exception;
-use PowerBoard\Enums\OrderListColumns;
-use PowerBoard\Enums\OtherPaymentMethods;
-use PowerBoard\Repositories\LogRepository;
-use PowerBoard\Services\OrderService;
-use PowerBoard\Services\ProcessPayment\ApmProcessor;
-use PowerBoard\Services\SettingsService;
-use PowerBoard\Services\Validation\ValidationHelperService;
+use Paydock\Enums\OrderListColumns;
+use Paydock\Enums\OtherPaymentMethods;
+use Paydock\Repositories\LogRepository;
+use Paydock\Services\OrderService;
+use Paydock\Services\ProcessPayment\ApmProcessor;
+use Paydock\Services\SettingsService;
+use Paydock\Services\Validation\ValidationHelperService;
 
 abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 	/**
@@ -20,7 +20,7 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 		$settings      = SettingsService::getInstance();
 		$paymentMethod = $this->getAPMsType();
 
-		$this->id          = 'power_board_' . $paymentMethod->getId() . '_a_p_m_s_gateway';
+		$this->id          = 'paydock_' . $paymentMethod->getId() . '_a_p_m_s_gateway';
 		$this->title       = $settings->getWidgetPaymentAPMTitle( $paymentMethod );
 		$this->description = $settings->getWidgetPaymentAPMDescription( $paymentMethod );
 
@@ -44,7 +44,7 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 		if ( ! wp_verify_nonce( $wpNonce, 'process_payment' ) ) {
 			throw new RouteException(
 				'woocommerce_rest_checkout_process_payment_error',
-				esc_html( __( 'Error: Security check', 'power-board' ) )
+				esc_html( __( 'Error: Security check', 'paydock' ) )
 			);
 		}
 
@@ -60,7 +60,7 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 
 			if ( ! empty( $response['error'] ) || empty( $response['resource']['data']['_id'] ) ) {
 				throw new Exception( __( 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later.',
-					'power-board' ) );
+					'paydock' ) );
 			}
 
 			$chargeId = $response['resource']['data']['_id'];
@@ -75,7 +75,7 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 			throw new RouteException(
 				'woocommerce_rest_checkout_process_payment_error',
 				/* translators: %s: Error message */
-				esc_html( sprintf( __( 'Error: %s', 'power-board' ), $e->getMessage() ) )
+				esc_html( sprintf( __( 'Error: %s', 'paydock' ), $e->getMessage() ) )
 			);
 		}
 
@@ -93,7 +93,7 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 			$order->payment_complete();
 			$order->update_meta_data( 'pb_directly_charged', 1 );
 		}
-		$order->update_meta_data( 'power_board_charge_id', $chargeId );
+		$order->update_meta_data( 'paydock_charge_id', $chargeId );
 		$order->save();
 
 		WC()->cart->empty_cart();
@@ -118,23 +118,23 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 	public function getValidatedData() {
 		$postData = array_change_key_case( $_POST, CASE_LOWER );
 		if ( ! ( new ValidationHelperService( $postData['amount'] ) )->isFloat() ) {
-			wp_die( __( 'wrong "amount" format', 'power-board' ) );
+			wp_die( __( 'wrong "amount" format', 'paydock' ) );
 		}
 		if ( ! empty( sanitize_text_field( $postData['gatewayid'] ) ) &&
 		     ! ( new ValidationHelperService( $postData['gatewayid'] ) )->isServiceId() ) {
-			wp_die( __( 'wrong "gateway" ID', 'power-board' ) );
+			wp_die( __( 'wrong "gateway" ID', 'paydock' ) );
 		}
 		if ( ! empty( $postData['paymentsourcetoken'] ) &&
 		     ! ( new ValidationHelperService( $postData['paymentsourcetoken'] ) )->isUUID() ) {
-			wp_die( __( 'wrong "payment source token" format', 'power-board' ) );
+			wp_die( __( 'wrong "payment source token" format', 'paydock' ) );
 		}
 		if ( ! empty( $postData['fraudserviceid'] ) &&
 		     ! ( new ValidationHelperService( $postData['fraudserviceid'] ) )->isServiceId() ) {
-			wp_die( __( 'wrong "fraud service" ID', 'power-board' ) );
+			wp_die( __( 'wrong "fraud service" ID', 'paydock' ) );
 		}
 		if ( ! empty( $postData['gatewaytype'] ) &&
 		     ! ( new ValidationHelperService( $postData['gatewaytype'] ) )->isValidAPMId() ) {
-			wp_die( __( 'wrong "wrong payment method" ID', 'power-board' ) );
+			wp_die( __( 'wrong "wrong payment method" ID', 'paydock' ) );
 		}
 
 

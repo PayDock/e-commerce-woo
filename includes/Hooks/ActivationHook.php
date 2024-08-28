@@ -1,10 +1,10 @@
 <?php
 
-namespace PowerBoard\Hooks;
+namespace Paydock\Hooks;
 
-use PowerBoard\Contracts\Hook;
-use PowerBoard\Contracts\Repository;
-use PowerBoard\PowerBoardPlugin;
+use Paydock\Contracts\Hook;
+use Paydock\Contracts\Repository;
+use Paydock\PaydockPlugin;
 
 class ActivationHook implements Hook {
 
@@ -29,7 +29,7 @@ class ActivationHook implements Hook {
 		'wc-pb-p-refund'  => 'refunded',
 	];
 
-	public const CUSTOM_STATUS_META_KEY = 'power_board_custom_status';
+	public const CUSTOM_STATUS_META_KEY = 'paydock_custom_status';
 
 	public function __construct() {
 	}
@@ -39,7 +39,7 @@ class ActivationHook implements Hook {
 
 		$repositories = array_map( function ( $className ) {
 			return new $className();
-		}, PowerBoardPlugin::REPOSITORIES );
+		}, PaydockPlugin::REPOSITORIES );
 
 		array_map( [ $instance, 'runMigration' ], $repositories );
 

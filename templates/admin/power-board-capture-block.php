@@ -1,7 +1,7 @@
 <?php if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 } // Exit if accessed directly ?>
-<span class="power-board-order-actions">
+<span class="paydock-order-actions">
     <?php
         $pb_charge_meta = $order->get_meta( 'pb_directly_charged' );
         $order_directly_charged = ! empty( $pb_charge_meta ) ? $pb_charge_meta : false;
@@ -9,12 +9,12 @@
         if ( $order_directly_charged == false ) :
     ?>
         <button type="button"
-                onclick="powerBoardPaymentCapture(<?php echo esc_attr( $order->get_id() ); ?>, 'power-board-capture-charge')"
+                onclick="paydockPaymentCapture(<?php echo esc_attr( $order->get_id() ); ?>, 'paydock-capture-charge')"
                 class="button">
 			Capture charge
 		</button>
     <button type="button"
-              onclick="handlePowerBoardPaymentCapture(<?php echo esc_attr( $order->get_id() ); ?>, 'power-board-cancel-authorised')"
+              onclick="handlePaydockPaymentCapture(<?php echo esc_attr( $order->get_id() ); ?>, 'paydock-cancel-authorised')"
               class="button">
       Cancel charge
     </button>
@@ -48,7 +48,7 @@
     <div class="refund-actions manual-capture-actions">
 		<?php /* translators: capture amount  */ ?>
         <button type="button"
-                onclick="handlePowerBoardPaymentCapture(<?php echo esc_attr( $order->get_id() ); ?>, 'power-board-capture-charge')"
+                onclick="handlePaydockPaymentCapture(<?php echo esc_attr( $order->get_id() ); ?>, 'paydock-capture-charge')"
                 class="button button-primary">
 			<?php esc_html_e( 'Capture ', 'woocommerce' );
 			$currency_symbol = get_woocommerce_currency_symbol( $order->get_currency() );;

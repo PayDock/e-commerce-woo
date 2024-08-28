@@ -1,10 +1,10 @@
 <?php
 
-namespace PowerBoard\Services\Settings;
+namespace Paydock\Services\Settings;
 
-use PowerBoard\Abstracts\AbstractSettingService;
-use PowerBoard\Enums\SettingsTabs;
-use PowerBoard\Repositories\LogRepository;
+use Paydock\Abstracts\AbstractSettingService;
+use Paydock\Enums\SettingsTabs;
+use Paydock\Repositories\LogRepository;
 
 class LogsSettingService extends AbstractSettingService {
 	public function generate_settings_html( $form_fields = [], $echo = true ): ?string {

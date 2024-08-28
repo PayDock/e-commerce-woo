@@ -1,6 +1,6 @@
 <?php
 
-namespace PowerBoard\Contracts;
+namespace Paydock\Contracts;
 
 interface Repository {
 	public const INDEX_POSTFIX = 'index';

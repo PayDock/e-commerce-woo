@@ -8,12 +8,12 @@ export default (id, buttonId, data, isSandbox) => {
         country: data.county,
     }
 
-    if ('#powerBoardWalletApplePayButton' === buttonId) {
+    if ('#paydockWalletApplePayButton' === buttonId) {
         config['wallets'] = ['apple'];
         config['amount_label'] = "Total";
     }
 
-    if ('#powerBoardWalletPayPalButton' === buttonId) {
+    if ('#paydockWalletPayPalButton' === buttonId) {
         config['pay_later'] = data.pay_later;
 
         config['style'] = {
@@ -21,8 +21,8 @@ export default (id, buttonId, data, isSandbox) => {
         };
     }
 
-    if ('#powerBoardWalletAfterpayButton' === buttonId) {
-        jQuery('#powerBoardWalletAfterpayButton').each((index, element) => element.addEventListener("click", (event) => {
+    if ('#paydockWalletAfterpayButton' === buttonId) {
+        jQuery('#paydockWalletAfterpayButton').each((index, element) => element.addEventListener("click", (_event) => {
             data.payment = id.replace('-', '_')
             paymentSourceElement.val(JSON.stringify(data))
             orderButton.click();
@@ -45,7 +45,7 @@ export default (id, buttonId, data, isSandbox) => {
         orderButton.click();
     })
 
-    buttons.current.onPaymentError((data) => {
+    buttons.current.onPaymentError((_data) => {
         orderButton.click();
     });
 

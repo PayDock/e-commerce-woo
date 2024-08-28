@@ -2,8 +2,8 @@ import walletsForm from "../includes/wallets-form";
 
 walletsForm(
     'google-pay',
-    'PowerBoard Google Pay',
-    'powerBoardWalletGooglePayButton',
+    'Paydock Google Pay',
+    'paydockWalletGooglePayButton',
     [
         'first_name',
         'last_name',

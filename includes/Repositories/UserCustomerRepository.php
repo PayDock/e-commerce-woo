@@ -1,9 +1,9 @@
 <?php
 
-namespace PowerBoard\Repositories;
+namespace Paydock\Repositories;
 
 class UserCustomerRepository {
-	const USER_CUSTOMERS_KEY = 'power_board_card_customers';
+	const USER_CUSTOMERS_KEY = 'paydock_card_customers';
 
 	private $cache;
 	private $userId;

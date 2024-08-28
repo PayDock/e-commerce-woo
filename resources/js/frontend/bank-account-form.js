@@ -3,13 +3,13 @@ import {registerPaymentMethod} from '@woocommerce/blocks-registry';
 import {decodeEntities} from '@wordpress/html-entities';
 import {getSetting} from '@woocommerce/settings';
 import {useEffect} from 'react';
-import {checkboxSavedBankAccountComponent, selectSavedBankAccountsComponent} from '../includes/wc-power-board';
+import {checkboxSavedBankAccountComponent, selectSavedBankAccountsComponent} from '../includes/wc-paydock';
 
-const settings = getSetting('power_board_bank_account_block_data', {});
+const settings = getSetting('paydock_bank_account_block_data', {});
 
-const textDomain = 'power_board';
+const textDomain = 'paydock';
 const labels = {
-    defaultLabel: __('PowerBoard Payments', textDomain),
+    defaultLabel: __('Paydock Payments', textDomain),
     saveBankAcoountLabel: __('Save payment details', textDomain),
     selectTokenLabel: __('Saved payment details', textDomain),
     fillDataError: __('Please fill in the card data.', textDomain)
@@ -31,8 +31,8 @@ const Content = (props) => {
 
     useEffect(() => {
         const validation = onCheckoutValidation(async () => {
-            if (window.hasOwnProperty('powerBoardValidation')) {
-                if (!powerBoardValidation.wcFormValidation()) {
+            if (window.hasOwnProperty('paydockValidation')) {
+                if (!paydockValidation.wcFormValidation()) {
                     return {
                         type: emitResponse.responseTypes.ERROR,
                         errorMessage: labels.requiredDataError
@@ -48,10 +48,10 @@ const Content = (props) => {
                 return true;
             }
 
-            window.widgetPowerBoardBankAccount.trigger(window.cba.TRIGGER.SUBMIT_FORM);
+            window.widgetPaydockBankAccount.trigger(window.cba.TRIGGER.SUBMIT_FORM);
             let result = false;
 
-            window.widgetPowerBoardBankAccount.on(window.cba.EVENT.FINISH, (data) => {
+            window.widgetPaydockBankAccount.on(window.cba.EVENT.FINISH, (_data) => {
                 result = true;
             })
 
@@ -120,13 +120,13 @@ const Content = (props) => {
             {class: 'logo-comm-bank'},
             createElement(
                 "img",
-                {src: `${window.powerBoardWidgetSettings.pluginUrlPrefix}assets/images/commBank_logo.png`}
+                {src: `${window.paydockWidgetSettings.pluginUrlPrefix}assets/images/commBank_logo.png`}
             ),
         ),
         selectSavedBankAccountsComponent(labels.selectTokenLabel),
         createElement(
             "div",
-            {id: 'powerBoardWidgetBankAccount_wrapper'}
+            {id: 'paydockWidgetBankAccount_wrapper'}
         ),
         createElement(
             "input",
@@ -146,7 +146,7 @@ const Label = (props) => {
 };
 
 const PaydokBankAccountBlock = {
-    name: "power_board_bank_account_gateway",
+    name: "paydock_bank_account_gateway",
     label: <Label/>,
     content: <Content/>,
     edit: <Content/>,

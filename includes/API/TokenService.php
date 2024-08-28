@@ -1,8 +1,8 @@
 <?php
 
-namespace PowerBoard\API;
+namespace Paydock\API;
 
-use PowerBoard\Abstracts\AbstractApiService;
+use Paydock\Abstracts\AbstractApiService;
 
 class TokenService extends AbstractApiService {
 	const ENDPOINT = 'payment_sources/tokens';

@@ -1,9 +1,9 @@
 <?php
 
-namespace PowerBoard\Helpers;
+namespace Paydock\Helpers;
 
-use PowerBoard\Enums\DSTypes;
-use PowerBoard\Enums\FraudTypes;
+use Paydock\Enums\DSTypes;
+use Paydock\Enums\FraudTypes;
 
 class ArgsForProcessPayment {
 	public static function prepare( array $args = [] ): array {

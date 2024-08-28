@@ -4,7 +4,7 @@ import getStandalone3dsToken from './get-standalone-3ds-token';
 import sleep from './sleep';
 
 export default async () => {
-    const settings = getSetting('power_board_data', {});
+    const settings = getSetting('paydock_data', {});
 
     if (settings.selectedToken.trim().length === 0) {
         settings.selectedToken = await getVaultToken()
@@ -12,7 +12,7 @@ export default async () => {
 
     const threeDsToken = await getStandalone3dsToken(settings.selectedToken)
 
-    const canvas = new window.cba.Canvas3ds('#powerBoardWidget3ds', threeDsToken);
+    const canvas = new window.cba.Canvas3ds('#paydockWidget3ds', threeDsToken);
     canvas.load();
 
     let result = false;
@@ -23,7 +23,7 @@ export default async () => {
         result = chargeAuthSuccessEvent.charge_3ds_id
         result = 'error'
     })
-    canvas.on('chargeAuthReject', function (data) {
+    canvas.on('chargeAuthReject', function (_data) {
         result = chargeAuthSuccessEvent.charge_3ds_id
         result = 'error';
     });

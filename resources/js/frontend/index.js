@@ -9,22 +9,22 @@ import {
     selectSavedCardsComponent,
     sleep,
     standalone3Ds
-} from '../includes/wc-power-board';
+} from '../includes/wc-paydock';
 import {select} from '@wordpress/data';
 import {CART_STORE_KEY} from '@woocommerce/block-data';
 
 const cart = select(CART_STORE_KEY);
-const settings = getSetting('power_board_data', {});
+const settings = getSetting('paydock_data', {});
 
-const textDomain = 'power-board';
+const textDomain = 'paydock';
 const labels = {
-    defaultLabel: __('PowerBoard Payments', textDomain),
+    defaultLabel: __('Paydock Payments', textDomain),
     saveCardLabel: __('Save payment details', textDomain),
     selectTokenLabel: __('Saved payment details', textDomain),
     fillDataError: __('Please fill in the card data.', textDomain),
     fillCCDataError: __('Please fill in the required credit card form fields', textDomain),
     requiredDataError: __('Please fill in the required fields of the form to display payment methods', textDomain),
-    additionalDataRejected: __('Payment has been rejected by PowerBoard. Please try again in a few minutes', textDomain)
+    additionalDataRejected: __('Payment has been rejected by Paydock. Please try again in a few minutes', textDomain)
 }
 
 const label = decodeEntities(settings.title) || labels.defaultLabel;
@@ -53,9 +53,9 @@ const Content = (props) => {
 
             formSubmittedAlready = window.widgetReloaded ? false : formSubmittedAlready
 
-            if (window.hasOwnProperty('powerBoardValidation')) {
-                if (!powerBoardValidation.powerboardCCFormValidation()) {
-                    var validationState = window.widgetPowerBoard.getValidationState();
+            if (window.hasOwnProperty('paydockValidation')) {
+                if (!paydockValidation.paydockCCFormValidation()) {
+                    var validationState = window.widgetPaydock.getValidationState();
 
                     var invalid_fields = [];
                     validationState.invalid_fields.forEach(field => {
@@ -83,7 +83,7 @@ const Content = (props) => {
                     }
                 }
 
-                if (!powerBoardValidation.wcFormValidation()) {
+                if (!paydockValidation.wcFormValidation()) {
                     return {
                         type: emitResponse.responseTypes.ERROR,
                         errorMessage: labels.requiredDataError
@@ -134,17 +134,17 @@ const Content = (props) => {
                 phoneValue = document.getElementById('billing-phone').value
             }
 
-            window.widgetPowerBoard.updateFormValues({
+            window.widgetPaydock.updateFormValues({
                 email: document.getElementById('email').value,
                 phone: phoneValue
             });
-            window.widgetPowerBoard.trigger(window.cba.TRIGGER.SUBMIT_FORM);
+            window.widgetPaydock.trigger(window.cba.TRIGGER.SUBMIT_FORM);
 
             let result = false;
-            window.widgetPowerBoard.on(window.cba.EVENT.FINISH, () => {
+            window.widgetPaydock.on(window.cba.EVENT.FINISH, () => {
                 result = true
 
-                const savedCards = document.querySelector('.power-board-select-saved-cards')
+                const savedCards = document.querySelector('.paydock-select-saved-cards')
                 if (savedCards !== null) {
                     savedCards.style = 'display: none'
                 }
@@ -252,11 +252,11 @@ const Content = (props) => {
         selectSavedCardsComponent(labels.selectTokenLabel),
         createElement(
             "div",
-            {id: 'powerBoardWidgetCard_wrapper'}
+            {id: 'paydockWidgetCard_wrapper'}
         ),
         createElement(
             "div",
-            {id: 'powerBoardWidget3ds'}
+            {id: 'paydockWidget3ds'}
         ),
         createElement(
             "input",
@@ -270,23 +270,23 @@ const Content = (props) => {
 };
 
 const Paydok = {
-    name: "power_board_gateway",
+    name: "paydock_gateway",
     label: createElement(() =>
         createElement(
             "div",
             {
-                className: 'power-board-payment-method-label'
+                className: 'paydock-payment-method-label'
             },
             createElement("img", {
-                src: `${window.powerBoardWidgetSettings.pluginUrlPrefix}assets/images/icons/card.png`,
+                src: `${window.paydockWidgetSettings.pluginUrlPrefix}assets/images/icons/card.png`,
                 alt: label,
-                className: 'power-board-payment-method-label-icon card'
+                className: 'paydock-payment-method-label-icon card'
             }),
             "  " + label,
             createElement("img", {
-                src: `${window.powerBoardWidgetSettings.pluginUrlPrefix}assets/images/commBank_logo.png`,
+                src: `${window.paydockWidgetSettings.pluginUrlPrefix}assets/images/commBank_logo.png`,
                 alt: label,
-                className: 'power-board-payment-method-label-logo'
+                className: 'paydock-payment-method-label-logo'
             })
         )
     ),

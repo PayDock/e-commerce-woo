@@ -2,7 +2,7 @@ import Select from 'react-select'
 import {getSetting} from '@woocommerce/settings';
 
 export default (selectTokenLabel = 'Saved bank accounts', newCardLabel = 'New Account') => {
-    const settings = getSetting('power_board_bank_account_block_data', {});
+    const settings = getSetting('paydock_bank_account_block_data', {});
 
     if (!settings.hasOwnProperty('tokens') || typeof settings.tokens !== "object") {
         return '';
@@ -51,7 +51,7 @@ export default (selectTokenLabel = 'Saved bank accounts', newCardLabel = 'New Ac
                     const $saveCard = jQuery('.bank-account-save-card')
                     settings.selectedToken = value
 
-                    window.widgetPowerBoardBankAccount.updateFormValues({
+                    window.widgetPaydockBankAccount.updateFormValues({
                         account_name: '',
                         account_number: '',
                         account_routing: ''
@@ -62,7 +62,7 @@ export default (selectTokenLabel = 'Saved bank accounts', newCardLabel = 'New Ac
                     if (value !== '') {
                         const token = settings.tokens.find(token => token.vault_token === value)
                         if (token !== undefined) {
-                            window.widgetPowerBoardBankAccount.updateFormValues({
+                            window.widgetPaydockBankAccount.updateFormValues({
                                 account_name: token.account_name,
                                 account_number: token.account_number,
                                 account_routing: token.account_routing

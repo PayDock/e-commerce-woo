@@ -1,10 +1,10 @@
 <?php
 
-namespace PowerBoard\Helpers;
+namespace Paydock\Helpers;
 
 use Exception;
-use PowerBoard\Repositories\UserTokenRepository;
-use PowerBoard\Services\SDKAdapterService;
+use Paydock\Repositories\UserTokenRepository;
+use Paydock\Services\SDKAdapterService;
 
 class VaultTokenHelper {
 	private $args = [];
@@ -22,7 +22,7 @@ class VaultTokenHelper {
 		}
 
 		if ( empty( $OTTtoken ) ) {
-			throw new Exception( esc_html( __( 'The token wasn\'t generated correctly. <input id="widget_error" hidden type="text"/>', 'power-board' ) ) );
+			throw new Exception( esc_html( __( 'The token wasn\'t generated correctly. <input id="widget_error" hidden type="text"/>', 'paydock' ) ) );
 		}
 
 		$vaultTokenData = [
@@ -42,8 +42,8 @@ class VaultTokenHelper {
 		if ( ! empty( $responce['error'] ) || empty( $responce['resource']['data']['vault_token'] ) ) {
 			$message = ! empty( $responce['error']['message'] ) ? ' ' . $responce['error']['message'] : '';
 
-			/* translators: %s: Detailed message from PowerBoard API. */
-			throw new Exception( esc_html( sprintf( __( 'Can\'t create PowerBoard vault token. %s <input id="widget_error" hidden type="text"/>', 'power-board' ), $message ) ) );
+			/* translators: %s: Detailed message from Paydock API. */
+			throw new Exception( esc_html( sprintf( __( 'Can\'t create Paydock vault token. %s <input id="widget_error" hidden type="text"/>', 'paydock' ), $message ) ) );
 		}
 
 		if ( $this->shouldSaveVaultToken() ) {

@@ -1,27 +1,27 @@
 <?php
 
-namespace PowerBoard\Services\Checkout;
+namespace Paydock\Services\Checkout;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Exception;
-use PowerBoard\Abstracts\AbstractPaymentService;
-use PowerBoard\Enums\DSTypes;
-use PowerBoard\Enums\FraudTypes;
-use PowerBoard\Enums\OrderListColumns;
-use PowerBoard\Enums\SaveCardOptions;
-use PowerBoard\Enums\TypeExchangeOTT;
-use PowerBoard\Exceptions\LoggedException;
-use PowerBoard\Repositories\LogRepository;
-use PowerBoard\Services\OrderService;
-use PowerBoard\Services\ProcessPayment\BankAccountProcessor;
-use PowerBoard\Services\SettingsService;
-use PowerBoard\Services\Validation\ValidationHelperService;
+use Paydock\Abstracts\AbstractPaymentService;
+use Paydock\Enums\DSTypes;
+use Paydock\Enums\FraudTypes;
+use Paydock\Enums\OrderListColumns;
+use Paydock\Enums\SaveCardOptions;
+use Paydock\Enums\TypeExchangeOTT;
+use Paydock\Exceptions\LoggedException;
+use Paydock\Repositories\LogRepository;
+use Paydock\Services\OrderService;
+use Paydock\Services\ProcessPayment\BankAccountProcessor;
+use Paydock\Services\SettingsService;
+use Paydock\Services\Validation\ValidationHelperService;
 
 class BankAccountPaymentService extends AbstractPaymentService {
 	public function __construct() {
 		$settings = SettingsService::getInstance();
 
-		$this->id          = 'power_board_bank_account_gateway';
+		$this->id          = 'paydock_bank_account_gateway';
 		$this->title       = $settings->getWidgetPaymentBankAccountTitle();
 		$this->description = $settings->getWidgetPaymentBankAccountDescription();
 
@@ -42,7 +42,7 @@ class BankAccountPaymentService extends AbstractPaymentService {
 		if ( ! wp_verify_nonce( $wpNonce, 'process_payment' ) ) {
 			throw new RouteException(
 				'woocommerce_rest_checkout_process_payment_error',
-				esc_html( __( 'Error: Security check', 'power-board' ) )
+				esc_html( __( 'Error: Security check', 'paydock' ) )
 			);
 		}
 
@@ -66,13 +66,13 @@ class BankAccountPaymentService extends AbstractPaymentService {
 			throw new RouteException(
 				'woocommerce_rest_checkout_process_payment_error',
 				/* Translators: %s Exception message. */
-				esc_html( sprintf( __( 'Error: %s', 'power-board' ), $exception->getMessage() ) )
+				esc_html( sprintf( __( 'Error: %s', 'paydock' ), $exception->getMessage() ) )
 			);
 		} catch ( Exception $exception ) {
 			throw new RouteException(
 				'woocommerce_rest_checkout_process_payment_error',
 				/* Translators: %s Exception message. */
-				esc_html( sprintf( __( 'Error: %s', 'power-board' ), $exception->getMessage() ) )
+				esc_html( sprintf( __( 'Error: %s', 'paydock' ), $exception->getMessage() ) )
 			);
 		}
 
@@ -91,7 +91,7 @@ class BankAccountPaymentService extends AbstractPaymentService {
 		OrderService::updateStatus( $order->get_id(), $status );
 		$order->payment_complete();
 		$order->update_meta_data( 'pb_directly_charged', 1 );
-		$order->update_meta_data( 'power_board_charge_id', $chargeId );
+		$order->update_meta_data( 'paydock_charge_id', $chargeId );
 		$order->update_meta_data( OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(), 'Bank' );
 		$order->save();
 
@@ -117,25 +117,25 @@ class BankAccountPaymentService extends AbstractPaymentService {
 
 	protected function getValidatedPostData(): array {
 		if ( ! ( new ValidationHelperService( $_POST['amount'] ) )->isFloat() ) {
-			wp_die( __( 'wrong "amount" format', 'power-board' ) );
+			wp_die( __( 'wrong "amount" format', 'paydock' ) );
 		}
 		if ( ! empty( $_POST['selectedtoken'] ) && ! ( new ValidationHelperService( $_POST['selectedtoken'] ) )->isUUID() ) {
-			wp_die( __( 'wrong "selected token" format', 'power-board' ) );
+			wp_die( __( 'wrong "selected token" format', 'paydock' ) );
 		}
 		if ( ! empty( $_POST['paymentsourcetoken'] ) && ! ( new ValidationHelperService( $_POST['paymentsourcetoken'] ) )->isUUID() ) {
-			wp_die( __( 'wrong "payment source token" format', 'power-board' ) );
+			wp_die( __( 'wrong "payment source token" format', 'paydock' ) );
 		}
 		if ( ! empty( $_POST['gatewayid'] ) && ! ( new ValidationHelperService( $_POST['gatewayid'] ) )->isServiceId() ) {
-			wp_die( __( 'wrong "gateway" ID', 'power-board' ) );
+			wp_die( __( 'wrong "gateway" ID', 'paydock' ) );
 		}
 		if ( ! empty( $_POST['card3dsserviceid'] ) && ! ( new ValidationHelperService( $_POST['gatewcard3dsserviceidayid'] ) )->isServiceId() ) {
-			wp_die( __( 'wrong "3ds service" ID', 'power-board' ) );
+			wp_die( __( 'wrong "3ds service" ID', 'paydock' ) );
 		}
 		if ( ! empty( $_POST['charge3dsid'] ) && ! ( new ValidationHelperService( $_POST['charge3dsid'] ) )->isUUID() ) {
-			wp_die( __( 'wrong "charge 3ds id" format', 'power-board' ) );
+			wp_die( __( 'wrong "charge 3ds id" format', 'paydock' ) );
 		}
 		if ( ! empty( $_POST['cardfraudserviceid'] ) && ! ( new ValidationHelperService( $_POST['cardfraudserviceid'] ) )->isServiceId() ) {
-			wp_die( __( 'wrong "fraud service" ID', 'power-board' ) );
+			wp_die( __( 'wrong "fraud service" ID', 'paydock' ) );
 		}
 
 		$ds             = sanitize_text_field( $_POST['card3ds'] );

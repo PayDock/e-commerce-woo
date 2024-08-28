@@ -1,14 +1,14 @@
 <?php
 
-namespace PowerBoard\Services\ProcessPayment;
+namespace Paydock\Services\ProcessPayment;
 
 use Exception;
-use PowerBoard\Enums\OtherPaymentMethods;
-use PowerBoard\Helpers\ArgsForProcessPayment;
-use PowerBoard\Helpers\ShippingHelper;
-use PowerBoard\Repositories\LogRepository;
-use PowerBoard\Repositories\UserCustomerRepository;
-use PowerBoard\Services\SDKAdapterService;
+use Paydock\Enums\OtherPaymentMethods;
+use Paydock\Helpers\ArgsForProcessPayment;
+use Paydock\Helpers\ShippingHelper;
+use Paydock\Repositories\LogRepository;
+use Paydock\Repositories\UserCustomerRepository;
+use Paydock\Services\SDKAdapterService;
 
 class ApmProcessor {
 	const CHARGE_METHOD = 'charge';
@@ -36,7 +36,7 @@ class ApmProcessor {
 		$this->setRunMethod();
 
 		if ( ! in_array( $this->runMethod, self::ALLOWED_METHODS ) ) {
-			throw new Exception( esc_html( __( 'Undefined run method', 'power-board' ) ) );
+			throw new Exception( esc_html( __( 'Undefined run method', 'paydock' ) ) );
 		}
 
 		return call_user_func( [ $this, $this->runMethod ] );
@@ -102,7 +102,7 @@ class ApmProcessor {
 				$message,
 				LogRepository::ERROR
 			);
-			throw new Exception( esc_html( __( 'The PowerBoard customer could not be created successfully.', 'power-board' ) ) );
+			throw new Exception( esc_html( __( 'The Paydock customer could not be created successfully.', 'paydock' ) ) );
 		}
 
 		$this->logger->createLogRecord(

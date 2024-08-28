@@ -4,9 +4,9 @@ jQuery(document).ready(function ($) {
         select: 'select', checkbox: 'checkbox'
     };
     const prefixes = [
-        'woocommerce_power_board_power_board_',
-        'woocommerce_power_board_sandbox_power_board_sandbox_',
-        'woocommerce_power_board_widget_power_board_widget_'
+        'woocommerce_paydock_paydock_',
+        'woocommerce_paydock_sandbox_paydock_sandbox_',
+        'woocommerce_paydock_widget_paydock_widget_'
     ];
 
     const conditions = [{

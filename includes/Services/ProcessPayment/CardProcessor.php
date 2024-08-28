@@ -1,16 +1,16 @@
 <?php
 
-namespace PowerBoard\Services\ProcessPayment;
+namespace Paydock\Services\ProcessPayment;
 
 use Exception;
-use PowerBoard\Enums\DSTypes;
-use PowerBoard\Enums\FraudTypes;
-use PowerBoard\Enums\SaveCardOptions;
-use PowerBoard\Helpers\ArgsForProcessPayment;
-use PowerBoard\Helpers\VaultTokenHelper;
-use PowerBoard\Repositories\LogRepository;
-use PowerBoard\Repositories\UserTokenRepository;
-use PowerBoard\Services\SDKAdapterService;
+use Paydock\Enums\DSTypes;
+use Paydock\Enums\FraudTypes;
+use Paydock\Enums\SaveCardOptions;
+use Paydock\Helpers\ArgsForProcessPayment;
+use Paydock\Helpers\VaultTokenHelper;
+use Paydock\Repositories\LogRepository;
+use Paydock\Repositories\UserTokenRepository;
+use Paydock\Services\SDKAdapterService;
 
 class CardProcessor {
 	const FRAUD_3DS_CHARGE_METHOD = 'fraud3DsCharge';
@@ -52,7 +52,7 @@ class CardProcessor {
 		$this->setRunMethod();
 
 		if ( ! in_array( $this->runMethod, self::ALLOWED_METHODS ) ) {
-			throw new Exception( esc_html( __( 'Undefined run method', 'power-board' ) ) );
+			throw new Exception( esc_html( __( 'Undefined run method', 'paydock' ) ) );
 		}
 
 		return call_user_func( [ $this, $this->runMethod ] );
@@ -151,7 +151,7 @@ class CardProcessor {
 				$message,
 				LogRepository::ERROR
 			);
-			throw new Exception( esc_html( __( 'The 3ds charge could not be created successfully.', 'power-board' ) ) );
+			throw new Exception( esc_html( __( 'The 3ds charge could not be created successfully.', 'paydock' ) ) );
 		}
 
 		$this->logger->createLogRecord(
@@ -305,7 +305,7 @@ class CardProcessor {
 		] );
 
 		if ( empty( $response['error'] ) && ! empty( $response['resource']['data']['_id'] ) ) {
-			update_option( 'power_board_fraud_' . (string) $this->order->get_id(), $options );
+			update_option( 'paydock_fraud_' . (string) $this->order->get_id(), $options );
 		}
 
 		return $response;
@@ -351,7 +351,7 @@ class CardProcessor {
 		] );
 
 		if ( empty( $response['error'] ) && ! empty( $response['resource']['data']['_id'] ) ) {
-			update_option( 'power_board_fraud_' . (string) $this->order->get_id(), $options );
+			update_option( 'paydock_fraud_' . (string) $this->order->get_id(), $options );
 		}
 
 		return $response;
@@ -558,7 +558,7 @@ class CardProcessor {
 		] );
 
 		if ( empty( $response['error'] ) && ! empty( $response['resource']['data']['_id'] ) ) {
-			update_option( 'power_board_fraud_' . (string) $this->order->get_id(), $options );
+			update_option( 'paydock_fraud_' . (string) $this->order->get_id(), $options );
 		}
 
 		return $response;
@@ -598,7 +598,7 @@ class CardProcessor {
 					$message,
 					LogRepository::ERROR
 				);
-				throw new Exception( esc_html( __( 'The PowerBoard customer could not be created successfully.', 'power-board' ) ) );
+				throw new Exception( esc_html( __( 'The Paydock customer could not be created successfully.', 'paydock' ) ) );
 			}
 
 			$this->logger->createLogRecord(
@@ -654,7 +654,7 @@ class CardProcessor {
 
 		if ( ! empty( $responce['error'] ) ) {
 			$message = ! empty( $responce['error']['message'] ) ? ' ' . $responce['error']['message'] : '';
-			throw new Exception( esc_html( __( 'The charge could not be created successfully. <input id="widget_error" hidden type="text"/>', 'power-board' ) ) );
+			throw new Exception( esc_html( __( 'The charge could not be created successfully. <input id="widget_error" hidden type="text"/>', 'paydock' ) ) );
 		}
 
 		return $responce;
@@ -693,8 +693,8 @@ class CardProcessor {
 				$message,
 				LogRepository::ERROR
 			);
-			/* translators: %s: Error message from PowerBoaRD API. */
-			throw new Exception( esc_html( sprintf( __( 'The PowerBoard customer could not be created successfully. %s', 'power-board' ), $message ) ) );
+			/* translators: %s: Error message from Paydock API. */
+			throw new Exception( esc_html( sprintf( __( 'The Paydock customer could not be created successfully. %s', 'paydock' ), $message ) ) );
 		}
 		$this->logger->createLogRecord(
 			$customer['resource']['data']['_id'],

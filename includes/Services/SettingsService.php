@@ -1,21 +1,21 @@
 <?php
 
-namespace PowerBoard\Services;
+namespace Paydock\Services;
 
-use PowerBoard\Abstracts\AbstractSettingService;
-use PowerBoard\Enums\APMsSettings;
-use PowerBoard\Enums\BankAccountSettings;
-use PowerBoard\Enums\CardSettings;
-use PowerBoard\Enums\CredentialSettings;
-use PowerBoard\Enums\CredentialsTypes;
-use PowerBoard\Enums\OtherPaymentMethods;
-use PowerBoard\Enums\SettingGroups;
-use PowerBoard\Enums\WalletPaymentMethods;
-use PowerBoard\Enums\WalletSettings;
-use PowerBoard\Enums\WidgetSettings;
-use PowerBoard\Services\Settings\LiveConnectionSettingService;
-use PowerBoard\Services\Settings\SandboxConnectionSettingService;
-use PowerBoard\Services\Settings\WidgetSettingService;
+use Paydock\Abstracts\AbstractSettingService;
+use Paydock\Enums\APMsSettings;
+use Paydock\Enums\BankAccountSettings;
+use Paydock\Enums\CardSettings;
+use Paydock\Enums\CredentialSettings;
+use Paydock\Enums\CredentialsTypes;
+use Paydock\Enums\OtherPaymentMethods;
+use Paydock\Enums\SettingGroups;
+use Paydock\Enums\WalletPaymentMethods;
+use Paydock\Enums\WalletSettings;
+use Paydock\Enums\WidgetSettings;
+use Paydock\Services\Settings\LiveConnectionSettingService;
+use Paydock\Services\Settings\SandboxConnectionSettingService;
+use Paydock\Services\Settings\WidgetSettingService;
 
 final class SettingsService {
 	private const ENABLED_CONDITION = 'yes';

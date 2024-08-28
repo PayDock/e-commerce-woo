@@ -1,22 +1,22 @@
 <?php
 
-namespace PowerBoard\Services;
+namespace Paydock\Services;
 
 use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
-use PowerBoard\Abstracts\AbstractSingleton;
-use PowerBoard\Controllers\Admin\WidgetController;
-use PowerBoard\Controllers\Webhooks\PaymentController;
-use PowerBoard\Enums\SettingsTabs;
-use PowerBoard\Services\Checkout\BankAccountPaymentService;
-use PowerBoard\Util\AfterpayAPMsBlock;
-use PowerBoard\Util\AfterpayWalletBlock;
-use PowerBoard\Util\ApplePayWalletBlock;
-use PowerBoard\Util\BankAccountBlock;
-use PowerBoard\Util\GooglePayWalletBlock;
-use PowerBoard\Util\PayPalWalletBlock;
-use PowerBoard\Util\PowerBoardGatewayBlocks;
-use PowerBoard\Util\ZipAPMsBlock;
+use Paydock\Abstracts\AbstractSingleton;
+use Paydock\Controllers\Admin\WidgetController;
+use Paydock\Controllers\Webhooks\PaymentController;
+use Paydock\Enums\SettingsTabs;
+use Paydock\Services\Checkout\BankAccountPaymentService;
+use Paydock\Util\AfterpayAPMsBlock;
+use Paydock\Util\AfterpayWalletBlock;
+use Paydock\Util\ApplePayWalletBlock;
+use Paydock\Util\BankAccountBlock;
+use Paydock\Util\GooglePayWalletBlock;
+use Paydock\Util\PayPalWalletBlock;
+use Paydock\Util\PaydockGatewayBlocks;
+use Paydock\Util\ZipAPMsBlock;
 
 class ActionsService extends AbstractSingleton {
 	protected const PROCESS_OPTIONS_FUNCTION = 'process_admin_options';
@@ -37,13 +37,13 @@ class ActionsService extends AbstractSingleton {
 
 	protected function addCompatibilityWithWooCommerce(): void {
 		if ( class_exists( FeaturesUtil::class ) ) {
-			FeaturesUtil::declare_compatibility( 'custom_order_tables', POWER_BOARD_PLUGIN_FILE );
+			FeaturesUtil::declare_compatibility( 'custom_order_tables', paydock_PLUGIN_FILE );
 		}
 	}
 
 	protected function addPaymentActions() {
 		$payments = [
-			'power_board_bank_account_gateway' => new BankAccountPaymentService(),
+			'paydock_bank_account_gateway' => new BankAccountPaymentService(),
 		];
 		foreach ( $payments as $paymentKey => $payment ) {
 			add_action(
@@ -72,7 +72,7 @@ class ActionsService extends AbstractSingleton {
 		add_action( 'before_woocommerce_init', function () {
 			FeaturesUtil::declare_compatibility(
 				'cart_checkout_blocks',
-				POWER_BOARD_PLUGIN_FILE,
+				paydock_PLUGIN_FILE,
 				true
 			);
 		} );
@@ -80,7 +80,7 @@ class ActionsService extends AbstractSingleton {
 		add_action(
 			'woocommerce_blocks_payment_method_type_registration',
 			function ( PaymentMethodRegistry $payment_method_registry ) {
-				$payment_method_registry->register( new PowerBoardGatewayBlocks() );
+				$payment_method_registry->register( new PaydockGatewayBlocks() );
 				$payment_method_registry->register( new BankAccountBlock() );
 				$payment_method_registry->register( new ApplePayWalletBlock() );
 				$payment_method_registry->register( new GooglePayWalletBlock() );
@@ -108,7 +108,7 @@ class ActionsService extends AbstractSingleton {
 
 	protected function addEndpoints() {
 		add_action( 'rest_api_init', function () {
-			register_rest_route( 'power-board/v1', '/wallets/charge',
+			register_rest_route( 'paydock/v1', '/wallets/charge',
 				[ // nosemgrep: audit.php.wp.security.rest-route.permission-callback.return-true  -- /wallets/charge is a public endpoint and doesn't need any permission checks.
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => [ new WidgetController(), 'createWalletCharge' ],
@@ -120,7 +120,7 @@ class ActionsService extends AbstractSingleton {
 	protected function addOrderActions() {
 		$orderService      = new OrderService();
 		$paymentController = new PaymentController();
-		add_action( 'woocommerce_order_item_add_action_buttons', [ $orderService, 'iniPowerBoardOrderButtons' ], 10,
+		add_action( 'woocommerce_order_item_add_action_buttons', [ $orderService, 'iniPaydockOrderButtons' ], 10,
 			2 );
 		add_action( 'woocommerce_order_status_changed', [ $orderService, 'statusChangeVerification' ], 20, 4 );
 		add_action( 'woocommerce_admin_order_totals_after_total',

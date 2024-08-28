@@ -5,7 +5,7 @@ import {select} from '@wordpress/data';
 import {CART_STORE_KEY} from '@woocommerce/block-data';
 
 export default async (forcePermanentVault = false, newAmount = null) => {
-    const settings = getSetting('power_board_data', {});
+    const settings = getSetting('paydock_data', {});
 
     if (window.widgetReloaded) settings.selectedToken = ""
     if (settings.selectedToken.trim().length === 0 && settings.card3DSFlow === 'PERMANENT_VAULT') {
@@ -75,13 +75,13 @@ export default async (forcePermanentVault = false, newAmount = null) => {
         return false;
     }
 
-    document.getElementById('powerBoardWidget3ds').innerHTML = '';
-    document.getElementById('powerBoardWidget3ds').setAttribute('style', '')
+    document.getElementById('paydockWidget3ds').innerHTML = '';
+    document.getElementById('paydockWidget3ds').setAttribute('style', '')
 
-    const canvas = new window.cba.Canvas3ds('#powerBoardWidget3ds', preAuthResp._3ds.token);
+    const canvas = new window.cba.Canvas3ds('#paydockWidget3ds', preAuthResp._3ds.token);
     canvas.load();
 
-    document.getElementById('powerBoardWidgetCard_wrapper').setAttribute('style', 'display: none')
+    document.getElementById('paydockWidgetCard_wrapper').setAttribute('style', 'display: none')
 
     let result = false;
     canvas.on('chargeAuthSuccess', (chargeAuthEvent) => {
@@ -107,15 +107,15 @@ export default async (forcePermanentVault = false, newAmount = null) => {
 
     if (result === 'error') {
         showCardWidget();
-        window.widgetPowerBoard.reload();
+        window.widgetPaydock.reload();
         window.widgetReloaded = true;
     }
     return result;
 }
 
 function showCardWidget() {
-    document.getElementById('powerBoardWidgetCard_wrapper').setAttribute('style', '');
-    const canvas3dsWrapper = document.getElementById('powerBoardWidget3ds');
+    document.getElementById('paydockWidgetCard_wrapper').setAttribute('style', '');
+    const canvas3dsWrapper = document.getElementById('paydockWidget3ds');
     canvas3dsWrapper.innerHTML = '';
     canvas3dsWrapper.setAttribute('style', 'display: none');
 }

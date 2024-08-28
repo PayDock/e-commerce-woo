@@ -1,1 +1,1 @@
-jQuery('.power-board-active-hidden-settings').hide();
+jQuery('.paydock-active-hidden-settings').hide();

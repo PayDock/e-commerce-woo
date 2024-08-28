@@ -10,7 +10,7 @@ import initButton from './wallets/init';
 import axios from 'axios';
 import canMakePayment from "./canMakePayment";
 
-const textDomain = 'power_board';
+const textDomain = 'paydock';
 const labels = {
     validationError: __('Please fill in the required fields of the form to display payment methods', textDomain),
     fillDataError: __('The payment service does not accept payment. Please try again later or choose another payment method.', textDomain),
@@ -25,8 +25,8 @@ let localState = {
 }
 
 export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
-    const settingKey = `power_board_${id}_wallet_block_data`;
-    const paymentName = `power_board_${id}_wallets_gateway`;
+    const settingKey = `paydock_${id}_wallet_block_data`;
+    const paymentName = `paydock_${id}_wallets_gateway`;
 
     const settings = getSetting(settingKey, {});
     const label = decodeEntities(settings.title) || __(defaultLabel, textDomain);
@@ -57,12 +57,12 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
             items: cart.getCartData().items
         }
 
-        axios.post('/wp-json/power-board/v1/wallets/charge', billingData).then((response) => {
+        axios.post('/wp-json/paydock/v1/wallets/charge', billingData).then((response) => {
             localState.initData = response.data
             setTimeout(() => {
                 initButton(id, '#' + buttonId, localState.initData, settings.isSandbox, localState.reload)
             }, 0);
-        }).catch((e) => {
+        }).catch((_e) => {
             localState.wasInit = false;
         })
     }
@@ -72,13 +72,13 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
         const {eventRegistration, emitResponse} = props;
         const {onPaymentSetup, onCheckoutValidation, onShippingRateSelectSuccess} = eventRegistration;
         const billingAddress = cart.getCustomerData().billingAddress;
-        const afterpayCountriesError = jQuery('.power-board-country-available');
+        const afterpayCountriesError = jQuery('.paydock-country-available');
 
         let validationSuccess = validateData(billingAddress, dataFieldsRequired);
 
         jQuery('.wc-block-components-checkout-place-order-button').hide();
 
-        if (('powerBoardWalletAfterpayButton' === buttonId)
+        if (('paydockWalletAfterpayButton' === buttonId)
             && validationSuccess
             && !afterpayCountries.find((element) => element === billingAddress.country.toLowerCase())) {
             afterpayCountriesError.show()
@@ -102,7 +102,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
                     initWallet();
                 }
             });
-            const oncheckout = onCheckoutValidation(async (data) => {
+            const oncheckout = onCheckoutValidation(async (_data) => {
                 if (!validationSuccess) {
                     return {
                         type: emitResponse.responseTypes.ERROR, errorMessage: labels.fillDataError
@@ -118,7 +118,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
                 }
             });
 
-            const unsubscribe = onPaymentSetup(async (data) => {
+            const unsubscribe = onPaymentSetup(async (_data) => {
                 if (document.getElementById('paymentSourceWalletsToken').value) {
                     return {
                         type: emitResponse.responseTypes.SUCCESS, meta: {
@@ -167,15 +167,15 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
             paymentWasSuccessElement,
             createElement(
                 'div',
-                {id: 'powerBoardWidgetWallets', class: 'power-board-widget-content',},
+                {id: 'paydockWidgetWallets', class: 'paydock-widget-content',},
                 ...wallets
             ), createElement(
                 'div',
-                {class: 'power-board-validation-error', style: {display: validationSuccess ? 'none' : ''}},
+                {class: 'paydock-validation-error', style: {display: validationSuccess ? 'none' : ''}},
                 labels.validationError
             ), createElement(
                 "div",
-                {class: 'power-board-country-available', style: {display: 'none'}},
+                {class: 'paydock-country-available', style: {display: 'none'}},
                 labels.notAvailable
             ),
             input
@@ -188,12 +188,12 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
             createElement(
                 "div",
                 {
-                    className: 'power-board-payment-method-label'
+                    className: 'paydock-payment-method-label'
                 },
                 createElement("img", {
-                    src: `${window.powerBoardWidgetSettings.pluginUrlPrefix}assets/images/icons/${id}.png`,
+                    src: `${window.paydockWidgetSettings.pluginUrlPrefix}assets/images/icons/${id}.png`,
                     alt: label,
-                    className: `power-board-payment-method-label-icon ${id}`
+                    className: `paydock-payment-method-label-icon ${id}`
                 }),
                 "  " + label,
             )

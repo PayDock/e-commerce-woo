@@ -1,11 +1,11 @@
 <?php
 
-namespace PowerBoard\Repositories;
+namespace Paydock\Repositories;
 
-use PowerBoard\Services\HashService;
+use Paydock\Services\HashService;
 
 class UserTokenRepository {
-	const CARD_TOKENS_KEY = 'power_board_card_tokens';
+	const CARD_TOKENS_KEY = 'paydock_card_tokens';
 
 	private $cache;
 	private $userId;

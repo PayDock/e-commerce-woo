@@ -1,6 +1,6 @@
 <?php
 
-namespace PowerBoard\Controllers\Admin;
+namespace Paydock\Controllers\Admin;
 
 class SettingsController {
 

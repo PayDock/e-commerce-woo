@@ -1,8 +1,8 @@
 <?php
 
-namespace PowerBoard\API;
+namespace Paydock\API;
 
-use PowerBoard\Abstracts\AbstractApiService;
+use Paydock\Abstracts\AbstractApiService;
 
 class ServiceService extends AbstractApiService {
 	const ENDPOINT = 'services';

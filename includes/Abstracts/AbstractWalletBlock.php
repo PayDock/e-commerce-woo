@@ -1,9 +1,9 @@
 <?php
 
-namespace PowerBoard\Abstracts;
+namespace Paydock\Abstracts;
 
-use PowerBoard\Enums\WalletPaymentMethods;
-use PowerBoard\Services\SettingsService;
+use Paydock\Enums\WalletPaymentMethods;
+use Paydock\Services\SettingsService;
 
 abstract class AbstractWalletBlock extends AbstractBlock {
 	protected $gateway;
@@ -11,7 +11,7 @@ abstract class AbstractWalletBlock extends AbstractBlock {
 	public function __construct() {
 		$walletTypeId = $this->getType()->getId();
 
-		$this->name   = 'power_board_' . $walletTypeId . '_wallet_block';
+		$this->name   = 'paydock_' . $walletTypeId . '_wallet_block';
 		$this->script = $walletTypeId . '-wallet';
 
 		parent::__construct();

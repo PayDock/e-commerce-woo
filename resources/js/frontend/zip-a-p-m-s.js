@@ -2,8 +2,8 @@ import walletsForm from "../includes/apms";
 
 walletsForm(
     'zip',
-    'PowerBoard Zip',
-    'powerBoardAPMsZipButton',
+    'Paydock Zip',
+    'paydockAPMsZipButton',
     [
         'first_name',
         'last_name',
