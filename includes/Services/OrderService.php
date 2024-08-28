@@ -10,6 +10,8 @@ class OrderService {
 
 	public function __construct() {
 		if ( is_admin() ) {
+			\WC_Cache_Helper::set_nocache_constants();
+			nocache_headers();
 			$this->templateService = new TemplateService( $this );
 		}
 	}
