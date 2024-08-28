@@ -25,12 +25,6 @@ class ActionsService extends AbstractSingleton {
 	protected static $instance = null;
 
 	protected function __construct() {
-		add_action( 'init', function () {
-			if ( ! session_id() ) {
-				session_start();
-			}
-		} );
-
 		add_action( 'before_woocommerce_init', function () {
 			$this->addCompatibilityWithWooCommerce();
 			$this->addPaymentActions();

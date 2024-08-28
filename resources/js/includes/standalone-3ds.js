@@ -20,9 +20,11 @@ export default async () => {
         result = chargeAuthSuccessEvent.charge_3ds_id
     })
     canvas.on('additionalDataCollectReject', (chargeAuthSuccessEvent) => {
+        result = chargeAuthSuccessEvent.charge_3ds_id
         result = 'error'
     })
     canvas.on('chargeAuthReject', function (data) {
+        result = chargeAuthSuccessEvent.charge_3ds_id
         result = 'error';
     });
 
