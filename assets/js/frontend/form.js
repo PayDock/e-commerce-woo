@@ -32,7 +32,7 @@ setTimeout(() => jQuery(function ($) {
         lastWcFormValidation: false,
         powerboardCCFormValidation() {
             const { tokens, selectedToken } = window.wc.wcSettings.getSetting('power_board_data', {});
-            return (tokens.length > 0 && selectedToken !== "") || window.widgetPowerBoard.isValidForm();
+            return (Array.isArray(tokens) && tokens.length > 0 && selectedToken !== "") || window.widgetPowerBoard.isValidForm();
         },
         wcFormValidation() {
             const checkoutFormElements = document.querySelectorAll('.wc-block-checkout__form input, .wc-block-checkout__form select');
