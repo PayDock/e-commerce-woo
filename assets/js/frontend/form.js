@@ -179,7 +179,7 @@ setTimeout(() => jQuery(function ($) {
 
         if (paydockCardSettings.hasOwnProperty('styles') && paydockCardSettings.cardSupportedCardTypes !== '') {
             supportedCard = paydockCardSettings.cardSupportedCardTypes.replaceAll(' ', '').split(',')
-            widget.setSupportedCardIcons(supportedCard);
+            widget.setSupportedCardIcons(supportedCard, true);
         }
         widget.setEnv(paydockCardSettings.isSandbox ? 'sandbox' : 'production');
         widget.onFinishInsert('input[name="paydock_payment_source_token"]', 'payment_source');
