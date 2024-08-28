@@ -1,8 +1,8 @@
 <?php
 
-namespace Paydock\Enums;
+namespace PowerBoard\Enums;
 
-use Paydock\Abstracts\AbstractEnum;
+use PowerBoard\Abstracts\AbstractEnum;
 
 class APMsSettings extends AbstractEnum {
 	protected const ENABLE = 'ENABLE';
@@ -60,7 +60,7 @@ class APMsSettings extends AbstractEnum {
 				return 'Direct charge stands for authorization and capture in a single request';
 
 			case self::SAVE_CARD:
-				return 'Offer your customer the option to save the card information permanently at Paydock for further usage';
+				return 'Offer your customer the option to save the card information permanently at PowerBoard for further usage';
 
 			default:
 				return '';

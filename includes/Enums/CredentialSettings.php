@@ -1,8 +1,8 @@
 <?php
 
-namespace Paydock\Enums;
+namespace PowerBoard\Enums;
 
-use Paydock\Abstracts\AbstractEnum;
+use PowerBoard\Abstracts\AbstractEnum;
 
 class CredentialSettings extends AbstractEnum {
 	protected const SANDBOX = 'SANDBOX';
@@ -50,7 +50,7 @@ class CredentialSettings extends AbstractEnum {
 			case self::SANDBOX:
 				return 'Sandbox';
 			case self::TYPE:
-				return 'Connection to Paydock';
+				return 'Connection to PowerBoard';
 			default:
 				return '';
 		}

@@ -1,8 +1,8 @@
 <?php
 
-namespace Paydock\Enums;
+namespace PowerBoard\Enums;
 
-use Paydock\Abstracts\AbstractEnum;
+use PowerBoard\Abstracts\AbstractEnum;
 
 class WalletPaymentMethods extends AbstractEnum {
 	protected const APPLE_PAY = 'APPLE_PAY';

@@ -10,10 +10,10 @@
     </th>
     <td class="forminp">
         <fieldset>
-            Min: <input name="<?php echo esc_attr( $keys['min'] ); ?>" class="input-text regular-input paydock"
+            Min: <input name="<?php echo esc_attr( $keys['min'] ); ?>" class="input-text regular-input powerboard"
                         type="text"
                         value="<?php echo esc_attr( $value['min'] ); ?>">
-            Max: <input name="<?php echo esc_attr( $keys['max'] ); ?>" class="input-text regular-input paydock"
+            Max: <input name="<?php echo esc_attr( $keys['max'] ); ?>" class="input-text regular-input powerboard"
                         type="text"
                         value="<?php echo esc_attr( $value['max'] ); ?>">
         </fieldset>

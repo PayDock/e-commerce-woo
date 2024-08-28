@@ -10,7 +10,7 @@ import initButton from './wallets/init';
 import axios from 'axios';
 import canMakePayment from "./canMakePayment";
 
-const textDomain = 'paydock';
+const textDomain = 'power_board';
 const labels = {
     validationError: __('Please fill in the required fields of the form to display payment methods', textDomain),
     fillDataError: __('The payment service does not accept payment. Please try again later or choose another payment method.', textDomain),
@@ -25,8 +25,8 @@ let localState = {
 }
 
 export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
-    const settingKey = `paydock_${id}_wallet_block_data`;
-    const paymentName = `paydock_${id}_wallets_gateway`;
+    const settingKey = `power_board_${id}_wallet_block_data`;
+    const paymentName = `power_board_${id}_wallets_gateway`;
 
     const settings = getSetting(settingKey, {});
     const label = decodeEntities(settings.title) || __(defaultLabel, textDomain);
@@ -40,7 +40,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
         if (!button.length || localState.total === cart.getCartTotals()?.total_price) {
             return;
         }
-        jQuery('#' + buttonId).each((index, element) => {
+        jQuery('#' + buttonId).each((index,element) => {
             element.innerHTML = '';
         })
         localState.total = cart.getCartTotals()?.total_price;
@@ -57,7 +57,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
             items: cart.getCartData().items
         }
 
-        axios.post('/wp-json/paydock/v1/wallets/charge', billingData).then((response) => {
+        axios.post('/wp-json/power-board/v1/wallets/charge', billingData).then((response) => {
             localState.initData = response.data
             setTimeout(() => {
                 initButton(id, '#' + buttonId, localState.initData, settings.isSandbox, localState.reload)
@@ -72,17 +72,17 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
         const {eventRegistration, emitResponse} = props;
         const {onPaymentSetup, onCheckoutValidation, onShippingRateSelectSuccess} = eventRegistration;
         const billingAddress = cart.getCustomerData().billingAddress;
-        const afterpayCountriesError = jQuery('.paydock-country-available');
+        const afterpayCountriesError = jQuery('.power-board-country-available');
 
         let validationSuccess = validateData(billingAddress, dataFieldsRequired);
 
         jQuery('.wc-block-components-checkout-place-order-button').hide();
 
-        if (('paydockWalletAfterpayButton' === buttonId)
+        if (('powerBoardWalletAfterpayButton' === buttonId)
             && validationSuccess
             && !afterpayCountries.find((element) => element === billingAddress.country.toLowerCase())) {
             afterpayCountriesError.show()
-        } else if (validationSuccess && !localState.initData) {
+        } else if (validationSuccess && !localState.initData && !localState.wasInit) {
             afterpayCountriesError.hide()
             initWallet();
         } else if (validationSuccess && localState.initData && !button.length) {
@@ -167,15 +167,15 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
             paymentWasSuccessElement,
             createElement(
                 'div',
-                {id: 'paydockWidgetWallets', class: 'paydock-widget-content',},
+                {id: 'powerBoardWidgetWallets', class: 'power-board-widget-content',},
                 ...wallets
             ), createElement(
                 'div',
-                {class: 'paydock-validation-error', style: {display: validationSuccess ? 'none' : ''}},
+                {class: 'power-board-validation-error', style: {display: validationSuccess ? 'none' : ''}},
                 labels.validationError
             ), createElement(
                 "div",
-                {class: 'paydock-country-available', style: {display: 'none'}},
+                {class: 'power-board-country-available', style: {display: 'none'}},
                 labels.notAvailable
             ),
             input
@@ -188,19 +188,19 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
             createElement(
                 "div",
                 {
-                    className: 'paydock-payment-method-label'
+                    className: 'power-board-payment-method-label'
                 },
                 createElement("img", {
-                    src: `/wp-content/plugins/paydock/assets/images/icons/${id}.png`,
+                    src: `${window.powerBoardWidgetSettings.pluginUrlPrefix}assets/images/icons/${id}.png`,
                     alt: label,
-                    className: `paydock-payment-method-label-icon ${id}`
+                    className: `power-board-payment-method-label-icon ${id}`
                 }),
                 "  " + label,
             )
         ),
         content: <Content/>,
         edit: <Content/>,
-        canMakePayment: () => canMakePayment(settings.total_limitation, cart.getCartTotals()?.total_price),
+        canMakePayment: () => true,
         ariaLabel: label,
         supports: {
             features: settings.supports,

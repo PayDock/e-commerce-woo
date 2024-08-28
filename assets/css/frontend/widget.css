@@ -1,10 +1,10 @@
-#paydockWidgetCard, #paydockWidgetCard_wrapper {
+#powerBoardWidgetCard, #powerBoardWidgetCard_wrapper {
     min-height: 260px;
     scrollbar-width: thin;
     position: relative;
 }
 
-#paydockWidgetCard_wrapper:before, #paydockWidgetBankAccount_wrapper:before {
+#powerBoardWidgetCard_wrapper:before, #powerBoardWidgetBankAccount_wrapper:before {
     content: 'loading...';
     font-size: 12px;
     position: absolute;
@@ -14,16 +14,16 @@
     z-index: -1;
 }
 
-#paydockWidgetCard::-webkit-scrollbar-thumb {
+#powerBoardWidgetCard::-webkit-scrollbar-thumb {
     border: 1px solid black; /* creates padding around scroll thumb */
 }
 
-#paydockWidgetBankAccount, #paydockWidgetBankAccount_wrapper {
+#powerBoardWidgetBankAccount, #powerBoardWidgetBankAccount_wrapper {
     min-height: 200px;
     position: relative;
 }
 
-#paydockWalletPayPalButton {
+#powerBoardWalletPayPalButton {
     align-items: center;
     display: flex;
 }
@@ -36,13 +36,13 @@
     height: 50px;
 }
 
-#paydockWidgetCard iframe {
+#powerBoardWidgetCard iframe {
     border: 0;
     width: 100%;
     height: 280px;
 }
 
-#paydockWidgetBankAccount iframe {
+#powerBoardWidgetBankAccount iframe {
     border: 0;
     width: 100%;
     height: 200px;
@@ -52,17 +52,17 @@
     overflow: hidden;
 }
 
-#paydockWidget3ds iframe {
+#powerBoardWidget3ds iframe {
     border: 0;
     width: 100%;
     height: 360px;
 }
 
-#paydockWidgetApm img {
+#powerBoardWidgetApm img {
     margin-top: 50px;
 }
 
-#paydockWidgetApm img {
+#powerBoardWidgetApm img {
     margin: 0 50px;
 }
 
@@ -77,20 +77,20 @@
     margin-bottom: 20px;
 }
 
-.paydock-validation-error {
+.power-board-validation-error {
     color: red;
     padding: 20px;
     text-align: center;
 }
 
-.paydock-country-available {
+.power-board-country-available {
     color: red;
     padding: 20px;
     text-align: center;
 }
 
 
-.paydock-cvv-code input {
+.power-board-cvv-code input {
     -webkit-text-security: disc;
     text-security: disc;
 }
@@ -111,7 +111,7 @@
     width: 150px;
 }
 
-#paydockWidgetWallets {
+#powerBoardWidgetWallets {
     -webkit-display: flex;
     -webkit-flex-wrap: wrap;
     -webkit-justify-content: space-between;
@@ -138,64 +138,61 @@
     margin-left: auto;
 }
 
-#paydockWidgetWallets #paymentCompleted {
+#powerBoardWidgetWallets #paymentCompleted {
     display: none !important;
 }
 
-#paydockWidgetWallets {
+#powerBoardWidgetWallets {
     flex-direction: column;
 }
 
-#paydockWalletGooglePayButton{
+#powerBoardWalletGooglePayButton{
     height: 55px;
 }
 
-.paydock-apple-container {
+.power-board-apple-container {
     display: block;
     width: 150px !important;
     height: 55px !important;
-    box-sizing: border-box;
 }
 
-.paydock-payment-method-label-logo {
-    margin: -6px 1em -6px auto;
-    height: 36px !important;
-    max-height: 36px !important;
-}
-
-.paydock-payment-method-label {
+.power-board-payment-method-label {
     display: flex;
     align-content: center;
     box-sizing: content-box;
     width: 100%;
 }
-.paydock-payment-method-label-icon {
+.power-board-payment-method-label-icon {
     margin-right: 5px;
 }
-.paydock-payment-method-label-icon.pay-pal{
+.power-board-payment-method-label-icon.pay-pal{
     height: 20px !important;
     max-height: 20px !important;
     margin-top: 2px;
 }
-.paydock-payment-method-label-icon.zip{
+
+.power-board-payment-method-label-icon.zip{
     height: 20px !important;
     max-height: 20px !important;
     margin: -1px 13px;
 }
-.paydock-payment-method-label-icon.afterpay{
+.power-board-payment-method-label-icon.afterpay{
     margin: auto 6px;
 }
-.paydock-payment-method-label-icon.google-pay{
+.power-board-payment-method-label-icon.google-pay{
     margin: -1px 17px;
 }
-.paydock-payment-method-label-icon.apple-pay{
+.power-board-payment-method-label-icon.apple-pay{
     margin: -1px 11px;
 }
-.paydock-payment-method-label-icon.card{
+.power-board-payment-method-label-icon.card{
     margin: -1px 25px;
 }
-.paydock-payment-method-label-logo {
+.power-board-payment-method-label-logo {
     margin: -6px 1em -6px auto;
     height: 36px !important;
     max-height: 36px !important;
+}
+.wc-orders-list-table .status-power-board-p-paid .order_total>span {
+    display: none;
 }

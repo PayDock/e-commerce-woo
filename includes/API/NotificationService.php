@@ -1,8 +1,8 @@
 <?php
 
-namespace Paydock\API;
+namespace PowerBoard\API;
 
-use Paydock\Abstracts\AbstractApiService;
+use PowerBoard\Abstracts\AbstractApiService;
 
 class NotificationService extends AbstractApiService {
 	const ENDPOINT = 'notifications';

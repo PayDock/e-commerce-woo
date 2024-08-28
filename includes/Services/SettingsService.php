@@ -1,21 +1,21 @@
 <?php
 
-namespace Paydock\Services;
+namespace PowerBoard\Services;
 
-use Paydock\Abstracts\AbstractSettingService;
-use Paydock\Enums\APMsSettings;
-use Paydock\Enums\BankAccountSettings;
-use Paydock\Enums\CardSettings;
-use Paydock\Enums\CredentialSettings;
-use Paydock\Enums\CredentialsTypes;
-use Paydock\Enums\OtherPaymentMethods;
-use Paydock\Enums\SettingGroups;
-use Paydock\Enums\WalletPaymentMethods;
-use Paydock\Enums\WalletSettings;
-use Paydock\Enums\WidgetSettings;
-use Paydock\Services\Settings\LiveConnectionSettingService;
-use Paydock\Services\Settings\SandboxConnectionSettingService;
-use Paydock\Services\Settings\WidgetSettingService;
+use PowerBoard\Abstracts\AbstractSettingService;
+use PowerBoard\Enums\APMsSettings;
+use PowerBoard\Enums\BankAccountSettings;
+use PowerBoard\Enums\CardSettings;
+use PowerBoard\Enums\CredentialSettings;
+use PowerBoard\Enums\CredentialsTypes;
+use PowerBoard\Enums\OtherPaymentMethods;
+use PowerBoard\Enums\SettingGroups;
+use PowerBoard\Enums\WalletPaymentMethods;
+use PowerBoard\Enums\WalletSettings;
+use PowerBoard\Enums\WidgetSettings;
+use PowerBoard\Services\Settings\LiveConnectionSettingService;
+use PowerBoard\Services\Settings\SandboxConnectionSettingService;
+use PowerBoard\Services\Settings\WidgetSettingService;
 
 final class SettingsService {
 	private const ENABLED_CONDITION = 'yes';
@@ -776,7 +776,11 @@ final class SettingsService {
 	}
 
 	public function getWidgetScriptUrl(): string {
-		$sdkUrl = 'https://widget.paydock.com/sdk/{version}/widget.umd.min.js';
+		if ( $this->isSandbox ) {
+			$sdkUrl = 'https://widget.preproduction.powerboard.commbank.com.au/sdk/{version}/widget.umd.js';
+		} else {
+			$sdkUrl = 'https://widget.powerboard.commbank.com.au/sdk/{version}/widget.umd.js';
+		}
 
 		return strtr( $sdkUrl, [ '{version}' => self::getInstance()->getVersion() ] );
 	}
@@ -796,46 +800,6 @@ final class SettingsService {
 		}
 
 		return $this->getWidgetService()->get_option( $customVersionKey ) ?? $version;
-	}
-
-	public function getWidgetPaymentWalletMinMax( WalletPaymentMethods $methods ): array {
-		switch ( $methods->name ) {
-			case WalletPaymentMethods::APPLE_PAY()->name:
-				$setting_min = WidgetSettings::PAYMENT_WALLET_APPLE_PAY_MIN();
-				$setting_max = WidgetSettings::PAYMENT_WALLET_APPLE_PAY_MAX();
-				break;
-			case WalletPaymentMethods::GOOGLE_PAY()->name:
-				$setting_min = WidgetSettings::PAYMENT_WALLET_GOOGLE_PAY_MIN();
-				$setting_max = WidgetSettings::PAYMENT_WALLET_GOOGLE_PAY_MAX();
-				break;
-			case WalletPaymentMethods::PAY_PAL_SMART_BUTTON()->name:
-				$setting_min = WidgetSettings::PAYMENT_WALLET_PAYPAL_MIN();
-				$setting_max = WidgetSettings::PAYMENT_WALLET_PAYPAL_MAX();
-				break;
-			case WalletPaymentMethods::AFTERPAY()->name:
-				$setting_min = WidgetSettings::PAYMENT_WALLET_AFTERPAY_V2_MIN();
-				$setting_max = WidgetSettings::PAYMENT_WALLET_AFTERPAY_V2_MAX();
-				break;
-			default:
-				$setting_min = '';
-				$setting_max = '';
-				break;
-		}
-
-		return [
-			'min' => $this->getWidgetService()->get_option(
-				$this->getOptionName( $this->getWidgetService()->id, [
-					$setting_min->name,
-				] ),
-				$setting_min->getDefault()
-			),
-			'max' => $this->getWidgetService()->get_option(
-				$this->getOptionName( $this->getWidgetService()->id, [
-					$setting_max->name,
-				] ),
-				$setting_max->getDefault()
-			),
-		];
 	}
 
 	public function getWidgetPaymentAPMsMinMax( OtherPaymentMethods $methods ): array {
@@ -870,25 +834,6 @@ final class SettingsService {
 		];
 	}
 
-	public function getWidgetPaymentCardMinMax(): array {
-		$setting_min = WidgetSettings::PAYMENT_CARD_MIN();
-		$setting_max = WidgetSettings::PAYMENT_CARD_MAX();
-
-		return [
-			'min' => $this->getWidgetService()->get_option(
-				$this->getOptionName( $this->getWidgetService()->id, [
-					$setting_min->name,
-				] ),
-				$setting_min->getDefault()
-			),
-			'max' => $this->getWidgetService()->get_option(
-				$this->getOptionName( $this->getWidgetService()->id, [
-					$setting_max->name,
-				] ),
-				$setting_max->getDefault()
-			),
-		];
-	}
 
 	public static function getInstance(): self {
 		if ( is_null( self::$instance ) ) {

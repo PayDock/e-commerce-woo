@@ -1,14 +1,14 @@
 <?php
 
-namespace Paydock\Services\Checkout;
+namespace PowerBoard\Services\Checkout;
 
-use Paydock\Abstracts\AbstractAPMsPaymentService;
-use Paydock\Enums\OtherPaymentMethods;
+use PowerBoard\Abstracts\AbstractAPMsPaymentService;
+use PowerBoard\Enums\OtherPaymentMethods;
 
 class AfterpayAPMsPaymentServiceService extends AbstractAPMsPaymentService {
 
 	public function  get_title(){
-		return trim($this->title) ? $this->title :  'Afterpay v1';
+        return trim($this->title) ? $this->title :  'Afterpay v1';
 	}
 	protected function getAPMsType(): OtherPaymentMethods {
 		return OtherPaymentMethods::AFTERPAY();

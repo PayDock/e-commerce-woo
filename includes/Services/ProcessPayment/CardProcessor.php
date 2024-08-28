@@ -1,16 +1,16 @@
 <?php
 
-namespace Paydock\Services\ProcessPayment;
+namespace PowerBoard\Services\ProcessPayment;
 
 use Exception;
-use Paydock\Enums\DSTypes;
-use Paydock\Enums\FraudTypes;
-use Paydock\Enums\SaveCardOptions;
-use Paydock\Helpers\ArgsForProcessPayment;
-use Paydock\Helpers\VaultTokenHelper;
-use Paydock\Repositories\LogRepository;
-use Paydock\Repositories\UserTokenRepository;
-use Paydock\Services\SDKAdapterService;
+use PowerBoard\Enums\DSTypes;
+use PowerBoard\Enums\FraudTypes;
+use PowerBoard\Enums\SaveCardOptions;
+use PowerBoard\Helpers\ArgsForProcessPayment;
+use PowerBoard\Helpers\VaultTokenHelper;
+use PowerBoard\Repositories\LogRepository;
+use PowerBoard\Repositories\UserTokenRepository;
+use PowerBoard\Services\SDKAdapterService;
 
 class CardProcessor {
 	const FRAUD_3DS_CHARGE_METHOD = 'fraud3DsCharge';
@@ -52,7 +52,7 @@ class CardProcessor {
 		$this->setRunMethod();
 
 		if ( ! in_array( $this->runMethod, self::ALLOWED_METHODS ) ) {
-			throw new Exception( esc_html( __( 'Undefined run method', 'paydock' ) ) );
+			throw new Exception( esc_html( __( 'Undefined run method', 'power-board' ) ) );
 		}
 
 		return call_user_func( [ $this, $this->runMethod ] );
@@ -106,7 +106,7 @@ class CardProcessor {
 		return $this->runMethod;
 	}
 
-	public function getStandalone3dsToken(): string {
+	public function getStandalone3dsToken( ): string {
 		$vaultToken = $this->getVaultToken();
 
 		$paymentSource = [
@@ -118,7 +118,7 @@ class CardProcessor {
 		}
 
 		$args = [
-			'amount'    => $this->order->get_total(),
+			'amount'    => $this->args['amount'],
 			'reference' => '',
 			'currency'  => strtoupper( get_woocommerce_currency() ),
 			'customer'  => [
@@ -151,7 +151,7 @@ class CardProcessor {
 				$message,
 				LogRepository::ERROR
 			);
-			throw new Exception( esc_html( __( 'The 3ds charge could not be created successfully.', 'paydock' ) ) );
+			throw new Exception( esc_html( __( 'The 3ds charge could not be created successfully.', 'power-board' ) ) );
 		}
 
 		$this->logger->createLogRecord(
@@ -180,13 +180,15 @@ class CardProcessor {
 			return [];
 		}
 
-		WC()->cart->calculate_totals();
+		if ( ! is_admin() ) {
+			WC()->cart->calculate_totals();
+		}
 
 		$address1 = $this->order->get_billing_address_1();
 		$address2 = $this->order->get_billing_address_2();
 
 		$result = [
-			'amount'           => $this->order->get_total(),
+			'amount'           => (float) $this->order->get_total(),
 			'address_country'  => $this->order->get_billing_country(),
 			'address_postcode' => $this->order->get_billing_postcode(),
 			'address_city'     => $this->order->get_billing_city(),
@@ -303,7 +305,7 @@ class CardProcessor {
 		] );
 
 		if ( empty( $response['error'] ) && ! empty( $response['resource']['data']['_id'] ) ) {
-			update_option( 'paydock_fraud_' . (string) $this->order->get_id(), $options );
+			update_option( 'power_board_fraud_' . (string) $this->order->get_id(), $options );
 		}
 
 		return $response;
@@ -349,7 +351,7 @@ class CardProcessor {
 		] );
 
 		if ( empty( $response['error'] ) && ! empty( $response['resource']['data']['_id'] ) ) {
-			update_option( 'paydock_fraud_' . (string) $this->order->get_id(), $options );
+			update_option( 'power_board_fraud_' . (string) $this->order->get_id(), $options );
 		}
 
 		return $response;
@@ -556,7 +558,7 @@ class CardProcessor {
 		] );
 
 		if ( empty( $response['error'] ) && ! empty( $response['resource']['data']['_id'] ) ) {
-			update_option( 'paydock_fraud_' . (string) $this->order->get_id(), $options );
+			update_option( 'power_board_fraud_' . (string) $this->order->get_id(), $options );
 		}
 
 		return $response;
@@ -596,7 +598,7 @@ class CardProcessor {
 					$message,
 					LogRepository::ERROR
 				);
-				throw new Exception( esc_html( __( 'The Paydock customer could not be created successfully.', 'paydock' ) ) );
+				throw new Exception( esc_html( __( 'The PowerBoard customer could not be created successfully.', 'power-board' ) ) );
 			}
 
 			$this->logger->createLogRecord(
@@ -652,8 +654,7 @@ class CardProcessor {
 
 		if ( ! empty( $responce['error'] ) ) {
 			$message = ! empty( $responce['error']['message'] ) ? ' ' . $responce['error']['message'] : '';
-			/* translators: %s: Error message from Paydock API. */
-			throw new Exception( esc_html( sprintf( __( 'The charge could not be created successfully. %s <input id="widget_error" hidden type="text"/>', 'paydock' ), $message ) ) );
+			throw new Exception( esc_html( __( 'The charge could not be created successfully. <input id="widget_error" hidden type="text"/>', 'power-board' ) ) );
 		}
 
 		return $responce;
@@ -675,12 +676,11 @@ class CardProcessor {
 			], $this->getAdditionalFields( 'amount' ) ),
 		], $this->getAdditionalFields( 'amount' ) );
 
-		if ( empty( $customerArgs['phone'] ) ) {
-			unset( $customerArgs['phone'] );
-		}
-
 		if ( SaveCardOptions::WITH_GATEWAY()->name === $this->args['cardsavecardoption'] && ! empty( $this->args['gatewayid'] ) ) {
 			$customerArgs['payment_source']['gateway_id'] = $this->args['gatewayid'];
+		}
+		if ( empty( $customerArgs['phone'] ) ) {
+			unset( $customerArgs['phone'] );
 		}
 
 		$customer = SDKAdapterService::getInstance()->createCustomer( $customerArgs );
@@ -693,8 +693,8 @@ class CardProcessor {
 				$message,
 				LogRepository::ERROR
 			);
-			/* translators: %s: Error message from Paydock API. */
-			throw new Exception( esc_html( sprintf( __( 'The Paydock customer could not be created successfully. %s', 'paydock' ), $message ) ) );
+			/* translators: %s: Error message from PowerBoaRD API. */
+			throw new Exception( esc_html( sprintf( __( 'The PowerBoard customer could not be created successfully. %s', 'power-board' ), $message ) ) );
 		}
 		$this->logger->createLogRecord(
 			$customer['resource']['data']['_id'],

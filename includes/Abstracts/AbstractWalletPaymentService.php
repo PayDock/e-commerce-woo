@@ -1,19 +1,20 @@
 <?php
 
-namespace Paydock\Abstracts;
+namespace PowerBoard\Abstracts;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
-use Paydock\Enums\OrderListColumns;
-use Paydock\Enums\WalletPaymentMethods;
-use Paydock\Repositories\LogRepository;
-use Paydock\Services\SettingsService;
+use PowerBoard\Enums\OrderListColumns;
+use PowerBoard\Enums\WalletPaymentMethods;
+use PowerBoard\Repositories\LogRepository;
+use PowerBoard\Services\OrderService;
+use PowerBoard\Services\SettingsService;
 
 abstract class AbstractWalletPaymentService extends AbstractPaymentService {
 	public function __construct() {
 		$settings      = SettingsService::getInstance();
 		$paymentMethod = $this->getWalletType();
 
-		$this->id          = 'paydock_' . $paymentMethod->getId() . '_wallets_gateway';
+		$this->id          = 'power_board_' . $paymentMethod->getId() . '_wallets_gateway';
 		$this->title       = $settings->getWidgetPaymentWalletTitle( $paymentMethod );
 		$this->description = $settings->getWidgetPaymentWalletDescription( $paymentMethod );
 
@@ -36,7 +37,7 @@ abstract class AbstractWalletPaymentService extends AbstractPaymentService {
 		if ( ! wp_verify_nonce( $wpNonce, 'process_payment' ) ) {
 			throw new RouteException(
 				'woocommerce_rest_checkout_process_payment_error',
-				esc_html( __( 'Error: Security check', 'paydock' ) )
+				esc_html( __( 'Error: Security check', 'power-board' ) )
 			);
 		}
 
@@ -62,31 +63,29 @@ abstract class AbstractWalletPaymentService extends AbstractPaymentService {
 		$wallet  = reset( $wallets );
 		$isFraud = ! empty( $wallet['fraud'] ) && $wallet['fraud'];
 		if ( $isFraud ) {
-			update_option( 'paydock_fraud_' . (string) $order->get_id(), [] );
+			update_option( 'power_board_fraud_' . (string) $order->get_id(), [] );
 		}
 
 		$loggerRepository = new LogRepository();
 		if ( 'inreview' === $data['data']['status'] ) {
-			$status = 'wc-paydock-requested';
+			$status = 'wc-pb-requested';
 		} elseif (
 			( 'pending' === $data['data']['status'] )
 			|| ( ! empty( $_GET['direct_charge'] ) && ( 'true' == $_GET['direct_charge'] ) )
 		) {
-			$status = 'wc-paydock-authorize';
+			$status = 'wc-pb-authorize';
 		} else {
-			$status = 'wc-paydock-paid';
+			$status = 'wc-pb-paid';
 		}
 
-		$order->set_status( $status );
-		$order->payment_complete();
+		OrderService::updateStatus( $order_id, $status );
+		if ( ! in_array( $status, [ 'wc-pb-authorize' ] ) ) {
+			$order->payment_complete();
+			$order->update_meta_data( 'pb_directly_charged', 1 );
+		}
+		$order->update_meta_data( 'power_board_charge_id', $chargeId );
+		$order->update_meta_data( OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(), $this->getWalletType()->getLabel() );
 		$order->save();
-
-		update_post_meta( $order_id, 'paydock_charge_id', $chargeId );
-		add_post_meta(
-			$order_id,
-			OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(),
-			$this->getWalletType()->getLabel()
-		);
 
 		WC()->cart->empty_cart();
 
@@ -95,7 +94,7 @@ abstract class AbstractWalletPaymentService extends AbstractPaymentService {
 			'Charge',
 			$status,
 			'Successful',
-			'wc-paydock-authorize' === $status ? LogRepository::DEFAULT : LogRepository::SUCCESS
+			'wc-pb-authorize' === $status ? LogRepository::DEFAULT : LogRepository::SUCCESS
 		);
 
 		return [

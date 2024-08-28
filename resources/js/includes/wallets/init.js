@@ -1,5 +1,5 @@
 let buttons = {};
-export default (id, buttonId, data, isSandbox, reload = false) => {
+export default (id, buttonId, data, isSandbox) => {
     const paymentSourceElement = jQuery('#paymentSourceWalletsToken');
     const paymentCompleted = jQuery('#paymentCompleted');
     const orderButton = jQuery('.wc-block-components-checkout-place-order-button');
@@ -8,12 +8,12 @@ export default (id, buttonId, data, isSandbox, reload = false) => {
         country: data.county,
     }
 
-    if ('#paydockWalletApplePayButton' === buttonId) {
+    if ('#powerBoardWalletApplePayButton' === buttonId) {
         config['wallets'] = ['apple'];
         config['amount_label'] = "Total";
     }
 
-    if ('#paydockWalletPayPalButton' === buttonId) {
+    if ('#powerBoardWalletPayPalButton' === buttonId) {
         config['pay_later'] = data.pay_later;
 
         config['style'] = {
@@ -21,8 +21,8 @@ export default (id, buttonId, data, isSandbox, reload = false) => {
         };
     }
 
-    if ('#paydockWalletAfterpayButton' === buttonId) {
-        jQuery('#paydockWalletAfterpayButton').each((index, element) => element.addEventListener("click", (event) => {
+    if ('#powerBoardWalletAfterpayButton' === buttonId) {
+        jQuery('#powerBoardWalletAfterpayButton').each((index, element) => element.addEventListener("click", (event) => {
             data.payment = id.replace('-', '_')
             paymentSourceElement.val(JSON.stringify(data))
             orderButton.click();
@@ -32,13 +32,12 @@ export default (id, buttonId, data, isSandbox, reload = false) => {
     if(buttons.current){
         delete buttons.current;
     }
+    buttons.current = new window.cba.WalletButtons(buttonId, data.resource.data.token, config)
 
-    buttons.current = new window.paydock.WalletButtons(buttonId, data.resource.data.token, config)
-
-    buttons.current.setEnv(isSandbox ? 'sandbox' : 'production')
+    buttons.current.setEnv(isSandbox ? 'preproduction_cba' : 'production_cba')
 
     buttons.current.onPaymentSuccessful((result) => {
-        result.payment = id.replace('-', '_')
+        result.payment = id.replace('-','_')
         paymentSourceElement.val(JSON.stringify(result))
         paymentCompleted.show();
         jQuery(buttonId).hide();
@@ -51,7 +50,7 @@ export default (id, buttonId, data, isSandbox, reload = false) => {
     });
 
     buttons.current.onPaymentInReview((result) => {
-        result.payment = id.replace('-', '_')
+        result.payment = id.replace('-','_')
         paymentSourceElement.val(JSON.stringify(result))
         paymentCompleted.show();
         jQuery(buttonId).hide();

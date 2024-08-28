@@ -1,10 +1,10 @@
 <?php
 
-namespace Paydock\Abstracts;
+namespace PowerBoard\Abstracts;
 
 use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
-use Paydock\PaydockPlugin;
-use Paydock\Services\SettingsService;
+use PowerBoard\PowerBoardPlugin;
+use PowerBoard\Services\SettingsService;
 
 abstract class AbstractBlock extends AbstractPaymentMethodType {
 	private static $isLoad = false;
@@ -23,42 +23,54 @@ abstract class AbstractBlock extends AbstractPaymentMethodType {
 	public function get_payment_method_script_handles() {
 		if ( ! self::$isLoad && is_checkout() ) {
 			wp_enqueue_script(
-				'paydock-form',
-				PAYDOCK_PLUGIN_URL . '/assets/js/frontend/form.js',
+				'power-board-form',
+				POWER_BOARD_PLUGIN_URL . 'assets/js/frontend/form.js',
 				[],
-				PAYDOCK_PLUGIN_VERSION,
+				POWER_BOARD_PLUGIN_VERSION,
 				true
 			);
+
+			wp_localize_script( 'power-board-form', 'powerBoardWidgetSettings', [
+				'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL
+			] );
 			wp_enqueue_style(
-				'paydock-widget-css',
-				PAYDOCK_PLUGIN_URL . '/assets/css/frontend/widget.css',
+				'power-board-widget-css',
+				POWER_BOARD_PLUGIN_URL . 'assets/css/frontend/widget.css',
 				[],
-				PAYDOCK_PLUGIN_VERSION,
+				POWER_BOARD_PLUGIN_VERSION,
 				true
 			);
 
 			wp_enqueue_script(
-				'paydock-api',
+				'power-board-api',
 				SettingsService::getInstance()->getWidgetScriptUrl(),
 				[],
-				PAYDOCK_PLUGIN_VERSION,
+				POWER_BOARD_PLUGIN_VERSION,
 				true
 			);
+			wp_localize_script( 'power-board-api', 'powerBoardWidgetSettings', [
+				'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL
+			] );
 
 			self::$isLoad = true;
 		}
 
 		$scriptPath      = 'assets/build/js/frontend/' . $this->script . '.js';
 		$scriptAssetPath = 'assets/build/js/frontend/' . $this->script . '.asset.php';
-		$scriptUrl       = plugins_url( $scriptPath, PAYDOCK_PLUGIN_FILE );
-		$scriptName      = PaydockPlugin::PLUGIN_PREFIX . '-' . $this->script;
+		$scriptUrl       = plugins_url( $scriptPath, POWER_BOARD_PLUGIN_FILE );
+		$scriptName      = PowerBoardPlugin::PLUGIN_PREFIX . '-' . $this->script;
 
 		$scriptAsset = file_exists( $scriptAssetPath ) ? require( $scriptAssetPath ) : [
 			'dependencies' => [],
-			'version'      => PAYDOCK_PLUGIN_VERSION,
+			'version'      => POWER_BOARD_PLUGIN_VERSION,
 		];
 		wp_register_script( $scriptName, $scriptUrl, $scriptAsset['dependencies'], $scriptAsset['version'], true );
-
+		wp_localize_script( $scriptName, 'powerBoardWidgetSettings', [
+			'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL
+		] );
+		wp_localize_script( 'power-board-api', 'powerBoardWidgetSettings', [
+			'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL
+		] );
 		if ( function_exists( 'wp_set_script_translations' ) ) {
 			wp_set_script_translations( $scriptName );
 		}

@@ -1,17 +1,16 @@
 <?php
 
-namespace Paydock\Services\Checkout;
+namespace PowerBoard\Services\Checkout;
 
-use Paydock\Abstracts\AbstractAPMsPaymentService;
-use Paydock\Enums\OtherPaymentMethods;
+use PowerBoard\Abstracts\AbstractAPMsPaymentService;
+use PowerBoard\Enums\OtherPaymentMethods;
 
 class ZipAPMsPaymentServiceService extends AbstractAPMsPaymentService {
 
 	protected function getAPMsType(): OtherPaymentMethods {
 		return OtherPaymentMethods::ZIPPAY();
 	}
-
-    public function  get_title(){
-		return trim($this->title) ? $this->title : 'Zip';
-    }
+	public function  get_title(){
+        return trim($this->title) ? $this->title : 'Zip';
+	}
 }

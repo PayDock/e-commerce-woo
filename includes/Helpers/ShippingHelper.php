@@ -1,6 +1,6 @@
 <?php
 
-namespace Paydock\Helpers;
+namespace PowerBoard\Helpers;
 
 class ShippingHelper {
 	public static function getPickupLocationByName( string $name ) {

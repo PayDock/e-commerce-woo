@@ -1,8 +1,8 @@
 <?php
 
-namespace Paydock\Enums;
+namespace PowerBoard\Enums;
 
-use Paydock\Abstracts\AbstractEnum;
+use PowerBoard\Abstracts\AbstractEnum;
 
 class CustomInputStyles extends AbstractEnum {
 	protected const COLOR = 'color';

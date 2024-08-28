@@ -1,25 +1,24 @@
 <?php
 
-namespace Paydock\Services;
+namespace PowerBoard\Services;
 
-use Paydock\API\ChargeService;
-use Paydock\API\ConfigService;
-use Paydock\API\CustomerService;
-use Paydock\API\GatewayService;
-use Paydock\API\NotificationService;
-use Paydock\API\ServiceService;
-use Paydock\API\TokenService;
-use Paydock\API\VaultService;
-use Paydock\Enums\CredentialSettings;
-use Paydock\Enums\CredentialsTypes;
-use Paydock\Enums\SettingGroups;
-use Paydock\Services\Settings\LiveConnectionSettingService;
-use Paydock\Services\Settings\SandboxConnectionSettingService;
+use PowerBoard\API\ChargeService;
+use PowerBoard\API\ConfigService;
+use PowerBoard\API\CustomerService;
+use PowerBoard\API\GatewayService;
+use PowerBoard\API\NotificationService;
+use PowerBoard\API\ServiceService;
+use PowerBoard\API\TokenService;
+use PowerBoard\API\VaultService;
+use PowerBoard\Enums\ConfigAPI;
+use PowerBoard\Enums\CredentialSettings;
+use PowerBoard\Enums\CredentialsTypes;
+use PowerBoard\Enums\SettingGroups;
+use PowerBoard\Services\Settings\LiveConnectionSettingService;
+use PowerBoard\Services\Settings\SandboxConnectionSettingService;
 
 class SDKAdapterService {
 	private const ENABLED_CONDITION = 'yes';
-	private const PROD_ENV = 'production';
-	private const SANDBOX_ENV = 'sandbox';
 	private static $instance = null;
 
 	public function __construct() {
@@ -33,9 +32,11 @@ class SDKAdapterService {
 
 		if ( $isProd ) {
 			$settings = new LiveConnectionSettingService();
+			$env = ConfigAPI::PRODUCTION_ENVIRONMENT()->value;
 
 		} else {
 			$settings = new SandboxConnectionSettingService();
+			$env = ConfigAPI::SANDBOX_ENVIRONMENT()->value;
 		}
 
 		$isAccessToken = CredentialsTypes::ACCESS_KEY()->name == $settings->get_option(
@@ -60,8 +61,6 @@ class SDKAdapterService {
 				CredentialSettings::SECRET_KEY()->name,
 			] ) );
 		}
-
-		$env = $isProd ? self::PROD_ENV : self::SANDBOX_ENV;
 
 		ConfigService::init( $env, $secretKey, $publicKey ?? null );
 	}

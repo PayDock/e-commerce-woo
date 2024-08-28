@@ -3,7 +3,7 @@ import {__} from '@wordpress/i18n';
 import {getSetting} from '@woocommerce/settings';
 
 export default (label = 'Security number') => {
-    const settings = getSetting('paydock_data', {});
+    const settings = getSetting('power_board_data', {});
 
     const wrapperClassName = 'wc-block-components-text-input'
     const [hasError, setHasError] = useState(false)
@@ -11,7 +11,7 @@ export default (label = 'Security number') => {
 
     return (
         <div
-            className={wrapperClassName + ' paydock-cvv-code' + (hasError ? ' has-error' : '') + (isActive ? ' is-active' : '')}
+            className={wrapperClassName + ' power-board-cvv-code' + (hasError ? ' has-error' : '') + (isActive ? ' is-active' : '')}
             style={{display: 'none'}}>
             <input
                 id="cvv"

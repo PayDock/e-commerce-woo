@@ -1,10 +1,10 @@
 <?php
 
-namespace Paydock\Services\Settings;
+namespace PowerBoard\Services\Settings;
 
-use Paydock\Abstracts\AbstractSettingService;
-use Paydock\Enums\SettingsTabs;
-use Paydock\Repositories\LogRepository;
+use PowerBoard\Abstracts\AbstractSettingService;
+use PowerBoard\Enums\SettingsTabs;
+use PowerBoard\Repositories\LogRepository;
 
 class LogsSettingService extends AbstractSettingService {
 	public function generate_settings_html( $form_fields = [], $echo = true ): ?string {
@@ -17,7 +17,7 @@ class LogsSettingService extends AbstractSettingService {
 		$order   = ! empty( $order ) ? sanitize_text_field( $order ) : 'desc';
 		$orderBy = ! empty( $orderBy ) ? sanitize_text_field( $orderBy ) : 'created_at';
 
-		$tabs = $this->getTabs();
+		$tabs    = $this->getTabs();
 		$records = ( new LogRepository() )->getLogs( $page, $perPage, $orderBy, $order );
 
 		if ( $echo ) {

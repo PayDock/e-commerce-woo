@@ -1,6 +1,6 @@
 <?php
 
-namespace Paydock\Abstracts;
+namespace PowerBoard\Abstracts;
 
 abstract class AbstractSingleton {
 	abstract protected function __construct();

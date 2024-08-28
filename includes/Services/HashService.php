@@ -1,8 +1,8 @@
 <?php
 
-namespace Paydock\Services;
+namespace PowerBoard\Services;
 
-use Paydock\PaydockPlugin;
+use PowerBoard\PowerBoardPlugin;
 
 class HashService {
 	private const CIPHER = 'AES-128-CBC';
@@ -27,7 +27,7 @@ class HashService {
 			return AUTH_KEY;
 		}
 
-		return PaydockPlugin::PLUGIN_PREFIX;
+		return PowerBoardPlugin::PLUGIN_PREFIX;
 	}
 
 	public static function decrypt( string $string ): string {

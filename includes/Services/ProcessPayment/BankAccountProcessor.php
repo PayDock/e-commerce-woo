@@ -1,14 +1,14 @@
 <?php
 
-namespace Paydock\Services\ProcessPayment;
+namespace PowerBoard\Services\ProcessPayment;
 
-use Paydock\Enums\SaveCardOptions;
-use Paydock\Exceptions\LoggedException;
-use Paydock\Helpers\ArgsForProcessPayment;
-use Paydock\Helpers\VaultTokenHelper;
-use Paydock\Repositories\LogRepository;
-use Paydock\Repositories\UserTokenRepository;
-use Paydock\Services\SDKAdapterService;
+use PowerBoard\Enums\SaveCardOptions;
+use PowerBoard\Exceptions\LoggedException;
+use PowerBoard\Helpers\ArgsForProcessPayment;
+use PowerBoard\Helpers\VaultTokenHelper;
+use PowerBoard\Repositories\LogRepository;
+use PowerBoard\Repositories\UserTokenRepository;
+use PowerBoard\Services\SDKAdapterService;
 
 class BankAccountProcessor {
 	protected $order;
@@ -19,9 +19,9 @@ class BankAccountProcessor {
 	private $logger;
 
 	public function __construct( $order, $args ) {
-		$this->order = $order;
-		$this->logger = new LogRepository();
-		$this->args = ArgsForProcessPayment::prepare( $args );
+		$this->order            = $order;
+		$this->logger           = new LogRepository();
+		$this->args             = ArgsForProcessPayment::prepare( $args );
 		$this->vaultTokenHelper = new VaultTokenHelper( $this->args );
 	}
 
@@ -56,16 +56,16 @@ class BankAccountProcessor {
 
 	public function chargeWithCustomerId(): array {
 		$request = [
-			'reference' => (string) $this->orderId,
-			'first_name' => $this->order->get_billing_first_name(),
-			'last_name' => $this->order->get_billing_last_name(),
-			'email' => $this->order->get_billing_email(),
-			'phone' => $this->order->get_billing_phone(),
+			'reference'      => (string) $this->orderId,
+			'first_name'     => $this->order->get_billing_first_name(),
+			'last_name'      => $this->order->get_billing_last_name(),
+			'email'          => $this->order->get_billing_email(),
+			'phone'          => $this->order->get_billing_phone(),
 			'payment_source' => array_merge( [
-						'amount' => $this->order->get_total(),
-						'type' => 'bank_account',
-						'vault_token' => $this->getVaultToken(),
-					], $this->getAdditionalFields( 'amount' ) ),
+				'amount'      => $this->order->get_total(),
+				'type'        => 'bank_account',
+				'vault_token' => $this->getVaultToken(),
+			], $this->getAdditionalFields( 'amount' ) ),
 		];
 
 		if ( ! empty( $this->args['gatewayid'] ) && SaveCardOptions::WITH_GATEWAY()->name === $this->getSaveType() ) {
@@ -86,7 +86,7 @@ class BankAccountProcessor {
 					LogRepository::ERROR
 				);
 				new LoggedException(
-					__( 'Oops! Something went wrong. Please check the information provided and try again. ', 'paydock' ),
+					__( 'Oops! Something went wrong. Please check the information provided and try again. ', 'power-board' ),
 					0,
 					null,
 					$response
@@ -131,19 +131,21 @@ class BankAccountProcessor {
 
 	protected function getAdditionalFields( $exclude = [] ): array {
 
-		WC()->cart->calculate_totals();
+		if ( ! is_admin() ) {
+			WC()->cart->calculate_totals();
+		}
 
 		$address1 = $this->order->get_billing_address_1();
 		$address2 = $this->order->get_billing_address_2();
 
 		$result = [
-			'amount' => $this->order->get_total(),
-			'address_country' => $this->order->get_billing_country(),
+			'amount'           => (float) $this->order->get_total(),
+			'address_country'  => $this->order->get_billing_country(),
 			'address_postcode' => $this->order->get_billing_postcode(),
-			'address_city' => $this->order->get_billing_city(),
-			'address_state' => $this->order->get_billing_state(),
-			'address_line1' => $address1,
-			'address_line2' => $address2,
+			'address_city'     => $this->order->get_billing_city(),
+			'address_state'    => $this->order->get_billing_state(),
+			'address_line1'    => $address1,
+			'address_line2'    => $address2,
 		];
 
 		if ( ! empty( $exclude ) ) {
@@ -161,9 +163,8 @@ class BankAccountProcessor {
 		$addPaymentSource = $this->getAdditionalFields( 'amount' );
 
 		$paymentSource = [
-			'vault_token' => ! empty( $this->args['selectedtoken'] ) ? $this->args['selectedtoken'] : $this->getVaultToken(
-			),
-			'type' => 'bank_account',
+			'vault_token' => ! empty( $this->args['selectedtoken'] ) ? $this->args['selectedtoken'] : $this->getVaultToken(),
+			'type'        => 'bank_account',
 		];
 
 		if ( ! empty( $this->args['gatewayid'] ) ) {
@@ -172,13 +173,13 @@ class BankAccountProcessor {
 
 		$request = [
 			'reference' => (string) $this->orderId,
-			'amount' => $this->order->get_total(),
-			'currency' => strtoupper( get_woocommerce_currency() ),
-			'customer' => [
-				'first_name' => $this->order->get_billing_first_name(),
-				'last_name' => $this->order->get_billing_last_name(),
-				'email' => $this->order->get_billing_email(),
-				'phone' => $this->order->get_billing_phone(),
+			'amount'    => $this->order->get_total(),
+			'currency'  => strtoupper( get_woocommerce_currency() ),
+			'customer'  => [
+				'first_name'     => $this->order->get_billing_first_name(),
+				'last_name'      => $this->order->get_billing_last_name(),
+				'email'          => $this->order->get_billing_email(),
+				'phone'          => $this->order->get_billing_phone(),
 				'payment_source' => array_merge( $addPaymentSource, $paymentSource ),
 			],
 		];

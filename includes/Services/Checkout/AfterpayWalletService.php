@@ -1,20 +1,21 @@
 <?php
 
-namespace Paydock\Services\Checkout;
+namespace PowerBoard\Services\Checkout;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
-use Paydock\Abstracts\AbstractWalletPaymentService;
-use Paydock\Enums\OrderListColumns;
-use Paydock\Enums\WalletPaymentMethods;
-use Paydock\Repositories\LogRepository;
+use PowerBoard\Abstracts\AbstractWalletPaymentService;
+use PowerBoard\Enums\OrderListColumns;
+use PowerBoard\Enums\WalletPaymentMethods;
+use PowerBoard\Repositories\LogRepository;
 
 class AfterpayWalletService extends AbstractWalletPaymentService {
+
 	protected function getWalletType(): WalletPaymentMethods {
 		return WalletPaymentMethods::AFTERPAY();
 	}
 
 	public function get_title() {
-		return trim( $this->title ) ? $this->title : 'Afterpay v1';
+		return trim( $this->title ) ? $this->title : 'Afterpay v2';
 	}
 
 	public function process_payment( $order_id, $retry = true, $force_customer = false ) {
@@ -23,9 +24,7 @@ class AfterpayWalletService extends AbstractWalletPaymentService {
 		if ( ! wp_verify_nonce( $wpNonce, 'process_payment' ) ) {
 			throw new RouteException(
 				'woocommerce_rest_checkout_process_payment_error',
-
-				/* Translators: %s Error message from API. */
-				esc_html( __( 'Error: Security check', 'paydock' ) )
+				esc_html( __( 'Error: Security check', 'power-board' ) )
 			);
 		}
 
@@ -53,20 +52,15 @@ class AfterpayWalletService extends AbstractWalletPaymentService {
 		$wallet  = reset( $wallets );
 		$isFraud = ! empty( $wallet['fraud'] ) && $wallet['fraud'];
 		if ( $isFraud ) {
-			update_option( 'paydock_fraud_' . (string) $order->get_id(), [] );
+			update_option( 'power_board_fraud_' . (string) $order->get_id(), [] );
 		}
 
 		$loggerRepository = new LogRepository();
 
 		$order->set_status( 'wc-pending' );
+		$order->update_meta_data( 'power_board_charge_id', $chargeId );
+		$order->update_meta_data( OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(), $this->getWalletType()->getLabel() );
 		$order->save();
-
-		update_post_meta( $order_id, 'paydock_charge_id', $chargeId );
-		add_post_meta(
-			$order_id,
-			OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(),
-			$this->getWalletType()->getLabel()
-		);
 
 		$loggerRepository->createLogRecord(
 			$data['data']['id'] ?? '',
@@ -76,7 +70,7 @@ class AfterpayWalletService extends AbstractWalletPaymentService {
 		);
 
 		return [
-			'result' => 'success',
+			'result' => 'success'
 		];
 	}
 }

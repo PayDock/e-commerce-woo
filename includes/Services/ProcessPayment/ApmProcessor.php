@@ -1,14 +1,14 @@
 <?php
 
-namespace Paydock\Services\ProcessPayment;
+namespace PowerBoard\Services\ProcessPayment;
 
 use Exception;
-use Paydock\Enums\OtherPaymentMethods;
-use Paydock\Helpers\ArgsForProcessPayment;
-use Paydock\Helpers\ShippingHelper;
-use Paydock\Repositories\LogRepository;
-use Paydock\Repositories\UserCustomerRepository;
-use Paydock\Services\SDKAdapterService;
+use PowerBoard\Enums\OtherPaymentMethods;
+use PowerBoard\Helpers\ArgsForProcessPayment;
+use PowerBoard\Helpers\ShippingHelper;
+use PowerBoard\Repositories\LogRepository;
+use PowerBoard\Repositories\UserCustomerRepository;
+use PowerBoard\Services\SDKAdapterService;
 
 class ApmProcessor {
 	const CHARGE_METHOD = 'charge';
@@ -36,7 +36,7 @@ class ApmProcessor {
 		$this->setRunMethod();
 
 		if ( ! in_array( $this->runMethod, self::ALLOWED_METHODS ) ) {
-			throw new Exception( esc_html( __( 'Undefined run method', 'paydock' ) ) );
+			throw new Exception( esc_html( __( 'Undefined run method', 'power-board' ) ) );
 		}
 
 		return call_user_func( [ $this, $this->runMethod ] );
@@ -102,7 +102,7 @@ class ApmProcessor {
 				$message,
 				LogRepository::ERROR
 			);
-			throw new Exception( esc_html( __( 'The Paydock customer could not be created successfully.', 'paydock' ) ) );
+			throw new Exception( esc_html( __( 'The PowerBoard customer could not be created successfully.', 'power-board' ) ) );
 		}
 
 		$this->logger->createLogRecord(
@@ -157,14 +157,15 @@ class ApmProcessor {
 		if ( ! $this->order ) {
 			return [];
 		}
-
-		WC()->cart->calculate_totals();
+		if ( ! is_admin() ) {
+			WC()->cart->calculate_totals();
+		}
 
 		$address1 = $this->order->get_billing_address_1();
 		$address2 = $this->order->get_billing_address_2();
 
 		$result = [
-			'amount'           => $this->order->get_total(),
+			'amount'           => (float) $this->order->get_total(),
 			'address_country'  => $this->order->get_billing_country(),
 			'address_postcode' => $this->order->get_billing_postcode(),
 			'address_city'     => $this->order->get_billing_city(),

@@ -1,17 +1,22 @@
 <?php
 
-namespace Paydock\Services\Checkout;
+namespace PowerBoard\Services\Checkout;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Exception;
-use Paydock\Enums\OrderListColumns;
-use Paydock\Enums\SettingsTabs;
-use Paydock\Enums\WidgetSettings;
-use Paydock\Repositories\LogRepository;
-use Paydock\Repositories\UserTokenRepository;
-use Paydock\Services\ProcessPayment\CardProcessor;
-use Paydock\Services\SDKAdapterService;
-use Paydock\Services\SettingsService;
+use PowerBoard\Enums\DSTypes;
+use PowerBoard\Enums\FraudTypes;
+use PowerBoard\Enums\OrderListColumns;
+use PowerBoard\Enums\SaveCardOptions;
+use PowerBoard\Enums\SettingsTabs;
+use PowerBoard\Enums\TypeExchangeOTT;
+use PowerBoard\Enums\WidgetSettings;
+use PowerBoard\Repositories\LogRepository;
+use PowerBoard\Repositories\UserTokenRepository;
+use PowerBoard\Services\OrderService;
+use PowerBoard\Services\ProcessPayment\CardProcessor;
+use PowerBoard\Services\SettingsService;
+use PowerBoard\Services\Validation\ValidationHelperService;
 use WC_Payment_Gateway;
 
 class CardPaymentService extends WC_Payment_Gateway {
@@ -19,8 +24,8 @@ class CardPaymentService extends WC_Payment_Gateway {
 	 * Constructor
 	 */
 	public function __construct() {
-		$this->id         = 'paydock_gateway';
-		$this->icon       = apply_filters( 'woocommerce_paydock_gateway_icon', '' );
+		$this->id         = 'power_board_gateway';
+		$this->icon       = apply_filters( 'woocommerce_power_board_gateway_icon', '' );
 		$this->has_fields = true;
 		$this->supports   = [
 			'products',
@@ -34,8 +39,8 @@ class CardPaymentService extends WC_Payment_Gateway {
 			'default_credit_card_form',
 		];
 
-		$this->method_title       = _x( 'Paydock payment', 'Paydock payment method', 'paydock' );
-		$this->method_description = __( 'Allows Paydock payments.', 'paydock' );
+		$this->method_title       = _x( 'PowerBoard payment', 'PowerBoard payment method', 'power-board' );
+		$this->method_description = __( 'Allows PowerBoard payments.', 'power-board' );
 
 		// Load the settings.
 		$this->init_settings();
@@ -55,7 +60,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 		// Actions.
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, [ $this, 'process_admin_options' ] );
 		add_action(
-			'woocommerce_scheduled_subscription_payment_paydock',
+			'woocommerce_scheduled_subscription_payment_power_board',
 			[ $this, 'process_subscription_payment' ],
 			10,
 			2
@@ -63,7 +68,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 
 		add_action( 'wp_enqueue_scripts', [ $this, 'payment_scripts' ] );
 
-		add_action( 'wp_ajax_paydock_get_vault_token', [ $this, 'paydock_get_vault_token' ] );
+		add_action( 'wp_ajax_get_vault_token', [ $this, 'get_vault_token' ] );
 
 		add_action( 'woocommerce_after_checkout_billing_form', [ $this, 'woocommerce_before_checkout_form' ], 10, 1 );
 	}
@@ -73,27 +78,33 @@ class CardPaymentService extends WC_Payment_Gateway {
 			return '';
 		}
 
-		wp_enqueue_script( 'paydock-form', PAYDOCK_PLUGIN_URL . '/assets/js/frontend/form.js', [], time(), true );
-		wp_localize_script( 'paydock-form', 'paydockCardWidgetSettings', [
+		wp_enqueue_script( 'power-board-form', POWER_BOARD_PLUGIN_URL . 'assets/js/frontend/form.js', [], time(), true );
+		wp_localize_script( 'power-board-form', 'powerBoardCardWidgetSettings', [
 			'suportedCard' => 'Visa, Mastercard, Adex',
 		] );
-		wp_enqueue_style( 'paydock-widget-css', PAYDOCK_PLUGIN_URL . '/assets/css/frontend/widget.css', [], time() );
+		wp_localize_script( 'power-board-form', 'powerBoardWidgetSettings', [
+			'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL
+		] );
+		wp_enqueue_style( 'power-board-widget-css', POWER_BOARD_PLUGIN_URL . 'assets/css/frontend/widget.css', [], time() );
 
-		wp_localize_script( 'paydock-form', 'PaydockAjax', [
+		wp_localize_script( 'power-board-form', 'PowerBoardAjax', [
 			'url'     => admin_url( 'admin-ajax.php' ),
-			'wpnonce' => wp_create_nonce( 'paydock_get_vault_token' )
+			'wpnonce' => wp_create_nonce( 'get_vault_token' )
+		] );
+		wp_localize_script( 'power-board-form', 'powerBoardWidgetSettings', [
+			'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL
 		] );
 
 		return '';
 	}
 
-	public function get_title() {
-		return trim( $this->title ) ? $this->title : 'Card';
-	}
-
 	public function is_available() {
 		return SettingsService::getInstance()->isEnabledPayment()
 		       && SettingsService::getInstance()->isCardEnabled();
+	}
+
+	public function get_title() {
+		return trim( $this->title ) ? $this->title : 'Card';
 	}
 
 	/**
@@ -106,7 +117,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 		if ( ! wp_verify_nonce( $wpNonce, 'process_payment' ) ) {
 			throw new RouteException(
 				'woocommerce_rest_checkout_process_payment_error',
-				esc_html( __( 'Error: Security check', 'paydock' ) )
+				esc_html( __( 'Error: Security check', 'power-board' ) )
 			);
 		}
 
@@ -117,7 +128,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 		/* Translators: %1$s: number of orders
 		*  Translators: %2$s: Site name
 		*/
-			__( 'Order №%1$s from %2$s.', 'paydock-for-woocommerce' ),
+			__( 'Order №%1$s from %2$s.', 'power-board' ),
 			$order->get_order_number(),
 			$siteName
 		);
@@ -129,12 +140,12 @@ class CardPaymentService extends WC_Payment_Gateway {
 			$cardProcessor = new CardProcessor( array_merge( [
 				'amount'      => (float) $order->get_total(),
 				'description' => $description,
-			], $_POST ) );
+			], $this->getValidatedPostData() ) );
 
 			$response = $cardProcessor->run( $order );
 
-			if ( ! empty( $response['error'] ) ) {
-				throw new Exception( esc_html( __( 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later. <input id="widget_error" hidden type="text"/>', 'paydock' ) ) );
+			if ( ! empty( $response['error'] ) && stripos( $response['error']['message'], '3d' ) === false ) {
+				throw new Exception( esc_html( __( 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later. <input id="widget_error" hidden type="text"/>', 'power-board' ) ) );
 			}
 
 			$chargeId = ! empty( $response['resource']['data']['_id'] ) ? $response['resource']['data']['_id'] : '';
@@ -149,7 +160,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 			throw new RouteException(
 				'woocommerce_rest_checkout_process_payment_error',
 				/* Translators: %s Error message from API. */
-				esc_html( sprintf( __( 'Error: %s', 'paydock' ), $e->getMessage() ) )
+				esc_html( sprintf( __( 'Error: %s', 'power-board' ), $e->getMessage() ) )
 			);
 		}
 
@@ -166,40 +177,38 @@ class CardPaymentService extends WC_Payment_Gateway {
 			throw new RouteException(
 				'woocommerce_rest_checkout_process_payment_error',
 				/* Translators: %s Error message from API. */
-				esc_html( sprintf( __( 'Error: %s', 'paydock' ), $e->getMessage() ) )
+				esc_html( sprintf( __( 'Error: %s', 'power-board' ), $e->getMessage() ) )
 			);
 		}
 
 		$status          = ucfirst( strtolower( $response['resource']['data']['status'] ?? 'undefined' ) );
 		$operation       = ucfirst( strtolower( $response['resource']['type'] ?? 'undefined' ) );
 		$isAuthorization = $response['resource']['data']['authorization'] ?? 0;
-		$isCompleted     = false;
 		$markAsSuccess   = false;
 		if (
 			'Pre_authentication_pending' === $status &&
 			$cardProcessor->getRunMethod() === CardProcessor::FRAUD_IN_BUILD_CHARGE_METHOD
 		) {
-			$status = 'wc-paydock-pending';
+			$status = 'wc-pb-pending';
 		} else {
 			if ( $isAuthorization && in_array( $status, [ 'Pending', 'Pre_authentication_pending' ] ) ) {
-				$status = 'wc-paydock-authorize';
+				$status = 'wc-pb-authorize';
 			} else {
 				$markAsSuccess = true;
 				$isCompleted   = 'Complete' === $status;
-				$status        = $isCompleted ? 'wc-paydock-paid' : 'wc-paydock-pending';
+				$status        = $isCompleted ? 'wc-pb-paid' : 'wc-pb-pending';
 			}
 		}
 
-		$order->set_status( $status );
-		$order->payment_complete();
-		$order->save();
-		update_post_meta( $order->get_id(), 'paydock_charge_id', $chargeId );
-		add_post_meta(
-			$order->get_id(),
-			OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(),
-			'Card'
-		);
+		OrderService::updateStatus( $order->get_id(), $status );
+		if ( ! in_array( $status, [ 'wc-pb-pending', 'wc-pb-authorize' ] ) ) {
+			$order->payment_complete();
+			$order->update_meta_data( 'pb_directly_charged', 1 );
+		}
+		$order->update_meta_data( 'power_board_charge_id', $chargeId );
+		$order->update_meta_data( OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(), 'Card' );
 		WC()->cart->empty_cart();
+		$order->save();
 
 		$loggerRepository->createLogRecord(
 			$chargeId,
@@ -215,19 +224,100 @@ class CardPaymentService extends WC_Payment_Gateway {
 		];
 	}
 
+	protected function getValidatedPostData(): array {
+		$postData = array_change_key_case( $_POST, CASE_LOWER );
+		if ( ! ( new ValidationHelperService( $postData['amount'] ) )->isFloat() ) {
+			wp_die( __( 'wrong "amount" format', 'power-board' ) );
+		}
+		if ( ! empty( $postData['selectedtoken'] ) &&
+		     ! ( new ValidationHelperService( $postData['selectedtoken'] ) )->isUUID() ) {
+			wp_die( __( 'wrong "selected token" format', 'power-board' ) );
+		}
+		if ( ! empty( $postData['paymentsourcetoken'] ) &&
+		     ! ( new ValidationHelperService( $postData['paymentsourcetoken'] ) )->isUUID() ) {
+			wp_die( __( 'wrong "payment source token" format', 'power-board' ) );
+		}
+		if ( ! empty( $postData['gatewayid'] ) &&
+		     ! ( new ValidationHelperService( $postData['gatewayid'] ) )->isServiceId() ) {
+			wp_die( __( 'wrong "gateway" ID', 'power-board' ) );
+		}
+		if ( ! empty( $postData['card3dsserviceid'] ) &&
+		     ! ( new ValidationHelperService( $postData['card3dsserviceid'] ) )->isServiceId() ) {
+			wp_die( __( 'wrong "3ds service" ID', 'power-board' ) );
+		}
+		if ( ! empty( $postData['charge3dsid'] ) &&
+		     ! ( new ValidationHelperService( $postData['charge3dsid'] ) )->isUUID() ) {
+			wp_die( __( 'wrong "charge 3ds id" format', 'power-board' ) );
+		}
+		if ( ! empty( $postData['cardfraudserviceid'] ) &&
+		     ! ( new ValidationHelperService( $postData['cardfraudserviceid'] ) )->isServiceId() ) {
+			wp_die( __( 'wrong "fraud service" ID', 'power-board' ) );
+		}
+
+		$ds             = ! empty( $postData['card3ds'] ) ? sanitize_text_field( $postData['card3ds'] ) : '';
+		$dsFlow         = ! empty( $postData['card3dsflow'] ) ? sanitize_text_field( $postData['card3dsflow'] ) : '';
+		$fraud          = ! empty( $postData['cardfraud'] ) ? sanitize_text_field( $postData['cardfraud'] ) : '';
+		$saveCardOption = ! empty( $postData['cardsavecardoption'] ) ? sanitize_text_field( $postData['cardsavecardoption'] ) : '';
+
+		return [
+			'amount'              => (float) $postData['amount'],
+			'selectedtoken'       => sanitize_text_field( $postData['selectedtoken'] ),
+			'paymentsourcetoken'  => sanitize_text_field( $postData['paymentsourcetoken'] ),
+			'gatewayid'           => sanitize_text_field( $postData['gatewayid'] ),
+			'card3ds'             => in_array( $ds, [
+				DSTypes::IN_BUILD()->name,
+				DSTypes::STANDALONE()->name,
+				DSTypes::DISABLE()->name,
+			] ) ? $ds : DSTypes::DISABLE()->name,
+			'card3dsserviceid'    => sanitize_text_field( $postData['card3dsserviceid'] ),
+			'card3dsflow'         => in_array( $dsFlow, [
+				TypeExchangeOTT::PERMANENT_VAULT()->name,
+				TypeExchangeOTT::SESSION_VAULT()->name,
+			] ) ? $dsFlow : TypeExchangeOTT::SESSION_VAULT()->name,
+			'charge3dsid'         => sanitize_text_field( $postData['charge3dsid'] ),
+			'cardfraud'           => in_array( $fraud, [
+				FraudTypes::DISABLE()->name,
+				FraudTypes::STANDALONE()->name,
+				FraudTypes::IN_BUILD()->name,
+			] ) ? sanitize_text_field( $postData['cardfraud'] ) : FraudTypes::DISABLE()->name,
+			'cardfraudserviceid'  => sanitize_text_field( $postData['cardfraudserviceid'] ),
+			'carddirectcharge'    => in_array( sanitize_text_field( $postData['carddirectcharge'] ), [
+				'1',
+				'true'
+			], true ) ? 'true' : 'false',
+			'cardsavecard'        => in_array( sanitize_text_field( $postData['cardsavecard'] ), [
+				'1',
+				'true'
+			], true ) ? 'true' : 'false',
+			'cardsavecardoption'  => in_array( $saveCardOption, [
+				SaveCardOptions::VAULT()->name,
+				SaveCardOptions::WITH_GATEWAY()->name,
+				SaveCardOptions::WITHOUT_GATEWAY()->name,
+			] ) ? $saveCardOption : SaveCardOptions::VAULT()->name,
+			'cardsavecardchecked' => in_array( sanitize_text_field( $postData['cardsavecardchecked'] ), [
+				'1',
+				'true'
+			], true ) ? 'true' : 'false',
+			'first_name'          => ! empty( $postData['first_name'] ) ? sanitize_text_field( $postData['first_name'] ) : '',
+			'last_name'           => ! empty( $postData['last_name'] ) ? sanitize_text_field( $postData['last_name'] ) : '',
+			'phone'               => ! empty( $postData['phone'] ) ? sanitize_text_field( $postData['phone'] ) : '',
+			'email'               => ! empty( $postData['email'] ) ? sanitize_text_field( $postData['email'] ) : '',
+		];
+	}
+
 	/**
 	 * Ajax function
 	 */
-	public function paydock_get_vault_token(): void {
+	public function get_vault_token(): void {
 		$wpNonce = ! empty( $_POST['_wpnonce'] ) ? sanitize_text_field( $_POST['_wpnonce'] ) : null;
-		if ( ! wp_verify_nonce( $wpNonce, 'paydock_get_vault_token' ) ) {
+		if ( ! wp_verify_nonce( $wpNonce, 'get_vault_token' ) ) {
 			die( 'Security check' );
 		}
 
 		if ( ! empty( $_SERVER['HTTP_X_REQUESTED_WITH'] ) && strtolower(
 			                                                     sanitize_text_field( $_SERVER['HTTP_X_REQUESTED_WITH'] )
 		                                                     ) == 'xmlhttprequest' ) {
-			$cardProcessor = new CardProcessor( $_POST );
+			$cardProcessor = new CardProcessor( $this->getValidatedPostData() );
 			$type          = ! empty( $_POST['type'] ) ? sanitize_text_field( $_POST['type'] ) : null;
 			try {
 				switch ( $type ) {
@@ -251,7 +341,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 				throw new RouteException(
 					'woocommerce_rest_checkout_process_payment_error',
 					/* Translators: %s Error message from API. */
-					esc_html( sprintf( __( 'Error: %s', 'paydock' ), $e->getMessage() ) )
+					esc_html( sprintf( __( 'Error: %s', 'power-board' ), $e->getMessage() ) )
 				);
 			}
 		} else {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Paydock\Exceptions;
+namespace PowerBoard\Exceptions;
 
 use Exception;
 

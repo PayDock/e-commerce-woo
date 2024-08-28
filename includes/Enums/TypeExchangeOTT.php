@@ -1,8 +1,8 @@
 <?php
 
-namespace Paydock\Enums;
+namespace PowerBoard\Enums;
 
-use Paydock\Abstracts\AbstractEnum;
+use PowerBoard\Abstracts\AbstractEnum;
 
 class TypeExchangeOTT extends AbstractEnum {
 	protected const PERMANENT_VAULT = 'With vault';

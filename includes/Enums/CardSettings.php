@@ -1,8 +1,8 @@
 <?php
 
-namespace Paydock\Enums;
+namespace PowerBoard\Enums;
 
-use Paydock\Abstracts\AbstractEnum;
+use PowerBoard\Abstracts\AbstractEnum;
 
 class CardSettings extends AbstractEnum {
 	protected const ENABLE = 'ENABLE';
@@ -56,7 +56,7 @@ class CardSettings extends AbstractEnum {
 	public function getDescription(): string {
 		switch ( $this->name ) {
 			case self::SAVE_CARD:
-				return 'Offer your customer to save the card permanently at Paydock for further usage';
+				return 'Offer your customer to save the card permanently at PowerBoard for further usage';
 			default:
 				return '';
 		}

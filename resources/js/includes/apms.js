@@ -8,17 +8,17 @@ import {select} from '@wordpress/data';
 import {CART_STORE_KEY} from '@woocommerce/block-data';
 import canMakePayment from "./canMakePayment";
 
-const textDomain = 'paydock';
+const textDomain = 'power_board';
 const labels = {
-    defaultLabel: __('Paydock Payments', textDomain),
-    placeOrderButtonLabel: __('Place Order by Paydock', textDomain),
+    defaultLabel: __('PowerBoard Payments', textDomain),
+    placeOrderButtonLabel: __('Place Order by PowerBoard', textDomain),
     validationError: __('Please fill in the required fields of the form to display payment methods', textDomain),
     notAvailable: __('The payment method is not available in your country.', textDomain),
 }
 let wasInit = false;
 export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
-    const settingKey = `paydock_${id}_a_p_m_s_block_data`;
-    const paymentName = `paydock_${id}_a_p_m_s_gateway`;
+    const settingKey = `power_board_${id}_a_p_m_s_block_data`;
+    const paymentName = `power_board_${id}_a_p_m_s_gateway`;
 
     const settings = getSetting(settingKey, {});
     const label = decodeEntities(settings.title) || __(defaultLabel, textDomain);
@@ -30,8 +30,8 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
         const billingAddress = cart.getCustomerData().billingAddress;
         const shippingAddress = cart.getCustomerData().shippingAddress;
         const shippingRates = cart.getShippingRates();
-        const countriesError = jQuery('.paydock-country-available');
-        const validationError = jQuery('.paydock-validation-error');
+        const countriesError = jQuery('.power-board-country-available');
+        const validationError = jQuery('.power-board-validation-error');
         const buttonElement = jQuery('#' + buttonId);
         const orderButton = jQuery('.wc-block-components-checkout-place-order-button');
         const paymentCompleteElement = jQuery('#paymentCompleted');
@@ -68,12 +68,12 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
         setTimeout(() => {
             if ((validationSuccess && 'zip' === id) && !wasInit) {
                 wasInit = true;
-                button = new window.paydock.ZipmoneyCheckoutButton('#' + buttonId, settings.publicKey, settings.gatewayId);
+                button = new window.cba.ZipmoneyCheckoutButton('#' + buttonId, settings.publicKey, settings.gatewayId);
 
                 data.gatewayType = 'zippay'
             } else if ((validationSuccess && 'afterpay' === id) && !wasInit) {
                 wasInit = true;
-                button = new window.paydock.AfterpayCheckoutButton('#' + buttonId, settings.publicKey, settings.gatewayId);
+                button = new window.cba.AfterpayCheckoutButton('#' + buttonId, settings.publicKey, settings.gatewayId);
                 meta = {
                     amount: settings.amount,
                     currency: settings.currency,
@@ -107,7 +107,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
                     state: shippingAddress.state
                 };
 
-                if (shippingRates.length && shippingRates[0].shipping_rates.length) {
+                if(shippingRates.length && shippingRates[0].shipping_rates.length) {
                     shippingRates[0].shipping_rates.forEach((rate, key) => {
                         if (!rate.selected) {
                             return;
@@ -157,14 +157,15 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
                             reference: item.short_description,
                         };
 
-                        if (item.images.length > 0) {
+                        if (item.images.length > 0)
+                        {
                             result.image_uri = item.images[0].src
                         }
 
                         return result
                     })
                 }
-                button.setEnv(settings.isSandbox ? 'sandbox' : 'production')
+                button.setEnv(settings.isSandbox ? 'preproduction_cba' : 'production_cba')
                 button.setMeta(meta);
                 button.on('finish', () => {
                     if (settings.directCharge) {
@@ -221,6 +222,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
                     message: labels.fillDataError,
                 };
             });
+
             return () => {
                 const unsubscribeFn = (fn) => typeof fn === 'function' ? fn() : null;
 
@@ -238,7 +240,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
 
         return createElement(
             'div',
-            {id: 'paydockWidgetApm'},
+            {id: 'powerBoardWidgetApm'},
             createElement('div', {
                 id: 'paymentCompleted', style: {
                     display: 'none',
@@ -266,14 +268,14 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
                 },
                 createElement('img',
                     {
-                        src: `/wp-content/plugins/paydock/assets/images/${id}.png`,
+                        src: `${window.powerBoardWidgetSettings.pluginUrlPrefix}assets/images/${id}.png`,
                     },
                 ),
             ),),
             createElement(
                 'div',
                 {
-                    class: 'paydock-validation-error',
+                    class: 'power-board-validation-error',
                 },
                 labels.validationError
             ),
@@ -287,7 +289,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
             createElement(
                 "div",
                 {
-                    class: 'paydock-country-available',
+                    class: 'power-board-country-available',
                     style: {
                         display: 'none'
                     }
@@ -296,10 +298,6 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
             ),
         )
     }
-    const Label = (props) => {
-        const {PaymentMethodLabel} = props.components;
-        return <PaymentMethodLabel text={label}/>;
-    };
 
     const PaydokApms = {
         name: paymentName,
@@ -307,12 +305,12 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
             createElement(
                 "div",
                 {
-                    className: 'paydock-payment-method-label'
+                    className: 'power-board-payment-method-label'
                 },
                 createElement("img", {
-                    src: `/wp-content/plugins/paydock/assets/images/icons/${id}.png`,
+                    src: `${window.powerBoardWidgetSettings.pluginUrlPrefix}assets/images/icons/${id}.png`,
                     alt: label,
-                    className: `paydock-payment-method-label-icon ${id}`
+                    className: `power-board-payment-method-label-icon ${id}`
                 }),
                 "  " + label,
             )

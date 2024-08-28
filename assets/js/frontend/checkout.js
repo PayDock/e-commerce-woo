@@ -1,39 +1,39 @@
-const paydockSettings = window.wc.wcSettings.getSetting('paydock_data', {});
-const paydockLabel = window.wp.htmlEntities.decodeEntities(paydockSettings.title)
-    || window.wp.i18n.__('Paydock', 'paydock_gateway');
+const powerBoardSettings = window.wc.wcSettings.getSetting('power_board_data', {});
+const powerBoardLabel = window.wp.htmlEntities.decodeEntities(powerBoardSettings.title)
+    || window.wp.i18n.__('PowerBoard', 'power_board_gateway');
 
-const paydockContent = () => {
+const powerBoardContent = () => {
     return wp.element.createElement(
         'div',
         null,
         wp.element.createElement(
             "div",
             null,
-            window.wp.htmlEntities.decodeEntities(paydockSettings.description || '')),
+            window.wp.htmlEntities.decodeEntities(powerBoardSettings.description || '')),
         wp.element.createElement(
             "div", {
-                id: 'paydockWidgetCard',
+                id: 'powerBoardWidgetCard',
             }
         ), wp.element.createElement(
             "input", {
                 type: 'hidden',
-                name: 'paydock_payment_source_token'
+                name: 'payment_source_tokenzz'
             }
         )
     );
 };
 
-const Block_Paydock_Gateway = {
-    name: 'paydock_gateway',
-    label: paydockLabel,
-    content: Object(window.wp.element.createElement)(paydockContent, null),
-    edit: Object(window.wp.element.createElement)(paydockContent, null),
-    placeOrderButtonLabel: 'Place Order by Paydock',
+const Block_Power_Board_Gateway = {
+    name: 'power_board_gateway',
+    label: powerBoardLabel,
+    content: Object(window.wp.element.createElement)(powerBoardContent, null),
+    edit: Object(window.wp.element.createElement)(powerBoardContent, null),
+    placeOrderButtonLabel: 'Place Order by PowerBoard',
     canMakePayment: () => true,
-    ariaLabel: paydockLabel,
+    ariaLabel: powerBoardLabel,
     supports: {
-        features: paydockSettings.supports,
+        features: powerBoardSettings.supports,
     },
 };
 
-window.wc.wcBlocksRegistry.registerPaymentMethod(Block_Paydock_Gateway);
+window.wc.wcBlocksRegistry.registerPaymentMethod(Block_Power_Board_Gateway);

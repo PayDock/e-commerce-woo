@@ -1,10 +1,10 @@
 <?php
 
-namespace Paydock\Util;
+namespace PowerBoard\Util;
 
-use Paydock\Abstracts\AbstractWalletBlock;
-use Paydock\Enums\WalletPaymentMethods;
-use Paydock\Services\Checkout\AfterpayWalletService;
+use PowerBoard\Abstracts\AbstractWalletBlock;
+use PowerBoard\Enums\WalletPaymentMethods;
+use PowerBoard\Services\Checkout\AfterpayWalletService;
 
 final class AfterpayWalletBlock extends AbstractWalletBlock {
 	public function getType(): WalletPaymentMethods {

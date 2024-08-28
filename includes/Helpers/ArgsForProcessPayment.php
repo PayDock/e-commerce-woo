@@ -1,12 +1,13 @@
 <?php
 
-namespace Paydock\Helpers;
+namespace PowerBoard\Helpers;
 
-use Paydock\Enums\DSTypes;
-use Paydock\Enums\FraudTypes;
+use PowerBoard\Enums\DSTypes;
+use PowerBoard\Enums\FraudTypes;
 
 class ArgsForProcessPayment {
 	public static function prepare( array $args = [] ): array {
+
 		$args = array_change_key_case( $args, CASE_LOWER );
 
 		foreach ( $args as $key => $arg ) {

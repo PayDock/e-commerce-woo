@@ -1,8 +1,8 @@
 <?php
 
-namespace Paydock\API;
+namespace PowerBoard\API;
 
-use Paydock\Abstracts\AbstractApiService;
+use PowerBoard\Abstracts\AbstractApiService;
 
 class VaultService extends AbstractApiService {
 	const ENDPOINT = 'vault/payment_sources';

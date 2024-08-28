@@ -1,12 +1,12 @@
 <?php
 
-namespace Paydock\Controllers\Admin;
+namespace PowerBoard\Controllers\Admin;
 
-use Paydock\Enums\WalletPaymentMethods;
-use Paydock\Helpers\ShippingHelper;
-use Paydock\Repositories\LogRepository;
-use Paydock\Services\SDKAdapterService;
-use Paydock\Services\SettingsService;
+use PowerBoard\Enums\WalletPaymentMethods;
+use PowerBoard\Helpers\ShippingHelper;
+use PowerBoard\Repositories\LogRepository;
+use PowerBoard\Services\SDKAdapterService;
+use PowerBoard\Services\SettingsService;
 use WP_REST_Request;
 
 class WidgetController {
@@ -103,15 +103,16 @@ class WidgetController {
 				],
 			];
 
-			if ( ! empty( $shippingAddress['phone'] ) ) {
-				$chargeRequest['shipping']['contact']['phone'] = $shippingAddress['phone'];
-			}
-
 			if ( ! empty( $billingAdress['phone'] ) ) {
 				$chargeRequest['customer']['phone'] = $billingAdress['phone'];
 			}
+
 			if ( ! empty( $billingAdress['address_2'] ) ) {
 				$chargeRequest['customer']['payment_source']['address_line2'] = $billingAdress['address_2'];
+			}
+
+			if ( ! empty( $shippingAddress['phone'] ) ) {
+				$chargeRequest['shipping']['contact']['phone'] = $shippingAddress['phone'];
 			}
 
 			if ( ! empty( $shippingAddress['address_2'] ) ) {
@@ -163,7 +164,7 @@ class WidgetController {
 			                           ->createWalletCharge( $chargeRequest,
 				                           $settings->isWalletDirectCharge( $payment ) );
 
-			$result['county'] = $billingAdress['country'] ?? '';
+			$result['county'] = $request['address']['country'] ?? '';
 
 			if ( WalletPaymentMethods::PAY_PAL_SMART_BUTTON()->name === $payment->name ) {
 				$result['pay_later'] = 'yes' === $settings->isPayPallSmartButtonPayLater();

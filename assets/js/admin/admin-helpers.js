@@ -1,3 +1,4 @@
+
 jQuery(document).ready(function () {
     const capturedAmount = jQuery('.wc-order-totals .captured-amount');
 
@@ -6,7 +7,6 @@ jQuery(document).ready(function () {
 
     function updateElementContent(element, content) {
         element.html(content);
-        element.find('.amount').remove();
         element.find('.available-to-refund-amount').removeClass('hidden');
     }
 

@@ -1,10 +1,10 @@
 import {getSetting} from '@woocommerce/settings';
 
 export default async () => {
-    const data = {...getSetting('paydock_data', {})};
-    data.action = 'paydock_get_vault_token';
+    const data = {...getSetting('power_board_data', {})};
+    data.action = 'get_vault_token';
     data.type = 'standalone-3ds-token';
-    data._wpnonce = PaydockAjax.wpnonce;
+    data._wpnonce = PowerBoardAjax.wpnonce;
 
     if (document.querySelector('#shipping-first_name') !== null) {
         data.first_name = document.querySelector('#shipping-first_name').value
@@ -35,5 +35,5 @@ export default async () => {
     data.styles = '';
     data.supports = '';
 
-    return jQuery.post(PaydockAjax.url, data).then();
+    return jQuery.post(PowerBoardAjax.url, data).then();
 }

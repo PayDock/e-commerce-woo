@@ -1,12 +1,12 @@
 <?php
 
-namespace Paydock\Services\Settings;
+namespace PowerBoard\Services\Settings;
 
-use Paydock\Enums\CredentialSettings;
-use Paydock\Enums\SettingGroups;
-use Paydock\Enums\SettingsTabs;
-use Paydock\PaydockPlugin;
-use Paydock\Services\SettingsService;
+use PowerBoard\Enums\CredentialSettings;
+use PowerBoard\Enums\SettingGroups;
+use PowerBoard\Enums\SettingsTabs;
+use PowerBoard\PowerBoardPlugin;
+use PowerBoard\Services\SettingsService;
 
 class SandboxConnectionSettingService extends LiveConnectionSettingService {
 	public function init_form_fields(): void {
@@ -19,8 +19,8 @@ class SandboxConnectionSettingService extends LiveConnectionSettingService {
 		$this->form_fields[ $sandBoxOptionKey ] = [
 			'type' => CredentialSettings::SANDBOX()->getInputType(),
 			'label' => __(
-				'To test your Paydock for WooCommerce Plugin, you can use the sandbox mode.',
-				'paydock'
+				'To test your PowerBoard for WooCommerce Plugin, you can use the sandbox mode.',
+				'power-board'
 			),
 			'title' => CredentialSettings::SANDBOX()->getLabel(),
 		];

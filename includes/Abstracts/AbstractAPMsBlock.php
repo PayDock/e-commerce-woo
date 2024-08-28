@@ -1,10 +1,10 @@
 <?php
 
-namespace Paydock\Abstracts;
+namespace PowerBoard\Abstracts;
 
-use Paydock\Enums\OtherPaymentMethods;
-use Paydock\Repositories\UserCustomerRepository;
-use Paydock\Services\SettingsService;
+use PowerBoard\Enums\OtherPaymentMethods;
+use PowerBoard\Repositories\UserCustomerRepository;
+use PowerBoard\Services\SettingsService;
 
 abstract class AbstractAPMsBlock extends AbstractBlock {
 	protected $gateway;
@@ -12,7 +12,7 @@ abstract class AbstractAPMsBlock extends AbstractBlock {
 	public function __construct() {
 		$aPMsTypeId = $this->getType()->getId();
 
-		$this->name   = 'paydock_' . $aPMsTypeId . '_a_p_m_s_block';
+		$this->name   = 'power_board_' . $aPMsTypeId . '_a_p_m_s_block';
 		$this->script = $aPMsTypeId . '-a-p-m-s';
 
 		parent::__construct();
@@ -31,7 +31,11 @@ abstract class AbstractAPMsBlock extends AbstractBlock {
 			];
 		}
 
-		WC()->cart->calculate_totals();
+		$total = 0;
+		if ( WC()->cart ) {
+			WC()->cart->calculate_totals();
+			$total = WC()->cart->total;
+		}
 
 		return array_merge( $userCustomers, [
 			// Wordpress data
@@ -39,7 +43,7 @@ abstract class AbstractAPMsBlock extends AbstractBlock {
 			'isUserLoggedIn'     => is_user_logged_in(),
 			'isSandbox'          => $settingsService->isSandbox(),
 			// Woocommerce data
-			'amount'             => WC()->cart->total,
+			'amount'             => $total,
 			'currency'           => strtoupper( get_woocommerce_currency() ),
 			// Widget
 			'title'              => $settingsService->getWidgetPaymentAPMTitle( $payment ),

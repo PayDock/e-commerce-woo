@@ -1,9 +1,9 @@
 <?php
 
-namespace Paydock\Repositories;
+namespace PowerBoard\Repositories;
 
-use Paydock\Abstracts\AbstractRepository;
-use Paydock\Contracts\Repository;
+use PowerBoard\Abstracts\AbstractRepository;
+use PowerBoard\Contracts\Repository;
 
 class LogRepository extends AbstractRepository implements Repository {
 	private const AVAILABLE_SORT = [ 

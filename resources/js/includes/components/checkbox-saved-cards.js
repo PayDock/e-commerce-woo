@@ -2,7 +2,7 @@ import {createElement} from 'react';
 import {getSetting} from '@woocommerce/settings';
 
 export default (saveCardLabel = 'Save card') => {
-    const settings = getSetting('paydock_data', {});
+    const settings = getSetting('power_board_data', {});
 
     if (!settings.cardSaveCard || !settings.isUserLoggedIn) {
         return '';

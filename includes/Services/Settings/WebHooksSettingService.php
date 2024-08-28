@@ -1,9 +1,9 @@
 <?php
 
-namespace Paydock\Services\Settings;
+namespace PowerBoard\Services\Settings;
 
-use Paydock\Abstracts\AbstractSettingService;
-use Paydock\Enums\SettingsTabs;
+use PowerBoard\Abstracts\AbstractSettingService;
+use PowerBoard\Enums\SettingsTabs;
 
 class WebHooksSettingService extends AbstractSettingService {
 	protected function getId(): string {

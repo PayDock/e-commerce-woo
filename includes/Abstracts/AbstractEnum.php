@@ -1,6 +1,6 @@
 <?php
 
-namespace Paydock\Abstracts;
+namespace PowerBoard\Abstracts;
 
 abstract class AbstractEnum {
 	private const NAME_PROPERTY_NAME = 'name';

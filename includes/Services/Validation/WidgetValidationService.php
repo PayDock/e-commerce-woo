@@ -1,36 +1,26 @@
 <?php
 
-namespace Paydock\Services\Validation;
+namespace PowerBoard\Services\Validation;
 
-use Paydock\Enums\CustomStylesElements;
-use Paydock\Enums\WidgetSettings;
-use Paydock\Services\Settings\WidgetSettingService;
-use Paydock\Services\SettingsService;
+use PowerBoard\Enums\CustomStylesElements;
+use PowerBoard\Enums\WidgetSettings;
+use PowerBoard\Services\Settings\WidgetSettingService;
+use PowerBoard\Services\SettingsService;
 
 class WidgetValidationService {
 	private const VALIDATED_FIELDS = [
 		'PAYMENT_CARD_TITLE',
 		'PAYMENT_CARD_DESCRIPTION',
-		'PAYMENT_CARD_MIN',
-		'PAYMENT_CARD_MAX',
 		'PAYMENT_BANK_ACCOUNT_TITLE',
 		'PAYMENT_BANK_ACCOUNT_DESCRIPTION',
-		'PAYMENT_WALLET_APPLE_PAY_TITLE',
 		'PAYMENT_WALLET_APPLE_PAY_DESCRIPTION',
-		'PAYMENT_WALLET_APPLE_PAY_MIN',
-		'PAYMENT_WALLET_APPLE_PAY_MAX',
+		'PAYMENT_WALLET_APPLE_PAY_DESCRIPTION',
 		'PAYMENT_WALLET_GOOGLE_PAY_TITLE',
 		'PAYMENT_WALLET_GOOGLE_PAY_DESCRIPTION',
-		'PAYMENT_WALLET_GOOGLE_PAY_MIN',
-		'PAYMENT_WALLET_GOOGLE_PAY_MAX',
 		'PAYMENT_WALLET_AFTERPAY_V2_TITLE',
 		'PAYMENT_WALLET_AFTERPAY_V2_DESCRIPTION',
-		'PAYMENT_WALLET_AFTERPAY_V2_MIN',
-		'PAYMENT_WALLET_AFTERPAY_V2_MAX',
 		'PAYMENT_WALLET_PAYPAL_TITLE',
 		'PAYMENT_WALLET_PAYPAL_DESCRIPTION',
-		'PAYMENT_WALLET_PAYPAL_MIN',
-		'PAYMENT_WALLET_PAYPAL_MAX',
 		'PAYMENT_A_P_M_S_AFTERPAY_V1_TITLE',
 		'PAYMENT_A_P_M_S_AFTERPAY_V1_DESCRIPTION',
 		'PAYMENT_A_P_M_S_AFTERPAY_V1_MIN',
@@ -41,6 +31,8 @@ class WidgetValidationService {
 		'PAYMENT_A_P_M_S_ZIP_MAX',
 	];
 
+
+	private const ENABLED_CONDITION = 'yes';
 	private $errors = [];
 
 	private $result = [];
@@ -115,11 +107,11 @@ class WidgetValidationService {
 				|| ( $settingName && $isMax && ! empty( $value ) && ( $value != (string) floatval( $value ) ) )
 			) {
 				/* translators: %s: Title of form field. */
-				$this->errors[] = sprintf( __( "%s must be numeric.", 'paydock' ),
+				$this->errors[] = sprintf( __( "%s must be numeric.", 'power-board' ),
 					WidgetSettings::{$settingName}()->getFullTitle() );
 			} elseif ( $settingName && $isMin && ( 0 > (float) $value ) ) {
 				/* translators: %s: Title of form field. */
-				$this->errors[] = sprintf( __( "%s cannot be negative.", 'paydock' ),
+				$this->errors[] = sprintf( __( "%s cannot be negative.", 'power-board' ),
 					WidgetSettings::{$settingName}()->getFullTitle() );
 			} elseif (
 				$settingName
@@ -127,11 +119,11 @@ class WidgetValidationService {
 				&& ! empty( $value )
 				&& ( (float) $value < (float) $this->data[ str_replace( 'MAX', 'MIN', $key ) ] ) ) {
 				/* translators: %s: Title of form field. */
-				$this->errors[] = sprintf( __( "%s cannot be less than the min value.", 'paydock' ),
+				$this->errors[] = sprintf( __( "%s cannot be less than the min value.", 'power-board' ),
 					WidgetSettings::{$settingName}()->getFullTitle() );
 			} elseif ( $settingName && empty( $value ) && ! $isMin && ! $isMax ) {
 				/* translators: %s: Title of form field. */
-				$this->errors[] = sprintf( __( "%s can't be empty.", 'paydock' ),
+				$this->errors[] = sprintf( __( "%s can't be empty.", 'power-board' ),
 					WidgetSettings::{$settingName}()->getFullTitle() );
 			}
 
@@ -148,12 +140,12 @@ class WidgetValidationService {
 					|| ! $this->validateCustomStyles( $decoded )
 				)
 			) {
-				$this->errors[] = __( 'Custom styles must be a valid JSON.', 'paydock' );
+				$this->errors[] = __( 'Custom styles must be a valid JSON.', 'power-board' );
 			}
 		}
 
 		if ( 'custom' == $this->data[ $versionKey ] && empty( $this->data[ $customVersionKey ] ) ) {
-			$this->errors[] = __( "Version can't be empty.", 'paydock' );
+			$this->errors[] = __( "Version can't be empty.", 'power-board' );
 		}
 	}
 

@@ -1,12 +1,35 @@
 <?php
 
-namespace Paydock\Hooks;
+namespace PowerBoard\Hooks;
 
-use Paydock\Contracts\Hook;
-use Paydock\Contracts\Repository;
-use Paydock\PaydockPlugin;
+use PowerBoard\Contracts\Hook;
+use PowerBoard\Contracts\Repository;
+use PowerBoard\PowerBoardPlugin;
 
 class ActivationHook implements Hook {
+
+	public const CUSTOM_STATUSES = [
+		'pb-failed'       => 'failed',
+		'wc-pb-failed'    => 'failed',
+		'pb-pending'      => 'pending',
+		'wc-pb-pending'   => 'pending',
+		'pb-paid'         => 'processing',
+		'pb-authorize'    => 'on-hold',
+		'pb-requested'    => 'processing',
+		'pb-p-paid'       => 'processing',
+		'wc-pb-paid'      => 'processing',
+		'wc-pb-authorize' => 'on-hold',
+		'wc-pb-requested' => 'processing',
+		'wc-pb-p-paid'    => 'processing',
+		'pb-cancelled'    => 'cancelled',
+		'wc-pb-cancelled' => 'cancelled',
+		'pb-refunded'     => 'refunded',
+		'pb-p-refund'     => 'refunded',
+		'wc-pb-refunded'  => 'refunded',
+		'wc-pb-p-refund'  => 'refunded',
+	];
+
+	public const CUSTOM_STATUS_META_KEY = 'power_board_custom_status';
 
 	public function __construct() {
 	}
@@ -16,33 +39,28 @@ class ActivationHook implements Hook {
 
 		$repositories = array_map( function ( $className ) {
 			return new $className();
-		}, PaydockPlugin::REPOSITORIES );
+		}, PowerBoardPlugin::REPOSITORIES );
 
 		array_map( [ $instance, 'runMigration' ], $repositories );
 
-		$instance->renameConfiguration();
+		$instance->fixOrderStatuses();
 	}
 
 	protected function runMigration( Repository $repository ): void {
 		$repository->createTable();
 	}
 
-	protected function renameConfiguration() {
-		$options = [
-			'woocommerce_pay_dock_sandbox_settings' => 'woocommerce_paydock_sandbox_settings',
-			'woocommerce_pay_dock_settings'         => 'woocommerce_paydock_settings',
-			'woocommerce_pay_dock_widget_settings'  => 'woocommerce_paydock_widget_settings'
-		];
-		foreach ( $options as $oldOptionName => $newOptionName ) {
-			$oldOption = get_option( $oldOptionName );
-			if ( $oldOption ) {
-				$newOption = [];
-				foreach ( $oldOption as $key => $value ) {
-					$newKey               = str_replace( 'pay_dock', 'paydock', $key );
-					$newOption[ $newKey ] = $value;
-				}
-				add_option( $newOptionName, $newOption );
-			}
+	protected function fixOrderStatuses() {
+		foreach ( self::CUSTOM_STATUSES as $custom_status => $new_Status ) {
+			$this->updateOrderStatus( wc_get_orders( [ 'status' => $custom_status ] ), $new_Status );
+		}
+	}
+
+	protected function updateOrderStatus( $orders, $new_status ) {
+		foreach ( $orders as $order ) {
+			$order->update_meta_data( self::CUSTOM_STATUS_META_KEY, $order->get_status() );
+			$order->set_status( $new_status );
+			$order->save();
 		}
 	}
 }

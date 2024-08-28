@@ -1,8 +1,8 @@
 <?php
 
-namespace Paydock\Enums;
+namespace PowerBoard\Enums;
 
-use Paydock\Abstracts\AbstractEnum;
+use PowerBoard\Abstracts\AbstractEnum;
 
 class NotificationEvents extends AbstractEnum {
 	protected const TRANSACTION_SUCCESS = 'Transaction Success';
