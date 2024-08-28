@@ -25,8 +25,8 @@ abstract class AbstractPaymentService extends WC_Payment_Gateway {
 		];
 
 		$this->method_title       = _x( 'Paydock payment', 'Paydock payment method',
-			'woocommerce-gateway-ppwer-board' );
-		$this->method_description = __( 'Allows Paydock payments.', 'woocommerce-gateway-ppwer-board' );
+			'woocommerce-gateway-paydock' );
+		$this->method_description = __( 'Allows Paydock payments.', 'woocommerce-gateway-paydock' );
 
 		$this->init_settings();
 	}

@@ -1,1 +1,1 @@
-jQuery('.paydock-active-hidden-settings').hide();
+jQuery('.pay-dock-active-hidden-settings').hide();

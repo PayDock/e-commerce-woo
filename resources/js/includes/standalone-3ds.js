@@ -12,7 +12,7 @@ export default async () => {
 
     const threeDsToken = await getStandalone3dsToken(settings.selectedToken)
 
-    const canvas = new window.cba.Canvas3ds('#paydockWidget3ds', threeDsToken);
+    const canvas = new window.paydock.Canvas3ds('#paydockWidget3ds', threeDsToken);
     canvas.load();
 
     let result = false;

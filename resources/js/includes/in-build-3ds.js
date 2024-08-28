@@ -66,7 +66,7 @@ export default async (forcePermanentVault = false, newAmount = null) => {
     }
 
     const envVal = settings.isSandbox ? 'preproduction_cba' : 'production_cba'
-    const preAuthResp = await new window.cba.Api(settings.publicKey)
+    const preAuthResp = await new window.paydock.Api(settings.publicKey)
         .setEnv(envVal)
         .charge()
         .preAuth(preAuthData);
@@ -78,7 +78,7 @@ export default async (forcePermanentVault = false, newAmount = null) => {
     document.getElementById('paydockWidget3ds').innerHTML = '';
     document.getElementById('paydockWidget3ds').setAttribute('style', '')
 
-    const canvas = new window.cba.Canvas3ds('#paydockWidget3ds', preAuthResp._3ds.token);
+    const canvas = new window.paydock.Canvas3ds('#paydockWidget3ds', preAuthResp._3ds.token);
     canvas.load();
 
     document.getElementById('paydockWidgetCard_wrapper').setAttribute('style', 'display: none')

@@ -9,6 +9,7 @@ use Paydock\Enums\OtherPaymentMethods;
 use Paydock\Repositories\LogRepository;
 use Paydock\Services\OrderService;
 use Paydock\Services\ProcessPayment\ApmProcessor;
+use Paydock\Services\SDKAdapterService;
 use Paydock\Services\SettingsService;
 use Paydock\Services\Validation\ValidationHelperService;
 

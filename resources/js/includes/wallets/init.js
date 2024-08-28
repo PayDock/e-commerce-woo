@@ -32,7 +32,7 @@ export default (id, buttonId, data, isSandbox) => {
     if(buttons.current){
         delete buttons.current;
     }
-    buttons.current = new window.cba.WalletButtons(buttonId, data.resource.data.token, config)
+    buttons.current = new window.paydock.WalletButtons(buttonId, data.resource.data.token, config)
 
     buttons.current.setEnv(isSandbox ? 'preproduction_cba' : 'production_cba')
 

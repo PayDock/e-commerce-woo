@@ -138,10 +138,10 @@ const Content = (props) => {
                 email: document.getElementById('email').value,
                 phone: phoneValue
             });
-            window.widgetPaydock.trigger(window.cba.TRIGGER.SUBMIT_FORM);
+            window.widgetPaydock.trigger(window.paydock.TRIGGER.SUBMIT_FORM);
 
             let result = false;
-            window.widgetPaydock.on(window.cba.EVENT.FINISH, () => {
+            window.widgetPaydock.on(window.paydock.EVENT.FINISH, () => {
                 result = true
 
                 const savedCards = document.querySelector('.paydock-select-saved-cards')
@@ -150,7 +150,7 @@ const Content = (props) => {
                 }
             })
 
-            const paymentSourceToken = document.querySelector('[name="payment_source_token"]')
+            const paymentSourceToken = document.querySelector('[name="paydock_payment_source_token"]')
             for (let second = 1; second <= 100; second++) {
                 await sleep(100);
                 if (paymentSourceToken !== null && paymentSourceToken.value.length) {
@@ -203,7 +203,7 @@ const Content = (props) => {
         });
 
         const unsubscribe = onPaymentSetup(async () => {
-            const paymentSourceToken = document.querySelector('[name="payment_source_token"]')
+            const paymentSourceToken = document.querySelector('[name="paydock_payment_source_token"]')
             if (paymentSourceToken === null) {
                 return;
             }
@@ -262,7 +262,7 @@ const Content = (props) => {
             "input",
             {
                 type: 'hidden',
-                name: 'payment_source_token'
+                name: 'paydock_payment_source_token'
             }
         ),
         checkboxSavedCardsComponent(labels.saveCardLabel)

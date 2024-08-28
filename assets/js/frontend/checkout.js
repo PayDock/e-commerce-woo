@@ -17,13 +17,13 @@ const paydockContent = () => {
         ), wp.element.createElement(
             "input", {
                 type: 'hidden',
-                name: 'payment_source_tokenzz'
+                name: 'paydock_payment_source_token'
             }
         )
     );
 };
 
-const Block_paydock_Gateway = {
+const Block_Paydock_Gateway = {
     name: 'paydock_gateway',
     label: paydockLabel,
     content: Object(window.wp.element.createElement)(paydockContent, null),
@@ -36,4 +36,4 @@ const Block_paydock_Gateway = {
     },
 };
 
-window.wc.wcBlocksRegistry.registerPaymentMethod(Block_paydock_Gateway);
+window.wc.wcBlocksRegistry.registerPaymentMethod(Block_Paydock_Gateway);

@@ -48,10 +48,10 @@ const Content = (props) => {
                 return true;
             }
 
-            window.widgetPaydockBankAccount.trigger(window.cba.TRIGGER.SUBMIT_FORM);
+            window.widgetPaydockBankAccount.trigger(window.paydock.TRIGGER.SUBMIT_FORM);
             let result = false;
 
-            window.widgetPaydockBankAccount.on(window.cba.EVENT.FINISH, (_data) => {
+            window.widgetPaydockBankAccount.on(window.paydock.EVENT.FINISH, (_data) => {
                 result = true;
             })
 

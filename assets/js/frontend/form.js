@@ -112,11 +112,11 @@ setTimeout(() => jQuery(function ($) {
 
         const gateway = 'not_configured';
 
-        const bankAccount = new cba.Configuration(gateway, 'bank_account');
+        const bankAccount = new paydock.Configuration(gateway, 'bank_account');
         bankAccount.setFormFields(['account_routing']);
 
         paydockValidation.createWidgetDiv('paydockWidgetBankAccount');
-        const widget = new cba.HtmlWidget('#paydockWidgetBankAccount', paydockBankAccountSettings.publicKey, 'not_configured', 'bank_account', 'payment_source');
+        const widget = new paydock.HtmlWidget('#paydockWidgetBankAccount', paydockBankAccountSettings.publicKey, 'not_configured', 'bank_account', 'payment_source');
         widget.setFormFields(['account_routing']);
 
         window.widgetPaydockBankAccount = widget;
@@ -137,7 +137,7 @@ setTimeout(() => jQuery(function ($) {
         widget.interceptSubmitForm('#widget');
         widget.load();
 
-        widget.on(window.cba.EVENT.AFTER_LOAD, () => {
+        widget.on(window.paydock.EVENT.AFTER_LOAD, () => {
             if ($('#paydockWidgetBankAccount_wrapper').length > 0) {
                 paydockValidation.passWidgetToWrapper('paydockWidgetBankAccount')
             }
@@ -166,7 +166,7 @@ setTimeout(() => jQuery(function ($) {
 
         let gatewayId = isPermanent ? paydockCardSettings.gatewayId : 'not_configured';
 
-        widget = new cba.HtmlWidget('#paydockWidgetCard', paydockCardSettings.publicKey, gatewayId, "card", "card_payment_source_with_cvv");
+        widget = new paydock.HtmlWidget('#paydockWidgetCard', paydockCardSettings.publicKey, gatewayId, "card", "card_payment_source_with_cvv");
         widget.setFormPlaceholders({
             card_name: 'Card holders name *',
             card_number: 'Credit card number *',
@@ -212,14 +212,14 @@ setTimeout(() => jQuery(function ($) {
         widget.load();
 
         let performAfterLoadActions = true
-        widget.on(window.cba.EVENT.AFTER_LOAD, () => {
+        widget.on(window.paydock.EVENT.AFTER_LOAD, () => {
             widget.hideElements(['submit_button', 'email', 'phone']);
             if (performAfterLoadActions && $('#paydockWidgetCard_wrapper').length > 0) {
                 paydockValidation.passWidgetToWrapper('paydockWidgetCard');
                 performAfterLoadActions = false;
             }
         })
-        widget.on(window.cba.EVENT.FINISH, () => {
+        widget.on(window.paydock.EVENT.FINISH, () => {
             let counter = 0;
             const widgetErrorInterval = setInterval(() => {
                 const errorInput = document.querySelectorAll("#widget_error")[0]
@@ -238,7 +238,7 @@ setTimeout(() => jQuery(function ($) {
 
     function reloadWidget() {
         window.widgetPaydock.reload();
-        const paymentSourceToken = document.querySelector('[name="payment_source_token"]');
+        const paymentSourceToken = document.querySelector('[name="paydock_payment_source_token"]');
         paymentSourceToken.value = null;
         window.widgetReloaded = true
     }

@@ -68,12 +68,12 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
         setTimeout(() => {
             if ((validationSuccess && 'zip' === id) && !wasInit) {
                 wasInit = true;
-                button = new window.cba.ZipmoneyCheckoutButton('#' + buttonId, settings.publicKey, settings.gatewayId);
+                button = new window.paydock.ZipmoneyCheckoutButton('#' + buttonId, settings.publicKey, settings.gatewayId);
 
                 data.gatewayType = 'zippay'
             } else if ((validationSuccess && 'afterpay' === id) && !wasInit) {
                 wasInit = true;
-                button = new window.cba.AfterpayCheckoutButton('#' + buttonId, settings.publicKey, settings.gatewayId);
+                button = new window.paydock.AfterpayCheckoutButton('#' + buttonId, settings.publicKey, settings.gatewayId);
                 meta = {
                     amount: settings.amount,
                     currency: settings.currency,
@@ -94,7 +94,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
 
 
             if (button) {
-                button.onFinishInsert('input[name="payment_source_apm_token"]', 'payment_source_token');
+                button.onFinishInsert('input[name="payment_source_apm_token"]', 'paydock_payment_source_token');
 
                 const shipping_address = {
                     first_name: shippingAddress.first_name,
