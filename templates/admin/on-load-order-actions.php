@@ -1,8 +1,7 @@
 <script>
   jQuery( function($) {
     $( window ).on( "beforeunload", function() {
-      $('.form-field.wc-order-status').remove()
-      console.log("Handler for `beforeunload` called.")
+      $('.form-field.wc-order-status').remove();
     } );
   } )
 </script>
