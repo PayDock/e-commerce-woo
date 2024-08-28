@@ -211,6 +211,7 @@ setTimeout(() => jQuery(function ($) {
         widget.interceptSubmitForm('#widget');
         widget.load();
 
+        let performAfterLoadActions = true
         widget.on(window.cba.EVENT.AFTER_LOAD, () => {
             widget.hideElements(['submit_button', 'email', 'phone']);
             if (performAfterLoadActions && $('#powerBoardWidgetCard_wrapper').length > 0) {
