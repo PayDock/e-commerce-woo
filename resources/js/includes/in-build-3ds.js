@@ -87,14 +87,14 @@ export default async (forcePermanentVault = false, newAmount = null) => {
     canvas.on('chargeAuthSuccess', (chargeAuthEvent) => {
         result = chargeAuthEvent.charge_3ds_id
     })
-    canvas.on('additionalDataCollectReject', (chargeAuthSuccessEvent) => {
-        result = 'error';
+    canvas.on('additionalDataCollectReject', (chargeAuthEvent) => {
+        result = chargeAuthEvent.charge_3ds_id
     })
-    canvas.on('chargeAuthReject', function (data) {
-        if (data.status === 'not_authenticated') {
+    canvas.on('chargeAuthReject', function (chargeAuthEvent) {
+        if (chargeAuthEvent.status === 'not_authenticated') {
             showCardWidget();
         }
-        result = data.charge_3ds_id
+        result = chargeAuthEvent.charge_3ds_id
     });
 
     for (let second = 1; second <= 10000; second++) {

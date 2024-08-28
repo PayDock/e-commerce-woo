@@ -31,8 +31,10 @@ abstract class AbstractAPMsBlock extends AbstractBlock {
 			];
 		}
 
-		if ( ! is_admin() ) {
+		$total = 0;
+		if ( WC()->cart ) {
 			WC()->cart->calculate_totals();
+			$total = WC()->cart->total;
 		}
 
 		return array_merge( $userCustomers, [
@@ -41,7 +43,7 @@ abstract class AbstractAPMsBlock extends AbstractBlock {
 			'isUserLoggedIn'     => is_user_logged_in(),
 			'isSandbox'          => $settingsService->isSandbox(),
 			// Woocommerce data
-			'amount'             => WC()->cart->total,
+			'amount'             => $total,
 			'currency'           => strtoupper( get_woocommerce_currency() ),
 			// Widget
 			'title'              => $settingsService->getWidgetPaymentAPMTitle( $payment ),

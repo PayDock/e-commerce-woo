@@ -106,7 +106,7 @@ class CardProcessor {
 		return $this->runMethod;
 	}
 
-	public function getStandalone3dsToken(): string {
+	public function getStandalone3dsToken( ): string {
 		$vaultToken = $this->getVaultToken();
 
 		$paymentSource = [
@@ -118,7 +118,7 @@ class CardProcessor {
 		}
 
 		$args = [
-			'amount'    => $this->order->get_total(),
+			'amount'    => $this->args['amount'],
 			'reference' => '',
 			'currency'  => strtoupper( get_woocommerce_currency() ),
 			'customer'  => [
@@ -676,12 +676,11 @@ class CardProcessor {
 			], $this->getAdditionalFields( 'amount' ) ),
 		], $this->getAdditionalFields( 'amount' ) );
 
-		if ( empty( $customerArgs['phone'] ) ) {
-			unset( $customerArgs['phone'] );
-		}
-
 		if ( SaveCardOptions::WITH_GATEWAY()->name === $this->args['cardsavecardoption'] && ! empty( $this->args['gatewayid'] ) ) {
 			$customerArgs['payment_source']['gateway_id'] = $this->args['gatewayid'];
+		}
+		if ( empty( $customerArgs['phone'] ) ) {
+			unset( $customerArgs['phone'] );
 		}
 
 		$customer = SDKAdapterService::getInstance()->createCustomer( $customerArgs );

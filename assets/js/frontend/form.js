@@ -85,7 +85,7 @@ setTimeout(() => jQuery(function ($) {
                 clonnedHtmlWidget.setAttribute('style', '');
                 document.getElementById(id + '_wrapper').append(clonnedHtmlWidget);
             }
-            window.widgetPowerBoard.hideElements(['submit_button']);
+            window.widgetPowerBoard.hideElements(['submit_button', 'email', 'phone']);
         },
     }
 
@@ -206,19 +206,19 @@ setTimeout(() => jQuery(function ($) {
 
         widget.setFormFields(["card_name*","card_number*", "card_ccv*"]);
         widget.setEnv(powerBoardCardSettings.isSandbox ? 'preproduction_cba' : 'production_cba');
+        widget.setFormFields(['email', 'phone']);
         widget.onFinishInsert('input[name="payment_source_token"]', 'payment_source');
         widget.interceptSubmitForm('#widget');
-        widget.hideElements(['submit_button']);
         widget.load();
 
         let performAfterLoadActions = true
         widget.on(window.cba.EVENT.AFTER_LOAD, () => {
+            widget.hideElements(['submit_button', 'email', 'phone']);
             if (performAfterLoadActions && $('#powerBoardWidgetCard_wrapper').length > 0) {
                 powerBoardValidation.passWidgetToWrapper('powerBoardWidgetCard');
                 performAfterLoadActions = false;
             }
         })
-
         widget.on(window.cba.EVENT.FINISH, () => {
             let counter = 0;
             const widgetErrorInterval = setInterval(() => {
