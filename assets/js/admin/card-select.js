@@ -1,33 +1,33 @@
 jQuery(window).on('load', function () {
     const json = {
         "options": [{
-            "image": `${window.paydockWidgetSettings.pluginUrlPrefix}assets/images/ausbc.png`,
+            "image": "/wp-content/plugins/paydock/assets/images/ausbc.png",
             "title": "Australian Bank Card",
             "type": "ausbc"
         }, {
-            "image": `${window.paydockWidgetSettings.pluginUrlPrefix}assets/images/diners.png`,
+            "image": "/wp-content/plugins/paydock/assets/images/diners.png",
             "title": "Diner's Club, Diner's Club International, Diner's Club / Carte Blanche",
             "type": "diners"
         }, {
-            "image": `${window.paydockWidgetSettings.pluginUrlPrefix}assets/images/japcb.png`,
+            "image": "/wp-content/plugins/paydock/assets/images/japcb.png",
             "title": "Japanese Credit Bureau",
             "type": "japcb"
         }, {
-            "image": `${window.paydockWidgetSettings.pluginUrlPrefix}assets/images/maestro.png`, "title": "Maestro", "type": "maestro"
+            "image": "/wp-content/plugins/paydock/assets/images/maestro.png", "title": "Maestro", "type": "maestro"
         }, {
-            "image": `${window.paydockWidgetSettings.pluginUrlPrefix}assets/images/laser.png`, "title": "Laser", "type": "laser"
+            "image": "/wp-content/plugins/paydock/assets/images/laser.png", "title": "Laser", "type": "laser"
         }, {
-            "image": `${window.paydockWidgetSettings.pluginUrlPrefix}assets/images/solo.png`, "title": "Solo (Paymentech)", "type": "solo"
+            "image": "/wp-content/plugins/paydock/assets/images/solo.png", "title": "Solo (Paymentech)", "type": "solo"
         }, {
-            "image": `${window.paydockWidgetSettings.pluginUrlPrefix}assets/images/mastercard.png`,
+            "image": "/wp-content/plugins/paydock/assets/images/mastercard.png",
             "title": "MasterCard",
             "type": "mastercard"
         }, {
-            "image": `${window.paydockWidgetSettings.pluginUrlPrefix}assets/images/discover.png`, "title": "Discover", "type": "discover"
+            "image": "/wp-content/plugins/paydock/assets/images/discover.png", "title": "Discover", "type": "discover"
         }, {
-            "image": `${window.paydockWidgetSettings.pluginUrlPrefix}assets/images/amex.png`, "title": "American Express", "type": "amex"
+            "image": "/wp-content/plugins/paydock/assets/images/amex.png", "title": "American Express", "type": "amex"
         }, {
-            "image": `${window.paydockWidgetSettings.pluginUrlPrefix}assets/images/visa.png`,
+            "image": "/wp-content/plugins/paydock/assets/images/visa.png",
             "title": "Visa, Visa Electron",
             "type": "visa"
         },]
