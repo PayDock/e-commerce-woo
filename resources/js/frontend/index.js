@@ -22,6 +22,7 @@ const labels = {
     saveCardLabel: __('Save payment details', textDomain),
     selectTokenLabel: __('Saved payment details', textDomain),
     fillDataError: __('Please fill in the card data.', textDomain),
+    fillCCDataError: __('Please fill in the required credit card form fields', textDomain),
     requiredDataError: __('Please fill in the required fields of the form to display payment methods', textDomain),
     additionalDataRejected: __('Payment has been rejected by PowerBoard. Please try again in a few minutes', textDomain)
 }

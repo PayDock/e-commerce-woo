@@ -180,7 +180,9 @@ class CardProcessor {
 			return [];
 		}
 
-		WC()->cart->calculate_totals();
+		if ( ! is_admin() ) {
+			WC()->cart->calculate_totals();
+		}
 
 		$address1 = $this->order->get_billing_address_1();
 		$address2 = $this->order->get_billing_address_2();
@@ -577,6 +579,10 @@ class CardProcessor {
 				],
 			], $this->getAdditionalFields( 'amount' ) );
 
+			if ( empty( $customerArgs['phone'] ) ) {
+				unset( $customerArgs['phone'] );
+			}
+
 			if ( SaveCardOptions::WITH_GATEWAY()->name === $this->args['cardsavecardoption'] && ! empty( $this->args['gatewayid'] ) ) {
 				$customerArgs['payment_source']['gateway_id'] = $this->args['gatewayid'];
 			}
@@ -632,6 +638,10 @@ class CardProcessor {
 			],
 		];
 
+		if ( empty( $params['customer']['phone'] ) ) {
+			unset( $params['customer']['phone'] );
+		}
+
 		if ( ! empty( $this->args['gatewayid'] ) ) {
 			$params['customer']['payment_source']['gateway_id'] = $this->args['gatewayid'];
 		}
@@ -668,6 +678,9 @@ class CardProcessor {
 
 		if ( SaveCardOptions::WITH_GATEWAY()->name === $this->args['cardsavecardoption'] && ! empty( $this->args['gatewayid'] ) ) {
 			$customerArgs['payment_source']['gateway_id'] = $this->args['gatewayid'];
+		}
+		if ( empty( $customerArgs['phone'] ) ) {
+			unset( $customerArgs['phone'] );
 		}
 
 		$customer = SDKAdapterService::getInstance()->createCustomer( $customerArgs );
