@@ -10,8 +10,6 @@ class OrderService {
 
 	public function __construct() {
 		if ( is_admin() ) {
-			\WC_Cache_Helper::set_nocache_constants();
-			nocache_headers();
 			$this->templateService = new TemplateService( $this );
 		}
 	}
@@ -43,6 +41,7 @@ class OrderService {
 	}
 
 	public function iniPowerBoardOrderButtons( $order ) {
+		$this->templateService->includeAdminHtml( 'on-load-order-actions', compact( 'order' ) );
 		$orderCustomStatus = $order->get_meta( ActivationHook::CUSTOM_STATUS_META_KEY );
 		$orderStatus       = $order->get_status();
 		$capturedAmount    = $order->get_meta( 'capture_amount' );
