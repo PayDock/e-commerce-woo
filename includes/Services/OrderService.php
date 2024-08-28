@@ -17,17 +17,34 @@ class OrderService {
 	public static function updateStatus( $id, $custom_status, $status_note = null ) {
 		$order = wc_get_order( $id );
 
-		$order->set_status( ActivationHook::CUSTOM_STATUSES[ $custom_status ], $status_note );
-		$order->update_meta_data( ActivationHook::CUSTOM_STATUS_META_KEY, $custom_status );
-		$order->save();
+		if ( is_object( $order ) ) {
+
+			$partial_refund = strpos( $custom_status, 'pb-p-refund' );
+
+			if ( $partial_refund === false ) {
+
+				$order->set_status( ActivationHook::CUSTOM_STATUSES[ $custom_status ], $status_note );
+				$order->update_meta_data( ActivationHook::CUSTOM_STATUS_META_KEY, $custom_status );
+				$order->save();
+
+			} else {
+
+				if ( ! empty( $status_note ) ) {
+					$order->add_order_note( $status_note );
+				}
+
+			}
+
+		}
+
 	}
 
 	public function iniPowerBoardOrderButtons( $order ) {
 		$orderCustomStatus = $order->get_meta( ActivationHook::CUSTOM_STATUS_META_KEY );
 		$orderStatus       = $order->get_status();
-		$capturedAmount    = get_post_meta( $order->get_id(), 'capture_amount' );
-		$capturedAmount    = is_array( $capturedAmount ) ? reset( $capturedAmount ) : $capturedAmount;
+		$capturedAmount    = $order->get_meta( 'capture_amount' );
 		$totalRefaund      = $order->get_total_refunded();
+		$orderTotal      = (float) $order->get_total(false);
 		if ( in_array( $orderStatus, [
 				'pending',
 				'failed',
@@ -41,7 +58,7 @@ class OrderService {
 				'pb-authorize',
 				'wc-pb-authorize'
 			] )
-		     || ( $order->get_total() == $totalRefaund )
+		     || ( $orderTotal == $totalRefaund )
 		     || ( $capturedAmount == $totalRefaund )
 		) {
 			wp_enqueue_style(
@@ -53,6 +70,7 @@ class OrderService {
 		}
 		if ( in_array( $orderStatus, [
 				'processing',
+				'on-hold',
 			] ) && in_array( $orderCustomStatus, [
 				'pb-authorize',
 				'wc-pb-authorize',
@@ -112,20 +130,23 @@ class OrderService {
 	}
 
 	public function informationAboutPartialCaptured( $orderId ) {
-		$capturedAmount = get_post_meta( $orderId, 'capture_amount' );
-		$order          = wc_get_order( $orderId );
-		if ( $capturedAmount && is_array( $capturedAmount ) && in_array( $order->get_status(), [
-				'failed',
-				'pending',
-				'processing',
-				'refunded',
-			] ) ) {
-			$capturedAmount = reset( $capturedAmount );
-			if ( $order->get_total() > $capturedAmount ) {
-				$this->templateService->includeAdminHtml( 'information-about-partial-captured',
-					compact( 'order', 'capturedAmount' ) );
+
+		$order = wc_get_order( $orderId );
+
+		if ( is_object( $order ) ) {
+
+			$capturedAmount = $order->get_meta( 'capture_amount' );
+
+			if ( ! empty( $capturedAmount ) ) {
+
+				// if ( $order->get_total() > $capturedAmount ) {
+					$this->templateService->includeAdminHtml( 'information-about-partial-captured', compact( 'order', 'capturedAmount' ) );
+				// }
+
 			}
+
 		}
+
 	}
 
 	public function displayStatusChangeError() {
