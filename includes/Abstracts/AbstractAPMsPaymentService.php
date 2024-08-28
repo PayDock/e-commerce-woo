@@ -87,16 +87,12 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 			$isCompleted = 'complete' === strtolower( $status );
 			$status      = $isCompleted ? 'wc-paydock-paid' : 'wc-paydock-pending';
 		}
+
+		$order->update_meta_data( 'paydock_charge_id', $chargeId );
+		$order->update_meta_data( OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(), $this->getAPMsType()->getLabel() );
 		$order->set_status( $status );
 		$order->payment_complete();
 		$order->save();
-
-		update_post_meta( $order->get_id(), 'paydock_charge_id', $chargeId );
-		add_post_meta(
-			$order->get_id(),
-			OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(),
-			$this->getAPMsType()->getLabel()
-		);
 
 		WC()->cart->empty_cart();
 
