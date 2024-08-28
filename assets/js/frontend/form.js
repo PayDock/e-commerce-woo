@@ -150,7 +150,8 @@ setTimeout(() => jQuery(function ($) {
 
         const htmlWidget = document.getElementById('powerBoardWidgetCard')
         if (htmlWidget !== null && htmlWidget.innerHTML.trim().length > 0) {
-            powerBoardValidation.passWidgetToWrapper('powerBoardWidgetCard')
+            powerBoardValidation.passWidgetToWrapper('powerBoardWidgetCard');
+            reloadWidget();
             return;
         }
 
@@ -212,10 +213,33 @@ setTimeout(() => jQuery(function ($) {
 
         widget.on(window.cba.EVENT.AFTER_LOAD, () => {
             widget.hideElements(['submit_button', 'email', 'phone']);
-            if ($('#powerBoardWidgetCard_wrapper').length > 0) {
-                powerBoardValidation.passWidgetToWrapper('powerBoardWidgetCard')
+            if (performAfterLoadActions && $('#powerBoardWidgetCard_wrapper').length > 0) {
+                powerBoardValidation.passWidgetToWrapper('powerBoardWidgetCard');
+                performAfterLoadActions = false;
             }
         })
+        widget.on(window.cba.EVENT.FINISH, () => {
+            let counter = 0;
+            const widgetErrorInterval = setInterval(() => {
+                const errorInput = document.querySelectorAll("#widget_error")[0]
+                if (!!errorInput) {
+                    reloadWidget();
+                    errorInput?.remove();
+                    clearInterval(widgetErrorInterval);
+                } else if(counter  === 50) {
+                    clearInterval(widgetErrorInterval);
+                } else {
+                    counter++;
+                }
+            }, 1000)
+        })
+    }
+
+    function reloadWidget() {
+        window.widgetPowerBoard.reload();
+        const paymentSourceToken = document.querySelector('[name="payment_source_token"]');
+        paymentSourceToken.value = null;
+        window.widgetReloaded = true
     }
 
     function setPaymentMethodWatcher() {
