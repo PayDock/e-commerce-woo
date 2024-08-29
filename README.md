@@ -129,3 +129,6 @@ Also we use helper code that not need compile what contained in assets path.
 
 = 3.1.2 =
 * Bug fixes
+
+= 3.1.3 =
+* More bugs fixed
