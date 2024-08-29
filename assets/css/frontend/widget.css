@@ -154,6 +154,13 @@
     display: block;
     width: 150px !important;
     height: 55px !important;
+    box-sizing: border-box;
+}
+
+.paydock-payment-method-label-logo {
+    margin: -6px 1em -6px auto;
+    height: 36px !important;
+    max-height: 36px !important;
 }
 
 .paydock-payment-method-label {

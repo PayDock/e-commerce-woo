@@ -30,6 +30,7 @@ abstract class AbstractWalletBlock extends AbstractBlock {
 			'publicKey'        => $settings->getPublicKey(),
 			'isSandbox'        => $settings->isSandbox(),
 			'styles'           => $settings->getWidgetStyles(),
+			'total_limitation' => $settings->getWidgetPaymentWalletMinMax( $payment ),
 		];
 
 

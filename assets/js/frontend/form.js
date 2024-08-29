@@ -205,20 +205,20 @@ setTimeout(() => jQuery(function ($) {
         }
 
         widget.setFormFields(["card_name*","card_number*", "card_ccv*"]);
-        widget.setEnv(paydockCardSettings.isSandbox ? 'preproduction_cba' : 'production_cba');
-        widget.setFormFields(['email', 'phone']);
+        widget.setEnv(paydockCardSettings.isSandbox ? 'sandbox' : 'production');
         widget.onFinishInsert('input[name="payment_source_token"]', 'payment_source');
         widget.interceptSubmitForm('#widget');
+        widget.hideElements(['submit_button']);
         widget.load();
 
         let performAfterLoadActions = true
         widget.on(window.paydock.EVENT.AFTER_LOAD, () => {
-            widget.hideElements(['submit_button', 'email', 'phone']);
             if (performAfterLoadActions && $('#paydockWidgetCard_wrapper').length > 0) {
                 paydockValidation.passWidgetToWrapper('paydockWidgetCard');
                 performAfterLoadActions = false;
             }
         })
+
         widget.on(window.paydock.EVENT.FINISH, () => {
             let counter = 0;
             const widgetErrorInterval = setInterval(() => {

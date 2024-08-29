@@ -34,7 +34,7 @@ export default (id, buttonId, data, isSandbox) => {
     }
     buttons.current = new window.paydock.WalletButtons(buttonId, data.resource.data.token, config)
 
-    buttons.current.setEnv(isSandbox ? 'preproduction_cba' : 'production_cba')
+    buttons.current.setEnv(isSandbox ? 'sandbox' : 'production')
 
     buttons.current.onPaymentSuccessful((result) => {
         result.payment = id.replace('-','_')

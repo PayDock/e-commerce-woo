@@ -19,7 +19,7 @@ class OrderService {
 
 		if ( is_object( $order ) ) {
 
-			$partial_refund = strpos( $custom_status, 'pb-p-refund' );
+			$partial_refund = strpos( $custom_status, 'paydock-p-refund' );
 
 			if ( $partial_refund === false ) {
 
@@ -51,12 +51,12 @@ class OrderService {
 				'cancelled',
 			] )
 		     || in_array( $orderCustomStatus, [
-				'pb-requested',
-				'wc-pb-requested',
-				'pb-refunded',
-				'WC-pb-refunded',
-				'pb-authorize',
-				'wc-pb-authorize'
+				'paydock-requested',
+				'wc-paydock-requested',
+				'paydock-refunded',
+				'WC-paydock-refunded',
+				'paydock-authorize',
+				'wc-paydock-authorize'
 			] )
 		     || ( $orderTotal == $totalRefaund )
 		     || ( $capturedAmount == $totalRefaund )
@@ -72,12 +72,12 @@ class OrderService {
 				'processing',
 				'on-hold',
 			] ) && in_array( $orderCustomStatus, [
-				'pb-authorize',
-				'wc-pb-authorize',
-				'pb-paid',
-				'wc-pb-paid',
-				'wc-pb-p-paid',
-				'pb-p-paid'
+				'paydock-authorize',
+				'wc-paydock-authorize',
+				'paydock-paid',
+				'wc-paydock-paid',
+				'wc-paydock-p-paid',
+				'paydock-p-paid'
 			] ) ) {
 			$this->templateService->includeAdminHtml( 'paydock-capture-block', compact( 'order' ) );
 			wp_enqueue_script(

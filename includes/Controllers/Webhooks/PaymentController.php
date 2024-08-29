@@ -29,8 +29,8 @@ class PaymentController {
 		} else {
 			$order = wc_get_order( $orderId );
 			/*if ( ! in_array( $order->get_meta( ActivationHook::CUSTOM_STATUS_META_KEY ), [
-				'pb-authorize',
-				'wc-pb-authorize'
+				'paydock-authorize',
+				'wc-paydock-authorize'
 			] ) ) {
 				$error = __( 'The order has been authorized and is awaiting approval.', 'paydock'  );
 			}*/
@@ -58,7 +58,7 @@ class PaymentController {
 			] );
 			if ( ! empty( $charge['resource']['data']['status'] ) && 'complete' == $charge['resource']['data']['status'] ) {
 				$newChargeId = $charge['resource']['data']['_id'];
-				$newStatus   = $orderTotal > $amount ? 'pb-p-paid' : 'pb-paid';
+				$newStatus   = $orderTotal > $amount ? 'paydock-p-paid' : 'paydock-paid';
 				$loggerRepository->createLogRecord(
 					$newChargeId,
 					'Capture',
@@ -116,12 +116,12 @@ class PaymentController {
 				$loggerRepository->createLogRecord(
 					$paydockChargeId,
 					'Cancel-authorised',
-					'wc-pb-cancelled',
+					'wc-paydock-cancelled',
 					'',
 					LogRepository::SUCCESS
 				);
 				$order->payment_complete();
-				OrderService::updateStatus( $orderId, 'pb-cancelled' );
+				OrderService::updateStatus( $orderId, 'paydock-cancelled' );
 				wp_send_json_success(
 					[ 'message' => __( 'The payment has been cancelled successfully. ', 'woocommerce' ) ]
 				);
@@ -190,9 +190,9 @@ class PaymentController {
 			) ) {
 			$newRefundedId = end( $result['resource']['data']['transactions'] )['_id'];
 			if ( $captureAmount ) {
-				$status = $totalRefunded < $captureAmount ? 'wc-pb-p-refund' : 'wc-pb-refunded';
+				$status = $totalRefunded < $captureAmount ? 'wc-paydock-p-refund' : 'wc-paydock-refunded';
 			} else {
-				$status = $totalRefunded < $order->get_total() ? 'wc-pb-p-refund' : 'wc-pb-refunded';
+				$status = $totalRefunded < $order->get_total() ? 'wc-paydock-p-refund' : 'wc-paydock-refunded';
 			}
 
 			$order->update_meta_data( 'paydock_refunded_status', $status );
@@ -365,26 +365,26 @@ class PaymentController {
 		switch ( strtoupper( $status ) ) {
 			case ChargeStatuses::COMPLETE()->name:
 				$captureAmount = wc_format_decimal( $data['transaction']['amount'] );
-				$orderStatus   = $orderTotal > $captureAmount ? 'wc-pb-p-paid' : 'wc-pb-paid';
+				$orderStatus   = $orderTotal > $captureAmount ? 'wc-paydock-p-paid' : 'wc-paydock-paid';
 				$order->update_meta_data( 'capture_amount', $captureAmount );
 				$order->save();
 				break;
 			case ChargeStatuses::PENDING()->name:
 			case ChargeStatuses::PRE_AUTHENTICATION_PENDING()->name:
-				$orderStatus = $isAuthorization ? 'wc-pb-authorize' : 'wc-pb-pending';
+				$orderStatus = $isAuthorization ? 'wc-paydock-authorize' : 'wc-paydock-pending';
 				break;
 			case ChargeStatuses::CANCELLED()->name:
-				$orderStatus = 'wc-pb-cancelled';
+				$orderStatus = 'wc-paydock-cancelled';
 				break;
 			case ChargeStatuses::REFUNDED()->name:
-				$orderStatus = 'wc-pb-refunded';
+				$orderStatus = 'wc-paydock-refunded';
 				break;
 			case ChargeStatuses::REQUESTED()->name:
-				$orderStatus = 'wc-pb-requested';
+				$orderStatus = 'wc-paydock-requested';
 				break;
 			case ChargeStatuses::DECLINED()->name:
 			case ChargeStatuses::FAILED()->name:
-				$orderStatus = 'wc-pb-failed';
+				$orderStatus = 'wc-paydock-failed';
 				break;
 			default:
 				$orderStatus = $order->get_status();
@@ -400,7 +400,7 @@ class PaymentController {
 			$operation,
 			$orderStatus,
 			'',
-			in_array( $orderStatus, [ 'wc-pb-paid', 'wc-pb-p-paid', 'wc-pb-authorize', 'wc-pb-pending' ]
+			in_array( $orderStatus, [ 'wc-paydock-paid', 'wc-paydock-p-paid', 'wc-paydock-authorize', 'wc-paydock-pending' ]
 			) ? LogRepository::SUCCESS : LogRepository::DEFAULT
 		);
 
@@ -426,7 +426,7 @@ class PaymentController {
 
 		if ( 'complete' !== $fraudStatus ) {
 			$operation = ucfirst( strtolower( $data['type'] ?? 'undefined' ) );
-			$status    = 'wc-pb-failed';
+			$status    = 'wc-paydock-failed';
 
 			delete_option( $optionName );
 			OrderService::updateStatus( $orderId, $status );
@@ -520,11 +520,11 @@ class PaymentController {
 		$markAsSuccess   = false;
 
 		if ( $isAuthorization && in_array( $status, [ 'Pending', 'Pre_authentication_pending' ] ) ) {
-			$status = 'wc-pb-authorize';
+			$status = 'wc-paydock-authorize';
 		} else {
 			$markAsSuccess = true;
 			$isCompleted   = 'Complete' === $status;
-			$status        = $isCompleted ? 'wc-pb-paid' : 'wc-pb-pending';
+			$status        = $isCompleted ? 'wc-paydock-paid' : 'wc-paydock-pending';
 		}
 
 		OrderService::updateStatus( $orderId, $status );
@@ -579,9 +579,9 @@ class PaymentController {
 			case ChargeStatuses::REFUNDED()->name:
 			case ChargeStatuses::REFUND_REQUESTED()->name:
 				if ( $refundAmount < $orderTotal ) {
-					$orderStatus = 'wc-pb-p-refund';
+					$orderStatus = 'wc-paydock-p-refund';
 				} else {
-					$orderStatus = 'wc-pb-refunded';
+					$orderStatus = 'wc-paydock-refunded';
 				}
 				$order->update_meta_data( 'paydock_refunded_status', $orderStatus );
 				$order->save();
@@ -613,7 +613,7 @@ class PaymentController {
 			$operation,
 			$orderStatus,
 			$result instanceof \WP_Error ? $result->get_error_message() : '',
-			in_array( $orderStatus, [ 'wc-pb-paid', 'wc-pb-authorize', 'wc-pb-pending' ]
+			in_array( $orderStatus, [ 'wc-paydock-paid', 'wc-paydock-authorize', 'wc-paydock-pending' ]
 			) ? LogRepository::SUCCESS : LogRepository::DEFAULT
 		);
 

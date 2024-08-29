@@ -189,19 +189,19 @@ class CardPaymentService extends WC_Payment_Gateway {
 			'Pre_authentication_pending' === $status &&
 			$cardProcessor->getRunMethod() === CardProcessor::FRAUD_IN_BUILD_CHARGE_METHOD
 		) {
-			$status = 'wc-pb-pending';
+			$status = 'wc-paydock-pending';
 		} else {
 			if ( $isAuthorization && in_array( $status, [ 'Pending', 'Pre_authentication_pending' ] ) ) {
-				$status = 'wc-pb-authorize';
+				$status = 'wc-paydock-authorize';
 			} else {
 				$markAsSuccess = true;
 				$isCompleted   = 'Complete' === $status;
-				$status        = $isCompleted ? 'wc-pb-paid' : 'wc-pb-pending';
+				$status        = $isCompleted ? 'wc-paydock-paid' : 'wc-paydock-pending';
 			}
 		}
 
 		OrderService::updateStatus( $order->get_id(), $status );
-		if ( ! in_array( $status, [ 'wc-pb-pending', 'wc-pb-authorize' ] ) ) {
+		if ( ! in_array( $status, [ 'wc-paydock-pending', 'wc-paydock-authorize' ] ) ) {
 			$order->payment_complete();
 			$order->update_meta_data( 'pb_directly_charged', 1 );
 		}

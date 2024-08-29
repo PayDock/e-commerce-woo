@@ -26,7 +26,7 @@ To install and configure the Paydock plugin, you need:
 
 * Web Server - Nginx
 * PHP 8.1
-* MySQL version 8.0 or greater OR MariaDB 11.1
+* MySQL version 8.0 or greater OR MariaDB 11.1 
 * Support for HTTPS (SSL certificate)
 * PHP memory limit of 256MB
 * PHP Requirements (curl, gd2, mbstring, xml, json, and zip)

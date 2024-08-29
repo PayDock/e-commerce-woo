@@ -65,7 +65,7 @@ export default async (forcePermanentVault = false, newAmount = null) => {
         preAuthData.token = settings.paymentSourceToken
     }
 
-    const envVal = settings.isSandbox ? 'preproduction_cba' : 'production_cba'
+    const envVal = settings.isSandbox ? 'sandbox' : 'production'
     const preAuthResp = await new window.paydock.Api(settings.publicKey)
         .setEnv(envVal)
         .charge()

@@ -68,18 +68,18 @@ abstract class AbstractWalletPaymentService extends AbstractPaymentService {
 
 		$loggerRepository = new LogRepository();
 		if ( 'inreview' === $data['data']['status'] ) {
-			$status = 'wc-pb-requested';
+			$status = 'wc-paydock-requested';
 		} elseif (
 			( 'pending' === $data['data']['status'] )
 			|| ( ! empty( $_GET['direct_charge'] ) && ( 'true' == $_GET['direct_charge'] ) )
 		) {
-			$status = 'wc-pb-authorize';
+			$status = 'wc-paydock-authorize';
 		} else {
-			$status = 'wc-pb-paid';
+			$status = 'wc-paydock-paid';
 		}
 
 		OrderService::updateStatus( $order_id, $status );
-		if ( ! in_array( $status, [ 'wc-pb-authorize' ] ) ) {
+		if ( ! in_array( $status, [ 'wc-paydock-authorize' ] ) ) {
 			$order->payment_complete();
 			$order->update_meta_data( 'pb_directly_charged', 1 );
 		}
@@ -94,7 +94,7 @@ abstract class AbstractWalletPaymentService extends AbstractPaymentService {
 			'Charge',
 			$status,
 			'Successful',
-			'wc-pb-authorize' === $status ? LogRepository::DEFAULT : LogRepository::SUCCESS
+			'wc-paydock-authorize' === $status ? LogRepository::DEFAULT : LogRepository::SUCCESS
 		);
 
 		return [
