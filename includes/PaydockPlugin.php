@@ -1,6 +1,6 @@
 <?php
 
-namespace Paydock;
+namespace PayDock;
 
 use Paydock\Abstracts\AbstractSingleton;
 use Paydock\Hooks\ActivationHook;

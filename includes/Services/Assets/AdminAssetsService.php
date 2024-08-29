@@ -1,6 +1,6 @@
 <?php
 
-namespace Paydock\Services\Assets;
+namespace PayDock\Services\Assets;
 
 use Paydock\PaydockPlugin;
 
@@ -74,7 +74,7 @@ class AdminAssetsService {
 			$scriptName = $this->getScriptName( $script );
 			wp_enqueue_script( $this->getScriptName( $script ), '', [], PAYDOCK_PLUGIN_VERSION, true );
 			wp_localize_script( $scriptName, 'paydockWidgetSettings', [
-				'pluginUrlPrefix' => paydock_PLUGIN_URL
+				'pluginUrlPrefix' => PAYDOCK_PLUGIN_URL
 			] );
 		}
 	}

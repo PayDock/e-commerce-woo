@@ -85,7 +85,7 @@ setTimeout(() => jQuery(function ($) {
                 clonnedHtmlWidget.setAttribute('style', '');
                 document.getElementById(id + '_wrapper').append(clonnedHtmlWidget);
             }
-            window.widgetPaydock.hideElements(['submit_button', 'email', 'phone']);
+            window.widgetPaydock.hideElements(['submit_button']);
         },
     }
 
@@ -206,7 +206,7 @@ setTimeout(() => jQuery(function ($) {
 
         widget.setFormFields(["card_name*","card_number*", "card_ccv*"]);
         widget.setEnv(paydockCardSettings.isSandbox ? 'sandbox' : 'production');
-        widget.onFinishInsert('input[name="payment_source_token"]', 'payment_source');
+        widget.onFinishInsert('input[name="paydock_payment_source_token"]', 'payment_source');
         widget.interceptSubmitForm('#widget');
         widget.hideElements(['submit_button']);
         widget.load();

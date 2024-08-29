@@ -1,6 +1,6 @@
 <?php
 
-namespace Paydock\Repositories;
+namespace PayDock\Repositories;
 
 use Paydock\Services\HashService;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Paydock\Exceptions;
+namespace PayDock\Exceptions;
 
 use Exception;
 

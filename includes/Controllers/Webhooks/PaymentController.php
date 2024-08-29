@@ -1,6 +1,6 @@
 <?php
 
-namespace Paydock\Controllers\Webhooks;
+namespace PayDock\Controllers\Webhooks;
 
 use Paydock\Enums\ChargeStatuses;
 use Paydock\Enums\NotificationEvents;
@@ -68,7 +68,7 @@ class PaymentController {
 				);
 				$order->update_meta_data( 'capture_amount', $amount );
 				$order->update_meta_data( 'paydock_charge_id', $newChargeId );
-				$order->update_meta_data( 'pb_directly_charged', 1 );
+				$order->update_meta_data( 'paydock_directly_charged', 1 );
 				$order->payment_complete();
 				$order->save();
 
@@ -162,10 +162,6 @@ class PaymentController {
 			$amount = $args['amount'];
 		}
 
-		$captureAmount = $order->get_meta( 'capture_amount' );
-
-		$totalRefunded = (float) $order->get_total_refunded();
-
 		if ( ! in_array( $order->get_status(), [
 				'processing',
 				'refunded'
@@ -175,7 +171,10 @@ class PaymentController {
 
 		$loggerRepository = new LogRepository();
 
+
+		$totalRefunded = (float) $order->get_total_refunded();
 		$paydockChargeId = $order->get_meta( 'paydock_charge_id' );
+		$captureAmount = $order->get_meta( 'capture_amount' );
 		if ( $captureAmount && $totalRefunded > $captureAmount ) {
 			$totalRefunded = $captureAmount;
 		}

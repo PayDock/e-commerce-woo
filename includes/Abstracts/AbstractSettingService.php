@@ -1,8 +1,9 @@
 <?php
 
-namespace Paydock\Abstracts;
+namespace PayDock\Abstracts;
 
 use Paydock\Enums\SettingsTabs;
+use Paydock\PaydockPlugin;
 use Paydock\Services\Assets\AdminAssetsService;
 use Paydock\Services\TemplateService;
 

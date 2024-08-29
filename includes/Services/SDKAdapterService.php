@@ -1,6 +1,6 @@
 <?php
 
-namespace Paydock\Services;
+namespace PayDock\Services;
 
 use Paydock\API\ChargeService;
 use Paydock\API\ConfigService;

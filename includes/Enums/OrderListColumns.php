@@ -1,6 +1,6 @@
 <?php
 
-namespace Paydock\Enums;
+namespace PayDock\Enums;
 
 use Paydock\Abstracts\AbstractEnum;
 use Paydock\PaydockPlugin;

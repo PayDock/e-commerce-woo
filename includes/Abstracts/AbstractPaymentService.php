@@ -1,6 +1,6 @@
 <?php
 
-namespace Paydock\Abstracts;
+namespace PayDock\Abstracts;
 
 use Paydock\Services\SettingsService;
 use WC_Payment_Gateway;
@@ -41,24 +41,24 @@ abstract class AbstractPaymentService extends WC_Payment_Gateway {
 			return '';
 		}
 
-		wp_enqueue_script( 'paydock-form', paydock_PLUGIN_URL . 'assets/js/frontend/form.js', [], time(),
+		wp_enqueue_script( 'paydock-form', PAYDOCK_PLUGIN_URL . 'assets/js/frontend/form.js', [], time(),
 			true );
 		wp_localize_script( 'paydock-form', 'paydockCardWidgetSettings', [
 			'suportedCard'    => 'Visa, Mastercard, Adex',
 		] );
 		wp_localize_script( 'paydock-form', 'paydockWidgetSettings', [
-			'pluginUrlPrefix' => paydock_PLUGIN_URL
+			'pluginUrlPrefix' => PAYDOCK_PLUGIN_URL
 		] );
 		wp_enqueue_style(
 			'paydock-widget-css',
-			paydock_PLUGIN_URL . 'assets/css/frontend/widget.css',
+			PAYDOCK_PLUGIN_URL . 'assets/css/frontend/widget.css',
 			[],
 			time()
 		);
 
 		wp_enqueue_script( 'paydock-api', SettingsService::getInstance()->getWidgetScriptUrl(), [], time(), true );
 		wp_localize_script( 'paydock-api', 'paydockWidgetSettings', [
-			'pluginUrlPrefix' => paydock_PLUGIN_URL
+			'pluginUrlPrefix' => PAYDOCK_PLUGIN_URL
 		] );
 	}
 }

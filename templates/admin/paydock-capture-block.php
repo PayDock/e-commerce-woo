@@ -3,8 +3,8 @@
 } // Exit if accessed directly ?>
 <span class="paydock-order-actions">
     <?php
-        $pb_charge_meta = $order->get_meta( 'pb_directly_charged' );
-        $order_directly_charged = ! empty( $pb_charge_meta ) ? $pb_charge_meta : false;
+        $paydock_charge_meta = $order->get_meta( 'paydock_directly_charged' );
+        $order_directly_charged = ! empty( $paydock_charge_meta ) ? $paydock_charge_meta : false;
 
         if ( $order_directly_charged == false ) :
     ?>

@@ -1,6 +1,6 @@
 <?php
 
-namespace Paydock\Abstracts;
+namespace PayDock\Abstracts;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Exception;
@@ -92,7 +92,7 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 		OrderService::updateStatus( $order_id, $status );
 		if ( ! in_array( $status, [ 'wc-paydock-authorize' ] ) ) {
 			$order->payment_complete();
-			$order->update_meta_data( 'pb_directly_charged', 1 );
+			$order->update_meta_data( 'paydock_directly_charged', 1 );
 		}
 		$order->update_meta_data( 'paydock_charge_id', $chargeId );
 		$order->save();

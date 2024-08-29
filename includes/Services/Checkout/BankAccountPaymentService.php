@@ -1,6 +1,6 @@
 <?php
 
-namespace Paydock\Services\Checkout;
+namespace PayDock\Services\Checkout;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Exception;
@@ -90,7 +90,7 @@ class BankAccountPaymentService extends AbstractPaymentService {
 
 		OrderService::updateStatus( $order->get_id(), $status );
 		$order->payment_complete();
-		$order->update_meta_data( 'pb_directly_charged', 1 );
+		$order->update_meta_data( 'paydock_directly_charged', 1 );
 		$order->update_meta_data( 'paydock_charge_id', $chargeId );
 		$order->update_meta_data( OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(), 'Bank' );
 		$order->save();

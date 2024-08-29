@@ -1,6 +1,6 @@
 <?php
 
-namespace Paydock\Abstracts;
+namespace PayDock\Abstracts;
 
 use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
 use Paydock\PaydockPlugin;
@@ -24,18 +24,18 @@ abstract class AbstractBlock extends AbstractPaymentMethodType {
 		if ( ! self::$isLoad && is_checkout() ) {
 			wp_enqueue_script(
 				'paydock-form',
-				paydock_PLUGIN_URL . 'assets/js/frontend/form.js',
+				PAYDOCK_PLUGIN_URL . 'assets/js/frontend/form.js',
 				[],
 				PAYDOCK_PLUGIN_VERSION,
 				true
 			);
 
 			wp_localize_script( 'paydock-form', 'paydockWidgetSettings', [
-				'pluginUrlPrefix' => paydock_PLUGIN_URL
+				'pluginUrlPrefix' => PAYDOCK_PLUGIN_URL
 			] );
 			wp_enqueue_style(
 				'paydock-widget-css',
-				paydock_PLUGIN_URL . 'assets/css/frontend/widget.css',
+				PAYDOCK_PLUGIN_URL . 'assets/css/frontend/widget.css',
 				[],
 				PAYDOCK_PLUGIN_VERSION,
 				true
@@ -49,7 +49,7 @@ abstract class AbstractBlock extends AbstractPaymentMethodType {
 				true
 			);
 			wp_localize_script( 'paydock-api', 'paydockWidgetSettings', [
-				'pluginUrlPrefix' => paydock_PLUGIN_URL
+				'pluginUrlPrefix' => PAYDOCK_PLUGIN_URL
 			] );
 
 			self::$isLoad = true;
@@ -66,10 +66,10 @@ abstract class AbstractBlock extends AbstractPaymentMethodType {
 		];
 		wp_register_script( $scriptName, $scriptUrl, $scriptAsset['dependencies'], $scriptAsset['version'], true );
 		wp_localize_script( $scriptName, 'paydockWidgetSettings', [
-			'pluginUrlPrefix' => paydock_PLUGIN_URL
+			'pluginUrlPrefix' => PAYDOCK_PLUGIN_URL
 		] );
 		wp_localize_script( 'paydock-api', 'paydockWidgetSettings', [
-			'pluginUrlPrefix' => paydock_PLUGIN_URL
+			'pluginUrlPrefix' => PAYDOCK_PLUGIN_URL
 		] );
 		if ( function_exists( 'wp_set_script_translations' ) ) {
 			wp_set_script_translations( $scriptName );

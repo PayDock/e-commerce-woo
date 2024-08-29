@@ -1,6 +1,6 @@
 <?php
 
-namespace Paydock\Services\Checkout;
+namespace PayDock\Services\Checkout;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Exception;
@@ -68,7 +68,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 
 		add_action( 'wp_enqueue_scripts', [ $this, 'payment_scripts' ] );
 
-		add_action( 'wp_ajax_get_vault_token', [ $this, 'get_vault_token' ] );
+		add_action( 'wp_ajax_paydock_get_vault_token', [ $this, 'paydock_get_vault_token' ] );
 
 		add_action( 'woocommerce_after_checkout_billing_form', [ $this, 'woocommerce_before_checkout_form' ], 10, 1 );
 	}
@@ -78,21 +78,21 @@ class CardPaymentService extends WC_Payment_Gateway {
 			return '';
 		}
 
-		wp_enqueue_script( 'paydock-form', paydock_PLUGIN_URL . 'assets/js/frontend/form.js', [], time(), true );
+		wp_enqueue_script( 'paydock-form', PAYDOCK_PLUGIN_URL . 'assets/js/frontend/form.js', [], time(), true );
 		wp_localize_script( 'paydock-form', 'paydockCardWidgetSettings', [
 			'suportedCard' => 'Visa, Mastercard, Adex',
 		] );
 		wp_localize_script( 'paydock-form', 'paydockWidgetSettings', [
-			'pluginUrlPrefix' => paydock_PLUGIN_URL
+			'pluginUrlPrefix' => PAYDOCK_PLUGIN_URL
 		] );
-		wp_enqueue_style( 'paydock-widget-css', paydock_PLUGIN_URL . 'assets/css/frontend/widget.css', [], time() );
+		wp_enqueue_style( 'paydock-widget-css', PAYDOCK_PLUGIN_URL . 'assets/css/frontend/widget.css', [], time() );
 
 		wp_localize_script( 'paydock-form', 'PaydockAjax', [
 			'url'     => admin_url( 'admin-ajax.php' ),
 			'wpnonce' => wp_create_nonce( 'get_vault_token' )
 		] );
 		wp_localize_script( 'paydock-form', 'paydockWidgetSettings', [
-			'pluginUrlPrefix' => paydock_PLUGIN_URL
+			'pluginUrlPrefix' => PAYDOCK_PLUGIN_URL
 		] );
 
 		return '';
@@ -203,7 +203,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 		OrderService::updateStatus( $order->get_id(), $status );
 		if ( ! in_array( $status, [ 'wc-paydock-pending', 'wc-paydock-authorize' ] ) ) {
 			$order->payment_complete();
-			$order->update_meta_data( 'pb_directly_charged', 1 );
+			$order->update_meta_data( 'paydock_directly_charged', 1 );
 		}
 		$order->update_meta_data( 'paydock_charge_id', $chargeId );
 		$order->update_meta_data( OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(), 'Card' );

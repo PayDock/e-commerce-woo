@@ -1,6 +1,6 @@
 <?php
 
-namespace Paydock\Services\Validation;
+namespace PayDock\Services\Validation;
 
 use Exception;
 use Paydock\Abstracts\AbstractSettingService;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Paydock\Services\Checkout;
+namespace PayDock\Services\Checkout;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Paydock\Abstracts\AbstractWalletPaymentService;

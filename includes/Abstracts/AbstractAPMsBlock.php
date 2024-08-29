@@ -1,6 +1,6 @@
 <?php
 
-namespace Paydock\Abstracts;
+namespace PayDock\Abstracts;
 
 use Paydock\Enums\OtherPaymentMethods;
 use Paydock\Repositories\UserCustomerRepository;

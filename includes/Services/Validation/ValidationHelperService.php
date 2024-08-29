@@ -1,6 +1,6 @@
 <?php
 
-namespace Paydock\Services\Validation;
+namespace PayDock\Services\Validation;
 
 use Paydock\Enums\OtherPaymentMethods;
 

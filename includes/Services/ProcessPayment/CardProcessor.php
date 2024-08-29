@@ -1,6 +1,6 @@
 <?php
 
-namespace Paydock\Services\ProcessPayment;
+namespace PayDock\Services\ProcessPayment;
 
 use Exception;
 use Paydock\Enums\DSTypes;

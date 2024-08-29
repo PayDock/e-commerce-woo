@@ -1,6 +1,6 @@
 <?php
 
-namespace Paydock\Abstracts;
+namespace PayDock\Abstracts;
 
 abstract class AbstractSingleton {
 	abstract protected function __construct();

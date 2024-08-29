@@ -1,6 +1,6 @@
 <?php
 
-namespace Paydock\Contracts;
+namespace PayDock\Contracts;
 
 interface Repository {
 	public const INDEX_POSTFIX = 'index';

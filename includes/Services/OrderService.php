@@ -1,6 +1,6 @@
 <?php
 
-namespace Paydock\Services;
+namespace PayDock\Services;
 
 use Paydock\Hooks\ActivationHook;
 
@@ -63,7 +63,7 @@ class OrderService {
 		) {
 			wp_enqueue_style(
 				'hide-refund-button-styles',
-				paydock_PLUGIN_URL . 'assets/css/admin/hide-refund-button.css',
+				PAYDOCK_PLUGIN_URL . 'assets/css/admin/hide-refund-button.css',
 				[],
 				PAYDOCK_PLUGIN_VERSION
 			);
@@ -82,7 +82,7 @@ class OrderService {
 			$this->templateService->includeAdminHtml( 'paydock-capture-block', compact( 'order' ) );
 			wp_enqueue_script(
 				'paydock-capture-block',
-				paydock_PLUGIN_URL . 'assets/js/admin/paydock-capture-block.js',
+				PAYDOCK_PLUGIN_URL . 'assets/js/admin/paydock-capture-block.js',
 				[],
 				time(),
 				true
