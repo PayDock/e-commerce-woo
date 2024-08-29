@@ -11,11 +11,11 @@
  * Description: PowerBoard simplify how you manage your payments. Reduce costs, technical headaches & streamline compliance using PowerBoard's payment orchestration.
  * Author: PowerBoard
  * Author URI: https://www.commbank.com.au/business/payments/take-online-payments/powerboard.html#getting-started
- * Version: 3.1.3
+ * Version: 3.1.2
  * Requires at least: 6.4.2
  * Text Domain: power-board
  * Tested up to: 6.6
- * Stable tag: 3.1.3
+ * Stable tag: 3.1.2
  * License: GPL-3.0
  * License URI: http://www.gnu.org/licenses/gpl-3.0.html
  * WC requires at least: 6.4.2
@@ -39,7 +39,7 @@ if ( ! defined( 'POWER_BOARD_PLUGIN_URL' ) ) {
 }
 
 if ( ! defined( 'POWER_BOARD_PLUGIN_VERSION' ) ) {
-	define( 'POWER_BOARD_PLUGIN_VERSION', '3.1.3' );
+	define( 'POWER_BOARD_PLUGIN_VERSION', '3.1.2' );
 }
 
 require_once 'vendor/autoload.php';

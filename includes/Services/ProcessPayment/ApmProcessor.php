@@ -157,6 +157,7 @@ class ApmProcessor {
 		if ( ! $this->order ) {
 			return [];
 		}
+
 		if ( ! is_admin() ) {
 			WC()->cart->calculate_totals();
 		}
