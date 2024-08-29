@@ -15,6 +15,7 @@ class OrderService {
 	}
 
 	public static function updateStatus( $id, $custom_status, $status_note = null ) {
+
 		$order = wc_get_order( $id );
 
 		if ( is_object( $order ) ) {

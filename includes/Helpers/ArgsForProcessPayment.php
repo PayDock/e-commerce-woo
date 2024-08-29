@@ -7,7 +7,6 @@ use PowerBoard\Enums\FraudTypes;
 
 class ArgsForProcessPayment {
 	public static function prepare( array $args = [] ): array {
-
 		$args = array_change_key_case( $args, CASE_LOWER );
 
 		foreach ( $args as $key => $arg ) {
