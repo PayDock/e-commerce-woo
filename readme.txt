@@ -1,13 +1,13 @@
 === Paydock for WooCommerce ===
 
-Contributors: Paydock
-https://www.commbank.com.au/
+Contributors: paydock
+Donate link: https://paydock.com/
 Tags: paydock, woocommerce, payment, gateways, payment gateways
 Requires PHP: 7.4
 Requires at least: 6.0
-Tested up to: 6.6
-Stable tag: 3.1.3
-License: GPL-3.0
+Tested up to: 6.5.3
+Stable tag: 3.0.5
+License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
 Accept more payment methods with Paydock. Connect multiple payment gateways with a central interface to manage the transactions.
@@ -17,6 +17,8 @@ Accept more payment methods with Paydock. Connect multiple payment gateways with
 Accept more payment methods with Paydock. Connect multiple payment gateways with a central interface to manage the transactions.
 
 Use Paydock to add a payment gateway for credit cards, bank transfers, PayPal or even Buy now pay later gateways.
+
+For a full list of payment gateways Paydock is connected to, visit [Paydock] (https://paydock.com/features/api/ "PayDock gateways")
 
 == Installation ==
 
@@ -33,7 +35,7 @@ To install and configure the Paydock plugin, you need:
 
 1. **Download the Plugin**
    - Download the zip file with the plugin:
-     [Paydock WooCommerce Plugin] (https://github.com/PayDock/e-commerce-woo/blob/paydock/power-board_v3.1.3.zip)
+     [Paydock WooCommerce Plugin] (https://github.com/PayDock/e-commerce-woo/blob/main/paydock_v3.0.5.zip)
 
 2. **Install the Plugin**
    - Go to WordPress -> Plugins -> Add new Plugin -> Upload Plugin
@@ -44,11 +46,12 @@ To install and configure the Paydock plugin, you need:
    - Watch the video tutorial with step by step guidance: [Video Tutorial] (https://www.loom.com/share/e3baad357d4444c6967ef4b96377784b?sid=4f21b0af-43f2-4081-9ce7-76bf946fa535)
 
 5. **Obtain Admin Credentials**
+   - Press [here] (https://jetsoftpro.atlassian.net/wiki/spaces/Paydoc/pages/2607448306/Installing+plugin+the+first+time) to obtain your WordPress admin user credentials.
 
 To download the latest version of Paydock's WooCommerce plugin, you can manually trigger a build and download the generated artefact directly from GitHub:
 
 1. **Trigger the Build**
-   - Visit the Actions tab in Paydock's GitHub repository: [Paydock GitHub] (https://github.com/PayDock/e-commerce-woo/tree/paydock)
+   - Visit the Actions tab in Paydock's GitHub repository: [Paydock GitHub] (https://github.com/PayDock/e-commerce-woo)
    - Under Workflows, find the workflow named "Build and upload the Paydock plugin"
    - Click on "Run workflow"
    - Select the branch and click the green "Run workflow" button
@@ -57,38 +60,6 @@ To download the latest version of Paydock's WooCommerce plugin, you can manually
    - Once the workflow completes, click on the run that you triggered in the previous step
    - Scroll down to the Artifacts at the bottom of the page
    - Click on the link to download the ZIP file
-
-## Third Party API and libraries
-
-
-this plugin provides the ability to use payment methods through the Paydock API:
-* for sandbox https://api.preproduction.paydock.commbank.com.au/v1/
-* for live https://api.paydock.commbank.com.au/v1/
-
-We also use a Paydock widget to implement front-end features ([More here](https://developer.paydock.commbank.com.au/reference/paydock-widget))
-
-### Terms of Use and Privacy Policy
-
-You can find all relevant information here:
-
-- [Power Board Web site](https://www.commbank.com.au/business/payments/take-online-payments/paydock.html)
-- [Paydock Terms and Conditions to supplement the Merchant Agreement](https://www.commbank.com.au/content/dam/commbank-assets/business/merchants/2022-09/paydock-terms-and-conditions-july-2022.pdf)
-- [Group Privacy Statement](https://www.commbank.com.au/support/privacy.html?ei=CB-footer_privacy)
-- [Important documents](https://www.commbank.com.au/important-info.html?ei=CB-footer_ImportantDocs)
-- [Cookies policy](https://www.commbank.com.au/important-info/cookies.html?ei=CB-footer_cookies)
-
-This plugin transmits the payment and order information that the user provides on the checkout page to Power Board only
-when making a payment using one of the methods provided by this plugin.
-The following data is transferred for payment:
-* All payment details
-* Delivery data (if delivery is included in the price and paid for when placing the order)
-* Product details
-
-## Source
-
-This plugin contains compile and non compile js code, if you need customize something. Code that need compile for working with woocommerce block in `/resource` path.
-In root dir you can find `webpack.config.js` file, its default config for compile front-end js, but you can use it as a starting point to create your own configuration.
-Also we use helper code that not need compile what contained in assets path.
 
 == Screenshots ==
 
@@ -117,10 +88,10 @@ Also we use helper code that not need compile what contained in assets path.
 * New features, readme, changelog, etc.
 
 = 2.0.46 =
-* Patch, small fixes
+* Patch
 
 = 2.0.53 =
-* Min-max feature
+* Small fixes
 
 = 3.0.4 =
 * Fixes, updates, tweaks

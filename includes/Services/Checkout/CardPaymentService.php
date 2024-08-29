@@ -89,7 +89,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 
 		wp_localize_script( 'paydock-form', 'PaydockAjax', [
 			'url'     => admin_url( 'admin-ajax.php' ),
-			'wpnonce' => wp_create_nonce( 'get_vault_token' )
+			'wpnonce' => wp_create_nonce( 'paydock_get_vault_token' )
 		] );
 		wp_localize_script( 'paydock-form', 'paydockWidgetSettings', [
 			'pluginUrlPrefix' => PAYDOCK_PLUGIN_URL
@@ -308,9 +308,9 @@ class CardPaymentService extends WC_Payment_Gateway {
 	/**
 	 * Ajax function
 	 */
-	public function get_vault_token(): void {
+	public function paydock_get_vault_token(): void {
 		$wpNonce = ! empty( $_POST['_wpnonce'] ) ? sanitize_text_field( $_POST['_wpnonce'] ) : null;
-		if ( ! wp_verify_nonce( $wpNonce, 'get_vault_token' ) ) {
+		if ( ! wp_verify_nonce( $wpNonce, 'paydock_get_vault_token' ) ) {
 			die( 'Security check' );
 		}
 

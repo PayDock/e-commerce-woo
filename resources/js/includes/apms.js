@@ -298,6 +298,10 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
             ),
         )
     }
+    const Label = (props) => {
+        const {PaymentMethodLabel} = props.components;
+        return <PaymentMethodLabel text={label}/>;
+    };
 
     const PaydokApms = {
         name: paymentName,

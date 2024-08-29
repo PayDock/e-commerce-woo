@@ -1,6 +1,6 @@
 <?php
 
-namespace PayDock;
+namespace Paydock;
 
 use Paydock\Abstracts\AbstractSingleton;
 use Paydock\Hooks\ActivationHook;
@@ -11,7 +11,7 @@ use Paydock\Services\FiltersService;
 
 if ( ! class_exists( '\Paydock\PaydockPlugin' ) ) {
 	final class PaydockPlugin extends AbstractSingleton {
-		public const REPOSITORIES = [ 
+		public const REPOSITORIES = [
 			LogRepository::class,
 		];
 

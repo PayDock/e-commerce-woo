@@ -71,6 +71,7 @@ final class PaydockGatewayBlocks extends AbstractBlock {
 			'cardSaveCardChecked'    => false,
 			// Other
 			'supports'               => array_filter( $this->gateway->supports, [ $this->gateway, 'supports' ] ),
+			'total_limitation'       => $settingsService->getWidgetPaymentCardMinMax(),
 		] );
 	}
 }

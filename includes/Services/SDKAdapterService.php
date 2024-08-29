@@ -40,23 +40,23 @@ class SDKAdapterService {
 		}
 
 		$isAccessToken = CredentialsTypes::ACCESS_KEY()->name == $settings->get_option(
-			$settingsService->getOptionName( $settings->id, [ 
+			$settingsService->getOptionName( $settings->id, [
 				SettingGroups::CREDENTIALS()->name,
 				CredentialSettings::TYPE()->name,
 			] )
 		);
 
 		if ( $isAccessToken ) {
-			$secretKey = $settings->get_option( $settingsService->getOptionName( $settings->id, [ 
+			$secretKey = $settings->get_option( $settingsService->getOptionName( $settings->id, [
 				SettingGroups::CREDENTIALS()->name,
 				CredentialSettings::ACCESS_KEY()->name,
 			] ) );
 		} else {
-			$publicKey = $settings->get_option( $settingsService->getOptionName( $settings->id, [ 
+			$publicKey = $settings->get_option( $settingsService->getOptionName( $settings->id, [
 				SettingGroups::CREDENTIALS()->name,
 				CredentialSettings::PUBLIC_KEY()->name,
 			] ) );
-			$secretKey = $settings->get_option( $settingsService->getOptionName( $settings->id, [ 
+			$secretKey = $settings->get_option( $settingsService->getOptionName( $settings->id, [
 				SettingGroups::CREDENTIALS()->name,
 				CredentialSettings::SECRET_KEY()->name,
 			] ) );
@@ -70,7 +70,7 @@ class SDKAdapterService {
 			$settings = new SandboxConnectionSettingService();
 
 			return self::ENABLED_CONDITION !== $settings->get_option(
-				SettingsService::getInstance()->getOptionName( $settings->id, [ 
+				SettingsService::getInstance()->getOptionName( $settings->id, [
 					SettingGroups::CREDENTIALS()->name,
 					CredentialSettings::SANDBOX()->name,
 				] )
