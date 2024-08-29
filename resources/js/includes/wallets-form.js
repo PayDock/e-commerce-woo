@@ -191,7 +191,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
                     className: 'paydock-payment-method-label'
                 },
                 createElement("img", {
-                    src: `${window.paydockWidgetSettings.pluginUrlPrefix}assets/images/icons/${id}.png`,
+                    src: `/wp-content/plugins/paydock/assets/images/icons/${id}.png`,
                     alt: label,
                     className: `paydock-payment-method-label-icon ${id}`
                 }),

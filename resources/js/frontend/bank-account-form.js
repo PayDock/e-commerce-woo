@@ -120,7 +120,7 @@ const Content = (props) => {
             {class: 'logo-comm-bank'},
             createElement(
                 "img",
-                {src: `${window.paydockWidgetSettings.pluginUrlPrefix}assets/images/commBank_logo.png`}
+                {src: '/wp-content/plugins/paydock/assets/images/logo.png'}
             ),
         ),
         selectSavedBankAccountsComponent(labels.selectTokenLabel),

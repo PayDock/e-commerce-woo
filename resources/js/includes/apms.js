@@ -94,7 +94,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
 
 
             if (button) {
-                button.onFinishInsert('input[name="payment_source_apm_token"]', 'paydock_payment_source_token');
+                button.onFinishInsert('input[name="payment_source_apm_token"]', 'payment_source_token');
 
                 const shipping_address = {
                     first_name: shippingAddress.first_name,
@@ -268,7 +268,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
                 },
                 createElement('img',
                     {
-                        src: `${window.paydockWidgetSettings.pluginUrlPrefix}assets/images/${id}.png`,
+                        src: `/wp-content/plugins/paydock/assets/images/${id}.png`,
                     },
                 ),
             ),),
@@ -308,7 +308,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
                     className: 'paydock-payment-method-label'
                 },
                 createElement("img", {
-                    src: `${window.paydockWidgetSettings.pluginUrlPrefix}assets/images/icons/${id}.png`,
+                    src: `/wp-content/plugins/paydock/assets/images/icons/${id}.png`,
                     alt: label,
                     className: `paydock-payment-method-label-icon ${id}`
                 }),

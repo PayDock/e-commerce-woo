@@ -776,11 +776,7 @@ final class SettingsService {
 	}
 
 	public function getWidgetScriptUrl(): string {
-		if ( $this->isSandbox ) {
-			$sdkUrl = 'https://widget.preproduction.powerboard.commbank.com.au/sdk/{version}/widget.umd.js';
-		} else {
-			$sdkUrl = 'https://widget.powerboard.commbank.com.au/sdk/{version}/widget.umd.js';
-		}
+		$sdkUrl = 'https://widget.paydock.com/sdk/{version}/widget.umd.min.js';
 
 		return strtr( $sdkUrl, [ '{version}' => self::getInstance()->getVersion() ] );
 	}

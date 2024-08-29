@@ -278,13 +278,13 @@ const Paydok = {
                 className: 'paydock-payment-method-label'
             },
             createElement("img", {
-                src: `${window.paydockWidgetSettings.pluginUrlPrefix}assets/images/icons/card.png`,
+                src: `/wp-content/plugins/paydock/assets/images/icons/card.png`,
                 alt: label,
                 className: 'paydock-payment-method-label-icon card'
             }),
             "  " + label,
             createElement("img", {
-                src: `${window.paydockWidgetSettings.pluginUrlPrefix}assets/images/commBank_logo.png`,
+                src: `/wp-content/plugins/paydock/assets/images/logo.png`,
                 alt: label,
                 className: 'paydock-payment-method-label-logo'
             })

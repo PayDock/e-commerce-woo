@@ -2,7 +2,7 @@ import {getSetting} from '@woocommerce/settings';
 
 export default async () => {
     const data = {...getSetting('paydock_data', {})};
-    data.action = 'get_vault_token';
+    data.action = 'paydock_get_vault_token';
     data.type = 'standalone-3ds-token';
     data._wpnonce = PaydockAjax.wpnonce;
 
