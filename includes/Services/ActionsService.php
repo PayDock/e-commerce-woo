@@ -1,6 +1,6 @@
 <?php
 
-namespace PayDock\Services;
+namespace Paydock\Services;
 
 use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;

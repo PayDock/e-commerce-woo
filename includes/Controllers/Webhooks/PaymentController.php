@@ -1,6 +1,6 @@
 <?php
 
-namespace PayDock\Controllers\Webhooks;
+namespace Paydock\Controllers\Webhooks;
 
 use Paydock\Enums\ChargeStatuses;
 use Paydock\Enums\NotificationEvents;

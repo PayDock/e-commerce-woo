@@ -1,6 +1,6 @@
 <?php
 
-namespace PayDock\Abstracts;
+namespace Paydock\Abstracts;
 
 use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
 use Paydock\PaydockPlugin;

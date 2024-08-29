@@ -1,6 +1,6 @@
 <?php
 
-namespace PayDock\Abstracts;
+namespace Paydock\Abstracts;
 
 use Paydock\API\ConfigService;
 use WP_Error;

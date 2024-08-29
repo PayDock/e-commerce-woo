@@ -1,6 +1,6 @@
 <?php
 
-namespace PayDock\Services;
+namespace Paydock\Services;
 
 use Paydock\PaydockPlugin;
 

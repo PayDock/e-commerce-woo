@@ -1,6 +1,6 @@
 <?php
 
-namespace PayDock\Repositories;
+namespace Paydock\Repositories;
 
 use Paydock\Abstracts\AbstractRepository;
 use Paydock\Contracts\Repository;

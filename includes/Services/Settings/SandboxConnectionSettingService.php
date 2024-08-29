@@ -1,6 +1,6 @@
 <?php
 
-namespace PayDock\Services\Settings;
+namespace Paydock\Services\Settings;
 
 use Paydock\Enums\CredentialSettings;
 use Paydock\Enums\SettingGroups;

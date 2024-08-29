@@ -1,6 +1,6 @@
 <?php
 
-namespace PayDock\Abstracts;
+namespace Paydock\Abstracts;
 
 use Paydock\Services\SettingsService;
 use WC_Payment_Gateway;

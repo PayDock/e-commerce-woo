@@ -1,6 +1,6 @@
 <?php
 
-namespace PayDock\Hooks;
+namespace Paydock\Hooks;
 
 use Paydock\Contracts\Hook;
 use Paydock\Contracts\Repository;

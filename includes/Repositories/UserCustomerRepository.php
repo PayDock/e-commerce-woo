@@ -1,6 +1,6 @@
 <?php
 
-namespace PayDock\Repositories;
+namespace Paydock\Repositories;
 
 class UserCustomerRepository {
 	const USER_CUSTOMERS_KEY = 'paydock_card_customers';

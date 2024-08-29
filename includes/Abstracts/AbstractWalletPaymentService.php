@@ -1,6 +1,6 @@
 <?php
 
-namespace PayDock\Abstracts;
+namespace Paydock\Abstracts;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Paydock\Enums\OrderListColumns;

@@ -1,6 +1,6 @@
 <?php
 
-namespace PayDock\Services\Checkout;
+namespace Paydock\Services\Checkout;
 
 use Paydock\Abstracts\AbstractAPMsPaymentService;
 use Paydock\Enums\OtherPaymentMethods;

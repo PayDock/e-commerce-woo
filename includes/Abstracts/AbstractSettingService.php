@@ -1,6 +1,6 @@
 <?php
 
-namespace PayDock\Abstracts;
+namespace Paydock\Abstracts;
 
 use Paydock\Enums\SettingsTabs;
 use Paydock\PaydockPlugin;

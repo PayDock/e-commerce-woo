@@ -1,6 +1,6 @@
 <?php
 
-namespace PayDock\Services\ProcessPayment;
+namespace Paydock\Services\ProcessPayment;
 
 use Paydock\Enums\SaveCardOptions;
 use Paydock\Exceptions\LoggedException;

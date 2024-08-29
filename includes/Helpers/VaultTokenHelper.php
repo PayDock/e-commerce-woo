@@ -1,6 +1,6 @@
 <?php
 
-namespace PayDock\Helpers;
+namespace Paydock\Helpers;
 
 use Exception;
 use Paydock\Repositories\UserTokenRepository;

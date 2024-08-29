@@ -1,6 +1,6 @@
 <?php
 
-namespace PayDock\Services\Settings;
+namespace Paydock\Services\Settings;
 
 use Paydock\Abstracts\AbstractSettingService;
 use Paydock\Enums\APMsSettings;

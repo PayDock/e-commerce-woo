@@ -1,6 +1,6 @@
 <?php
 
-namespace PayDock\Controllers\Admin;
+namespace Paydock\Controllers\Admin;
 
 use Paydock\Enums\WalletPaymentMethods;
 use Paydock\Helpers\ShippingHelper;

@@ -1,6 +1,6 @@
 <?php
 
-namespace PayDock\Services\Checkout;
+namespace Paydock\Services\Checkout;
 
 use Paydock\Abstracts\AbstractWalletPaymentService;
 use Paydock\Enums\WalletPaymentMethods;

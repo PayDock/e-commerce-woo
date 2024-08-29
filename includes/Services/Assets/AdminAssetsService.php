@@ -1,6 +1,6 @@
 <?php
 
-namespace PayDock\Services\Assets;
+namespace Paydock\Services\Assets;
 
 use Paydock\PaydockPlugin;
 

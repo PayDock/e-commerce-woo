@@ -1,6 +1,6 @@
 <?php
 
-namespace PayDock\Helpers;
+namespace Paydock\Helpers;
 
 use Paydock\Enums\DSTypes;
 use Paydock\Enums\FraudTypes;

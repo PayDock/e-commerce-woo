@@ -1,6 +1,6 @@
 <?php
 
-namespace PayDock\API;
+namespace Paydock\API;
 
 use Paydock\Abstracts\AbstractApiService;
 
