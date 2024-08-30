@@ -61,7 +61,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
             localState.initData = response.data
             setTimeout(() => {
                 initButton(id, '#' + buttonId, localState.initData, settings.isSandbox, localState.reload)
-            }, 100)
+            }, 0);
         }).catch((e) => {
             localState.wasInit = false;
         })
@@ -85,11 +85,11 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
         } else if (validationSuccess && !localState.initData && !localState.wasInit) {
             afterpayCountriesError.hide()
             initWallet();
-        } else if (validationSuccess && localState.initData && !button) {
+        } else if (validationSuccess && localState.initData && !button.length) {
             afterpayCountriesError.hide()
             setTimeout(() => {
                 initButton(id, '#' + buttonId, localState.initData, settings.isSandbox)
-            }, 100)
+            }, 0);
         }
 
         useEffect(() => {

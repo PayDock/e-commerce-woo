@@ -24,9 +24,8 @@ class OrderService {
 
 			if ( $partial_refund === false ) {
 
-				$order->update_meta_data( ActivationHook::CUSTOM_STATUSES[ $custom_status ], $status_note );
+				$order->set_status( ActivationHook::CUSTOM_STATUSES[ $custom_status ], $status_note );
 				$order->update_meta_data( ActivationHook::CUSTOM_STATUS_META_KEY, $custom_status );
-                $order->set_status( ActivationHook::CUSTOM_STATUSES[ $custom_status ] );
 				$order->save();
 
 			} else {
@@ -46,6 +45,7 @@ class OrderService {
 		$orderStatus       = $order->get_status();
 		$capturedAmount    = $order->get_meta( 'capture_amount' );
 		$totalRefaund      = $order->get_total_refunded();
+		$orderTotal      = (float) $order->get_total(false);
 		if ( in_array( $orderStatus, [
 				'pending',
 				'failed',
@@ -59,7 +59,7 @@ class OrderService {
 				'pb-authorize',
 				'wc-pb-authorize'
 			] )
-		     || ( $order->get_total() == $totalRefaund )
+		     || ( $orderTotal == $totalRefaund )
 		     || ( $capturedAmount == $totalRefaund )
 		) {
 			wp_enqueue_style(
