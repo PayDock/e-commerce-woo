@@ -76,17 +76,13 @@ class CardPaymentService extends WC_Payment_Gateway {
 		wp_enqueue_script( 'paydock-form', PAYDOCK_PLUGIN_URL . 'assets/js/frontend/form.js', [], time(), true );
 		wp_localize_script( 'paydock-form', 'paydockCardWidgetSettings', [
 			'suportedCard' => 'Visa, Mastercard, Adex',
-		] );
-		wp_localize_script( 'paydock-form', 'paydockWidgetSettings', [
 			'pluginUrlPrefix' => PAYDOCK_PLUGIN_URL
 		] );
 		wp_enqueue_style( 'paydock-widget-css', PAYDOCK_PLUGIN_URL . 'assets/css/frontend/widget.css', [], time() );
 
 		wp_localize_script( 'paydock-form', 'PaydockAjax', [
 			'url'     => admin_url( 'admin-ajax.php' ),
-			'wpnonce' => wp_create_nonce( 'paydock_get_vault_token' )
-		] );
-		wp_localize_script( 'paydock-form', 'paydockWidgetSettings', [
+			'wpnonce' => wp_create_nonce( 'paydock_get_vault_token' ),
 			'pluginUrlPrefix' => PAYDOCK_PLUGIN_URL
 		] );
 
