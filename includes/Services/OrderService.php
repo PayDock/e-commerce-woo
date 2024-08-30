@@ -19,24 +19,10 @@ class OrderService {
 
 		if ( is_object( $order ) ) {
 
-			$partial_refund = strpos( $custom_status, 'paydock-p-refund' );
-
-			if ( $partial_refund === false ) {
-
 				$order->set_status( ActivationHook::CUSTOM_STATUSES[ $custom_status ], $status_note );
 				$order->update_meta_data( ActivationHook::CUSTOM_STATUS_META_KEY, $custom_status );
 				$order->save();
-
-			} else {
-
-				if ( ! empty( $status_note ) ) {
-					$order->add_order_note( $status_note );
-				}
-
-			}
-
 		}
-
 	}
 
 	public function iniPaydockOrderButtons( $order ) {
@@ -49,6 +35,8 @@ class OrderService {
 				'pending',
 				'failed',
 				'cancelled',
+				'refunded',
+				'on-hold',
 			] )
 		     || in_array( $orderCustomStatus, [
 				'paydock-requested',
@@ -90,6 +78,16 @@ class OrderService {
 			wp_localize_script( 'paydock-capture-block', 'paydockCaptureBlockSettings', [
 				'wpnonce' => esc_attr( wp_create_nonce( 'capture-or-cancel' ) ),
 			] );
+		}
+		if ( in_array( $orderStatus, [
+				'on-hold',
+			] ) ) {
+			wp_enqueue_style(
+				'hide-on-hold-buttons',
+				POWER_BOARD_PLUGIN_URL . 'assets/css/admin/hide-on-hold-buttons.css',
+				[],
+				POWER_BOARD_PLUGIN_VERSION
+			);
 		}
 	}
 

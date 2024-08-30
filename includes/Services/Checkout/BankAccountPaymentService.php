@@ -5,17 +5,12 @@ namespace Paydock\Services\Checkout;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Exception;
 use Paydock\Abstracts\AbstractPaymentService;
-use Paydock\Enums\DSTypes;
-use Paydock\Enums\FraudTypes;
 use Paydock\Enums\OrderListColumns;
-use Paydock\Enums\SaveCardOptions;
-use Paydock\Enums\TypeExchangeOTT;
 use Paydock\Exceptions\LoggedException;
 use Paydock\Repositories\LogRepository;
 use Paydock\Services\OrderService;
 use Paydock\Services\ProcessPayment\BankAccountProcessor;
 use Paydock\Services\SettingsService;
-use Paydock\Services\Validation\ValidationHelperService;
 
 class BankAccountPaymentService extends AbstractPaymentService {
 	public function __construct() {
@@ -52,7 +47,7 @@ class BankAccountPaymentService extends AbstractPaymentService {
 		$chargeId         = '';
 
 		try {
-			$processor = new BankAccountProcessor( $order, $this->getValidatedPostData() );
+			$processor = new BankAccountProcessor( $order, $_POST );
 
 			$response = $processor->run( $order_id );
 			$chargeId = ! empty( $response['resource']['data']['_id'] ) ? $response['resource']['data']['_id'] : '';
@@ -113,66 +108,5 @@ class BankAccountPaymentService extends AbstractPaymentService {
 
 	public function webhook() {
 
-	}
-
-	protected function getValidatedPostData(): array {
-		if ( ! ( new ValidationHelperService( $_POST['amount'] ) )->isFloat() ) {
-			wp_die( __( 'wrong "amount" format', 'paydock' ) );
-		}
-		if ( ! empty( $_POST['selectedtoken'] ) && ! ( new ValidationHelperService( $_POST['selectedtoken'] ) )->isUUID() ) {
-			wp_die( __( 'wrong "selected token" format', 'paydock' ) );
-		}
-		if ( ! empty( $_POST['paymentsourcetoken'] ) && ! ( new ValidationHelperService( $_POST['paymentsourcetoken'] ) )->isUUID() ) {
-			wp_die( __( 'wrong "payment source token" format', 'paydock' ) );
-		}
-		if ( ! empty( $_POST['gatewayid'] ) && ! ( new ValidationHelperService( $_POST['gatewayid'] ) )->isServiceId() ) {
-			wp_die( __( 'wrong "gateway" ID', 'paydock' ) );
-		}
-		if ( ! empty( $_POST['card3dsserviceid'] ) && ! ( new ValidationHelperService( $_POST['gatewcard3dsserviceidayid'] ) )->isServiceId() ) {
-			wp_die( __( 'wrong "3ds service" ID', 'paydock' ) );
-		}
-		if ( ! empty( $_POST['charge3dsid'] ) && ! ( new ValidationHelperService( $_POST['charge3dsid'] ) )->isUUID() ) {
-			wp_die( __( 'wrong "charge 3ds id" format', 'paydock' ) );
-		}
-		if ( ! empty( $_POST['cardfraudserviceid'] ) && ! ( new ValidationHelperService( $_POST['cardfraudserviceid'] ) )->isServiceId() ) {
-			wp_die( __( 'wrong "fraud service" ID', 'paydock' ) );
-		}
-
-		$ds             = sanitize_text_field( $_POST['card3ds'] );
-		$dsFlow         = sanitize_text_field( $_POST['card3dsflow'] );
-		$fraud          = sanitize_text_field( $_POST['card3dsfraud'] );
-		$saveCardOption = sanitize_text_field( $_POST['savecardoptions'] );
-
-		return [
-			'amount'              => (float) $_POST['amount'],
-			'selectedtoken'       => sanitize_text_field( $_POST['selectedtoken'] ),
-			'paymentsourcetoken'  => sanitize_text_field( $_POST['paymentsourcetoken'] ),
-			'gatewayid'           => sanitize_text_field( $_POST['gatewayid'] ),
-			'card3ds'             => in_array( $ds, [
-				DSTypes::IN_BUILD()->name,
-				DSTypes::STANDALONE()->name,
-				DSTypes::DISABLE()->name,
-			] ) ? $ds : DSTypes::DISABLE()->name,
-			'card3dsserviceid'    => sanitize_text_field( $_POST['card3dsserviceid'] ),
-			'card3dsflow'         => in_array( $dsFlow, [
-				TypeExchangeOTT::PERMANENT_VAULT()->name,
-				TypeExchangeOTT::SESSION_VAULT()->name,
-			] ) ? $dsFlow : TypeExchangeOTT::SESSION_VAULT()->name,
-			'charge3dsid'         => sanitize_text_field( $_POST['charge3dsid'] ),
-			'cardfraud'           => in_array( $fraud, [
-				FraudTypes::DISABLE()->name,
-				FraudTypes::STANDALONE()->name,
-				FraudTypes::IN_BUILD()->name,
-			] ),
-			'cardfraudserviceid'  => sanitize_text_field( $_POST['cardfraudserviceid'] ),
-			'carddirectcharge'    => (int) $_POST['cardfraudcharge'] > 0,
-			'cardsavecard'        => (int) $_POST['cardfraudcharge'] > 0,
-			'cardsavecardoption'  => in_array( $saveCardOption, [
-				SaveCardOptions::VAULT()->name,
-				SaveCardOptions::WITH_GATEWAY()->name,
-				SaveCardOptions::WITHOUT_GATEWAY()->name,
-			] ) ? $saveCardOption : SaveCardOptions::VAULT()->name,
-			'cardsavecardchecked' => (int) $_POST['cardfraudcharge'] > 0,
-		];
 	}
 }

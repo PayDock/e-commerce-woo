@@ -72,6 +72,10 @@ export default async (forcePermanentVault = false, newAmount = null) => {
         .preAuth(preAuthData);
 
     if (typeof preAuthResp._3ds.token === "undefined") {
+        window.widgetPowerBoard.reload();
+        const paymentSourceToken = document.querySelector('[name="payment_source_token"]');
+        paymentSourceToken.value = null;
+        window.widgetReloaded = true
         return false;
     }
 
@@ -87,14 +91,14 @@ export default async (forcePermanentVault = false, newAmount = null) => {
     canvas.on('chargeAuthSuccess', (chargeAuthEvent) => {
         result = chargeAuthEvent.charge_3ds_id
     })
-    canvas.on('additionalDataCollectReject', (chargeAuthEvent) => {
-        result = chargeAuthEvent.charge_3ds_id
+    canvas.on('additionalDataCollectReject', (chargeAuthSuccessEvent) => {
+        result = 'error';
     })
-    canvas.on('chargeAuthReject', function (chargeAuthEvent) {
-        if (chargeAuthEvent.status === 'not_authenticated') {
+    canvas.on('chargeAuthReject', function (data) {
+        if (data.status === 'not_authenticated') {
             showCardWidget();
         }
-        result = chargeAuthEvent.charge_3ds_id
+        result = data.charge_3ds_id
     });
 
     for (let second = 1; second <= 10000; second++) {

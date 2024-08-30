@@ -4,19 +4,14 @@ namespace Paydock\Services\Checkout;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Exception;
-use Paydock\Enums\DSTypes;
-use Paydock\Enums\FraudTypes;
 use Paydock\Enums\OrderListColumns;
-use Paydock\Enums\SaveCardOptions;
 use Paydock\Enums\SettingsTabs;
-use Paydock\Enums\TypeExchangeOTT;
 use Paydock\Enums\WidgetSettings;
 use Paydock\Repositories\LogRepository;
 use Paydock\Repositories\UserTokenRepository;
 use Paydock\Services\OrderService;
 use Paydock\Services\ProcessPayment\CardProcessor;
 use Paydock\Services\SettingsService;
-use Paydock\Services\Validation\ValidationHelperService;
 use WC_Payment_Gateway;
 
 class CardPaymentService extends WC_Payment_Gateway {
@@ -74,7 +69,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 	}
 
 	public function payment_scripts() {
-		if ( ! is_checkout() ) {
+        if ( ! is_checkout() ) {
 			return '';
 		}
 
@@ -140,11 +135,11 @@ class CardPaymentService extends WC_Payment_Gateway {
 			$cardProcessor = new CardProcessor( array_merge( [
 				'amount'      => (float) $order->get_total(),
 				'description' => $description,
-			], $this->getValidatedPostData() ) );
+			], $_POST ) );
 
 			$response = $cardProcessor->run( $order );
 
-			if ( ! empty( $response['error'] ) && stripos( $response['error']['message'], '3d' ) === false ) {
+			if ( ! empty( $response['error'] ) ) {
 				throw new Exception( esc_html( __( 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later. <input id="widget_error" hidden type="text"/>', 'paydock' ) ) );
 			}
 
@@ -224,87 +219,6 @@ class CardPaymentService extends WC_Payment_Gateway {
 		];
 	}
 
-	protected function getValidatedPostData(): array {
-		$postData = array_change_key_case( $_POST, CASE_LOWER );
-		if ( ! ( new ValidationHelperService( $postData['amount'] ) )->isFloat() ) {
-			wp_die( __( 'wrong "amount" format', 'paydock' ) );
-		}
-		if ( ! empty( $postData['selectedtoken'] ) &&
-		     ! ( new ValidationHelperService( $postData['selectedtoken'] ) )->isUUID() ) {
-			wp_die( __( 'wrong "selected token" format', 'paydock' ) );
-		}
-		if ( ! empty( $postData['paymentsourcetoken'] ) &&
-		     ! ( new ValidationHelperService( $postData['paymentsourcetoken'] ) )->isUUID() ) {
-			wp_die( __( 'wrong "payment source token" format', 'paydock' ) );
-		}
-		if ( ! empty( $postData['gatewayid'] ) &&
-		     ! ( new ValidationHelperService( $postData['gatewayid'] ) )->isServiceId() ) {
-			wp_die( __( 'wrong "gateway" ID', 'paydock' ) );
-		}
-		if ( ! empty( $postData['card3dsserviceid'] ) &&
-		     ! ( new ValidationHelperService( $postData['card3dsserviceid'] ) )->isServiceId() ) {
-			wp_die( __( 'wrong "3ds service" ID', 'paydock' ) );
-		}
-		if ( ! empty( $postData['charge3dsid'] ) &&
-		     ! ( new ValidationHelperService( $postData['charge3dsid'] ) )->isUUID() ) {
-			wp_die( __( 'wrong "charge 3ds id" format', 'paydock' ) );
-		}
-		if ( ! empty( $postData['cardfraudserviceid'] ) &&
-		     ! ( new ValidationHelperService( $postData['cardfraudserviceid'] ) )->isServiceId() ) {
-			wp_die( __( 'wrong "fraud service" ID', 'paydock' ) );
-		}
-
-		$ds             = ! empty( $postData['card3ds'] ) ? sanitize_text_field( $postData['card3ds'] ) : '';
-		$dsFlow         = ! empty( $postData['card3dsflow'] ) ? sanitize_text_field( $postData['card3dsflow'] ) : '';
-		$fraud          = ! empty( $postData['cardfraud'] ) ? sanitize_text_field( $postData['cardfraud'] ) : '';
-		$saveCardOption = ! empty( $postData['cardsavecardoption'] ) ? sanitize_text_field( $postData['cardsavecardoption'] ) : '';
-
-		return [
-			'amount'              => (float) $postData['amount'],
-			'selectedtoken'       => sanitize_text_field( $postData['selectedtoken'] ),
-			'paymentsourcetoken'  => sanitize_text_field( $postData['paymentsourcetoken'] ),
-			'gatewayid'           => sanitize_text_field( $postData['gatewayid'] ),
-			'card3ds'             => in_array( $ds, [
-				DSTypes::IN_BUILD()->name,
-				DSTypes::STANDALONE()->name,
-				DSTypes::DISABLE()->name,
-			] ) ? $ds : DSTypes::DISABLE()->name,
-			'card3dsserviceid'    => sanitize_text_field( $postData['card3dsserviceid'] ),
-			'card3dsflow'         => in_array( $dsFlow, [
-				TypeExchangeOTT::PERMANENT_VAULT()->name,
-				TypeExchangeOTT::SESSION_VAULT()->name,
-			] ) ? $dsFlow : TypeExchangeOTT::SESSION_VAULT()->name,
-			'charge3dsid'         => sanitize_text_field( $postData['charge3dsid'] ),
-			'cardfraud'           => in_array( $fraud, [
-				FraudTypes::DISABLE()->name,
-				FraudTypes::STANDALONE()->name,
-				FraudTypes::IN_BUILD()->name,
-			] ) ? sanitize_text_field( $postData['cardfraud'] ) : FraudTypes::DISABLE()->name,
-			'cardfraudserviceid'  => sanitize_text_field( $postData['cardfraudserviceid'] ),
-			'carddirectcharge'    => in_array( sanitize_text_field( $postData['carddirectcharge'] ), [
-				'1',
-				'true'
-			], true ) ? 'true' : 'false',
-			'cardsavecard'        => in_array( sanitize_text_field( $postData['cardsavecard'] ), [
-				'1',
-				'true'
-			], true ) ? 'true' : 'false',
-			'cardsavecardoption'  => in_array( $saveCardOption, [
-				SaveCardOptions::VAULT()->name,
-				SaveCardOptions::WITH_GATEWAY()->name,
-				SaveCardOptions::WITHOUT_GATEWAY()->name,
-			] ) ? $saveCardOption : SaveCardOptions::VAULT()->name,
-			'cardsavecardchecked' => in_array( sanitize_text_field( $postData['cardsavecardchecked'] ), [
-				'1',
-				'true'
-			], true ) ? 'true' : 'false',
-			'first_name'          => ! empty( $postData['first_name'] ) ? sanitize_text_field( $postData['first_name'] ) : '',
-			'last_name'           => ! empty( $postData['last_name'] ) ? sanitize_text_field( $postData['last_name'] ) : '',
-			'phone'               => ! empty( $postData['phone'] ) ? sanitize_text_field( $postData['phone'] ) : '',
-			'email'               => ! empty( $postData['email'] ) ? sanitize_text_field( $postData['email'] ) : '',
-		];
-	}
-
 	/**
 	 * Ajax function
 	 */
@@ -317,7 +231,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 		if ( ! empty( $_SERVER['HTTP_X_REQUESTED_WITH'] ) && strtolower(
 			                                                     sanitize_text_field( $_SERVER['HTTP_X_REQUESTED_WITH'] )
 		                                                     ) == 'xmlhttprequest' ) {
-			$cardProcessor = new CardProcessor( $this->getValidatedPostData() );
+			$cardProcessor = new CardProcessor( $_POST );
 			$type          = ! empty( $_POST['type'] ) ? sanitize_text_field( $_POST['type'] ) : null;
 			try {
 				switch ( $type ) {

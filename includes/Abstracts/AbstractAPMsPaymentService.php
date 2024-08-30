@@ -11,7 +11,6 @@ use Paydock\Services\OrderService;
 use Paydock\Services\ProcessPayment\ApmProcessor;
 use Paydock\Services\SDKAdapterService;
 use Paydock\Services\SettingsService;
-use Paydock\Services\Validation\ValidationHelperService;
 
 abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 	/**
@@ -55,7 +54,7 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 		$chargeId         = '';
 
 		try {
-			$processor = new ApmProcessor( $this->getValidatedData() );
+			$processor = new ApmProcessor( $_POST );
 
 			$response = $processor->run( $order );
 
@@ -113,40 +112,6 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 		return [
 			'result'   => 'success',
 			'redirect' => $this->get_return_url( $order ),
-		];
-	}
-
-	public function getValidatedData() {
-		$postData = array_change_key_case( $_POST, CASE_LOWER );
-		if ( ! ( new ValidationHelperService( $postData['amount'] ) )->isFloat() ) {
-			wp_die( __( 'wrong "amount" format', 'paydock' ) );
-		}
-		if ( ! empty( sanitize_text_field( $postData['gatewayid'] ) ) &&
-		     ! ( new ValidationHelperService( $postData['gatewayid'] ) )->isServiceId() ) {
-			wp_die( __( 'wrong "gateway" ID', 'paydock' ) );
-		}
-		if ( ! empty( $postData['paymentsourcetoken'] ) &&
-		     ! ( new ValidationHelperService( $postData['paymentsourcetoken'] ) )->isUUID() ) {
-			wp_die( __( 'wrong "payment source token" format', 'paydock' ) );
-		}
-		if ( ! empty( $postData['fraudserviceid'] ) &&
-		     ! ( new ValidationHelperService( $postData['fraudserviceid'] ) )->isServiceId() ) {
-			wp_die( __( 'wrong "fraud service" ID', 'paydock' ) );
-		}
-		if ( ! empty( $postData['gatewaytype'] ) &&
-		     ! ( new ValidationHelperService( $postData['gatewaytype'] ) )->isValidAPMId() ) {
-			wp_die( __( 'wrong "wrong payment method" ID', 'paydock' ) );
-		}
-
-
-		return [
-			'amount'             => ! empty ( $postData['amount'] ) ? (float) $postData['amount'] : 0,
-			'gatewayid'          => sanitize_text_field( $postData['gatewayid'] ),
-			'paymentsourcetoken' => $postData['paymentsourcetoken'],
-			'directcharge'       => (int) $postData['directcharge'] > 0,
-			'fraud'              => (int) $postData['fraud'] > 0,
-			'fraudserviceid'     => sanitize_text_field( $postData['fraudserviceid'] ),
-			'gatewaytype'        => sanitize_text_field( $postData['gatewaytype'] ),
 		];
 	}
 

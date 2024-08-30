@@ -5,52 +5,36 @@ namespace Paydock\Services\Assets;
 use Paydock\PaydockPlugin;
 
 class AdminAssetsService {
+	private const SCRIPTS = [
+		'tabs',
+		'connections',
+		'card-select',
+		'deactivation-confirmation',
+		// 'admin-helpers'
+	];
+	private const STYLES = [
+		'card-select',
+	];
+
 	private const PREFIX = 'admin';
+
 	private const SCRIPT_PREFIX = 'script';
 	private const STYLE_PREFIX = 'style';
+
 	private const URL_SCRIPT_PREFIX = 'assets/js/admin/';
 	private const URL_SCRIPT_POSTFIX = '.js';
+
 	private const URL_STYLE_PREFIX = 'assets/css/admin/';
 	private const URL_STYLE_POSTFIX = '.css';
-	private array $scripts = [];
-	private array $styles = [];
 
 	public function __construct() {
-		$this->setActualScripts();
-		$this->setActualStyles();
-
 		$this->registerScripts();
 		$this->loadScripts();
-
 		$this->addStyles();
 	}
 
-	public function setActualScripts(): void {
-		$section = filter_input( INPUT_GET, 'section', FILTER_SANITIZE_STRING );
-		$page    = filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRING );
-
-		if ( isset( $_SERVER['SCRIPT_NAME'] ) && ( $_SERVER['SCRIPT_NAME'] == '/wp-admin/plugins.php' ) ) {
-			$this->scripts[] = 'deactivation-confirmation';
-		} elseif ( 'wc-orders' === $page ) {
-			$this->scripts[] = 'admin-helpers';
-		} elseif ( $section && ( stripos( $section, 'paydock' ) !== false ) ) {
-			$this->scripts = [
-				'tabs',
-				'connections',
-				'card-select'
-			];
-		}
-	}
-
-	public function setActualStyles(): void {
-		$section = filter_input( INPUT_GET, 'section', FILTER_SANITIZE_STRING );
-		if ( $section && ( stripos( $section, 'paydock' ) !== false ) ) {
-			$this->styles = [ 'card-select' ];
-		}
-	}
-
 	public function registerScripts(): void {
-		foreach ( $this->scripts as $script ) {
+		foreach ( self::SCRIPTS as $script ) {
 			wp_register_script(
 				$this->getScriptName( $script ),
 				plugins_url( $this->getScriptPath( $script ), PAYDOCK_PLUGIN_FILE ),
@@ -70,7 +54,7 @@ class AdminAssetsService {
 	}
 
 	public function loadScripts(): void {
-		foreach ( $this->scripts as $script ) {
+		foreach ( self::SCRIPTS as $script ) {
 			$scriptName = $this->getScriptName( $script );
 			wp_enqueue_script( $this->getScriptName( $script ), '', [], PAYDOCK_PLUGIN_VERSION, true );
 			wp_localize_script( $scriptName, 'paydockWidgetSettings', [
@@ -80,7 +64,7 @@ class AdminAssetsService {
 	}
 
 	private function addStyles(): void {
-		foreach ( $this->styles as $style ) {
+		foreach ( self::STYLES as $style ) {
 			wp_enqueue_style(
 				$this->getStyleName( $style ),
 				plugins_url( $this->getStylePath( $style ), PAYDOCK_PLUGIN_FILE ),
