@@ -161,7 +161,7 @@ class PaymentController {
 			$amount = $args['amount'];
 		}
 
-		$captureAmount = $order->get_meta( 'capture_amount' );
+		$captureAmount = (float) $order->get_meta( 'capture_amount' );
 
 		$totalRefunded = (float) $order->get_total_refunded();
 
@@ -179,9 +179,17 @@ class PaymentController {
 			$totalRefunded = $captureAmount;
 		}
 
+		if ($_POST['action'] === 'edit_order') {
+			$amountToRefund =  $captureAmount <= $amount ? ($captureAmount * 100 - $totalRefunded * 100) / 100 : $amount;
+			$refund->set_amount($amountToRefund);
+			$refund->set_total( $amountToRefund * -1 );
+		} else {
+			$amountToRefund = $amount;
+		}
+
 		$result = SDKAdapterService::getInstance()->refunds( [
 			'charge_id' => $powerBoardChargeId,
-			'amount'    => $amount,
+			'amount'    => $amountToRefund,
 		] );
 		if ( ! empty( $result['resource']['data']['status'] ) && in_array(
 				$result['resource']['data']['status'],
@@ -196,7 +204,7 @@ class PaymentController {
 
 			$order->update_meta_data( 'power_board_refunded_status', $status );
 			$status_note = __( 'The refund', 'woocommerce' )
-			               . " {$amount} "
+			               . " {$amountToRefund} "
 			               . __( 'has been successfully.', 'woocommerce' );
 
 			$order->payment_complete();

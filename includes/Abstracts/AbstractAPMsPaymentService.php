@@ -88,7 +88,10 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 			$status      = $isCompleted ? 'wc-pb-paid' : 'wc-pb-pending';
 		}
 		OrderService::updateStatus( $order_id, $status );
-		$order->payment_complete();
+		if ( ! in_array( $status, [ 'wc-pb-authorize' ] ) ) {
+			$order->payment_complete();
+			$order->update_meta_data( 'pb_directly_charged', 1 );
+		}
 		$order->update_meta_data( 'power_board_charge_id', $chargeId );
 		$order->save();
 
