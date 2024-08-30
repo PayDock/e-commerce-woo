@@ -4,6 +4,10 @@
 <span class="power-board-order-actions">
     <?php
         $pb_charge_meta = $order->get_meta( 'pb_directly_charged' );
+        $partiallyRefunded = in_array( $order->get_meta('power_board_refunded_status'), [
+          'wc-pb-p-refund',
+          'pb-p-refund'
+        ] );
         $order_directly_charged = ! empty( $pb_charge_meta ) ? $pb_charge_meta : false;
 
         if ( $order_directly_charged == false ) :
@@ -13,11 +17,13 @@
                 class="button">
 			Capture charge
 		</button>
-    <button type="button"
-              onclick="handlePowerBoardPaymentCapture(<?php echo esc_attr( $order->get_id() ); ?>, 'power-board-cancel-authorised')"
-              class="button">
-      Cancel charge
-    </button>
+    <?php if ( !$partiallyRefunded ) :?>
+          <button type="button"
+                  onclick="handlePowerBoardPaymentCapture(<?php echo esc_attr( $order->get_id() ); ?>, 'power-board-cancel-authorised')"
+                  class="button">
+          Cancel charge
+      </button>
+    <?php endif; ?>
   <?php endif; ?>
 </span>
 <div class="wc-order-data-row wc-order-partial-paid-items wc-order-data-row-toggle" style="display: none;">
