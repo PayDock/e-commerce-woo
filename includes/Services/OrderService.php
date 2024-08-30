@@ -15,29 +15,14 @@ class OrderService {
 	}
 
 	public static function updateStatus( $id, $custom_status, $status_note = null ) {
-
 		$order = wc_get_order( $id );
 
 		if ( is_object( $order ) ) {
 
-			$partial_refund = strpos( $custom_status, 'pb-p-refund' );
-
-			if ( $partial_refund === false ) {
-
 				$order->set_status( ActivationHook::CUSTOM_STATUSES[ $custom_status ], $status_note );
 				$order->update_meta_data( ActivationHook::CUSTOM_STATUS_META_KEY, $custom_status );
 				$order->save();
-
-			} else {
-
-				if ( ! empty( $status_note ) ) {
-					$order->add_order_note( $status_note );
-				}
-
-			}
-
 		}
-
 	}
 
 	public function iniPowerBoardOrderButtons( $order ) {
