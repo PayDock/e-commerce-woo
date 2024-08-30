@@ -69,7 +69,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 	}
 
 	public function payment_scripts() {
-        if ( ! is_checkout() || ! $this->is_available() ) {
+        if ( ! is_checkout() ) {
 			return '';
 		}
 
