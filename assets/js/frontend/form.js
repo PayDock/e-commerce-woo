@@ -8,12 +8,12 @@ setTimeout(() => jQuery(function ($) {
             baseCheckboxIdName: 'radio-control-wc-payment-method-options',
             errorMessageClassName: 'wc-block-components-validation-error',
             paymentOptionsNames: [
-                'power_board_gateway',
-                'power_board_google-pay_wallets_gateway',
-                'power_board_afterpay_wallets_gateway',
-                'power_board_pay-pal_wallets_gateway',
-                'power_board_afterpay_a_p_m_s_gateway',
-                'power_board_zip_a_p_m_s_gateway',
+                'paydock_gateway',
+                'paydock_google-pay_wallets_gateway',
+                'paydock_afterpay_wallets_gateway',
+                'paydock_pay-pal_wallets_gateway',
+                'paydock_afterpay_a_p_m_s_gateway',
+                'paydock_zip_a_p_m_s_gateway',
             ],
             phonePattern: /^\+[1-9]{1}[0-9]{3,14}$/,
             errorMessageHtml: `<div class="wc-block-components-validation-error" role="alert"><p>Please enter your phone number in international format, starting with "+"</p></div>`,
@@ -117,7 +117,7 @@ setTimeout(() => jQuery(function ($) {
         },
         lastWcFormValidation: false,
         paydockCCFormValidation() {
-            const { tokens, selectedToken } = window.wc.wcSettings.getSetting('power_board_data', {});
+            const { tokens, selectedToken } = window.wc.wcSettings.getSetting('paydock_data', {});
             return (Array.isArray(tokens) && tokens.length > 0 && selectedToken !== "") || window.widgetPaydock.isValidForm();
         },
         wcFormValidation() {
@@ -177,13 +177,13 @@ setTimeout(() => jQuery(function ($) {
 
     window.paydockValidation = paydockValidation;
 
-    const idPaydockWidgetCard = 'radio-control-wc-payment-method-options-power_board_gateway';
-    const idPaydockWidgetBankAccount = 'radio-control-wc-payment-method-options-power_board_bank_account_gateway';
+    const idPaydockWidgetCard = 'radio-control-wc-payment-method-options-paydock_gateway';
+    const idPaydockWidgetBankAccount = 'radio-control-wc-payment-method-options-paydock_bank_account_gateway';
 
     const searchParams = new URLSearchParams(window.location.search);
     function initPaydockWidgetBankAccount() {
         lastInit = idPaydockWidgetBankAccount;
-        const paydockBankAccountSettings = window.wc.wcSettings.getSetting('power_board_bank_account_block_data', {});
+        const paydockBankAccountSettings = window.wc.wcSettings.getSetting('paydock_bank_account_block_data', {});
 
         if (!paydockBankAccountSettings.isActive) {
             return;
@@ -198,11 +198,11 @@ setTimeout(() => jQuery(function ($) {
 
         const gateway = 'not_configured';
 
-        const bankAccount = new cba.Configuration(gateway, 'bank_account');
+        const bankAccount = new paydock.Configuration(gateway, 'bank_account');
         bankAccount.setFormFields(['account_routing']);
 
         paydockValidation.createWidgetDiv('paydockWidgetBankAccount');
-        const widget = new cba.HtmlWidget('#paydockWidgetBankAccount', paydockBankAccountSettings.publicKey, 'not_configured', 'bank_account', 'payment_source');
+        const widget = new paydock.HtmlWidget('#paydockWidgetBankAccount', paydockBankAccountSettings.publicKey, 'not_configured', 'bank_account', 'payment_source');
         widget.setFormFields(['account_routing']);
 
         window.widgetPaydockBankAccount = widget;
@@ -223,7 +223,7 @@ setTimeout(() => jQuery(function ($) {
         widget.interceptSubmitForm('#widget');
         widget.load();
 
-        widget.on(window.cba.EVENT.AFTER_LOAD, () => {
+        widget.on(window.paydock.EVENT.AFTER_LOAD, () => {
             if ($('#paydockWidgetBankAccount_wrapper').length > 0) {
                 paydockValidation.passWidgetToWrapper('paydockWidgetBankAccount')
             }
@@ -241,7 +241,7 @@ setTimeout(() => jQuery(function ($) {
             return;
         }
 
-        const paydockCardSettings = window.wc.wcSettings.getSetting('power_board_data', {});
+        const paydockCardSettings = window.wc.wcSettings.getSetting('paydock_data', {});
         paydockValidation.createWidgetDiv('paydockWidgetCard');
 
         let isPermanent = paydockCardSettings.hasOwnProperty('card3DSFlow')
@@ -252,7 +252,7 @@ setTimeout(() => jQuery(function ($) {
 
         let gatewayId = isPermanent ? paydockCardSettings.gatewayId : 'not_configured';
 
-        widget = new cba.HtmlWidget('#paydockWidgetCard', paydockCardSettings.publicKey, gatewayId, "card", "card_payment_source_with_cvv");
+        widget = new paydock.HtmlWidget('#paydockWidgetCard', paydockCardSettings.publicKey, gatewayId, "card", "card_payment_source_with_cvv");
         widget.setFormPlaceholders({
             card_name: 'Card holders name *',
             card_number: 'Credit card number *',
@@ -291,21 +291,21 @@ setTimeout(() => jQuery(function ($) {
         }
 
         widget.setFormFields(["card_name*","card_number*", "card_ccv*"]);
-        widget.setEnv(paydockCardSettings.isSandbox ? 'preproduction_cba' : 'production_cba');
+        widget.setEnv(paydockCardSettings.isSandbox ? 'sandbox' : 'production');
         widget.onFinishInsert('input[name="payment_source_token"]', 'payment_source');
         widget.interceptSubmitForm('#widget');
         widget.hideElements(['submit_button']);
         widget.load();
 
         let performAfterLoadActions = true
-        widget.on(window.cba.EVENT.AFTER_LOAD, () => {
+        widget.on(window.paydock.EVENT.AFTER_LOAD, () => {
             if (performAfterLoadActions && $('#paydockWidgetCard_wrapper').length > 0) {
                 paydockValidation.passWidgetToWrapper('paydockWidgetCard');
                 performAfterLoadActions = false;
             }
         })
 
-        widget.on(window.cba.EVENT.FINISH, () => {
+        widget.on(window.paydock.EVENT.FINISH, () => {
             let counter = 0;
             const widgetErrorInterval = setInterval(() => {
                 const errorInput = document.querySelectorAll("#widget_error")[0]
@@ -333,20 +333,20 @@ setTimeout(() => jQuery(function ($) {
         $('.wc-block-components-radio-control__input').on('change', (event) => {
             const $orderButton = $('.wc-block-components-checkout-place-order-button');
             switch (event.target.value) {
-                case 'power_board_gateway':
+                case 'paydock_gateway':
                     initPaydockWidgetCard();
                     $orderButton.show();
                     break;
-                case 'power_board_bank_account_gateway':
+                case 'paydock_bank_account_gateway':
                     initPaydockWidgetBankAccount();
                     $orderButton.show();
                     break;
-                case 'power_board_google-pay_wallets_gateway':
-                case 'power_board_apple-pay_wallets_gateway':
-                case 'power_board_afterpay-pay_wallets_gateway':
-                case 'power_board_pay-pal_wallets_gateway':
-                case 'power_board_afterpay_a_p_m_s_gateway':
-                case 'power_board_zip_a_p_m_s_gateway':
+                case 'paydock_google-pay_wallets_gateway':
+                case 'paydock_apple-pay_wallets_gateway':
+                case 'paydock_afterpay-pay_wallets_gateway':
+                case 'paydock_pay-pal_wallets_gateway':
+                case 'paydock_afterpay_a_p_m_s_gateway':
+                case 'paydock_zip_a_p_m_s_gateway':
                     $orderButton.hide();
                     break;
                 default:
@@ -360,11 +360,11 @@ setTimeout(() => jQuery(function ($) {
 
     setInterval(() => {
         try {
-            const paydockAfterpayWalletsSettings = window.wc?.wcSettings?.getSetting('power_board_afterpay_wallet_block_data', {});
+            const paydockAfterpayWalletsSettings = window.wc?.wcSettings?.getSetting('paydock_afterpay_wallet_block_data', {});
             const $radioWidgetCard = $('#' + idPaydockWidgetCard);
             const $radioWidgetBankAccount = $('#' + idPaydockWidgetBankAccount);
             const $orderButton = $('.wc-block-components-checkout-place-order-button');
-            const $afterpayRadiobatton = $('#radio-control-wc-payment-method-options-power_board_afterpay_wallets_gateway');
+            const $afterpayRadiobatton = $('#radio-control-wc-payment-method-options-paydock_afterpay_wallets_gateway');
             if (
                 paydockAfterpayWalletsSettings
                 && paydockAfterpayWalletsSettings.hasOwnProperty('afterpayChargeId')

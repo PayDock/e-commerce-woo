@@ -4,7 +4,7 @@
 <span class="paydock-order-actions">
     <?php
         $paydock_charge_meta = $order->get_meta( 'paydock_directly_charged' );
-        $partiallyRefunded = in_array( $order->get_meta('power_board_refunded_status'), [
+        $partiallyRefunded = in_array( $order->get_meta('paydock_refunded_status'), [
           'wc-pb-p-refund',
           'pb-p-refund'
         ] );
@@ -20,7 +20,7 @@
     <?php endif; ?>
     <?php if ( !$partiallyRefunded ) :?>
           <button type="button"
-                  onclick="handlePaydockPaymentCapture(<?php echo esc_attr( $order->get_id() ); ?>, 'power-board-cancel-authorised')"
+                  onclick="handlePaydockPaymentCapture(<?php echo esc_attr( $order->get_id() ); ?>, 'paydock-cancel-authorised')"
                   class="button">
           Cancel charge
       </button>
