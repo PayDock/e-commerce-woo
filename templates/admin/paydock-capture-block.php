@@ -17,6 +17,7 @@
                 class="button">
 			Capture charge
 		</button>
+    <?php endif; ?>
     <?php if ( !$partiallyRefunded ) :?>
           <button type="button"
                   onclick="handlePaydockPaymentCapture(<?php echo esc_attr( $order->get_id() ); ?>, 'power-board-cancel-authorised')"
@@ -24,7 +25,6 @@
           Cancel charge
       </button>
     <?php endif; ?>
-  <?php endif; ?>
 </span>
 <div class="wc-order-data-row wc-order-partial-paid-items wc-order-data-row-toggle" style="display: none;">
     <table class="wc-order-totals">
