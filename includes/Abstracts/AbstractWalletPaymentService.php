@@ -79,16 +79,13 @@ abstract class AbstractWalletPaymentService extends AbstractPaymentService {
 		}
 
 		OrderService::updateStatus( $order_id, $status );
-		$order->payment_complete();
+		if ( ! in_array( $status, [ 'wc-pb-authorize' ] ) ) {
+			$order->payment_complete();
+			$order->update_meta_data( 'pb_directly_charged', 1 );
+		}
+		$order->update_meta_data( 'power_board_charge_id', $chargeId );
+		$order->update_meta_data( OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(), $this->getWalletType()->getLabel() );
 		$order->save();
-
-		update_post_meta( $order_id, 'power_board_charge_id', $chargeId );
-
-		add_post_meta(
-			$order->get_id(),
-			OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(),
-			$this->getWalletType()->getLabel()
-		);
 
 		WC()->cart->empty_cart();
 

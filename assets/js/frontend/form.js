@@ -1,4 +1,90 @@
 setTimeout(() => jQuery(function ($) {
+    $(document).ready(function() {
+        const CONFIG = {
+            phoneInputIds: {
+                shipping: '#shipping-phone',
+                billing: '#billing-phone',
+            },
+            baseCheckboxIdName: 'radio-control-wc-payment-method-options',
+            errorMessageClassName: 'wc-block-components-validation-error',
+            paymentOptionsNames: [
+                'power_board_gateway',
+                'power_board_google-pay_wallets_gateway',
+                'power_board_afterpay_wallets_gateway',
+                'power_board_pay-pal_wallets_gateway',
+                'power_board_afterpay_a_p_m_s_gateway',
+                'power_board_zip_a_p_m_s_gateway',
+            ],
+            phonePattern: /^\+[1-9]{1}[0-9]{3,14}$/,
+            errorMessageHtml: `<div class="wc-block-components-validation-error" role="alert"><p>Please enter your phone number in international format, starting with "+"</p></div>`,
+        };
+
+        const $submitButton = $('button.wc-block-components-checkout-place-order-button');
+        const $shippingWrapper = $('#shipping-fields .wc-block-components-address-address-wrapper');
+
+        const getPhoneInputs = () =>
+            Object.entries(CONFIG.phoneInputIds)
+                .reduce((acc, [key, selector]) => {
+                    const $input = $(selector);
+                    if ($input.length) acc[key] = $input;
+                    return acc;
+                }, {});
+
+        const getPaymentOptionsComponents = () =>
+            CONFIG.paymentOptionsNames
+                .map(name => $(`#${CONFIG.baseCheckboxIdName}-${name}`).parents().eq(1))
+                .filter($component => $component.length);
+
+        const validatePhone = ($input) => {
+            const phone = $input.val();
+            $input.next(`.${CONFIG.errorMessageClassName}`).remove();
+            if (phone && !CONFIG.phonePattern.test(phone)) {
+                $input.after(CONFIG.errorMessageHtml);
+
+                return false;
+            }
+
+            return true;
+        };
+
+        const updateVisibility = (phoneInputs) => {
+            const validationResults = Object.entries(phoneInputs).reduce((acc, [key, $input]) => {
+                acc[key] = validatePhone($input);
+                return acc;
+            }, {});
+
+            const allValid = Object.values(validationResults).every(Boolean);
+            const shippingValid = validationResults.shipping;
+
+            if (!shippingValid) $shippingWrapper.addClass('is-editing');
+
+            $submitButton.css('visibility', allValid ? 'visible' : 'hidden');
+
+            getPaymentOptionsComponents().forEach($component =>
+                $component.css({
+                    opacity: allValid ? 1 : 0.5,
+                    pointerEvents: allValid ? 'auto' : 'none',
+                })
+            );
+        };
+
+        const initPhoneNumbersValidation = () => {
+            const phoneInputs = getPhoneInputs();
+            if (!Object.keys(phoneInputs).length) return;
+
+            Object.values(phoneInputs).forEach($input =>
+                $input.on('blur input', () => updateVisibility(phoneInputs))
+            );
+
+            updateVisibility(phoneInputs);
+        };
+
+        initPhoneNumbersValidation();
+
+        $('.wc-block-checkout__use-address-for-billing input[type="checkbox"]').on("change", initPhoneNumbersValidation);
+    });
+
+
     let lastInit = '';
 
     const powerBoardValidation = {
@@ -30,6 +116,10 @@ setTimeout(() => jQuery(function ($) {
             })
         },
         lastWcFormValidation: false,
+        powerboardCCFormValidation() {
+            const { tokens, selectedToken } = window.wc.wcSettings.getSetting('power_board_data', {});
+            return (Array.isArray(tokens) && tokens.length > 0 && selectedToken !== "") || window.widgetPowerBoard.isValidForm();
+        },
         wcFormValidation() {
             const checkoutFormElements = document.querySelectorAll('.wc-block-checkout__form input, .wc-block-checkout__form select');
             if (checkoutFormElements.length === 0) {
@@ -162,7 +252,13 @@ setTimeout(() => jQuery(function ($) {
 
         let gatewayId = isPermanent ? powerBoardCardSettings.gatewayId : 'not_configured';
 
-        widget = new cba.HtmlWidget('#powerBoardWidgetCard', powerBoardCardSettings.publicKey, gatewayId);
+        widget = new cba.HtmlWidget('#powerBoardWidgetCard', powerBoardCardSettings.publicKey, gatewayId, "card", "card_payment_source_with_cvv");
+        widget.setFormPlaceholders({
+            card_name: 'Card holders name *',
+            card_number: 'Credit card number *',
+            expire_month: 'MM/YY *',
+            card_ccv: 'CCV *',
+        })
 
         window.widgetPowerBoard = widget;
         if (powerBoardCardSettings.hasOwnProperty('styles')) {
@@ -175,11 +271,26 @@ setTimeout(() => jQuery(function ($) {
             });
         }
 
+        /*
         if (powerBoardCardSettings.hasOwnProperty('styles') && powerBoardCardSettings.cardSupportedCardTypes !== '') {
             supportedCard = powerBoardCardSettings.cardSupportedCardTypes.replaceAll(' ', '').split(',')
-            widget.setSupportedCardIcons(supportedCard);
+
+            widget.setSupportedCardIcons(supportedCard, true);
+        }
+        */
+
+        if(powerBoardCardSettings.cardSupportedCardTypes !== '') {
+            var supportedCardTypes = [];
+
+            var supportedCards = powerBoardCardSettings.cardSupportedCardTypes.replaceAll(' ', '').split(',')
+            $.each(supportedCards, function(index, value) {
+                supportedCardTypes.push(value);
+            });
+
+            widget.setSupportedCardIcons(supportedCardTypes, true);
         }
 
+        widget.setFormFields(["card_name*","card_number*", "card_ccv*"]);
         widget.setEnv(powerBoardCardSettings.isSandbox ? 'preproduction_cba' : 'production_cba');
         widget.onFinishInsert('input[name="payment_source_token"]', 'payment_source');
         widget.interceptSubmitForm('#widget');
