@@ -77,6 +77,16 @@ class OrderService {
 				'wpnonce' => esc_attr( wp_create_nonce( 'capture-or-cancel' ) ),
 			] );
 		}
+		if ( in_array( $orderStatus, [
+				'on-hold',
+			] ) ) {
+			wp_enqueue_style(
+				'hide-on-hold-buttons',
+				POWER_BOARD_PLUGIN_URL . 'assets/css/admin/hide-on-hold-buttons.css',
+				[],
+				POWER_BOARD_PLUGIN_VERSION
+			);
+		}
 	}
 
 	public function statusChangeVerification( $orderId, $oldStatusKey, $newStatusKey, $order ) {
