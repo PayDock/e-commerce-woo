@@ -83,9 +83,9 @@ class OrderService {
 			] ) ) {
 			wp_enqueue_style(
 				'hide-on-hold-buttons',
-				POWER_BOARD_PLUGIN_URL . 'assets/css/admin/hide-on-hold-buttons.css',
+				PAYDOCK_PLUGIN_URL . 'assets/css/admin/hide-on-hold-buttons.css',
 				[],
-				POWER_BOARD_PLUGIN_VERSION
+				PAYDOCK_PLUGIN_VERSION
 			);
 		}
 	}
