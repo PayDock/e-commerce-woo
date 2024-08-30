@@ -94,7 +94,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
 
 
             if (button) {
-                button.onFinishInsert('input[name="payment_source_apm_token"]', 'payment_source_token');
+                button.onFinishInsert('input[name="payment_source_apm_token"]', 'paydock_payment_source_token');
 
                 const shipping_address = {
                     first_name: shippingAddress.first_name,

@@ -292,7 +292,7 @@ setTimeout(() => jQuery(function ($) {
 
         widget.setFormFields(["card_name*","card_number*", "card_ccv*"]);
         widget.setEnv(paydockCardSettings.isSandbox ? 'sandbox' : 'production');
-        widget.onFinishInsert('input[name="payment_source_token"]', 'payment_source');
+        widget.onFinishInsert('input[name="paydock_payment_source_token"]', 'payment_source');
         widget.interceptSubmitForm('#widget');
         widget.hideElements(['submit_button']);
         widget.load();
@@ -324,7 +324,7 @@ setTimeout(() => jQuery(function ($) {
 
     function reloadWidget() {
         window.widgetPaydock.reload();
-        const paymentSourceToken = document.querySelector('[name="payment_source_token"]');
+        const paymentSourceToken = document.querySelector('[name="paydock_payment_source_token"]');
         paymentSourceToken.value = null;
         window.widgetReloaded = true
     }
