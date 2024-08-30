@@ -72,7 +72,7 @@ export default async (forcePermanentVault = false, newAmount = null) => {
         .preAuth(preAuthData);
 
     if (typeof preAuthResp._3ds.token === "undefined") {
-        window.widgetPowerBoard.reload();
+        window.widgetPaydock.reload();
         const paymentSourceToken = document.querySelector('[name="payment_source_token"]');
         paymentSourceToken.value = null;
         window.widgetReloaded = true
