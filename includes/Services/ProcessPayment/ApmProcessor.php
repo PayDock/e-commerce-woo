@@ -172,7 +172,7 @@ class ApmProcessor {
 			'address_city'     => $this->order->get_billing_city(),
 			'address_state'    => $this->order->get_billing_state(),
 			'address_line1'    => $address1,
-			'address_line2'    => $address2,
+			'address_line2'    => $address2 ? $address2 : null,
 		];
 
 		if ( ! empty( $exclude ) ) {
