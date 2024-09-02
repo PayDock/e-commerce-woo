@@ -72,6 +72,10 @@ export default async (forcePermanentVault = false, newAmount = null) => {
         .preAuth(preAuthData);
 
     if (typeof preAuthResp._3ds.token === "undefined") {
+        window.widgetPaydock.reload();
+        const paymentSourceToken = document.querySelector('[name="payment_source_token"]');
+        paymentSourceToken.value = null;
+        window.widgetReloaded = true
         return false;
     }
 
@@ -107,7 +111,7 @@ export default async (forcePermanentVault = false, newAmount = null) => {
 
     if (result === 'error') {
         showCardWidget();
-        window.widgetPowerBoard.reload();
+        window.widgetPaydock.reload();
         window.widgetReloaded = true;
     }
 

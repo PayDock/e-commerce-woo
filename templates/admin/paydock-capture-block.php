@@ -72,6 +72,13 @@
     }
 </script>
 <span class="paydock-order-actions">
+    <?php
+        $partiallyRefunded = in_array( $order->get_meta('paydock_refunded_status'), [
+          'wc-paydock-refunded',
+          'paydock-refunded',
+          'refunded',
+        ] );
+    ?>
 	<?php if ( 'paydock-authorize' == $order->get_status() ) : ?>
         <button type="button"
                 onclick="paydockPaymentCapture(<?php echo esc_attr( $order->get_id() ); ?>, 'paydock-capture-charge')"
@@ -79,11 +86,13 @@
 			Capture charge
 		</button>
 	<?php endif; ?>
-	<button type="button"
-            onclick="handlePaydockPaymentCapture(<?php echo esc_attr( $order->get_id() ); ?>, 'paydock-cancel-authorised')"
-            class="button">
-		Cancel charge
-	</button>
+	<?php if ( !$partiallyRefunded ) :?>
+        <button type="button"
+                onclick="handlePaydockPaymentCapture(<?php echo esc_attr( $order->get_id() ); ?>, 'paydock-cancel-authorised')"
+                class="button">
+            Cancel charge
+        </button>
+    <?php endif; ?>
 </span>
 <div class="wc-order-data-row wc-order-partial-paid-items wc-order-data-row-toggle" style="display: none;">
     <table class="wc-order-totals">

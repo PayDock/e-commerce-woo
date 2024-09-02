@@ -12,6 +12,17 @@ class OrderService {
 		}
 	}
 
+	public static function updateStatus( $id, $custom_status, $status_note = null ) {
+		$order = wc_get_order( $id );
+
+		if ( is_object( $order ) ) {
+
+				$order->set_status( ActivationHook::CUSTOM_STATUSES[ $custom_status ], $status_note );
+				$order->update_meta_data( ActivationHook::CUSTOM_STATUS_META_KEY, $custom_status );
+				$order->save();
+		}
+	}
+
 	public function iniPaydockOrderButtons( $order ) {
 		$orderStatus = $order->get_status();
 		if ( in_array( $orderStatus, [
@@ -20,6 +31,7 @@ class OrderService {
 			'paydock-refunded',
 			'paydock-authorize',
 			'paydock-cancelled',
+			'paydock-on-hold',
 		] ) ) {
 			$this->templateService->includeAdminHtml( 'hide-refund-button' );
 		}
@@ -30,6 +42,18 @@ class OrderService {
 		] ) ) {
 			$this->templateService->includeAdminHtml( 'paydock-capture-block', compact( 'order', 'order' ) );
 		}
+
+		if ( in_array( $orderStatus, [
+				'on-hold',
+			] ) ) {
+			wp_enqueue_style(
+				'hide-on-hold-buttons',
+				PAYDOCK_PLUGIN_URL . 'assets/css/admin/hide-on-hold-buttons.css',
+				[],
+				PAYDOCK_PLUGIN_VERSION
+			);
+		}
+
 	}
 
 	public function statusChangeVerification( $orderId, $oldStatusKey, $newStatusKey, $order ) {
