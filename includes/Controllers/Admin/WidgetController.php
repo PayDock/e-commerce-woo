@@ -155,7 +155,8 @@ class WidgetController {
 			}
 
 			if ( $isAfterPay ) {
-				$chargeRequest['meta']['success_url'] = $order->get_checkout_order_received_url();
+				$chargeRequest['meta']['success_url'] = add_query_arg( 'afterpay-success', 'true',
+					$order->get_checkout_order_received_url() );
 				$chargeRequest['meta']['error_url']   = add_query_arg( 'afterpay-error', 'true',
 					$order->get_checkout_order_received_url() );
 			}

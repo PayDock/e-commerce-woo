@@ -33,11 +33,11 @@ class AfterpayWalletService extends AbstractWalletPaymentService {
 		$chargeId = null;
 
 		if ( ! empty( $_POST['payment_response'] ) ) {
-			$data = json_decode( sanitize_text_field( $_POST['payment_response'] ), true );
+			$data = json_decode( sanitize_text_field( $_POST['payment_response'] ), true )['resource']['data'];
 		}
 
 		if ( ( json_last_error() === JSON_ERROR_NONE ) && ! empty( $_POST['payment_response'] ) ) {
-			$chargeId = $data['data']['id'];
+			$chargeId = $data['charge']['_id'];
 		}
 
 		$wallets = [];
@@ -57,7 +57,7 @@ class AfterpayWalletService extends AbstractWalletPaymentService {
 
 		$loggerRepository = new LogRepository();
 
-		$order->set_status( 'wc-pending' );
+		$order->set_status( 'wc-paydock-pending' );
 		$order->update_meta_data( 'paydock_charge_id', $chargeId );
 		$order->update_meta_data( OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(), $this->getWalletType()->getLabel() );
 		$order->save();
