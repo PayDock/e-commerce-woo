@@ -23,6 +23,11 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
     const settings = getSetting(settingKey, {});
     const label = decodeEntities(settings.title) || __(defaultLabel, textDomain);
     const cart = select(CART_STORE_KEY);
+    const getNewAmount = () => {
+        const { total_price: currentTotalPrice } = cart.getCartTotals();
+        return Number(currentTotalPrice / 100).toFixed(2);
+    };
+
     const Content = (props) => {
         const {eventRegistration, emitResponse} = props;
         const {onPaymentSetup, onCheckoutValidation, onShippingRateSelectSuccess} = eventRegistration;
@@ -75,7 +80,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
                 wasInit = true;
                 button = new window.paydock.AfterpayCheckoutButton('#' + buttonId, settings.publicKey, settings.gatewayId);
                 meta = {
-                    amount: settings.amount,
+                    amount: getNewAmount(),
                     currency: settings.currency,
                     email: billingAddress.email,
                     first_name: billingAddress.first_name,
@@ -133,7 +138,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
                 }
 
                 meta.charge = {
-                    amount: settings.amount,
+                    amount: getNewAmount(),
                     currency: settings.currency,
                     email: billingAddress.email,
                     first_name: billingAddress.first_name,
@@ -187,8 +192,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
 
         useEffect(() => {
             const unsubscribeFromShippingEvent = onShippingRateSelectSuccess(async () => {
-                const { total_price: currentTotalPrice } = cart.getCartTotals();
-                const newAmount = Number(currentTotalPrice / 100).toFixed(2);
+                const newAmount = getNewAmount();
                 const updateAmount = (currentAmount, newAmount) => currentAmount !== undefined ? { amount: newAmount } : {};
 
                 button.setMeta({
