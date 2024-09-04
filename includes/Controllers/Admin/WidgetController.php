@@ -165,7 +165,7 @@ class WidgetController {
 			                           ->createWalletCharge( $chargeRequest,
 				                           $settings->isWalletDirectCharge( $payment ) );
 
-			$result['county'] = $billingAdress['country'] ?? '';
+			$result['county'] = $request['address']['country'] ?? '';
 
 			if ( WalletPaymentMethods::PAY_PAL_SMART_BUTTON()->name === $payment->name ) {
 				$result['pay_later'] = 'yes' === $settings->isPayPallSmartButtonPayLater();
