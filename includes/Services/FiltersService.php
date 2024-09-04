@@ -5,6 +5,7 @@ namespace Paydock\Services;
 use Paydock\Abstracts\AbstractSingleton;
 use Paydock\Enums\OrderListColumns;
 use Paydock\Enums\SettingsTabs;
+use Paydock\Enums\WalletPaymentMethods;
 use Paydock\Hooks\ActivationHook;
 use Paydock\PaydockPlugin;
 use Paydock\Services\Checkout\AfterpayAPMsPaymentServiceService;
@@ -127,14 +128,26 @@ class FiltersService extends AbstractSingleton {
 	}
 
 	public function woocommerceThankyouOrderReceivedText( $text ) {
+		$settings = SettingsService::getInstance();
 		$orderId = absint( get_query_var( 'order-received' ) );
 		$options  = get_option( "paydock_fraud_{$orderId}" );
 		$order    = wc_get_order( $orderId );
 		$status   = $order->get_meta( ActivationHook::CUSTOM_STATUS_META_KEY );
-		$afterpay = filter_input( INPUT_GET, 'afterpay-error', FILTER_SANITIZE_STRING );
+		$afterpayError = filter_input( INPUT_GET, 'afterpay-error', FILTER_SANITIZE_STRING );
+		$afterpaySuccess = filter_input( INPUT_GET, 'afterpay-success', FILTER_SANITIZE_STRING );
 
-		if ( ! empty( $afterpay ) && ( 'true' === $afterpay ) ) {
+		if ( ! empty( $afterpayError ) && ( 'true' === $afterpayError ) ) {
+			OrderService::updateStatus($orderId, 'wc-paydock-cancelled');
 			return __( 'Order has been cancelled', 'paydock' );
+		}
+		if ( ! empty( $afterpaySuccess ) && ( $afterpaySuccess === 'true' ) ) {
+			if ($settings->isWalletDirectCharge( WalletPaymentMethods::AFTERPAY() )) {
+				$order->payment_complete();
+				$order->update_meta_data( 'paydock_directly_charged', 1 );
+				$order->save();
+			} else {
+				OrderService::updateStatus($orderId, 'wc-paydock-authorize');
+			}
 		}
 		if ( false === $options && 'processing' !== $status ) {
 			return __( 'Thank you. Your order has been received.', 'paydock' );
