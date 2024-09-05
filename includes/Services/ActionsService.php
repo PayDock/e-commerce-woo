@@ -39,6 +39,24 @@ class ActionsService extends AbstractSingleton {
 			$this->addEndpoints();
 			$this->addOrderActions();
 		} );
+
+		add_filter( 'gettext', array( $this, 'cba_refund_msg' ), 20, 3 );
+	}
+
+	public function cba_refund_msg( $translated_text, $text, $domain ) {
+
+		if ( 'woocommerce' === $domain ) {
+
+			$message_to_change = strpos( $translated_text, 'Invalid refund amount' );
+
+			if ( $message_to_change !== false ) {
+				$translated_text = 'The requested refund amount exceeds the available charge/Transaction amount';
+			}
+
+		}
+
+		return $translated_text;
+
 	}
 
 	protected function addCompatibilityWithWooCommerce(): void {

@@ -16,7 +16,6 @@ const labels = {
     notAvailable: __('The payment method is not available in your country.', textDomain),
 }
 let wasInit = false;
-let button = null;
 export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
     const settingKey = `power_board_${id}_a_p_m_s_block_data`;
     const paymentName = `power_board_${id}_a_p_m_s_gateway`;
@@ -24,6 +23,11 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
     const settings = getSetting(settingKey, {});
     const label = decodeEntities(settings.title) || __(defaultLabel, textDomain);
     const cart = select(CART_STORE_KEY);
+    const getNewAmount = () => {
+        const { total_price: currentTotalPrice } = cart.getCartTotals();
+        return Number(currentTotalPrice / 100).toFixed(2);
+    };
+
     const Content = (props) => {
         const {eventRegistration, emitResponse} = props;
         const {onPaymentSetup, onCheckoutValidation, onShippingRateSelectSuccess} = eventRegistration;
@@ -41,6 +45,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
         let isAvailableCountry = !!countries.find(
             (element) => element === billingAddress.country.toLowerCase()
         );
+        let button = null;
         let meta = {};
         let data = {...settings};
         data.customers = '';
@@ -80,7 +85,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
 
             if (validationSuccess && 'afterpay' === id) {
                 meta = {
-                    amount: Number((cart.getCartTotals().total_price / 100).toFixed(3)).toFixed(2),
+                    amount: getNewAmount(),
                     currency: settings.currency,
                     email: billingAddress.email,
                     first_name: billingAddress.first_name,
@@ -136,7 +141,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
                 }
 
                 meta.charge = {
-                    amount: Number((cart.getCartTotals().total_price / 100).toFixed(3)).toFixed(2),
+                    amount: getNewAmount(),
                     currency: settings.currency,
                     email: billingAddress.email,
                     first_name: billingAddress.first_name,
@@ -190,8 +195,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
 
         useEffect(() => {
             const unsubscribeFromShippingEvent = onShippingRateSelectSuccess(async () => {
-                const { total_price: currentTotalPrice } = cart.getCartTotals();
-                const newAmount = Number(currentTotalPrice / 100).toFixed(2);
+                const newAmount = getNewAmount();
                 const updateAmount = (currentAmount, newAmount) => currentAmount !== undefined ? { amount: newAmount } : {};
 
                 button.setMeta({
@@ -211,7 +215,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
                 }
 
                 data.paymentSourceToken = paymentSourceToken.value;
-                data.amount = Number((cart.getCartTotals().total_price / 100).toFixed(3)).toFixed(2)
+                data.amount = getNewAmount();
                 if (data.paymentSourceToken.length > 0 || settings.selectedToken.length > 0) {
                     return {
                         type: emitResponse.responseTypes.SUCCESS,

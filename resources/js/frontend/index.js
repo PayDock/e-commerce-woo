@@ -22,6 +22,7 @@ const labels = {
     saveCardLabel: __('Save payment details', textDomain),
     selectTokenLabel: __('Saved payment details', textDomain),
     fillDataError: __('Please fill in the card data.', textDomain),
+    fillCCDataError: __('Please fill in the required credit card form fields', textDomain),
     requiredDataError: __('Please fill in the required fields of the form to display payment methods', textDomain),
     additionalDataRejected: __('Payment has been rejected by PowerBoard. Please try again in a few minutes', textDomain)
 }
@@ -46,8 +47,43 @@ const Content = (props) => {
         });
 
         const validation = onCheckoutValidation(async () => {
+            var errorMessageDismissButton = document.querySelectorAll('.wc-block-components-notice-banner__dismiss')[0]
+            if (errorMessageDismissButton) {
+                errorMessageDismissButton.click();
+            }
+
             formSubmittedAlready = window.widgetReloaded ? false : formSubmittedAlready
+
             if (window.hasOwnProperty('powerBoardValidation')) {
+                if (!powerBoardValidation.powerboardCCFormValidation()) {
+                    var validationState = window.widgetPowerBoard.getValidationState();
+
+                    var invalid_fields = [];
+                    validationState.invalid_fields.forEach(field => {
+                        switch(field) {
+                            case "card_name":
+                                invalid_fields.push("Card Name");
+                                break;
+                            case "card_number":
+                                invalid_fields.push("Card Number");
+                                break;
+                            case "expiry_date":
+                                invalid_fields.push("Expiry Date");
+                                break;
+                            case "card_ccv":
+                                invalid_fields.push("Card CCV");
+                                break;
+                        }
+                    });
+
+                    var errorMessage = labels.fillCCDataError + (invalid_fields.length ? `: ${invalid_fields.join(", ")}` : "");
+
+                    return {
+                        type: emitResponse.responseTypes.ERROR,
+                        errorMessage: errorMessage
+                    }
+                }
+
                 if (!powerBoardValidation.wcFormValidation()) {
                     return {
                         type: emitResponse.responseTypes.ERROR,
@@ -106,7 +142,7 @@ const Content = (props) => {
             window.widgetPowerBoard.trigger(window.cba.TRIGGER.SUBMIT_FORM);
 
             let result = false;
-            window.widgetPowerBoard.on(window.cba.EVENT.FINISH, (event) => {
+            window.widgetPowerBoard.on(window.cba.EVENT.FINISH, () => {
                 result = true
 
                 const savedCards = document.querySelector('.power-board-select-saved-cards')
