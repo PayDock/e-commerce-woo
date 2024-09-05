@@ -181,7 +181,7 @@ jQuery(function ($) {
                     this.currentForm.card.setSupportedCardIcons(supportedCard);
                 }
 
-                this.currentForm.card.setEnv(config.isSandbox ? 'preproduction_cba' : 'production_cba');
+                this.currentForm.card.setEnv(config.isSandbox ? 'staging_cba' : 'production_cba');
                 this.currentForm.card.setFormFields(['email', 'phone']);
                 this.currentForm.card.onFinishInsert('#classic-power_board_gateway-token', 'payment_source');
                 this.currentForm.card.interceptSubmitForm('#widget');
@@ -265,7 +265,7 @@ jQuery(function ($) {
                 } else {
                     preAuthData.token = $('#classic-power_board_gateway-token').val()
                 }
-                const envVal = config.isSandbox ? 'preproduction_cba' : 'production_cba'
+                const envVal = config.isSandbox ? 'staging_cba' : 'production_cba'
                 const preAuthResp = await new window.cba.Api(config.publicKey)
                     .setEnv(envVal)
                     .charge()
@@ -345,7 +345,7 @@ jQuery(function ($) {
 
 
                 const canvas = new window.cba.Canvas3ds("#power-board-3ds-container", threeDsToken);
-                canvas.setEnv(config.isSandbox ? 'preproduction_cba' : 'production_cba');
+                canvas.setEnv(config.isSandbox ? 'staging_cba' : 'production_cba');
 
                 canvas.on('chargeAuthSuccess', (data) => {
                     $('#charge3dsid').val(data.charge_3ds_id)
@@ -523,7 +523,7 @@ jQuery(function ($) {
                             config
                         );
 
-                        this.currentForm.wallets[index].setEnv(isSandbox ? 'preproduction_cba' : 'production_cba')
+                        this.currentForm.wallets[index].setEnv(isSandbox ? 'staging_cba' : 'production_cba')
 
                         this.currentForm.wallets[index].onPaymentError((data) => {
                             this.form.submit()
@@ -594,7 +594,7 @@ jQuery(function ($) {
                     items: settings.items
                 }
 
-                this.currentForm.apms[type].setEnv(settings.isSandbox ? 'preproduction_cba' : 'production_cba')
+                this.currentForm.apms[type].setEnv(settings.isSandbox ? 'staging_cba' : 'production_cba')
                 this.currentForm.apms[type].setMeta(meta)
                 this.currentForm.apms[type].onFinishInsert(`#classic-power_board_${type}_a_p_m_s_gateway-token`, 'payment_source_token');
                 this.currentForm.apms[type].on('finish', () => {
