@@ -163,7 +163,17 @@ class PaymentController {
 
 		$captureAmount = (float) $order->get_meta( 'capture_amount' );
 
+		$directlyCharged = $order->get_meta( 'pb_directly_charged' );
+
 		$totalRefunded = (float) $order->get_total_refunded();
+
+		$statusChangeVerificationFailed = $order->get_meta( 'status_change_verification_failed' );
+		if ( $_POST['action'] === 'edit_order' && $statusChangeVerificationFailed ) {
+			$refund->set_amount(0);
+			$refund->set_total(0);
+			$refund->set_parent_id( 0 );
+			return;
+		}
 
 		if ( ! in_array( $order->get_status(), [
 				'processing',
@@ -180,7 +190,7 @@ class PaymentController {
 		}
 
 		if ($_POST['action'] === 'edit_order') {
-			$amountToRefund =  $captureAmount <= $amount ? ($captureAmount * 100 - $totalRefunded * 100) / 100 : $amount;
+			$amountToRefund =  !$directlyCharged && $captureAmount <= $amount ? ($captureAmount * 100 - $totalRefunded * 100) / 100 : $amount;
 			$refund->set_amount($amountToRefund);
 			$refund->set_total( $amountToRefund * -1 );
 		} else {

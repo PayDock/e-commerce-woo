@@ -91,6 +91,7 @@ class OrderService {
 	}
 
 	public function statusChangeVerification( $orderId, $oldStatusKey, $newStatusKey, $order ) {
+		$order->update_meta_data( 'status_change_verification_failed', "" );
 		if ( ( $oldStatusKey == $newStatusKey ) || ! empty( $GLOBALS['power_board_is_updating_order_status'] ) || null === $orderId ) {
 			return;
 		}
@@ -118,6 +119,7 @@ class OrderService {
 					$newStatusName
 				);
 				$GLOBALS['power_board_is_updating_order_status'] = true;
+				$order->update_meta_data( 'status_change_verification_failed', 1 );
 				$order->update_status( $oldStatusKey, $error );
 				update_option( 'power_board_status_change_error', $error );
 				unset( $GLOBALS['power_board_is_updating_order_status'] );
