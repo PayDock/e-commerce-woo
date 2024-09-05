@@ -268,10 +268,6 @@ const Content = (props) => {
         checkboxSavedCardsComponent(labels.saveCardLabel)
     );
 };
-const Label = (props) => {
-    const {PaymentMethodLabel} = props.components;
-    return <PaymentMethodLabel text={label}/>;
-};
 
 const Paydok = {
     name: "paydock_gateway",
