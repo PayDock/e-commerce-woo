@@ -19,9 +19,9 @@ class OrderService {
 
 		if ( is_object( $order ) ) {
 
-				$order->set_status( ActivationHook::CUSTOM_STATUSES[ $custom_status ], $status_note );
-				$order->update_meta_data( ActivationHook::CUSTOM_STATUS_META_KEY, $custom_status );
-				$order->save();
+			$order->set_status( ActivationHook::CUSTOM_STATUSES[ $custom_status ], $status_note );
+			$order->update_meta_data( ActivationHook::CUSTOM_STATUS_META_KEY, $custom_status );
+			$order->save();
 		}
 	}
 

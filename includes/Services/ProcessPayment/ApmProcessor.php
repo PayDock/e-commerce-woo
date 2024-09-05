@@ -9,6 +9,7 @@ use PowerBoard\Helpers\ShippingHelper;
 use PowerBoard\Repositories\LogRepository;
 use PowerBoard\Repositories\UserCustomerRepository;
 use PowerBoard\Services\SDKAdapterService;
+use PowerBoard\Services\SettingsService;
 
 class ApmProcessor {
 	const CHARGE_METHOD = 'charge';
