@@ -72,7 +72,6 @@ class PaymentController {
 				$order->save();
 
 				OrderService::updateStatus( $orderId, $newStatus );
-				$order->save();
 				wp_send_json_success( [
 					'message' => __( 'The capture process was successful.', 'woocommerce' ),
 				] );
@@ -122,7 +121,6 @@ class PaymentController {
 				);
 				$order->payment_complete();
 				OrderService::updateStatus( $orderId, 'pb-cancelled' );
-				$order->save();
 				wp_send_json_success(
 					[ 'message' => __( 'The payment has been cancelled successfully. ', 'woocommerce' ) ]
 				);
@@ -408,7 +406,6 @@ class PaymentController {
 
 			delete_option( $optionName );
 			OrderService::updateStatus( $orderId, $status );
-			$order->save();
 
 			$loggerRepository->createLogRecord(
 				$fraudId,
@@ -574,7 +571,6 @@ class PaymentController {
 		                . __( 'has been successfully.', 'woocommerce' );
 		$order->payment_complete();
 		OrderService::updateStatus( $orderId, $orderStatus, $status_notes );
-		$order->save();
 
 		$result = wc_create_refund( [
 			'amount'         => $refundAmount,
