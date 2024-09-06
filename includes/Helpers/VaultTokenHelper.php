@@ -39,11 +39,22 @@ class VaultTokenHelper {
 
 		$responce = SDKAdapterService::getInstance()->createVaultToken( $vaultTokenData );
 
-		if ( ! empty( $responce['error'] ) || empty( $responce['resource']['data']['vault_token'] ) ) {
-			$message = ! empty( $responce['error']['message'] ) ? ' ' . $responce['error']['message'] : '';
+		if ( ! empty( $responce['error'] ) ) {
 
-			/* translators: %s: Detailed message from PowerBoard API. */
-			throw new Exception( esc_html( sprintf( __( 'Can\'t create PowerBoard vault token. %s  <input id="widget_error" hidden type="text"/>', 'power-board' ), $message ) ) );
+			$parsed_api_error = '';
+
+			if ( ! empty( $responce['error']['details'][0]['description'] ) && ! empty( $responce['error']['details'][0]['status_code_description'] ) ) {
+				$parsed_api_error = $responce['error']['details'][0]['description'] . ': ' . $responce['error']['details'][0]['status_code_description'];
+			}
+
+			if ( empty( $parsed_api_error ) ) {
+				$parsed_api_error = __( 'Unable to create PowerBoard vault token', 'power-board' );
+			}
+
+			$parsed_api_error .= ' <input id="widget_error" hidden type="text"/>';
+
+			throw new Exception( esc_html( $parsed_api_error ) );
+
 		}
 
 		if ( $this->shouldSaveVaultToken() ) {
