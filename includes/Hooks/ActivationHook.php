@@ -5,6 +5,7 @@ namespace PowerBoard\Hooks;
 use PowerBoard\Contracts\Hook;
 use PowerBoard\Contracts\Repository;
 use PowerBoard\PowerBoardPlugin;
+use PowerBoard\Services\OrderService;
 
 class ActivationHook implements Hook {
 
@@ -58,9 +59,7 @@ class ActivationHook implements Hook {
 
 	protected function updateOrderStatus( $orders, $new_status ) {
 		foreach ( $orders as $order ) {
-			$order->update_meta_data( self::CUSTOM_STATUS_META_KEY, $order->get_status() );
-			$order->set_status( $new_status );
-			$order->save();
+			OrderService::updateStatus($order->id, $new_status );
 		}
 	}
 }
