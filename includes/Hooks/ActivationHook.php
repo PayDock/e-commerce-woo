@@ -5,7 +5,6 @@ namespace PowerBoard\Hooks;
 use PowerBoard\Contracts\Hook;
 use PowerBoard\Contracts\Repository;
 use PowerBoard\PowerBoardPlugin;
-use PowerBoard\Services\OrderService;
 
 class ActivationHook implements Hook {
 
