@@ -164,7 +164,13 @@ jQuery(function ($) {
                     )
                 let gatewayId = isPermanent ? config.gatewayId : 'not_configured';
 
-                this.currentForm.card = new cba.HtmlWidget('#classic-power_board_gateway', config.publicKey, gatewayId);
+                this.currentForm.card = new cba.HtmlWidget('#classic-power_board_gateway', config.publicKey, gatewayId, "card", "card_payment_source_with_cvv");
+                this.currentForm.card.setFormPlaceholders({
+                    card_name: 'Card holders name *',
+                    card_number: 'Credit card number *',
+                    expire_month: 'MM/YY *',
+                    card_ccv: 'CCV *',
+                })
 
                 if (config.hasOwnProperty('styles')) {
                     this.currentForm.card.setStyles(config.styles);
@@ -178,18 +184,18 @@ jQuery(function ($) {
 
                 if (config.hasOwnProperty('styles') && config.cardSupportedCardTypes !== '') {
                     let supportedCard = config.cardSupportedCardTypes.replaceAll(' ', '').split(',')
-                    this.currentForm.card.setSupportedCardIcons(supportedCard);
+                    this.currentForm.card.setSupportedCardIcons(supportedCard, true);
                 }
 
                 this.currentForm.card.setEnv(config.isSandbox ? 'preproduction_cba' : 'production_cba');
-                this.currentForm.card.setFormFields(['email', 'phone']);
+                this.currentForm.card.setFormFields(["card_name*","card_number*", "card_ccv*"]);
                 this.currentForm.card.onFinishInsert('#classic-power_board_gateway-token', 'payment_source');
                 this.currentForm.card.interceptSubmitForm('#widget');
 
                 this.currentForm.card.load();
 
                 this.currentForm.card.on(window.cba.EVENT.AFTER_LOAD, () => {
-                    this.currentForm.card.hideElements(['submit_button', 'email', 'phone']);
+                    this.currentForm.card.hideElements(['submit_button']);
                 })
                 this.currentForm.card.on(window.cba.EVENT.FINISH, () => {
                     switch (config.card3DS) {
@@ -602,22 +608,22 @@ jQuery(function ($) {
                 })
             },
             init() {
-                setInterval(() => {
-                    let paymentMethod = $('input[name="payment_method"]:checked').val();
-                    if (paymentMethod && !this.paymentMethod) {
-                        this.setPaymentMethod(paymentMethod)
-                    }
-
+                const orderBtnInterval = setInterval(() => {
                     let orderButton = document.getElementById('place_order');
                     if (orderButton) {
+                        clearInterval(orderBtnInterval)
                         orderButton.addEventListener('click', (event) => {
                             this.customSubmitForm(event)
                         })
                     }
+                }, 100)
 
-                    this.form.submit((event) => {
-                        this.customSubmitForm(event)
-                    });
+                const paymentMethodInterval = setInterval(() => {
+                    let paymentMethod = $('input[name="payment_method"]:checked').val();
+                    if (paymentMethod && !this.paymentMethod) {
+                        clearInterval(paymentMethodInterval)
+                        this.setPaymentMethod(paymentMethod)
+                    }
                 }, 100)
 
                 this.form = $('form[name="checkout"]');
@@ -629,6 +635,10 @@ jQuery(function ($) {
                         console.error(e)
                     }
                 })
+
+                this.form.submit((event) => {
+                    this.customSubmitForm(event)
+                });
 
                 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
             },
