@@ -18,7 +18,6 @@ class OrderService {
 		$order = wc_get_order( $id );
 
 		if ( is_object( $order ) ) {
-
 				$order->set_status( ActivationHook::CUSTOM_STATUSES[ $custom_status ], $status_note );
 				$order->update_meta_data( ActivationHook::CUSTOM_STATUS_META_KEY, $custom_status );
 				$order->save();
@@ -91,6 +90,7 @@ class OrderService {
 	}
 
 	public function statusChangeVerification( $orderId, $oldStatusKey, $newStatusKey, $order ) {
+		$order->update_meta_data( 'status_change_verification_failed', "" );
 		if ( ( $oldStatusKey == $newStatusKey ) || ! empty( $GLOBALS['paydock_is_updating_order_status'] ) || null === $orderId ) {
 			return;
 		}
@@ -102,7 +102,7 @@ class OrderService {
 				'pending',
 				'completed',
 			],
-			'refunded'   => [ 'processing', 'cancelled', 'failed', 'refunded' ],
+			'refunded'   => [ 'cancelled', 'failed', 'refunded' ],
 			'cancelled'  => [ 'failed', 'cancelled' ],
 		];
 		if ( ! empty( $rulesForStatuses[ $oldStatusKey ] ) ) {
@@ -118,6 +118,7 @@ class OrderService {
 					$newStatusName
 				);
 				$GLOBALS['paydock_is_updating_order_status'] = true;
+				$order->update_meta_data( 'status_change_verification_failed', 1 );
 				$order->update_status( $oldStatusKey, $error );
 				update_option( 'paydock_status_change_error', $error );
 				unset( $GLOBALS['paydock_is_updating_order_status'] );

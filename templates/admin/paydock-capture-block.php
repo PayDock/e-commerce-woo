@@ -1,10 +1,11 @@
-<?php use PowerBoard\Enums\OrderListColumns;
+<?php if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+use PowerBoard\Enums\OrderListColumns;
 use PowerBoard\Enums\OtherPaymentMethods;
 use PowerBoard\Enums\WalletPaymentMethods;
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-} // Exit if accessed directly ?>
+?>
 <span class="paydock-order-actions">
     <?php
         $paydock_charge_meta = $order->get_meta( 'paydock_directly_charged' );
