@@ -1,4 +1,8 @@
-<?php if ( ! defined( 'ABSPATH' ) ) {
+<?php use PowerBoard\Enums\OrderListColumns;
+use PowerBoard\Enums\OtherPaymentMethods;
+use PowerBoard\Enums\WalletPaymentMethods;
+
+if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 } // Exit if accessed directly ?>
 <span class="power-board-order-actions">
@@ -9,6 +13,12 @@
           'pb-p-refund'
         ] );
         $order_directly_charged = ! empty( $pb_charge_meta ) ? $pb_charge_meta : false;
+        $showCancelButton = ! in_array( $order->get_meta(OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey()), [
+            WalletPaymentMethods::PAY_PAL_SMART_BUTTON()->getLabel(),
+            WalletPaymentMethods::AFTERPAY()->getLabel(),
+            OtherPaymentMethods::AFTERPAY()->getLabel(),
+            OtherPaymentMethods::ZIPPAY()->getLabel(),
+          ] ) || $order_directly_charged == false;
 
         if ( $order_directly_charged == false ) :
     ?>
@@ -18,7 +28,7 @@
 			Capture charge
 		</button>
     <?php endif; ?>
-    <?php if ( !$partiallyRefunded ) :?>
+	  <?php if ( $showCancelButton && !$partiallyRefunded) :?>
           <button type="button"
                   onclick="handlePowerBoardPaymentCapture(<?php echo esc_attr( $order->get_id() ); ?>, 'power-board-cancel-authorised')"
                   class="button">
