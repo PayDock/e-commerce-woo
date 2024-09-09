@@ -59,7 +59,9 @@ class ActivationHook implements Hook {
 
 	protected function updateOrderStatus( $orders, $new_status ) {
 		foreach ( $orders as $order ) {
-			OrderService::updateStatus($order->id, $new_status );
+			$order->update_meta_data( self::CUSTOM_STATUS_META_KEY, $order->get_status() );
+			$order->set_status( $new_status );
+			$order->save();
 		}
 	}
 }
