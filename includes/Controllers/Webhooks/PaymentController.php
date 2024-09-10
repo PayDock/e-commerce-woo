@@ -163,7 +163,8 @@ class PaymentController {
 
 		if ( ! in_array( $order->get_status(), [
 				'processing',
-				'refunded'
+				'refunded',
+				'completed'
 			] ) || ( false === strpos( $order->get_payment_method(), PaydockPlugin::PLUGIN_PREFIX ) ) ) {
 			return;
 		}
