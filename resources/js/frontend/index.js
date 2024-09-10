@@ -21,7 +21,8 @@ const labels = {
     defaultLabel: __('PowerBoard Payments', textDomain),
     saveCardLabel: __('Save payment details', textDomain),
     selectTokenLabel: __('Saved payment details', textDomain),
-    fillDataError: __('Please fill in the card data.', textDomain),
+    fillDataError: __('Please fill in the card data', textDomain),
+    notSupport3DS: __('Payment has been rejected by PowerBoard. Please try a different payment method'),
     fillCCDataError: __('Please fill in the required credit card form fields', textDomain),
     requiredDataError: __('Please fill in the required fields of the form to display payment methods', textDomain),
     additionalDataRejected: __('Payment has been rejected by PowerBoard. Please try again in a few minutes', textDomain)
@@ -104,7 +105,7 @@ const Content = (props) => {
                         if (settings.charge3dsId === false) {
                             return {
                                 type: emitResponse.responseTypes.ERROR,
-                                errorMessage: labels.fillDataError,
+                                errorMessage: labels.notSupport3DS,
                             }
                         }
 
@@ -181,7 +182,7 @@ const Content = (props) => {
                     if (settings.charge3dsId === false) {
                         return {
                             type: emitResponse.responseTypes.ERROR,
-                            errorMessage: labels.fillDataError + ' charge3dsId',
+                            errorMessage: labels.notSupport3DS,
                         }
                     }
 
