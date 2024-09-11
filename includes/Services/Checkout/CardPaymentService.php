@@ -140,7 +140,27 @@ class CardPaymentService extends WC_Payment_Gateway {
 			$response = $cardProcessor->run( $order );
 
 			if ( ! empty( $response['error'] ) ) {
-				throw new Exception( esc_html( __( 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later. <input id="widget_error" hidden type="text"/>', 'paydock' ) ) );
+
+				$parsed_api_error = '';
+
+				if ( ! empty( $response['error']['details'][0]['description'] ) ) {
+
+					$parsed_api_error = $response['error']['details'][0]['description'];
+
+					if ( ! empty( $response['error']['details'][0]['status_code_description'] ) ) {
+						$parsed_api_error .= ': ' . $response['error']['details'][0]['status_code_description'];
+					}
+
+				}
+
+				if ( empty( $parsed_api_error ) ) {
+					$parsed_api_error = __( 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later.', 'power-board' );
+				}
+
+				$parsed_api_error .= ' <input id="widget_error" hidden type="text"/>';
+
+				throw new Exception( esc_html( $parsed_api_error ) );
+
 			}
 
 			$chargeId = ! empty( $response['resource']['data']['_id'] ) ? $response['resource']['data']['_id'] : '';
@@ -152,11 +172,8 @@ class CardPaymentService extends WC_Payment_Gateway {
 				$e->getMessage(),
 				LogRepository::ERROR
 			);
-			throw new RouteException(
-				'woocommerce_rest_checkout_process_payment_error',
-				/* Translators: %s Error message from API. */
-				esc_html( sprintf( __( 'Error: %s', 'paydock' ), $e->getMessage() ) )
-			);
+
+			throw new RouteException( 'woocommerce_rest_checkout_process_payment_error', esc_html( $e->getMessage() ) );
 		}
 
 		try {

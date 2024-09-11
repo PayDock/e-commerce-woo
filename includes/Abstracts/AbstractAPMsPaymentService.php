@@ -58,9 +58,26 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 
 			$response = $processor->run( $order );
 
-			if ( ! empty( $response['error'] ) || empty( $response['resource']['data']['_id'] ) ) {
-				throw new Exception( __( 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later.',
-					'paydock' ) );
+			if ( ! empty( $response['error'] ) ) {
+
+				$parsed_api_error = '';
+
+				if ( ! empty( $response['error']['details'][0]['description'] ) ) {
+
+					$parsed_api_error = $response['error']['details'][0]['description'];
+
+					if ( ! empty( $response['error']['details'][0]['status_code_description'] ) ) {
+						$parsed_api_error .= ': ' . $response['error']['details'][0]['status_code_description'];
+					}
+
+				}
+
+				if ( empty( $parsed_api_error ) ) {
+					$parsed_api_error = __( 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later.', 'paydock' );
+				}
+
+				throw new Exception( esc_html( $parsed_api_error ) );
+
 			}
 
 			$chargeId = $response['resource']['data']['_id'];
@@ -72,11 +89,8 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 				$e->getMessage(),
 				LogRepository::ERROR
 			);
-			throw new RouteException(
-				'woocommerce_rest_checkout_process_payment_error',
-				/* translators: %s: Error message */
-				esc_html( sprintf( __( 'Error: %s', 'paydock' ), $e->getMessage() ) )
-			);
+
+			throw new RouteException( 'woocommerce_rest_checkout_process_payment_error', esc_html( $e->getMessage() ) );
 		}
 
 		$status          = ucfirst( strtolower( $response['resource']['data']['transactions'][0]['status'] ?? 'undefined' ) );

@@ -58,11 +58,8 @@ class BankAccountPaymentService extends AbstractPaymentService {
 			$message   = $exception->response['error']['details'][0]['gateway_specific_description'] ?? 'empty message';
 
 			$loggerRepository->createLogRecord( $chargeId, $operation, $status, $message, LogRepository::ERROR );
-			throw new RouteException(
-				'woocommerce_rest_checkout_process_payment_error',
-				/* Translators: %s Exception message. */
-				esc_html( sprintf( __( 'Error: %s', 'paydock' ), $exception->getMessage() ) )
-			);
+
+			throw new RouteException( 'woocommerce_rest_checkout_process_payment_error', esc_html( $exception->getMessage() ) );
 		} catch ( Exception $exception ) {
 			throw new RouteException(
 				'woocommerce_rest_checkout_process_payment_error',
