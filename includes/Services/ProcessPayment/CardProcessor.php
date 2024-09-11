@@ -151,7 +151,28 @@ class CardProcessor {
 				$message,
 				LogRepository::ERROR
 			);
-			throw new Exception( esc_html( __( 'The 3ds charge could not be created successfully.', 'power-board' ) ) );
+		}
+
+		if ( ! empty( $threeDsCharge['error'] ) ) {
+
+			$parsed_api_error = '';
+
+			if ( ! empty( $threeDsCharge['error']['details'][0]['description'] ) ) {
+
+				$parsed_api_error = $threeDsCharge['error']['details'][0]['description'];
+
+				if ( ! empty( $threeDsCharge['error']['details'][0]['status_code_description'] ) ) {
+					$parsed_api_error .= ': ' . $threeDsCharge['error']['details'][0]['status_code_description'];
+				}
+
+			}
+
+			if ( empty( $parsed_api_error ) ) {
+				$parsed_api_error = __( 'The 3DS charge failed to be created', 'power-board' );
+			}
+
+			throw new Exception( esc_html( $parsed_api_error ) );
+
 		}
 
 		$this->logger->createLogRecord(
@@ -598,7 +619,28 @@ class CardProcessor {
 					$message,
 					LogRepository::ERROR
 				);
-				throw new Exception( esc_html( __( 'The PowerBoard customer could not be created successfully.', 'power-board' ) ) );
+			}
+
+			if ( ! empty( $customer['error'] ) ) {
+
+				$parsed_api_error = '';
+
+				if ( ! empty( $customer['error']['details'][0]['description'] ) ) {
+
+					$parsed_api_error = $customer['error']['details'][0]['description'];
+
+					if ( ! empty( $customer['error']['details'][0]['status_code_description'] ) ) {
+						$parsed_api_error .= ': ' . $customer['error']['details'][0]['status_code_description'];
+					}
+
+				}
+
+				if ( empty( $parsed_api_error ) ) {
+					$parsed_api_error = __( 'Unable to create the PowerBoard customer record', 'power-board' );
+				}
+
+				throw new Exception( esc_html( $parsed_api_error ) );
+
 			}
 
 			$this->logger->createLogRecord(
@@ -650,14 +692,31 @@ class CardProcessor {
 			$params['customer']['payment_source']['card_ccv'] = $this->args['cvv'];
 		}
 
-		$responce = SDKAdapterService::getInstance()->createCharge( $params );
+		$response = SDKAdapterService::getInstance()->createCharge( $params );
 
-		if ( ! empty( $responce['error'] ) ) {
-			$message = ! empty( $responce['error']['message'] ) ? ' ' . $responce['error']['message'] : '';
-			throw new Exception( esc_html( __( 'The charge could not be created successfully. <input id="widget_error" hidden type="text"/>', 'power-board' ) ) );
+		if ( ! empty( $response['error'] ) ) {
+
+			$parsed_api_error = '';
+
+			if ( ! empty( $response['error']['details'][0]['description'] ) ) {
+
+				$parsed_api_error = $response['error']['details'][0]['description'];
+
+				if ( ! empty( $response['error']['details'][0]['status_code_description'] ) ) {
+					$parsed_api_error .= ': ' . $response['error']['details'][0]['status_code_description'];
+				}
+
+			}
+
+			if ( empty( $parsed_api_error ) ) {
+				$parsed_api_error = __( 'The 3DS charge failed to be created', 'power-board' );
+			}
+
+			throw new Exception( esc_html( $parsed_api_error ) );
+
 		}
 
-		return $responce;
+		return $response;
 	}
 
 	public function createCustomer( $force = false ): void {
@@ -694,9 +753,30 @@ class CardProcessor {
 				$message,
 				LogRepository::ERROR
 			);
-			/* translators: %s: Error message from PowerBoaRD API. */
-			throw new Exception( esc_html( sprintf( __( 'The PowerBoard customer could not be created successfully. %s', 'power-board' ), $message ) ) );
 		}
+
+		if ( ! empty( $customer['error'] ) ) {
+
+			$parsed_api_error = '';
+
+			if ( ! empty( $customer['error']['details'][0]['description'] ) ) {
+
+				$parsed_api_error = $customer['error']['details'][0]['description'];
+
+				if ( ! empty( $customer['error']['details'][0]['status_code_description'] ) ) {
+					$parsed_api_error .= ': ' . $customer['error']['details'][0]['status_code_description'];
+				}
+
+			}
+
+			if ( empty( $parsed_api_error ) ) {
+				$parsed_api_error = __( 'Unable to create the PowerBoard customer record', 'power-board' );
+			}
+
+			throw new Exception( esc_html( $parsed_api_error ) );
+
+		}
+
 		$this->logger->createLogRecord(
 			$customer['resource']['data']['_id'],
 			'Create customer',

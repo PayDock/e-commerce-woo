@@ -37,20 +37,37 @@ class VaultTokenHelper {
 			$vaultTokenData = array_merge( $vaultTokenData, $additionalFields );
 		}
 
-		$responce = SDKAdapterService::getInstance()->createVaultToken( $vaultTokenData );
+		$response = SDKAdapterService::getInstance()->createVaultToken( $vaultTokenData );
 
-		if ( ! empty( $responce['error'] ) || empty( $responce['resource']['data']['vault_token'] ) ) {
-			$message = ! empty( $responce['error']['message'] ) ? ' ' . $responce['error']['message'] : '';
+		if ( ! empty( $response['error'] ) ) {
 
-			/* translators: %s: Detailed message from PowerBoard API. */
-			throw new Exception( esc_html( sprintf( __( 'Can\'t create PowerBoard vault token. %s  <input id="widget_error" hidden type="text"/>', 'power-board' ), $message ) ) );
+			$parsed_api_error = '';
+
+			if ( ! empty( $response['error']['details'][0]['description'] ) ) {
+
+				$parsed_api_error = $response['error']['details'][0]['description'];
+
+				if ( ! empty( $response['error']['details'][0]['status_code_description'] ) ) {
+					$parsed_api_error .= ': ' . $response['error']['details'][0]['status_code_description'];
+				}
+
+			}
+
+			if ( empty( $parsed_api_error ) ) {
+				$parsed_api_error = __( 'Unable to create PowerBoard vault token', 'power-board' );
+			}
+
+			$parsed_api_error .= ' <input id="widget_error" hidden type="text"/>';
+
+			throw new Exception( esc_html( $parsed_api_error ) );
+
 		}
 
 		if ( $this->shouldSaveVaultToken() ) {
-			( new UserTokenRepository() )->saveUserToken( $responce['resource']['data'] );
+			( new UserTokenRepository() )->saveUserToken( $response['resource']['data'] );
 		}
 
-		$this->args['selectedtoken'] = $responce['resource']['data']['vault_token'];
+		$this->args['selectedtoken'] = $response['resource']['data']['vault_token'];
 
 		return $this->args['selectedtoken'];
 	}

@@ -102,7 +102,28 @@ class ApmProcessor {
 				$message,
 				LogRepository::ERROR
 			);
-			throw new Exception( esc_html( __( 'The PowerBoard customer could not be created successfully.', 'power-board' ) ) );
+		}
+
+		if ( ! empty( $customer['error'] ) ) {
+
+			$parsed_api_error = '';
+
+			if ( ! empty( $customer['error']['details'][0]['description'] ) ) {
+
+				$parsed_api_error = $customer['error']['details'][0]['description'];
+
+				if ( ! empty( $customer['error']['details'][0]['status_code_description'] ) ) {
+					$parsed_api_error .= ': ' . $customer['error']['details'][0]['status_code_description'];
+				}
+
+			}
+
+			if ( empty( $parsed_api_error ) ) {
+				$parsed_api_error = __( 'Unable to create the PowerBoard customer record', 'power-board' );
+			}
+
+			throw new Exception( esc_html( $parsed_api_error ) );
+
 		}
 
 		$this->logger->createLogRecord(
