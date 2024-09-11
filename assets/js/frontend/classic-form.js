@@ -20,6 +20,7 @@ jQuery(function ($) {
             form: null,
             showErrorMessage(errorMessage) {
                 $('.woocommerce-notices-wrapper:first').html("");
+                $('.woocommerce-NoticeGroup.woocommerce-NoticeGroup-checkout').html("");
                 jQuery.post(PowerBoardAjax.url, {
                     _wpnonce: PowerBoardAjax.wpnonce_error,
                     dataType: 'html',
@@ -250,19 +251,15 @@ jQuery(function ($) {
                             this.form.submit()
                     }
 
-                    let counter = 0;
                     const widgetErrorInterval = setInterval(() => {
-                        const errorInput = document.querySelectorAll("#widget_error")[0]
-                        if (!!errorInput) {
+                        const errorBanner = document.querySelectorAll('.wc-block-components-notice-banner.is-error')[0];
+                        const bannerContent = errorBanner?.querySelectorAll('.wc-block-components-notice-banner__content')[0];
+                        if (bannerContent?.innerText.indexOf('widget_error') > -1) {
                             this.reloadCardWidget();
-                            errorInput?.remove();
+                            bannerContent.innerText = bannerContent?.innerText.replace('widget_error', '')
                             clearInterval(widgetErrorInterval);
-                        } else if(counter  === 50) {
-                            clearInterval(widgetErrorInterval);
-                        } else {
-                            counter++;
                         }
-                    }, 1000)
+                    }, 100)
                 })
 
                 $('#select-saved-cards').on('change', (event) => {
@@ -707,6 +704,7 @@ jQuery(function ($) {
             },
         }
         setTimeout(() => {
+            $('.woocommerce-notices-wrapper:first').html("");
             powerBoardHelper.init()
         }, 2000)
     });

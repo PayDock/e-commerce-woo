@@ -22,7 +22,7 @@ class VaultTokenHelper {
 		}
 
 		if ( empty( $OTTtoken ) ) {
-			throw new Exception( esc_html( __( 'The token wasn\'t generated correctly.  <input id="widget_error" hidden type="text"/>', 'power-board' ) ) );
+			throw new Exception( esc_html( __( 'The token wasn\'t generated correctly. widget_error', 'power-board' ) ) );
 		}
 
 		$vaultTokenData = [
@@ -43,7 +43,7 @@ class VaultTokenHelper {
 			$message = ! empty( $responce['error']['message'] ) ? ' ' . $responce['error']['message'] : '';
 
 			/* translators: %s: Detailed message from PowerBoard API. */
-			throw new Exception( esc_html( sprintf( __( 'Can\'t create PowerBoard vault token. %s  <input id="widget_error" hidden type="text"/>', 'power-board' ), $message ) ) );
+			throw new Exception( esc_html( sprintf( __( 'Can\'t create PowerBoard vault token. %s widget_error', 'power-board' ), $message ) ) );
 		}
 
 		if ( $this->shouldSaveVaultToken() ) {
