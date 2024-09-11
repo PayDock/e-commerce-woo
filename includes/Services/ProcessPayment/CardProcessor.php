@@ -157,8 +157,14 @@ class CardProcessor {
 
 			$parsed_api_error = '';
 
-			if ( ! empty( $threeDsCharge['error']['details'][0]['description'] ) && ! empty( $threeDsCharge['error']['details'][0]['status_code_description'] ) ) {
-				$parsed_api_error = $threeDsCharge['error']['details'][0]['description'] . ': ' . $threeDsCharge['error']['details'][0]['status_code_description'];
+			if ( ! empty( $threeDsCharge['error']['details'][0]['description'] ) ) {
+
+				$parsed_api_error = $threeDsCharge['error']['details'][0]['description'];
+
+				if ( ! empty( $threeDsCharge['error']['details'][0]['status_code_description'] ) ) {
+					$parsed_api_error .= ': ' . $threeDsCharge['error']['details'][0]['status_code_description'];
+				}
+
 			}
 
 			if ( empty( $parsed_api_error ) ) {
@@ -619,8 +625,14 @@ class CardProcessor {
 
 				$parsed_api_error = '';
 
-				if ( ! empty( $customer['error']['details'][0]['description'] ) && ! empty( $customer['error']['details'][0]['status_code_description'] ) ) {
-					$parsed_api_error = $customer['error']['details'][0]['description'] . ': ' . $customer['error']['details'][0]['status_code_description'];
+				if ( ! empty( $customer['error']['details'][0]['description'] ) ) {
+
+					$parsed_api_error = $customer['error']['details'][0]['description'];
+
+					if ( ! empty( $customer['error']['details'][0]['status_code_description'] ) ) {
+						$parsed_api_error .= ': ' . $customer['error']['details'][0]['status_code_description'];
+					}
+
 				}
 
 				if ( empty( $parsed_api_error ) ) {
@@ -680,14 +692,20 @@ class CardProcessor {
 			$params['customer']['payment_source']['card_ccv'] = $this->args['cvv'];
 		}
 
-		$responce = SDKAdapterService::getInstance()->createCharge( $params );
+		$response = SDKAdapterService::getInstance()->createCharge( $params );
 
-		if ( ! empty( $responce['error'] ) ) {
+		if ( ! empty( $response['error'] ) ) {
 
 			$parsed_api_error = '';
 
-			if ( ! empty( $responce['error']['details'][0]['description'] ) && ! empty( $responce['error']['details'][0]['status_code_description'] ) ) {
-				$parsed_api_error = $responce['error']['details'][0]['description'] . ': ' . $responce['error']['details'][0]['status_code_description'];
+			if ( ! empty( $response['error']['details'][0]['description'] ) ) {
+
+				$parsed_api_error = $response['error']['details'][0]['description'];
+
+				if ( ! empty( $response['error']['details'][0]['status_code_description'] ) ) {
+					$parsed_api_error .= ': ' . $response['error']['details'][0]['status_code_description'];
+				}
+
 			}
 
 			if ( empty( $parsed_api_error ) ) {
@@ -698,7 +716,7 @@ class CardProcessor {
 
 		}
 
-		return $responce;
+		return $response;
 	}
 
 	public function createCustomer( $force = false ): void {
@@ -741,8 +759,14 @@ class CardProcessor {
 
 			$parsed_api_error = '';
 
-			if ( ! empty( $customer['error']['details'][0]['description'] ) && ! empty( $customer['error']['details'][0]['status_code_description'] ) ) {
-				$parsed_api_error = $customer['error']['details'][0]['description'] . ': ' . $customer['error']['details'][0]['status_code_description'];
+			if ( ! empty( $customer['error']['details'][0]['description'] ) ) {
+
+				$parsed_api_error = $customer['error']['details'][0]['description'];
+
+				if ( ! empty( $customer['error']['details'][0]['status_code_description'] ) ) {
+					$parsed_api_error .= ': ' . $customer['error']['details'][0]['status_code_description'];
+				}
+
 			}
 
 			if ( empty( $parsed_api_error ) ) {

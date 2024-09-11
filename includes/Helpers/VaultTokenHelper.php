@@ -37,14 +37,20 @@ class VaultTokenHelper {
 			$vaultTokenData = array_merge( $vaultTokenData, $additionalFields );
 		}
 
-		$responce = SDKAdapterService::getInstance()->createVaultToken( $vaultTokenData );
+		$response = SDKAdapterService::getInstance()->createVaultToken( $vaultTokenData );
 
-		if ( ! empty( $responce['error'] ) ) {
+		if ( ! empty( $response['error'] ) ) {
 
 			$parsed_api_error = '';
 
-			if ( ! empty( $responce['error']['details'][0]['description'] ) && ! empty( $responce['error']['details'][0]['status_code_description'] ) ) {
-				$parsed_api_error = $responce['error']['details'][0]['description'] . ': ' . $responce['error']['details'][0]['status_code_description'];
+			if ( ! empty( $response['error']['details'][0]['description'] ) ) {
+
+				$parsed_api_error = $response['error']['details'][0]['description'];
+
+				if ( ! empty( $response['error']['details'][0]['status_code_description'] ) ) {
+					$parsed_api_error .= ': ' . $response['error']['details'][0]['status_code_description'];
+				}
+
 			}
 
 			if ( empty( $parsed_api_error ) ) {
@@ -58,10 +64,10 @@ class VaultTokenHelper {
 		}
 
 		if ( $this->shouldSaveVaultToken() ) {
-			( new UserTokenRepository() )->saveUserToken( $responce['resource']['data'] );
+			( new UserTokenRepository() )->saveUserToken( $response['resource']['data'] );
 		}
 
-		$this->args['selectedtoken'] = $responce['resource']['data']['vault_token'];
+		$this->args['selectedtoken'] = $response['resource']['data']['vault_token'];
 
 		return $this->args['selectedtoken'];
 	}

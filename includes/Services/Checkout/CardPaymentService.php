@@ -143,8 +143,14 @@ class CardPaymentService extends WC_Payment_Gateway {
 
 				$parsed_api_error = '';
 
-				if ( ! empty( $response['error']['details'][0]['description'] ) && ! empty( $response['error']['details'][0]['status_code_description'] ) ) {
-					$parsed_api_error = $response['error']['details'][0]['description'] . ': ' . $response['error']['details'][0]['status_code_description'];
+				if ( ! empty( $response['error']['details'][0]['description'] ) ) {
+
+					$parsed_api_error = $response['error']['details'][0]['description'];
+
+					if ( ! empty( $response['error']['details'][0]['status_code_description'] ) ) {
+						$parsed_api_error .= ': ' . $response['error']['details'][0]['status_code_description'];
+					}
+
 				}
 
 				if ( empty( $parsed_api_error ) ) {
