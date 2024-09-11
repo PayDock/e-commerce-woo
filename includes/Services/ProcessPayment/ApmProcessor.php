@@ -142,6 +142,8 @@ class ApmProcessor {
 					$parsed_api_error .= ': ' . $customer['error']['details'][0]['status_code_description'];
 				}
 
+			} elseif ( ! empty( $customer['error']['message'] ) ) {
+				$parsed_api_error = $customer['error']['message'];
 			}
 
 			if ( empty( $parsed_api_error ) ) {
