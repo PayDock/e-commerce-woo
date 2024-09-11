@@ -231,13 +231,14 @@ jQuery(function ($) {
                 this.currentForm.card.setFormFields(["card_name*","card_number*", "card_ccv*"]);
                 this.currentForm.card.onFinishInsert('#classic-power_board_gateway-token', 'payment_source');
                 this.currentForm.card.interceptSubmitForm('#widget');
+                this.currentForm.card.hideElements(['submit_button']);
 
                 this.currentForm.card.load();
 
-                this.currentForm.card.on(window.cba.EVENT.AFTER_LOAD, () => {
-                    this.currentForm.card.hideElements(['submit_button']);
-                })
-                this.currentForm.card.on(window.cba.EVENT.FINISH, () => {
+                this.currentForm.card.on(window.cba.EVENT.FINISH, (data) => {
+                    if (this.currentForm.widgetReloaded) {
+                        config.selectedToken = "";
+                    }
                     switch (config.card3DS) {
                         case 'IN_BUILD':
                             this.init3DSInBuilt(config)
@@ -248,6 +249,20 @@ jQuery(function ($) {
                         default:
                             this.form.submit()
                     }
+
+                    let counter = 0;
+                    const widgetErrorInterval = setInterval(() => {
+                        const errorInput = document.querySelectorAll("#widget_error")[0]
+                        if (!!errorInput) {
+                            this.reloadCardWidget();
+                            errorInput?.remove();
+                            clearInterval(widgetErrorInterval);
+                        } else if(counter  === 50) {
+                            clearInterval(widgetErrorInterval);
+                        } else {
+                            counter++;
+                        }
+                    }, 1000)
                 })
 
                 $('#select-saved-cards').on('change', (event) => {
@@ -267,6 +282,12 @@ jQuery(function ($) {
                     }
                     $('#power-board-selected-token').val(value)
                 })
+            },
+            reloadCardWidget() {
+                this.currentForm.card.reload();
+                const paymentSourceToken = $('#classic-power_board_gateway-token');
+                paymentSourceToken.value = null;
+                this.currentForm.widgetReloaded = true;
             },
             async init3DSInBuilt(config) {
                 if (config.selectedToken.trim().length === 0 && config.card3DSFlow === 'PERMANENT_VAULT') {
@@ -318,6 +339,8 @@ jQuery(function ($) {
                     .preAuth(preAuthData);
 
                 if (typeof preAuthResp._3ds.token === "undefined") {
+                    this.showErrorMessage('Payment has been rejected by PowerBoard. Please try a different payment method');
+                    this.reloadCardWidget();
                     return false;
                 }
 
