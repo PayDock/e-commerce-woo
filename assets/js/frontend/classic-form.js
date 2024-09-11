@@ -18,6 +18,22 @@ jQuery(function ($) {
             defaultFormTriger: false,
             sleepSetTimeout_ctrl: null,
             form: null,
+            showErrorMessage(errorMessage) {
+                $('.woocommerce-notices-wrapper:first').html("");
+                jQuery.post(PowerBoardAjax.url, {
+                    _wpnonce: PowerBoardAjax.wpnonce_error,
+                    dataType: 'html',
+                    action: 'power_board_create_error_notice',
+                    error: errorMessage,
+                }).then(message => {
+                    var doc = new DOMParser().parseFromString(message, "text/html");
+                    var noticeBanner = doc.querySelectorAll("div.wc-block-components-notice-banner");
+                    $('.woocommerce-notices-wrapper:first').append(noticeBanner)
+                    $('html, body').animate({
+                        scrollTop: ($('div.woocommerce-notices-wrapper').offset().top - 100)
+                    }, 800)
+                });
+            },
             setFieldLikeInvalid(fieldName) {
                 let element = document.getElementById(`${fieldName}_field`);
 
@@ -148,9 +164,33 @@ jQuery(function ($) {
                 }
             },
             customSubmitForm(event) {
+                $('.woocommerce-notices-wrapper:first').html('')
                 if (('power_board_gateway' === this.paymentMethod) && !this.defaultFormTriger) {
                     event.preventDefault();
-                    this.currentForm.card.trigger(window.cba.TRIGGER.SUBMIT_FORM);
+                    let config = this.getConfigs();
+                    if (!((Array.isArray(config.tokens) && config.tokens.length > 0 && config.selectedToken !== "") || this.currentForm.card.isValidForm())) {
+                        var invalid_fields = [];
+                        this.currentForm.card.getValidationState().invalid_fields?.forEach(field => {
+                            switch(field) {
+                                case "card_name":
+                                    invalid_fields.push("Card Name");
+                                    break;
+                                case "card_number":
+                                    invalid_fields.push("Card Number");
+                                    break;
+                                case "expiry_date":
+                                    invalid_fields.push("Expiry Date");
+                                    break;
+                                case "card_ccv":
+                                    invalid_fields.push("Card CCV");
+                                    break;
+                            }
+                        });
+                        this.showErrorMessage('Please fill in the required credit card form fields' + (invalid_fields.length ? `: ${invalid_fields.join(", ")}` : ""));
+
+                    } else {
+                        this.currentForm.card.trigger(window.cba.TRIGGER.SUBMIT_FORM);
+                    }
                 }
             },
             initCardForm() {

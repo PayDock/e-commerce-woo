@@ -56,6 +56,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 		add_action( 'wp_enqueue_scripts', [ $this, 'payment_scripts' ] );
 
 		add_action( 'wp_ajax_power_board_get_vault_token', [ $this, 'power_board_get_vault_token' ] );
+		add_action( 'wp_ajax_power_board_create_error_notice', [ $this, 'power_board_create_error_notice' ], 20 );
 
 		add_action( 'woocommerce_after_checkout_billing_form', [ $this, 'woocommerce_before_checkout_form' ], 10, 1 );
 	}
@@ -317,6 +318,15 @@ class CardPaymentService extends WC_Payment_Gateway {
 		}
 
 		die();
+	}
+
+	/**
+	 * Ajax function
+	 */
+	public function power_board_create_error_notice() {
+		wc_add_notice( __( $_POST['error'], 'power-board' ), 'error' );
+		$response['data'] = wc_print_notices();
+		return $response;
 	}
 
 	public function woocommerce_before_checkout_form( $arg ) {
