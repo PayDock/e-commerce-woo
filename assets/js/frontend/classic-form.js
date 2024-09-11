@@ -281,10 +281,18 @@ jQuery(function ($) {
                 const canvas = new window.cba.Canvas3ds("#power-board-3ds-container", preAuthResp._3ds.token);
                 canvas.load();
 
-                canvas.on('chargeAuth', (chargeAuthSuccessEvent) => {
-                    $('#charge3dsid').val(chargeAuthSuccessEvent.charge_3ds_id)
-                    this.form.submit()
+                canvas.on('chargeAuthSuccess', (chargeAuthEvent) => {
+                    $('#charge3dsid').val(chargeAuthEvent.charge_3ds_id);
+                    this.form.submit();
                 })
+                canvas.on('chargeAuthReject', (data) => {
+                    if (data.status === 'not_authenticated') {
+                        $("#power-board-3ds-container").hide();
+                        $('#classic-power_board_gateway').show();
+                    }
+                    $('#charge3dsid').val(data.charge_3ds_id);
+                    this.form.submit();
+                });
             },
             async getVaultToken(config) {
                 data = {...config}
