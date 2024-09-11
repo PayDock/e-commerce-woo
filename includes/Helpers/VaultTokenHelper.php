@@ -51,6 +51,8 @@ class VaultTokenHelper {
 					$parsed_api_error .= ': ' . $response['error']['details'][0]['status_code_description'];
 				}
 
+			} elseif ( ! empty( $response['error']['message'] ) ) {
+				$parsed_api_error = $response['error']['message'];
 			}
 
 			if ( empty( $parsed_api_error ) ) {

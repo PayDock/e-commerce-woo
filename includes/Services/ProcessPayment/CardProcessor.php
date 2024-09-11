@@ -165,6 +165,8 @@ class CardProcessor {
 					$parsed_api_error .= ': ' . $threeDsCharge['error']['details'][0]['status_code_description'];
 				}
 
+			} elseif ( ! empty( $threeDsCharge['error']['message'] ) ) {
+				$parsed_api_error = $threeDsCharge['error']['message'];
 			}
 
 			if ( empty( $parsed_api_error ) ) {
@@ -633,6 +635,8 @@ class CardProcessor {
 						$parsed_api_error .= ': ' . $customer['error']['details'][0]['status_code_description'];
 					}
 
+				} elseif ( ! empty( $customer['error']['message'] ) ) {
+					$parsed_api_error = $customer['error']['message'];
 				}
 
 				if ( empty( $parsed_api_error ) ) {
@@ -706,10 +710,12 @@ class CardProcessor {
 					$parsed_api_error .= ': ' . $response['error']['details'][0]['status_code_description'];
 				}
 
+			} elseif ( ! empty( $response['error']['message'] ) ) {
+				$parsed_api_error = $response['error']['message'];
 			}
 
 			if ( empty( $parsed_api_error ) ) {
-				$parsed_api_error = __( 'The 3DS charge failed to be created', 'power-board' );
+				$parsed_api_error = __( 'The customer charge failed to be created', 'power-board' );
 			}
 
 			throw new Exception( esc_html( $parsed_api_error ) );
@@ -767,6 +773,8 @@ class CardProcessor {
 					$parsed_api_error .= ': ' . $customer['error']['details'][0]['status_code_description'];
 				}
 
+			} elseif ( ! empty( $customer['error']['message'] ) ) {
+				$parsed_api_error = $customer['error']['message'];
 			}
 
 			if ( empty( $parsed_api_error ) ) {
