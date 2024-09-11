@@ -323,6 +323,8 @@ setTimeout(() => jQuery(function ($) {
     }
 
     function reloadWidget() {
+        const settings = window.wc.wcSettings.getSetting('power_board_data', {});
+        settings.selectedToken = ''
         window.widgetPowerBoard.reload();
         const paymentSourceToken = document.querySelector('[name="payment_source_token"]');
         paymentSourceToken.value = null;
