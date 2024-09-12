@@ -143,7 +143,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 			$response = $cardProcessor->run( $order );
 
 			if ( ! empty( $response['error'] ) && stripos( $response['error']['message'], '3d' ) === false) {
-				throw new Exception( esc_html( __( 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later. <input id="widget_error" hidden type="text"/>', 'power-board' ) ) );
+				throw new Exception( esc_html( __( 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later. widget_error', 'power-board' ) ) );
 			}
 
 			$chargeId = ! empty( $response['resource']['data']['_id'] ) ? $response['resource']['data']['_id'] : '';

@@ -20,6 +20,7 @@ jQuery(function ($) {
             form: null,
             showErrorMessage(errorMessage) {
                 $('.woocommerce-notices-wrapper:first').html("");
+                $('.woocommerce-NoticeGroup.woocommerce-NoticeGroup-checkout').html("");
                 jQuery.post(PowerBoardAjax.url, {
                     _wpnonce: PowerBoardAjax.wpnonce_error,
                     dataType: 'html',
@@ -231,13 +232,14 @@ jQuery(function ($) {
                 this.currentForm.card.setFormFields(["card_name*","card_number*", "card_ccv*"]);
                 this.currentForm.card.onFinishInsert('#classic-power_board_gateway-token', 'payment_source');
                 this.currentForm.card.interceptSubmitForm('#widget');
+                this.currentForm.card.hideElements(['submit_button']);
 
                 this.currentForm.card.load();
 
-                this.currentForm.card.on(window.cba.EVENT.AFTER_LOAD, () => {
-                    this.currentForm.card.hideElements(['submit_button']);
-                })
-                this.currentForm.card.on(window.cba.EVENT.FINISH, () => {
+                this.currentForm.card.on(window.cba.EVENT.FINISH, (data) => {
+                    if (this.currentForm.widgetReloaded) {
+                        config.selectedToken = "";
+                    }
                     switch (config.card3DS) {
                         case 'IN_BUILD':
                             this.init3DSInBuilt(config)
@@ -248,6 +250,16 @@ jQuery(function ($) {
                         default:
                             this.form.submit()
                     }
+
+                    const widgetErrorInterval = setInterval(() => {
+                        const errorBanner = document.querySelectorAll('.wc-block-components-notice-banner.is-error')[0];
+                        const bannerContent = errorBanner?.querySelectorAll('.wc-block-components-notice-banner__content')[0];
+                        if (bannerContent?.innerText.indexOf('widget_error') > -1) {
+                            this.reloadCardWidget();
+                            bannerContent.innerText = bannerContent?.innerText.replace('widget_error', '')
+                            clearInterval(widgetErrorInterval);
+                        }
+                    }, 100)
                 })
 
                 $('#select-saved-cards').on('change', (event) => {
@@ -267,6 +279,12 @@ jQuery(function ($) {
                     }
                     $('#power-board-selected-token').val(value)
                 })
+            },
+            reloadCardWidget() {
+                this.currentForm.card.reload();
+                const paymentSourceToken = $('#classic-power_board_gateway-token');
+                paymentSourceToken.value = null;
+                this.currentForm.widgetReloaded = true;
             },
             async init3DSInBuilt(config) {
                 if (config.selectedToken.trim().length === 0 && config.card3DSFlow === 'PERMANENT_VAULT') {
@@ -318,6 +336,8 @@ jQuery(function ($) {
                     .preAuth(preAuthData);
 
                 if (typeof preAuthResp._3ds.token === "undefined") {
+                    this.showErrorMessage('Payment has been rejected by PowerBoard. Please try a different payment method');
+                    this.reloadCardWidget();
                     return false;
                 }
 
@@ -692,6 +712,7 @@ jQuery(function ($) {
             },
         }
         setTimeout(() => {
+            $('.woocommerce-notices-wrapper:first').html("");
             powerBoardHelper.init()
         }, 2000)
     });

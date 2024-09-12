@@ -151,7 +151,7 @@ const Content = (props) => {
                 }
             })
 
-            const paymentSourceToken = document.querySelector('[name="power_board_payment_source_token"]')
+            const paymentSourceToken = document.querySelector('[name="payment_source_token"]')
             for (let second = 1; second <= 100; second++) {
                 await sleep(100);
                 if (paymentSourceToken !== null && paymentSourceToken.value.length) {
@@ -204,7 +204,7 @@ const Content = (props) => {
         });
 
         const unsubscribe = onPaymentSetup(async () => {
-            const paymentSourceToken = document.querySelector('[name="power_board_payment_source_token"]')
+            const paymentSourceToken = document.querySelector('[name="payment_source_token"]')
             if (paymentSourceToken === null) {
                 return;
             }
@@ -264,7 +264,7 @@ const Content = (props) => {
             "input",
             {
                 type: 'hidden',
-                name: 'power_board_payment_source_token'
+                name: 'payment_source_token'
             }
         ),
         checkboxSavedCardsComponent(labels.saveCardLabel)
