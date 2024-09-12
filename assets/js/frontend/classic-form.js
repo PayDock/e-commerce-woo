@@ -1,5 +1,64 @@
 jQuery(function ($) {
     $(document).ready(() => {
+        const CONFIG = {
+            phoneInputId: '#billing_phone',
+            baseCheckboxIdName: 'payment_method',
+            errorMessageClassName: 'wc-block-components-validation-error',
+            paymentOptionsNames: [
+                'power_board_gateway',
+                'power_board_google-pay_wallets_gateway',
+                'power_board_afterpay_wallets_gateway',
+                'power_board_pay-pal_wallets_gateway',
+                'power_board_afterpay_a_p_m_s_gateway',
+                'power_board_zip_a_p_m_s_gateway',
+            ],
+            phonePattern: /^\+[1-9]{1}[0-9]{3,14}$/,
+            errorMessageHtml: `<div class="wc-block-components-validation-error" role="alert"><p>Please enter your phone number in international format, starting with "+"</p></div>`,
+        };
+
+        const getPhoneInput = () => $(CONFIG.phoneInputId);
+
+        const getPaymentOptionsComponents = () =>
+          CONFIG.paymentOptionsNames
+            .map(name => $(`#${CONFIG.baseCheckboxIdName}_${name}`).parents().eq(1))
+            .filter($component => $component.length);
+
+        const validatePhone = ($input) => {
+            const phone = $input.val();
+            $input.next(`.${CONFIG.errorMessageClassName}`).remove();
+            if (phone && !CONFIG.phonePattern.test(phone)) {
+                $input.after(CONFIG.errorMessageHtml);
+
+                return false;
+            }
+
+            return true;
+        };
+
+        const updateVisibility = (phoneInput) => {
+            const validPhone = validatePhone(phoneInput);
+            $('button#place_order').styles = 'visibility:' + (validPhone ? 'visible' : 'hidden');
+
+            getPaymentOptionsComponents().forEach($component => {
+                  $component.css({
+                      opacity: validPhone ? 1 : 0.5,
+                      pointerEvents: validPhone ? 'auto' : 'none',
+                  })
+              }
+            );
+        };
+
+        const initPhoneNumberValidation = () => {
+            const phoneInput = getPhoneInput();
+            if (!phoneInput) return;
+
+            phoneInput.on('blur input', () => updateVisibility(phoneInput));
+
+            updateVisibility(phoneInput);
+        };
+
+        initPhoneNumberValidation();
+
         const powerBoardHelper = {
             paymentMethod: null,
             currentForm: {
@@ -20,6 +79,7 @@ jQuery(function ($) {
             form: null,
             showErrorMessage(errorMessage) {
                 $('.woocommerce-notices-wrapper:first').html("");
+                $('.woocommerce-NoticeGroup.woocommerce-NoticeGroup-checkout').html("");
                 jQuery.post(PowerBoardAjax.url, {
                     _wpnonce: PowerBoardAjax.wpnonce_error,
                     dataType: 'html',
@@ -231,13 +291,14 @@ jQuery(function ($) {
                 this.currentForm.card.setFormFields(["card_name*","card_number*", "card_ccv*"]);
                 this.currentForm.card.onFinishInsert('#classic-power_board_gateway-token', 'payment_source');
                 this.currentForm.card.interceptSubmitForm('#widget');
+                this.currentForm.card.hideElements(['submit_button']);
 
                 this.currentForm.card.load();
 
-                this.currentForm.card.on(window.cba.EVENT.AFTER_LOAD, () => {
-                    this.currentForm.card.hideElements(['submit_button']);
-                })
-                this.currentForm.card.on(window.cba.EVENT.FINISH, () => {
+                this.currentForm.card.on(window.cba.EVENT.FINISH, (data) => {
+                    if (this.currentForm.widgetReloaded) {
+                        config.selectedToken = "";
+                    }
                     switch (config.card3DS) {
                         case 'IN_BUILD':
                             this.init3DSInBuilt(config)
@@ -248,6 +309,16 @@ jQuery(function ($) {
                         default:
                             this.form.submit()
                     }
+
+                    const widgetErrorInterval = setInterval(() => {
+                        const errorBanner = document.querySelectorAll('.wc-block-components-notice-banner.is-error')[0];
+                        const bannerContent = errorBanner?.querySelectorAll('.wc-block-components-notice-banner__content')[0];
+                        if (bannerContent?.innerText.indexOf('widget_error') > -1) {
+                            this.reloadCardWidget();
+                            bannerContent.innerText = bannerContent?.innerText.replace('widget_error', '')
+                            clearInterval(widgetErrorInterval);
+                        }
+                    }, 100)
                 })
 
                 $('#select-saved-cards').on('change', (event) => {
@@ -267,6 +338,12 @@ jQuery(function ($) {
                     }
                     $('#power-board-selected-token').val(value)
                 })
+            },
+            reloadCardWidget() {
+                this.currentForm.card.reload();
+                const paymentSourceToken = $('#classic-power_board_gateway-token');
+                paymentSourceToken.value = null;
+                this.currentForm.widgetReloaded = true;
             },
             async init3DSInBuilt(config) {
                 if (config.selectedToken.trim().length === 0 && config.card3DSFlow === 'PERMANENT_VAULT') {
@@ -318,6 +395,8 @@ jQuery(function ($) {
                     .preAuth(preAuthData);
 
                 if (typeof preAuthResp._3ds.token === "undefined") {
+                    this.showErrorMessage('Payment has been rejected by PowerBoard. Please try a different payment method');
+                    this.reloadCardWidget();
                     return false;
                 }
 
@@ -692,6 +771,7 @@ jQuery(function ($) {
             },
         }
         setTimeout(() => {
+            $('.woocommerce-notices-wrapper:first').html("");
             powerBoardHelper.init()
         }, 2000)
     });

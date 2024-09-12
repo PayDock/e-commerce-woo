@@ -22,7 +22,7 @@ class VaultTokenHelper {
 		}
 
 		if ( empty( $OTTtoken ) ) {
-			throw new Exception( esc_html( __( 'The token wasn\'t generated correctly.  <input id="widget_error" hidden type="text"/>', 'power-board' ) ) );
+			throw new Exception( esc_html( __( 'The token wasn\'t generated correctly. widget_error', 'power-board' ) ) );
 		}
 
 		$vaultTokenData = [
