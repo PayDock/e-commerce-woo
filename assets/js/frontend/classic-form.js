@@ -18,6 +18,22 @@ jQuery(function ($) {
             defaultFormTriger: false,
             sleepSetTimeout_ctrl: null,
             form: null,
+            showErrorMessage(errorMessage) {
+                $('.woocommerce-notices-wrapper:first').html("");
+                jQuery.post(PowerBoardAjax.url, {
+                    _wpnonce: PowerBoardAjax.wpnonce_error,
+                    dataType: 'html',
+                    action: 'power_board_create_error_notice',
+                    error: errorMessage,
+                }).then(message => {
+                    var doc = new DOMParser().parseFromString(message, "text/html");
+                    var noticeBanner = doc.querySelectorAll("div.wc-block-components-notice-banner");
+                    $('.woocommerce-notices-wrapper:first').append(noticeBanner)
+                    $('html, body').animate({
+                        scrollTop: ($('div.woocommerce-notices-wrapper').offset().top - 100)
+                    }, 800)
+                });
+            },
             setFieldLikeInvalid(fieldName) {
                 let element = document.getElementById(`${fieldName}_field`);
 
@@ -148,9 +164,33 @@ jQuery(function ($) {
                 }
             },
             customSubmitForm(event) {
+                $('.woocommerce-notices-wrapper:first').html('')
                 if (('power_board_gateway' === this.paymentMethod) && !this.defaultFormTriger) {
                     event.preventDefault();
-                    this.currentForm.card.trigger(window.cba.TRIGGER.SUBMIT_FORM);
+                    let config = this.getConfigs();
+                    if (!((Array.isArray(config.tokens) && config.tokens.length > 0 && config.selectedToken !== "") || this.currentForm.card.isValidForm())) {
+                        var invalid_fields = [];
+                        this.currentForm.card.getValidationState().invalid_fields?.forEach(field => {
+                            switch(field) {
+                                case "card_name":
+                                    invalid_fields.push("Card Name");
+                                    break;
+                                case "card_number":
+                                    invalid_fields.push("Card Number");
+                                    break;
+                                case "expiry_date":
+                                    invalid_fields.push("Expiry Date");
+                                    break;
+                                case "card_ccv":
+                                    invalid_fields.push("Card CCV");
+                                    break;
+                            }
+                        });
+                        this.showErrorMessage('Please fill in the required credit card form fields' + (invalid_fields.length ? `: ${invalid_fields.join(", ")}` : ""));
+
+                    } else {
+                        this.currentForm.card.trigger(window.cba.TRIGGER.SUBMIT_FORM);
+                    }
                 }
             },
             initCardForm() {
@@ -164,7 +204,13 @@ jQuery(function ($) {
                     )
                 let gatewayId = isPermanent ? config.gatewayId : 'not_configured';
 
-                this.currentForm.card = new cba.HtmlWidget('#classic-power_board_gateway', config.publicKey, gatewayId);
+                this.currentForm.card = new cba.HtmlWidget('#classic-power_board_gateway', config.publicKey, gatewayId, "card", "card_payment_source_with_cvv");
+                this.currentForm.card.setFormPlaceholders({
+                    card_name: 'Card holders name *',
+                    card_number: 'Credit card number *',
+                    expire_month: 'MM/YY *',
+                    card_ccv: 'CCV *',
+                })
 
                 if (config.hasOwnProperty('styles')) {
                     this.currentForm.card.setStyles(config.styles);
@@ -178,18 +224,18 @@ jQuery(function ($) {
 
                 if (config.hasOwnProperty('styles') && config.cardSupportedCardTypes !== '') {
                     let supportedCard = config.cardSupportedCardTypes.replaceAll(' ', '').split(',')
-                    this.currentForm.card.setSupportedCardIcons(supportedCard);
+                    this.currentForm.card.setSupportedCardIcons(supportedCard, true);
                 }
 
                 this.currentForm.card.setEnv(config.isSandbox ? 'preproduction_cba' : 'production_cba');
-                this.currentForm.card.setFormFields(['email', 'phone']);
+                this.currentForm.card.setFormFields(["card_name*","card_number*", "card_ccv*"]);
                 this.currentForm.card.onFinishInsert('#classic-power_board_gateway-token', 'payment_source');
                 this.currentForm.card.interceptSubmitForm('#widget');
 
                 this.currentForm.card.load();
 
                 this.currentForm.card.on(window.cba.EVENT.AFTER_LOAD, () => {
-                    this.currentForm.card.hideElements(['submit_button', 'email', 'phone']);
+                    this.currentForm.card.hideElements(['submit_button']);
                 })
                 this.currentForm.card.on(window.cba.EVENT.FINISH, () => {
                     switch (config.card3DS) {
@@ -602,22 +648,22 @@ jQuery(function ($) {
                 })
             },
             init() {
-                setInterval(() => {
-                    let paymentMethod = $('input[name="payment_method"]:checked').val();
-                    if (paymentMethod && !this.paymentMethod) {
-                        this.setPaymentMethod(paymentMethod)
-                    }
-
+                const orderBtnInterval = setInterval(() => {
                     let orderButton = document.getElementById('place_order');
                     if (orderButton) {
+                        clearInterval(orderBtnInterval)
                         orderButton.addEventListener('click', (event) => {
                             this.customSubmitForm(event)
                         })
                     }
+                }, 100)
 
-                    this.form.submit((event) => {
-                        this.customSubmitForm(event)
-                    });
+                const paymentMethodInterval = setInterval(() => {
+                    let paymentMethod = $('input[name="payment_method"]:checked').val();
+                    if (paymentMethod && !this.paymentMethod) {
+                        clearInterval(paymentMethodInterval)
+                        this.setPaymentMethod(paymentMethod)
+                    }
                 }, 100)
 
                 this.form = $('form[name="checkout"]');
@@ -629,6 +675,10 @@ jQuery(function ($) {
                         console.error(e)
                     }
                 })
+
+                this.form.submit((event) => {
+                    this.customSubmitForm(event)
+                });
 
                 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
             },
