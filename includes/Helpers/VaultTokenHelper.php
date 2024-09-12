@@ -43,14 +43,8 @@ class VaultTokenHelper {
 
 			$parsed_api_error = '';
 
-			if ( ! empty( $response['error']['details'][0]['description'] ) ) {
-
-				$parsed_api_error = $response['error']['details'][0]['description'];
-
-				if ( ! empty( $response['error']['details'][0]['status_code_description'] ) ) {
-					$parsed_api_error .= ': ' . $response['error']['details'][0]['status_code_description'];
-				}
-
+			if ( ! empty( $response['error']['details'][0]['gateway_specific_description'] ) ) {
+				$parsed_api_error = $response['error']['details'][0]['gateway_specific_description'];
 			} elseif ( ! empty( $response['error']['message'] ) ) {
 				$parsed_api_error = $response['error']['message'];
 			}
