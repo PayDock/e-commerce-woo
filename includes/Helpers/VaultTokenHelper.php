@@ -59,7 +59,7 @@ class VaultTokenHelper {
 				$parsed_api_error = __( 'Unable to create PowerBoard vault token', 'power-board' );
 			}
 
-			$parsed_api_error .= ' <input id="widget_error" hidden type="text"/>';
+			$parsed_api_error .= ' widget_error';
 
 			throw new Exception( esc_html( $parsed_api_error ) );
 
