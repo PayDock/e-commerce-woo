@@ -24,10 +24,10 @@ Prerequisites to install and configure the PowerBoard plugin, you will need a Wo
 * [WooCommerce PHP and Wordpress Support] (https://woocommerce.com/document/update-php-wordpress/)
 
 ### Step-by-Step Installation
-
+https://github.com/CommBank-PowerBoard/powerboard-e-commerce-woo
 1. **Download the Plugin**
    - Download the zip file with the plugin:  
-     [PowerBoard WooCommerce Plugin] (https://github.com/CommBank-PowerBoard/powerboard-e-commerce-woo/blob/power_board/power-board_v3.1.3.zip)
+     [PowerBoard WooCommerce Plugin] (https://github.com/CommBank-PowerBoard/powerboard-e-commerce-woo)
 
 2. **Install the Plugin**
    - Go to WordPress -> Plugins -> Add new Plugin -> Upload Plugin
@@ -77,3 +77,47 @@ The following data is transferred for payment:
 This plugin contains compile and non compile js code, if you need customize something. Code that need compile for working with woocommerce block in `/resource` path.
 In root dir you can find `webpack.config.js` file, its default config for compile front-end js, but you can use it as a starting point to create your own configuration.
 Also we use helper code that not need compile what contained in assets path.
+
+== Screenshots ==
+
+1. Frontend
+2. Admin side settings
+3. API side
+
+== Changelog ==
+
+= 1.0.19 =
+* Initial release
+
+= 1.0.28 =
+* Bug fixes
+
+= 1.4.0 =
+* First release on the plugins store
+
+= 1.5.7 =
+* Bug fixes
+
+= 2.0.37 =
+* Completely new plugin. This version includes new code, supports new versions of PHP, MySQL, WordPress, WooCommerce, and v2 API of the PowerBoard app.
+
+= 2.0.44 =
+* New features, readme, changelog, etc.
+
+= 2.0.46 =
+* Patch, small fixes
+
+= 2.0.53 =
+* Min-max feature
+
+= 3.0.4 =
+* Fixes, updates, tweaks
+
+= 3.0.5 =
+* Statuses, openssl, paths
+
+= 3.1.2 =
+* Bug fixes
+
+= 3.1.3 =
+* More bugs fixed
