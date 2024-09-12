@@ -1,5 +1,64 @@
 jQuery(function ($) {
     $(document).ready(() => {
+        const CONFIG = {
+            phoneInputId: '#billing_phone',
+            baseCheckboxIdName: 'payment_method',
+            errorMessageClassName: 'wc-block-components-validation-error',
+            paymentOptionsNames: [
+                'power_board_gateway',
+                'power_board_google-pay_wallets_gateway',
+                'power_board_afterpay_wallets_gateway',
+                'power_board_pay-pal_wallets_gateway',
+                'power_board_afterpay_a_p_m_s_gateway',
+                'power_board_zip_a_p_m_s_gateway',
+            ],
+            phonePattern: /^\+[1-9]{1}[0-9]{3,14}$/,
+            errorMessageHtml: `<div class="wc-block-components-validation-error" role="alert"><p>Please enter your phone number in international format, starting with "+"</p></div>`,
+        };
+
+        const getPhoneInput = () => $(CONFIG.phoneInputId);
+
+        const getPaymentOptionsComponents = () =>
+          CONFIG.paymentOptionsNames
+            .map(name => $(`#${CONFIG.baseCheckboxIdName}_${name}`).parents().eq(1))
+            .filter($component => $component.length);
+
+        const validatePhone = ($input) => {
+            const phone = $input.val();
+            $input.next(`.${CONFIG.errorMessageClassName}`).remove();
+            if (phone && !CONFIG.phonePattern.test(phone)) {
+                $input.after(CONFIG.errorMessageHtml);
+
+                return false;
+            }
+
+            return true;
+        };
+
+        const updateVisibility = (phoneInput) => {
+            const validPhone = validatePhone(phoneInput);
+            $('button#place_order').styles = 'visibility:' + (validPhone ? 'visible' : 'hidden');
+
+            getPaymentOptionsComponents().forEach($component => {
+                  $component.css({
+                      opacity: validPhone ? 1 : 0.5,
+                      pointerEvents: validPhone ? 'auto' : 'none',
+                  })
+              }
+            );
+        };
+
+        const initPhoneNumberValidation = () => {
+            const phoneInput = getPhoneInput();
+            if (!phoneInput) return;
+
+            phoneInput.on('blur input', () => updateVisibility(phoneInput));
+
+            updateVisibility(phoneInput);
+        };
+
+        initPhoneNumberValidation();
+
         const powerBoardHelper = {
             paymentMethod: null,
             currentForm: {
