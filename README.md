@@ -19,18 +19,8 @@ Prerequisites to install and configure the PowerBoard plugin, you will need a Wo
 ### Step-by-Step Installation
 
 1. **Download the Plugin**
-   To download the latest version of PowerBoard's WooCommerce plugin, you can manually trigger a build and download the generated artefact directly from GitHub:
 
-   1. **Trigger the Build**
-   - Visit the Actions tab in the top navigation bar
-   - Under Workflows, find the workflow named "Build and upload the PowerBoard plugin"
-   - Click on "Run workflow"
-   - Select the branch and click the green "Run workflow" button
-
-   2. **Download the Plugin**
-   - Once the workflow completes, click on the run that you triggered in the previous step
-   - Scroll down to the Artifacts at the bottom of the page
-   - Click on the link to download the ZIP file
+Download our latest zip files from our releases section [here](https://github.com/CommBank-PowerBoard/powerboard-e-commerce-woo/releases/latest)
 
 2. **Install the Plugin**
    - Go to your Wordpress Site
