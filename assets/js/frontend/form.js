@@ -310,7 +310,7 @@ setTimeout(() => jQuery(function ($) {
             const widgetErrorInterval = setInterval(() => {
                 const errorInput = document.querySelectorAll("#widget_error")[0]
                 if (!!errorInput) {
-                    reloadWidget(true);
+                    reloadWidget();
                     errorInput?.remove();
                     clearInterval(widgetErrorInterval);
                 } else if(counter  === 50) {
@@ -322,14 +322,13 @@ setTimeout(() => jQuery(function ($) {
         })
     }
 
-    function reloadWidget(isError = false) {
+    function reloadWidget() {
         const settings = window.wc.wcSettings.getSetting('power_board_data', {});
         settings.selectedToken = ''
         window.widgetPowerBoard.reload();
         const paymentSourceToken = document.querySelector('[name="payment_source_token"]');
         paymentSourceToken.value = null;
         window.widgetReloaded = true
-        window.widgetPaymentError = isError
     }
 
     function setPaymentMethodWatcher() {
