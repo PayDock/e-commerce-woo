@@ -92,7 +92,7 @@ const Content = (props) => {
                 }
             }
 
-            if (!window.widgetReloaded && settings.selectedToken.length > 0) {
+            if (!(window.widgetReloaded && window.widgetPaymentError) && settings.selectedToken.length > 0) {
                 const selectedToken = settings.tokens.find(item => item.vault_token === settings.selectedToken)
                 if (!!selectedToken && selectedToken.hasOwnProperty('customer_id')) {
                     return true;
