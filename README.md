@@ -20,7 +20,7 @@ Prerequisites to install and configure the PowerBoard plugin, you will need a Wo
 
 1. **Download the Plugin**
 
-Download our latest zip files from our releases section [here](https://github.com/CommBank-PowerBoard/powerboard-e-commerce-woo/releases/latest)
+   - Zip files available from our releases section [here](https://github.com/CommBank-PowerBoard/powerboard-e-commerce-woo/releases/latest)
 
 2. **Install the Plugin**
    - Go to your Wordpress Site
