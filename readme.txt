@@ -3,6 +3,9 @@
 Contributors: PowerBoard
 https://www.commbank.com.au/
 Tags: powerboard, woocommerce, payment, gateways, payment gateways
+Requires PHP: 7.4
+Requires at least: 6.3
+Tested up to: 6.6
 Stable tag: 3.1.3
 License: GPL-3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -20,14 +23,14 @@ Use PowerBoard to add a payment gateway for credit cards, bank transfers, PayPal
 Prerequisites to install and configure the PowerBoard plugin, you will need a Wordpress instance running:
 
 * WooCommerce versions: 8.3-8.9
-* [WooCommerce Server Requirements] (https://woocommerce.com/document/server-requirements/)
-* [WooCommerce PHP and Wordpress Support] (https://woocommerce.com/document/update-php-wordpress/)
+* [WooCommerce Server Requirements](https://woocommerce.com/document/server-requirements/)
+* [WooCommerce PHP and Wordpress Support](https://woocommerce.com/document/update-php-wordpress/)
 
 ### Step-by-Step Installation
-https://github.com/CommBank-PowerBoard/powerboard-e-commerce-woo
+
 1. **Download the Plugin**
    - Download the zip file with the plugin:  
-     [PowerBoard WooCommerce Plugin] (https://github.com/CommBank-PowerBoard/powerboard-e-commerce-woo)
+     [PowerBoard WooCommerce Plugin](https://github.com/CommBank-PowerBoard/powerboard-e-commerce-woo)
 
 2. **Install the Plugin**
    - Go to WordPress -> Plugins -> Add new Plugin -> Upload Plugin
@@ -59,13 +62,13 @@ We also use a PowerBoard widget to implement front-end features ([More here](htt
 
 You can find all relevant information here:
 
-- [PowerBoard Web site](https://www.commbank.com.au/business/payments/take-online-payments/powerboard.html)
+- [Power Board Web site](https://www.commbank.com.au/business/payments/take-online-payments/powerboard.html)
 - [PowerBoard Terms and Conditions to supplement the Merchant Agreement](https://www.commbank.com.au/content/dam/commbank-assets/business/merchants/2022-09/powerboard-terms-and-conditions-july-2022.pdf)
 - [Group Privacy Statement](https://www.commbank.com.au/support/privacy.html?ei=CB-footer_privacy)
 - [Important documents](https://www.commbank.com.au/important-info.html?ei=CB-footer_ImportantDocs)
 - [Cookies policy](https://www.commbank.com.au/important-info/cookies.html?ei=CB-footer_cookies)
 
-This plugin transmits the payment and order information that the user provides on the checkout page to PowerBoard only
+This plugin transmits the payment and order information that the user provides on the checkout page to Power Board only
 when making a payment using one of the methods provided by this plugin.
 The following data is transferred for payment:
 * All payment details
