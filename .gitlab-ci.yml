@@ -1,0 +1,7 @@
+stages:
+ - security
+
+include:
+  - project: 'paydock/platform/gitlab-templates'
+    ref: main
+    file: '/security/gitlab-defectdojo.yaml'
