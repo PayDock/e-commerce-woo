@@ -323,12 +323,16 @@ setTimeout(() => jQuery(function ($) {
     }
 
     function reloadWidget() {
+        const savedCards = document.querySelector('.power-board-select-saved-cards');
+        if (savedCards !== null) {
+            savedCards.style = 'display: block';
+        }
         const settings = window.wc.wcSettings.getSetting('power_board_data', {});
-        settings.selectedToken = ''
+        settings.selectedToken = '';
         window.widgetPowerBoard.reload();
         const paymentSourceToken = document.querySelector('[name="payment_source_token"]');
         paymentSourceToken.value = null;
-        window.widgetReloaded = true
+        window.widgetReloaded = true;
     }
 
     function setPaymentMethodWatcher() {
