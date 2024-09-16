@@ -27,12 +27,6 @@ class PaymentController {
 			$error = __( 'The order is not found.', 'paydock' );
 		} else {
 			$order = wc_get_order( $orderId );
-			/*if ( ! in_array( $order->get_meta( ActivationHook::CUSTOM_STATUS_META_KEY ), [
-				'paydock-authorize',
-				'wc-paydock-authorize'
-			] ) ) {
-				$error = __( 'The order has been authorized and is awaiting approval.', 'paydock'  );
-			}*/
 		}
 
 		if ( is_object( $order ) ) {
@@ -42,11 +36,7 @@ class PaymentController {
 			$orderTotal = false;
 		}
 
-		// if ( ! empty( $orderTotal ) ) {
-		// 	$amount = $orderTotal;
-		// } else {
-			$amount = wc_format_decimal( $_POST['amount'] );
-		// }
+		$amount = wc_format_decimal( $_POST['amount'] );
 
 		$loggerRepository   = new LogRepository();
 		$paydockChargeId = $order->get_meta( 'paydock_charge_id' );
