@@ -2,9 +2,9 @@
 	exit;
 }
 
-use PowerBoard\Enums\OrderListColumns;
-use PowerBoard\Enums\OtherPaymentMethods;
-use PowerBoard\Enums\WalletPaymentMethods;
+use Paydock\Enums\OrderListColumns;
+use Paydock\Enums\OtherPaymentMethods;
+use Paydock\Enums\WalletPaymentMethods;
 ?>
 <span class="paydock-order-actions">
     <?php

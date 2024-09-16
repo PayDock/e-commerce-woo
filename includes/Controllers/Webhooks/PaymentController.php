@@ -179,7 +179,7 @@ class PaymentController {
 			$totalRefunded = $captureAmount;
 		}
 
-		$directlyCharged = $order->get_meta( 'pb_directly_charged' );
+		$directlyCharged = $order->get_meta( 'paydock_directly_charged' );
 		if ($_POST['action'] === 'edit_order') {
 			$amountToRefund =  !$directlyCharged && $captureAmount <= $amount ? ($captureAmount * 100 - $totalRefunded * 100) / 100 : $amount;
 			$refund->set_amount($amountToRefund);
