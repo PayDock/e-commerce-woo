@@ -8,6 +8,7 @@ use Paydock\Abstracts\AbstractPaymentService;
 use Paydock\Enums\OrderListColumns;
 use Paydock\Exceptions\LoggedException;
 use Paydock\Repositories\LogRepository;
+use Paydock\Services\OrderService;
 use Paydock\Services\ProcessPayment\BankAccountProcessor;
 use Paydock\Services\SettingsService;
 
@@ -57,11 +58,8 @@ class BankAccountPaymentService extends AbstractPaymentService {
 			$message   = $exception->response['error']['details'][0]['gateway_specific_description'] ?? 'empty message';
 
 			$loggerRepository->createLogRecord( $chargeId, $operation, $status, $message, LogRepository::ERROR );
-			throw new RouteException(
-				'woocommerce_rest_checkout_process_payment_error',
-				/* Translators: %s Exception message. */
-				esc_html( sprintf( __( 'Error: %s', 'paydock' ), $exception->getMessage() ) )
-			);
+
+			throw new RouteException( 'woocommerce_rest_checkout_process_payment_error', esc_html( $exception->getMessage() ) );
 		} catch ( Exception $exception ) {
 			throw new RouteException(
 				'woocommerce_rest_checkout_process_payment_error',
@@ -73,7 +71,6 @@ class BankAccountPaymentService extends AbstractPaymentService {
 		$status          = ucfirst( strtolower( $response['resource']['data']['transactions'][0]['status'] ?? 'undefined' ) );
 		$operation       = ucfirst( strtolower( $response['resource']['type'] ?? 'undefined' ) );
 		$isAuthorization = $response['resource']['data']['authorization'] ?? 0;
-		$isCompleted     = false;
 		$markAsSuccess   = false;
 		if ( $isAuthorization && 'Pending' == $status ) {
 			$status = 'wc-paydock-authorize';
@@ -82,15 +79,14 @@ class BankAccountPaymentService extends AbstractPaymentService {
 			$isCompleted   = 'Complete' === $status;
 			$status        = $isCompleted ? 'wc-paydock-paid' : 'wc-paydock-requested';
 		}
-		$order->set_status( $status );
+
+		OrderService::updateStatus( $order->get_id(), $status );
 		$order->payment_complete();
+		$order->update_meta_data( 'paydock_directly_charged', 1 );
+		$order->update_meta_data( 'paydock_charge_id', $chargeId );
+		$order->update_meta_data( OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(), 'Bank' );
 		$order->save();
-		update_post_meta( $order->get_id(), 'paydock_charge_id', $chargeId );
-		add_post_meta(
-			$order->get_id(),
-			OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(),
-			'Bank'
-		);
+
 		WC()->cart->empty_cart();
 
 		$loggerRepository->createLogRecord(

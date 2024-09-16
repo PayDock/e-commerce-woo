@@ -72,11 +72,15 @@ export default async (forcePermanentVault = false, newAmount = null) => {
         .preAuth(preAuthData);
 
     if (typeof preAuthResp._3ds.token === "undefined") {
+        window.widgetPaydock.reload();
+        const paymentSourceToken = document.querySelector('[name="paydock_payment_source_token"]');
+        paymentSourceToken.value = null;
+        window.widgetReloaded = true
         return false;
     }
 
     document.getElementById('paydockWidget3ds').innerHTML = '';
-    document.getElementById('paydockWidget3ds').setAttribute('style', '');
+    document.getElementById('paydockWidget3ds').setAttribute('style', '')
 
     const canvas = new window.paydock.Canvas3ds('#paydockWidget3ds', preAuthResp._3ds.token);
     canvas.load();
@@ -107,10 +111,9 @@ export default async (forcePermanentVault = false, newAmount = null) => {
 
     if (result === 'error') {
         showCardWidget();
-        window.widgetPowerBoard.reload();
+        window.widgetPaydock.reload();
         window.widgetReloaded = true;
     }
-
     return result;
 }
 

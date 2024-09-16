@@ -41,6 +41,8 @@ class WidgetValidationService {
 		'PAYMENT_A_P_M_S_ZIP_MAX',
 	];
 
+
+	private const ENABLED_CONDITION = 'yes';
 	private $errors = [];
 
 	private $result = [];

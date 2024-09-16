@@ -8,6 +8,29 @@ use Paydock\PaydockPlugin;
 
 class ActivationHook implements Hook {
 
+	public const CUSTOM_STATUSES = [
+		'paydock-failed'       => 'failed',
+		'wc-paydock-failed'    => 'failed',
+		'paydock-pending'      => 'pending',
+		'wc-paydock-pending'   => 'pending',
+		'paydock-paid'         => 'processing',
+		'paydock-authorize'    => 'on-hold',
+		'paydock-requested'    => 'processing',
+		'paydock-p-paid'       => 'processing',
+		'wc-paydock-paid'      => 'processing',
+		'wc-paydock-authorize' => 'on-hold',
+		'wc-paydock-requested' => 'processing',
+		'wc-paydock-p-paid'    => 'processing',
+		'paydock-cancelled'    => 'cancelled',
+		'wc-paydock-cancelled' => 'cancelled',
+		'paydock-refunded'     => 'refunded',
+		'paydock-p-refund'     => 'refunded',
+		'wc-paydock-refunded'  => 'refunded',
+		'wc-paydock-p-refund'  => 'refunded',
+	];
+
+	public const CUSTOM_STATUS_META_KEY = 'paydock_custom_status';
+
 	public function __construct() {
 	}
 
@@ -20,29 +43,24 @@ class ActivationHook implements Hook {
 
 		array_map( [ $instance, 'runMigration' ], $repositories );
 
-		$instance->renameConfiguration();
+		$instance->fixOrderStatuses();
 	}
 
 	protected function runMigration( Repository $repository ): void {
 		$repository->createTable();
 	}
 
-	protected function renameConfiguration() {
-		$options = [
-			'woocommerce_pay_dock_sandbox_settings' => 'woocommerce_paydock_sandbox_settings',
-			'woocommerce_pay_dock_settings'         => 'woocommerce_paydock_settings',
-			'woocommerce_pay_dock_widget_settings'  => 'woocommerce_paydock_widget_settings'
-		];
-		foreach ( $options as $oldOptionName => $newOptionName ) {
-			$oldOption = get_option( $oldOptionName );
-			if ( $oldOption ) {
-				$newOption = [];
-				foreach ( $oldOption as $key => $value ) {
-					$newKey               = str_replace( 'pay_dock', 'paydock', $key );
-					$newOption[ $newKey ] = $value;
-				}
-				add_option( $newOptionName, $newOption );
-			}
+	protected function fixOrderStatuses() {
+		foreach ( self::CUSTOM_STATUSES as $custom_status => $new_Status ) {
+			$this->updateOrderStatus( wc_get_orders( [ 'status' => $custom_status ] ), $new_Status );
+		}
+	}
+
+	protected function updateOrderStatus( $orders, $new_status ) {
+		foreach ( $orders as $order ) {
+			$order->update_meta_data( self::CUSTOM_STATUS_META_KEY, $order->get_status() );
+			$order->set_status( $new_status );
+			$order->save();
 		}
 	}
 }

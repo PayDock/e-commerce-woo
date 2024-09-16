@@ -30,7 +30,9 @@ final class PaydockGatewayBlocks extends AbstractBlock {
 			$userTokens['tokens'] = ( new UserTokenRepository() )->getUserTokens();
 		}
 
-		WC()->cart->calculate_totals();
+		if ( ! is_admin() ) {
+			WC()->cart->calculate_totals();
+		}
 
 		return array_merge( $userTokens, [
 			// Wordpress data

@@ -22,7 +22,7 @@ class AdminAssetsService {
 	private const STYLE_PREFIX = 'style';
 
 	private const URL_SCRIPT_PREFIX = 'assets/js/admin/';
-	private const URL_SCRIPT_POSTFIX = '.js?27012024';
+	private const URL_SCRIPT_POSTFIX = '.js';
 
 	private const URL_STYLE_PREFIX = 'assets/css/admin/';
 	private const URL_STYLE_POSTFIX = '.css';
@@ -55,7 +55,11 @@ class AdminAssetsService {
 
 	public function loadScripts(): void {
 		foreach ( self::SCRIPTS as $script ) {
+			$scriptName = $this->getScriptName( $script );
 			wp_enqueue_script( $this->getScriptName( $script ), '', [], PAYDOCK_PLUGIN_VERSION, true );
+			wp_localize_script( $scriptName, 'paydockWidgetSettings', [
+				'pluginUrlPrefix' => PAYDOCK_PLUGIN_URL
+			] );
 		}
 	}
 

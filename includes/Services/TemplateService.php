@@ -3,6 +3,7 @@
 namespace Paydock\Services;
 
 use Paydock\Enums\SettingsTabs;
+use Paydock\Services\SettingsService;
 
 class TemplateService {
 	private const TEMPLATE_DIR = 'templates';
@@ -26,6 +27,10 @@ class TemplateService {
 	}
 
 	public function includeAdminHtml( string $template, array $data = [] ): void {
+
+		$settings = SettingsService::getInstance();
+		$data['settings'] = $settings;
+
 		$data['templateService'] = $this;
 
 		if ( ! empty( $data ) ) {

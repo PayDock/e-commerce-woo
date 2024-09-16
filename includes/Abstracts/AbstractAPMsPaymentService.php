@@ -7,6 +7,7 @@ use Exception;
 use Paydock\Enums\OrderListColumns;
 use Paydock\Enums\OtherPaymentMethods;
 use Paydock\Repositories\LogRepository;
+use Paydock\Services\OrderService;
 use Paydock\Services\ProcessPayment\ApmProcessor;
 use Paydock\Services\SDKAdapterService;
 use Paydock\Services\SettingsService;
@@ -57,9 +58,28 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 
 			$response = $processor->run( $order );
 
-			if ( ! empty( $response['error'] ) || empty( $response['resource']['data']['_id'] ) ) {
-				throw new Exception( __( 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later.',
-					'paydock' ) );
+			if ( ! empty( $response['error'] ) ) {
+
+				$parsed_api_error = '';
+
+				if ( ! empty( $response['error']['details'][0]['description'] ) ) {
+
+					$parsed_api_error = $response['error']['details'][0]['description'];
+
+					if ( ! empty( $response['error']['details'][0]['status_code_description'] ) ) {
+						$parsed_api_error .= ': ' . $response['error']['details'][0]['status_code_description'];
+					}
+
+				} elseif ( ! empty( $response['error']['message'] ) ) {
+					$parsed_api_error = $response['error']['message'];
+				}
+
+				if ( empty( $parsed_api_error ) ) {
+					$parsed_api_error = __( 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later.', 'paydock' );
+				}
+
+				throw new Exception( esc_html( $parsed_api_error ) );
+
 			}
 
 			$chargeId = $response['resource']['data']['_id'];
@@ -71,11 +91,8 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 				$e->getMessage(),
 				LogRepository::ERROR
 			);
-			throw new RouteException(
-				'woocommerce_rest_checkout_process_payment_error',
-				/* translators: %s: Error message */
-				esc_html( sprintf( __( 'Error: %s', 'paydock' ), $e->getMessage() ) )
-			);
+
+			throw new RouteException( 'woocommerce_rest_checkout_process_payment_error', esc_html( $e->getMessage() ) );
 		}
 
 		$status          = ucfirst( strtolower( $response['resource']['data']['transactions'][0]['status'] ?? 'undefined' ) );
@@ -87,16 +104,13 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 			$isCompleted = 'complete' === strtolower( $status );
 			$status      = $isCompleted ? 'wc-paydock-paid' : 'wc-paydock-pending';
 		}
-		$order->set_status( $status );
-		$order->payment_complete();
+		OrderService::updateStatus( $order_id, $status );
+		if ( ! in_array( $status, [ 'wc-paydock-authorize' ] ) ) {
+			$order->payment_complete();
+			$order->update_meta_data( 'paydock_directly_charged', 1 );
+		}
+		$order->update_meta_data( 'paydock_charge_id', $chargeId );
 		$order->save();
-
-		update_post_meta( $order->get_id(), 'paydock_charge_id', $chargeId );
-		add_post_meta(
-			$order->get_id(),
-			OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(),
-			$this->getAPMsType()->getLabel()
-		);
 
 		WC()->cart->empty_cart();
 
@@ -107,6 +121,9 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 			'',
 			'wc-paydock-paid' == $status ? LogRepository::SUCCESS : LogRepository::DEFAULT
 		);
+
+		$order->update_meta_data( OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(), $this->getAPMsType()->getLabel() );
+		$order->save();
 
 		return [
 			'result'   => 'success',

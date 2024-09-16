@@ -51,7 +51,7 @@ const Content = (props) => {
             window.widgetPaydockBankAccount.trigger(window.paydock.TRIGGER.SUBMIT_FORM);
             let result = false;
 
-            window.widgetPaydockBankAccount.on(window.paydock.EVENT.FINISH, (data) => {
+            window.widgetPaydockBankAccount.on(window.paydock.EVENT.FINISH, (_data) => {
                 result = true;
             })
 
