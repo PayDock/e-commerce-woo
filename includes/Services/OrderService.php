@@ -136,11 +136,7 @@ class OrderService {
 			$capturedAmount = $order->get_meta( 'capture_amount' );
 
 			if ( ! empty( $capturedAmount ) ) {
-
-				// if ( $order->get_total() > $capturedAmount ) {
 					$this->templateService->includeAdminHtml( 'information-about-partial-captured', compact( 'order', 'capturedAmount' ) );
-				// }
-
 			}
 
 		}

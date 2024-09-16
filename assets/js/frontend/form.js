@@ -271,14 +271,6 @@ setTimeout(() => jQuery(function ($) {
             });
         }
 
-        /*
-        if (paydockCardSettings.hasOwnProperty('styles') && paydockCardSettings.cardSupportedCardTypes !== '') {
-            supportedCard = paydockCardSettings.cardSupportedCardTypes.replaceAll(' ', '').split(',')
-
-            widget.setSupportedCardIcons(supportedCard, true);
-        }
-        */
-
         if(paydockCardSettings.cardSupportedCardTypes !== '') {
             var supportedCardTypes = [];
 
