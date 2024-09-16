@@ -170,7 +170,7 @@ class CardProcessor {
 			}
 
 			if ( empty( $parsed_api_error ) ) {
-				$parsed_api_error = __( 'The 3DS charge failed to be created', 'power-board' );
+				$parsed_api_error = __( 'The 3DS charge failed to be created', 'paydock' );
 			}
 
 			throw new Exception( esc_html( $parsed_api_error ) );
@@ -640,7 +640,7 @@ class CardProcessor {
 				}
 
 				if ( empty( $parsed_api_error ) ) {
-					$parsed_api_error = __( 'Unable to create the PowerBoard customer record', 'power-board' );
+					$parsed_api_error = __( 'Unable to create the Paydock customer record', 'paydock' );
 				}
 
 				throw new Exception( esc_html( $parsed_api_error ) );
@@ -715,7 +715,7 @@ class CardProcessor {
 			}
 
 			if ( empty( $parsed_api_error ) ) {
-				$parsed_api_error = __( 'The customer charge failed to be created', 'power-board' );
+				$parsed_api_error = __( 'The customer charge failed to be created', 'paydock' );
 			}
 
 			throw new Exception( esc_html( $parsed_api_error ) );
@@ -778,7 +778,7 @@ class CardProcessor {
 			}
 
 			if ( empty( $parsed_api_error ) ) {
-				$parsed_api_error = __( 'Unable to create the PowerBoard customer record', 'power-board' );
+				$parsed_api_error = __( 'Unable to create the Paydock customer record', 'paydock' );
 			}
 
 			throw new Exception( esc_html( $parsed_api_error ) );

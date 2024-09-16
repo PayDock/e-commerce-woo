@@ -121,7 +121,7 @@ class ApmProcessor {
 			}
 
 			if ( empty( $parsed_api_error ) ) {
-				$parsed_api_error = __( 'Unable to create the PowerBoard customer record', 'power-board' );
+				$parsed_api_error = __( 'Unable to create the Paydock customer record', 'paydock' );
 			}
 
 			throw new Exception( esc_html( $parsed_api_error ) );

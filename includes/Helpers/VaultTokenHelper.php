@@ -56,7 +56,7 @@ class VaultTokenHelper {
 			}
 
 			if ( empty( $parsed_api_error ) ) {
-				$parsed_api_error = __( 'Unable to create PowerBoard vault token', 'power-board' );
+				$parsed_api_error = __( 'Unable to create Paydock vault token', 'paydock' );
 			}
 
 			$parsed_api_error .= ' <input id="widget_error" hidden type="text"/>';
