@@ -315,10 +315,14 @@ setTimeout(() => jQuery(function ($) {
     }
 
     function reloadWidget() {
+        const savedCards = document.querySelector('.power-board-select-saved-cards');
+        if (savedCards !== null) {
+            savedCards.style = 'display: block';
+        }
         window.widgetPaydock.reload();
         const paymentSourceToken = document.querySelector('[name="paydock_payment_source_token"]');
         paymentSourceToken.value = null;
-        window.widgetReloaded = true
+        window.widgetReloaded = true;
     }
 
     function setPaymentMethodWatcher() {
