@@ -259,9 +259,6 @@ jQuery(function ($) {
                 $("#power-board-3ds-container").hide();
 
                 if (!!this.currentForm.card) {
-                    const selectSavedCard = $('#select-saved-cards');
-                    if (selectSavedCard) selectSavedCard.val("")
-                    $('#classic-power_board_gateway-wrapper').show();
                     this.reloadCardWidget();
                     return;
                 }
@@ -306,7 +303,7 @@ jQuery(function ($) {
 
                 this.currentForm.card.load();
 
-                this.currentForm.card.on(window.cba.EVENT.FINISH, (data) => {
+                this.currentForm.card.on(window.cba.EVENT.FINISH, () => {
                     config.paymentSourceToken = $('#power-board-selected-token').val();
                     switch (config.card3DS) {
                         case 'IN_BUILD':
@@ -679,7 +676,7 @@ jQuery(function ($) {
 
                         this.currentForm.wallets[index].setEnv(isSandbox ? 'preproduction_cba' : 'production_cba')
 
-                        this.currentForm.wallets[index].onPaymentError((data) => {
+                        this.currentForm.wallets[index].onPaymentError(() => {
                             this.form.submit()
                         });
 
