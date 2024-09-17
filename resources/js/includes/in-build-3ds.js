@@ -71,16 +71,9 @@ export default async (forcePermanentVault = false, newAmount = null) => {
         .preAuth(preAuthData);
 
     if (typeof preAuthResp._3ds.token === "undefined") {
-        const savedCards = document.querySelector('.power-board-select-saved-cards');
-        if (savedCards !== null) {
-            savedCards.style = 'display: block';
-        }
-        const settings = window.wc.wcSettings.getSetting('power_board_data', {});
-        settings.selectedToken = '';
-        window.widgetPowerBoard.reload();
+        reloadWidget()
         const paymentSourceToken = document.querySelector('[name="payment_source_token"]');
         paymentSourceToken.value = null;
-        window.widgetReloaded = true
         return false;
     }
 
@@ -116,16 +109,20 @@ export default async (forcePermanentVault = false, newAmount = null) => {
 
     if (result === 'error') {
         showCardWidget();
-        const savedCards = document.querySelector('.power-board-select-saved-cards');
-        if (savedCards !== null) {
-            savedCards.style = 'display: block';
-        }
-        const settings = window.wc.wcSettings.getSetting('power_board_data', {});
-        settings.selectedToken = '';
-        window.widgetPowerBoard.reload();
-        window.widgetReloaded = true;
+        reloadWidget();
     }
     return result;
+}
+
+function reloadWidget() {
+    const savedCards = document.querySelector('.power-board-select-saved-cards');
+    if (savedCards !== null) {
+        savedCards.style = 'display: block';
+    }
+    const settings = window.wc.wcSettings.getSetting('power_board_data', {});
+    settings.selectedToken = '';
+    window.widgetPowerBoard.reload();
+    window.widgetReloaded = true;
 }
 
 function showCardWidget() {
