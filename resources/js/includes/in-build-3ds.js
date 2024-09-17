@@ -7,7 +7,6 @@ import {CART_STORE_KEY} from '@woocommerce/block-data';
 export default async (forcePermanentVault = false, newAmount = null) => {
     const settings = getSetting('power_board_data', {});
 
-    if (window.widgetReloaded) settings.selectedToken = ""
     if (settings.selectedToken.trim().length === 0 && settings.card3DSFlow === 'PERMANENT_VAULT') {
         settings.selectedToken = await getVaultToken()
     }
@@ -72,6 +71,12 @@ export default async (forcePermanentVault = false, newAmount = null) => {
         .preAuth(preAuthData);
 
     if (typeof preAuthResp._3ds.token === "undefined") {
+        const savedCards = document.querySelector('.power-board-select-saved-cards');
+        if (savedCards !== null) {
+            savedCards.style = 'display: block';
+        }
+        const settings = window.wc.wcSettings.getSetting('power_board_data', {});
+        settings.selectedToken = '';
         window.widgetPowerBoard.reload();
         const paymentSourceToken = document.querySelector('[name="payment_source_token"]');
         paymentSourceToken.value = null;
@@ -91,7 +96,7 @@ export default async (forcePermanentVault = false, newAmount = null) => {
     canvas.on('chargeAuthSuccess', (chargeAuthEvent) => {
         result = chargeAuthEvent.charge_3ds_id
     })
-    canvas.on('additionalDataCollectReject', (chargeAuthSuccessEvent) => {
+    canvas.on('additionalDataCollectReject', () => {
         result = 'error';
     })
     canvas.on('chargeAuthReject', function (data) {
@@ -111,6 +116,12 @@ export default async (forcePermanentVault = false, newAmount = null) => {
 
     if (result === 'error') {
         showCardWidget();
+        const savedCards = document.querySelector('.power-board-select-saved-cards');
+        if (savedCards !== null) {
+            savedCards.style = 'display: block';
+        }
+        const settings = window.wc.wcSettings.getSetting('power_board_data', {});
+        settings.selectedToken = '';
         window.widgetPowerBoard.reload();
         window.widgetReloaded = true;
     }
