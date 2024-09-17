@@ -177,6 +177,7 @@
     max-height: 20px !important;
     margin-top: 2px;
 }
+
 .paydock-payment-method-label-icon.zip{
     height: 20px !important;
     max-height: 20px !important;
@@ -198,4 +199,7 @@
     margin: -6px 1em -6px auto;
     height: 36px !important;
     max-height: 36px !important;
+}
+.wc-orders-list-table .status-paydock-p-paid .order_total>span {
+    display: none;
 }

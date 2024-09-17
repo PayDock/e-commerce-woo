@@ -156,6 +156,7 @@ class WidgetSettingService extends AbstractSettingService {
 			->getAdminHtml( 'min-max', compact( 'keys', 'data', 'value' ) );
 	}
 
+
 	public function generate_textarea_html( $key, $data ) {
 		$field_key = $this->get_field_key( $key );
 		$defaults  = [

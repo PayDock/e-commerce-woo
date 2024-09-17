@@ -10,6 +10,7 @@ use Paydock\API\NotificationService;
 use Paydock\API\ServiceService;
 use Paydock\API\TokenService;
 use Paydock\API\VaultService;
+use Paydock\Enums\ConfigAPI;
 use Paydock\Enums\CredentialSettings;
 use Paydock\Enums\CredentialsTypes;
 use Paydock\Enums\SettingGroups;
@@ -18,8 +19,6 @@ use Paydock\Services\Settings\SandboxConnectionSettingService;
 
 class SDKAdapterService {
 	private const ENABLED_CONDITION = 'yes';
-	private const PROD_ENV = 'production';
-	private const SANDBOX_ENV = 'sandbox';
 	private static $instance = null;
 
 	public function __construct() {
@@ -33,35 +32,35 @@ class SDKAdapterService {
 
 		if ( $isProd ) {
 			$settings = new LiveConnectionSettingService();
+			$env = ConfigAPI::PRODUCTION_ENVIRONMENT()->value;
 
 		} else {
 			$settings = new SandboxConnectionSettingService();
+			$env = ConfigAPI::SANDBOX_ENVIRONMENT()->value;
 		}
 
 		$isAccessToken = CredentialsTypes::ACCESS_KEY()->name == $settings->get_option(
-			$settingsService->getOptionName( $settings->id, [ 
+			$settingsService->getOptionName( $settings->id, [
 				SettingGroups::CREDENTIALS()->name,
 				CredentialSettings::TYPE()->name,
 			] )
 		);
 
 		if ( $isAccessToken ) {
-			$secretKey = $settings->get_option( $settingsService->getOptionName( $settings->id, [ 
+			$secretKey = $settings->get_option( $settingsService->getOptionName( $settings->id, [
 				SettingGroups::CREDENTIALS()->name,
 				CredentialSettings::ACCESS_KEY()->name,
 			] ) );
 		} else {
-			$publicKey = $settings->get_option( $settingsService->getOptionName( $settings->id, [ 
+			$publicKey = $settings->get_option( $settingsService->getOptionName( $settings->id, [
 				SettingGroups::CREDENTIALS()->name,
 				CredentialSettings::PUBLIC_KEY()->name,
 			] ) );
-			$secretKey = $settings->get_option( $settingsService->getOptionName( $settings->id, [ 
+			$secretKey = $settings->get_option( $settingsService->getOptionName( $settings->id, [
 				SettingGroups::CREDENTIALS()->name,
 				CredentialSettings::SECRET_KEY()->name,
 			] ) );
 		}
-
-		$env = $isProd ? self::PROD_ENV : self::SANDBOX_ENV;
 
 		ConfigService::init( $env, $secretKey, $publicKey ?? null );
 	}
@@ -71,7 +70,7 @@ class SDKAdapterService {
 			$settings = new SandboxConnectionSettingService();
 
 			return self::ENABLED_CONDITION !== $settings->get_option(
-				SettingsService::getInstance()->getOptionName( $settings->id, [ 
+				SettingsService::getInstance()->getOptionName( $settings->id, [
 					SettingGroups::CREDENTIALS()->name,
 					CredentialSettings::SANDBOX()->name,
 				] )
@@ -189,24 +188,24 @@ class SDKAdapterService {
 		return $chargeService->refunds( $params )->call();
 	}
 
-	public function errorMessageToString( $responce ): string {
-		if ( $responce instanceof \WP_Error ) {
-			return $responce->get_error_message();
+	public function errorMessageToString( $response ): string {
+		if ( $response instanceof \WP_Error ) {
+			return $response->get_error_message();
 		}
 
-		$result = ! empty( $responce['error']['message'] ) ? ' ' . $responce['error']['message'] : '';
-		if ( isset( $responce['error']['details'] ) ) {
-			if ( ! empty( $responce['error']['details']['messages'] ) ) {
-				$firstMessage = reset( $responce['error']['details']['messages'] );
+		$result = ! empty( $response['error']['message'] ) ? ' ' . $response['error']['message'] : '';
+		if ( isset( $response['error']['details'] ) ) {
+			if ( ! empty( $response['error']['details']['messages'] ) ) {
+				$firstMessage = reset( $response['error']['details']['messages'] );
 
 				return $firstMessage;
 			}
 
-			$firstDetail = reset( $responce['error']['details'] );
+			$firstDetail = reset( $response['error']['details'] );
 			if ( is_array( $firstDetail ) ) {
 				$result .= ' ' . implode( ',', $firstDetail );
 			} else {
-				$result .= ' ' . implode( ',', $responce['error']['details'] );
+				$result .= ' ' . implode( ',', $response['error']['details'] );
 			}
 		}
 

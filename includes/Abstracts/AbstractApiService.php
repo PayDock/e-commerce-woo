@@ -35,9 +35,9 @@ abstract class AbstractApiService {
 		}
 
 		$args['headers']['X-paydock-Meta'] = 'V'
-		                                     . PAYDOCK_PLUGIN_VERSION
-		                                     . '_woocommerce_'
-		                                     . WC()->version;
+		                                         . PAYDOCK_PLUGIN_VERSION
+		                                         . '_woocommerce_'
+		                                         . WC()->version;
 
 		switch ( $this->allowedAction[ $this->action ] ) {
 			case 'POST':

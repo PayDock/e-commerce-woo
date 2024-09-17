@@ -6,7 +6,6 @@ use Paydock\Enums\WalletPaymentMethods;
 use Paydock\Services\SettingsService;
 
 abstract class AbstractWalletBlock extends AbstractBlock {
-
 	protected $gateway;
 
 	public function __construct() {
@@ -31,8 +30,8 @@ abstract class AbstractWalletBlock extends AbstractBlock {
 			'publicKey'        => $settings->getPublicKey(),
 			'isSandbox'        => $settings->isSandbox(),
 			'styles'           => $settings->getWidgetStyles(),
-			'total_limitation' => $settings->getWidgetPaymentWalletMinMax( $payment ),
 		];
+
 
 		$result['wallets'][ strtolower( $payment->name ) ] = [
 			'gatewayId'      => $settings->getWalletGatewayId( $payment ),

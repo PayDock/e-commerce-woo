@@ -17,7 +17,7 @@ class LogsSettingService extends AbstractSettingService {
 		$order   = ! empty( $order ) ? sanitize_text_field( $order ) : 'desc';
 		$orderBy = ! empty( $orderBy ) ? sanitize_text_field( $orderBy ) : 'created_at';
 
-		$tabs = $this->getTabs();
+		$tabs    = $this->getTabs();
 		$records = ( new LogRepository() )->getLogs( $page, $perPage, $orderBy, $order );
 
 		if ( $echo ) {

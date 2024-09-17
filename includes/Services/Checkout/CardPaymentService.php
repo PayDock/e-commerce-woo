@@ -9,8 +9,8 @@ use Paydock\Enums\SettingsTabs;
 use Paydock\Enums\WidgetSettings;
 use Paydock\Repositories\LogRepository;
 use Paydock\Repositories\UserTokenRepository;
+use Paydock\Services\OrderService;
 use Paydock\Services\ProcessPayment\CardProcessor;
-use Paydock\Services\SDKAdapterService;
 use Paydock\Services\SettingsService;
 use WC_Payment_Gateway;
 
@@ -69,31 +69,37 @@ class CardPaymentService extends WC_Payment_Gateway {
 	}
 
 	public function payment_scripts() {
-		if ( ! is_checkout() ) {
+        if ( ! is_checkout() ) {
 			return '';
 		}
 
-		wp_enqueue_script( 'paydock-form', PAYDOCK_PLUGIN_URL . '/assets/js/frontend/form.js', [], time(), true );
+		wp_enqueue_script( 'paydock-form', PAYDOCK_PLUGIN_URL . 'assets/js/frontend/form.js', [], time(), true );
 		wp_localize_script( 'paydock-form', 'paydockCardWidgetSettings', [
 			'suportedCard' => 'Visa, Mastercard, Adex',
 		] );
-		wp_enqueue_style( 'paydock-widget-css', PAYDOCK_PLUGIN_URL . '/assets/css/frontend/widget.css', [], time() );
+		wp_localize_script( 'paydock-form', 'paydockWidgetSettings', [
+			'pluginUrlPrefix' => PAYDOCK_PLUGIN_URL
+		] );
+		wp_enqueue_style( 'paydock-widget-css', PAYDOCK_PLUGIN_URL . 'assets/css/frontend/widget.css', [], time() );
 
 		wp_localize_script( 'paydock-form', 'PaydockAjax', [
 			'url'     => admin_url( 'admin-ajax.php' ),
 			'wpnonce' => wp_create_nonce( 'paydock_get_vault_token' )
 		] );
+		wp_localize_script( 'paydock-form', 'paydockWidgetSettings', [
+			'pluginUrlPrefix' => PAYDOCK_PLUGIN_URL
+		] );
 
 		return '';
-	}
-
-	public function get_title() {
-		return trim( $this->title ) ? $this->title : 'Card';
 	}
 
 	public function is_available() {
 		return SettingsService::getInstance()->isEnabledPayment()
 		       && SettingsService::getInstance()->isCardEnabled();
+	}
+
+	public function get_title() {
+		return trim( $this->title ) ? $this->title : 'Card';
 	}
 
 	/**
@@ -117,7 +123,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 		/* Translators: %1$s: number of orders
 		*  Translators: %2$s: Site name
 		*/
-			__( 'Order №%1$s from %2$s.', 'paydock-for-woocommerce' ),
+			__( 'Order №%1$s from %2$s.', 'paydock' ),
 			$order->get_order_number(),
 			$siteName
 		);
@@ -134,7 +140,29 @@ class CardPaymentService extends WC_Payment_Gateway {
 			$response = $cardProcessor->run( $order );
 
 			if ( ! empty( $response['error'] ) ) {
-				throw new Exception( esc_html( __( 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later. <input id="widget_error" hidden type="text"/>', 'paydock' ) ) );
+
+				$parsed_api_error = '';
+
+				if ( ! empty( $response['error']['details'][0]['description'] ) ) {
+
+					$parsed_api_error = $response['error']['details'][0]['description'];
+
+					if ( ! empty( $response['error']['details'][0]['status_code_description'] ) ) {
+						$parsed_api_error .= ': ' . $response['error']['details'][0]['status_code_description'];
+					}
+
+				} elseif ( ! empty( $response['error']['message'] ) ) {
+					$parsed_api_error = $response['error']['message'];
+				}
+
+				if ( empty( $parsed_api_error ) ) {
+					$parsed_api_error = __( 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later.', 'paydock' );
+				}
+
+				$parsed_api_error .= ' <input id="widget_error" hidden type="text"/>';
+
+				throw new Exception( esc_html( $parsed_api_error ) );
+
 			}
 
 			$chargeId = ! empty( $response['resource']['data']['_id'] ) ? $response['resource']['data']['_id'] : '';
@@ -146,11 +174,8 @@ class CardPaymentService extends WC_Payment_Gateway {
 				$e->getMessage(),
 				LogRepository::ERROR
 			);
-			throw new RouteException(
-				'woocommerce_rest_checkout_process_payment_error',
-				/* Translators: %s Error message from API. */
-				esc_html( sprintf( __( 'Error: %s', 'paydock' ), $e->getMessage() ) )
-			);
+
+			throw new RouteException( 'woocommerce_rest_checkout_process_payment_error', esc_html( $e->getMessage() ) );
 		}
 
 		try {
@@ -173,7 +198,6 @@ class CardPaymentService extends WC_Payment_Gateway {
 		$status          = ucfirst( strtolower( $response['resource']['data']['status'] ?? 'undefined' ) );
 		$operation       = ucfirst( strtolower( $response['resource']['type'] ?? 'undefined' ) );
 		$isAuthorization = $response['resource']['data']['authorization'] ?? 0;
-		$isCompleted     = false;
 		$markAsSuccess   = false;
 		if (
 			'Pre_authentication_pending' === $status &&
@@ -190,16 +214,15 @@ class CardPaymentService extends WC_Payment_Gateway {
 			}
 		}
 
-		$order->set_status( $status );
-		$order->payment_complete();
-		$order->save();
-		update_post_meta( $order->get_id(), 'paydock_charge_id', $chargeId );
-		add_post_meta(
-			$order->get_id(),
-			OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(),
-			'Card'
-		);
+		OrderService::updateStatus( $order->get_id(), $status );
+		if ( ! in_array( $status, [ 'wc-paydock-pending', 'wc-paydock-authorize' ] ) ) {
+			$order->payment_complete();
+			$order->update_meta_data( 'paydock_directly_charged', 1 );
+		}
+		$order->update_meta_data( 'paydock_charge_id', $chargeId );
+		$order->update_meta_data( OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(), 'Card' );
 		WC()->cart->empty_cart();
+		$order->save();
 
 		$loggerRepository->createLogRecord(
 			$chargeId,

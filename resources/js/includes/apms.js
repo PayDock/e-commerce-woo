@@ -23,6 +23,11 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
     const settings = getSetting(settingKey, {});
     const label = decodeEntities(settings.title) || __(defaultLabel, textDomain);
     const cart = select(CART_STORE_KEY);
+    const getNewAmount = () => {
+        const { total_price: currentTotalPrice } = cart.getCartTotals();
+        return Number(currentTotalPrice / 100).toFixed(2);
+    };
+
     const Content = (props) => {
         const {eventRegistration, emitResponse} = props;
         const {onPaymentSetup, onCheckoutValidation, onShippingRateSelectSuccess} = eventRegistration;
@@ -75,7 +80,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
                 wasInit = true;
                 button = new window.paydock.AfterpayCheckoutButton('#' + buttonId, settings.publicKey, settings.gatewayId);
                 meta = {
-                    amount: settings.amount,
+                    amount: getNewAmount(),
                     currency: settings.currency,
                     email: billingAddress.email,
                     first_name: billingAddress.first_name,
@@ -107,8 +112,8 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
                     state: shippingAddress.state
                 };
 
-                if (shippingRates.length && shippingRates[0].shipping_rates.length) {
-                    shippingRates[0].shipping_rates.forEach((rate, key) => {
+                if(shippingRates.length && shippingRates[0].shipping_rates.length) {
+                    shippingRates[0].shipping_rates.forEach((rate, _key) => {
                         if (!rate.selected) {
                             return;
                         }
@@ -133,7 +138,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
                 }
 
                 meta.charge = {
-                    amount: settings.amount,
+                    amount: getNewAmount(),
                     currency: settings.currency,
                     email: billingAddress.email,
                     first_name: billingAddress.first_name,
@@ -157,7 +162,8 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
                             reference: item.short_description,
                         };
 
-                        if (item.images.length > 0) {
+                        if (item.images.length > 0)
+                        {
                             result.image_uri = item.images[0].src
                         }
 
@@ -186,8 +192,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
 
         useEffect(() => {
             const unsubscribeFromShippingEvent = onShippingRateSelectSuccess(async () => {
-                const { total_price: currentTotalPrice } = cart.getCartTotals();
-                const newAmount = Number(currentTotalPrice / 100).toFixed(2);
+                const newAmount = getNewAmount();
                 const updateAmount = (currentAmount, newAmount) => currentAmount !== undefined ? { amount: newAmount } : {};
 
                 button.setMeta({
@@ -221,6 +226,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
                     message: labels.fillDataError,
                 };
             });
+
             return () => {
                 const unsubscribeFn = (fn) => typeof fn === 'function' ? fn() : null;
 
@@ -296,10 +302,6 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
             ),
         )
     }
-    const Label = (props) => {
-        const {PaymentMethodLabel} = props.components;
-        return <PaymentMethodLabel text={label}/>;
-    };
 
     const PaydokApms = {
         name: paymentName,

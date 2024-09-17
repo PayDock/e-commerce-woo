@@ -103,15 +103,16 @@ class WidgetController {
 				],
 			];
 
-			if ( ! empty( $shippingAddress['phone'] ) ) {
-				$chargeRequest['shipping']['contact']['phone'] = $shippingAddress['phone'];
-			}
-
 			if ( ! empty( $billingAdress['phone'] ) ) {
 				$chargeRequest['customer']['phone'] = $billingAdress['phone'];
 			}
+
 			if ( ! empty( $billingAdress['address_2'] ) ) {
 				$chargeRequest['customer']['payment_source']['address_line2'] = $billingAdress['address_2'];
+			}
+
+			if ( ! empty( $shippingAddress['phone'] ) ) {
+				$chargeRequest['shipping']['contact']['phone'] = $shippingAddress['phone'];
 			}
 
 			if ( ! empty( $shippingAddress['address_2'] ) ) {
@@ -154,7 +155,8 @@ class WidgetController {
 			}
 
 			if ( $isAfterPay ) {
-				$chargeRequest['meta']['success_url'] = $order->get_checkout_order_received_url();
+				$chargeRequest['meta']['success_url'] = add_query_arg( 'afterpay-success', 'true',
+					$order->get_checkout_order_received_url() );
 				$chargeRequest['meta']['error_url']   = add_query_arg( 'afterpay-error', 'true',
 					$order->get_checkout_order_received_url() );
 			}
@@ -163,7 +165,7 @@ class WidgetController {
 			                           ->createWalletCharge( $chargeRequest,
 				                           $settings->isWalletDirectCharge( $payment ) );
 
-			$result['county'] = $billingAdress['country'] ?? '';
+			$result['county'] = $request['address']['country'] ?? '';
 
 			if ( WalletPaymentMethods::PAY_PAL_SMART_BUTTON()->name === $payment->name ) {
 				$result['pay_later'] = 'yes' === $settings->isPayPallSmartButtonPayLater();

@@ -40,7 +40,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
         if (!button.length || localState.total === cart.getCartTotals()?.total_price) {
             return;
         }
-        jQuery('#' + buttonId).each((index, element) => {
+        jQuery('#' + buttonId).each((index,element) => {
             element.innerHTML = '';
         })
         localState.total = cart.getCartTotals()?.total_price;
@@ -62,7 +62,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
             setTimeout(() => {
                 initButton(id, '#' + buttonId, localState.initData, settings.isSandbox, localState.reload)
             }, 0);
-        }).catch((e) => {
+        }).catch((_e) => {
             localState.wasInit = false;
         })
     }
@@ -82,7 +82,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
             && validationSuccess
             && !afterpayCountries.find((element) => element === billingAddress.country.toLowerCase())) {
             afterpayCountriesError.show()
-        } else if (validationSuccess && !localState.initData) {
+        } else if (validationSuccess && !localState.initData && !localState.wasInit) {
             afterpayCountriesError.hide()
             initWallet();
         } else if (validationSuccess && localState.initData && !button.length) {
@@ -102,7 +102,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
                     initWallet();
                 }
             });
-            const oncheckout = onCheckoutValidation(async (data) => {
+            const oncheckout = onCheckoutValidation(async (_data) => {
                 if (!validationSuccess) {
                     return {
                         type: emitResponse.responseTypes.ERROR, errorMessage: labels.fillDataError
@@ -118,7 +118,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
                 }
             });
 
-            const unsubscribe = onPaymentSetup(async (data) => {
+            const unsubscribe = onPaymentSetup(async (_data) => {
                 if (document.getElementById('paymentSourceWalletsToken').value) {
                     return {
                         type: emitResponse.responseTypes.SUCCESS, meta: {
@@ -200,7 +200,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
         ),
         content: <Content/>,
         edit: <Content/>,
-        canMakePayment: () => canMakePayment(settings.total_limitation, cart.getCartTotals()?.total_price),
+        canMakePayment: () => true,
         ariaLabel: label,
         supports: {
             features: settings.supports,

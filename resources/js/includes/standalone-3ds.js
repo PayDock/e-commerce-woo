@@ -22,7 +22,7 @@ export default async () => {
     canvas.on('additionalDataCollectReject', (chargeAuthSuccessEvent) => {
         result = 'error'
     })
-    canvas.on('chargeAuthReject', function (data) {
+    canvas.on('chargeAuthReject', function (_data) {
         result = 'error';
     });
 

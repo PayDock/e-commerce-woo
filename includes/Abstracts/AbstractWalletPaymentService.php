@@ -6,6 +6,7 @@ use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Paydock\Enums\OrderListColumns;
 use Paydock\Enums\WalletPaymentMethods;
 use Paydock\Repositories\LogRepository;
+use Paydock\Services\OrderService;
 use Paydock\Services\SettingsService;
 
 abstract class AbstractWalletPaymentService extends AbstractPaymentService {
@@ -77,16 +78,14 @@ abstract class AbstractWalletPaymentService extends AbstractPaymentService {
 			$status = 'wc-paydock-paid';
 		}
 
-		$order->set_status( $status );
-		$order->payment_complete();
+		OrderService::updateStatus( $order_id, $status );
+		if ( ! in_array( $status, [ 'wc-paydock-authorize' ] ) ) {
+			$order->payment_complete();
+			$order->update_meta_data( 'paydock_directly_charged', 1 );
+		}
+		$order->update_meta_data( 'paydock_charge_id', $chargeId );
+		$order->update_meta_data( OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(), $this->getWalletType()->getLabel() );
 		$order->save();
-
-		update_post_meta( $order_id, 'paydock_charge_id', $chargeId );
-		add_post_meta(
-			$order_id,
-			OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(),
-			$this->getWalletType()->getLabel()
-		);
 
 		WC()->cart->empty_cart();
 

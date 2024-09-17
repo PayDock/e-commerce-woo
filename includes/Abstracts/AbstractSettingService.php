@@ -21,6 +21,7 @@ abstract class AbstractSettingService extends \WC_Payment_Gateway {
 		if ( in_array( $section, $available_sections ) ) {
 			$this->currentSection = $section;
 		}
+
 		$this->id                 = $this->getId();
 		$this->enabled            = $this->get_option( 'enabled' );
 		$this->method_title       = __( 'Paydock Gateway', 'paydock' );
@@ -68,19 +69,19 @@ abstract class AbstractSettingService extends \WC_Payment_Gateway {
 	protected function getTabs(): array {
 		return [
 			SettingsTabs::LIVE_CONNECTION()->value    => [
-				'label'  => __( 'Live Connection' ),
+				'label'  => __( 'Live Connection', 'paydock' ),
 				'active' => SettingsTabs::LIVE_CONNECTION()->value == $this->currentSection,
 			],
 			SettingsTabs::SANDBOX_CONNECTION()->value => [
-				'label'  => __( 'Sandbox Connection' ),
+				'label'  => __( 'Sandbox Connection', 'paydock' ),
 				'active' => SettingsTabs::SANDBOX_CONNECTION()->value == $this->currentSection,
 			],
 			SettingsTabs::WIDGET()->value             => [
-				'label'  => __( 'Widget Configuration' ),
+				'label'  => __( 'Widget Configuration', 'paydock' ),
 				'active' => SettingsTabs::WIDGET()->value == $this->currentSection,
 			],
 			SettingsTabs::LOG()->value                => [
-				'label'  => __( 'Logs' ),
+				'label'  => __( 'Logs', 'paydock' ),
 				'active' => SettingsTabs::LOG()->value == $this->currentSection,
 			],
 		];
