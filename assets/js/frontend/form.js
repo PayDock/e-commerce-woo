@@ -319,6 +319,8 @@ setTimeout(() => jQuery(function ($) {
         if (savedCards !== null) {
             savedCards.style = 'display: block';
         }
+        const settings = window.wc.wcSettings.getSetting('paydock_data', {});
+        settings.selectedToken = ''
         window.widgetPaydock.reload();
         const paymentSourceToken = document.querySelector('[name="paydock_payment_source_token"]');
         paymentSourceToken.value = null;
