@@ -8,15 +8,14 @@ use Paydock\Abstracts\AbstractSingleton;
 use Paydock\Controllers\Admin\WidgetController;
 use Paydock\Controllers\Webhooks\PaymentController;
 use Paydock\Enums\SettingsTabs;
-use Paydock\PaydockPlugin;
 use Paydock\Services\Checkout\BankAccountPaymentService;
 use Paydock\Util\AfterpayAPMsBlock;
 use Paydock\Util\AfterpayWalletBlock;
 use Paydock\Util\ApplePayWalletBlock;
 use Paydock\Util\BankAccountBlock;
 use Paydock\Util\GooglePayWalletBlock;
-use Paydock\Util\PaydockGatewayBlocks;
 use Paydock\Util\PayPalWalletBlock;
+use Paydock\Util\PaydockGatewayBlocks;
 use Paydock\Util\ZipAPMsBlock;
 
 class ActionsService extends AbstractSingleton {
@@ -40,6 +39,24 @@ class ActionsService extends AbstractSingleton {
 			$this->addEndpoints();
 			$this->addOrderActions();
 		} );
+
+		add_filter( 'gettext', array( $this, 'custom_refund_message' ), 20, 3 );
+	}
+
+	public function custom_refund_message( $translated_text, $text, $domain ) {
+
+		if ( 'woocommerce' === $domain ) {
+
+			$message_to_change = strpos( $translated_text, 'Invalid refund amount' );
+
+			if ( $message_to_change !== false ) {
+				$translated_text = 'The requested refund amount exceeds the available charge/Transaction amount';
+			}
+
+		}
+
+		return $translated_text;
+
 	}
 
 	protected function addCompatibilityWithWooCommerce(): void {
@@ -127,7 +144,8 @@ class ActionsService extends AbstractSingleton {
 	protected function addOrderActions() {
 		$orderService      = new OrderService();
 		$paymentController = new PaymentController();
-		add_action( 'woocommerce_order_item_add_action_buttons', [ $orderService, 'iniPaydockOrderButtons' ], 10, 2 );
+		add_action( 'woocommerce_order_item_add_action_buttons', [ $orderService, 'iniPaydockOrderButtons' ], 10,
+			2 );
 		add_action( 'woocommerce_order_status_changed', [ $orderService, 'statusChangeVerification' ], 20, 4 );
 		add_action( 'woocommerce_admin_order_totals_after_total',
 			[ $orderService, 'informationAboutPartialCaptured' ] );

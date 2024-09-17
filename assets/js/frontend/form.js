@@ -1,4 +1,90 @@
 setTimeout(() => jQuery(function ($) {
+    $(document).ready(function() {
+        const CONFIG = {
+            phoneInputIds: {
+                shipping: '#shipping-phone',
+                billing: '#billing-phone',
+            },
+            baseCheckboxIdName: 'radio-control-wc-payment-method-options',
+            errorMessageClassName: 'wc-block-components-validation-error',
+            paymentOptionsNames: [
+                'paydock_gateway',
+                'paydock_google-pay_wallets_gateway',
+                'paydock_afterpay_wallets_gateway',
+                'paydock_pay-pal_wallets_gateway',
+                'paydock_afterpay_a_p_m_s_gateway',
+                'paydock_zip_a_p_m_s_gateway',
+            ],
+            phonePattern: /^\+[1-9]{1}[0-9]{3,14}$/,
+            errorMessageHtml: `<div class="wc-block-components-validation-error" role="alert"><p>Please enter your phone number in international format, starting with "+"</p></div>`,
+        };
+
+        const $submitButton = $('button.wc-block-components-checkout-place-order-button');
+        const $shippingWrapper = $('#shipping-fields .wc-block-components-address-address-wrapper');
+
+        const getPhoneInputs = () =>
+            Object.entries(CONFIG.phoneInputIds)
+                .reduce((acc, [key, selector]) => {
+                    const $input = $(selector);
+                    if ($input.length) acc[key] = $input;
+                    return acc;
+                }, {});
+
+        const getPaymentOptionsComponents = () =>
+            CONFIG.paymentOptionsNames
+                .map(name => $(`#${CONFIG.baseCheckboxIdName}-${name}`).parents().eq(1))
+                .filter($component => $component.length);
+
+        const validatePhone = ($input) => {
+            const phone = $input.val();
+            $input.next(`.${CONFIG.errorMessageClassName}`).remove();
+            if (phone && !CONFIG.phonePattern.test(phone)) {
+                $input.after(CONFIG.errorMessageHtml);
+
+                return false;
+            }
+
+            return true;
+        };
+
+        const updateVisibility = (phoneInputs) => {
+            const validationResults = Object.entries(phoneInputs).reduce((acc, [key, $input]) => {
+                acc[key] = validatePhone($input);
+                return acc;
+            }, {});
+
+            const allValid = Object.values(validationResults).every(Boolean);
+            const shippingValid = validationResults.shipping;
+
+            if (!shippingValid) $shippingWrapper.addClass('is-editing');
+
+            $submitButton.css('visibility', allValid ? 'visible' : 'hidden');
+
+            getPaymentOptionsComponents().forEach($component =>
+                $component.css({
+                    opacity: allValid ? 1 : 0.5,
+                    pointerEvents: allValid ? 'auto' : 'none',
+                })
+            );
+        };
+
+        const initPhoneNumbersValidation = () => {
+            const phoneInputs = getPhoneInputs();
+            if (!Object.keys(phoneInputs).length) return;
+
+            Object.values(phoneInputs).forEach($input =>
+                $input.on('blur input', () => updateVisibility(phoneInputs))
+            );
+
+            updateVisibility(phoneInputs);
+        };
+
+        initPhoneNumbersValidation();
+
+        $('.wc-block-checkout__use-address-for-billing input[type="checkbox"]').on("change", initPhoneNumbersValidation);
+    });
+
+
     let lastInit = '';
 
     const paydockValidation = {
@@ -30,6 +116,10 @@ setTimeout(() => jQuery(function ($) {
             })
         },
         lastWcFormValidation: false,
+        paydockCCFormValidation() {
+            const { tokens, selectedToken } = window.wc.wcSettings.getSetting('paydock_data', {});
+            return (Array.isArray(tokens) && tokens.length > 0 && selectedToken !== "") || window.widgetPaydock.isValidForm();
+        },
         wcFormValidation() {
             const checkoutFormElements = document.querySelectorAll('.wc-block-checkout__form input, .wc-block-checkout__form select');
             if (checkoutFormElements.length === 0) {
@@ -91,8 +181,6 @@ setTimeout(() => jQuery(function ($) {
     const idPaydockWidgetBankAccount = 'radio-control-wc-payment-method-options-paydock_bank_account_gateway';
 
     const searchParams = new URLSearchParams(window.location.search);
-    const paydockAfterpayWalletsSettings = window.wc?.wcSettings?.getSetting('paydock_afterpay_wallet_block_data', {});
-
     function initPaydockWidgetBankAccount() {
         lastInit = idPaydockWidgetBankAccount;
         const paydockBankAccountSettings = window.wc.wcSettings.getSetting('paydock_bank_account_block_data', {});
@@ -143,7 +231,7 @@ setTimeout(() => jQuery(function ($) {
     }
 
     function initPaydockWidgetCard() {
-        window.widgetReloaded = lastInit !== idPaydockWidgetCard;
+        window.widgetReloaded = lastInit === idPaydockWidgetCard;
         lastInit = idPaydockWidgetCard;
 
         const htmlWidget = document.getElementById('paydockWidgetCard')
@@ -164,7 +252,13 @@ setTimeout(() => jQuery(function ($) {
 
         let gatewayId = isPermanent ? paydockCardSettings.gatewayId : 'not_configured';
 
-        widget = new paydock.HtmlWidget('#paydockWidgetCard', paydockCardSettings.publicKey, gatewayId);
+        widget = new paydock.HtmlWidget('#paydockWidgetCard', paydockCardSettings.publicKey, gatewayId, "card", "card_payment_source_with_cvv");
+        widget.setFormPlaceholders({
+            card_name: 'Card holders name *',
+            card_number: 'Credit card number *',
+            expire_month: 'MM/YY *',
+            card_ccv: 'CCV *',
+        })
 
         window.widgetPaydock = widget;
         if (paydockCardSettings.hasOwnProperty('styles')) {
@@ -177,10 +271,18 @@ setTimeout(() => jQuery(function ($) {
             });
         }
 
-        if (paydockCardSettings.hasOwnProperty('styles') && paydockCardSettings.cardSupportedCardTypes !== '') {
-            supportedCard = paydockCardSettings.cardSupportedCardTypes.replaceAll(' ', '').split(',')
-            widget.setSupportedCardIcons(supportedCard);
+        if(paydockCardSettings.cardSupportedCardTypes !== '') {
+            var supportedCardTypes = [];
+
+            var supportedCards = paydockCardSettings.cardSupportedCardTypes.replaceAll(' ', '').split(',')
+            $.each(supportedCards, function(index, value) {
+                supportedCardTypes.push(value);
+            });
+
+            widget.setSupportedCardIcons(supportedCardTypes, true);
         }
+
+        widget.setFormFields(["card_name*","card_number*", "card_ccv*"]);
         widget.setEnv(paydockCardSettings.isSandbox ? 'sandbox' : 'production');
         widget.onFinishInsert('input[name="paydock_payment_source_token"]', 'payment_source');
         widget.interceptSubmitForm('#widget');
@@ -190,7 +292,8 @@ setTimeout(() => jQuery(function ($) {
         let performAfterLoadActions = true
         widget.on(window.paydock.EVENT.AFTER_LOAD, () => {
             if (performAfterLoadActions && $('#paydockWidgetCard_wrapper').length > 0) {
-                paydockValidation.passWidgetToWrapper('paydockWidgetCard')
+                paydockValidation.passWidgetToWrapper('paydockWidgetCard');
+                performAfterLoadActions = false;
             }
         })
 
@@ -249,12 +352,14 @@ setTimeout(() => jQuery(function ($) {
 
     setInterval(() => {
         try {
+            const paydockAfterpayWalletsSettings = window.wc?.wcSettings?.getSetting('paydock_afterpay_wallet_block_data', {});
             const $radioWidgetCard = $('#' + idPaydockWidgetCard);
             const $radioWidgetBankAccount = $('#' + idPaydockWidgetBankAccount);
             const $orderButton = $('.wc-block-components-checkout-place-order-button');
             const $afterpayRadiobatton = $('#radio-control-wc-payment-method-options-paydock_afterpay_wallets_gateway');
             if (
-                paydockAfterpayWalletsSettings.hasOwnProperty('afterpayChargeId')
+                paydockAfterpayWalletsSettings
+                && paydockAfterpayWalletsSettings.hasOwnProperty('afterpayChargeId')
                 && (paydockAfterpayWalletsSettings.afterpayChargeId.length > 0)
                 && searchParams.has('afterpay_success')
                 && !wasClick

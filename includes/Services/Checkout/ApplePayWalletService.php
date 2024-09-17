@@ -10,7 +10,7 @@ class ApplePayWalletService extends AbstractWalletPaymentService {
 		return WalletPaymentMethods::APPLE_PAY();
 	}
 
-    public function  get_title(){
-		return trim($this->title) ? $this->title :  'Apple Pay';
-    }
+	public function  get_title(){
+        return trim($this->title) ? $this->title :  'Apple Pay';
+	}
 }

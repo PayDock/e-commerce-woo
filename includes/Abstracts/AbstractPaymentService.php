@@ -24,7 +24,8 @@ abstract class AbstractPaymentService extends WC_Payment_Gateway {
 			'default_credit_card_form',
 		];
 
-		$this->method_title       = _x( 'Paydock payment', 'Paydock payment method', 'woocommerce-gateway-paydock' );
+		$this->method_title       = _x( 'Paydock payment', 'Paydock payment method',
+			'woocommerce-gateway-paydock' );
 		$this->method_description = __( 'Allows Paydock payments.', 'woocommerce-gateway-paydock' );
 
 		$this->init_settings();
@@ -40,14 +41,24 @@ abstract class AbstractPaymentService extends WC_Payment_Gateway {
 			return '';
 		}
 
-		wp_enqueue_script( 'paydock-form', PAYDOCK_PLUGIN_URL . '/assets/js/frontend/form.js', [], time(), true );
+		wp_enqueue_script( 'paydock-form', PAYDOCK_PLUGIN_URL . 'assets/js/frontend/form.js', [], time(),
+			true );
+		wp_localize_script( 'paydock-form', 'paydockCardWidgetSettings', [
+			'suportedCard'    => 'Visa, Mastercard, Adex',
+		] );
+		wp_localize_script( 'paydock-form', 'paydockWidgetSettings', [
+			'pluginUrlPrefix' => PAYDOCK_PLUGIN_URL
+		] );
 		wp_enqueue_style(
 			'paydock-widget-css',
-			PAYDOCK_PLUGIN_URL . '/assets/css/frontend/widget.css',
+			PAYDOCK_PLUGIN_URL . 'assets/css/frontend/widget.css',
 			[],
 			time()
 		);
 
 		wp_enqueue_script( 'paydock-api', SettingsService::getInstance()->getWidgetScriptUrl(), [], time(), true );
+		wp_localize_script( 'paydock-api', 'paydockWidgetSettings', [
+			'pluginUrlPrefix' => PAYDOCK_PLUGIN_URL
+		] );
 	}
 }

@@ -11,7 +11,7 @@ use Paydock\Services\FiltersService;
 
 if ( ! class_exists( '\Paydock\PaydockPlugin' ) ) {
 	final class PaydockPlugin extends AbstractSingleton {
-		public const REPOSITORIES = [ 
+		public const REPOSITORIES = [
 			LogRepository::class,
 		];
 

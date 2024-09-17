@@ -102,7 +102,30 @@ class ApmProcessor {
 				$message,
 				LogRepository::ERROR
 			);
-			throw new Exception( esc_html( __( 'The Paydock customer could not be created successfully.', 'paydock' ) ) );
+		}
+
+		if ( ! empty( $customer['error'] ) ) {
+
+			$parsed_api_error = '';
+
+			if ( ! empty( $customer['error']['details'][0]['description'] ) ) {
+
+				$parsed_api_error = $customer['error']['details'][0]['description'];
+
+				if ( ! empty( $customer['error']['details'][0]['status_code_description'] ) ) {
+					$parsed_api_error .= ': ' . $customer['error']['details'][0]['status_code_description'];
+				}
+
+			} elseif ( ! empty( $customer['error']['message'] ) ) {
+				$parsed_api_error = $customer['error']['message'];
+			}
+
+			if ( empty( $parsed_api_error ) ) {
+				$parsed_api_error = __( 'Unable to create the Paydock customer record', 'paydock' );
+			}
+
+			throw new Exception( esc_html( $parsed_api_error ) );
+
 		}
 
 		$this->logger->createLogRecord(
@@ -158,19 +181,21 @@ class ApmProcessor {
 			return [];
 		}
 
-		WC()->cart->calculate_totals();
+		if ( ! is_admin() ) {
+			WC()->cart->calculate_totals();
+		}
 
 		$address1 = $this->order->get_billing_address_1();
 		$address2 = $this->order->get_billing_address_2();
 
 		$result = [
-			'amount'           => $this->order->get_total(),
+			'amount'           => (float) $this->order->get_total(),
 			'address_country'  => $this->order->get_billing_country(),
 			'address_postcode' => $this->order->get_billing_postcode(),
 			'address_city'     => $this->order->get_billing_city(),
 			'address_state'    => $this->order->get_billing_state(),
 			'address_line1'    => $address1,
-			'address_line2'    => $address2,
+			'address_line2'    => $address2 ? $address2 : null,
 		];
 
 		if ( ! empty( $exclude ) ) {

@@ -9,12 +9,13 @@ use Paydock\Enums\WalletPaymentMethods;
 use Paydock\Repositories\LogRepository;
 
 class AfterpayWalletService extends AbstractWalletPaymentService {
+
 	protected function getWalletType(): WalletPaymentMethods {
 		return WalletPaymentMethods::AFTERPAY();
 	}
 
 	public function get_title() {
-		return trim( $this->title ) ? $this->title : 'Afterpay v1';
+		return trim( $this->title ) ? $this->title : 'Afterpay v2';
 	}
 
 	public function process_payment( $order_id, $retry = true, $force_customer = false ) {
@@ -23,8 +24,6 @@ class AfterpayWalletService extends AbstractWalletPaymentService {
 		if ( ! wp_verify_nonce( $wpNonce, 'process_payment' ) ) {
 			throw new RouteException(
 				'woocommerce_rest_checkout_process_payment_error',
-
-				/* Translators: %s Error message from API. */
 				esc_html( __( 'Error: Security check', 'paydock' ) )
 			);
 		}
@@ -34,11 +33,11 @@ class AfterpayWalletService extends AbstractWalletPaymentService {
 		$chargeId = null;
 
 		if ( ! empty( $_POST['payment_response'] ) ) {
-			$data = json_decode( sanitize_text_field( $_POST['payment_response'] ), true );
+			$data = json_decode( sanitize_text_field( $_POST['payment_response'] ), true )['resource']['data'];
 		}
 
 		if ( ( json_last_error() === JSON_ERROR_NONE ) && ! empty( $_POST['payment_response'] ) ) {
-			$chargeId = $data['data']['id'];
+			$chargeId = $data['charge']['_id'];
 		}
 
 		$wallets = [];
@@ -58,15 +57,10 @@ class AfterpayWalletService extends AbstractWalletPaymentService {
 
 		$loggerRepository = new LogRepository();
 
-		$order->set_status( 'wc-pending' );
+		$order->set_status( 'wc-paydock-pending' );
+		$order->update_meta_data( 'paydock_charge_id', $chargeId );
+		$order->update_meta_data( OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(), $this->getWalletType()->getLabel() );
 		$order->save();
-
-		update_post_meta( $order_id, 'paydock_charge_id', $chargeId );
-		add_post_meta(
-			$order_id,
-			OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(),
-			$this->getWalletType()->getLabel()
-		);
 
 		$loggerRepository->createLogRecord(
 			$data['data']['id'] ?? '',
@@ -76,7 +70,7 @@ class AfterpayWalletService extends AbstractWalletPaymentService {
 		);
 
 		return [
-			'result' => 'success',
+			'result' => 'success'
 		];
 	}
 }

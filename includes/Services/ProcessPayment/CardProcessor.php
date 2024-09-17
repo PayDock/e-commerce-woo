@@ -151,7 +151,30 @@ class CardProcessor {
 				$message,
 				LogRepository::ERROR
 			);
-			throw new Exception( esc_html( __( 'The 3ds charge could not be created successfully.', 'paydock' ) ) );
+		}
+
+		if ( ! empty( $threeDsCharge['error'] ) ) {
+
+			$parsed_api_error = '';
+
+			if ( ! empty( $threeDsCharge['error']['details'][0]['description'] ) ) {
+
+				$parsed_api_error = $threeDsCharge['error']['details'][0]['description'];
+
+				if ( ! empty( $threeDsCharge['error']['details'][0]['status_code_description'] ) ) {
+					$parsed_api_error .= ': ' . $threeDsCharge['error']['details'][0]['status_code_description'];
+				}
+
+			} elseif ( ! empty( $threeDsCharge['error']['message'] ) ) {
+				$parsed_api_error = $threeDsCharge['error']['message'];
+			}
+
+			if ( empty( $parsed_api_error ) ) {
+				$parsed_api_error = __( 'The 3DS charge failed to be created', 'paydock' );
+			}
+
+			throw new Exception( esc_html( $parsed_api_error ) );
+
 		}
 
 		$this->logger->createLogRecord(
@@ -180,19 +203,21 @@ class CardProcessor {
 			return [];
 		}
 
-		WC()->cart->calculate_totals();
+		if ( ! is_admin() ) {
+			WC()->cart->calculate_totals();
+		}
 
 		$address1 = $this->order->get_billing_address_1();
 		$address2 = $this->order->get_billing_address_2();
 
 		$result = [
-			'amount'           => $this->order->get_total(),
+			'amount'           => (float) $this->order->get_total(),
 			'address_country'  => $this->order->get_billing_country(),
 			'address_postcode' => $this->order->get_billing_postcode(),
 			'address_city'     => $this->order->get_billing_city(),
 			'address_state'    => $this->order->get_billing_state(),
 			'address_line1'    => $address1,
-			'address_line2'    => $address2,
+			'address_line2'    => $address2 ? $address2 : null,
 		];
 
 		if ( ! empty( $exclude ) ) {
@@ -596,7 +621,30 @@ class CardProcessor {
 					$message,
 					LogRepository::ERROR
 				);
-				throw new Exception( esc_html( __( 'The Paydock customer could not be created successfully.', 'paydock' ) ) );
+			}
+
+			if ( ! empty( $customer['error'] ) ) {
+
+				$parsed_api_error = '';
+
+				if ( ! empty( $customer['error']['details'][0]['description'] ) ) {
+
+					$parsed_api_error = $customer['error']['details'][0]['description'];
+
+					if ( ! empty( $customer['error']['details'][0]['status_code_description'] ) ) {
+						$parsed_api_error .= ': ' . $customer['error']['details'][0]['status_code_description'];
+					}
+
+				} elseif ( ! empty( $customer['error']['message'] ) ) {
+					$parsed_api_error = $customer['error']['message'];
+				}
+
+				if ( empty( $parsed_api_error ) ) {
+					$parsed_api_error = __( 'Unable to create the Paydock customer record', 'paydock' );
+				}
+
+				throw new Exception( esc_html( $parsed_api_error ) );
+
 			}
 
 			$this->logger->createLogRecord(
@@ -648,15 +696,33 @@ class CardProcessor {
 			$params['customer']['payment_source']['card_ccv'] = $this->args['cvv'];
 		}
 
-		$responce = SDKAdapterService::getInstance()->createCharge( $params );
+		$response = SDKAdapterService::getInstance()->createCharge( $params );
 
-		if ( ! empty( $responce['error'] ) ) {
-			$message = ! empty( $responce['error']['message'] ) ? ' ' . $responce['error']['message'] : '';
-			/* translators: %s: Error message from Paydock API. */
-			throw new Exception( esc_html( sprintf( __( 'The charge could not be created successfully. %s <input id="widget_error" hidden type="text"/>', 'paydock' ), $message ) ) );
+		if ( ! empty( $response['error'] ) ) {
+
+			$parsed_api_error = '';
+
+			if ( ! empty( $response['error']['details'][0]['description'] ) ) {
+
+				$parsed_api_error = $response['error']['details'][0]['description'];
+
+				if ( ! empty( $response['error']['details'][0]['status_code_description'] ) ) {
+					$parsed_api_error .= ': ' . $response['error']['details'][0]['status_code_description'];
+				}
+
+			} elseif ( ! empty( $response['error']['message'] ) ) {
+				$parsed_api_error = $response['error']['message'];
+			}
+
+			if ( empty( $parsed_api_error ) ) {
+				$parsed_api_error = __( 'The customer charge failed to be created', 'paydock' );
+			}
+
+			throw new Exception( esc_html( $parsed_api_error ) );
+
 		}
 
-		return $responce;
+		return $response;
 	}
 
 	public function createCustomer( $force = false ): void {
@@ -693,9 +759,32 @@ class CardProcessor {
 				$message,
 				LogRepository::ERROR
 			);
-			/* translators: %s: Error message from Paydock API. */
-			throw new Exception( esc_html( sprintf( __( 'The Paydock customer could not be created successfully. %s', 'paydock' ), $message ) ) );
 		}
+
+		if ( ! empty( $customer['error'] ) ) {
+
+			$parsed_api_error = '';
+
+			if ( ! empty( $customer['error']['details'][0]['description'] ) ) {
+
+				$parsed_api_error = $customer['error']['details'][0]['description'];
+
+				if ( ! empty( $customer['error']['details'][0]['status_code_description'] ) ) {
+					$parsed_api_error .= ': ' . $customer['error']['details'][0]['status_code_description'];
+				}
+
+			} elseif ( ! empty( $customer['error']['message'] ) ) {
+				$parsed_api_error = $customer['error']['message'];
+			}
+
+			if ( empty( $parsed_api_error ) ) {
+				$parsed_api_error = __( 'Unable to create the Paydock customer record', 'paydock' );
+			}
+
+			throw new Exception( esc_html( $parsed_api_error ) );
+
+		}
+
 		$this->logger->createLogRecord(
 			$customer['resource']['data']['_id'],
 			'Create customer',
