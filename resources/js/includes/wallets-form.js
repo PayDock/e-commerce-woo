@@ -57,7 +57,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
             items: cart.getCartData().items
         }
 
-        axios.post('/wp-json/power-board/v1/wallets/charge', billingData).then((response) => {
+        axios.post(walletsData.ajax_url, billingData).then((response) => {
             localState.initData = response.data
             setTimeout(() => {
                 initButton(id, '#' + buttonId, localState.initData, settings.isSandbox, localState.reload)
