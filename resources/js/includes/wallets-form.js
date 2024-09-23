@@ -73,7 +73,8 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
                 localState.wasInit = false;
             })
         } else {
-
+            console.error("Request for unsafe URL:", walletsData.ajax_url);
+            localState.wasInit = false;
         }
     }
     const Content = (props) => {
