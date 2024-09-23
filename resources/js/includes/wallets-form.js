@@ -57,14 +57,21 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
             items: cart.getCartData().items
         }
 
-        axios.post(walletsData.ajax_url, billingData).then((response) => {
-            localState.initData = response.data
-            setTimeout(() => {
-                initButton(id, '#' + buttonId, localState.initData, settings.isSandbox, localState.reload)
-            }, 0);
-        }).catch((e) => {
+        const walletsDataUrl = new URL(walletsData.ajax_url);
+
+        if (walletsDataUrl.origin === window.location.origin) {
+            axios.post(walletsData.ajax_url, billingData).then((response) => {
+                localState.initData = response.data
+                setTimeout(() => {
+                    initButton(id, '#' + buttonId, localState.initData, settings.isSandbox, localState.reload)
+                }, 0);
+            }).catch((e) => {
+                localState.wasInit = false;
+            })
+        } else {
+            console.error("Request for unsafe URL:", walletsData.ajax_url);
             localState.wasInit = false;
-        })
+        }
     }
     const Content = (props) => {
         button = jQuery('#' + buttonId)
