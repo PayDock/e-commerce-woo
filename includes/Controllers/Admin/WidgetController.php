@@ -41,8 +41,6 @@ class WidgetController {
 			return new WP_Error( 'invalid_items', __( 'Invalid items data', 'power_board' ), array( 'status' => 400 ) );
 		}
 
-		$request = array_map( 'sanitize_text_field', $request );
-
 		if ( isset( $request['address'] ) ) {
 			$request['address'] = array_map( 'sanitize_text_field', $request['address'] );
 		}
