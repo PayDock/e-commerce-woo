@@ -13,6 +13,7 @@ sftp-config.json
 /node_modules/
 /node_modules2/
 /deploy/
+package-lock.json
 
 # Sass
 .sass-cache/
