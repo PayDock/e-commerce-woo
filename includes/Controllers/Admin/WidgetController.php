@@ -10,220 +10,175 @@ use PowerBoard\Services\SettingsService;
 use WP_REST_Request;
 
 class WidgetController {
-	public function createWalletCharge( WP_REST_Request $request ) {
+    public function createWalletCharge( WP_REST_Request $request ) {
+        $settings = SettingsService::getInstance();
+        $order    = wc_get_order( $request['order_id'] );
 
-		$request = $request->get_json_params();
+        $loggerRepository = new LogRepository();
 
-		$required_fields = ['order_id', 'type', 'total', 'address', 'items'];
-		foreach ( $required_fields as $field ) {
-			if ( empty( $request[ $field ] ) ) {
-				return new WP_Error( 'missing_data', __( 'Required data is missing: ', 'power_board' ) . $field, array( 'status' => 400 ) );
-			}
-		}
+        $request    = $request->get_json_params();
+        $result     = [];
+        $isAfterPay = false;
 
-		$valid_types = ['afterpay', 'apple-pay', 'google-pay', 'pay-pal'];
-		if ( ! in_array( $request['type'], $valid_types ) ) {
-			return new WP_Error( 'invalid_type', __( 'Invalid payment type', 'power_board' ), array( 'status' => 400 ) );
-		}
+        switch ( $request['type'] ) {
+            case 'afterpay':
+                $isAfterPay = true;
+                $payment    = WalletPaymentMethods::AFTERPAY();
+                break;
+            case 'apple-pay':
+                $payment = WalletPaymentMethods::APPLE_PAY();
+                break;
+            case 'google-pay':
+                $payment = WalletPaymentMethods::GOOGLE_PAY();
+                break;
+            case 'pay-pal':
+                $payment = WalletPaymentMethods::PAY_PAL_SMART_BUTTON();
+                break;
+        }
 
-		if ( ! is_numeric( $request['total']['total_price'] ) || strlen( $request['total']['currency_code'] ) !== 3 ) {
-			return new WP_Error( 'invalid_total', __( 'Invalid total or currency data', 'power_board' ), array( 'status' => 400 ) );
-		}
+        $key = strtolower( $payment->name );
+        if ( $settings->isWalletEnabled( $payment ) ) {
+            $reference = $request['order_id'];
 
-		$address_fields = ['first_name', 'last_name', 'email', 'address_1', 'city', 'state', 'country', 'postcode'];
-		foreach ( $address_fields as $field ) {
-			if ( empty( $request['address'][ $field ] ) ) {
-				return new WP_Error( 'invalid_address', __( 'Invalid address field: ', 'power_board' ) . $field, array( 'status' => 400 ) );
-			}
-		}
+            $items = [];
+            foreach ( $request['items'] as $item ) {
+                $image = wp_get_attachment_image_url( get_post_thumbnail_id( $item['id'] ), 'full' );
 
-		if ( ! is_array( $request['items'] ) || empty( $request['items'] ) ) {
-			return new WP_Error( 'invalid_items', __( 'Invalid items data', 'power_board' ), array( 'status' => 400 ) );
-		}
+                $itemData = [
+                    'amount'   => round( $item['prices']['price'] / 100, 2 ),
+                    'name'     => $item['name'],
+                    'type'     => $item['type'],
+                    'quantity' => $item['quantity'],
+                    'item_uri' => $item['permalink'],
+                ];
 
-		if ( isset( $request['address'] ) ) {
-			$request['address'] = array_map( 'sanitize_text_field', $request['address'] );
-		}
+                if ( ! empty( $image ) ) {
+                    $itemData['image_uri'] = $image;
+                }
 
-		if ( isset( $request['shipping_address'] ) ) {
-			$request['shipping_address'] = array_map( 'sanitize_text_field', $request['shipping_address'] );
-		}
+                $items[] = $itemData;
+            }
+            $billingAdress   = $request['address'];
+            $shippingAddress = $request['shipping_address'];
 
-		foreach ( $request['items'] as &$item ) {
-			$item['name'] = sanitize_text_field( $item['name'] );
-			$item['type'] = sanitize_text_field( $item['type'] );
-			$item['permalink'] = esc_url_raw( $item['permalink'] );
-		}
-		unset( $item );
+            foreach ( $shippingAddress as $key => $value ) {
+                if ( empty( trim( $value ) ) ) {
+                    $shippingAddress[ $key ] = $billingAdress[ $key ];
+                }
+            }
 
-		$settings = SettingsService::getInstance();
-		$order    = wc_get_order( $request['order_id'] );
+            $chargeRequest = [
+                'amount'    => round( $request['total']['total_price'] / 100, 2 ),
+                'currency'  => $request['total']['currency_code'],
+                'reference' => (string) $reference,
+                'customer'  => [
+                    'first_name'     => $billingAdress['first_name'],
+                    'last_name'      => $billingAdress['last_name'],
+                    'email'          => $billingAdress['email'],
+                    'payment_source' => [
+                        'gateway_id'       => $settings->getWalletGatewayId( $payment ),
+                        'address_line1'    => $billingAdress['address_1'],
+                        'address_city'     => $billingAdress['city'],
+                        'address_state'    => $billingAdress['state'],
+                        'address_country'  => $billingAdress['country'],
+                        'address_postcode' => $billingAdress['postcode'],
+                    ],
+                ],
+                'meta'      => [
+                    'store_name' => get_bloginfo( 'name' ),
+                ],
+                'items'     => $items,
+                'shipping'  => [
+                    'amount'           => round( $request['total']['total_shipping'] / 100, 2 ),
+                    'currency'         => $request['total']['currency_code'],
+                    'address_line1'    => $shippingAddress['address_1'],
+                    'address_city'     => $shippingAddress['city'],
+                    'address_state'    => $shippingAddress['state'],
+                    'address_country'  => $shippingAddress['country'],
+                    'address_postcode' => $shippingAddress['postcode'],
+                    'contact'          => [
+                        'first_name' => $shippingAddress['first_name'],
+                        'last_name'  => $shippingAddress['last_name'],
+                    ],
+                ],
+            ];
 
-		$loggerRepository = new LogRepository();
+            if ( ! empty( $billingAdress['phone'] ) ) {
+                $chargeRequest['customer']['phone'] = $billingAdress['phone'];
+            }
 
-		$result     = [];
-		$isAfterPay = false;
+            if ( ! empty( $billingAdress['address_2'] ) ) {
+                $chargeRequest['customer']['payment_source']['address_line2'] = $billingAdress['address_2'];
+            }
 
-		switch ( $request['type'] ) {
-			case 'afterpay':
-				$isAfterPay = true;
-				$payment    = WalletPaymentMethods::AFTERPAY();
-				break;
-			case 'apple-pay':
-				$payment = WalletPaymentMethods::APPLE_PAY();
-				break;
-			case 'google-pay':
-				$payment = WalletPaymentMethods::GOOGLE_PAY();
-				break;
-			case 'pay-pal':
-				$payment = WalletPaymentMethods::PAY_PAL_SMART_BUTTON();
-				break;
-		}
+            if ( ! empty( $shippingAddress['phone'] ) ) {
+                $chargeRequest['shipping']['contact']['phone'] = $shippingAddress['phone'];
+            }
 
-		$key = strtolower( $payment->name );
-		if ( $settings->isWalletEnabled( $payment ) ) {
-			$reference = sanitize_text_field( $request['order_id'] );
+            if ( ! empty( $shippingAddress['address_2'] ) ) {
+                $chargeRequest['shipping']['address_line2'] = $shippingAddress['address_2'];
+            }
 
-			$items = [];
-			foreach ( $request['items'] as $item ) {
-				$image = wp_get_attachment_image_url( get_post_thumbnail_id( $item['id'] ), 'full' );
+            if ( ! empty( $request['shipping_rates'] ) ) {
+                $shippingRates = reset( $request['shipping_rates'] );
+                foreach ( $shippingRates['shipping_rates'] as $shippingRate ) {
+                    if ( $shippingRate['selected'] ) {
+                        if ( 'pickup_location' === $shippingRate['method_id'] ) {
+                            $location = ShippingHelper::getPickupLocationByKey( $shippingRate['rate_id'] );
+                            if ( false !== $location ) {
+                                $chargeRequest['shipping']['address_line1']    = $location['address']['address_1'];
+                                $chargeRequest['shipping']['address_city']     = $location['address']['city'];
+                                $chargeRequest['shipping']['address_state']    = $location['address']['state'];
+                                $chargeRequest['shipping']['address_country']  = $location['address']['country'];
+                                $chargeRequest['shipping']['address_postcode'] = $location['address']['postcode'];
+                                unset( $chargeRequest['shipping']['address_line2'] );
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
 
-				$itemData = [
-					'amount'   => round( floatval( $item['prices']['price'] ) / 100, 2 ),
-					'name'     => $item['name'],
-					'type'     => $item['type'],
-					'quantity' => intval( $item['quantity'] ),
-					'item_uri' => esc_url_raw( $item['permalink'] ),
-				];
+            if ( WalletPaymentMethods::APPLE_PAY()->name === $payment->name ) {
+                $chargeRequest['customer']['payment_source']['wallet_type'] = 'apple';
+            }
 
-				if ( ! empty( $image ) ) {
-					$itemData['image_uri'] = esc_url_raw( $image );
-				}
+            $fraudService = $settings->getWalletFraudServiceId( $payment );
+            if (
+                $settings->isWalletFraud( $payment )
+                && ! empty( $fraudService )
+            ) {
+                $chargeRequest['fraud'] = [
+                    'service_id' => $fraudService,
+                    'data'       => [],
+                ];
+            }
 
-				$items[] = $itemData;
-			}
+            if ( $isAfterPay ) {
+                $chargeRequest['meta']['success_url'] = $order->get_checkout_order_received_url();
+                $chargeRequest['meta']['error_url']   = add_query_arg( 'afterpay-error', 'true',
+                    $order->get_checkout_order_received_url() );
+            }
 
-			$billingAddress = $request['address'];
-			$shippingAddress = $request['shipping_address'];
+            $result = SDKAdapterService::getInstance()
+                ->createWalletCharge( $chargeRequest,
+                    $settings->isWalletDirectCharge( $payment ) );
 
-			foreach ( $shippingAddress as $key => $value ) {
-				if ( empty( trim( $value ) ) ) {
-					$shippingAddress[ $key ] = $billingAddress[ $key ];
-				}
-			}
+            $result['county'] = $request['address']['country'] ?? '';
 
-			$chargeRequest = [
-				'amount'    => round( floatval( $request['total']['total_price'] ) / 100, 2 ),
-				'currency'  => sanitize_text_field( $request['total']['currency_code'] ),
-				'reference' => (string) $reference,
-				'customer'  => [
-					'first_name'     => sanitize_text_field( $billingAddress['first_name'] ),
-					'last_name'      => sanitize_text_field( $billingAddress['last_name'] ),
-					'email'          => sanitize_email( $billingAddress['email'] ),
-					'payment_source' => [
-						'gateway_id'       => sanitize_text_field( $settings->getWalletGatewayId( $payment ) ),
-						'address_line1'    => sanitize_text_field( $billingAddress['address_1'] ),
-						'address_city'     => sanitize_text_field( $billingAddress['city'] ),
-						'address_state'    => sanitize_text_field( $billingAddress['state'] ),
-						'address_country'  => sanitize_text_field( $billingAddress['country'] ),
-						'address_postcode' => sanitize_text_field( $billingAddress['postcode'] ),
-					],
-				],
-				'meta'      => [
-					'store_name' => sanitize_text_field( get_bloginfo( 'name' ) ),
-				],
-				'items'     => $items,
-				'shipping'  => [
-					'amount'           => round( floatval( $request['total']['total_shipping'] ) / 100, 2 ),
-					'currency'         => sanitize_text_field( $request['total']['currency_code'] ),
-					'address_line1'    => sanitize_text_field( $shippingAddress['address_1'] ),
-					'address_city'     => sanitize_text_field( $shippingAddress['city'] ),
-					'address_state'    => sanitize_text_field( $shippingAddress['state'] ),
-					'address_country'  => sanitize_text_field( $shippingAddress['country'] ),
-					'address_postcode' => sanitize_text_field( $shippingAddress['postcode'] ),
-					'contact'          => [
-						'first_name' => sanitize_text_field( $shippingAddress['first_name'] ),
-						'last_name'  => sanitize_text_field( $shippingAddress['last_name'] ),
-					],
-				],
-			];
+            if ( WalletPaymentMethods::PAY_PAL_SMART_BUTTON()->name === $payment->name ) {
+                $result['pay_later'] = 'yes' === $settings->isPayPallSmartButtonPayLater();
+            }
 
-			if ( ! empty( $billingAddress['phone'] ) ) {
-				$chargeRequest['customer']['phone'] = sanitize_text_field( $billingAddress['phone'] );
-			}
+            if ( ! empty( $result[ $key ]['error'] ) ) {
+                $operation = ucfirst( strtolower( $result[ $key ]['resource']['type'] ?? 'undefined' ) );
+                $status    = $result[ $key ]['error']['message'] ?? 'empty status';
+                $message   = $result[ $key ]['error']['details'][0]['gateway_specific_description'] ?? 'empty message';
 
-			if ( ! empty( $billingAddress['address_2'] ) ) {
-				$chargeRequest['customer']['payment_source']['address_line2'] = sanitize_text_field( $billingAddress['address_2'] );
-			}
+                $loggerRepository->createLogRecord( '', $operation, $status, $message, LogRepository::ERROR );
+            }
+        }
 
-			if ( ! empty( $shippingAddress['phone'] ) ) {
-				$chargeRequest['shipping']['contact']['phone'] = sanitize_text_field( $shippingAddress['phone'] );
-			}
-
-			if ( ! empty( $shippingAddress['address_2'] ) ) {
-				$chargeRequest['shipping']['address_line2'] = sanitize_text_field( $shippingAddress['address_2'] );
-			}
-
-			if ( ! empty( $request['shipping_rates'] ) ) {
-				$shippingRates = reset( $request['shipping_rates'] );
-				foreach ( $shippingRates['shipping_rates'] as $shippingRate ) {
-					if ( $shippingRate['selected'] ) {
-						if ( 'pickup_location' === sanitize_text_field( $shippingRate['method_id'] ) ) {
-							$location = ShippingHelper::getPickupLocationByKey( sanitize_text_field( $shippingRate['rate_id'] ) );
-							if ( false !== $location ) {
-								$chargeRequest['shipping']['address_line1']    = sanitize_text_field( $location['address']['address_1'] );
-								$chargeRequest['shipping']['address_city']     = sanitize_text_field( $location['address']['city'] );
-								$chargeRequest['shipping']['address_state']    = sanitize_text_field( $location['address']['state'] );
-								$chargeRequest['shipping']['address_country']  = sanitize_text_field( $location['address']['country'] );
-								$chargeRequest['shipping']['address_postcode'] = sanitize_text_field( $location['address']['postcode'] );
-								unset( $chargeRequest['shipping']['address_line2'] );
-							}
-						}
-						break;
-					}
-				}
-			}
-
-			if ( WalletPaymentMethods::APPLE_PAY()->name === $payment->name ) {
-				$chargeRequest['customer']['payment_source']['wallet_type'] = 'apple';
-			}
-
-			$fraudService = sanitize_text_field( $settings->getWalletFraudServiceId( $payment ) );
-			if (
-				$settings->isWalletFraud( $payment )
-				&& ! empty( $fraudService )
-			) {
-				$chargeRequest['fraud'] = [
-					'service_id' => $fraudService,
-					'data'       => [],
-				];
-			}
-
-			if ( $isAfterPay ) {
-				$chargeRequest['meta']['success_url'] = esc_url_raw( $order->get_checkout_order_received_url() );
-				$chargeRequest['meta']['error_url']   = esc_url_raw( add_query_arg( 'afterpay-error', 'true',
-					$order->get_checkout_order_received_url() ) );
-			}
-
-			$result = SDKAdapterService::getInstance()
-			                           ->createWalletCharge( $chargeRequest,
-				                           $settings->isWalletDirectCharge( $payment ) );
-
-			$result['country'] = sanitize_text_field( $request['address']['country'] ?? '' );
-
-			if ( WalletPaymentMethods::PAY_PAL_SMART_BUTTON()->name === $payment->name ) {
-				$result['pay_later'] = 'yes' === $settings->isPayPallSmartButtonPayLater();
-			}
-
-			if ( ! empty( $result[ $key ]['error'] ) ) {
-				$operation = ucfirst( strtolower( sanitize_text_field( $result[ $key ]['resource']['type'] ?? 'undefined' ) ) );
-				$status    = sanitize_text_field( $result[ $key ]['error']['message'] ?? 'empty status' );
-				$message   = sanitize_text_field( $result[ $key ]['error']['details'][0]['gateway_specific_description'] ?? 'empty message' );
-
-				$loggerRepository->createLogRecord( '', $operation, $status, $message, LogRepository::ERROR );
-			}
-		}
-
-		return rest_ensure_response( $result );
-	}
+        return rest_ensure_response( $result );
+    }
 }
