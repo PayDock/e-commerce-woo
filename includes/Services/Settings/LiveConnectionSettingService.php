@@ -23,6 +23,7 @@ use PowerBoard\Services\SettingsService;
 use PowerBoard\Services\Validation\ConnectionValidationService;
 
 class LiveConnectionSettingService extends AbstractSettingService {
+
 	public function __construct() {
 		parent::__construct();
 
@@ -284,24 +285,51 @@ class LiveConnectionSettingService extends AbstractSettingService {
 	}
 
 	public function process_admin_options() {
+
 		$this->init_settings();
 		$validationService = new ConnectionValidationService( $this );
-		$this->settings    = array_merge( $this->settings, $validationService->getResult() );
 
 		$service = SettingsService::getInstance();
-
+		$hashedCredentialKeys = [];
 		foreach ( CredentialSettings::cases() as $credentialSettings ) {
 			if ( in_array( $credentialSettings->name, CredentialSettings::getHashed() ) ) {
 				$key = $service->getOptionName( $this->id, [
 					SettingGroups::CREDENTIALS()->name,
 					$credentialSettings->name,
 				] );
-
-				if ( ! empty( $this->settings[ $key ] ) ) {
-					$this->settings[ $key ] = HashService::encrypt( $this->settings[ $key ] );
-				}
+				$hashedCredentialKeys[ $key ] = $credentialSettings;
 			}
 		}
+
+		foreach ( $this->get_form_fields() as $key => $field ) {
+			$type = $this->get_field_type( $field );
+
+			$option_key = $this->plugin_id . $this->id . '_' . $key;
+			$value = isset( $_POST[ $option_key ] ) ? wc_clean( wp_unslash( $_POST[ $option_key ] ) ) : null;
+
+			if ( method_exists( $this, 'validate_' . $type . '_field' ) ) {
+				$value = $this->{'validate_' . $type . '_field'}( $key, $value );
+			} else {
+				$value = $this->validate_text_field( $key, $value );
+			}
+
+			if ( array_key_exists( $key, $hashedCredentialKeys ) ) {
+				if ( $value === '********************' || $value === null ) {
+					$value = $this->get_option( $key );
+				} elseif ( $value === '' ) {
+					$value = '';
+				}
+			}
+
+			$this->settings[ $key ] = $value;
+		}
+
+		foreach ( $hashedCredentialKeys as $key => $credentialSettings ) {
+			if ( ! empty( $this->settings[ $key ] ) && $this->settings[ $key ] !== '********************' ) {
+				$this->settings[ $key ] = HashService::encrypt( $this->settings[ $key ] );
+			}
+		}
+
 		foreach ( $validationService->getErrors() as $error ) {
 			$this->add_error( $error );
 			\WC_Admin_Settings::add_error( $error );
@@ -315,9 +343,47 @@ class LiveConnectionSettingService extends AbstractSettingService {
 			apply_filters( 'woocommerce_settings_api_sanitized_fields_' . $this->id, $this->settings ),
 			'yes'
 		);
+
 	}
 
 	protected function getId(): string {
 		return SettingsTabs::LIVE_CONNECTION()->value;
 	}
+
+	public function generate_settings_html( $form_fields = [], $echo = true ): ?string {
+
+		if ( empty( $form_fields ) ) {
+			$form_fields = $this->get_form_fields();
+		}
+
+		$service = SettingsService::getInstance();
+
+		foreach ( CredentialSettings::cases() as $credentialSettings ) {
+			if ( in_array( $credentialSettings->name, CredentialSettings::getHashed() ) ) {
+				$key = $service->getOptionName( $this->id, [
+					SettingGroups::CREDENTIALS()->name,
+					$credentialSettings->name,
+				]);
+
+				if ( ! empty( $this->settings[ $key ] ) ) {
+					$this->settings[ $key ] = '********************';
+				} else {
+					$this->settings[ $key ] = '';
+				}
+			}
+		}
+
+		return parent::generate_settings_html( $form_fields, $echo );
+
+	}
+
+	public function validate_big_label_field( $key, $value ) {
+		return '';
+	}
+
+	public function validate_label_field( $key, $value ) {
+		return '';
+	}
+
+
 }
