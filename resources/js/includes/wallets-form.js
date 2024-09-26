@@ -57,14 +57,25 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
             items: cart.getCartData().items
         }
 
-        axios.post('/wp-json/power-board/v1/wallets/charge', billingData).then((response) => {
-            localState.initData = response.data
-            setTimeout(() => {
-                initButton(id, '#' + buttonId, localState.initData, settings.isSandbox, localState.reload)
-            }, 0);
-        }).catch((e) => {
+        const whitelist = [
+            '/wp-json/power-board/v1/wallets/charge'
+        ];
+
+        const walletsDataUrl = new URL(walletsData.ajax_url);
+
+        if (whitelist.includes(walletsDataUrl.pathname)) {
+            axios.post(walletsDataUrl.pathname, billingData).then((response) => {
+                localState.initData = response.data
+                setTimeout(() => {
+                    initButton(id, '#' + buttonId, localState.initData, settings.isSandbox, localState.reload)
+                }, 0);
+            }).catch((e) => {
+                localState.wasInit = false;
+            })
+        } else {
+            console.error("Request for unsafe URL:", walletsData.ajax_url);
             localState.wasInit = false;
-        })
+        }
     }
     const Content = (props) => {
         button = jQuery('#' + buttonId)
