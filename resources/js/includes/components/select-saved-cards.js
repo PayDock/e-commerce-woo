@@ -56,7 +56,7 @@ export default (selectTokenLabel = 'Saved cards', newCardLabel = 'New card') => 
 
                     if (value !== '') {
                         const token = settings.tokens.find(token => token.vault_token === value)
-                        if (token !== undefined) {
+                        if (typeof token !== 'undefined') {
                             jQuery('#powerBoardWidgetCard_wrapper').hide()
 
                             $saveCard.hide()
