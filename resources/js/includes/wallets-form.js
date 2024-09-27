@@ -57,14 +57,11 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
             items: cart.getCartData().items
         }
 
-        const whitelist = [
-            '/wp-json/power-board/v1/wallets/charge'
-        ];
+        const walletsChargeRoute = '/wp-json/power-board/v1/wallets/charge';
+        const whitelist = [walletsChargeRoute];
 
-        const walletsDataUrl = new URL(walletsData.ajax_url);
-
-        if (whitelist.includes(walletsDataUrl.pathname)) {
-            axios.post(walletsDataUrl.pathname, billingData).then((response) => {
+        if (whitelist.includes(walletsChargeRoute)) {
+            axios.post(walletsChargeRoute, billingData).then((response) => {
                 localState.initData = response.data
                 setTimeout(() => {
                     initButton(id, '#' + buttonId, localState.initData, settings.isSandbox, localState.reload)
@@ -73,7 +70,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
                 localState.wasInit = false;
             })
         } else {
-            console.error("Request for unsafe URL:", walletsData.ajax_url);
+            console.error('Request for unsafe URL: ', walletsChargeRoute);
             localState.wasInit = false;
         }
     }
