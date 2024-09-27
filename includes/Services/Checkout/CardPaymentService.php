@@ -90,18 +90,6 @@ class CardPaymentService extends WC_Payment_Gateway {
 			'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL
 		] );
 
-		wp_enqueue_script(
-			'walletsForm',
-			POWER_BOARD_PLUGIN_URL . 'resources/js/includes/wallets-form.js',
-			[ 'jquery', 'react' ],
-			'1.0',
-			true
-		);
-
-		wp_localize_script( 'walletsForm', 'walletsData', [
-			'ajax_url' => rest_url( 'power-board/v1/wallets/charge' ),
-		] );
-
 		return '';
 	}
 
