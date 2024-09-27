@@ -324,11 +324,13 @@ class LiveConnectionSettingService extends AbstractSettingService {
 			$this->settings[ $key ] = $value;
 		}
 
-		foreach ( $hashedCredentialKeys as $key => $credentialSettings ) {
-			if ( ! empty( $this->settings[ $key ] ) && $this->settings[ $key ] !== '********************' ) {
-				$this->settings[ $key ] = HashService::encrypt( $this->settings[ $key ] );
-			}
-		}
+        foreach ( $hashedCredentialKeys as $key => $credentialSettings ) {
+            $isEncrypted = HashService::decrypt($this->settings[ $key ]) !== $this->settings[ $key ];
+
+            if ( ! empty( $this->settings[ $key ] ) && !$isEncrypted) {
+                $this->settings[ $key ] = HashService::encrypt( $this->settings[ $key ] );
+            }
+        }
 
 		foreach ( $validationService->getErrors() as $error ) {
 			$this->add_error( $error );
