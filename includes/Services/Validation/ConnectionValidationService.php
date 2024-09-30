@@ -22,6 +22,7 @@ use PowerBoard\Services\SettingsService;
 
 class ConnectionValidationService {
 	private $oldAccessToken = null;
+	private $oldWidgetAccessToken = null;
 	private $oldPublicKey = null;
 	private $oldSecretKey = null;
 	private const ENABLED_CONDITION = 'yes';
@@ -151,6 +152,9 @@ class ConnectionValidationService {
 
 	private function checkAccessKeyConnection( ?string $accessToken ): bool {
 		$this->saveOldCredential();
+		if ( $accessToken === '********************' || $accessToken === null ) {
+			$accessToken = $this->oldAccessToken;
+		}
 
 		ConfigService::$accessToken = $accessToken;
 		ConfigService::$publicKey = null;
@@ -171,23 +175,28 @@ class ConnectionValidationService {
 	}
 	private function saveOldCredential() {
 		$this->oldAccessToken = ConfigService::$accessToken;
+		$this->oldWidgetAccessToken = ConfigService::$widgetAccessToken;
 		$this->oldPublicKey = ConfigService::$publicKey;
 		$this->oldSecretKey = ConfigService::$secretKey;
 	}
 
 	private function restoreCredential() {
 		ConfigService::$accessToken = $this->oldAccessToken;
+		ConfigService::$widgetAccessToken = $this->oldWidgetAccessToken;
 		ConfigService::$publicKey = $this->oldPublicKey;
 		ConfigService::$secretKey = $this->oldSecretKey;
 	}
-	private function checkWidgetKeyConnection( ?string $accessToken ): bool {
+	private function checkWidgetKeyConnection( ?string $widgetAccessToken ): bool {
 		$this->saveOldCredential();
+		if ( $widgetAccessToken === '********************' || $widgetAccessToken === null ) {
+			$widgetAccessToken = $this->oldWidgetAccessToken;
+		}
 
-		ConfigService::$accessToken = $accessToken;
+		ConfigService::$widgetAccessToken = $widgetAccessToken;
 		ConfigService::$publicKey = null;
 		ConfigService::$secretKey = null;
 
-		$result = $this->adapterService->token();
+		$result = $this->adapterService->token([ 'gateway_id' => '', 'type' => '' ], true);
 		$result = empty( $result['error'] );
 
 		$this->restoreCredential();
@@ -207,6 +216,7 @@ class ConnectionValidationService {
 		ConfigService::$publicKey = $publicKey;
 		ConfigService::$secretKey = null;
 		ConfigService::$accessToken = null;
+		ConfigService::$widgetAccessToken = null;
 
 		$result = $this->adapterService->token();
 		$result = empty( $result['error'] );
@@ -221,6 +231,7 @@ class ConnectionValidationService {
 
 		ConfigService::$publicKey = null;
 		ConfigService::$accessToken = null;
+		ConfigService::$widgetAccessToken = null;
 		ConfigService::$secretKey = $secretKey;
 
 		$this->getawayIds = $this->adapterService->searchGateway( [ 'sort_direction' => 'DESC' ] );
