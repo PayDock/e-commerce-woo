@@ -251,7 +251,7 @@ jQuery(function ($) {
                     }
                 } else if (this.defaultFormTriger) {
                     const config = this.getConfigs();
-                    config.selectedToken = $('#power-board-selected-token').val();
+                    config.selectedToken = $('#classic-power_board_gateway-token').val();
                     this.listenForWidgetErrors();
                 }
             },
@@ -297,20 +297,21 @@ jQuery(function ($) {
 
                 this.currentForm.card.setEnv(config.isSandbox ? 'preproduction_cba' : 'production_cba');
                 this.currentForm.card.setFormFields(["card_name*","card_number*", "card_ccv*"]);
-                this.currentForm.card.onFinishInsert('#power-board-selected-token', 'payment_source');
+                this.currentForm.card.onFinishInsert('#classic-power_board_gateway-token', 'payment_source');
                 this.currentForm.card.interceptSubmitForm('#widget');
                 this.currentForm.card.hideElements(['submit_button']);
 
                 this.currentForm.card.load();
 
                 this.currentForm.card.on(window.cba.EVENT.FINISH, () => {
-                    config.paymentSourceToken = $('#power-board-selected-token').val();
-                    switch (config.card3DS) {
+                    const currentConfig = this.getConfigs();
+                    currentConfig.paymentSourceToken = $('#classic-power_board_gateway-token').val();
+                    switch (currentConfig.card3DS) {
                         case 'IN_BUILD':
-                            this.init3DSInBuilt(config)
+                            this.init3DSInBuilt(currentConfig)
                             break;
                         case 'STANDALONE':
-                            this.init3DSStandalone(config)
+                            this.init3DSStandalone(currentConfig)
                             break;
                         default:
                             this.form.submit()
@@ -334,7 +335,7 @@ jQuery(function ($) {
                         checkbox.hide()
                         this.defaultFormTriger = true;
                     }
-                    $('#power-board-selected-token').val(value)
+                    $('#classic-power_board_gateway-token').val(value)
                 })
             },
             showWidget() {
@@ -347,9 +348,9 @@ jQuery(function ($) {
                 this.showWidget();
                 const config = this.getConfigs();
                 config.selectedToken = "";
+                $('#classic-power_board_gateway-settings').val(JSON.stringify(config));
+                $('#classic-power_board_gateway-token').val(null);
                 this.currentForm.card.reload();
-                const paymentSourceToken = $('#power-board-selected-token');
-                paymentSourceToken.value = null;
                 this.currentForm.widgetReloaded = true;
             },
             listenForWidgetErrors() {
@@ -369,7 +370,7 @@ jQuery(function ($) {
                     config.selectedToken = await this.getVaultToken(config);
                 }
 
-                $('#power-board-selected-token').val(config.selectedToken)
+                $('#classic-power_board_gateway-token').val(config.selectedToken)
 
                 let address = this.getAddressData(false);
                 const preAuthData = {
@@ -405,7 +406,7 @@ jQuery(function ($) {
                     preAuthData.customer.payment_source.vault_token = config.selectedToken;
                     preAuthData.customer.payment_source.gateway_id = config.gatewayId;
                 } else {
-                    preAuthData.token = $('#power-board-selected-token').val()
+                    preAuthData.token = $('#classic-power_board_gateway-token').val()
                 }
                 const envVal = config.isSandbox ? 'preproduction_cba' : 'production_cba'
                 const preAuthResp = await new window.cba.Api(config.publicKey)
@@ -440,7 +441,7 @@ jQuery(function ($) {
             },
             async getVaultToken(config) {
                 data = {...config}
-                data.paymentSourceToken = $('#power-board-selected-token').val()
+                data.paymentSourceToken = $('#classic-power_board_gateway-token').val()
                 data.action = 'power_board_get_vault_token';
                 data._wpnonce = PowerBoardAjax.wpnonce_3ds;
                 data.tokens = '';
@@ -449,7 +450,7 @@ jQuery(function ($) {
 
                 let checkbox = document.getElementById("card_save_card");
 
-                if (checkbox.checked) {
+                if (checkbox?.checked) {
                     data.cardsavecardchecked = 'true'
                 }
 
@@ -462,7 +463,7 @@ jQuery(function ($) {
             async getStandalone3dsToken(config) {
                 const data = {...config};
                 data.action = 'power_board_get_vault_token';
-                data.paymentSourceToken = $('#power-board-selected-token').val()
+                data.paymentSourceToken = $('#classic-power_board_gateway-token').val();
                 data.type = 'standalone-3ds-token';
                 data._wpnonce = PowerBoardAjax.wpnonce_3ds;
                 let address = this.getAddressData(false);
@@ -490,7 +491,7 @@ jQuery(function ($) {
                     config.selectedToken = await this.getVaultToken(config)
                 }
 
-                $('#power-board-selected-token').val(config.selectedToken)
+                $('#classic-power_board_gateway-token').val(config.selectedToken)
 
                 const threeDsToken = await this.getStandalone3dsToken(config)
 

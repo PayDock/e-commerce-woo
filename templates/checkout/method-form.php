@@ -28,7 +28,6 @@ echo wpautop( wp_kses_post( esc_attr( $description ) ) );
 				<?php endforeach; ?>
             </select>
         </div>
-        <input type="hidden" id="power-board-selected-token" name="selectedtoken">
 	<?php endif; ?>
     <div id="power-board-3ds-container"></div>
 	<?php if ( in_array( $id, [ 'power_board_afterpay_a_p_m_s_gateway', 'power_board_zip_a_p_m_s_gateway' ] ) ): ?>
