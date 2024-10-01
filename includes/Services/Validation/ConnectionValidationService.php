@@ -205,19 +205,25 @@ class ConnectionValidationService {
 	}
 
 	private function checkCredentialConnection( ?string $public, ?string $secret ): bool {
+		$this->saveOldCredential();
+		if ( $secret === '********************' || $secret === null ) {
+			$secret = $this->oldSecretKey;
+		}
+		if ( $public === '********************' || $public === null ) {
+			$public = $this->oldPublicKey;
+		}
 		ConfigService::$publicKey = $public;
 		ConfigService::$secretKey = $secret;
-
-		return $this->checkPublicKey( $public ) && $this->checkSecretKey( $secret );
-	}
-
-	private function checkPublicKey( ?string $publicKey ): bool {
-		$this->saveOldCredential();
-		ConfigService::$publicKey = $publicKey;
-		ConfigService::$secretKey = null;
 		ConfigService::$accessToken = null;
 		ConfigService::$widgetAccessToken = null;
 
+		$result = $this->checkPublicKey() && $this->checkSecretKey();
+
+		$this->restoreCredential();
+		return $result;
+	}
+
+	private function checkPublicKey(): bool {
 		$result = $this->adapterService->token();
 		$result = empty( $result['error'] );
 
@@ -226,14 +232,7 @@ class ConnectionValidationService {
 		return $result;
 	}
 
-	private function checkSecretKey( ?string $secretKey ): bool {
-		$this->saveOldCredential();
-
-		ConfigService::$publicKey = null;
-		ConfigService::$accessToken = null;
-		ConfigService::$widgetAccessToken = null;
-		ConfigService::$secretKey = $secretKey;
-
+	private function checkSecretKey(): bool {
 		$this->getawayIds = $this->adapterService->searchGateway( [ 'sort_direction' => 'DESC' ] );
 		$this->servicesIds = $this->adapterService->searchServices( [ 'sort_direction' => 'DESC' ] );
 
