@@ -771,6 +771,14 @@ jQuery(function ($) {
                     }
                 }, 100)
 
+                const hide = setInterval(() => {
+                    let paymentMethod = $('.payment_method_power_board');
+                    if (paymentMethod) {
+                        clearInterval(hide);
+                        paymentMethod.hide();
+                    }
+                }, 100)
+
                 this.form = $('form[name="checkout"]');
 
                 this.form.on('change', () => {
