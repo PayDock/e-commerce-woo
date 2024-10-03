@@ -315,7 +315,7 @@ setTimeout(() => jQuery(function ($) {
     }
 
     function reloadWidget() {
-        const savedCards = document.querySelector('.power-board-select-saved-cards');
+        const savedCards = document.querySelector('.paydock-select-saved-cards');
         if (savedCards !== null) {
             savedCards.style = 'display: block';
         }
