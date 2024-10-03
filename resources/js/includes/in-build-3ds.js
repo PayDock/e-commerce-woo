@@ -114,13 +114,13 @@ export default async (forcePermanentVault = false, newAmount = null) => {
     return result;
 }
 function reloadWidget() {
-    const savedCards = document.querySelector('.power-board-select-saved-cards');
+    const savedCards = document.querySelector('.paydock-select-saved-cards');
     if (savedCards !== null) {
         savedCards.style = 'display: block';
     }
-    const settings = window.wc.wcSettings.getSetting('power_board_data', {});
+    const settings = window.wc.wcSettings.getSetting('paydock_data', {});
     settings.selectedToken = '';
-    window.widgetPowerBoard.reload();
+    window.widgetPaydock.reload();
     window.widgetReloaded = true;
 }
 

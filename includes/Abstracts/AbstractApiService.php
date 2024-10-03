@@ -14,26 +14,44 @@ abstract class AbstractApiService {
 	protected $parameters = [];
 	protected $allowedAction = [];
 
-	public function call(): array {
-		$url  = ConfigService::buildApiUrl( $this->buildEndpoint() );
+	public function callWithWidgetAccessToken(): array {
 		$args = [
 			'headers' => [
 				'content-type' => 'application/json',
 			],
 		];
 
-		if ( ! empty( ConfigService::$secretKey ) ) {
-			$args['headers']['x-user-secret-key'] = ConfigService::$secretKey;
+		if (! empty( ConfigService::$widgetAccessToken )) {
+			$args['headers']['x-access-token'] = ConfigService::$widgetAccessToken;
 		}
+
+		return $this->runCall($args);
+	}
+
+	public function call(): array {
+		$args = [
+			'headers' => [
+				'content-type' => 'application/json',
+			],
+		];
 
 		if ( ! empty( ConfigService::$accessToken ) ) {
 			$args['headers']['x-access-token'] = ConfigService::$accessToken;
+		} else {
+			if ( ! empty( ConfigService::$secretKey ) ) {
+				$args['headers']['x-user-secret-key'] = ConfigService::$secretKey;
+			}
+
+			if ( ! empty( ConfigService::$publicKey ) ) {
+				$args['headers']['x-user-public-key'] = ConfigService::$publicKey;
+			}
 		}
 
-		if ( ! empty( ConfigService::$publicKey ) ) {
-			$args['headers']['x-user-public-key'] = ConfigService::$publicKey;
-		}
+		return $this->runCall($args);
+	}
 
+	protected function runCall($args): array {
+		$url  = ConfigService::buildApiUrl( $this->buildEndpoint() );
 		$args['headers']['X-paydock-Meta'] = 'V'
 		                                         . PAYDOCK_PLUGIN_VERSION
 		                                         . '_woocommerce_'
