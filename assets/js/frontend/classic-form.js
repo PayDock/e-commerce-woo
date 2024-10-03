@@ -771,10 +771,10 @@ jQuery(function ($) {
                     }
                 }, 100)
 
-                const hide = setInterval(() => {
+                const hidePowerBoardOption = setInterval(() => {
                     let paymentMethod = $('.payment_method_power_board');
                     if (paymentMethod) {
-                        clearInterval(hide);
+                        clearInterval(hidePowerBoardOption);
                         paymentMethod.hide();
                     }
                 }, 100)
