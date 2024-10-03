@@ -219,16 +219,15 @@ class ConnectionValidationService {
 
 		$result = $this->checkPublicKey() && $this->checkSecretKey();
 
-		$this->restoreCredential();
+		if (!$result) {
+			$this->restoreCredential();
+		}
 		return $result;
 	}
 
 	private function checkPublicKey(): bool {
 		$result = $this->adapterService->token();
 		$result = empty( $result['error'] );
-
-		$this->restoreCredential();
-
 		return $result;
 	}
 
@@ -237,9 +236,6 @@ class ConnectionValidationService {
 		$this->servicesIds = $this->adapterService->searchServices( [ 'sort_direction' => 'DESC' ] );
 
 		$result = empty( $this->getawayIds['error'] );
-
-		$this->restoreCredential();
-
 		return $result;
 	}
 
