@@ -51,6 +51,10 @@ class SDKAdapterService {
 				SettingGroups::CREDENTIALS()->name,
 				CredentialSettings::ACCESS_KEY()->name,
 			] ) );
+			$publicKey = $settings->get_option( $settingsService->getOptionName( $settings->id, [ 
+				SettingGroups::CREDENTIALS()->name,
+				CredentialSettings::WIDGET_KEY()->name,
+			] ) );
 		} else {
 			$publicKey = $settings->get_option( $settingsService->getOptionName( $settings->id, [ 
 				SettingGroups::CREDENTIALS()->name,
@@ -112,8 +116,12 @@ class SDKAdapterService {
 		return $notificationService->create( $parameters )->call();
 	}
 
-	public function token( array $params = [ 'gateway_id' => '', 'type' => '' ] ): array {
+	public function token( array $params = [ 'gateway_id' => '', 'type' => '' ], ?bool $useWidgetAccessToken = false ): array {
 		$tokenService = new TokenService();
+
+		if ($useWidgetAccessToken) {
+			return $tokenService->create( $params )->callWithWidgetAccessToken();
+		}
 
 		return $tokenService->create( $params )->call();
 	}
