@@ -787,7 +787,7 @@ class CardProcessor {
 				$parsed_api_error = __( 'Unable to create the PowerBoard customer record', 'power-board' );
 			}
 
-			$parsed_api_error .= ' widget_error>';
+			$parsed_api_error .= ' widget_error';
 
 			throw new Exception( esc_html( $parsed_api_error ) );
 
