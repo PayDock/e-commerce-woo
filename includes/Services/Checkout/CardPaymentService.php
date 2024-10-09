@@ -59,6 +59,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 		add_action( 'wp_ajax_power_board_create_error_notice', [ $this, 'power_board_create_error_notice' ], 20 );
 
 		add_action( 'woocommerce_after_checkout_billing_form', [ $this, 'woocommerce_before_checkout_form' ], 10, 1 );
+		add_action( 'woocommerce_billing_fields', [$this, 'wps_remove_filter_phone'], 10, 1);
 	}
 
 	public function payment_scripts() {
@@ -350,6 +351,11 @@ class CardPaymentService extends WC_Payment_Gateway {
 
 	public function woocommerce_before_checkout_form( $arg ) {
 	}
+
+  function wps_remove_filter_phone($address_fields) {
+      $address_fields['billing_phone']['required'] = false;
+      return $address_fields;
+  }
 
 	public function payment_fields() {
 		$template = new TemplateService ( $this );
