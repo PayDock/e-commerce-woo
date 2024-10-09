@@ -71,7 +71,7 @@ export default async (forcePermanentVault = false, newAmount = null) => {
         .preAuth(preAuthData);
 
     if (typeof preAuthResp._3ds.token === "undefined") {
-        reloadWidget()
+        reloadWidget();
         const paymentSourceToken = document.querySelector('[name="payment_source_token"]');
         paymentSourceToken.value = null;
         return false;
@@ -110,7 +110,10 @@ export default async (forcePermanentVault = false, newAmount = null) => {
     if (result === 'error') {
         showCardWidget();
         reloadWidget();
+    } else {
+        listenForWidgetErrors();
     }
+
     return result;
 }
 
@@ -121,6 +124,8 @@ function reloadWidget() {
     }
     const settings = window.wc.wcSettings.getSetting('power_board_data', {});
     settings.selectedToken = '';
+    const paymentSourceToken = document.querySelector('[name="payment_source_token"]');
+    paymentSourceToken.value = null;
     window.widgetPowerBoard.reload();
     window.widgetReloaded = true;
 }
@@ -130,4 +135,24 @@ function showCardWidget() {
     const canvas3dsWrapper = document.getElementById('powerBoardWidget3ds');
     canvas3dsWrapper.innerHTML = '';
     canvas3dsWrapper.setAttribute('style', 'display: none');
+}
+
+function listenForWidgetErrors() {
+    if (!!window.widgetErrorInterval) clearInterval(window.widgetErrorInterval);
+    let counter = 0;
+    window.widgetErrorInterval = setInterval(() => {
+        const errorBanner = document.querySelectorAll('.wc-block-components-notice-banner.is-error')[0];
+        const bannerContent = errorBanner?.querySelectorAll('.wc-block-components-notice-banner__content')[0];
+        if (bannerContent?.innerText.indexOf('widget_error') > -1) {
+            console.log('found error')
+            showCardWidget();
+            reloadWidget();
+            bannerContent.innerText = bannerContent?.innerText.replace('widget_error', '')
+            clearInterval(window.widgetErrorInterval);
+        } else if (counter === 300) {
+            clearInterval(window.widgetErrorInterval);
+        } else {
+            counter++;
+        }
+    }, 100)
 }
