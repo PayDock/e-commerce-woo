@@ -22,6 +22,7 @@ use PowerBoard\Services\SettingsService;
 
 class ConnectionValidationService {
 	private $oldAccessToken = null;
+	private $oldWidgetAccessToken = null;
 	private $oldPublicKey = null;
 	private $oldSecretKey = null;
 	private const ENABLED_CONDITION = 'yes';
@@ -151,6 +152,9 @@ class ConnectionValidationService {
 
 	private function checkAccessKeyConnection( ?string $accessToken ): bool {
 		$this->saveOldCredential();
+		if ( $accessToken === '********************' || $accessToken === null ) {
+			$accessToken = $this->oldAccessToken;
+		}
 
 		ConfigService::$accessToken = $accessToken;
 		ConfigService::$publicKey = null;
@@ -171,23 +175,28 @@ class ConnectionValidationService {
 	}
 	private function saveOldCredential() {
 		$this->oldAccessToken = ConfigService::$accessToken;
+		$this->oldWidgetAccessToken = ConfigService::$widgetAccessToken;
 		$this->oldPublicKey = ConfigService::$publicKey;
 		$this->oldSecretKey = ConfigService::$secretKey;
 	}
 
 	private function restoreCredential() {
 		ConfigService::$accessToken = $this->oldAccessToken;
+		ConfigService::$widgetAccessToken = $this->oldWidgetAccessToken;
 		ConfigService::$publicKey = $this->oldPublicKey;
 		ConfigService::$secretKey = $this->oldSecretKey;
 	}
-	private function checkWidgetKeyConnection( ?string $accessToken ): bool {
+	private function checkWidgetKeyConnection( ?string $widgetAccessToken ): bool {
 		$this->saveOldCredential();
+		if ( $widgetAccessToken === '********************' || $widgetAccessToken === null ) {
+			$widgetAccessToken = $this->oldWidgetAccessToken;
+		}
 
-		ConfigService::$accessToken = $accessToken;
+		ConfigService::$widgetAccessToken = $widgetAccessToken;
 		ConfigService::$publicKey = null;
 		ConfigService::$secretKey = null;
 
-		$result = $this->adapterService->token();
+		$result = $this->adapterService->token([ 'gateway_id' => '', 'type' => '' ], true);
 		$result = empty( $result['error'] );
 
 		$this->restoreCredential();
@@ -196,40 +205,37 @@ class ConnectionValidationService {
 	}
 
 	private function checkCredentialConnection( ?string $public, ?string $secret ): bool {
+		$this->saveOldCredential();
+		if ( $secret === '********************' || $secret === null ) {
+			$secret = $this->oldSecretKey;
+		}
+		if ( $public === '********************' || $public === null ) {
+			$public = $this->oldPublicKey;
+		}
 		ConfigService::$publicKey = $public;
 		ConfigService::$secretKey = $secret;
-
-		return $this->checkPublicKey( $public ) && $this->checkSecretKey( $secret );
-	}
-
-	private function checkPublicKey( ?string $publicKey ): bool {
-		$this->saveOldCredential();
-		ConfigService::$publicKey = $publicKey;
-		ConfigService::$secretKey = null;
 		ConfigService::$accessToken = null;
+		ConfigService::$widgetAccessToken = null;
 
-		$result = $this->adapterService->token();
-		$result = empty( $result['error'] );
+		$result = $this->checkPublicKey() && $this->checkSecretKey();
 
-		$this->restoreCredential();
-
+		if (!$result) {
+			$this->restoreCredential();
+		}
 		return $result;
 	}
 
-	private function checkSecretKey( ?string $secretKey ): bool {
-		$this->saveOldCredential();
+	private function checkPublicKey(): bool {
+		$result = $this->adapterService->token();
+		$result = empty( $result['error'] );
+		return $result;
+	}
 
-		ConfigService::$publicKey = null;
-		ConfigService::$accessToken = null;
-		ConfigService::$secretKey = $secretKey;
-
+	private function checkSecretKey(): bool {
 		$this->getawayIds = $this->adapterService->searchGateway( [ 'sort_direction' => 'DESC' ] );
 		$this->servicesIds = $this->adapterService->searchServices( [ 'sort_direction' => 'DESC' ] );
 
 		$result = empty( $this->getawayIds['error'] );
-
-		$this->restoreCredential();
-
 		return $result;
 	}
 

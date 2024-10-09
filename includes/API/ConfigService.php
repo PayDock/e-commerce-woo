@@ -7,21 +7,25 @@ use PowerBoard\Enums\ConfigAPI;
 class ConfigService {
 	public static $environment = null;
 	public static $accessToken = null;
+	public static $widgetAccessToken = null;
 	public static $secretKey = null;
 	public static $publicKey = null;
 
-	public static function init( string $environment, string $secretKeyOrAccessToken, ?string $publicKey = null ) {
+	public static function init( string $environment, string $secretKeyOrAccessToken, ?string $publicKeyOrWidgetAccessToken = null ) {
 		self::$environment = $environment;
 
 		if ( self::isAccessToken( $secretKeyOrAccessToken ) ) {
 			self::$secretKey = null;
+			self::$publicKey = null;
 			self::$accessToken = $secretKeyOrAccessToken;
+			self::$widgetAccessToken = $publicKeyOrWidgetAccessToken;
 		} else {
 			self::$secretKey = $secretKeyOrAccessToken;
+		  self::$publicKey = $publicKeyOrWidgetAccessToken;
 			self::$accessToken = null;
+			self::$widgetAccessToken = null;
 		}
 
-		self::$publicKey = $publicKey;
 	}
 
 	public static function isAccessToken( string $token ): bool {
