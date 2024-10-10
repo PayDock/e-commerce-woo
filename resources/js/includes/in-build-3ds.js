@@ -144,7 +144,6 @@ function listenForWidgetErrors() {
         const errorBanner = document.querySelectorAll('.wc-block-components-notice-banner.is-error')[0];
         const bannerContent = errorBanner?.querySelectorAll('.wc-block-components-notice-banner__content')[0];
         if (bannerContent?.innerText.indexOf('widget_error') > -1) {
-            console.log('found error')
             showCardWidget();
             reloadWidget();
             bannerContent.innerText = bannerContent?.innerText.replace('widget_error', '')
