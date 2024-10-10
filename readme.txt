@@ -22,7 +22,7 @@ For a full list of payment gateways Paydock is connected to, visit [Paydock] (ht
 
 == Installation ==
 
-Prerequisites to install and configure the PowerBoard plugin, you will need a Wordpress instance running:
+Prerequisites to install and configure the Paydock plugin, you will need a Wordpress instance running:
 
 * WooCommerce versions: 8.3-8.9
 * [WooCommerce Server Requirements](https://woocommerce.com/document/server-requirements/)

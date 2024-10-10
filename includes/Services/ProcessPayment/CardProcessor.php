@@ -173,7 +173,7 @@ class CardProcessor {
 				$parsed_api_error = __( 'The 3DS charge failed to be created', 'paydock' );
 			}
 
-			$parsed_api_error .= ' <input id="widget_error" hidden type="text"/>';
+			$parsed_api_error .= ' widget_error';
 
 			throw new Exception( esc_html( $parsed_api_error ) );
 
@@ -645,7 +645,7 @@ class CardProcessor {
 					$parsed_api_error = __( 'Unable to create the Paydock customer record', 'paydock' );
 				}
 
-				$parsed_api_error .= ' <input id="widget_error" hidden type="text"/>';
+				$parsed_api_error .= ' widget_error';
 
         throw new Exception( esc_html( $parsed_api_error ) );
 			}
@@ -721,7 +721,7 @@ class CardProcessor {
 				$parsed_api_error = __( 'The customer charge failed to be created', 'paydock' );
 			}
 
-      $parsed_api_error .= ' <input id="widget_error" hidden type="text"/>';
+			$parsed_api_error .= ' widget_error';
 
 			throw new Exception( esc_html( $parsed_api_error ) );
 
@@ -786,7 +786,7 @@ class CardProcessor {
 				$parsed_api_error = __( 'Unable to create the Paydock customer record', 'paydock' );
 			}
 
-      $parsed_api_error .= ' <input id="widget_error" hidden type="text"/>';
+			$parsed_api_error .= ' widget_error';
 
 			throw new Exception( esc_html( $parsed_api_error ) );
 

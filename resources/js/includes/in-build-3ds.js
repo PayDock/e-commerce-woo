@@ -110,7 +110,10 @@ export default async (forcePermanentVault = false, newAmount = null) => {
     if (result === 'error') {
         showCardWidget();
         reloadWidget();
+    } else {
+        listenForWidgetErrors();
     }
+
     return result;
 }
 function reloadWidget() {
@@ -120,6 +123,8 @@ function reloadWidget() {
     }
     const settings = window.wc.wcSettings.getSetting('paydock_data', {});
     settings.selectedToken = '';
+    const paymentSourceToken = document.querySelector('[name="payment_source_token"]');
+    paymentSourceToken.value = null;
     window.widgetPaydock.reload();
     window.widgetReloaded = true;
 }
@@ -129,4 +134,23 @@ function showCardWidget() {
     const canvas3dsWrapper = document.getElementById('paydockWidget3ds');
     canvas3dsWrapper.innerHTML = '';
     canvas3dsWrapper.setAttribute('style', 'display: none');
+}
+
+function listenForWidgetErrors() {
+    if (!!window.widgetErrorInterval) clearInterval(window.widgetErrorInterval);
+    let counter = 0;
+    window.widgetErrorInterval = setInterval(() => {
+        const errorBanner = document.querySelectorAll('.wc-block-components-notice-banner.is-error')[0];
+        const bannerContent = errorBanner?.querySelectorAll('.wc-block-components-notice-banner__content')[0];
+        if (bannerContent?.innerText.indexOf('widget_error') > -1) {
+            showCardWidget();
+            reloadWidget();
+            bannerContent.innerText = bannerContent?.innerText.replace('widget_error', '')
+            clearInterval(window.widgetErrorInterval);
+        } else if (counter === 300) {
+            clearInterval(window.widgetErrorInterval);
+        } else {
+            counter++;
+        }
+    }, 100)
 }
