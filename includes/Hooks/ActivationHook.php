@@ -14,11 +14,11 @@ class ActivationHook implements Hook {
 		'pb-pending'      => 'pending',
 		'wc-pb-pending'   => 'pending',
 		'pb-paid'         => 'processing',
-		'pb-authorize'    => 'processing',
+		'pb-authorize'    => 'on-hold',
 		'pb-requested'    => 'processing',
 		'pb-p-paid'       => 'processing',
 		'wc-pb-paid'      => 'processing',
-		'wc-pb-authorize' => 'processing',
+		'wc-pb-authorize' => 'on-hold',
 		'wc-pb-requested' => 'processing',
 		'wc-pb-p-paid'    => 'processing',
 		'pb-cancelled'    => 'cancelled',
@@ -58,7 +58,7 @@ class ActivationHook implements Hook {
 
 	protected function updateOrderStatus( $orders, $new_status ) {
 		foreach ( $orders as $order ) {
-			update_post_meta( $order->get_id(), self::CUSTOM_STATUS_META_KEY, $order->get_status() );
+			$order->update_meta_data( self::CUSTOM_STATUS_META_KEY, $order->get_status() );
 			$order->set_status( $new_status );
 			$order->save();
 		}

@@ -51,6 +51,10 @@ class SDKAdapterService {
 				SettingGroups::CREDENTIALS()->name,
 				CredentialSettings::ACCESS_KEY()->name,
 			] ) );
+			$publicKey = $settings->get_option( $settingsService->getOptionName( $settings->id, [ 
+				SettingGroups::CREDENTIALS()->name,
+				CredentialSettings::WIDGET_KEY()->name,
+			] ) );
 		} else {
 			$publicKey = $settings->get_option( $settingsService->getOptionName( $settings->id, [ 
 				SettingGroups::CREDENTIALS()->name,
@@ -112,8 +116,12 @@ class SDKAdapterService {
 		return $notificationService->create( $parameters )->call();
 	}
 
-	public function token( array $params = [ 'gateway_id' => '', 'type' => '' ] ): array {
+	public function token( array $params = [ 'gateway_id' => '', 'type' => '' ], ?bool $useWidgetAccessToken = false ): array {
 		$tokenService = new TokenService();
+
+		if ($useWidgetAccessToken) {
+			return $tokenService->create( $params )->callWithWidgetAccessToken();
+		}
 
 		return $tokenService->create( $params )->call();
 	}
@@ -188,24 +196,24 @@ class SDKAdapterService {
 		return $chargeService->refunds( $params )->call();
 	}
 
-	public function errorMessageToString( $responce ): string {
-		if ( $responce instanceof \WP_Error ) {
-			return $responce->get_error_message();
+	public function errorMessageToString( $response ): string {
+		if ( $response instanceof \WP_Error ) {
+			return $response->get_error_message();
 		}
 
-		$result = ! empty( $responce['error']['message'] ) ? ' ' . $responce['error']['message'] : '';
-		if ( isset( $responce['error']['details'] ) ) {
-			if ( ! empty( $responce['error']['details']['messages'] ) ) {
-				$firstMessage = reset( $responce['error']['details']['messages'] );
+		$result = ! empty( $response['error']['message'] ) ? ' ' . $response['error']['message'] : '';
+		if ( isset( $response['error']['details'] ) ) {
+			if ( ! empty( $response['error']['details']['messages'] ) ) {
+				$firstMessage = reset( $response['error']['details']['messages'] );
 
 				return $firstMessage;
 			}
 
-			$firstDetail = reset( $responce['error']['details'] );
+			$firstDetail = reset( $response['error']['details'] );
 			if ( is_array( $firstDetail ) ) {
 				$result .= ' ' . implode( ',', $firstDetail );
 			} else {
-				$result .= ' ' . implode( ',', $responce['error']['details'] );
+				$result .= ' ' . implode( ',', $response['error']['details'] );
 			}
 		}
 

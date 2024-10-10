@@ -85,9 +85,28 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 
 			$response = $processor->run( $order );
 
-			if ( ! empty( $response['error'] ) || empty( $response['resource']['data']['_id'] ) ) {
-				throw new Exception( __( 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later.',
-					'power-board' ) );
+			if ( ! empty( $response['error'] ) ) {
+
+				$parsed_api_error = '';
+
+				if ( ! empty( $response['error']['details'][0]['description'] ) ) {
+
+					$parsed_api_error = $response['error']['details'][0]['description'];
+
+					if ( ! empty( $response['error']['details'][0]['status_code_description'] ) ) {
+						$parsed_api_error .= ': ' . $response['error']['details'][0]['status_code_description'];
+					}
+
+				} elseif ( ! empty( $response['error']['message'] ) ) {
+					$parsed_api_error = $response['error']['message'];
+				}
+
+				if ( empty( $parsed_api_error ) ) {
+					$parsed_api_error = __( 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later.', 'power-board' );
+				}
+
+				throw new Exception( esc_html( $parsed_api_error ) );
+
 			}
 
 			$chargeId = $response['resource']['data']['_id'];
@@ -99,11 +118,8 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 				$e->getMessage(),
 				LogRepository::ERROR
 			);
-			throw new RouteException(
-				'woocommerce_rest_checkout_process_payment_error',
-				/* translators: %s: Error message */
-				esc_html( sprintf( __( 'Error: %s', 'power-board' ), $e->getMessage() ) )
-			);
+
+			throw new RouteException( 'woocommerce_rest_checkout_process_payment_error', esc_html( $e->getMessage() ) );
 		}
 
 		$status          = ucfirst( strtolower( $response['resource']['data']['transactions'][0]['status'] ?? 'undefined' ) );
@@ -116,10 +132,12 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 			$status      = $isCompleted ? 'wc-pb-paid' : 'wc-pb-pending';
 		}
 		OrderService::updateStatus( $order_id, $status );
-		$order->payment_complete();
+		if ( ! in_array( $status, [ 'wc-pb-authorize' ] ) ) {
+			$order->payment_complete();
+			$order->update_meta_data( 'pb_directly_charged', 1 );
+		}
+		$order->update_meta_data( 'power_board_charge_id', $chargeId );
 		$order->save();
-
-		update_post_meta( $order->get_id(), 'power_board_charge_id', $chargeId );
 
 		WC()->cart->empty_cart();
 
@@ -131,11 +149,8 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 			'wc-pb-paid' == $status ? LogRepository::SUCCESS : LogRepository::DEFAULT
 		);
 
-		add_post_meta(
-			$order->get_id(),
-			OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(),
-			$this->getAPMsType()->getLabel()
-		);
+		$order->update_meta_data( OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(), $this->getAPMsType()->getLabel() );
+		$order->save();
 
 		$order->set_payment_method_title( SettingsService::getInstance()->getWidgetPaymentAPMTitle( $this->getAPMsType() ) );
 		$order->save();

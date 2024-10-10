@@ -1,5 +1,64 @@
 jQuery(function ($) {
     $(document).ready(() => {
+        const CONFIG = {
+            phoneInputId: '#billing_phone',
+            baseCheckboxIdName: 'payment_method',
+            errorMessageClassName: 'wc-block-components-validation-error',
+            paymentOptionsNames: [
+                'power_board_gateway',
+                'power_board_google-pay_wallets_gateway',
+                'power_board_afterpay_wallets_gateway',
+                'power_board_pay-pal_wallets_gateway',
+                'power_board_afterpay_a_p_m_s_gateway',
+                'power_board_zip_a_p_m_s_gateway',
+            ],
+            phonePattern: /^\+[1-9]{1}[0-9]{3,14}$/,
+            errorMessageHtml: `<div class="wc-block-components-validation-error" role="alert"><p>Please enter your phone number in international format, starting with "+"</p></div>`,
+        };
+
+        const getPhoneInput = () => $(CONFIG.phoneInputId);
+
+        const getPaymentOptionsComponents = () =>
+          CONFIG.paymentOptionsNames
+            .map(name => $(`#${CONFIG.baseCheckboxIdName}_${name}`).parents().eq(1))
+            .filter($component => $component.length);
+
+        const validatePhone = ($input) => {
+            const phone = $input.val();
+            $input.next(`.${CONFIG.errorMessageClassName}`).remove();
+            if (phone && !CONFIG.phonePattern.test(phone)) {
+                $input.after(CONFIG.errorMessageHtml);
+
+                return false;
+            }
+
+            return true;
+        };
+
+        const updateVisibility = (phoneInput) => {
+            const validPhone = validatePhone(phoneInput);
+            $('button#place_order').styles = 'visibility:' + (validPhone ? 'visible' : 'hidden');
+
+            getPaymentOptionsComponents().forEach($component => {
+                  $component.css({
+                      opacity: validPhone ? 1 : 0.5,
+                      pointerEvents: validPhone ? 'auto' : 'none',
+                  })
+              }
+            );
+        };
+
+        const initPhoneNumberValidation = () => {
+            const phoneInput = getPhoneInput();
+            if (!phoneInput) return;
+
+            phoneInput.on('blur input', () => updateVisibility(phoneInput));
+
+            updateVisibility(phoneInput);
+        };
+
+        initPhoneNumberValidation();
+
         const powerBoardHelper = {
             paymentMethod: null,
             currentForm: {
@@ -18,6 +77,24 @@ jQuery(function ($) {
             defaultFormTriger: false,
             sleepSetTimeout_ctrl: null,
             form: null,
+            widgetErrorInterval: null,
+            showErrorMessage(errorMessage) {
+                $('.woocommerce-notices-wrapper:first').html("");
+                $('.woocommerce-NoticeGroup.woocommerce-NoticeGroup-checkout').html("");
+                jQuery.post(PowerBoardAjax.url, {
+                    _wpnonce: PowerBoardAjax.wpnonce_error,
+                    dataType: 'html',
+                    action: 'power_board_create_error_notice',
+                    error: errorMessage,
+                }).then(message => {
+                    var doc = new DOMParser().parseFromString(message, "text/html");
+                    var noticeBanner = doc.querySelectorAll("div.wc-block-components-notice-banner");
+                    $('.woocommerce-notices-wrapper:first').append(noticeBanner)
+                    $('html, body').animate({
+                        scrollTop: ($('div.woocommerce-notices-wrapper').offset().top - 100)
+                    }, 800)
+                });
+            },
             setFieldLikeInvalid(fieldName) {
                 let element = document.getElementById(`${fieldName}_field`);
 
@@ -97,9 +174,6 @@ jQuery(function ($) {
                 let orderButton = $('button[name="woocommerce_checkout_place_order"]')
 
                 if (this.paymentMethod === methodName) {
-                    setTimeout(() => {
-                        this.paymentMethod = null
-                    }, 100)
                     return;
                 }
                 orderButton.hide();
@@ -119,13 +193,13 @@ jQuery(function ($) {
                         this.initGoogleForm({});
                         break;
                     case 'power_board_afterpay_wallets_gateway':
-                        this.initAvterpayV2Form();
+                        this.initAfterpayV2Form();
                         break;
                     case 'power_board_pay-pal_wallets_gateway':
                         this.initPayPalForm();
                         break;
                     case 'power_board_afterpay_a_p_m_s_gateway':
-                        this.initAftrepayV1Form();
+                        this.initAfterpayV1Form();
                         break;
                     case 'power_board_zip_a_p_m_s_gateway':
                         this.initZipForm();
@@ -148,13 +222,47 @@ jQuery(function ($) {
                 }
             },
             customSubmitForm(event) {
+                $('.woocommerce-notices-wrapper:first').html('')
                 if (('power_board_gateway' === this.paymentMethod) && !this.defaultFormTriger) {
                     event.preventDefault();
-                    this.currentForm.card.trigger(window.cba.TRIGGER.SUBMIT_FORM);
+                    let config = this.getConfigs();
+                    if (!((Array.isArray(config.tokens) && config.tokens.length > 0 && config.selectedToken !== "") || this.currentForm.card.isValidForm())) {
+                        var invalid_fields = [];
+                        this.currentForm.card.getValidationState().invalid_fields?.forEach(field => {
+                            switch(field) {
+                                case "card_name":
+                                    invalid_fields.push("Card Name");
+                                    break;
+                                case "card_number":
+                                    invalid_fields.push("Card Number");
+                                    break;
+                                case "expiry_date":
+                                    invalid_fields.push("Expiry Date");
+                                    break;
+                                case "card_ccv":
+                                    invalid_fields.push("Card CCV");
+                                    break;
+                            }
+                        });
+                        this.showErrorMessage('Please fill in the required credit card form fields' + (invalid_fields.length ? `: ${invalid_fields.join(", ")}` : ""));
+
+                    } else {
+                        this.currentForm.card.trigger(window.cba.TRIGGER.SUBMIT_FORM);
+                    }
+                } else if (this.defaultFormTriger) {
+                    const config = this.getConfigs();
+                    config.selectedToken = $('#power-board-selected-token').val();
+                    this.listenForWidgetErrors();
                 }
             },
             initCardForm() {
-                $("#power-board-3ds-container").hide()
+                $("#power-board-3ds-container").hide();
+
+                if (!!this.currentForm.card) {
+                    this.reloadCardWidget();
+                    return;
+                }
+
                 const config = this.getConfigs();
 
                 let isPermanent = config.hasOwnProperty('card3DSFlow')
@@ -164,7 +272,13 @@ jQuery(function ($) {
                     )
                 let gatewayId = isPermanent ? config.gatewayId : 'not_configured';
 
-                this.currentForm.card = new cba.HtmlWidget('#classic-power_board_gateway', config.publicKey, gatewayId);
+                this.currentForm.card = new cba.HtmlWidget('#classic-power_board_gateway', config.publicKey, gatewayId, "card", "card_payment_source_with_cvv");
+                this.currentForm.card.setFormPlaceholders({
+                    card_name: 'Card holders name *',
+                    card_number: 'Credit card number *',
+                    expire_month: 'MM/YY *',
+                    card_ccv: 'CCV *',
+                })
 
                 if (config.hasOwnProperty('styles')) {
                     this.currentForm.card.setStyles(config.styles);
@@ -178,20 +292,19 @@ jQuery(function ($) {
 
                 if (config.hasOwnProperty('styles') && config.cardSupportedCardTypes !== '') {
                     let supportedCard = config.cardSupportedCardTypes.replaceAll(' ', '').split(',')
-                    this.currentForm.card.setSupportedCardIcons(supportedCard);
+                    this.currentForm.card.setSupportedCardIcons(supportedCard, true);
                 }
 
                 this.currentForm.card.setEnv(config.isSandbox ? 'preproduction_cba' : 'production_cba');
-                this.currentForm.card.setFormFields(['email', 'phone']);
-                this.currentForm.card.onFinishInsert('#classic-power_board_gateway-token', 'payment_source');
+                this.currentForm.card.setFormFields(["card_name*","card_number*", "card_ccv*"]);
+                this.currentForm.card.onFinishInsert('#power-board-selected-token', 'payment_source');
                 this.currentForm.card.interceptSubmitForm('#widget');
+                this.currentForm.card.hideElements(['submit_button']);
 
                 this.currentForm.card.load();
 
-                this.currentForm.card.on(window.cba.EVENT.AFTER_LOAD, () => {
-                    this.currentForm.card.hideElements(['submit_button', 'email', 'phone']);
-                })
                 this.currentForm.card.on(window.cba.EVENT.FINISH, () => {
+                    config.paymentSourceToken = $('#power-board-selected-token').val();
                     switch (config.card3DS) {
                         case 'IN_BUILD':
                             this.init3DSInBuilt(config)
@@ -202,6 +315,8 @@ jQuery(function ($) {
                         default:
                             this.form.submit()
                     }
+
+                    this.listenForWidgetErrors();
                 })
 
                 $('#select-saved-cards').on('change', (event) => {
@@ -211,8 +326,8 @@ jQuery(function ($) {
 
                     widgetform.hide()
                     if (!value) {
-                        widgetform.show()
-                        checkbox.show()
+                        widgetform.show();
+                        checkbox.show();
                         this.defaultFormTriger = false;
                     } else {
                         widgetform.hide()
@@ -221,6 +336,33 @@ jQuery(function ($) {
                     }
                     $('#power-board-selected-token').val(value)
                 })
+            },
+            showWidget() {
+                $('#select-saved-cards').val("");
+                $('#card_save_card').parent().show();
+                $('#classic-power_board_gateway-wrapper').show();
+                this.defaultFormTriger = false;
+            },
+            reloadCardWidget() {
+                this.showWidget();
+                const config = this.getConfigs();
+                config.selectedToken = "";
+                this.currentForm.card.reload();
+                const paymentSourceToken = $('#power-board-selected-token');
+                paymentSourceToken.value = null;
+                this.currentForm.widgetReloaded = true;
+            },
+            listenForWidgetErrors() {
+                if (!!this.widgetErrorInterval) clearInterval(this.widgetErrorInterval);
+                this.widgetErrorInterval = setInterval(() => {
+                    const errorBanner = document.querySelectorAll('.wc-block-components-notice-banner.is-error')[0];
+                    const bannerContent = errorBanner?.querySelectorAll('.wc-block-components-notice-banner__content')[0];
+                    if (bannerContent?.innerText.indexOf('widget_error') > -1) {
+                        this.reloadCardWidget();
+                        bannerContent.innerText = bannerContent?.innerText.replace('widget_error', '')
+                        clearInterval(this.widgetErrorInterval);
+                    }
+                }, 100)
             },
             async init3DSInBuilt(config) {
                 if (config.selectedToken.trim().length === 0 && config.card3DSFlow === 'PERMANENT_VAULT') {
@@ -263,7 +405,7 @@ jQuery(function ($) {
                     preAuthData.customer.payment_source.vault_token = config.selectedToken;
                     preAuthData.customer.payment_source.gateway_id = config.gatewayId;
                 } else {
-                    preAuthData.token = $('#classic-power_board_gateway-token').val()
+                    preAuthData.token = $('#power-board-selected-token').val()
                 }
                 const envVal = config.isSandbox ? 'preproduction_cba' : 'production_cba'
                 const preAuthResp = await new window.cba.Api(config.publicKey)
@@ -272,6 +414,8 @@ jQuery(function ($) {
                     .preAuth(preAuthData);
 
                 if (typeof preAuthResp._3ds.token === "undefined") {
+                    this.showErrorMessage('Payment has been rejected by PowerBoard. Please try a different payment method');
+                    this.reloadCardWidget();
                     return false;
                 }
 
@@ -281,14 +425,22 @@ jQuery(function ($) {
                 const canvas = new window.cba.Canvas3ds("#power-board-3ds-container", preAuthResp._3ds.token);
                 canvas.load();
 
-                canvas.on('chargeAuth', (chargeAuthSuccessEvent) => {
-                    $('#charge3dsid').val(chargeAuthSuccessEvent.charge_3ds_id)
-                    this.form.submit()
+                canvas.on('chargeAuthSuccess', (chargeAuthEvent) => {
+                    $('#charge3dsid').val(chargeAuthEvent.charge_3ds_id);
+                    this.form.submit();
                 })
+                canvas.on('chargeAuthReject', (data) => {
+                    if (data.status === 'not_authenticated') {
+                        $("#power-board-3ds-container").hide();
+                        $('#classic-power_board_gateway').show();
+                    }
+                    $('#charge3dsid').val(data.charge_3ds_id);
+                    this.form.submit();
+                });
             },
             async getVaultToken(config) {
                 data = {...config}
-                data.paymentSourceToken = $('#classic-power_board_gateway-token').val()
+                data.paymentSourceToken = $('#power-board-selected-token').val()
                 data.action = 'power_board_get_vault_token';
                 data._wpnonce = PowerBoardAjax.wpnonce_3ds;
                 data.tokens = '';
@@ -303,7 +455,6 @@ jQuery(function ($) {
 
                 return jQuery.post(PowerBoardAjax.url, data).then();
             },
-
             async sleep(ms) {
                 clearInterval(this.sleepSetTimeout_ctrl);
                 return new Promise(resolve => this.sleepSetTimeout_ctrl = setTimeout(resolve, ms));
@@ -311,7 +462,7 @@ jQuery(function ($) {
             async getStandalone3dsToken(config) {
                 const data = {...config};
                 data.action = 'power_board_get_vault_token';
-                data.paymentSourceToken = $('#classic-power_board_gateway-token').val()
+                data.paymentSourceToken = $('#power-board-selected-token').val()
                 data.type = 'standalone-3ds-token';
                 data._wpnonce = PowerBoardAjax.wpnonce_3ds;
                 let address = this.getAddressData(false);
@@ -397,7 +548,7 @@ jQuery(function ($) {
                     wallets: ['apple']
                 })
             },
-            initAvterpayV2Form() {
+            initAfterpayV2Form() {
                 const type = 'afterpay';
                 if ('power_board_afterpay_wallets_gateway' !== this.paymentMethod) {
                     delete this.currentForm.wallets.afterpay;
@@ -417,7 +568,7 @@ jQuery(function ($) {
                     pay_later: config?.pay_pal_smart_button?.payLater?.toLowerCase() === 'yes'
                 })
             },
-            initAftrepayV1Form() {
+            initAfterpayV1Form() {
                 const countries = ['au', 'nz', 'us', 'ca', 'uk', 'gb', 'fr', 'it', 'es', 'de'];
 
                 let countriesErrorElement = $('#classic-power_board_afterpay_a_p_m_s_gateway-error-countries');
@@ -525,7 +676,7 @@ jQuery(function ($) {
 
                         this.currentForm.wallets[index].setEnv(isSandbox ? 'preproduction_cba' : 'production_cba')
 
-                        this.currentForm.wallets[index].onPaymentError((data) => {
+                        this.currentForm.wallets[index].onPaymentError(() => {
                             this.form.submit()
                         });
 
@@ -602,22 +753,22 @@ jQuery(function ($) {
                 })
             },
             init() {
-                setInterval(() => {
-                    let paymentMethod = $('input[name="payment_method"]:checked').val();
-                    if (paymentMethod && !this.paymentMethod) {
-                        this.setPaymentMethod(paymentMethod)
-                    }
-
+                const orderBtnInterval = setInterval(() => {
                     let orderButton = document.getElementById('place_order');
                     if (orderButton) {
+                        clearInterval(orderBtnInterval)
                         orderButton.addEventListener('click', (event) => {
                             this.customSubmitForm(event)
                         })
                     }
+                }, 100)
 
-                    this.form.submit((event) => {
-                        this.customSubmitForm(event)
-                    });
+                const paymentMethodInterval = setInterval(() => {
+                    let paymentMethod = $('input[name="payment_method"]:checked').val();
+                    if (paymentMethod && !this.paymentMethod) {
+                        clearInterval(paymentMethodInterval)
+                        this.setPaymentMethod(paymentMethod)
+                    }
                 }, 100)
 
                 this.form = $('form[name="checkout"]');
@@ -630,10 +781,15 @@ jQuery(function ($) {
                     }
                 })
 
+                this.form.submit((event) => {
+                    this.customSubmitForm(event)
+                });
+
                 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
             },
         }
         setTimeout(() => {
+            $('.woocommerce-notices-wrapper:first').html("");
             powerBoardHelper.init()
         }, 2000)
     });

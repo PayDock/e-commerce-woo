@@ -1,22 +1,41 @@
 <?php if ( ! defined( 'ABSPATH' ) ) {
 	exit;
-} // Exit if accessed directly ?>
+}
+
+use PowerBoard\Enums\OrderListColumns;
+use PowerBoard\Enums\OtherPaymentMethods;
+use PowerBoard\Enums\WalletPaymentMethods;
+?>
 <span class="power-board-order-actions">
-	<?php if ( in_array( $order->get_meta( \PowerBoard\Hooks\ActivationHook::CUSTOM_STATUS_META_KEY ), [
-		'pb-authorize',
-		'wc-pb-authorize'
-	] ) ) : ?>
+    <?php
+        $pb_charge_meta = $order->get_meta( 'pb_directly_charged' );
+        $partiallyRefunded = in_array( $order->get_meta('power_board_refunded_status'), [
+          'wc-pb-p-refund',
+          'pb-p-refund'
+        ] );
+        $order_directly_charged = ! empty( $pb_charge_meta ) ? $pb_charge_meta : false;
+        $showCancelButton = ! in_array( $order->get_meta(OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey()), [
+            WalletPaymentMethods::PAY_PAL_SMART_BUTTON()->getLabel(),
+            WalletPaymentMethods::AFTERPAY()->getLabel(),
+            OtherPaymentMethods::AFTERPAY()->getLabel(),
+            OtherPaymentMethods::ZIPPAY()->getLabel(),
+          ] ) || $order_directly_charged == false;
+
+        if ( $order_directly_charged == false ) :
+    ?>
         <button type="button"
                 onclick="powerBoardPaymentCapture(<?php echo esc_attr( $order->get_id() ); ?>, 'power-board-capture-charge')"
                 class="button">
 			Capture charge
 		</button>
-	<?php endif; ?>
-	<button type="button"
-            onclick="handlePowerBoardPaymentCapture(<?php echo esc_attr( $order->get_id() ); ?>, 'power-board-cancel-authorised')"
-            class="button">
-		Cancel charge
-	</button>
+    <?php endif; ?>
+	  <?php if ( $showCancelButton && !$partiallyRefunded) :?>
+          <button type="button"
+                  onclick="handlePowerBoardPaymentCapture(<?php echo esc_attr( $order->get_id() ); ?>, 'power-board-cancel-authorised')"
+                  class="button">
+          Cancel charge
+      </button>
+    <?php endif; ?>
 </span>
 <div class="wc-order-data-row wc-order-partial-paid-items wc-order-data-row-toggle" style="display: none;">
     <table class="wc-order-totals">

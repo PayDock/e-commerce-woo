@@ -56,12 +56,13 @@ class CardPaymentService extends WC_Payment_Gateway {
 		add_action( 'wp_enqueue_scripts', [ $this, 'payment_scripts' ] );
 
 		add_action( 'wp_ajax_power_board_get_vault_token', [ $this, 'power_board_get_vault_token' ] );
+		add_action( 'wp_ajax_power_board_create_error_notice', [ $this, 'power_board_create_error_notice' ], 20 );
 
 		add_action( 'woocommerce_after_checkout_billing_form', [ $this, 'woocommerce_before_checkout_form' ], 10, 1 );
 	}
 
 	public function payment_scripts() {
-		if ( ! is_checkout() || ! $this->is_available() ) {
+        if ( ! is_checkout() ) {
 			return '';
 		}
 
@@ -141,8 +142,30 @@ class CardPaymentService extends WC_Payment_Gateway {
 
 			$response = $cardProcessor->run( $order );
 
-			if ( ! empty( $response['error'] ) && stripos( $response['error']['message'], '3d' ) === false) {
-				throw new Exception( esc_html( __( 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later. <input id="widget_error" hidden type="text"/>', 'power-board' ) ) );
+			if ( ! empty( $response['error'] ) ) {
+
+				$parsed_api_error = '';
+
+				if ( ! empty( $response['error']['details'][0]['description'] ) ) {
+
+					$parsed_api_error = $response['error']['details'][0]['description'];
+
+					if ( ! empty( $response['error']['details'][0]['status_code_description'] ) ) {
+						$parsed_api_error .= ': ' . $response['error']['details'][0]['status_code_description'];
+					}
+
+				} elseif ( ! empty( $response['error']['message'] ) ) {
+					$parsed_api_error = $response['error']['message'];
+				}
+
+				if ( empty( $parsed_api_error ) ) {
+					$parsed_api_error = __( 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later.', 'power-board' );
+				}
+
+				$parsed_api_error .= ' widget_error';
+
+				throw new Exception( esc_html( $parsed_api_error ) );
+
 			}
 
 			$chargeId = ! empty( $response['resource']['data']['_id'] ) ? $response['resource']['data']['_id'] : '';
@@ -154,11 +177,8 @@ class CardPaymentService extends WC_Payment_Gateway {
 				$e->getMessage(),
 				LogRepository::ERROR
 			);
-			throw new RouteException(
-				'woocommerce_rest_checkout_process_payment_error',
-				/* Translators: %s Error message from API. */
-				esc_html( sprintf( __( 'Error: %s', 'power-board' ), $e->getMessage() ) )
-			);
+
+			throw new RouteException( 'woocommerce_rest_checkout_process_payment_error', esc_html( $e->getMessage() ) );
 		}
 
 		try {
@@ -198,14 +218,16 @@ class CardPaymentService extends WC_Payment_Gateway {
 		}
 
 		OrderService::updateStatus( $order->get_id(), $status );
-		if ( ! in_array( $status, [ 'wc-pb-pending' ] ) ) {
+		if ( ! in_array( $status, [ 'wc-pb-pending', 'wc-pb-authorize' ] ) ) {
 			$order->payment_complete();
+			$order->update_meta_data( 'pb_directly_charged', 1 );
 		}
-		$order->set_payment_method_title( SettingsService::getInstance()->getWidgetPaymentCardTitle() );
-		$order->save();
-		update_post_meta( $order->get_id(), 'power_board_charge_id', $chargeId );
-		add_post_meta( $order->get_id(), OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(), 'Card' );
+
+		$order->update_meta_data( 'power_board_charge_id', $chargeId );
+		$order->update_meta_data( OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(), 'Card' );
+
 		WC()->cart->empty_cart();
+		$order->save();
 
 		$loggerRepository->createLogRecord(
 			$chargeId,
@@ -315,6 +337,15 @@ class CardPaymentService extends WC_Payment_Gateway {
 		}
 
 		die();
+	}
+
+	/**
+	 * Ajax function
+	 */
+	public function power_board_create_error_notice() {
+		wc_add_notice( __( $_POST['error'], 'power-board' ), 'error' );
+		$response['data'] = wc_print_notices();
+		return $response;
 	}
 
 	public function woocommerce_before_checkout_form( $arg ) {

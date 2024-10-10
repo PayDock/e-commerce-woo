@@ -58,14 +58,9 @@ class AfterpayWalletService extends AbstractWalletPaymentService {
 		$loggerRepository = new LogRepository();
 
 		$order->set_status( 'wc-pending' );
+		$order->update_meta_data( 'power_board_charge_id', $chargeId );
+		$order->update_meta_data( OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(), $this->getWalletType()->getLabel() );
 		$order->save();
-
-		update_post_meta( $order_id, 'power_board_charge_id', $chargeId );
-		add_post_meta(
-			$order_id,
-			OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(),
-			$this->getWalletType()->getLabel()
-		);
 
 		$loggerRepository->createLogRecord(
 			$data['data']['id'] ?? '',

@@ -128,7 +128,30 @@ class ApmProcessor {
 				$message,
 				LogRepository::ERROR
 			);
-			throw new Exception( esc_html( __( 'The PowerBoard customer could not be created successfully.', 'power-board' ) ) );
+		}
+
+		if ( ! empty( $customer['error'] ) ) {
+
+			$parsed_api_error = '';
+
+			if ( ! empty( $customer['error']['details'][0]['description'] ) ) {
+
+				$parsed_api_error = $customer['error']['details'][0]['description'];
+
+				if ( ! empty( $customer['error']['details'][0]['status_code_description'] ) ) {
+					$parsed_api_error .= ': ' . $customer['error']['details'][0]['status_code_description'];
+				}
+
+			} elseif ( ! empty( $customer['error']['message'] ) ) {
+				$parsed_api_error = $customer['error']['message'];
+			}
+
+			if ( empty( $parsed_api_error ) ) {
+				$parsed_api_error = __( 'Unable to create the PowerBoard customer record', 'power-board' );
+			}
+
+			throw new Exception( esc_html( $parsed_api_error ) );
+
 		}
 
 		$this->logger->createLogRecord(
@@ -198,7 +221,7 @@ class ApmProcessor {
 			'address_city'     => $this->order->get_billing_city(),
 			'address_state'    => $this->order->get_billing_state(),
 			'address_line1'    => $address1,
-			'address_line2'    => empty( trim( $address2 ) ) ? $address1 : $address2,
+			'address_line2'    => $address2 ? $address2 : null,
 		];
 
 		if ( ! empty( $exclude ) ) {
@@ -255,7 +278,7 @@ class ApmProcessor {
 			$address2 = $this->order->get_shipping_address_2();
 
 			$result['address_line1']    = $address1;
-			$result['address_line2']    = empty( trim( $address2 ) ) ? $address1 : $address2;
+			$result['address_line2']    = $address2;
 			$result['address_city']     = $this->order->get_shipping_city();
 			$result['address_state']    = $this->order->get_shipping_state();
 			$result['address_country']  = $this->order->get_shipping_country();

@@ -61,7 +61,7 @@ export default (selectTokenLabel = 'Saved bank accounts', newCardLabel = 'New Ac
 
                     if (value !== '') {
                         const token = settings.tokens.find(token => token.vault_token === value)
-                        if (token !== undefined) {
+                        if (typeof token !== 'undefined') {
                             window.widgetPowerBoardBankAccount.updateFormValues({
                                 account_name: token.account_name,
                                 account_number: token.account_number,

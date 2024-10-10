@@ -17,19 +17,19 @@ function validationManualCapture(elem) {
     if (captureAmount > availableToCapture) {
         alert("You cannot capture be greater than order total " + availableToCapture);
         elem.val(availableToCapture);
-        captureAmountBtn.text(availableToCapture);
+        captureAmountBtn.text(availableToCapture.toFixed(2));
         return false;
     }
 
     if (captureAmount <= 0) {
         alert("This field should be positive");
         elem.val(availableToCapture);
-        captureAmountBtn.text(availableToCapture);
+        captureAmountBtn.text(availableToCapture.toFixed(2));
         return false;
     }
 
     elem.val(captureAmount);
-    captureAmountBtn.text(captureAmount);
+    captureAmountBtn.text(captureAmount.toFixed(2));
     return true;
 }
 
