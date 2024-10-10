@@ -17,6 +17,7 @@ use PowerBoard\Services\Checkout\PayPalWalletService;
 use PowerBoard\Services\Checkout\ZipAPMsPaymentServiceService;
 use PowerBoard\Services\Settings\LiveConnectionSettingService;
 use PowerBoard\Services\Settings\LogsSettingService;
+use PowerBoard\Services\Settings\AdvancedSettingService;
 use PowerBoard\Services\Settings\SandboxConnectionSettingService;
 use PowerBoard\Services\Settings\WidgetSettingService;
 
@@ -112,6 +113,7 @@ class FiltersService extends AbstractSingleton {
 			$methods[] = SandboxConnectionSettingService::class;
 			$methods[] = WidgetSettingService::class;
 			$methods[] = LogsSettingService::class;
+			$methods[] = AdvancedSettingService::class;
 			$methods[] = CardPaymentService::class;
 			$methods[] = BankAccountPaymentService::class;
 			$methods[] = ApplePayWalletService::class;

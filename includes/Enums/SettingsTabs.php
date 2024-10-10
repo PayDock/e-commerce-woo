@@ -6,6 +6,7 @@ use PowerBoard\Abstracts\AbstractEnum;
 use PowerBoard\PowerBoardPlugin;
 use PowerBoard\Services\Settings\LiveConnectionSettingService;
 use PowerBoard\Services\Settings\LogsSettingService;
+use PowerBoard\Services\Settings\AdvancedSettingService;
 use PowerBoard\Services\Settings\SandboxConnectionSettingService;
 use PowerBoard\Services\Settings\WebHooksSettingService;
 use PowerBoard\Services\Settings\WidgetSettingService;
@@ -16,6 +17,7 @@ class SettingsTabs extends AbstractEnum {
 	protected const WEBHOOKS = PowerBoardPlugin::PLUGIN_PREFIX . '_webhooks';
 	protected const WIDGET = PowerBoardPlugin::PLUGIN_PREFIX . '_widget';
 	protected const LOG = PowerBoardPlugin::PLUGIN_PREFIX . '_log';
+	protected const ADVANCED = PowerBoardPlugin::PLUGIN_PREFIX . '_advanced';
 
 	public static function secondary(): array {
 		$allTabs = self::allCases(); // Use a custom method to simulate enum cases.
@@ -45,6 +47,8 @@ class SettingsTabs extends AbstractEnum {
 				return new WidgetSettingService();
 			case self::LOG:
 				return new LogsSettingService();
+			case self::ADVANCED:
+				return new AdvancedSettingService();
 			default:
 				return null;
 		}

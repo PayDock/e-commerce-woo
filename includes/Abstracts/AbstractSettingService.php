@@ -83,6 +83,10 @@ abstract class AbstractSettingService extends \WC_Payment_Gateway {
 				'label'  => __( 'Logs', 'power-board' ),
 				'active' => SettingsTabs::LOG()->value == $this->currentSection,
 			],
+			SettingsTabs::ADVANCED()->value                => [
+				'label'  => __( 'Advanced', 'power-board' ),
+				'active' => SettingsTabs::ADVANCED()->value == $this->currentSection,
+			],
 		];
 	}
 

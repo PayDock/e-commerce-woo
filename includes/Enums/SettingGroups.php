@@ -6,6 +6,7 @@ use PowerBoard\Abstracts\AbstractEnum;
 
 class SettingGroups extends AbstractEnum {
 	protected const CREDENTIALS = 'CREDENTIALS';
+	protected const ADVANCED = 'ADVANCED';
 	protected const CARD = 'CARD';
 	protected const BANK_ACCOUNT = 'BANK_ACCOUNT';
 	protected const WALLETS = 'WALLETS';
@@ -31,6 +32,8 @@ class SettingGroups extends AbstractEnum {
 				return 'Bank account:';
 			case self::CREDENTIALS:
 				return 'API Credential:';
+			case self::ADVANCED:
+				return 'Advanced';
 			default:
 				return '';
 		}
