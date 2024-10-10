@@ -406,7 +406,7 @@ jQuery(function ($) {
                     preAuthData.customer.payment_source.vault_token = config.selectedToken;
                     preAuthData.customer.payment_source.gateway_id = config.gatewayId;
                 } else {
-                    preAuthData.token = $('#classic-power_board_gateway-token').val()
+                    preAuthData.token = config.paymentSourceToken;
                 }
                 const envVal = config.isSandbox ? 'preproduction_cba' : 'production_cba'
                 const preAuthResp = await new window.cba.Api(config.publicKey)
