@@ -28,7 +28,7 @@ abstract class AbstractWalletBlock extends AbstractBlock {
 			'title'            => $settings->getWidgetPaymentWalletTitle( $payment ),
 			'description'      => $settings->getWidgetPaymentWalletDescription( $payment ),
 			'publicKey'        => $settings->getPublicKey(),
-			'isSandbox'        => $settings->isSandbox(),
+			'environment'      => $settings->getEnvironment(),
 			'styles'           => $settings->getWidgetStyles(),
 		];
 

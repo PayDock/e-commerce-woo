@@ -38,7 +38,7 @@ final class PowerBoardGatewayBlocks extends AbstractBlock {
 			// Wordpress data
 			'_wpnonce'               => wp_create_nonce( 'process_payment' ),
 			'isUserLoggedIn'         => is_user_logged_in(),
-			'isSandbox'              => $settingsService->isSandbox(),
+			'environment'            => $settingsService->getEnvironment(),
 			// Woocommerce data
 			'amount'                 => WC()->cart->total,
 			'currency'               => strtoupper( get_woocommerce_currency() ),

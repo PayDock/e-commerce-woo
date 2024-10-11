@@ -64,7 +64,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
             axios.post(walletsChargeRoute, billingData).then((response) => {
                 localState.initData = response.data
                 setTimeout(() => {
-                    initButton(id, '#' + buttonId, localState.initData, settings.isSandbox, localState.reload)
+                    initButton(id, '#' + buttonId, localState.initData, settings.environment, localState.reload)
                 }, 0);
             }).catch((e) => {
                 localState.wasInit = false;
@@ -96,7 +96,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
         } else if (validationSuccess && localState.initData && !button.length) {
             afterpayCountriesError.hide()
             setTimeout(() => {
-                initButton(id, '#' + buttonId, localState.initData, settings.isSandbox)
+                initButton(id, '#' + buttonId, localState.initData, settings.environment)
             }, 0);
         }
 

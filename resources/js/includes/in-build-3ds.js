@@ -64,7 +64,7 @@ export default async (forcePermanentVault = false, newAmount = null) => {
         preAuthData.token = settings.paymentSourceToken
     }
 
-    const envVal = settings.isSandbox ? 'preproduction_cba' : 'production_cba'
+    const envVal = settings.environment
     const preAuthResp = await new window.cba.Api(settings.publicKey)
         .setEnv(envVal)
         .charge()
