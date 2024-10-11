@@ -291,7 +291,7 @@ setTimeout(() => jQuery(function ($) {
         }
 
         widget.setFormFields(["card_name*","card_number*", "card_ccv*"]);
-        widget.setEnv(powerBoardCardSettings.isSandbox ? 'preproduction_cba' : 'production_cba');
+        widget.setEnv(powerBoardCardSettings.environment);
         widget.onFinishInsert('input[name="payment_source_token"]', 'payment_source');
         widget.interceptSubmitForm('#widget');
         widget.hideElements(['submit_button']);

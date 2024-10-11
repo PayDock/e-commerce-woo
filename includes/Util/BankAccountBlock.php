@@ -29,12 +29,12 @@ final class BankAccountBlock extends AbstractBlock {
 			WC()->cart->calculate_totals();
 		}
 
-		return array_merge( $userTokens, [ 
+		return array_merge( $userTokens, [
 			'isActive' => $this->is_active(),
 			// Wordpress data
 			'_wpnonce' => wp_create_nonce( 'process_payment' ),
 			'isUserLoggedIn' => is_user_logged_in(),
-			'isSandbox' => $settingsService->isSandbox(),
+			'environment' => $settings->getEnvironment(),
 			// Woocommerce data
 			'amount' => WC()->cart->total,
 			'currency' => strtoupper( get_woocommerce_currency() ),
