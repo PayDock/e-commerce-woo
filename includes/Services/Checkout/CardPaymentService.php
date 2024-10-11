@@ -159,7 +159,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 					$parsed_api_error = __( 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later.', 'power-board' );
 				}
 
-				$parsed_api_error .= ' <input id="widget_error" hidden type="text"/>';
+				$parsed_api_error .= ' widget_error';
 
 				throw new Exception( esc_html( $parsed_api_error ) );
 
