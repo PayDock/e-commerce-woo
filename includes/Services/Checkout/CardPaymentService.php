@@ -63,6 +63,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 
 		add_action( 'wp_enqueue_scripts', [ $this, 'payment_scripts' ] );
 
+		add_action( 'wp_ajax_nopriv_get_vault_token', [ $this, 'get_vault_token' ] );
 		add_action( 'wp_ajax_get_vault_token', [ $this, 'get_vault_token' ] );
 
 		add_action( 'woocommerce_after_checkout_billing_form', [ $this, 'woocommerce_before_checkout_form' ], 10, 1 );
@@ -159,7 +160,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 					$parsed_api_error = __( 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later.', 'power-board' );
 				}
 
-				$parsed_api_error .= ' <input id="widget_error" hidden type="text"/>';
+				$parsed_api_error .= ' widget_error';
 
 				throw new Exception( esc_html( $parsed_api_error ) );
 
