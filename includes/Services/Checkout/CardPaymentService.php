@@ -63,6 +63,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 
 		add_action( 'wp_enqueue_scripts', [ $this, 'payment_scripts' ] );
 
+		add_action( 'wp_ajax_nopriv_paydock_get_vault_token', [ $this, 'paydock_get_vault_token' ] );
 		add_action( 'wp_ajax_paydock_get_vault_token', [ $this, 'paydock_get_vault_token' ] );
 
 		add_action( 'woocommerce_after_checkout_billing_form', [ $this, 'woocommerce_before_checkout_form' ], 10, 1 );
