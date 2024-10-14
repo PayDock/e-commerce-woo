@@ -11,7 +11,7 @@ use PowerBoard\Services\FiltersService;
 
 if ( ! class_exists( '\PowerBoard\PowerBoardPlugin' ) ) {
 	final class PowerBoardPlugin extends AbstractSingleton {
-		public const REPOSITORIES = [ 
+		public const REPOSITORIES = [
 			LogRepository::class,
 		];
 
@@ -24,8 +24,8 @@ if ( ! class_exists( '\PowerBoard\PowerBoardPlugin' ) ) {
 		protected $paymentService = null;
 
 		protected function __construct() {
-			register_activation_hook( POWER_BOARD_PLUGIN_FILE, [ ActivationHook::class, 'handle' ] );
-			register_deactivation_hook( POWER_BOARD_PLUGIN_FILE, [ DeactivationHook::class, 'handle' ] );
+			register_activation_hook( PLUGIN_FILE, [ ActivationHook::class, 'handle' ] );
+			register_deactivation_hook( PLUGIN_FILE, [ DeactivationHook::class, 'handle' ] );
 
 			ActionsService::getInstance();
 			FiltersService::getInstance();

@@ -58,6 +58,6 @@ class TemplateService {
 	}
 
 	private function getTemplatePath( string $template ): string {
-		return plugin_dir_path( POWER_BOARD_PLUGIN_FILE ) . $template . self::TEMPLATE_END;
+		return plugin_dir_path( PLUGIN_FILE ) . $template . self::TEMPLATE_END;
 	}
 }

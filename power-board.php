@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (c) PowerBoard, Inc. and its affiliates. All Rights Reserved
+ * Copyright (c) PowerBoard for WooCommerce, Inc. and its affiliates. All Rights Reserved
  *
  * This source code is licensed under the license found in the
  * LICENSE file in the root directory of this source tree.
@@ -23,23 +23,39 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+  exit; // Exit if accessed directly
 }
 
-if ( ! defined( 'POWER_BOARD_PLUGIN_FILE' ) ) {
-	define( 'POWER_BOARD_PLUGIN_FILE', __FILE__ );
+if ( ! defined( 'PLUGIN_NAME' ) ) {
+  define( 'PLUGIN_NAME', 'PowerBoard for WooCommerce' );
 }
 
-if ( ! defined( 'POWER_BOARD_PLUGIN_PATH' ) ) {
-	define( 'POWER_BOARD_PLUGIN_PATH', dirname( __FILE__ ) );
+if ( ! defined( 'PLUGIN_FILE' ) ) {
+  define( 'PLUGIN_FILE', __FILE__ );
 }
 
-if ( ! defined( 'POWER_BOARD_PLUGIN_URL' ) ) {
-	define( 'POWER_BOARD_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+if ( ! defined( 'PLUGIN_PATH' ) ) {
+  define( 'PLUGIN_PATH', dirname( __FILE__ ) );
 }
 
-if ( ! defined( 'POWER_BOARD_PLUGIN_VERSION' ) ) {
-	define( 'POWER_BOARD_PLUGIN_VERSION', '3.1.3' );
+if ( ! defined( 'PLUGIN_URL' ) ) {
+  define( 'PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+}
+
+if ( ! defined( 'PLUGIN_VERSION' ) ) {
+  define( 'PLUGIN_VERSION', '3.1.3' );
+}
+
+if ( ! defined( 'PLUGIN_WIDGET_NAME' ) ) {
+  define( 'PLUGIN_WIDGET_NAME', 'cba' );
+}
+
+if ( ! defined( 'PLUGIN_TEXT_DOMAIN' ) ) {
+  define( 'PLUGIN_TEXT_DOMAIN', 'power-board' );
+}
+
+if ( ! defined( 'PLUGIN_PREFIX' ) ) {
+  define( 'PLUGIN_PREFIX', 'power_board' );
 }
 
 require_once 'vendor/autoload.php';

@@ -49,9 +49,9 @@ class OrderService {
 		) {
 			wp_enqueue_style(
 				'hide-refund-button-styles',
-				POWER_BOARD_PLUGIN_URL . 'assets/css/admin/hide-refund-button.css',
+				PLUGIN_URL . 'assets/css/admin/hide-refund-button.css',
 				[],
-				POWER_BOARD_PLUGIN_VERSION
+				PLUGIN_VERSION
 			);
 		}
 		if ( in_array( $orderStatus, [
@@ -68,7 +68,7 @@ class OrderService {
 			$this->templateService->includeAdminHtml( 'power-board-capture-block', compact( 'order' ) );
 			wp_enqueue_script(
 				'power-board-capture-block',
-				POWER_BOARD_PLUGIN_URL . 'assets/js/admin/power-board-capture-block.js',
+				PLUGIN_URL . 'assets/js/admin/power-board-capture-block.js',
 				[],
 				time(),
 				true
@@ -82,9 +82,9 @@ class OrderService {
 			] ) ) {
 			wp_enqueue_style(
 				'hide-on-hold-buttons',
-				POWER_BOARD_PLUGIN_URL . 'assets/css/admin/hide-on-hold-buttons.css',
+				PLUGIN_URL . 'assets/css/admin/hide-on-hold-buttons.css',
 				[],
-				POWER_BOARD_PLUGIN_VERSION
+				PLUGIN_VERSION
 			);
 		}
 	}

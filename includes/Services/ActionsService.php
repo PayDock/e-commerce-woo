@@ -61,7 +61,7 @@ class ActionsService extends AbstractSingleton {
 
 	protected function addCompatibilityWithWooCommerce(): void {
 		if ( class_exists( FeaturesUtil::class ) ) {
-			FeaturesUtil::declare_compatibility( 'custom_order_tables', POWER_BOARD_PLUGIN_FILE );
+			FeaturesUtil::declare_compatibility( 'custom_order_tables', PLUGIN_FILE );
 		}
 	}
 
@@ -96,7 +96,7 @@ class ActionsService extends AbstractSingleton {
 		add_action( 'before_woocommerce_init', function () {
 			FeaturesUtil::declare_compatibility(
 				'cart_checkout_blocks',
-				POWER_BOARD_PLUGIN_FILE,
+				PLUGIN_FILE,
 				true
 			);
 		} );

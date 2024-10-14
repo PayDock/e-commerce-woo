@@ -53,7 +53,7 @@ abstract class AbstractApiService {
 	protected function runCall($args): array {
 		$url  = ConfigService::buildApiUrl( $this->buildEndpoint() );
 		$args['headers']['X-Power-Board-Meta'] = 'V'
-		                                         . POWER_BOARD_PLUGIN_VERSION
+		                                         . PLUGIN_VERSION
 		                                         . '_woocommerce_'
 		                                         . WC()->version;
 
