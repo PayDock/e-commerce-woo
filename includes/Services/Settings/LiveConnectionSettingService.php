@@ -54,7 +54,7 @@ class LiveConnectionSettingService extends AbstractSettingService {
 			if ( SettingGroups::CARD() == $settingGroup ) {
 				$this->form_fields[ $key . '_label' ] = [
 					'type'  => 'big_label',
-					'title' => __( 'Payment Methods:', 'power-board' ),
+					'title' => __( 'Payment Methods:', PLUGIN_TEXT_DOMAIN ),
 				];
 			}
 
@@ -230,7 +230,7 @@ class LiveConnectionSettingService extends AbstractSettingService {
 				] );
 				$fields[ $key ] = [
 					'type'  => 'checkbox',
-					'title' => __( 'Pay Later', 'power-board' ),
+					'title' => __( 'Pay Later', PLUGIN_TEXT_DOMAIN ),
 				];
 			}
 		}

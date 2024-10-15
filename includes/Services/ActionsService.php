@@ -132,7 +132,7 @@ class ActionsService extends AbstractSingleton {
 
 	protected function addEndpoints() {
 		add_action( 'rest_api_init', function () {
-			register_rest_route( 'power-board/v1', '/wallets/charge',
+			register_rest_route( PLUGIN_TEXT_DOMAIN . '/v1', '/wallets/charge',
 				[ // nosemgrep: audit.php.wp.security.rest-route.permission-callback.return-true  -- /wallets/charge is a public endpoint and doesn't need any permission checks.
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => [ new WidgetController(), 'createWalletCharge' ],

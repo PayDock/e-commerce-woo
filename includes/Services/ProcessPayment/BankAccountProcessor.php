@@ -86,7 +86,7 @@ class BankAccountProcessor {
 					LogRepository::ERROR
 				);
 				new LoggedException(
-					__( 'Oops! Something went wrong. Please check the information provided and try again. ', 'power-board' ),
+					__( 'Oops! Something went wrong. Please check the information provided and try again. ', PLUGIN_TEXT_DOMAIN ),
 					0,
 					null,
 					$response
@@ -192,7 +192,7 @@ class BankAccountProcessor {
 
 		if ( ! empty( $response['error'] ) ) {
 			new LoggedException(
-				__( 'Oops! Something went wrong. Please check the information provided and try again. ', 'power-board' ),
+				__( 'Oops! Something went wrong. Please check the information provided and try again. ', PLUGIN_TEXT_DOMAIN ),
 				0,
 				null,
 				$response

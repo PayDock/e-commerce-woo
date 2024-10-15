@@ -36,7 +36,7 @@ class ApmProcessor {
 		$this->setRunMethod();
 
 		if ( ! in_array( $this->runMethod, self::ALLOWED_METHODS ) ) {
-			throw new Exception( esc_html( __( 'Undefined run method', 'power-board' ) ) );
+			throw new Exception( esc_html( __( 'Undefined run method', PLUGIN_TEXT_DOMAIN ) ) );
 		}
 
 		return call_user_func( [ $this, $this->runMethod ] );
@@ -121,7 +121,7 @@ class ApmProcessor {
 			}
 
 			if ( empty( $parsed_api_error ) ) {
-				$parsed_api_error = __( 'Unable to create the PowerBoard customer record', 'power-board' );
+				$parsed_api_error = __( 'Unable to create the PowerBoard customer record', PLUGIN_TEXT_DOMAIN );
 			}
 
 			throw new Exception( esc_html( $parsed_api_error ) );

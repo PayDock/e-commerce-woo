@@ -65,15 +65,15 @@ class OrderService {
 				'wc-pb-p-paid',
 				'pb-p-paid'
 			] ) ) {
-			$this->templateService->includeAdminHtml( 'power-board-capture-block', compact( 'order' ) );
+			$this->templateService->includeAdminHtml( PLUGIN_TEXT_DOMAIN . '-capture-block', compact( 'order' ) );
 			wp_enqueue_script(
-				'power-board-capture-block',
-				PLUGIN_URL . 'assets/js/admin/power-board-capture-block.js',
+				PLUGIN_TEXT_DOMAIN . '-capture-block',
+				PLUGIN_URL . 'assets/js/admin/' . PLUGIN_TEXT_DOMAIN . '-capture-block.js',
 				[],
 				time(),
 				true
 			);
-			wp_localize_script( 'power-board-capture-block', 'powerBoardCaptureBlockSettings', [
+			wp_localize_script( PLUGIN_TEXT_DOMAIN . '-capture-block', 'powerBoardCaptureBlockSettings', [
 				'wpnonce' => esc_attr( wp_create_nonce( 'capture-or-cancel' ) ),
 			] );
 		}
@@ -113,7 +113,7 @@ class OrderService {
 				/* translators: %1$s: Old status of processing order.
 				 * translators: %2$s: New status of processing order.
 				 */
-					__( 'You can not change status from "%1$s"  to "%2$s"', 'power-board' ),
+					__( 'You can not change status from "%1$s"  to "%2$s"', PLUGIN_PREFIX ),
 					$oldStatusName,
 					$newStatusName
 				);

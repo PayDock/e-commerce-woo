@@ -52,7 +52,7 @@ abstract class AbstractApiService {
 
 	protected function runCall($args): array {
 		$url  = ConfigService::buildApiUrl( $this->buildEndpoint() );
-		$args['headers']['X-Power-Board-Meta'] = 'V'
+		$args['headers']['X-' . PLUGIN_TEXT_DOMAIN . '-Meta'] = 'V'
 		                                         . PLUGIN_VERSION
 		                                         . '_woocommerce_'
 		                                         . WC()->version;
@@ -100,7 +100,7 @@ abstract class AbstractApiService {
 	protected function setAction( $action ): void {
 		if ( empty( $this->allowedAction[ $action ] ) ) {
 			/* translators: %s: Missing action name. */
-			throw new \LogicException( esc_html( sprintf( __( 'Not allowed action: %s', 'power-board' ), $action ) ) );
+			throw new \LogicException( esc_html( sprintf( __( 'Not allowed action: %s', PLUGIN_TEXT_DOMAIN ), $action ) ) );
 		}
 
 		$this->action = $action;

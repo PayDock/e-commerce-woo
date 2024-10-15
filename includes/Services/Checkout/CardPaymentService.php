@@ -34,8 +34,8 @@ class CardPaymentService extends WC_Payment_Gateway {
 			'default_credit_card_form',
 		];
 
-		$this->method_title       = _x( 'PowerBoard payment', 'PowerBoard payment method', 'power-board' );
-		$this->method_description = __( 'Allows PowerBoard payments.', 'power-board' );
+		$this->method_title       = _x( 'PowerBoard payment', 'PowerBoard payment method', PLUGIN_TEXT_DOMAIN );
+		$this->method_description = __( 'Allows PowerBoard payments.', PLUGIN_TEXT_DOMAIN );
 
 		// Load the settings.
 		$this->init_settings();
@@ -74,20 +74,20 @@ class CardPaymentService extends WC_Payment_Gateway {
 			return '';
 		}
 
-		wp_enqueue_script( 'power-board-form', PLUGIN_URL . 'assets/js/frontend/form.js', [], time(), true );
-		wp_localize_script( 'power-board-form', 'powerBoardCardWidgetSettings', [
+		wp_enqueue_script( PLUGIN_TEXT_DOMAIN . '-form', PLUGIN_URL . 'assets/js/frontend/form.js', [], time(), true );
+		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-form', 'powerBoardCardWidgetSettings', [
 			'suportedCard'    => 'Visa, Mastercard, Adex',
 		] );
-		wp_localize_script( 'power-board-form', 'powerBoardWidgetSettings', [
+		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-form', 'powerBoardWidgetSettings', [
 			'pluginUrlPrefix' => PLUGIN_URL
 		] );
-		wp_enqueue_style( 'power-board-widget-css', PLUGIN_URL . 'assets/css/frontend/widget.css', [], time() );
+		wp_enqueue_style( PLUGIN_TEXT_DOMAIN . '-widget-css', PLUGIN_URL . 'assets/css/frontend/widget.css', [], time() );
 
-		wp_localize_script( 'power-board-form', 'PowerBoardAjax', [
+		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-form', 'PowerBoardAjax', [
 			'url'     => admin_url( 'admin-ajax.php' ),
 			'wpnonce' => wp_create_nonce( 'get_vault_token' )
 		] );
-		wp_localize_script( 'power-board-form', 'powerBoardWidgetSettings', [
+		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-form', 'powerBoardWidgetSettings', [
 			'pluginUrlPrefix' => PLUGIN_URL
 		] );
 
@@ -113,7 +113,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 		if ( ! wp_verify_nonce( $wpNonce, 'process_payment' ) ) {
 			throw new RouteException(
 				'woocommerce_rest_checkout_process_payment_error',
-				esc_html( __( 'Error: Security check', 'power-board' ) )
+				esc_html( __( 'Error: Security check', PLUGIN_TEXT_DOMAIN ) )
 			);
 		}
 
@@ -124,7 +124,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 		/* Translators: %1$s: number of orders
 		*  Translators: %2$s: Site name
 		*/
-			__( 'Order №%1$s from %2$s.', 'power-board' ),
+			__( 'Order №%1$s from %2$s.', PLUGIN_TEXT_DOMAIN ),
 			$order->get_order_number(),
 			$siteName
 		);
@@ -157,7 +157,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 				}
 
 				if ( empty( $parsed_api_error ) ) {
-					$parsed_api_error = __( 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later.', 'power-board' );
+					$parsed_api_error = __( 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later.', PLUGIN_TEXT_DOMAIN );
 				}
 
 				$parsed_api_error .= ' widget_error';
@@ -192,7 +192,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 			throw new RouteException(
 				'woocommerce_rest_checkout_process_payment_error',
 				/* Translators: %s Error message from API. */
-				esc_html( sprintf( __( 'Error: %s', 'power-board' ), $e->getMessage() ) )
+				esc_html( sprintf( __( 'Error: %s', PLUGIN_TEXT_DOMAIN ), $e->getMessage() ) )
 			);
 		}
 
@@ -275,7 +275,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 				throw new RouteException(
 					'woocommerce_rest_checkout_process_payment_error',
 					/* Translators: %s Error message from API. */
-					esc_html( sprintf( __( 'Error: %s', 'power-board' ), $e->getMessage() ) )
+					esc_html( sprintf( __( 'Error: %s', PLUGIN_TEXT_DOMAIN ), $e->getMessage() ) )
 				);
 			}
 		} else {

@@ -134,13 +134,13 @@ class FiltersService extends AbstractSingleton {
 		$afterpay = filter_input( INPUT_GET, 'afterpay-error', FILTER_SANITIZE_STRING );
 
 		if ( ! empty( $afterpay ) && ( 'true' === $afterpay ) ) {
-			return __( 'Order has been cancelled', 'power-board' );
+			return __( 'Order has been cancelled', PLUGIN_TEXT_DOMAIN );
 		}
 		if ( false === $options && 'processing' !== $status ) {
-			return __( 'Thank you. Your order has been received.', 'power-board' );
+			return __( 'Thank you. Your order has been received.', PLUGIN_TEXT_DOMAIN );
 		}
 
-		return __( 'Your order is being processed. We\'ll get back to you shortly', 'power-board' );
+		return __( 'Your order is being processed. We\'ll get back to you shortly', PLUGIN_TEXT_DOMAIN );
 	}
 
 	public function getSettingLink( array $links ): array {
@@ -149,7 +149,7 @@ class FiltersService extends AbstractSingleton {
 			sprintf(
 				'<a href="%1$s">%2$s</a>',
 				admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . WooPluginPlugin::PLUGIN_PREFIX ),
-				__( 'Settings', 'power-board' )
+				__( 'Settings', PLUGIN_TEXT_DOMAIN )
 			)
 		);
 

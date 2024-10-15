@@ -22,7 +22,7 @@ class VaultTokenHelper {
 		}
 
 		if ( empty( $OTTtoken ) ) {
-			throw new Exception( esc_html( __( 'The token wasn\'t generated correctly. widget_error', 'power-board' ) ) );
+			throw new Exception( esc_html( __( 'The token wasn\'t generated correctly. widget_error', PLUGIN_TEXT_DOMAIN ) ) );
 		}
 
 		$vaultTokenData = [
@@ -56,7 +56,7 @@ class VaultTokenHelper {
 			}
 
 			if ( empty( $parsed_api_error ) ) {
-				$parsed_api_error = __( 'Unable to create PowerBoard vault token', 'power-board' );
+				$parsed_api_error = __( 'Unable to create PowerBoard vault token', PLUGIN_TEXT_DOMAIN );
 			}
 
 			$parsed_api_error .= ' widget_error';

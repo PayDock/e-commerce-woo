@@ -20,7 +20,7 @@ class SandboxConnectionSettingService extends LiveConnectionSettingService {
 			'type' => CredentialSettings::SANDBOX()->getInputType(),
 			'label' => __(
 				'To test your PowerBoard for WooCommerce Plugin, you can use the sandbox mode.',
-				'power-board'
+				PLUGIN_TEXT_DOMAIN
 			),
 			'title' => CredentialSettings::SANDBOX()->getLabel(),
 		];

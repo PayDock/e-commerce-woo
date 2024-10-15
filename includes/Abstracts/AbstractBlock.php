@@ -23,18 +23,18 @@ abstract class AbstractBlock extends AbstractPaymentMethodType {
 	public function get_payment_method_script_handles() {
 		if ( ! self::$isLoad && is_checkout() ) {
 			wp_enqueue_script(
-				'power-board-form',
+				PLUGIN_TEXT_DOMAIN . '-form',
 				PLUGIN_URL . 'assets/js/frontend/form.js',
 				[],
 				PLUGIN_VERSION,
 				true
 			);
 
-			wp_localize_script( 'power-board-form', 'powerBoardWidgetSettings', [
+			wp_localize_script( PLUGIN_TEXT_DOMAIN . '-form', 'powerBoardWidgetSettings', [
 				'pluginUrlPrefix' => PLUGIN_URL
 			] );
 			wp_enqueue_style(
-				'power-board-widget-css',
+				PLUGIN_TEXT_DOMAIN . '-widget-css',
 				PLUGIN_URL . 'assets/css/frontend/widget.css',
 				[],
 				PLUGIN_VERSION,
@@ -42,13 +42,13 @@ abstract class AbstractBlock extends AbstractPaymentMethodType {
 			);
 
 			wp_enqueue_script(
-				'power-board-api',
+				PLUGIN_TEXT_DOMAIN . '-api',
 				SettingsService::getInstance()->getWidgetScriptUrl(),
 				[],
 				PLUGIN_VERSION,
 				true
 			);
-			wp_localize_script( 'power-board-api', 'powerBoardWidgetSettings', [
+			wp_localize_script( PLUGIN_TEXT_DOMAIN . '-api', 'powerBoardWidgetSettings', [
 				'pluginUrlPrefix' => PLUGIN_URL
 			] );
 
@@ -68,7 +68,7 @@ abstract class AbstractBlock extends AbstractPaymentMethodType {
 		wp_localize_script( $scriptName, 'powerBoardWidgetSettings', [
 			'pluginUrlPrefix' => PLUGIN_URL
 		] );
-		wp_localize_script( 'power-board-api', 'powerBoardWidgetSettings', [
+		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-api', 'powerBoardWidgetSettings', [
 			'pluginUrlPrefix' => PLUGIN_URL
 		] );
 		if ( function_exists( 'wp_set_script_translations' ) ) {

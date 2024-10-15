@@ -23,13 +23,13 @@ abstract class AbstractSettingService extends \WC_Payment_Gateway {
 
 		$this->id                 = $this->getId();
 		$this->enabled            = $this->get_option( 'enabled' );
-		$this->method_title       = __( 'PowerBoard Gateway', 'power-board' );
+		$this->method_title       = __( 'PowerBoard Gateway', PLUGIN_TEXT_DOMAIN );
 		$this->method_description = __(
 			'PowerBoard simplify how you manage your payments. Reduce costs, technical headaches & streamline compliance using PowerBoard\'s payment orchestration.',
-			'power-board'
+			PLUGIN_TEXT_DOMAIN
 		);
 
-		$this->title = __( 'PowerBoard Gateway', 'power-board' );
+		$this->title = __( 'PowerBoard Gateway', PLUGIN_TEXT_DOMAIN );
 
 		$this->icon = plugins_url( 'assets/images/logo.svg' );
 
@@ -68,19 +68,19 @@ abstract class AbstractSettingService extends \WC_Payment_Gateway {
 	protected function getTabs(): array {
 		return [
 			SettingsTabs::LIVE_CONNECTION()->value    => [
-				'label'  => __( 'Live Connection', 'power-board' ),
+				'label'  => __( 'Live Connection', PLUGIN_TEXT_DOMAIN ),
 				'active' => SettingsTabs::LIVE_CONNECTION()->value == $this->currentSection,
 			],
 			SettingsTabs::SANDBOX_CONNECTION()->value => [
-				'label'  => __( 'Sandbox Connection', 'power-board' ),
+				'label'  => __( 'Sandbox Connection', PLUGIN_TEXT_DOMAIN ),
 				'active' => SettingsTabs::SANDBOX_CONNECTION()->value == $this->currentSection,
 			],
 			SettingsTabs::WIDGET()->value             => [
-				'label'  => __( 'Widget Configuration', 'power-board' ),
+				'label'  => __( 'Widget Configuration', PLUGIN_TEXT_DOMAIN ),
 				'active' => SettingsTabs::WIDGET()->value == $this->currentSection,
 			],
 			SettingsTabs::LOG()->value                => [
-				'label'  => __( 'Logs', 'power-board' ),
+				'label'  => __( 'Logs', PLUGIN_TEXT_DOMAIN ),
 				'active' => SettingsTabs::LOG()->value == $this->currentSection,
 			],
 		];

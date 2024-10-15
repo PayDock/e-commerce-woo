@@ -52,7 +52,7 @@ class CardProcessor {
 		$this->setRunMethod();
 
 		if ( ! in_array( $this->runMethod, self::ALLOWED_METHODS ) ) {
-			throw new Exception( esc_html( __( 'Undefined run method', 'power-board' ) ) );
+			throw new Exception( esc_html( __( 'Undefined run method', PLUGIN_TEXT_DOMAIN ) ) );
 		}
 
 		return call_user_func( [ $this, $this->runMethod ] );
@@ -170,7 +170,7 @@ class CardProcessor {
 			}
 
 			if ( empty( $parsed_api_error ) ) {
-				$parsed_api_error = __( 'The 3DS charge failed to be created', 'power-board' );
+				$parsed_api_error = __( 'The 3DS charge failed to be created', PLUGIN_TEXT_DOMAIN );
 			}
 
 			$parsed_api_error .= ' widget_error';
@@ -642,7 +642,7 @@ class CardProcessor {
 				}
 
 				if ( empty( $parsed_api_error ) ) {
-					$parsed_api_error = __( 'Unable to create the PowerBoard customer record', 'power-board' );
+					$parsed_api_error = __( 'Unable to create the PowerBoard customer record', PLUGIN_TEXT_DOMAIN );
 				}
 
 				$parsed_api_error .= ' widget_error';
@@ -719,7 +719,7 @@ class CardProcessor {
 			}
 
 			if ( empty( $parsed_api_error ) ) {
-				$parsed_api_error = __( 'The customer charge failed to be created', 'power-board' );
+				$parsed_api_error = __( 'The customer charge failed to be created', PLUGIN_TEXT_DOMAIN );
 			}
 
 			$parsed_api_error .= ' widget_error';
@@ -784,7 +784,7 @@ class CardProcessor {
 			}
 
 			if ( empty( $parsed_api_error ) ) {
-				$parsed_api_error = __( 'Unable to create the PowerBoard customer record', 'power-board' );
+				$parsed_api_error = __( 'Unable to create the PowerBoard customer record', PLUGIN_TEXT_DOMAIN );
 			}
 
 			$parsed_api_error .= ' widget_error';

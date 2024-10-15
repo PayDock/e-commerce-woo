@@ -29,6 +29,6 @@ abstract class AbstractRepository implements Repository {
 	}
 
 	public function getFullTableName( string $table ): string {
-		return $this->tablePrefix . WooPluginPlugin::PLUGIN_PREFIX . '_' . $table;
+		return $this->tablePrefix . WooPluginPlugin::PLUGIN_TEXT_DOMAIN . '_' . $table;
 	}
 }

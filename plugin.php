@@ -1,15 +1,15 @@
 <?php
 
 /**
- * Copyright (c) Paydock for WooCommerce, Inc. and its affiliates. All Rights Reserved
+ * Copyright (c) PowerBoard for WooCommerce, Inc. and its affiliates. All Rights Reserved
  *
  * This source code is licensed under the license found in the
  * LICENSE file in the root directory of this source tree.
  *
- * Plugin Name: Paydock for WooCommerce
+ * Plugin Name: PowerBoard for WooCommerce
  * Plugin URI: https://github.com/PayDock/jsp-woocommerce/tree/power_board
- * Description: Paydock simplify how you manage your payments. Reduce costs, technical headaches & streamline compliance using Paydock's payment orchestration.
- * Author: Paydock
+ * Description: PowerBoard simplify how you manage your payments. Reduce costs, technical headaches & streamline compliance using PowerBoard's payment orchestration.
+ * Author: PowerBoard
  * Author URI: https://www.commbank.com.au/business/payments/take-online-payments/powerboard.html#getting-started
  * Version: 3.1.3
  * Requires at least: 6.4.2
@@ -27,7 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! defined( 'PLUGIN_NAME' ) ) {
-  define( 'PLUGIN_NAME', 'Paydock for WooCommerce' );
+  define( 'PLUGIN_NAME', 'PowerBoard for WooCommerce' );
 }
 
 if ( ! defined( 'PLUGIN_FILE' ) ) {

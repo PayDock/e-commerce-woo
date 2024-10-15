@@ -16,7 +16,7 @@ class PaymentController {
 	public function capturePayment() {
 		$wpNonce = ! empty( $_POST['_wpnonce'] ) ? sanitize_text_field( $_POST['_wpnonce'] ) : null;
 		if ( ! wp_verify_nonce( $wpNonce, 'capture-or-cancel' ) ) {
-			wp_send_json_error( [ 'message' => __( 'Error: Security check', 'power-board' ) ] );
+			wp_send_json_error( [ 'message' => __( 'Error: Security check', PLUGIN_TEXT_DOMAIN ) ] );
 
 			return;
 		}
@@ -24,14 +24,14 @@ class PaymentController {
 		$orderId = ! empty( $_POST['order_id'] ) ? sanitize_text_field( $_POST['order_id'] ) : null;
 		$error   = null;
 		if ( ! $orderId ) {
-			$error = __( 'The order is not found.', 'power-board'  );
+			$error = __( 'The order is not found.', PLUGIN_TEXT_DOMAIN  );
 		} else {
 			$order = wc_get_order( $orderId );
 			/*if ( ! in_array( $order->get_meta( ActivationHook::CUSTOM_STATUS_META_KEY ), [
 				'pb-authorize',
 				'wc-pb-authorize'
 			] ) ) {
-				$error = __( 'The order has been authorized and is awaiting approval.', 'power-board'  );
+				$error = __( 'The order has been authorized and is awaiting approval.', PLUGIN_TEXT_DOMAIN  );
 			}*/
 		}
 
@@ -95,7 +95,7 @@ class PaymentController {
 	public function cancelAuthorised() {
 		$wpNonce = ! empty( $_POST['_wpnonce'] ) ? sanitize_text_field( $_POST['_wpnonce'] ) : null;
 		if ( ! wp_verify_nonce( $wpNonce, 'capture-or-cancel' ) ) {
-			wp_send_json_error( [ 'message' => __( 'Error: Security check', 'power-board' ) ] );
+			wp_send_json_error( [ 'message' => __( 'Error: Security check', PLUGIN_TEXT_DOMAIN ) ] );
 
 			return;
 		}
@@ -465,7 +465,7 @@ class PaymentController {
 				$chargeId ?? '',
 				'Charge',
 				'UnfulfilledCondition',
-				__( 'Can\'t charge.', 'power-board' ) . $message,
+				__( 'Can\'t charge.', PLUGIN_TEXT_DOMAIN ) . $message,
 				LogRepository::ERROR
 			);
 
@@ -481,7 +481,7 @@ class PaymentController {
 					$chargeId ?? '',
 					'Fraud Attach',
 					'UnfulfilledCondition',
-					__( 'Can\'t fraud attach.', 'power-board' ) . $message,
+					__( 'Can\'t fraud attach.', PLUGIN_TEXT_DOMAIN ) . $message,
 					LogRepository::ERROR
 				);
 

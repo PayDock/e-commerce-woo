@@ -107,11 +107,11 @@ class WidgetValidationService {
 				|| ( $settingName && $isMax && ! empty( $value ) && ( $value != (string) floatval( $value ) ) )
 			) {
 				/* translators: %s: Title of form field. */
-				$this->errors[] = sprintf( __( "%s must be numeric.", 'power-board' ),
+				$this->errors[] = sprintf( __( "%s must be numeric.", PLUGIN_TEXT_DOMAIN ),
 					WidgetSettings::{$settingName}()->getFullTitle() );
 			} elseif ( $settingName && $isMin && ( 0 > (float) $value ) ) {
 				/* translators: %s: Title of form field. */
-				$this->errors[] = sprintf( __( "%s cannot be negative.", 'power-board' ),
+				$this->errors[] = sprintf( __( "%s cannot be negative.", PLUGIN_TEXT_DOMAIN ),
 					WidgetSettings::{$settingName}()->getFullTitle() );
 			} elseif (
 				$settingName
@@ -119,11 +119,11 @@ class WidgetValidationService {
 				&& ! empty( $value )
 				&& ( (float) $value < (float) $this->data[ str_replace( 'MAX', 'MIN', $key ) ] ) ) {
 				/* translators: %s: Title of form field. */
-				$this->errors[] = sprintf( __( "%s cannot be less than the min value.", 'power-board' ),
+				$this->errors[] = sprintf( __( "%s cannot be less than the min value.", PLUGIN_TEXT_DOMAIN ),
 					WidgetSettings::{$settingName}()->getFullTitle() );
 			} elseif ( $settingName && empty( $value ) && ! $isMin && ! $isMax ) {
 				/* translators: %s: Title of form field. */
-				$this->errors[] = sprintf( __( "%s can't be empty.", 'power-board' ),
+				$this->errors[] = sprintf( __( "%s can't be empty.", PLUGIN_TEXT_DOMAIN ),
 					WidgetSettings::{$settingName}()->getFullTitle() );
 			}
 
@@ -140,12 +140,12 @@ class WidgetValidationService {
 					|| ! $this->validateCustomStyles( $decoded )
 				)
 			) {
-				$this->errors[] = __( 'Custom styles must be a valid JSON.', 'power-board' );
+				$this->errors[] = __( 'Custom styles must be a valid JSON.', PLUGIN_TEXT_DOMAIN );
 			}
 		}
 
 		if ( 'custom' == $this->data[ $versionKey ] && empty( $this->data[ $customVersionKey ] ) ) {
-			$this->errors[] = __( "Version can't be empty.", 'power-board' );
+			$this->errors[] = __( "Version can't be empty.", PLUGIN_TEXT_DOMAIN );
 		}
 	}
 

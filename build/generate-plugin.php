@@ -3,14 +3,6 @@
 $config_file = $argv[1];
 $config = include $config_file;
 
-$available_plugins = ['power-board', 'paydock'];
-
-foreach ($available_plugins as $plugin) {
-  if (file_exists('../' . $plugin . '.php')) {
-    unlink('../' . $plugin . '.php');
-  }
-}
-
 $plugin_content = <<<EOT
 <?php
 
@@ -74,7 +66,7 @@ if ( ! defined( 'PLUGIN_PREFIX' ) ) {
 
 require_once 'vendor/autoload.php';
 
-{$config['PLUGIN_TEXT']}\\{$config['PLUGIN_TEXT']}Plugin::getInstance();
+WooPlugin\WooPluginPlugin::getInstance();
 EOT;
 
-file_put_contents('../' . $config['PLUGIN_TEXT_DOMAIN'] . '.php', $plugin_content);
+file_put_contents('../plugin.php', $plugin_content);

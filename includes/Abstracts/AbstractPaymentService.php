@@ -41,23 +41,23 @@ abstract class AbstractPaymentService extends WC_Payment_Gateway {
 			return '';
 		}
 
-		wp_enqueue_script( 'power-board-form', PLUGIN_URL . 'assets/js/frontend/form.js', [], time(),
+		wp_enqueue_script( PLUGIN_TEXT_DOMAIN . '-form', PLUGIN_URL . 'assets/js/frontend/form.js', [], time(),
 			true );
-		wp_localize_script( 'power-board-form', 'powerBoardCardWidgetSettings', [
+		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-form', 'powerBoardCardWidgetSettings', [
 			'suportedCard'    => 'Visa, Mastercard, Adex',
 		] );
-		wp_localize_script( 'power-board-form', 'powerBoardWidgetSettings', [
+		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-form', 'powerBoardWidgetSettings', [
 			'pluginUrlPrefix' => PLUGIN_URL
 		] );
 		wp_enqueue_style(
-			'power-board-widget-css',
+			PLUGIN_TEXT_DOMAIN . '-widget-css',
 			PLUGIN_URL . 'assets/css/frontend/widget.css',
 			[],
 			time()
 		);
 
-		wp_enqueue_script( 'power-board-api', SettingsService::getInstance()->getWidgetScriptUrl(), [], time(), true );
-		wp_localize_script( 'power-board-api', 'powerBoardWidgetSettings', [
+		wp_enqueue_script( PLUGIN_TEXT_DOMAIN . '-api', SettingsService::getInstance()->getWidgetScriptUrl(), [], time(), true );
+		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-api', 'powerBoardWidgetSettings', [
 			'pluginUrlPrefix' => PLUGIN_URL
 		] );
 	}
