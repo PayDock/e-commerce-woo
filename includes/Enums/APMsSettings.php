@@ -60,7 +60,7 @@ class APMsSettings extends AbstractEnum {
 				return 'Direct charge stands for authorization and capture in a single request';
 
 			case self::SAVE_CARD:
-				return 'Offer your customer the option to save the card information permanently at ' . PLUGIN_TEXT . ' for further usage';
+				return 'Offer your customer the option to save the card information permanently at ' . PLUGIN_TEXT_NAME . ' for further usage';
 
 			default:
 				return '';

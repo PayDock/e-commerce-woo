@@ -60,7 +60,7 @@ class AdminAssetsService {
 			wp_localize_script( $scriptName, 'widgetSettings', [
 				'pluginUrlPrefix' => PLUGIN_URL,
 				'pluginTextDomain' => PLUGIN_TEXT_DOMAIN,
-				'pluginTextName' => PLUGIN_TEXT,
+				'pluginTextName' => PLUGIN_TEXT_NAME,
 				'pluginPrefix' => PLUGIN_PREFIX,
 			] );
 		}

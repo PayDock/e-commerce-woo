@@ -58,8 +58,8 @@ if ( ! defined( 'PLUGIN_PREFIX' ) ) {
   define( 'PLUGIN_PREFIX', 'power_board' );
 }
 
-if ( ! defined( 'PLUGIN_TEXT' ) ) {
-  define( 'PLUGIN_TEXT', 'PowerBoard' );
+if ( ! defined( 'PLUGIN_TEXT_NAME' ) ) {
+  define( 'PLUGIN_TEXT_NAME', 'PowerBoard' );
 }
 
 require_once 'vendor/autoload.php';

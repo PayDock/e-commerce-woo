@@ -1,3 +1,4 @@
-php generate-plugin.php "paydock-config.php"
+php plugin-generate.php config-paydock.php
+php readme-generate-paydock.php
 
 echo "Build for Paydock concluded"

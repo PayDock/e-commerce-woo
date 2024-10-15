@@ -33,7 +33,7 @@ abstract class AbstractBlock extends AbstractPaymentMethodType {
 			wp_localize_script( PLUGIN_TEXT_DOMAIN . '-form', 'widgetSettings', [
 				'pluginUrlPrefix' => PLUGIN_URL,
 				'pluginTextDomain' => PLUGIN_TEXT_DOMAIN,
-				'pluginTextName' => PLUGIN_TEXT,
+				'pluginTextName' => PLUGIN_TEXT_NAME,
 				'pluginPrefix' => PLUGIN_PREFIX,
 			] );
 			wp_enqueue_style(
@@ -54,7 +54,7 @@ abstract class AbstractBlock extends AbstractPaymentMethodType {
 			wp_localize_script( PLUGIN_TEXT_DOMAIN . '-api', 'widgetSettings', [
 				'pluginUrlPrefix' => PLUGIN_URL,
 				'pluginTextDomain' => PLUGIN_TEXT_DOMAIN,
-				'pluginTextName' => PLUGIN_TEXT,
+				'pluginTextName' => PLUGIN_TEXT_NAME,
 				'pluginPrefix' => PLUGIN_PREFIX,
 			] );
 
@@ -74,13 +74,13 @@ abstract class AbstractBlock extends AbstractPaymentMethodType {
 		wp_localize_script( $scriptName, 'widgetSettings', [
 				'pluginUrlPrefix' => PLUGIN_URL,
 				'pluginTextDomain' => PLUGIN_TEXT_DOMAIN,
-				'pluginTextName' => PLUGIN_TEXT,
+				'pluginTextName' => PLUGIN_TEXT_NAME,
 				'pluginPrefix' => PLUGIN_PREFIX,
 		] );
 		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-api', 'widgetSettings', [
 				'pluginUrlPrefix' => PLUGIN_URL,
 				'pluginTextDomain' => PLUGIN_TEXT_DOMAIN,
-				'pluginTextName' => PLUGIN_TEXT,
+				'pluginTextName' => PLUGIN_TEXT_NAME,
 				'pluginPrefix' => PLUGIN_PREFIX,
 		] );
 		if ( function_exists( 'wp_set_script_translations' ) ) {

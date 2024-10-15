@@ -24,9 +24,9 @@ abstract class AbstractPaymentService extends WC_Payment_Gateway {
 			'default_credit_card_form',
 		];
 
-		$this->method_title       = _x( PLUGIN_TEXT . ' payment', PLUGIN_TEXT . ' payment method',
+		$this->method_title       = _x( PLUGIN_TEXT_NAME . ' payment', PLUGIN_TEXT_NAME . ' payment method',
 			'woocommerce-gateway-ppwer-board' );
-		$this->method_description = __( 'Allows ' . PLUGIN_TEXT . ' payments.', 'woocommerce-gateway-ppwer-board' );
+		$this->method_description = __( 'Allows ' . PLUGIN_TEXT_NAME . ' payments.', 'woocommerce-gateway-ppwer-board' );
 
 		$this->init_settings();
 	}
@@ -49,7 +49,7 @@ abstract class AbstractPaymentService extends WC_Payment_Gateway {
 		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-form', 'widgetSettings', [
 				'pluginUrlPrefix' => PLUGIN_URL,
 				'pluginTextDomain' => PLUGIN_TEXT_DOMAIN,
-				'pluginTextName' => PLUGIN_TEXT,
+				'pluginTextName' => PLUGIN_TEXT_NAME,
 				'pluginPrefix' => PLUGIN_PREFIX,
 		] );
 		wp_enqueue_style(
@@ -63,7 +63,7 @@ abstract class AbstractPaymentService extends WC_Payment_Gateway {
 		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-api', 'widgetSettings', [
 				'pluginUrlPrefix' => PLUGIN_URL,
 				'pluginTextDomain' => PLUGIN_TEXT_DOMAIN,
-				'pluginTextName' => PLUGIN_TEXT,
+				'pluginTextName' => PLUGIN_TEXT_NAME,
 				'pluginPrefix' => PLUGIN_PREFIX,
 		] );
 	}

@@ -17,7 +17,7 @@ $plugin_content = <<<EOT
  * Description: {$config['PLUGIN_DESCRIPTION']}
  * Author: {$config['PLUGIN_AUTHOR']}
  * Author URI: {$config['PLUGIN_AUTHOR_URI']}
- * Version: {$config['PLUGIN_VERSION']}
+ * Version: 3.1.3
  * Requires at least: 6.4.2
  * Text Domain: {$config['PLUGIN_TEXT_DOMAIN']}
  * Tested up to: 6.6
@@ -49,7 +49,7 @@ if ( ! defined( 'PLUGIN_URL' ) ) {
 }
 
 if ( ! defined( 'PLUGIN_VERSION' ) ) {
-  define( 'PLUGIN_VERSION', '{$config['PLUGIN_VERSION']}' );
+  define( 'PLUGIN_VERSION', '3.1.3' );
 }
 
 if ( ! defined( 'PLUGIN_WIDGET_NAME' ) ) {
@@ -64,8 +64,8 @@ if ( ! defined( 'PLUGIN_PREFIX' ) ) {
   define( 'PLUGIN_PREFIX', '{$config['PLUGIN_PREFIX']}' );
 }
 
-if ( ! defined( 'PLUGIN_TEXT' ) ) {
-  define( 'PLUGIN_TEXT', '{$config['PLUGIN_TEXT']}' );
+if ( ! defined( 'PLUGIN_TEXT_NAME' ) ) {
+  define( 'PLUGIN_TEXT_NAME', '{$config['PLUGIN_TEXT_NAME']}' );
 }
 
 require_once 'vendor/autoload.php';

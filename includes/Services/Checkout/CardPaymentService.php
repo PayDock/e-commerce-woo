@@ -34,8 +34,8 @@ class CardPaymentService extends WC_Payment_Gateway {
 			'default_credit_card_form',
 		];
 
-		$this->method_title       = _x( PLUGIN_TEXT . ' payment', PLUGIN_TEXT . ' payment method', PLUGIN_TEXT_DOMAIN );
-		$this->method_description = __( 'Allows ' . PLUGIN_TEXT . ' payments.', PLUGIN_TEXT_DOMAIN );
+		$this->method_title       = _x( PLUGIN_TEXT_NAME . ' payment', PLUGIN_TEXT_NAME . ' payment method', PLUGIN_TEXT_DOMAIN );
+		$this->method_description = __( 'Allows ' . PLUGIN_TEXT_NAME . ' payments.', PLUGIN_TEXT_DOMAIN );
 
 		// Load the settings.
 		$this->init_settings();
@@ -81,7 +81,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-form', 'widgetSettings', [
 				'pluginUrlPrefix' => PLUGIN_URL,
 				'pluginTextDomain' => PLUGIN_TEXT_DOMAIN,
-				'pluginTextName' => PLUGIN_TEXT,
+				'pluginTextName' => PLUGIN_TEXT_NAME,
 				'pluginPrefix' => PLUGIN_PREFIX,
 		] );
 		wp_enqueue_style( PLUGIN_TEXT_DOMAIN . '-widget-css', PLUGIN_URL . 'assets/css/frontend/widget.css', [], time() );
@@ -93,7 +93,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-form', 'widgetSettings', [
 				'pluginUrlPrefix' => PLUGIN_URL,
 				'pluginTextDomain' => PLUGIN_TEXT_DOMAIN,
-				'pluginTextName' => PLUGIN_TEXT,
+				'pluginTextName' => PLUGIN_TEXT_NAME,
 				'pluginPrefix' => PLUGIN_PREFIX,
 		] );
 
