@@ -1,13 +1,13 @@
 <?php
 
-namespace PowerBoard\Abstracts;
+namespace WooPlugin\Abstracts;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
-use PowerBoard\Enums\OrderListColumns;
-use PowerBoard\Enums\WalletPaymentMethods;
-use PowerBoard\Repositories\LogRepository;
-use PowerBoard\Services\OrderService;
-use PowerBoard\Services\SettingsService;
+use WooPlugin\Enums\OrderListColumns;
+use WooPlugin\Enums\WalletPaymentMethods;
+use WooPlugin\Repositories\LogRepository;
+use WooPlugin\Services\OrderService;
+use WooPlugin\Services\SettingsService;
 
 abstract class AbstractWalletPaymentService extends AbstractPaymentService {
 	public function __construct() {

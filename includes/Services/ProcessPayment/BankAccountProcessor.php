@@ -1,14 +1,14 @@
 <?php
 
-namespace PowerBoard\Services\ProcessPayment;
+namespace WooPlugin\Services\ProcessPayment;
 
-use PowerBoard\Enums\SaveCardOptions;
-use PowerBoard\Exceptions\LoggedException;
-use PowerBoard\Helpers\ArgsForProcessPayment;
-use PowerBoard\Helpers\VaultTokenHelper;
-use PowerBoard\Repositories\LogRepository;
-use PowerBoard\Repositories\UserTokenRepository;
-use PowerBoard\Services\SDKAdapterService;
+use WooPlugin\Enums\SaveCardOptions;
+use WooPlugin\Exceptions\LoggedException;
+use WooPlugin\Helpers\ArgsForProcessPayment;
+use WooPlugin\Helpers\VaultTokenHelper;
+use WooPlugin\Repositories\LogRepository;
+use WooPlugin\Repositories\UserTokenRepository;
+use WooPlugin\Services\SDKAdapterService;
 
 class BankAccountProcessor {
 	protected $order;

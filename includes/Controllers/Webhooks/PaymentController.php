@@ -1,14 +1,14 @@
 <?php
 
-namespace PowerBoard\Controllers\Webhooks;
+namespace WooPlugin\Controllers\Webhooks;
 
-use PowerBoard\Enums\ChargeStatuses;
-use PowerBoard\Enums\NotificationEvents;
-use PowerBoard\Hooks\ActivationHook;
-use PowerBoard\PowerBoardPlugin;
-use PowerBoard\Repositories\LogRepository;
-use PowerBoard\Services\OrderService;
-use PowerBoard\Services\SDKAdapterService;
+use WooPlugin\Enums\ChargeStatuses;
+use WooPlugin\Enums\NotificationEvents;
+use WooPlugin\Hooks\ActivationHook;
+use WooPlugin\WooPluginPlugin;
+use WooPlugin\Repositories\LogRepository;
+use WooPlugin\Services\OrderService;
+use WooPlugin\Services\SDKAdapterService;
 
 class PaymentController {
 	private $status_update_hooks = [];
@@ -168,7 +168,7 @@ class PaymentController {
 				'processing',
 				'refunded',
 				'completed'
-			] ) || ( false === strpos( $order->get_payment_method(), PowerBoardPlugin::PLUGIN_PREFIX ) ) ) {
+			] ) || ( false === strpos( $order->get_payment_method(), WooPluginPlugin::PLUGIN_PREFIX ) ) ) {
 			return;
 		}
 

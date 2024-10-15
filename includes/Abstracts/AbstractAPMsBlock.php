@@ -1,10 +1,10 @@
 <?php
 
-namespace PowerBoard\Abstracts;
+namespace WooPlugin\Abstracts;
 
-use PowerBoard\Enums\OtherPaymentMethods;
-use PowerBoard\Repositories\UserCustomerRepository;
-use PowerBoard\Services\SettingsService;
+use WooPlugin\Enums\OtherPaymentMethods;
+use WooPlugin\Repositories\UserCustomerRepository;
+use WooPlugin\Services\SettingsService;
 
 abstract class AbstractAPMsBlock extends AbstractBlock {
 	protected $gateway;

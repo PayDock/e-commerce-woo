@@ -7,14 +7,14 @@ namespace Composer\Autoload;
 class ComposerStaticInit5def1875a6e5e3afb49cf3519ebccdea
 {
     public static $prefixLengthsPsr4 = array (
-        'P' => 
+        'W' => 
         array (
-            'PowerBoard\\' => 8,
+            'WooPlugin\\' => 10,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'PowerBoard\\' => 
+        'WooPlugin\\' => 
         array (
             0 => __DIR__ . '/../..' . '/includes',
         ),

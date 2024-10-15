@@ -1,11 +1,11 @@
 <?php
 
-namespace PowerBoard\Services\Validation;
+namespace WooPlugin\Services\Validation;
 
-use PowerBoard\Enums\CustomStylesElements;
-use PowerBoard\Enums\WidgetSettings;
-use PowerBoard\Services\Settings\WidgetSettingService;
-use PowerBoard\Services\SettingsService;
+use WooPlugin\Enums\CustomStylesElements;
+use WooPlugin\Enums\WidgetSettings;
+use WooPlugin\Services\Settings\WidgetSettingService;
+use WooPlugin\Services\SettingsService;
 
 class WidgetValidationService {
 	private const VALIDATED_FIELDS = [

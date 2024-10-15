@@ -1,12 +1,12 @@
 <?php
 
-namespace PowerBoard\Util;
+namespace WooPlugin\Util;
 
-use PowerBoard\Abstracts\AbstractBlock;
-use PowerBoard\Repositories\UserTokenRepository;
-use PowerBoard\Services\Checkout\CardPaymentService;
-use PowerBoard\Services\SDKAdapterService;
-use PowerBoard\Services\SettingsService;
+use WooPlugin\Abstracts\AbstractBlock;
+use WooPlugin\Repositories\UserTokenRepository;
+use WooPlugin\Services\Checkout\CardPaymentService;
+use WooPlugin\Services\SDKAdapterService;
+use WooPlugin\Services\SettingsService;
 
 final class PowerBoardGatewayBlocks extends AbstractBlock {
 	protected const SCRIPT = 'blocks';

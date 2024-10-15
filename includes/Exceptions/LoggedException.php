@@ -1,6 +1,6 @@
 <?php
 
-namespace PowerBoard\Exceptions;
+namespace WooPlugin\Exceptions;
 
 use Exception;
 

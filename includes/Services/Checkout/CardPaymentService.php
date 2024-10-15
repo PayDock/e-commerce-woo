@@ -1,17 +1,17 @@
 <?php
 
-namespace PowerBoard\Services\Checkout;
+namespace WooPlugin\Services\Checkout;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Exception;
-use PowerBoard\Enums\OrderListColumns;
-use PowerBoard\Enums\SettingsTabs;
-use PowerBoard\Enums\WidgetSettings;
-use PowerBoard\Repositories\LogRepository;
-use PowerBoard\Repositories\UserTokenRepository;
-use PowerBoard\Services\OrderService;
-use PowerBoard\Services\ProcessPayment\CardProcessor;
-use PowerBoard\Services\SettingsService;
+use WooPlugin\Enums\OrderListColumns;
+use WooPlugin\Enums\SettingsTabs;
+use WooPlugin\Enums\WidgetSettings;
+use WooPlugin\Repositories\LogRepository;
+use WooPlugin\Repositories\UserTokenRepository;
+use WooPlugin\Services\OrderService;
+use WooPlugin\Services\ProcessPayment\CardProcessor;
+use WooPlugin\Services\SettingsService;
 use WC_Payment_Gateway;
 
 class CardPaymentService extends WC_Payment_Gateway {

@@ -1,8 +1,8 @@
 <?php
 
-namespace PowerBoard\Enums;
+namespace WooPlugin\Enums;
 
-use PowerBoard\Abstracts\AbstractEnum;
+use WooPlugin\Abstracts\AbstractEnum;
 
 class ConfigAPI extends AbstractEnum {
 	protected const PRODUCTION_API_URL = 'https://api.powerboard.commbank.com.au/v1/';

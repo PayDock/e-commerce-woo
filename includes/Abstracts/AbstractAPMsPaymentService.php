@@ -1,15 +1,15 @@
 <?php
 
-namespace PowerBoard\Abstracts;
+namespace WooPlugin\Abstracts;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Exception;
-use PowerBoard\Enums\OrderListColumns;
-use PowerBoard\Enums\OtherPaymentMethods;
-use PowerBoard\Repositories\LogRepository;
-use PowerBoard\Services\OrderService;
-use PowerBoard\Services\ProcessPayment\ApmProcessor;
-use PowerBoard\Services\SettingsService;
+use WooPlugin\Enums\OrderListColumns;
+use WooPlugin\Enums\OtherPaymentMethods;
+use WooPlugin\Repositories\LogRepository;
+use WooPlugin\Services\OrderService;
+use WooPlugin\Services\ProcessPayment\ApmProcessor;
+use WooPlugin\Services\SettingsService;
 
 abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 	/**

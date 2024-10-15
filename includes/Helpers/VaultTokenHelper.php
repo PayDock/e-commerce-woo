@@ -1,10 +1,10 @@
 <?php
 
-namespace PowerBoard\Helpers;
+namespace WooPlugin\Helpers;
 
 use Exception;
-use PowerBoard\Repositories\UserTokenRepository;
-use PowerBoard\Services\SDKAdapterService;
+use WooPlugin\Repositories\UserTokenRepository;
+use WooPlugin\Services\SDKAdapterService;
 
 class VaultTokenHelper {
 	private $args = [];

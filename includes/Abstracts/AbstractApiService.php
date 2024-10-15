@@ -1,8 +1,8 @@
 <?php
 
-namespace PowerBoard\Abstracts;
+namespace WooPlugin\Abstracts;
 
-use PowerBoard\API\ConfigService;
+use WooPlugin\API\ConfigService;
 use WP_Error;
 
 abstract class AbstractApiService {

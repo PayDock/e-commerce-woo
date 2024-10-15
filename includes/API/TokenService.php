@@ -1,13 +1,13 @@
 <?php
 
-namespace PowerBoard\API;
+namespace WooPlugin\API;
 
-use PowerBoard\Abstracts\AbstractApiService;
+use WooPlugin\Abstracts\AbstractApiService;
 
 class TokenService extends AbstractApiService {
 	const ENDPOINT = 'payment_sources/tokens';
 
-	protected $allowedAction = [ 
+	protected $allowedAction = [
 		'create' => self::METHOD_POST,
 	];
 

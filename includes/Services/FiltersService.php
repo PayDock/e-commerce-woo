@@ -1,24 +1,24 @@
 <?php
 
-namespace PowerBoard\Services;
+namespace WooPlugin\Services;
 
-use PowerBoard\Abstracts\AbstractSingleton;
-use PowerBoard\Enums\OrderListColumns;
-use PowerBoard\Enums\SettingsTabs;
-use PowerBoard\Hooks\ActivationHook;
-use PowerBoard\PowerBoardPlugin;
-use PowerBoard\Services\Checkout\AfterpayAPMsPaymentServiceService;
-use PowerBoard\Services\Checkout\AfterpayWalletService;
-use PowerBoard\Services\Checkout\ApplePayWalletService;
-use PowerBoard\Services\Checkout\BankAccountPaymentService;
-use PowerBoard\Services\Checkout\CardPaymentService;
-use PowerBoard\Services\Checkout\GooglePayWalletService;
-use PowerBoard\Services\Checkout\PayPalWalletService;
-use PowerBoard\Services\Checkout\ZipAPMsPaymentServiceService;
-use PowerBoard\Services\Settings\LiveConnectionSettingService;
-use PowerBoard\Services\Settings\LogsSettingService;
-use PowerBoard\Services\Settings\SandboxConnectionSettingService;
-use PowerBoard\Services\Settings\WidgetSettingService;
+use WooPlugin\Abstracts\AbstractSingleton;
+use WooPlugin\Enums\OrderListColumns;
+use WooPlugin\Enums\SettingsTabs;
+use WooPlugin\Hooks\ActivationHook;
+use WooPlugin\WooPluginPlugin;
+use WooPlugin\Services\Checkout\AfterpayAPMsPaymentServiceService;
+use WooPlugin\Services\Checkout\AfterpayWalletService;
+use WooPlugin\Services\Checkout\ApplePayWalletService;
+use WooPlugin\Services\Checkout\BankAccountPaymentService;
+use WooPlugin\Services\Checkout\CardPaymentService;
+use WooPlugin\Services\Checkout\GooglePayWalletService;
+use WooPlugin\Services\Checkout\PayPalWalletService;
+use WooPlugin\Services\Checkout\ZipAPMsPaymentServiceService;
+use WooPlugin\Services\Settings\LiveConnectionSettingService;
+use WooPlugin\Services\Settings\LogsSettingService;
+use WooPlugin\Services\Settings\SandboxConnectionSettingService;
+use WooPlugin\Services\Settings\WidgetSettingService;
 
 class FiltersService extends AbstractSingleton {
 	protected static $instance = null;
@@ -148,7 +148,7 @@ class FiltersService extends AbstractSingleton {
 			$links,
 			sprintf(
 				'<a href="%1$s">%2$s</a>',
-				admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . PowerBoardPlugin::PLUGIN_PREFIX ),
+				admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . WooPluginPlugin::PLUGIN_PREFIX ),
 				__( 'Settings', 'power-board' )
 			)
 		);

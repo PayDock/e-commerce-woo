@@ -1,16 +1,16 @@
 <?php
 
-namespace PowerBoard\Services\ProcessPayment;
+namespace WooPlugin\Services\ProcessPayment;
 
 use Exception;
-use PowerBoard\Enums\DSTypes;
-use PowerBoard\Enums\FraudTypes;
-use PowerBoard\Enums\SaveCardOptions;
-use PowerBoard\Helpers\ArgsForProcessPayment;
-use PowerBoard\Helpers\VaultTokenHelper;
-use PowerBoard\Repositories\LogRepository;
-use PowerBoard\Repositories\UserTokenRepository;
-use PowerBoard\Services\SDKAdapterService;
+use WooPlugin\Enums\DSTypes;
+use WooPlugin\Enums\FraudTypes;
+use WooPlugin\Enums\SaveCardOptions;
+use WooPlugin\Helpers\ArgsForProcessPayment;
+use WooPlugin\Helpers\VaultTokenHelper;
+use WooPlugin\Repositories\LogRepository;
+use WooPlugin\Repositories\UserTokenRepository;
+use WooPlugin\Services\SDKAdapterService;
 
 class CardProcessor {
 	const FRAUD_3DS_CHARGE_METHOD = 'fraud3DsCharge';

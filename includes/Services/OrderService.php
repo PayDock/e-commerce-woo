@@ -1,8 +1,8 @@
 <?php
 
-namespace PowerBoard\Services;
+namespace WooPlugin\Services;
 
-use PowerBoard\Hooks\ActivationHook;
+use WooPlugin\Hooks\ActivationHook;
 
 class OrderService {
 

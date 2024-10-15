@@ -1,9 +1,9 @@
 <?php
 
-namespace PowerBoard\Services;
+namespace WooPlugin\Services;
 
-use PowerBoard\Enums\SettingsTabs;
-use PowerBoard\Services\SettingsService;
+use WooPlugin\Enums\SettingsTabs;
+use WooPlugin\Services\SettingsService;
 
 class TemplateService {
 	private const TEMPLATE_DIR = 'templates';

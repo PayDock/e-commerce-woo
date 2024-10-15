@@ -1,9 +1,9 @@
 <?php
 
-namespace PowerBoard\Services\Settings;
+namespace WooPlugin\Services\Settings;
 
-use PowerBoard\Abstracts\AbstractSettingService;
-use PowerBoard\Enums\SettingsTabs;
+use WooPlugin\Abstracts\AbstractSettingService;
+use WooPlugin\Enums\SettingsTabs;
 
 class WebHooksSettingService extends AbstractSettingService {
 	protected function getId(): string {

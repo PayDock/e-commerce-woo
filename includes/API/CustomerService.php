@@ -1,13 +1,13 @@
 <?php
 
-namespace PowerBoard\API;
+namespace WooPlugin\API;
 
-use PowerBoard\Abstracts\AbstractApiService;
+use WooPlugin\Abstracts\AbstractApiService;
 
 class CustomerService extends AbstractApiService {
 	const ENDPOINT = 'customers';
 
-	protected $allowedAction = [ 
+	protected $allowedAction = [
 		'create' => self::METHOD_POST,
 	];
 

@@ -1,14 +1,14 @@
 <?php
 
-namespace PowerBoard\Services\ProcessPayment;
+namespace WooPlugin\Services\ProcessPayment;
 
 use Exception;
-use PowerBoard\Enums\OtherPaymentMethods;
-use PowerBoard\Helpers\ArgsForProcessPayment;
-use PowerBoard\Helpers\ShippingHelper;
-use PowerBoard\Repositories\LogRepository;
-use PowerBoard\Repositories\UserCustomerRepository;
-use PowerBoard\Services\SDKAdapterService;
+use WooPlugin\Enums\OtherPaymentMethods;
+use WooPlugin\Helpers\ArgsForProcessPayment;
+use WooPlugin\Helpers\ShippingHelper;
+use WooPlugin\Repositories\LogRepository;
+use WooPlugin\Repositories\UserCustomerRepository;
+use WooPlugin\Services\SDKAdapterService;
 
 class ApmProcessor {
 	const CHARGE_METHOD = 'charge';

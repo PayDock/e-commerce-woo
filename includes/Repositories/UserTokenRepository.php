@@ -1,8 +1,8 @@
 <?php
 
-namespace PowerBoard\Repositories;
+namespace WooPlugin\Repositories;
 
-use PowerBoard\Services\HashService;
+use WooPlugin\Services\HashService;
 
 class UserTokenRepository {
 	const CARD_TOKENS_KEY = 'power_board_card_tokens';

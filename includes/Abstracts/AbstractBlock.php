@@ -1,10 +1,10 @@
 <?php
 
-namespace PowerBoard\Abstracts;
+namespace WooPlugin\Abstracts;
 
 use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
-use PowerBoard\PowerBoardPlugin;
-use PowerBoard\Services\SettingsService;
+use WooPlugin\WooPluginPlugin;
+use WooPlugin\Services\SettingsService;
 
 abstract class AbstractBlock extends AbstractPaymentMethodType {
 	private static $isLoad = false;
@@ -58,7 +58,7 @@ abstract class AbstractBlock extends AbstractPaymentMethodType {
 		$scriptPath      = 'assets/build/js/frontend/' . $this->script . '.js';
 		$scriptAssetPath = 'assets/build/js/frontend/' . $this->script . '.asset.php';
 		$scriptUrl       = plugins_url( $scriptPath, PLUGIN_FILE );
-		$scriptName      = PowerBoardPlugin::PLUGIN_PREFIX . '-' . $this->script;
+		$scriptName      = WooPluginPlugin::PLUGIN_PREFIX . '-' . $this->script;
 
 		$scriptAsset = file_exists( $scriptAssetPath ) ? require( $scriptAssetPath ) : [
 			'dependencies' => [],

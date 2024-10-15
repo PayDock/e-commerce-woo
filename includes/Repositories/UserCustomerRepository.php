@@ -1,6 +1,6 @@
 <?php
 
-namespace PowerBoard\Repositories;
+namespace WooPlugin\Repositories;
 
 class UserCustomerRepository {
 	const USER_CUSTOMERS_KEY = 'power_board_card_customers';

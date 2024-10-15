@@ -1,11 +1,11 @@
 <?php
 
-namespace PowerBoard\Util;
+namespace WooPlugin\Util;
 
-use PowerBoard\Abstracts\AbstractBlock;
-use PowerBoard\Repositories\UserTokenRepository;
-use PowerBoard\Services\Checkout\BankAccountPaymentService;
-use PowerBoard\Services\SettingsService;
+use WooPlugin\Abstracts\AbstractBlock;
+use WooPlugin\Repositories\UserTokenRepository;
+use WooPlugin\Services\Checkout\BankAccountPaymentService;
+use WooPlugin\Services\SettingsService;
 
 final class BankAccountBlock extends AbstractBlock {
 	protected const SCRIPT = 'bank-account-form';
@@ -29,7 +29,7 @@ final class BankAccountBlock extends AbstractBlock {
 			WC()->cart->calculate_totals();
 		}
 
-		return array_merge( $userTokens, [ 
+		return array_merge( $userTokens, [
 			'isActive' => $this->is_active(),
 			// Wordpress data
 			'_wpnonce' => wp_create_nonce( 'process_payment' ),

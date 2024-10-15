@@ -1,9 +1,9 @@
 <?php
 
-namespace PowerBoard\Abstracts;
+namespace WooPlugin\Abstracts;
 
-use PowerBoard\Contracts\Repository;
-use PowerBoard\PowerBoardPlugin;
+use WooPlugin\Contracts\Repository;
+use WooPlugin\WooPluginPlugin;
 
 abstract class AbstractRepository implements Repository {
 	protected $wordpressDB;
@@ -29,6 +29,6 @@ abstract class AbstractRepository implements Repository {
 	}
 
 	public function getFullTableName( string $table ): string {
-		return $this->tablePrefix . PowerBoardPlugin::PLUGIN_PREFIX . '_' . $table;
+		return $this->tablePrefix . WooPluginPlugin::PLUGIN_PREFIX . '_' . $table;
 	}
 }

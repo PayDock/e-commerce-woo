@@ -1,10 +1,10 @@
 <?php
 
-namespace PowerBoard\Util;
+namespace WooPlugin\Util;
 
-use PowerBoard\Abstracts\AbstractWalletBlock;
-use PowerBoard\Enums\WalletPaymentMethods;
-use PowerBoard\Services\Checkout\PayPalWalletService;
+use WooPlugin\Abstracts\AbstractWalletBlock;
+use WooPlugin\Enums\WalletPaymentMethods;
+use WooPlugin\Services\Checkout\PayPalWalletService;
 
 final class PayPalWalletBlock extends AbstractWalletBlock {
 	public function getType(): WalletPaymentMethods {

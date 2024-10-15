@@ -1,13 +1,13 @@
 <?php
 
-namespace PowerBoard\API;
+namespace WooPlugin\API;
 
-use PowerBoard\Abstracts\AbstractApiService;
+use WooPlugin\Abstracts\AbstractApiService;
 
 class NotificationService extends AbstractApiService {
 	const ENDPOINT = 'notifications';
 
-	protected $allowedAction = [ 
+	protected $allowedAction = [
 		'create' => self::METHOD_POST,
 		'search' => self::METHOD_GET,
 	];

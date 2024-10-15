@@ -1,22 +1,22 @@
 <?php
 
-namespace PowerBoard\Services;
+namespace WooPlugin\Services;
 
 use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
-use PowerBoard\Abstracts\AbstractSingleton;
-use PowerBoard\Controllers\Admin\WidgetController;
-use PowerBoard\Controllers\Webhooks\PaymentController;
-use PowerBoard\Enums\SettingsTabs;
-use PowerBoard\Services\Checkout\BankAccountPaymentService;
-use PowerBoard\Util\AfterpayAPMsBlock;
-use PowerBoard\Util\AfterpayWalletBlock;
-use PowerBoard\Util\ApplePayWalletBlock;
-use PowerBoard\Util\BankAccountBlock;
-use PowerBoard\Util\GooglePayWalletBlock;
-use PowerBoard\Util\PayPalWalletBlock;
-use PowerBoard\Util\PowerBoardGatewayBlocks;
-use PowerBoard\Util\ZipAPMsBlock;
+use WooPlugin\Abstracts\AbstractSingleton;
+use WooPlugin\Controllers\Admin\WidgetController;
+use WooPlugin\Controllers\Webhooks\PaymentController;
+use WooPlugin\Enums\SettingsTabs;
+use WooPlugin\Services\Checkout\BankAccountPaymentService;
+use WooPlugin\Util\AfterpayAPMsBlock;
+use WooPlugin\Util\AfterpayWalletBlock;
+use WooPlugin\Util\ApplePayWalletBlock;
+use WooPlugin\Util\BankAccountBlock;
+use WooPlugin\Util\GooglePayWalletBlock;
+use WooPlugin\Util\PayPalWalletBlock;
+use WooPlugin\Util\PowerBoardGatewayBlocks;
+use WooPlugin\Util\ZipAPMsBlock;
 
 class ActionsService extends AbstractSingleton {
 	protected const PROCESS_OPTIONS_FUNCTION = 'process_admin_options';

@@ -1,8 +1,8 @@
 <?php
 
-namespace PowerBoard\Services\Assets;
+namespace WooPlugin\Services\Assets;
 
-use PowerBoard\PowerBoardPlugin;
+use WooPlugin\WooPluginPlugin;
 
 class AdminAssetsService {
 	private const SCRIPTS = [
@@ -46,7 +46,7 @@ class AdminAssetsService {
 	}
 
 	private function getScriptName( string $script ): string {
-		return implode( '_', [ PowerBoardPlugin::PLUGIN_PREFIX, self::PREFIX, self::SCRIPT_PREFIX, $script ] );
+		return implode( '_', [ WooPluginPlugin::PLUGIN_PREFIX, self::PREFIX, self::SCRIPT_PREFIX, $script ] );
 	}
 
 	private function getScriptPath( string $script ): string {
@@ -75,7 +75,7 @@ class AdminAssetsService {
 	}
 
 	private function getStyleName( string $script ): string {
-		return implode( '_', [ PowerBoardPlugin::PLUGIN_PREFIX, self::PREFIX, self::STYLE_PREFIX, $script ] );
+		return implode( '_', [ WooPluginPlugin::PLUGIN_PREFIX, self::PREFIX, self::STYLE_PREFIX, $script ] );
 	}
 
 	private function getStylePath( string $script ): string {

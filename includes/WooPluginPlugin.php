@@ -1,16 +1,16 @@
 <?php
 
-namespace PowerBoard;
+namespace WooPlugin;
 
-use PowerBoard\Abstracts\AbstractSingleton;
-use PowerBoard\Hooks\ActivationHook;
-use PowerBoard\Hooks\DeactivationHook;
-use PowerBoard\Repositories\LogRepository;
-use PowerBoard\Services\ActionsService;
-use PowerBoard\Services\FiltersService;
+use WooPlugin\Abstracts\AbstractSingleton;
+use WooPlugin\Hooks\ActivationHook;
+use WooPlugin\Hooks\DeactivationHook;
+use WooPlugin\Repositories\LogRepository;
+use WooPlugin\Services\ActionsService;
+use WooPlugin\Services\FiltersService;
 
-if ( ! class_exists( '\PowerBoard\PowerBoardPlugin' ) ) {
-	final class PowerBoardPlugin extends AbstractSingleton {
+if ( ! class_exists( '\WooPlugin\WooPluginPlugin' ) ) {
+	final class WooPluginPlugin extends AbstractSingleton {
 		public const REPOSITORIES = [
 			LogRepository::class,
 		];

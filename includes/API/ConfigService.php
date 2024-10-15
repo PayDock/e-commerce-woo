@@ -1,8 +1,8 @@
 <?php
 
-namespace PowerBoard\API;
+namespace WooPlugin\API;
 
-use PowerBoard\Enums\ConfigAPI;
+use WooPlugin\Enums\ConfigAPI;
 
 class ConfigService {
 	public static $environment = null;

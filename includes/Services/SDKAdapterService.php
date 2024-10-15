@@ -1,21 +1,21 @@
 <?php
 
-namespace PowerBoard\Services;
+namespace WooPlugin\Services;
 
-use PowerBoard\API\ChargeService;
-use PowerBoard\API\ConfigService;
-use PowerBoard\API\CustomerService;
-use PowerBoard\API\GatewayService;
-use PowerBoard\API\NotificationService;
-use PowerBoard\API\ServiceService;
-use PowerBoard\API\TokenService;
-use PowerBoard\API\VaultService;
-use PowerBoard\Enums\ConfigAPI;
-use PowerBoard\Enums\CredentialSettings;
-use PowerBoard\Enums\CredentialsTypes;
-use PowerBoard\Enums\SettingGroups;
-use PowerBoard\Services\Settings\LiveConnectionSettingService;
-use PowerBoard\Services\Settings\SandboxConnectionSettingService;
+use WooPlugin\API\ChargeService;
+use WooPlugin\API\ConfigService;
+use WooPlugin\API\CustomerService;
+use WooPlugin\API\GatewayService;
+use WooPlugin\API\NotificationService;
+use WooPlugin\API\ServiceService;
+use WooPlugin\API\TokenService;
+use WooPlugin\API\VaultService;
+use WooPlugin\Enums\ConfigAPI;
+use WooPlugin\Enums\CredentialSettings;
+use WooPlugin\Enums\CredentialsTypes;
+use WooPlugin\Enums\SettingGroups;
+use WooPlugin\Services\Settings\LiveConnectionSettingService;
+use WooPlugin\Services\Settings\SandboxConnectionSettingService;
 
 class SDKAdapterService {
 	private const ENABLED_CONDITION = 'yes';
@@ -40,27 +40,27 @@ class SDKAdapterService {
 		}
 
 		$isAccessToken = CredentialsTypes::ACCESS_KEY()->name == $settings->get_option(
-			$settingsService->getOptionName( $settings->id, [ 
+			$settingsService->getOptionName( $settings->id, [
 				SettingGroups::CREDENTIALS()->name,
 				CredentialSettings::TYPE()->name,
 			] )
 		);
 
 		if ( $isAccessToken ) {
-			$secretKey = $settings->get_option( $settingsService->getOptionName( $settings->id, [ 
+			$secretKey = $settings->get_option( $settingsService->getOptionName( $settings->id, [
 				SettingGroups::CREDENTIALS()->name,
 				CredentialSettings::ACCESS_KEY()->name,
 			] ) );
-			$publicKey = $settings->get_option( $settingsService->getOptionName( $settings->id, [ 
+			$publicKey = $settings->get_option( $settingsService->getOptionName( $settings->id, [
 				SettingGroups::CREDENTIALS()->name,
 				CredentialSettings::WIDGET_KEY()->name,
 			] ) );
 		} else {
-			$publicKey = $settings->get_option( $settingsService->getOptionName( $settings->id, [ 
+			$publicKey = $settings->get_option( $settingsService->getOptionName( $settings->id, [
 				SettingGroups::CREDENTIALS()->name,
 				CredentialSettings::PUBLIC_KEY()->name,
 			] ) );
-			$secretKey = $settings->get_option( $settingsService->getOptionName( $settings->id, [ 
+			$secretKey = $settings->get_option( $settingsService->getOptionName( $settings->id, [
 				SettingGroups::CREDENTIALS()->name,
 				CredentialSettings::SECRET_KEY()->name,
 			] ) );
@@ -74,7 +74,7 @@ class SDKAdapterService {
 			$settings = new SandboxConnectionSettingService();
 
 			return self::ENABLED_CONDITION !== $settings->get_option(
-				SettingsService::getInstance()->getOptionName( $settings->id, [ 
+				SettingsService::getInstance()->getOptionName( $settings->id, [
 					SettingGroups::CREDENTIALS()->name,
 					CredentialSettings::SANDBOX()->name,
 				] )

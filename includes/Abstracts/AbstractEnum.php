@@ -1,6 +1,6 @@
 <?php
 
-namespace PowerBoard\Abstracts;
+namespace WooPlugin\Abstracts;
 
 abstract class AbstractEnum {
 	private const NAME_PROPERTY_NAME = 'name';

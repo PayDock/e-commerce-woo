@@ -1,12 +1,12 @@
 <?php
 
-namespace PowerBoard\Services\Settings;
+namespace WooPlugin\Services\Settings;
 
-use PowerBoard\Abstracts\AbstractSettingService;
-use PowerBoard\Enums\SettingsTabs;
-use PowerBoard\Enums\WidgetSettings;
-use PowerBoard\Services\SettingsService;
-use PowerBoard\Services\Validation\WidgetValidationService;
+use WooPlugin\Abstracts\AbstractSettingService;
+use WooPlugin\Enums\SettingsTabs;
+use WooPlugin\Enums\WidgetSettings;
+use WooPlugin\Services\SettingsService;
+use WooPlugin\Services\Validation\WidgetValidationService;
 
 class WidgetSettingService extends AbstractSettingService {
 	private const CUSTOM_STYLES_PLACEHOLDER = '{

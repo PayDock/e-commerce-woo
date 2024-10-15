@@ -1,12 +1,12 @@
 <?php
 
-namespace PowerBoard\Services\Checkout;
+namespace WooPlugin\Services\Checkout;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
-use PowerBoard\Abstracts\AbstractWalletPaymentService;
-use PowerBoard\Enums\OrderListColumns;
-use PowerBoard\Enums\WalletPaymentMethods;
-use PowerBoard\Repositories\LogRepository;
+use WooPlugin\Abstracts\AbstractWalletPaymentService;
+use WooPlugin\Enums\OrderListColumns;
+use WooPlugin\Enums\WalletPaymentMethods;
+use WooPlugin\Repositories\LogRepository;
 
 class AfterpayWalletService extends AbstractWalletPaymentService {
 

@@ -1,8 +1,8 @@
 <?php
 
-namespace PowerBoard\Abstracts;
+namespace WooPlugin\Abstracts;
 
-use PowerBoard\Services\SettingsService;
+use WooPlugin\Services\SettingsService;
 use WC_Payment_Gateway;
 
 abstract class AbstractPaymentService extends WC_Payment_Gateway {

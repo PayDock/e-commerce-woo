@@ -1,16 +1,16 @@
 <?php
 
-namespace PowerBoard\Services\Checkout;
+namespace WooPlugin\Services\Checkout;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Exception;
-use PowerBoard\Abstracts\AbstractPaymentService;
-use PowerBoard\Enums\OrderListColumns;
-use PowerBoard\Exceptions\LoggedException;
-use PowerBoard\Repositories\LogRepository;
-use PowerBoard\Services\OrderService;
-use PowerBoard\Services\ProcessPayment\BankAccountProcessor;
-use PowerBoard\Services\SettingsService;
+use WooPlugin\Abstracts\AbstractPaymentService;
+use WooPlugin\Enums\OrderListColumns;
+use WooPlugin\Exceptions\LoggedException;
+use WooPlugin\Repositories\LogRepository;
+use WooPlugin\Services\OrderService;
+use WooPlugin\Services\ProcessPayment\BankAccountProcessor;
+use WooPlugin\Services\SettingsService;
 
 class BankAccountPaymentService extends AbstractPaymentService {
 	public function __construct() {

@@ -1,10 +1,10 @@
 <?php
 
-namespace PowerBoard\Hooks;
+namespace WooPlugin\Hooks;
 
-use PowerBoard\Contracts\Hook;
-use PowerBoard\Contracts\Repository;
-use PowerBoard\PowerBoardPlugin;
+use WooPlugin\Contracts\Hook;
+use WooPlugin\Contracts\Repository;
+use WooPlugin\WooPluginPlugin;
 
 class UninstallHook implements Hook {
 
@@ -14,7 +14,7 @@ class UninstallHook implements Hook {
 	public static function handle(): void {
 		$repositories = array_map( function (string $className) {
 			return new $className();
-		}, PowerBoardPlugin::REPOSITORIES );
+		}, WooPluginPlugin::REPOSITORIES );
 		array_map( [ new self(), 'runMigration' ], $repositories );
 	}
 

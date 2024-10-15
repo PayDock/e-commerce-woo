@@ -1,6 +1,6 @@
 <?php
 
-namespace PowerBoard\Helpers;
+namespace WooPlugin\Helpers;
 
 class ShippingHelper {
 	public static function getPickupLocationByName( string $name ) {

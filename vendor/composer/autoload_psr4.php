@@ -6,5 +6,5 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
-    'PowerBoard\\' => array($baseDir . '/includes'),
+    'WooPlugin\\' => array($baseDir . '/includes'),
 );

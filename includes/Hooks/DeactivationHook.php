@@ -1,11 +1,11 @@
 <?php
 
-namespace PowerBoard\Hooks;
+namespace WooPlugin\Hooks;
 
-use PowerBoard\Contracts\Hook;
-use PowerBoard\Contracts\Repository;
-use PowerBoard\PowerBoardPlugin;
-use PowerBoard\Plugin;
+use WooPlugin\Contracts\Hook;
+use WooPlugin\Contracts\Repository;
+use WooPlugin\WooPluginPlugin;
+use WooPlugin\Plugin;
 
 class DeactivationHook implements Hook {
 
@@ -17,7 +17,7 @@ class DeactivationHook implements Hook {
 
 		$repositories = array_map( function ($className) {
 			return new $className();
-		}, PowerBoardPlugin::REPOSITORIES );
+		}, WooPluginPlugin::REPOSITORIES );
 
 		array_map( [ $instance, 'runMigration' ], $repositories );
 	}

@@ -1,9 +1,9 @@
 <?php
 
-namespace PowerBoard\Abstracts;
+namespace WooPlugin\Abstracts;
 
-use PowerBoard\Enums\WalletPaymentMethods;
-use PowerBoard\Services\SettingsService;
+use WooPlugin\Enums\WalletPaymentMethods;
+use WooPlugin\Services\SettingsService;
 
 abstract class AbstractWalletBlock extends AbstractBlock {
 	protected $gateway;

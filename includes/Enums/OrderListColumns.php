@@ -1,9 +1,9 @@
 <?php
 
-namespace PowerBoard\Enums;
+namespace WooPlugin\Enums;
 
-use PowerBoard\Abstracts\AbstractEnum;
-use PowerBoard\PowerBoardPlugin;
+use WooPlugin\Abstracts\AbstractEnum;
+use WooPlugin\WooPluginPlugin;
 
 class OrderListColumns extends AbstractEnum {
 	public const AFTER_COLUMN = 'order_status';
@@ -21,7 +21,7 @@ class OrderListColumns extends AbstractEnum {
 	public function getKey(): string {
 		switch ( $this->name ) {
 			case self::PAYMENT_SOURCE_TYPE:
-				return PowerBoardPlugin::PLUGIN_PREFIX . '_payment_source_type';
+				return WooPluginPlugin::PLUGIN_PREFIX . '_payment_source_type';
 			default:
 				return '';
 		}

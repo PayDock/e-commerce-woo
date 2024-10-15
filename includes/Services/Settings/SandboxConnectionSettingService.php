@@ -1,12 +1,12 @@
 <?php
 
-namespace PowerBoard\Services\Settings;
+namespace WooPlugin\Services\Settings;
 
-use PowerBoard\Enums\CredentialSettings;
-use PowerBoard\Enums\SettingGroups;
-use PowerBoard\Enums\SettingsTabs;
-use PowerBoard\PowerBoardPlugin;
-use PowerBoard\Services\SettingsService;
+use WooPlugin\Enums\CredentialSettings;
+use WooPlugin\Enums\SettingGroups;
+use WooPlugin\Enums\SettingsTabs;
+use WooPlugin\WooPluginPlugin;
+use WooPlugin\Services\SettingsService;
 
 class SandboxConnectionSettingService extends LiveConnectionSettingService {
 	public function init_form_fields(): void {

@@ -1,26 +1,26 @@
 <?php
 
-namespace PowerBoard\Services\Settings;
+namespace WooPlugin\Services\Settings;
 
-use PowerBoard\Abstracts\AbstractSettingService;
-use PowerBoard\Enums\APMsSettings;
-use PowerBoard\Enums\BankAccountSettings;
-use PowerBoard\Enums\CardSettings;
-use PowerBoard\Enums\CredentialSettings;
-use PowerBoard\Enums\CredentialsTypes;
-use PowerBoard\Enums\DSTypes;
-use PowerBoard\Enums\FraudTypes;
-use PowerBoard\Enums\OtherPaymentMethods;
-use PowerBoard\Enums\SaveCardOptions;
-use PowerBoard\Enums\SettingGroups;
-use PowerBoard\Enums\SettingsTabs;
-use PowerBoard\Enums\TypeExchangeOTT;
-use PowerBoard\Enums\WalletPaymentMethods;
-use PowerBoard\Enums\WalletSettings;
-use PowerBoard\PowerBoardPlugin;
-use PowerBoard\Services\HashService;
-use PowerBoard\Services\SettingsService;
-use PowerBoard\Services\Validation\ConnectionValidationService;
+use WooPlugin\Abstracts\AbstractSettingService;
+use WooPlugin\Enums\APMsSettings;
+use WooPlugin\Enums\BankAccountSettings;
+use WooPlugin\Enums\CardSettings;
+use WooPlugin\Enums\CredentialSettings;
+use WooPlugin\Enums\CredentialsTypes;
+use WooPlugin\Enums\DSTypes;
+use WooPlugin\Enums\FraudTypes;
+use WooPlugin\Enums\OtherPaymentMethods;
+use WooPlugin\Enums\SaveCardOptions;
+use WooPlugin\Enums\SettingGroups;
+use WooPlugin\Enums\SettingsTabs;
+use WooPlugin\Enums\TypeExchangeOTT;
+use WooPlugin\Enums\WalletPaymentMethods;
+use WooPlugin\Enums\WalletSettings;
+use WooPlugin\WooPluginPlugin;
+use WooPlugin\Services\HashService;
+use WooPlugin\Services\SettingsService;
+use WooPlugin\Services\Validation\ConnectionValidationService;
 
 class LiveConnectionSettingService extends AbstractSettingService {
 
@@ -46,7 +46,7 @@ class LiveConnectionSettingService extends AbstractSettingService {
 		$service = SettingsService::getInstance();
 
 		foreach ( SettingGroups::cases() as $settingGroup ) {
-			$key = PowerBoardPlugin::PLUGIN_PREFIX . '_' . $service->getOptionName( $this->id, [
+			$key = WooPluginPlugin::PLUGIN_PREFIX . '_' . $service->getOptionName( $this->id, [
 					$settingGroup->name,
 					'label',
 				] );

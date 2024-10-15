@@ -1,10 +1,10 @@
 <?php
 
-namespace PowerBoard\Abstracts;
+namespace WooPlugin\Abstracts;
 
-use PowerBoard\Enums\SettingsTabs;
-use PowerBoard\Services\Assets\AdminAssetsService;
-use PowerBoard\Services\TemplateService;
+use WooPlugin\Enums\SettingsTabs;
+use WooPlugin\Services\Assets\AdminAssetsService;
+use WooPlugin\Services\TemplateService;
 
 abstract class AbstractSettingService extends \WC_Payment_Gateway {
 	public $currentSection = null;

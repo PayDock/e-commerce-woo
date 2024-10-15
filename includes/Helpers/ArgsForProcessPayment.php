@@ -1,9 +1,9 @@
 <?php
 
-namespace PowerBoard\Helpers;
+namespace WooPlugin\Helpers;
 
-use PowerBoard\Enums\DSTypes;
-use PowerBoard\Enums\FraudTypes;
+use WooPlugin\Enums\DSTypes;
+use WooPlugin\Enums\FraudTypes;
 
 class ArgsForProcessPayment {
 	public static function prepare( array $args = [] ): array {

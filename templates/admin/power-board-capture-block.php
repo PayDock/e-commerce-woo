@@ -2,9 +2,9 @@
 	exit;
 }
 
-use PowerBoard\Enums\OrderListColumns;
-use PowerBoard\Enums\OtherPaymentMethods;
-use PowerBoard\Enums\WalletPaymentMethods;
+use WooPlugin\Enums\OrderListColumns;
+use WooPlugin\Enums\OtherPaymentMethods;
+use WooPlugin\Enums\WalletPaymentMethods;
 ?>
 <span class="power-board-order-actions">
     <?php
