@@ -50,7 +50,7 @@ class CredentialSettings extends AbstractEnum {
 			case self::SANDBOX:
 				return 'Sandbox';
 			case self::TYPE:
-				return 'Connection to PowerBoard';
+				return 'Connection to ' . PLUGIN_TEXT;
 			default:
 				return '';
 		}

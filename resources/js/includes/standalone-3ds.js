@@ -3,8 +3,10 @@ import getVaultToken from './get-vault-token';
 import getStandalone3dsToken from './get-standalone-3ds-token';
 import sleep from './sleep';
 
+const pluginPrefix = window.widgetSettings.pluginPrefix;
+
 export default async () => {
-    const settings = getSetting('power_board_data', {});
+    const settings = getSetting(pluginPrefix + '_data', {});
 
     if (settings.selectedToken.trim().length === 0) {
         settings.selectedToken = await getVaultToken()
@@ -12,7 +14,7 @@ export default async () => {
 
     const threeDsToken = await getStandalone3dsToken(settings.selectedToken)
 
-    const canvas = new window.cba.Canvas3ds('#powerBoardWidget3ds', threeDsToken);
+    const canvas = new window.cba.Canvas3ds('#pluginWidget3ds', threeDsToken);
     canvas.load();
 
     let result = false;

@@ -1,9 +1,11 @@
 import walletsForm from "../includes/apms";
 
+const pluginTextName = window.widgetSettings.pluginTextName;
+
 walletsForm(
     'zip',
-    'PowerBoard Zip',
-    'powerBoardAPMsZipButton',
+  pluginTextName + ' Zip',
+    'pluginAPMsZipButton',
     [
         'first_name',
         'last_name',

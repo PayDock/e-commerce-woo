@@ -5,7 +5,7 @@ namespace WooPlugin\Repositories;
 use WooPlugin\Services\HashService;
 
 class UserTokenRepository {
-	const CARD_TOKENS_KEY = 'power_board_card_tokens';
+	const CARD_TOKENS_KEY = PLUGIN_PREFIX . '_card_tokens';
 
 	private $cache;
 	private $userId;

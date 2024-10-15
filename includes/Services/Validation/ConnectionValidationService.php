@@ -38,7 +38,7 @@ class ConnectionValidationService {
 		'maestro' => 'Maestro',
 		'ausbc' => 'Australian Bank Card',
 	];
-	private const IS_WEBHOOK_SET_OPTION = 'is_power_board_webhook_set';
+	private const IS_WEBHOOK_SET_OPTION = 'is_' . PLUGIN_PREFIX . '_webhook_set';
 
 	public $service = null;
 	private $errors = [];
@@ -540,7 +540,7 @@ class ConnectionValidationService {
 		}
 
 		$notSettedWebhooks = $webhookEvents;
-		$webhookSiteUrl = get_site_url() . '/wc-api/power-board-webhook/';
+		$webhookSiteUrl = get_site_url() . '/wc-api/plugin-webhook/';
 		$shouldCreateWebhook = true;
 		$webhookRequest = $this->adapterService->searchNotifications( [ 'type' => 'webhook' ] );
 		if ( ! empty( $webhookRequest['resource']['data'] ) ) {

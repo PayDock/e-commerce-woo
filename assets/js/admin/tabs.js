@@ -1,1 +1,1 @@
-jQuery('.power-board-active-hidden-settings').hide();
+jQuery('.plugin-active-hidden-settings').hide();

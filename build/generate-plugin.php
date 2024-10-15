@@ -64,6 +64,10 @@ if ( ! defined( 'PLUGIN_PREFIX' ) ) {
   define( 'PLUGIN_PREFIX', '{$config['PLUGIN_PREFIX']}' );
 }
 
+if ( ! defined( 'PLUGIN_TEXT' ) ) {
+  define( 'PLUGIN_TEXT', '{$config['PLUGIN_TEXT']}' );
+}
+
 require_once 'vendor/autoload.php';
 
 WooPlugin\WooPluginPlugin::getInstance();

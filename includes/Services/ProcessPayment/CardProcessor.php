@@ -330,7 +330,7 @@ class CardProcessor {
 		] );
 
 		if ( empty( $response['error'] ) && ! empty( $response['resource']['data']['_id'] ) ) {
-			update_option( 'power_board_fraud_' . (string) $this->order->get_id(), $options );
+			update_option( PLUGIN_PREFIX . '_fraud_' . (string) $this->order->get_id(), $options );
 		}
 
 		return $response;
@@ -376,7 +376,7 @@ class CardProcessor {
 		] );
 
 		if ( empty( $response['error'] ) && ! empty( $response['resource']['data']['_id'] ) ) {
-			update_option( 'power_board_fraud_' . (string) $this->order->get_id(), $options );
+			update_option( PLUGIN_PREFIX . '_fraud_' . (string) $this->order->get_id(), $options );
 		}
 
 		return $response;
@@ -583,7 +583,7 @@ class CardProcessor {
 		] );
 
 		if ( empty( $response['error'] ) && ! empty( $response['resource']['data']['_id'] ) ) {
-			update_option( 'power_board_fraud_' . (string) $this->order->get_id(), $options );
+			update_option( PLUGIN_PREFIX . '_fraud_' . (string) $this->order->get_id(), $options );
 		}
 
 		return $response;
@@ -642,7 +642,7 @@ class CardProcessor {
 				}
 
 				if ( empty( $parsed_api_error ) ) {
-					$parsed_api_error = __( 'Unable to create the PowerBoard customer record', PLUGIN_TEXT_DOMAIN );
+					$parsed_api_error = __( 'Unable to create the ' . PLUGIN_TEXT . ' customer record', PLUGIN_TEXT_DOMAIN );
 				}
 
 				$parsed_api_error .= ' widget_error';
@@ -784,7 +784,7 @@ class CardProcessor {
 			}
 
 			if ( empty( $parsed_api_error ) ) {
-				$parsed_api_error = __( 'Unable to create the PowerBoard customer record', PLUGIN_TEXT_DOMAIN );
+				$parsed_api_error = __( 'Unable to create the ' . PLUGIN_TEXT . ' customer record', PLUGIN_TEXT_DOMAIN );
 			}
 
 			$parsed_api_error .= ' widget_error';

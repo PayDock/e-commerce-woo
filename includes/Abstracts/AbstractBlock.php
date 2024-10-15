@@ -30,8 +30,11 @@ abstract class AbstractBlock extends AbstractPaymentMethodType {
 				true
 			);
 
-			wp_localize_script( PLUGIN_TEXT_DOMAIN . '-form', 'powerBoardWidgetSettings', [
-				'pluginUrlPrefix' => PLUGIN_URL
+			wp_localize_script( PLUGIN_TEXT_DOMAIN . '-form', 'widgetSettings', [
+				'pluginUrlPrefix' => PLUGIN_URL,
+				'pluginTextDomain' => PLUGIN_TEXT_DOMAIN,
+				'pluginTextName' => PLUGIN_TEXT,
+				'pluginPrefix' => PLUGIN_PREFIX,
 			] );
 			wp_enqueue_style(
 				PLUGIN_TEXT_DOMAIN . '-widget-css',
@@ -48,8 +51,11 @@ abstract class AbstractBlock extends AbstractPaymentMethodType {
 				PLUGIN_VERSION,
 				true
 			);
-			wp_localize_script( PLUGIN_TEXT_DOMAIN . '-api', 'powerBoardWidgetSettings', [
-				'pluginUrlPrefix' => PLUGIN_URL
+			wp_localize_script( PLUGIN_TEXT_DOMAIN . '-api', 'widgetSettings', [
+				'pluginUrlPrefix' => PLUGIN_URL,
+				'pluginTextDomain' => PLUGIN_TEXT_DOMAIN,
+				'pluginTextName' => PLUGIN_TEXT,
+				'pluginPrefix' => PLUGIN_PREFIX,
 			] );
 
 			self::$isLoad = true;
@@ -65,11 +71,17 @@ abstract class AbstractBlock extends AbstractPaymentMethodType {
 			'version'      => PLUGIN_VERSION,
 		];
 		wp_register_script( $scriptName, $scriptUrl, $scriptAsset['dependencies'], $scriptAsset['version'], true );
-		wp_localize_script( $scriptName, 'powerBoardWidgetSettings', [
-			'pluginUrlPrefix' => PLUGIN_URL
+		wp_localize_script( $scriptName, 'widgetSettings', [
+				'pluginUrlPrefix' => PLUGIN_URL,
+				'pluginTextDomain' => PLUGIN_TEXT_DOMAIN,
+				'pluginTextName' => PLUGIN_TEXT,
+				'pluginPrefix' => PLUGIN_PREFIX,
 		] );
-		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-api', 'powerBoardWidgetSettings', [
-			'pluginUrlPrefix' => PLUGIN_URL
+		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-api', 'widgetSettings', [
+				'pluginUrlPrefix' => PLUGIN_URL,
+				'pluginTextDomain' => PLUGIN_TEXT_DOMAIN,
+				'pluginTextName' => PLUGIN_TEXT,
+				'pluginPrefix' => PLUGIN_PREFIX,
 		] );
 		if ( function_exists( 'wp_set_script_translations' ) ) {
 			wp_set_script_translations( $scriptName );

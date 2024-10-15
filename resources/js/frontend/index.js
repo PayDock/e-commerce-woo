@@ -9,29 +9,31 @@ import {
     selectSavedCardsComponent,
     sleep,
     standalone3Ds
-} from '../includes/wc-power-board';
+} from '../includes/wc-plugin';
 import {select} from '@wordpress/data';
 import {CART_STORE_KEY} from '@woocommerce/block-data';
 
 const cart = select(CART_STORE_KEY);
-const settings = getSetting('power_board_data', {});
+const settings = getSetting(window.widgetSettings.pluginPrefix + '_data', {});
 
-const textDomain = 'power-board';
+const textDomain = window.widgetSettings.pluginTextDomain;
+const textName = window.widgetSettings.pluginTextName;
 const labels = {
-    defaultLabel: __('PowerBoard Payments', textDomain),
+    defaultLabel: __(textName + ' Payments', textDomain),
     saveCardLabel: __('Save payment details', textDomain),
     selectTokenLabel: __('Saved payment details', textDomain),
     fillDataError: __('Please fill in the card data', textDomain),
-    notSupport3DS: __('Payment has been rejected by PowerBoard. Please try a different payment method'),
+    notSupport3DS: __('Payment has been rejected by ' + textName + '. Please try a different payment method'),
     fillCCDataError: __('Please fill in the required credit card form fields', textDomain),
     requiredDataError: __('Please fill in the required fields of the form to display payment methods', textDomain),
-    additionalDataRejected: __('Payment has been rejected by PowerBoard. Please try again in a few minutes', textDomain)
+    additionalDataRejected: __('Payment has been rejected by ' + textName + '. Please try again in a few minutes', textDomain)
 }
 
 const label = decodeEntities(settings.title) || labels.defaultLabel;
 
 let formSubmittedAlready = false;
 const Content = (props) => {
+
     const {eventRegistration, emitResponse} = props;
     const {onPaymentSetup, onCheckoutValidation, onShippingRateSelectSuccess} = eventRegistration;
 
@@ -54,9 +56,9 @@ const Content = (props) => {
 
             formSubmittedAlready = window.widgetReloaded ? false : formSubmittedAlready
 
-            if (window.hasOwnProperty('powerBoardValidation')) {
-                if (!powerBoardValidation.powerboardCCFormValidation()) {
-                    var validationState = window.widgetPowerBoard.getValidationState();
+            if (window.hasOwnProperty('pluginValidation')) {
+                if (!pluginValidation.pluginCCFormValidation()) {
+                    var validationState = window.pluginCardWidget.getValidationState();
 
                     var invalid_fields = [];
                     validationState.invalid_fields.forEach(field => {
@@ -84,7 +86,7 @@ const Content = (props) => {
                     }
                 }
 
-                if (!powerBoardValidation.wcFormValidation()) {
+                if (!pluginValidation.wcFormValidation()) {
                     return {
                         type: emitResponse.responseTypes.ERROR,
                         errorMessage: labels.requiredDataError
@@ -135,17 +137,17 @@ const Content = (props) => {
                 phoneValue = document.getElementById('billing-phone').value
             }
 
-            window.widgetPowerBoard.updateFormValues({
+            window.pluginCardWidget.updateFormValues({
                 email: document.getElementById('email').value,
                 phone: phoneValue
             });
-            window.widgetPowerBoard.trigger(window.cba.TRIGGER.SUBMIT_FORM);
+            window.pluginCardWidget.trigger(window.cba.TRIGGER.SUBMIT_FORM);
 
             let result = false;
-            window.widgetPowerBoard.on(window.cba.EVENT.FINISH, () => {
+            window.pluginCardWidget.on(window.cba.EVENT.FINISH, () => {
                 result = true
 
-                const savedCards = document.querySelector('.power-board-select-saved-cards')
+                const savedCards = document.querySelector('.' + textDomain + '.-select-saved-cards')
                 if (savedCards !== null) {
                     savedCards.style = 'display: none'
                 }
@@ -253,11 +255,11 @@ const Content = (props) => {
         selectSavedCardsComponent(labels.selectTokenLabel),
         createElement(
             "div",
-            {id: 'powerBoardWidgetCard_wrapper'}
+            {id: 'pluginWidgetCard_wrapper'}
         ),
         createElement(
             "div",
-            {id: 'powerBoardWidget3ds'}
+            {id: 'pluginWidget3ds'}
         ),
         createElement(
             "input",
@@ -271,23 +273,23 @@ const Content = (props) => {
 };
 
 const Paydok = {
-    name: "power_board_gateway",
+    name: window.widgetSettings.pluginPrefix +  "_gateway",
     label: createElement(() =>
         createElement(
             "div",
             {
-                className: 'power-board-payment-method-label'
+                className: textDomain + '-payment-method-label'
             },
             createElement("img", {
-                src: `${window.powerBoardWidgetSettings.pluginUrlPrefix}assets/images/icons/card.png`,
+                src: `${window.widgetSettings.pluginUrlPrefix}assets/images/icons/card.png`,
                 alt: label,
-                className: 'power-board-payment-method-label-icon card'
+                className: textDomain + '-payment-method-label-icon card'
             }),
             "  " + label,
             createElement("img", {
-                src: `${window.powerBoardWidgetSettings.pluginUrlPrefix}assets/images/commBank_logo.png`,
+                src: `${window.widgetSettings.pluginUrlPrefix}assets/images/commBank_logo.png`,
                 alt: label,
-                className: 'power-board-payment-method-label-logo'
+                className: textDomain + '-payment-method-label-logo'
             })
         )
     ),

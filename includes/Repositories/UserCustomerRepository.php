@@ -3,7 +3,7 @@
 namespace WooPlugin\Repositories;
 
 class UserCustomerRepository {
-	const USER_CUSTOMERS_KEY = 'power_board_card_customers';
+	const USER_CUSTOMERS_KEY = PLUGIN_PREFIX . '_card_customers';
 
 	private $cache;
 	private $userId;

@@ -1,9 +1,11 @@
 import walletsForm from "../includes/wallets-form";
 
+const pluginTextName = window.widgetSettings.pluginTextName;
+
 walletsForm(
     'pay-pal',
-    'PowerBoard PayPal',
-    'powerBoardWalletPayPalButton',
+  pluginTextName + ' PayPal',
+    'pluginWalletPayPalButton',
     [
         'first_name',
         'last_name',

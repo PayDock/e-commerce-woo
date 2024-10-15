@@ -6,10 +6,10 @@ use WooPlugin\Enums\OrderListColumns;
 use WooPlugin\Enums\OtherPaymentMethods;
 use WooPlugin\Enums\WalletPaymentMethods;
 ?>
-<span class="power-board-order-actions">
+<span class="plugin-order-actions">
     <?php
         $pb_charge_meta = $order->get_meta( 'pb_directly_charged' );
-        $partiallyRefunded = in_array( $order->get_meta('power_board_refunded_status'), [
+        $partiallyRefunded = in_array( $order->get_meta(PLUGIN_PREFIX . '_refunded_status'), [
           'wc-pb-p-refund',
           'pb-p-refund'
         ] );
@@ -24,14 +24,14 @@ use WooPlugin\Enums\WalletPaymentMethods;
         if ( $order_directly_charged == false ) :
     ?>
         <button type="button"
-                onclick="powerBoardPaymentCapture(<?php echo esc_attr( $order->get_id() ); ?>, 'power-board-capture-charge')"
+                onclick="paymentCapture(<?php echo esc_attr( $order->get_id() ); ?>, 'plugin-capture-charge')"
                 class="button">
 			Capture charge
 		</button>
     <?php endif; ?>
 	  <?php if ( $showCancelButton && !$partiallyRefunded) :?>
           <button type="button"
-                  onclick="handlePowerBoardPaymentCapture(<?php echo esc_attr( $order->get_id() ); ?>, 'power-board-cancel-authorised')"
+                  onclick="handlePluginPaymentCapture(<?php echo esc_attr( $order->get_id() ); ?>, 'plugin-cancel-authorised')"
                   class="button">
           Cancel charge
       </button>
@@ -65,7 +65,7 @@ use WooPlugin\Enums\WalletPaymentMethods;
     <div class="refund-actions manual-capture-actions">
 		<?php /* translators: capture amount  */ ?>
         <button type="button"
-                onclick="handlePowerBoardPaymentCapture(<?php echo esc_attr( $order->get_id() ); ?>, 'power-board-capture-charge')"
+                onclick="handlePluginPaymentCapture(<?php echo esc_attr( $order->get_id() ); ?>, 'plugin-capture-charge')"
                 class="button button-primary">
 			<?php esc_html_e( 'Capture ', 'woocommerce' );
 			$currency_symbol = get_woocommerce_currency_symbol( $order->get_currency() );;

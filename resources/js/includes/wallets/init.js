@@ -8,12 +8,12 @@ export default (id, buttonId, data, isSandbox) => {
         country: data.county,
     }
 
-    if ('#powerBoardWalletApplePayButton' === buttonId) {
+    if ('#pluginWalletApplePayButton' === buttonId) {
         config['wallets'] = ['apple'];
         config['amount_label'] = "Total";
     }
 
-    if ('#powerBoardWalletPayPalButton' === buttonId) {
+    if ('#pluginWalletPayPalButton' === buttonId) {
         config['pay_later'] = data.pay_later;
 
         config['style'] = {
@@ -21,8 +21,8 @@ export default (id, buttonId, data, isSandbox) => {
         };
     }
 
-    if ('#powerBoardWalletAfterpayButton' === buttonId) {
-        jQuery('#powerBoardWalletAfterpayButton').each((index, element) => element.addEventListener("click", (event) => {
+    if ('#pluginWalletAfterpayButton' === buttonId) {
+        jQuery('#pluginWalletAfterpayButton').each((index, element) => element.addEventListener("click", (event) => {
             data.payment = id.replace('-', '_')
             paymentSourceElement.val(JSON.stringify(data))
             orderButton.click();

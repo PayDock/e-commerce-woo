@@ -49,10 +49,10 @@ class PaymentController {
 		// }
 
 		$loggerRepository   = new LogRepository();
-		$powerBoardChargeId = $order->get_meta( 'power_board_charge_id' );
+		$pluginChargeId = $order->get_meta( PLUGIN_PREFIX . '_charge_id' );
 		if ( ! $error ) {
 			$charge = SDKAdapterService::getInstance()->capture( [
-				'charge_id' => $powerBoardChargeId,
+				'charge_id' => $pluginChargeId,
 				'amount'    => $amount,
 			] );
 			if ( ! empty( $charge['resource']['data']['status'] ) && 'complete' == $charge['resource']['data']['status'] ) {
@@ -66,7 +66,7 @@ class PaymentController {
 					LogRepository::SUCCESS
 				);
 				$order->update_meta_data( 'capture_amount', $amount );
-				$order->update_meta_data( 'power_board_charge_id', $newChargeId );
+				$order->update_meta_data( PLUGIN_PREFIX . '_charge_id', $newChargeId );
 				$order->update_meta_data( 'pb_directly_charged', 1 );
 				$order->payment_complete();
 				$order->save();
@@ -87,7 +87,7 @@ class PaymentController {
 			}
 		}
 		if ( $error ) {
-			$loggerRepository->createLogRecord( $powerBoardChargeId, 'Capture', 'error', $error, LogRepository::ERROR );
+			$loggerRepository->createLogRecord( $pluginChargeId, 'Capture', 'error', $error, LogRepository::ERROR );
 			wp_send_json_error( [ 'message' => $error ] );
 		}
 	}
@@ -107,13 +107,13 @@ class PaymentController {
 			$error = __( 'The order is not found.', 'woocommerce' );
 		}
 		$loggerRepository   = new LogRepository();
-		$powerBoardChargeId = $order->get_meta( 'power_board_charge_id' );
+		$pluginChargeId = $order->get_meta( PLUGIN_PREFIX . '_charge_id' );
 		if ( ! $error ) {
-			$result = SDKAdapterService::getInstance()->cancelAuthorised( [ 'charge_id' => $powerBoardChargeId ] );
+			$result = SDKAdapterService::getInstance()->cancelAuthorised( [ 'charge_id' => $pluginChargeId ] );
 
 			if ( ! empty( $result['resource']['data']['status'] ) && 'cancelled' == $result['resource']['data']['status'] ) {
 				$loggerRepository->createLogRecord(
-					$powerBoardChargeId,
+					$pluginChargeId,
 					'Cancel-authorised',
 					'wc-pb-cancelled',
 					'',
@@ -137,7 +137,7 @@ class PaymentController {
 		}
 		if ( $error ) {
 			$loggerRepository->createLogRecord(
-				$powerBoardChargeId,
+				$pluginChargeId,
 				'Cancel-authorised',
 				'error',
 				$error,
@@ -174,7 +174,7 @@ class PaymentController {
 
 		$loggerRepository = new LogRepository();
 
-		$powerBoardChargeId = $order->get_meta( 'power_board_charge_id' );
+		$pluginChargeId = $order->get_meta( PLUGIN_PREFIX . '_charge_id' );
 		if ( $captureAmount && $totalRefunded > $captureAmount ) {
 			$totalRefunded = $captureAmount;
 		}
@@ -197,7 +197,7 @@ class PaymentController {
 		}
 
 		$result = SDKAdapterService::getInstance()->refunds( [
-			'charge_id' => $powerBoardChargeId,
+			'charge_id' => $pluginChargeId,
 			'amount'    => $amountToRefund,
 		] );
 		if ( ! empty( $result['resource']['data']['status'] ) && in_array(
@@ -211,7 +211,7 @@ class PaymentController {
 				$status = $totalRefunded < $order->get_total() ? 'wc-pb-p-refund' : 'wc-pb-refunded';
 			}
 
-			$order->update_meta_data( 'power_board_refunded_status', $status );
+			$order->update_meta_data( PLUGIN_PREFIX . '_refunded_status', $status );
 			$status_note = __( 'The refund', 'woocommerce' )
 			               . " {$amountToRefund} "
 			               . __( 'has been successfully.', 'woocommerce' );
@@ -231,7 +231,7 @@ class PaymentController {
 					$result['error'] = implode( '; ', $result['error'] );
 				}
 				$loggerRepository->createLogRecord(
-					$powerBoardChargeId,
+					$pluginChargeId,
 					'Refund',
 					'error',
 					$result['error'],
@@ -240,7 +240,7 @@ class PaymentController {
 				throw new \Exception( esc_html( $result['error'] ) );
 			} else {
 				$error = __( 'The refund process has failed; please try again.', 'woocommerce' );
-				$loggerRepository->createLogRecord( $powerBoardChargeId, 'Refunded', 'error', $error,
+				$loggerRepository->createLogRecord( $pluginChargeId, 'Refunded', 'error', $error,
 					LogRepository::ERROR );
 				throw new \Exception( esc_html( $error ) );
 			}
@@ -253,11 +253,11 @@ class PaymentController {
 
 		if ( is_object( $order ) ) {
 
-			$powerBoardRefundedStatus = $order->get_meta( 'power_board_refunded_status' );
-			if ( $powerBoardRefundedStatus ) {
+			$pluginRefundedStatus = $order->get_meta( PLUGIN_PREFIX . '_refunded_status' );
+			if ( $pluginRefundedStatus ) {
 				remove_action( 'woocommerce_order_status_refunded', 'wc_order_fully_refunded' );
-				OrderService::updateStatus( $orderId, $powerBoardRefundedStatus );
-				$order->update_meta_data( 'power_board_refunded_status', '' );
+				OrderService::updateStatus( $orderId, $pluginRefundedStatus );
+				$order->update_meta_data( PLUGIN_PREFIX . '_refunded_status', '' );
 				$order->save();
 			}
 
@@ -366,7 +366,7 @@ class PaymentController {
 		}
 
 		OrderService::updateStatus( $orderId, $orderStatus );
-		$order->update_meta_data( 'power_board_charge_id', $chargeId );
+		$order->update_meta_data( PLUGIN_PREFIX . '_charge_id', $chargeId );
 		$order->save();
 
 		$loggerRepository = new LogRepository();
@@ -397,7 +397,7 @@ class PaymentController {
 		$fraudId     = $data['_id'];
 		$fraudStatus = $data['status'];
 
-		$optionName = "power_board_fraud_{$orderId}";
+		$optionName = PLUGIN_PREFIX . "_fraud_{$orderId}";
 
 		if ( 'complete' !== $fraudStatus ) {
 			$operation = ucfirst( strtolower( $data['type'] ?? 'undefined' ) );
@@ -503,7 +503,7 @@ class PaymentController {
 		}
 
 		OrderService::updateStatus( $orderId, $status );
-		$order->update_meta_data( 'power_board_charge_id', $chargeId );
+		$order->update_meta_data( PLUGIN_PREFIX . '_charge_id', $chargeId );
 		$order->save();
 
 		$loggerRepository->createLogRecord(
@@ -558,7 +558,7 @@ class PaymentController {
 				} else {
 					$orderStatus = 'wc-pb-refunded';
 				}
-				$order->update_meta_data( 'power_board_refunded_status', $orderStatus );
+				$order->update_meta_data( PLUGIN_PREFIX . '_refunded_status', $orderStatus );
 				$order->save();
 				break;
 			default:

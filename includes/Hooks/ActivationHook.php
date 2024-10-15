@@ -29,7 +29,7 @@ class ActivationHook implements Hook {
 		'wc-pb-p-refund'  => 'refunded',
 	];
 
-	public const CUSTOM_STATUS_META_KEY = 'power_board_custom_status';
+	public const CUSTOM_STATUS_META_KEY = PLUGIN_PREFIX . '_custom_status';
 
 	public function __construct() {
 	}

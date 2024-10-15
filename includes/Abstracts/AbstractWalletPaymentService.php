@@ -14,7 +14,7 @@ abstract class AbstractWalletPaymentService extends AbstractPaymentService {
 		$settings      = SettingsService::getInstance();
 		$paymentMethod = $this->getWalletType();
 
-		$this->id          = 'power_board_' . $paymentMethod->getId() . '_wallets_gateway';
+		$this->id          = PLUGIN_PREFIX . '_' . $paymentMethod->getId() . '_wallets_gateway';
 		$this->title       = $settings->getWidgetPaymentWalletTitle( $paymentMethod );
 		$this->description = $settings->getWidgetPaymentWalletDescription( $paymentMethod );
 
@@ -63,7 +63,7 @@ abstract class AbstractWalletPaymentService extends AbstractPaymentService {
 		$wallet  = reset( $wallets );
 		$isFraud = ! empty( $wallet['fraud'] ) && $wallet['fraud'];
 		if ( $isFraud ) {
-			update_option( 'power_board_fraud_' . (string) $order->get_id(), [] );
+			update_option( PLUGIN_PREFIX . '_fraud_' . (string) $order->get_id(), [] );
 		}
 
 		$loggerRepository = new LogRepository();
@@ -83,7 +83,7 @@ abstract class AbstractWalletPaymentService extends AbstractPaymentService {
 			$order->payment_complete();
 			$order->update_meta_data( 'pb_directly_charged', 1 );
 		}
-		$order->update_meta_data( 'power_board_charge_id', $chargeId );
+		$order->update_meta_data( PLUGIN_PREFIX . '_charge_id', $chargeId );
 		$order->update_meta_data( OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(), $this->getWalletType()->getLabel() );
 		$order->save();
 

@@ -57,8 +57,11 @@ class AdminAssetsService {
 		foreach ( self::SCRIPTS as $script ) {
 			$scriptName = $this->getScriptName( $script );
 			wp_enqueue_script( $this->getScriptName( $script ),'',[],PLUGIN_VERSION,true );
-			wp_localize_script( $scriptName, 'powerBoardWidgetSettings', [
-				'pluginUrlPrefix' => PLUGIN_URL
+			wp_localize_script( $scriptName, 'widgetSettings', [
+				'pluginUrlPrefix' => PLUGIN_URL,
+				'pluginTextDomain' => PLUGIN_TEXT_DOMAIN,
+				'pluginTextName' => PLUGIN_TEXT,
+				'pluginPrefix' => PLUGIN_PREFIX,
 			] );
 		}
 	}

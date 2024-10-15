@@ -128,7 +128,7 @@ class FiltersService extends AbstractSingleton {
 
 	public function woocommerceThankyouOrderReceivedText( $text ) {
 		$orderId = absint( get_query_var( 'order-received' ) );
-		$options  = get_option( "power_board_fraud_{$orderId}" );
+		$options  = get_option( PLUGIN_PREFIX . "_fraud_{$orderId}" );
 		$order    = wc_get_order( $orderId );
 		$status   = $order->get_meta( ActivationHook::CUSTOM_STATUS_META_KEY );
 		$afterpay = filter_input( INPUT_GET, 'afterpay-error', FILTER_SANITIZE_STRING );

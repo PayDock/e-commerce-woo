@@ -24,7 +24,7 @@ class OrderService {
 		}
 	}
 
-	public function iniPowerBoardOrderButtons( $order ) {
+	public function iniPluginOrderButtons( $order ) {
 		$orderCustomStatus = $order->get_meta( ActivationHook::CUSTOM_STATUS_META_KEY );
 		$orderStatus       = $order->get_status();
 		$capturedAmount    = $order->get_meta( 'capture_amount' );
@@ -73,7 +73,7 @@ class OrderService {
 				time(),
 				true
 			);
-			wp_localize_script( PLUGIN_TEXT_DOMAIN . '-capture-block', 'powerBoardCaptureBlockSettings', [
+			wp_localize_script( PLUGIN_TEXT_DOMAIN . '-capture-block', 'pluginCaptureBlockSettings', [
 				'wpnonce' => esc_attr( wp_create_nonce( 'capture-or-cancel' ) ),
 			] );
 		}
@@ -91,7 +91,7 @@ class OrderService {
 
 	public function statusChangeVerification( $orderId, $oldStatusKey, $newStatusKey, $order ) {
 		$order->update_meta_data( 'status_change_verification_failed', "" );
-		if ( ( $oldStatusKey == $newStatusKey ) || ! empty( $GLOBALS['power_board_is_updating_order_status'] ) || null === $orderId ) {
+		if ( ( $oldStatusKey == $newStatusKey ) || ! empty( $GLOBALS[PLUGIN_PREFIX . '_is_updating_order_status'] ) || null === $orderId ) {
 			return;
 		}
 		$rulesForStatuses = [
@@ -117,11 +117,11 @@ class OrderService {
 					$oldStatusName,
 					$newStatusName
 				);
-				$GLOBALS['power_board_is_updating_order_status'] = true;
+				$GLOBALS[PLUGIN_PREFIX . '_is_updating_order_status'] = true;
 				$order->update_meta_data( 'status_change_verification_failed', 1 );
 				$order->update_status( $oldStatusKey, $error );
-				update_option( 'power_board_status_change_error', $error );
-				unset( $GLOBALS['power_board_is_updating_order_status'] );
+				update_option( PLUGIN_PREFIX . '_status_change_error', $error );
+				unset( $GLOBALS[PLUGIN_PREFIX . '_is_updating_order_status'] );
 				throw new \Exception( esc_html( $error ) );
 			}
 		}
@@ -150,10 +150,10 @@ class OrderService {
 	public function displayStatusChangeError() {
 		$screen = get_current_screen();
 		if ( 'woocommerce_page_wc-orders' == $screen->id ) {
-			$message = get_option( 'power_board_status_change_error', '' );
+			$message = get_option( PLUGIN_PREFIX . '_status_change_error', '' );
 			if ( ! empty( $message ) ) {
 				echo '<div class=\'notice notice-error is-dismissible\'><p>' . esc_html( $message ) . '</p></div>';
-				delete_option( 'power_board_status_change_error' );
+				delete_option( PLUGIN_PREFIX . '_status_change_error' );
 			}
 		}
 	}

@@ -40,7 +40,7 @@ class BankAccountSettings extends AbstractEnum {
 	public function getDescription(): string {
 		switch ( $this->name ) {
 			case self::SAVE_CARD:
-				return 'Offer your customer the option to permanently save the bank account information at PowerBoard for further usage';
+				return 'Offer your customer the option to permanently save the bank account information at ' . PLUGIN_TEXT . ' for further usage';
 			default:
 				return '';
 		}

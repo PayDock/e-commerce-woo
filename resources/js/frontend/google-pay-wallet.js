@@ -1,9 +1,11 @@
 import walletsForm from "../includes/wallets-form";
 
+const pluginTextName = window.widgetSettings.pluginTextName;
+
 walletsForm(
     'google-pay',
-    'PowerBoard Google Pay',
-    'powerBoardWalletGooglePayButton',
+  pluginTextName + ' Google Pay',
+    'pluginWalletGooglePayButton',
     [
         'first_name',
         'last_name',

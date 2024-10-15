@@ -23,13 +23,13 @@ abstract class AbstractSettingService extends \WC_Payment_Gateway {
 
 		$this->id                 = $this->getId();
 		$this->enabled            = $this->get_option( 'enabled' );
-		$this->method_title       = __( 'PowerBoard Gateway', PLUGIN_TEXT_DOMAIN );
+		$this->method_title       = __( PLUGIN_TEXT . ' Gateway', PLUGIN_TEXT_DOMAIN );
 		$this->method_description = __(
-			'PowerBoard simplify how you manage your payments. Reduce costs, technical headaches & streamline compliance using PowerBoard\'s payment orchestration.',
+			PLUGIN_TEXT . ' simplify how you manage your payments. Reduce costs, technical headaches & streamline compliance using ' . PLUGIN_TEXT . '\'s payment orchestration.',
 			PLUGIN_TEXT_DOMAIN
 		);
 
-		$this->title = __( 'PowerBoard Gateway', PLUGIN_TEXT_DOMAIN );
+		$this->title = __( PLUGIN_TEXT . ' Gateway', PLUGIN_TEXT_DOMAIN );
 
 		$this->icon = plugins_url( 'assets/images/logo.svg' );
 

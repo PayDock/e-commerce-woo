@@ -58,6 +58,10 @@ if ( ! defined( 'PLUGIN_PREFIX' ) ) {
   define( 'PLUGIN_PREFIX', 'power_board' );
 }
 
+if ( ! defined( 'PLUGIN_TEXT' ) ) {
+  define( 'PLUGIN_TEXT', 'PowerBoard' );
+}
+
 require_once 'vendor/autoload.php';
 
 WooPlugin\WooPluginPlugin::getInstance();

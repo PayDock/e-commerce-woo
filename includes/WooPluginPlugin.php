@@ -15,7 +15,7 @@ if ( ! class_exists( '\WooPlugin\WooPluginPlugin' ) ) {
 			LogRepository::class,
 		];
 
-		public const PLUGIN_PREFIX = 'power_board';
+		public const PLUGIN_PREFIX = PLUGIN_PREFIX;
 
 		public const VERSION = '1.0.0';
 

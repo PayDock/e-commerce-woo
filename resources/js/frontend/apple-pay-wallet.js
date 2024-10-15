@@ -1,9 +1,11 @@
 import walletsForm from "../includes/wallets-form";
 
+const pluginTextName = window.widgetSettings.pluginTextName;
+
 walletsForm(
     'apple-pay',
-    'PowerBoard Apple Pay',
-    'powerBoardWalletApplePayButton',
+    pluginTextName + ' Apple Pay',
+    'pluginWalletApplePayButton',
     [
         'first_name',
         'last_name',

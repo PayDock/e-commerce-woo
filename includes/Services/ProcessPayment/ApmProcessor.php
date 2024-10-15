@@ -121,7 +121,7 @@ class ApmProcessor {
 			}
 
 			if ( empty( $parsed_api_error ) ) {
-				$parsed_api_error = __( 'Unable to create the PowerBoard customer record', PLUGIN_TEXT_DOMAIN );
+				$parsed_api_error = __( 'Unable to create the ' . PLUGIN_TEXT . ' customer record', PLUGIN_TEXT_DOMAIN );
 			}
 
 			throw new Exception( esc_html( $parsed_api_error ) );

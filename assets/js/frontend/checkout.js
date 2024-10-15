@@ -1,18 +1,20 @@
-const powerBoardSettings = window.wc.wcSettings.getSetting('power_board_data', {});
-const powerBoardLabel = window.wp.htmlEntities.decodeEntities(powerBoardSettings.title)
-    || window.wp.i18n.__('PowerBoard', 'power_board_gateway');
+const pluginPrefix = window.widgetSettings.pluginPrefix;
+const pluginTextName = window.widgetSettings.pluginTextName;
+const pluginSettings = window.wc.wcSettings.getSetting(pluginPrefix + '_data', {});
+const pluginLabel = window.wp.htmlEntities.decodeEntities(pluginSettings.title)
+    || window.wp.i18n.__(pluginTextName, pluginPrefix + '_gateway');
 
-const powerBoardContent = () => {
+const pluginContent = () => {
     return wp.element.createElement(
         'div',
         null,
         wp.element.createElement(
             "div",
             null,
-            window.wp.htmlEntities.decodeEntities(powerBoardSettings.description || '')),
+            window.wp.htmlEntities.decodeEntities(pluginSettings.description || '')),
         wp.element.createElement(
             "div", {
-                id: 'powerBoardWidgetCard',
+                id: 'pluginWidgetCard',
             }
         ), wp.element.createElement(
             "input", {
@@ -23,17 +25,17 @@ const powerBoardContent = () => {
     );
 };
 
-const Block_Power_Board_Gateway = {
-    name: 'power_board_gateway',
-    label: powerBoardLabel,
-    content: Object(window.wp.element.createElement)(powerBoardContent, null),
-    edit: Object(window.wp.element.createElement)(powerBoardContent, null),
-    placeOrderButtonLabel: 'Place Order by PowerBoard',
+const Block_Plugin_Gateway = {
+    name: pluginPrefix + '_gateway',
+    label: pluginLabel,
+    content: Object(window.wp.element.createElement)(pluginContent, null),
+    edit: Object(window.wp.element.createElement)(pluginContent, null),
+    placeOrderButtonLabel: 'Place Order by ' + pluginTextName,
     canMakePayment: () => true,
-    ariaLabel: powerBoardLabel,
+    ariaLabel: pluginLabel,
     supports: {
-        features: powerBoardSettings.supports,
+        features: pluginSettings.supports,
     },
 };
 
-window.wc.wcBlocksRegistry.registerPaymentMethod(Block_Power_Board_Gateway);
+window.wc.wcBlocksRegistry.registerPaymentMethod(Block_Plugin_Gateway);

@@ -16,7 +16,7 @@ class BankAccountPaymentService extends AbstractPaymentService {
 	public function __construct() {
 		$settings = SettingsService::getInstance();
 
-		$this->id          = 'power_board_bank_account_gateway';
+		$this->id          = PLUGIN_PREFIX . '_bank_account_gateway';
 		$this->title       = $settings->getWidgetPaymentBankAccountTitle();
 		$this->description = $settings->getWidgetPaymentBankAccountDescription();
 
@@ -83,7 +83,7 @@ class BankAccountPaymentService extends AbstractPaymentService {
 		OrderService::updateStatus( $order->get_id(), $status );
 		$order->payment_complete();
 		$order->update_meta_data( 'pb_directly_charged', 1 );
-		$order->update_meta_data( 'power_board_charge_id', $chargeId );
+		$order->update_meta_data( PLUGIN_PREFIX . '_charge_id', $chargeId );
 		$order->update_meta_data( OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(), 'Bank' );
 		$order->save();
 

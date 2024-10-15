@@ -1,12 +1,13 @@
 jQuery(document).ready(function ($) {
     const DISABLE_TEXT = 'DISABLE';
+    const pluginPrefix = window.widgetSettings.pluginPrefix;
     const types = {
         select: 'select', checkbox: 'checkbox'
     };
     const prefixes = [
-        'woocommerce_power_board_power_board_',
-        'woocommerce_power_board_sandbox_power_board_sandbox_',
-        'woocommerce_power_board_widget_power_board_widget_'
+        'woocommerce_' + pluginPrefix + '_' + pluginPrefix + '_',
+        'woocommerce_' + pluginPrefix + '_sandbox_' + pluginPrefix + '_sandbox_',
+        'woocommerce_' + pluginPrefix + '_widget_' + pluginPrefix + '_widget_'
     ];
 
     const conditions = [{

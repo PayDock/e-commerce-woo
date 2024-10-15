@@ -12,7 +12,7 @@ class OrderListColumns extends AbstractEnum {
 	public function getLabel(): string {
 		switch ( $this->name ) {
 			case self::PAYMENT_SOURCE_TYPE:
-				return 'PowerBoard Payment Type';
+				return PLUGIN_TEXT . ' Payment Type';
 			default:
 				return '';
 		}

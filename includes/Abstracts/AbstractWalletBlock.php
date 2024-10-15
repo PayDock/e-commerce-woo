@@ -11,7 +11,7 @@ abstract class AbstractWalletBlock extends AbstractBlock {
 	public function __construct() {
 		$walletTypeId = $this->getType()->getId();
 
-		$this->name   = 'power_board_' . $walletTypeId . '_wallet_block';
+		$this->name   = PLUGIN_PREFIX . '_' . $walletTypeId . '_wallet_block';
 		$this->script = $walletTypeId . '-wallet';
 
 		parent::__construct();

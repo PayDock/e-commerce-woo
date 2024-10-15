@@ -1,11 +1,11 @@
-function powerBoardPaymentCapture() {
-    jQuery('span.power-board-order-actions').hide();
+function paymentCapture() {
+    jQuery('span.plugin-order-actions').hide();
     jQuery('div.wc-order-totals-items').slideUp();
     jQuery('#woocommerce-order-items').find('div.wc-order-partial-paid-items').show();
 }
 
 function cancelActionManualCapture() {
-    jQuery('span.power-board-order-actions').show();
+    jQuery('span.plugin-order-actions').show();
     jQuery('div.wc-order-totals-items').slideDown();
     jQuery('#woocommerce-order-items').find('div.wc-order-partial-paid-items').hide();
 }
@@ -33,8 +33,8 @@ function validationManualCapture(elem) {
     return true;
 }
 
-function handlePowerBoardPaymentCapture(orderId, operation) {
-    if (operation === 'power-board-capture-charge') {
+function handlePluginPaymentCapture(orderId, operation) {
+    if (operation === 'plugin-capture-charge') {
         let validSumManualCapture = validationManualCapture(jQuery('#capture_amount'));
         if (!validSumManualCapture) {
             return;
@@ -52,7 +52,7 @@ function handlePowerBoardPaymentCapture(orderId, operation) {
             action: operation,
             order_id: orderId,
             amount: captureAmount,
-            _wpnonce: window.powerBoardCaptureBlockSettings.wpnonce
+            _wpnonce: window.pluginCaptureBlockSettings.wpnonce
         },
         success: function (response) {
             if (response.data.message !== undefined) {

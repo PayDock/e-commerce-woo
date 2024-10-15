@@ -8,17 +8,19 @@ import {select} from '@wordpress/data';
 import {CART_STORE_KEY} from '@woocommerce/block-data';
 import canMakePayment from "./canMakePayment";
 
-const textDomain = 'power_board';
+const pluginPrefix = window.widgetSettings.pluginPrefix;
+const textDomain = window.widgetSettings.pluginTextDomain;
+const textName = window.widgetSettings.pluginTextName;
 const labels = {
-    defaultLabel: __('PowerBoard Payments', textDomain),
-    placeOrderButtonLabel: __('Place Order by PowerBoard', textDomain),
+    defaultLabel: __(textName + ' Payments', textDomain),
+    placeOrderButtonLabel: __('Place Order by ' + textName, textDomain),
     validationError: __('Please fill in the required fields of the form to display payment methods', textDomain),
     notAvailable: __('The payment method is not available in your country.', textDomain),
 }
 let wasInit = false;
 export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
-    const settingKey = `power_board_${id}_a_p_m_s_block_data`;
-    const paymentName = `power_board_${id}_a_p_m_s_gateway`;
+    const settingKey = `${pluginPrefix}_${id}_a_p_m_s_block_data`;
+    const paymentName = `${pluginPrefix}_${id}_a_p_m_s_gateway`;
 
     const settings = getSetting(settingKey, {});
     const label = decodeEntities(settings.title) || __(defaultLabel, textDomain);
@@ -35,8 +37,8 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
         const billingAddress = cart.getCustomerData().billingAddress;
         const shippingAddress = cart.getCustomerData().shippingAddress;
         const shippingRates = cart.getShippingRates();
-        const countriesError = jQuery('.power-board-country-available');
-        const validationError = jQuery('.power-board-validation-error');
+        const countriesError = jQuery('.plugin-country-available');
+        const validationError = jQuery('.plugin-validation-error');
         const buttonElement = jQuery('#' + buttonId);
         const orderButton = jQuery('.wc-block-components-checkout-place-order-button');
         const paymentCompleteElement = jQuery('#paymentCompleted');
@@ -244,7 +246,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
 
         return createElement(
             'div',
-            {id: 'powerBoardWidgetApm'},
+            {id: 'pluginWidgetApm'},
             createElement('div', {
                 id: 'paymentCompleted', style: {
                     display: 'none',
@@ -272,14 +274,14 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
                 },
                 createElement('img',
                     {
-                        src: `${window.powerBoardWidgetSettings.pluginUrlPrefix}assets/images/${id}.png`,
+                        src: `${window.widgetSettings.pluginUrlPrefix}assets/images/${id}.png`,
                     },
                 ),
             ),),
             createElement(
                 'div',
                 {
-                    class: 'power-board-validation-error',
+                    class: 'plugin-validation-error',
                 },
                 labels.validationError
             ),
@@ -293,7 +295,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
             createElement(
                 "div",
                 {
-                    class: 'power-board-country-available',
+                    class: 'plugin-country-available',
                     style: {
                         display: 'none'
                     }
@@ -309,12 +311,12 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
             createElement(
                 "div",
                 {
-                    className: 'power-board-payment-method-label'
+                    className: 'plugin-payment-method-label'
                 },
                 createElement("img", {
-                    src: `${window.powerBoardWidgetSettings.pluginUrlPrefix}assets/images/icons/${id}.png`,
+                    src: `${window.widgetSettings.pluginUrlPrefix}assets/images/icons/${id}.png`,
                     alt: label,
-                    className: `power-board-payment-method-label-icon ${id}`
+                    className: `plugin-payment-method-label-icon ${id}`
                 }),
                 "  " + label,
             )

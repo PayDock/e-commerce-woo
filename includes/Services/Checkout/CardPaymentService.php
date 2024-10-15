@@ -19,8 +19,8 @@ class CardPaymentService extends WC_Payment_Gateway {
 	 * Constructor
 	 */
 	public function __construct() {
-		$this->id         = 'power_board_gateway';
-		$this->icon       = apply_filters( 'woocommerce_power_board_gateway_icon', '' );
+		$this->id         = PLUGIN_PREFIX . '_gateway';
+		$this->icon       = apply_filters( 'woocommerce_' . PLUGIN_PREFIX . '_gateway_icon', '' );
 		$this->has_fields = true;
 		$this->supports   = [
 			'products',
@@ -34,8 +34,8 @@ class CardPaymentService extends WC_Payment_Gateway {
 			'default_credit_card_form',
 		];
 
-		$this->method_title       = _x( 'PowerBoard payment', 'PowerBoard payment method', PLUGIN_TEXT_DOMAIN );
-		$this->method_description = __( 'Allows PowerBoard payments.', PLUGIN_TEXT_DOMAIN );
+		$this->method_title       = _x( PLUGIN_TEXT . ' payment', PLUGIN_TEXT . ' payment method', PLUGIN_TEXT_DOMAIN );
+		$this->method_description = __( 'Allows ' . PLUGIN_TEXT . ' payments.', PLUGIN_TEXT_DOMAIN );
 
 		// Load the settings.
 		$this->init_settings();
@@ -55,7 +55,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 		// Actions.
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, [ $this, 'process_admin_options' ] );
 		add_action(
-			'woocommerce_scheduled_subscription_payment_power_board',
+			'woocommerce_scheduled_subscription_payment_' . PLUGIN_PREFIX,
 			[ $this, 'process_subscription_payment' ],
 			10,
 			2
@@ -75,20 +75,26 @@ class CardPaymentService extends WC_Payment_Gateway {
 		}
 
 		wp_enqueue_script( PLUGIN_TEXT_DOMAIN . '-form', PLUGIN_URL . 'assets/js/frontend/form.js', [], time(), true );
-		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-form', 'powerBoardCardWidgetSettings', [
+		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-form', 'pluginCardWidgetSettings', [
 			'suportedCard'    => 'Visa, Mastercard, Adex',
 		] );
-		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-form', 'powerBoardWidgetSettings', [
-			'pluginUrlPrefix' => PLUGIN_URL
+		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-form', 'widgetSettings', [
+				'pluginUrlPrefix' => PLUGIN_URL,
+				'pluginTextDomain' => PLUGIN_TEXT_DOMAIN,
+				'pluginTextName' => PLUGIN_TEXT,
+				'pluginPrefix' => PLUGIN_PREFIX,
 		] );
 		wp_enqueue_style( PLUGIN_TEXT_DOMAIN . '-widget-css', PLUGIN_URL . 'assets/css/frontend/widget.css', [], time() );
 
-		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-form', 'PowerBoardAjax', [
+		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-form', 'PluginAjax', [
 			'url'     => admin_url( 'admin-ajax.php' ),
 			'wpnonce' => wp_create_nonce( 'get_vault_token' )
 		] );
-		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-form', 'powerBoardWidgetSettings', [
-			'pluginUrlPrefix' => PLUGIN_URL
+		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-form', 'widgetSettings', [
+				'pluginUrlPrefix' => PLUGIN_URL,
+				'pluginTextDomain' => PLUGIN_TEXT_DOMAIN,
+				'pluginTextName' => PLUGIN_TEXT,
+				'pluginPrefix' => PLUGIN_PREFIX,
 		] );
 
 		return '';
@@ -220,7 +226,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 			$order->payment_complete();
 			$order->update_meta_data( 'pb_directly_charged', 1 );
 		}
-		$order->update_meta_data( 'power_board_charge_id', $chargeId );
+		$order->update_meta_data( PLUGIN_PREFIX . '_charge_id', $chargeId );
 		$order->update_meta_data( OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(), 'Card' );
 		WC()->cart->empty_cart();
 		$order->save();

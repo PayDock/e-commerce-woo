@@ -56,7 +56,7 @@ class VaultTokenHelper {
 			}
 
 			if ( empty( $parsed_api_error ) ) {
-				$parsed_api_error = __( 'Unable to create PowerBoard vault token', PLUGIN_TEXT_DOMAIN );
+				$parsed_api_error = __( 'Unable to create ' . PLUGIN_TEXT . ' vault token', PLUGIN_TEXT_DOMAIN );
 			}
 
 			$parsed_api_error .= ' widget_error';

@@ -15,7 +15,7 @@ use WooPlugin\Util\ApplePayWalletBlock;
 use WooPlugin\Util\BankAccountBlock;
 use WooPlugin\Util\GooglePayWalletBlock;
 use WooPlugin\Util\PayPalWalletBlock;
-use WooPlugin\Util\PowerBoardGatewayBlocks;
+use WooPlugin\Util\PluginGatewayBlocks;
 use WooPlugin\Util\ZipAPMsBlock;
 
 class ActionsService extends AbstractSingleton {
@@ -67,7 +67,7 @@ class ActionsService extends AbstractSingleton {
 
 	protected function addPaymentActions() {
 		$payments = [
-			'power_board_bank_account_gateway' => new BankAccountPaymentService(),
+			PLUGIN_PREFIX . '_bank_account_gateway' => new BankAccountPaymentService(),
 		];
 		foreach ( $payments as $paymentKey => $payment ) {
 			add_action(
@@ -104,7 +104,7 @@ class ActionsService extends AbstractSingleton {
 		add_action(
 			'woocommerce_blocks_payment_method_type_registration',
 			function ( PaymentMethodRegistry $payment_method_registry ) {
-				$payment_method_registry->register( new PowerBoardGatewayBlocks() );
+				$payment_method_registry->register( new PluginGatewayBlocks() );
 				$payment_method_registry->register( new BankAccountBlock() );
 				$payment_method_registry->register( new ApplePayWalletBlock() );
 				$payment_method_registry->register( new GooglePayWalletBlock() );
@@ -144,16 +144,16 @@ class ActionsService extends AbstractSingleton {
 	protected function addOrderActions() {
 		$orderService      = new OrderService();
 		$paymentController = new PaymentController();
-		add_action( 'woocommerce_order_item_add_action_buttons', [ $orderService, 'iniPowerBoardOrderButtons' ], 10,
+		add_action( 'woocommerce_order_item_add_action_buttons', [ $orderService, 'iniPluginOrderButtons' ], 10,
 			2 );
 		add_action( 'woocommerce_order_status_changed', [ $orderService, 'statusChangeVerification' ], 20, 4 );
 		add_action( 'woocommerce_admin_order_totals_after_total',
 			[ $orderService, 'informationAboutPartialCaptured' ] );
 		add_action( 'admin_notices', [ $orderService, 'displayStatusChangeError' ] );
-		add_action( 'wp_ajax_power-board-capture-charge', [ $paymentController, 'capturePayment' ] );
-		add_action( 'wp_ajax_power-board-cancel-authorised', [ $paymentController, 'cancelAuthorised' ] );
+		add_action( 'wp_ajax_plugin-capture-charge', [ $paymentController, 'capturePayment' ] );
+		add_action( 'wp_ajax_plugin-cancel-authorised', [ $paymentController, 'cancelAuthorised' ] );
 		add_action( 'woocommerce_create_refund', [ $paymentController, 'refundProcess' ], 10, 2 );
 		add_action( 'woocommerce_order_refunded', [ $paymentController, 'afterRefundProcess' ], 10, 2 );
-		add_action( 'woocommerce_api_power-board-webhook', [ $paymentController, 'webhook' ] );
+		add_action( 'woocommerce_api_plugin-webhook', [ $paymentController, 'webhook' ] );
     }
 }

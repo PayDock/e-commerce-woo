@@ -12,7 +12,7 @@
 	</th>
 	<td class="forminp">
 		<fieldset>
-			<div id="multiselect-power-board" class="multiselect-power-board select">
+			<div id="multiselect-plugin" class="multiselect-plugin select">
 				<div class="value">Please select payment methods...</div>
 				<div class="error-text">Value is required and can't be empty</div>
 			</div>

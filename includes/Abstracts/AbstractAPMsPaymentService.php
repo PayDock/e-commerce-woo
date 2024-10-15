@@ -19,7 +19,7 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 		$settings      = SettingsService::getInstance();
 		$paymentMethod = $this->getAPMsType();
 
-		$this->id          = 'power_board_' . $paymentMethod->getId() . '_a_p_m_s_gateway';
+		$this->id          = PLUGIN_PREFIX . '_' . $paymentMethod->getId() . '_a_p_m_s_gateway';
 		$this->title       = $settings->getWidgetPaymentAPMTitle( $paymentMethod );
 		$this->description = $settings->getWidgetPaymentAPMDescription( $paymentMethod );
 
@@ -108,7 +108,7 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 			$order->payment_complete();
 			$order->update_meta_data( 'pb_directly_charged', 1 );
 		}
-		$order->update_meta_data( 'power_board_charge_id', $chargeId );
+		$order->update_meta_data( PLUGIN_PREFIX . '_charge_id', $chargeId );
 		$order->save();
 
 		WC()->cart->empty_cart();

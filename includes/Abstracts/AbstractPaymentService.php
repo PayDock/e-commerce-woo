@@ -10,7 +10,7 @@ abstract class AbstractPaymentService extends WC_Payment_Gateway {
 	 * Constructor
 	 */
 	public function __construct() {
-		$this->icon       = apply_filters( 'woocommerce_power_board_gateway_icon', '' );
+		$this->icon       = apply_filters( 'woocommerce_' . PLUGIN_PREFIX . '_gateway_icon', '' );
 		$this->has_fields = true;
 		$this->supports   = [
 			'products',
@@ -24,9 +24,9 @@ abstract class AbstractPaymentService extends WC_Payment_Gateway {
 			'default_credit_card_form',
 		];
 
-		$this->method_title       = _x( 'PowerBoard payment', 'PowerBoard payment method',
+		$this->method_title       = _x( PLUGIN_TEXT . ' payment', PLUGIN_TEXT . ' payment method',
 			'woocommerce-gateway-ppwer-board' );
-		$this->method_description = __( 'Allows PowerBoard payments.', 'woocommerce-gateway-ppwer-board' );
+		$this->method_description = __( 'Allows ' . PLUGIN_TEXT . ' payments.', 'woocommerce-gateway-ppwer-board' );
 
 		$this->init_settings();
 	}
@@ -43,11 +43,14 @@ abstract class AbstractPaymentService extends WC_Payment_Gateway {
 
 		wp_enqueue_script( PLUGIN_TEXT_DOMAIN . '-form', PLUGIN_URL . 'assets/js/frontend/form.js', [], time(),
 			true );
-		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-form', 'powerBoardCardWidgetSettings', [
+		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-form', 'pluginCardWidgetSettings', [
 			'suportedCard'    => 'Visa, Mastercard, Adex',
 		] );
-		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-form', 'powerBoardWidgetSettings', [
-			'pluginUrlPrefix' => PLUGIN_URL
+		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-form', 'widgetSettings', [
+				'pluginUrlPrefix' => PLUGIN_URL,
+				'pluginTextDomain' => PLUGIN_TEXT_DOMAIN,
+				'pluginTextName' => PLUGIN_TEXT,
+				'pluginPrefix' => PLUGIN_PREFIX,
 		] );
 		wp_enqueue_style(
 			PLUGIN_TEXT_DOMAIN . '-widget-css',
@@ -57,8 +60,11 @@ abstract class AbstractPaymentService extends WC_Payment_Gateway {
 		);
 
 		wp_enqueue_script( PLUGIN_TEXT_DOMAIN . '-api', SettingsService::getInstance()->getWidgetScriptUrl(), [], time(), true );
-		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-api', 'powerBoardWidgetSettings', [
-			'pluginUrlPrefix' => PLUGIN_URL
+		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-api', 'widgetSettings', [
+				'pluginUrlPrefix' => PLUGIN_URL,
+				'pluginTextDomain' => PLUGIN_TEXT_DOMAIN,
+				'pluginTextName' => PLUGIN_TEXT,
+				'pluginPrefix' => PLUGIN_PREFIX,
 		] );
 	}
 }
