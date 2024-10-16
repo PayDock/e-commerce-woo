@@ -1,5 +1,8 @@
 <?php
-$plugin_content = <<<EOT
+
+$is_prod = $argv[1] === "prod";
+
+$readme = <<<EOT
 # Paydock for WooCommerce #
 
 Accept more payment methods with Paydock. Connect multiple payment gateways with a central interface to manage the transactions.
@@ -37,9 +40,9 @@ In root dir you can find `webpack.config.js` file, its default config for compil
 Also we use helper code that not need compile what contained in assets path.
 EOT;
 
-file_put_contents('../README.md', $plugin_content);
+file_put_contents(($is_prod ? '.' : '..') + '/README.md', $readme);
 
-$changelog = file_get_contents('../changelog.txt');
+$changelog = file_get_contents(($is_prod ? '.' : '..') + '/changelog.txt');
 
 $readme_txt = <<<EOT
 === Paydock for WooCommerce ===
@@ -93,5 +96,5 @@ Prerequisites to install and configure the Paydock plugin, you will need a Wordp
 
 EOT;
 
-file_put_contents('../readme.txt', $readme_txt);
+file_put_contents(($is_prod ? '.' : '..') + '/readme.txt', $readme_txt);
 

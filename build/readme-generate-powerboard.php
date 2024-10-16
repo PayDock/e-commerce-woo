@@ -1,4 +1,7 @@
 <?php
+
+$is_prod = $argv[1] === "prod";
+
 $readme = <<<EOT
 # PowerBoard for WooCommerce #
 
@@ -62,9 +65,9 @@ In root dir you can find `webpack.config.js` file, its default config for compil
 Also we use helper code that not need compile what contained in assets path.
 EOT;
 
-file_put_contents('../README.md', $readme);
+file_put_contents(($is_prod ? '.' : '..') + '/README.md', $readme);
 
-$changelog = file_get_contents('../changelog.txt');
+$changelog = file_get_contents(($is_prod ? '.' : '..') + '/changelog.txt');
 
 $readme_txt = <<<EOT
 === PowerBoard for WooCommerce ===
@@ -147,4 +150,4 @@ Also we use helper code that not need compile what contained in assets path.
 
 EOT;
 
-file_put_contents('../readme.txt', $readme_txt);
+file_put_contents(($is_prod ? '.' : '..') + '/readme.txt', $readme_txt);
