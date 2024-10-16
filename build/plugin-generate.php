@@ -4,7 +4,7 @@ $config_file = $argv[1];
 $config = include $config_file;
 
 echo $config_file;
-echo $config;
+echo $config['PLUGIN_NAME'];
 
 $plugin_content = <<<EOT
 <?php
