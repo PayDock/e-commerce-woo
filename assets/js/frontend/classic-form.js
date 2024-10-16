@@ -50,9 +50,13 @@ jQuery(function ($) {
 
         const initPhoneNumberValidation = () => {
             const phoneInput = getPhoneInput();
+            const billingPhoneInput = $('#billing_phone_field');
             if (!phoneInput) return;
 
             phoneInput.on('blur input', () => updateVisibility(phoneInput));
+            billingPhoneInput.removeClass( 'validate-required' );
+            billingPhoneInput.removeClass( 'validate-phone' );
+            
 
             updateVisibility(phoneInput);
         };
@@ -136,6 +140,9 @@ jQuery(function ($) {
                 prefixes.map((prefix) => {
                     fieldsNames.map((field) => {
                         if ('shipping_' === prefix && ['email', 'phone'].includes(field)) {
+                            return;
+                        }
+                        if ('billing_' === prefix && ['phone'].includes(field)) {
                             return;
                         }
                         result.push(`${prefix}${field}`)
