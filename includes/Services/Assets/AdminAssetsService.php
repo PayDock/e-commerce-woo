@@ -62,6 +62,7 @@ class AdminAssetsService {
 				'pluginTextDomain' => PLUGIN_TEXT_DOMAIN,
 				'pluginTextName' => PLUGIN_TEXT_NAME,
 				'pluginPrefix' => PLUGIN_PREFIX,
+				'pluginWidgetName' => PLUGIN_WIDGET_NAME,
 			] );
 		}
 	}

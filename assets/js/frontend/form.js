@@ -1,4 +1,5 @@
-
+const pluginPrefix = window.widgetSettings.pluginPrefix;
+const pluginWidgetName = window.widgetSettings.pluginWidgetName;
 
 setTimeout(() => jQuery(function ($) {
     $(document).ready(function() {
@@ -10,12 +11,12 @@ setTimeout(() => jQuery(function ($) {
             baseCheckboxIdName: 'radio-control-wc-payment-method-options',
             errorMessageClassName: 'wc-block-components-validation-error',
             paymentOptionsNames: [
-                window.widgetSettings.pluginPrefix + '_gateway',
-                window.widgetSettings.pluginPrefix + '_google-pay_wallets_gateway',
-                window.widgetSettings.pluginPrefix + '_afterpay_wallets_gateway',
-                window.widgetSettings.pluginPrefix + '_pay-pal_wallets_gateway',
-                window.widgetSettings.pluginPrefix + '_afterpay_a_p_m_s_gateway',
-                window.widgetSettings.pluginPrefix + '_zip_a_p_m_s_gateway',
+                pluginPrefix + '_gateway',
+                pluginPrefix + '_google-pay_wallets_gateway',
+                pluginPrefix + '_afterpay_wallets_gateway',
+                pluginPrefix + '_pay-pal_wallets_gateway',
+                pluginPrefix + '_afterpay_a_p_m_s_gateway',
+                pluginPrefix + '_zip_a_p_m_s_gateway',
             ],
             phonePattern: /^\+[1-9]{1}[0-9]{3,14}$/,
             errorMessageHtml: `<div class="wc-block-components-validation-error" role="alert"><p>Please enter your phone number in international format, starting with "+"</p></div>`,
@@ -119,7 +120,7 @@ setTimeout(() => jQuery(function ($) {
         },
         lastWcFormValidation: false,
         pluginCCFormValidation() {
-            const { tokens, selectedToken } = window.wc.wcSettings.getSetting(window.widgetSettings.pluginPrefix + '_data', {});
+            const { tokens, selectedToken } = window.wc.wcSettings.getSetting(pluginPrefix + '_data', {});
             return (Array.isArray(tokens) && tokens.length > 0 && selectedToken !== "") || window.pluginCardWidget.isValidForm();
         },
         wcFormValidation() {
@@ -179,13 +180,13 @@ setTimeout(() => jQuery(function ($) {
 
     window.pluginValidation = pluginValidation;
 
-    const idPluginWidgetCard = 'radio-control-wc-payment-method-options-' + window.widgetSettings.pluginPrefix + '_gateway';
-    const idPluginWidgetBankAccount = 'radio-control-wc-payment-method-options-' + window.widgetSettings.pluginPrefix + '_bank_account_gateway';
+    const idPluginWidgetCard = 'radio-control-wc-payment-method-options-' + pluginPrefix + '_gateway';
+    const idPluginWidgetBankAccount = 'radio-control-wc-payment-method-options-' + pluginPrefix + '_bank_account_gateway';
 
     const searchParams = new URLSearchParams(window.location.search);
     function initPluginWidgetBankAccount() {
         lastInit = idPluginWidgetBankAccount;
-        const pluginBankAccountSettings = window.wc.wcSettings.getSetting(window.widgetSettings.pluginPrefix + '_bank_account_block_data', {});
+        const pluginBankAccountSettings = window.wc.wcSettings.getSetting(pluginPrefix + '_bank_account_block_data', {});
 
         if (!pluginBankAccountSettings.isActive) {
             return;
@@ -200,11 +201,11 @@ setTimeout(() => jQuery(function ($) {
 
         const gateway = 'not_configured';
 
-        const bankAccount = new cba.Configuration(gateway, 'bank_account');
+        const bankAccount = new window[pluginWidgetName].Configuration(gateway, 'bank_account');
         bankAccount.setFormFields(['account_routing']);
 
         pluginValidation.createWidgetDiv('pluginWidgetBankAccount');
-        const widget = new cba.HtmlWidget('#pluginWidgetBankAccount', pluginBankAccountSettings.publicKey, 'not_configured', 'bank_account', 'payment_source');
+        const widget = new window[pluginWidgetName].HtmlWidget('#pluginWidgetBankAccount', pluginBankAccountSettings.publicKey, 'not_configured', 'bank_account', 'payment_source');
         widget.setFormFields(['account_routing']);
 
         window.widgetPluginBankAccount = widget;
@@ -225,7 +226,7 @@ setTimeout(() => jQuery(function ($) {
         widget.interceptSubmitForm('#widget');
         widget.load();
 
-        widget.on(window.cba.EVENT.AFTER_LOAD, () => {
+        widget.on(window[pluginWidgetName].EVENT.AFTER_LOAD, () => {
             if ($('#pluginWidgetBankAccount_wrapper').length > 0) {
                 pluginValidation.passWidgetToWrapper('pluginWidgetBankAccount')
             }
@@ -243,7 +244,7 @@ setTimeout(() => jQuery(function ($) {
             return;
         }
 
-        const pluginCardSettings = window.wc.wcSettings.getSetting(window.widgetSettings.pluginPrefix + '_data', {});
+        const pluginCardSettings = window.wc.wcSettings.getSetting(pluginPrefix + '_data', {});
         pluginValidation.createWidgetDiv('pluginWidgetCard');
 
         let isPermanent = pluginCardSettings.hasOwnProperty('card3DSFlow')
@@ -254,7 +255,7 @@ setTimeout(() => jQuery(function ($) {
 
         let gatewayId = isPermanent ? pluginCardSettings.gatewayId : 'not_configured';
 
-        widget = new cba.HtmlWidget('#pluginWidgetCard', pluginCardSettings.publicKey, gatewayId, "card", "card_payment_source_with_cvv");
+        widget = new window[pluginWidgetName].HtmlWidget('#pluginWidgetCard', pluginCardSettings.publicKey, gatewayId, "card", "card_payment_source_with_cvv");
         widget.setFormPlaceholders({
             card_name: 'Card holders name *',
             card_number: 'Credit card number *',
@@ -300,14 +301,14 @@ setTimeout(() => jQuery(function ($) {
         widget.load();
 
         let performAfterLoadActions = true
-        widget.on(window.cba.EVENT.AFTER_LOAD, () => {
+        widget.on(window[pluginWidgetName].EVENT.AFTER_LOAD, () => {
             if (performAfterLoadActions && $('#pluginWidgetCard_wrapper').length > 0) {
                 pluginValidation.passWidgetToWrapper('pluginWidgetCard');
                 performAfterLoadActions = false;
             }
         })
 
-        widget.on(window.cba.EVENT.FINISH, () => {
+        widget.on(window[pluginWidgetName].EVENT.FINISH, () => {
             if (!!window.widgetErrorInterval) clearInterval(window.widgetErrorInterval);
             let counter = 0;
             window.widgetErrorInterval = setInterval(() => {
@@ -327,11 +328,11 @@ setTimeout(() => jQuery(function ($) {
     }
 
     function reloadWidget() {
-        const savedCards = document.querySelector( '.' + window.widgetSettings.pluginPrefix + '-select-saved-cards');
+        const savedCards = document.querySelector( '.' + pluginPrefix + '-select-saved-cards');
         if (savedCards !== null) {
             savedCards.style = 'display: block';
         }
-        const settings = window.wc.wcSettings.getSetting(window.widgetSettings.pluginPrefix + '_data', {});
+        const settings = window.wc.wcSettings.getSetting(pluginPrefix + '_data', {});
         settings.selectedToken = '';
         window.pluginCardWidget.reload();
         const paymentSourceToken = document.querySelector('[name="payment_source_token"]');
@@ -343,20 +344,20 @@ setTimeout(() => jQuery(function ($) {
         $('.wc-block-components-radio-control__input').on('change', (event) => {
             const $orderButton = $('.wc-block-components-checkout-place-order-button');
             switch (event.target.value) {
-                case window.widgetSettings.pluginPrefix + '_gateway':
+                case pluginPrefix + '_gateway':
                     initPluginWidgetCard();
                     $orderButton.show();
                     break;
-                case window.widgetSettings.pluginPrefix + '_bank_account_gateway':
+                case pluginPrefix + '_bank_account_gateway':
                     initPluginWidgetBankAccount();
                     $orderButton.show();
                     break;
-                case window.widgetSettings.pluginPrefix + '_google-pay_wallets_gateway':
-                case window.widgetSettings.pluginPrefix + '_apple-pay_wallets_gateway':
-                case window.widgetSettings.pluginPrefix + '_afterpay-pay_wallets_gateway':
-                case window.widgetSettings.pluginPrefix + '_pay-pal_wallets_gateway':
-                case window.widgetSettings.pluginPrefix + '_afterpay_a_p_m_s_gateway':
-                case window.widgetSettings.pluginPrefix + '_zip_a_p_m_s_gateway':
+                case pluginPrefix + '_google-pay_wallets_gateway':
+                case pluginPrefix + '_apple-pay_wallets_gateway':
+                case pluginPrefix + '_afterpay-pay_wallets_gateway':
+                case pluginPrefix + '_pay-pal_wallets_gateway':
+                case pluginPrefix + '_afterpay_a_p_m_s_gateway':
+                case pluginPrefix + '_zip_a_p_m_s_gateway':
                     $orderButton.hide();
                     break;
                 default:
@@ -370,11 +371,11 @@ setTimeout(() => jQuery(function ($) {
 
     setInterval(() => {
         try {
-            const pluginAfterpayWalletsSettings = window.wc?.wcSettings?.getSetting(window.widgetSettings.pluginPrefix + '_afterpay_wallet_block_data', {});
+            const pluginAfterpayWalletsSettings = window.wc?.wcSettings?.getSetting(pluginPrefix + '_afterpay_wallet_block_data', {});
             const $radioWidgetCard = $('#' + idPluginWidgetCard);
             const $radioWidgetBankAccount = $('#' + idPluginWidgetBankAccount);
             const $orderButton = $('.wc-block-components-checkout-place-order-button');
-            const $afterpayRadiobatton = $('#radio-control-wc-payment-method-options-' + window.widgetSettings.pluginPrefix + '_afterpay_wallets_gateway');
+            const $afterpayRadiobatton = $('#radio-control-wc-payment-method-options-' + pluginPrefix + '_afterpay_wallets_gateway');
             if (
                 pluginAfterpayWalletsSettings
                 && pluginAfterpayWalletsSettings.hasOwnProperty('afterpayChargeId')

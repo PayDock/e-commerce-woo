@@ -1,5 +1,6 @@
 let buttons = {};
 export default (id, buttonId, data, isSandbox) => {
+    const pluginWidgetName = window.widgetSettings.pluginWidgetName;
     const paymentSourceElement = jQuery('#paymentSourceWalletsToken');
     const paymentCompleted = jQuery('#paymentCompleted');
     const orderButton = jQuery('.wc-block-components-checkout-place-order-button');
@@ -32,7 +33,7 @@ export default (id, buttonId, data, isSandbox) => {
     if(buttons.current){
         delete buttons.current;
     }
-    buttons.current = new window.cba.WalletButtons(buttonId, data.resource.data.token, config)
+    buttons.current = new window[pluginWidgetName].WalletButtons(buttonId, data.resource.data.token, config)
 
     buttons.current.setEnv(isSandbox ? 'preproduction_cba' : 'production_cba')
 

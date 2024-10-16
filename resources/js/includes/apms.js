@@ -11,6 +11,7 @@ import canMakePayment from "./canMakePayment";
 const pluginPrefix = window.widgetSettings.pluginPrefix;
 const textDomain = window.widgetSettings.pluginTextDomain;
 const textName = window.widgetSettings.pluginTextName;
+const pluginWidgetName = window.widgetSettings.pluginWidgetName;
 const labels = {
     defaultLabel: __(textName + ' Payments', textDomain),
     placeOrderButtonLabel: __('Place Order by ' + textName, textDomain),
@@ -75,12 +76,12 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
         setTimeout(() => {
             if ((validationSuccess && 'zip' === id) && !wasInit) {
                 wasInit = true;
-                button = new window.cba.ZipmoneyCheckoutButton('#' + buttonId, settings.publicKey, settings.gatewayId);
+                button = new window[pluginWidgetName].ZipmoneyCheckoutButton('#' + buttonId, settings.publicKey, settings.gatewayId);
 
                 data.gatewayType = 'zippay'
             } else if ((validationSuccess && 'afterpay' === id) && !wasInit) {
                 wasInit = true;
-                button = new window.cba.AfterpayCheckoutButton('#' + buttonId, settings.publicKey, settings.gatewayId);
+                button = new window[pluginWidgetName].AfterpayCheckoutButton('#' + buttonId, settings.publicKey, settings.gatewayId);
                 meta = {
                     amount: getNewAmount(),
                     currency: settings.currency,

@@ -5,6 +5,7 @@ import {select} from '@wordpress/data';
 import {CART_STORE_KEY} from '@woocommerce/block-data';
 
 const pluginPrefix = window.widgetSettings.pluginPrefix;
+const pluginWidgetName = window.widgetSettings.pluginWidgetName;
 
 export default async (forcePermanentVault = false, newAmount = null) => {
     const settings = getSetting(pluginPrefix + '_data', {});
@@ -67,7 +68,7 @@ export default async (forcePermanentVault = false, newAmount = null) => {
     }
 
     const envVal = settings.isSandbox ? 'preproduction_cba' : 'production_cba'
-    const preAuthResp = await new window.cba.Api(settings.publicKey)
+    const preAuthResp = await new window[pluginWidgetName].Api(settings.publicKey)
         .setEnv(envVal)
         .charge()
         .preAuth(preAuthData);
@@ -82,7 +83,7 @@ export default async (forcePermanentVault = false, newAmount = null) => {
     document.getElementById('pluginWidget3ds').innerHTML = '';
     document.getElementById('pluginWidget3ds').setAttribute('style', '')
 
-    const canvas = new window.cba.Canvas3ds('#pluginWidget3ds', preAuthResp._3ds.token);
+    const canvas = new window[pluginWidgetName].Canvas3ds('#pluginWidget3ds', preAuthResp._3ds.token);
     canvas.load();
 
     document.getElementById('pluginWidgetCard_wrapper').setAttribute('style', 'display: none')

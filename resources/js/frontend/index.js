@@ -18,6 +18,7 @@ const settings = getSetting(window.widgetSettings.pluginPrefix + '_data', {});
 
 const textDomain = window.widgetSettings.pluginTextDomain;
 const textName = window.widgetSettings.pluginTextName;
+const pluginWidgetName = window.widgetSettings.pluginWidgetName;
 const labels = {
     defaultLabel: __(textName + ' Payments', textDomain),
     saveCardLabel: __('Save payment details', textDomain),
@@ -141,10 +142,10 @@ const Content = (props) => {
                 email: document.getElementById('email').value,
                 phone: phoneValue
             });
-            window.pluginCardWidget.trigger(window.cba.TRIGGER.SUBMIT_FORM);
+            window.pluginCardWidget.trigger(window[pluginWidgetName].TRIGGER.SUBMIT_FORM);
 
             let result = false;
-            window.pluginCardWidget.on(window.cba.EVENT.FINISH, () => {
+            window.pluginCardWidget.on(window[pluginWidgetName].EVENT.FINISH, () => {
                 result = true
 
                 const savedCards = document.querySelector('.' + textDomain + '.-select-saved-cards')

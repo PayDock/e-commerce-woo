@@ -51,6 +51,7 @@ abstract class AbstractPaymentService extends WC_Payment_Gateway {
 				'pluginTextDomain' => PLUGIN_TEXT_DOMAIN,
 				'pluginTextName' => PLUGIN_TEXT_NAME,
 				'pluginPrefix' => PLUGIN_PREFIX,
+				'pluginWidgetName' => PLUGIN_WIDGET_NAME,
 		] );
 		wp_enqueue_style(
 			PLUGIN_TEXT_DOMAIN . '-widget-css',
@@ -65,6 +66,7 @@ abstract class AbstractPaymentService extends WC_Payment_Gateway {
 				'pluginTextDomain' => PLUGIN_TEXT_DOMAIN,
 				'pluginTextName' => PLUGIN_TEXT_NAME,
 				'pluginPrefix' => PLUGIN_PREFIX,
+				'pluginWidgetName' => PLUGIN_WIDGET_NAME,
 		] );
 	}
 }

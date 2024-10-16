@@ -35,6 +35,7 @@ abstract class AbstractBlock extends AbstractPaymentMethodType {
 				'pluginTextDomain' => PLUGIN_TEXT_DOMAIN,
 				'pluginTextName' => PLUGIN_TEXT_NAME,
 				'pluginPrefix' => PLUGIN_PREFIX,
+				'pluginWidgetName' => PLUGIN_WIDGET_NAME,
 			] );
 			wp_enqueue_style(
 				PLUGIN_TEXT_DOMAIN . '-widget-css',
@@ -56,6 +57,7 @@ abstract class AbstractBlock extends AbstractPaymentMethodType {
 				'pluginTextDomain' => PLUGIN_TEXT_DOMAIN,
 				'pluginTextName' => PLUGIN_TEXT_NAME,
 				'pluginPrefix' => PLUGIN_PREFIX,
+				'pluginWidgetName' => PLUGIN_WIDGET_NAME,
 			] );
 
 			self::$isLoad = true;
@@ -76,12 +78,14 @@ abstract class AbstractBlock extends AbstractPaymentMethodType {
 				'pluginTextDomain' => PLUGIN_TEXT_DOMAIN,
 				'pluginTextName' => PLUGIN_TEXT_NAME,
 				'pluginPrefix' => PLUGIN_PREFIX,
+				'pluginWidgetName' => PLUGIN_WIDGET_NAME,
 		] );
 		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-api', 'widgetSettings', [
 				'pluginUrlPrefix' => PLUGIN_URL,
 				'pluginTextDomain' => PLUGIN_TEXT_DOMAIN,
 				'pluginTextName' => PLUGIN_TEXT_NAME,
 				'pluginPrefix' => PLUGIN_PREFIX,
+				'pluginWidgetName' => PLUGIN_WIDGET_NAME,
 		] );
 		if ( function_exists( 'wp_set_script_translations' ) ) {
 			wp_set_script_translations( $scriptName );

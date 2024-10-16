@@ -83,6 +83,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 				'pluginTextDomain' => PLUGIN_TEXT_DOMAIN,
 				'pluginTextName' => PLUGIN_TEXT_NAME,
 				'pluginPrefix' => PLUGIN_PREFIX,
+				'pluginWidgetName' => PLUGIN_WIDGET_NAME,
 		] );
 		wp_enqueue_style( PLUGIN_TEXT_DOMAIN . '-widget-css', PLUGIN_URL . 'assets/css/frontend/widget.css', [], time() );
 
@@ -95,6 +96,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 				'pluginTextDomain' => PLUGIN_TEXT_DOMAIN,
 				'pluginTextName' => PLUGIN_TEXT_NAME,
 				'pluginPrefix' => PLUGIN_PREFIX,
+				'pluginWidgetName' => PLUGIN_WIDGET_NAME,
 		] );
 
 		return '';

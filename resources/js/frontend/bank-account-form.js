@@ -8,6 +8,7 @@ import {checkboxSavedBankAccountComponent, selectSavedBankAccountsComponent} fro
 const pluginPrefix = window.widgetSettings.pluginPrefix;
 const textDomain = window.widgetSettings.pluginTextDomain;
 const textName = window.widgetSettings.pluginTextName;
+const pluginWidgetName = window.widgetSettings.pluginWidgetName;
 const settings = getSetting(pluginPrefix + '_bank_account_block_data', {});
 
 const labels = {
@@ -50,10 +51,10 @@ const Content = (props) => {
                 return true;
             }
 
-            window.widgetPluginBankAccount.trigger(window.cba.TRIGGER.SUBMIT_FORM);
+            window.widgetPluginBankAccount.trigger(window[pluginWidgetName].TRIGGER.SUBMIT_FORM);
             let result = false;
 
-            window.widgetPluginBankAccount.on(window.cba.EVENT.FINISH, (data) => {
+            window.widgetPluginBankAccount.on(window[pluginWidgetName].EVENT.FINISH, (data) => {
                 result = true;
             })
 
