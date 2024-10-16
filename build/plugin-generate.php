@@ -2,9 +2,7 @@
 
 $config_file = $argv[1];
 $config = include $config_file;
-
-echo $config_file;
-echo $config['PLUGIN_NAME'];
+$is_prod = $argv[2] === "prod";
 
 $plugin_content = <<<EOT
 <?php
@@ -76,4 +74,4 @@ require_once 'vendor/autoload.php';
 WooPlugin\WooPluginPlugin::getInstance();
 EOT;
 
-file_put_contents('../plugin.php', $plugin_content);
+file_put_contents(($is_prod ? '.' : '..') . '/plugin.php', $plugin_content);
