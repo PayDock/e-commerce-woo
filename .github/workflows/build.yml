@@ -1,13 +1,9 @@
-name: Build and upload Paydock for WooCommerce plugin
+name: Build and create Payments Plugin for WooCommerce Zip files
 
 on:
   push:
     branches:
-      - power_board
-  pull_request:
-    branches:
-      - power_board
-  workflow_dispatch:
+      - plugin-single-code-base
 
 jobs:
   build:
@@ -17,23 +13,44 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Prepare files for upload
-        run: |
-          mkdir artifacts
-          rsync -av --exclude='.git/' --exclude='.github/' --exclude='.gitignore' --exclude='.gitlab-ci.yml' --exclude='node.sh' --exclude='*.zip' ./ artifacts/
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2.31.1
+        with:
+          php-version: '8.2'
 
-      - name: Upload plugin artifact
+      - name: Prepare PowerBoard build file
+        run: |
+          chmod +x ./build/build-powerboard.sh
+          ./build/build-powerboard.sh
+
+      - name: Create PowerBoard build file
+        run:
+          zip -r power-board.zip . -x 'build/*' '.git/*' '.github/*' '.gitignore' '.gitlab-ci.yml' 'node.sh' '*.zip'
+
+      - name: Prepare Paydock build file
+        run: |
+          chmod +x ./build/build-paydock.sh
+          ./build/build-paydock.sh
+
+      - name: Create Paydock build file
+        run:
+          zip -r paydock.zip . -x 'build/*' '.git/*' '.github/*' '.gitignore' '.gitlab-ci.yml' 'node.sh' '*.zip'
+
+      - name: Upload PowerBoard artifact
         uses: actions/upload-artifact@v4
         with:
           name: power-board
-          path: artifacts/
+          path: power-board.zip
 
-#      - name: Zip the plugin
-#        run: zip -r power-board.zip artifacts/
+      - name: Upload Paydock artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: paydock
+          path: paydock.zip
 
 #      - name: Upload to Google Drive
 #        uses: google-github-actions/upload-cloud-storage@v0.8.0
 #        with:
-#          path: power-board.zip
-#          destination: 1mwR5ruoRrGF4cYa1TMlSyy-FYm-m2ZmP/power-board.zip
+#          path: paydock.zip
+#          destination: 1mwR5ruoRrGF4cYa1TMlSyy-FYm-m2ZmP/paydock.zip
 #          credentials: ${{ secrets.GDRIVE_SA_KEY }}

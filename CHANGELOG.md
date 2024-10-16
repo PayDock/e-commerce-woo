@@ -4,4 +4,4 @@
 
 ### Added
 
-- Initial PowerBoard plugin for WooCommerce
+- Initial plugin for WooCommerce

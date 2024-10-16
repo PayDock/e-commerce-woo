@@ -74,7 +74,7 @@ Also we use helper code that not need compile what contained in assets path.
 3. API side
 
 == Changelog ==
-*** PowerBoard for WooCommerce Changelog ***
+*** Changelog ***
 
 2024-08-29 - version 3.1.3
 * Bugs fixed
