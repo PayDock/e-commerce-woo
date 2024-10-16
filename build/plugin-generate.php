@@ -3,6 +3,9 @@
 $config_file = $argv[1];
 $config = include $config_file;
 
+echo $config_file;
+echo $config;
+
 $plugin_content = <<<EOT
 <?php
 
