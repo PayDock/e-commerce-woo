@@ -1,4 +1,4 @@
-php plugin-generate.php config-powerboard.php
-php readme-generate-powerboard.php
+php build/plugin-generate.php config-powerboard.php
+php build/readme-generate-powerboard.php
 
 echo "Build for PowerBoard concluded"
