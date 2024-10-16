@@ -20,8 +20,8 @@ jobs:
 
       - name: Prepare PowerBoard build file
         run: |
-          chmod +x ./build/build-powerboard.sh
-          ./build/build-powerboard.sh
+          chmod +x ./build/build-powerboard.prod.sh
+          ./build/build-powerboard.prod.sh
 
       - name: Create PowerBoard build file
         run:
@@ -29,8 +29,8 @@ jobs:
 
       - name: Prepare Paydock build file
         run: |
-          chmod +x ./build/build-paydock.sh
-          ./build/build-paydock.sh
+          chmod +x ./build/build-paydock.prod.sh
+          ./build/build-paydock.prod.sh
 
       - name: Create Paydock build file
         run:
