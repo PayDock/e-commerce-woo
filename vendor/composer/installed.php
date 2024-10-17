@@ -1,19 +1,19 @@
 <?php return array(
     'root' => array(
-        'name' => 'paydock/sp-woocommerce',
+        'name' => 'power_board/sp-woocommerce',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => 'e42c80e192e6b96566107814abb1836de0c8619c',
+        'reference' => '5d79686752eb674247d0569cb7abedc77d6a878c',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
         'dev' => true,
     ),
     'versions' => array(
-        'paydock/sp-woocommerce' => array(
+        'power_board/sp-woocommerce' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'e42c80e192e6b96566107814abb1836de0c8619c',
+            'reference' => '5d79686752eb674247d0569cb7abedc77d6a878c',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

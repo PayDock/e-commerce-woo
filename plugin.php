@@ -1,19 +1,19 @@
 <?php
 
 /**
- * Copyright (c) Paydock for WooCommerce, Inc. and its affiliates. All Rights Reserved
+ * Copyright (c) PowerBoard for WooCommerce, Inc. and its affiliates. All Rights Reserved
  *
  * This source code is licensed under the license found in the
  * LICENSE file in the root directory of this source tree.
  *
- * Plugin Name: Paydock for WooCommerce
- * Plugin URI: https://github.com/PayDock/jsp-woocommerce/tree/main
- * Description: Paydock simplify how you manage your payments. Reduce costs, technical headaches & streamline compliance using Paydock's payment orchestration.
- * Author: Paydock
- * Author URI: 
+ * Plugin Name: PowerBoard for WooCommerce
+ * Plugin URI: https://github.com/PayDock/jsp-woocommerce/tree/power_board
+ * Description: PowerBoard simplify how you manage your payments. Reduce costs, technical headaches & streamline compliance using PowerBoard's payment orchestration.
+ * Author: PowerBoard
+ * Author URI: https://www.commbank.com.au/business/payments/take-online-payments/powerboard.html#getting-started
  * Version: 3.1.3
  * Requires at least: 6.4.2
- * Text Domain: paydock
+ * Text Domain: power-board
  * Tested up to: 6.6
  * Stable tag: 3.1.3
  * License: GPL-3.0
@@ -27,7 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! defined( 'PLUGIN_NAME' ) ) {
-  define( 'PLUGIN_NAME', 'Paydock for WooCommerce' );
+  define( 'PLUGIN_NAME', 'PowerBoard for WooCommerce' );
 }
 
 if ( ! defined( 'PLUGIN_FILE' ) ) {
@@ -47,43 +47,43 @@ if ( ! defined( 'PLUGIN_VERSION' ) ) {
 }
 
 if ( ! defined( 'PLUGIN_WIDGET_NAME' ) ) {
-  define( 'PLUGIN_WIDGET_NAME', 'paydock' );
+  define( 'PLUGIN_WIDGET_NAME', 'cba' );
 }
 
 if ( ! defined( 'PLUGIN_TEXT_DOMAIN' ) ) {
-  define( 'PLUGIN_TEXT_DOMAIN', 'paydock' );
+  define( 'PLUGIN_TEXT_DOMAIN', 'power-board' );
 }
 
 if ( ! defined( 'PLUGIN_PREFIX' ) ) {
-  define( 'PLUGIN_PREFIX', 'paydock' );
+  define( 'PLUGIN_PREFIX', 'power_board' );
 }
 
 if ( ! defined( 'PLUGIN_TEXT_NAME' ) ) {
-  define( 'PLUGIN_TEXT_NAME', 'Paydock' );
+  define( 'PLUGIN_TEXT_NAME', 'PowerBoard' );
 }
 
 if ( ! defined( 'PLUGIN_PRODUCTION_API_URL' ) ) {
-  define( 'PLUGIN_PRODUCTION_API_URL', 'https://api.paydock.com/v1/' );
+  define( 'PLUGIN_PRODUCTION_API_URL', 'https://api.powerboard.commbank.com.au/v1/' );
 }
 
 if ( ! defined( 'PLUGIN_SANDBOX_API_URL' ) ) {
-  define( 'PLUGIN_SANDBOX_API_URL', 'https://api-sandbox.paydock.com/v1/' );
+  define( 'PLUGIN_SANDBOX_API_URL', 'https://api.preproduction.powerboard.commbank.com.au/v1/' );
 }
 
 if ( ! defined( 'PLUGIN_PRODUCTION_ENVIRONMENT' ) ) {
-  define( 'PLUGIN_PRODUCTION_ENVIRONMENT', 'production' );
+  define( 'PLUGIN_PRODUCTION_ENVIRONMENT', 'production_cba' );
 }
 
 if ( ! defined( 'PLUGIN_SANDBOX_ENVIRONMENT' ) ) {
-  define( 'PLUGIN_SANDBOX_ENVIRONMENT', 'sandbox' );
+  define( 'PLUGIN_SANDBOX_ENVIRONMENT', 'preproduction_cba' );
 }
 
 if ( ! defined( 'PLUGIN_PRODUCTION_WIDGET_URL' ) ) {
-  define( 'PLUGIN_PRODUCTION_WIDGET_URL', 'https://widget.paydock.com/sdk/{version}/widget.umd.min.js' );
+  define( 'PLUGIN_PRODUCTION_WIDGET_URL', 'https://widget.powerboard.commbank.com.au/sdk/{version}/widget.umd.js' );
 }
 
 if ( ! defined( 'PLUGIN_SANDBOX_WIDGET_URL' ) ) {
-  define( 'PLUGIN_SANDBOX_WIDGET_URL', 'https://widget.paydock.com/sdk/{version}/widget.umd.min.js' );
+  define( 'PLUGIN_SANDBOX_WIDGET_URL', 'https://widget.preproduction.powerboard.commbank.com.au/sdk/{version}/widget.umd.js' );
 }
 
 require_once 'vendor/autoload.php';
