@@ -1,7 +1,10 @@
 jQuery(function ($) {
     $(document).ready(() => {
         const CONFIG = {
-            phoneInputId: '#billing_phone',
+            phoneInputIds: {
+                shipping: '#shipping_phone',
+                billing: '#billing_phone',
+            },
             baseCheckboxIdName: 'payment_method',
             errorMessageClassName: 'wc-block-components-validation-error',
             paymentOptionsNames: [
@@ -16,7 +19,15 @@ jQuery(function ($) {
             errorMessageHtml: `<div class="wc-block-components-validation-error" role="alert"><p>Please enter your phone number in international format, starting with "+"</p></div>`,
         };
 
-        const getPhoneInput = () => $(CONFIG.phoneInputId);
+        const $shippingWrapper = $('#shipping-fields .wc-block-components-address-address-wrapper');
+
+        const getPhoneInputs = () =>
+          Object.entries(CONFIG.phoneInputIds)
+            .reduce((acc, [key, selector]) => {
+                const $input = $(selector);
+                if ($input.length) acc[key] = $input;
+                return acc;
+            }, {});
 
         const getPaymentOptionsComponents = () =>
           CONFIG.paymentOptionsNames
@@ -35,30 +46,37 @@ jQuery(function ($) {
             return true;
         };
 
-        const updateVisibility = (phoneInput) => {
-            const validPhone = validatePhone(phoneInput);
-            $('button#place_order').styles = 'visibility:' + (validPhone ? 'visible' : 'hidden');
+        const updateVisibility = (phoneInputs) => {
+            const validationResults = Object.entries(phoneInputs).reduce((acc, [key, $input]) => {
+                acc[key] = validatePhone($input);
+                return acc;
+            }, {});
+
+            const allValid = Object.values(validationResults).every(Boolean);
+            const shippingValid = validationResults.shipping;
+
+            if (!shippingValid) $shippingWrapper.addClass('is-editing');
+            $('button#place_order').styles = 'visibility:' + (allValid ? 'visible' : 'hidden');
 
             getPaymentOptionsComponents().forEach($component => {
                   $component.css({
-                      opacity: validPhone ? 1 : 0.5,
-                      pointerEvents: validPhone ? 'auto' : 'none',
+                      opacity: allValid ? 1 : 0.5,
+                      pointerEvents: allValid ? 'auto' : 'none',
                   })
               }
             );
         };
 
         const initPhoneNumberValidation = () => {
-            const phoneInput = getPhoneInput();
-            const billingPhoneInput = $('#billing_phone_field');
-            if (!phoneInput) return;
+            const phoneInputs = getPhoneInputs();
+            if (!Object.keys(phoneInputs).length) return;
 
-            phoneInput.on('blur input', () => updateVisibility(phoneInput));
-            billingPhoneInput.removeClass( 'validate-required' );
-            billingPhoneInput.removeClass( 'validate-phone' );
-            
+            Object.values(phoneInputs).forEach($input =>
+              $input.on('blur input', () => updateVisibility(phoneInputs))
+            );
 
-            updateVisibility(phoneInput);
+
+            updateVisibility(phoneInputs);
         };
 
         initPhoneNumberValidation();
