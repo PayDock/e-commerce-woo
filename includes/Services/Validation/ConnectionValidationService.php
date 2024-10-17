@@ -51,7 +51,7 @@ class ConnectionValidationService {
 	public function __construct( AbstractSettingService $service ) {
 		$this->service = $service;
 		$this->adapterService = SDKAdapterService::getInstance();
-		$this->adapterService->initialise( SettingsTabs::LIVE_CONNECTION()->value === $this->service->id );
+		$this->adapterService->initialise( $this->service->id );
 
 		$this->prepareFormData();
 		$this->validate();

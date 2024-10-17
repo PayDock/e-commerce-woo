@@ -25,18 +25,20 @@ class SDKAdapterService {
 		$this->initialise();
 	}
 
-	public function initialise( ?bool $forcedEnv = null ): void {
-		$isProd = $this->isProd( $forcedEnv );
+	public function initialise( ?string $selectedTab = null ): void {
+		$environment = $this->getEnvironment( $selectedTab );
 
 		$settingsService = SettingsService::getInstance();
 
-		if ( $isProd ) {
-			$settings = new LiveConnectionSettingService();
-			$env = ConfigAPI::PRODUCTION_ENVIRONMENT()->value;
-
-		} else {
+		if ( $environment === ConfigAPI::STAGING_ENVIRONMENT()->value ) {
+			$settings = new SandboxConnectionSettingService();
+			$env = ConfigAPI::STAGING_ENVIRONMENT()->value;
+		} else if ( $environment === ConfigAPI::SANDBOX_ENVIRONMENT()->value ) {
 			$settings = new SandboxConnectionSettingService();
 			$env = ConfigAPI::SANDBOX_ENVIRONMENT()->value;
+		} else {
+			$settings = new LiveConnectionSettingService();
+			$env = ConfigAPI::PRODUCTION_ENVIRONMENT()->value;
 		}
 
 		$isAccessToken = CredentialsTypes::ACCESS_KEY()->name == $settings->get_option(
@@ -69,19 +71,8 @@ class SDKAdapterService {
 		ConfigService::init( $env, $secretKey, $publicKey ?? null );
 	}
 
-	private function isProd( ?bool $forcedProdEnv = null ): bool {
-		if ( is_null( $forcedProdEnv ) ) {
-			$settings = new SandboxConnectionSettingService();
-
-			return self::ENABLED_CONDITION !== $settings->get_option(
-				SettingsService::getInstance()->getOptionName( $settings->id, [ 
-					SettingGroups::CREDENTIALS()->name,
-					CredentialSettings::SANDBOX()->name,
-				] )
-			);
-		}
-
-		return $forcedProdEnv;
+	private function getEnvironment( ?string $selectedTab = null ): string {
+		return SettingsService::getInstance()->getEnvironment($selectedTab);
 	}
 
 	public static function getInstance(): self {
