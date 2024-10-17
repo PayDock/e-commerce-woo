@@ -1,13 +1,13 @@
 <?php
 
-namespace PowerBoard\API;
+namespace WooPlugin\API;
 
-use PowerBoard\Abstracts\AbstractApiService;
+use WooPlugin\Abstracts\AbstractApiService;
 
 class ServiceService extends AbstractApiService {
 	const ENDPOINT = 'services';
 
-	protected $allowedAction = [ 
+	protected $allowedAction = [
 		'get' => self::METHOD_GET,
 		'search' => self::METHOD_GET,
 	];

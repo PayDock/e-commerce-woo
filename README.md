@@ -46,7 +46,7 @@ You can find all relevant information here:
 - [Important documents](https://www.commbank.com.au/important-info.html?ei=CB-footer_ImportantDocs)
 - [Cookies policy](https://www.commbank.com.au/important-info/cookies.html?ei=CB-footer_cookies)
 
-This plugin transmits the payment and order information that the user provides on the checkout page to Power Board only 
+This plugin transmits the payment and order information that the user provides on the checkout page to Power Board only
 when making a payment using one of the methods provided by this plugin.
 The following data is transferred for payment:
 * All payment details

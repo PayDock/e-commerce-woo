@@ -1,9 +1,11 @@
 import walletsForm from "../includes/wallets-form";
 
+const pluginTextName = window.widgetSettings.pluginTextName;
+
 walletsForm(
     'afterpay',
-    'PowerBoard Afterpay',
-    'powerBoardWalletAfterpayButton',
+    pluginTextName + ' Afterpay',
+    'pluginWalletAfterpayButton',
     [
         'first_name',
         'last_name',

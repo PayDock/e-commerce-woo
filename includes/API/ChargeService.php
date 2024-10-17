@@ -1,8 +1,8 @@
 <?php
 
-namespace PowerBoard\API;
+namespace WooPlugin\API;
 
-use PowerBoard\Abstracts\AbstractApiService;
+use WooPlugin\Abstracts\AbstractApiService;
 
 class ChargeService extends AbstractApiService {
 	const ENDPOINT = 'charges';
@@ -16,7 +16,7 @@ class ChargeService extends AbstractApiService {
 	protected $directCharge = null;
 
 	protected $id = null;
-	protected $allowedAction = [ 
+	protected $allowedAction = [
 		'create' => self::METHOD_POST,
 		'update' => self::METHOD_POST,
 		'wallet-initialize' => self::METHOD_POST,

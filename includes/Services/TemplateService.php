@@ -1,9 +1,9 @@
 <?php
 
-namespace PowerBoard\Services;
+namespace WooPlugin\Services;
 
-use PowerBoard\Enums\SettingsTabs;
-use PowerBoard\Services\SettingsService;
+use WooPlugin\Enums\SettingsTabs;
+use WooPlugin\Services\SettingsService;
 
 class TemplateService {
 	private const TEMPLATE_DIR = 'templates';
@@ -58,6 +58,6 @@ class TemplateService {
 	}
 
 	private function getTemplatePath( string $template ): string {
-		return plugin_dir_path( POWER_BOARD_PLUGIN_FILE ) . $template . self::TEMPLATE_END;
+		return plugin_dir_path( PLUGIN_FILE ) . $template . self::TEMPLATE_END;
 	}
 }

@@ -1,10 +1,10 @@
 <?php
 
-namespace PowerBoard\Util;
+namespace WooPlugin\Util;
 
-use PowerBoard\Abstracts\AbstractAPMsBlock;
-use PowerBoard\Enums\OtherPaymentMethods;
-use PowerBoard\Services\Checkout\ZipAPMsPaymentServiceService;
+use WooPlugin\Abstracts\AbstractAPMsBlock;
+use WooPlugin\Enums\OtherPaymentMethods;
+use WooPlugin\Services\Checkout\ZipAPMsPaymentServiceService;
 
 class ZipAPMsBlock extends AbstractAPMsBlock {
 

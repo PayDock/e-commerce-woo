@@ -4,8 +4,13 @@ import sleep from './sleep';
 import {select} from '@wordpress/data';
 import {CART_STORE_KEY} from '@woocommerce/block-data';
 
+const pluginPrefix = window.widgetSettings.pluginPrefix;
+const pluginWidgetName = window.widgetSettings.pluginWidgetName;
+const pluginProductionEnvironment = window.widgetSettings.pluginProductionEnvironment;
+const pluginSandboxEnvironment = window.widgetSettings.pluginSandboxEnvironment;
+
 export default async (forcePermanentVault = false, newAmount = null) => {
-    const settings = getSetting('power_board_data', {});
+    const settings = getSetting(pluginPrefix + '_data', {});
 
     if (settings.selectedToken.trim().length === 0 && settings.card3DSFlow === 'PERMANENT_VAULT') {
         settings.selectedToken = await getVaultToken()
@@ -64,8 +69,8 @@ export default async (forcePermanentVault = false, newAmount = null) => {
         preAuthData.token = settings.paymentSourceToken
     }
 
-    const envVal = settings.isSandbox ? 'preproduction_cba' : 'production_cba'
-    const preAuthResp = await new window.cba.Api(settings.publicKey)
+    const envVal = settings.isSandbox ? pluginSandboxEnvironment : pluginProductionEnvironment
+    const preAuthResp = await new window[pluginWidgetName].Api(settings.publicKey)
         .setEnv(envVal)
         .charge()
         .preAuth(preAuthData);
@@ -77,13 +82,13 @@ export default async (forcePermanentVault = false, newAmount = null) => {
         return false;
     }
 
-    document.getElementById('powerBoardWidget3ds').innerHTML = '';
-    document.getElementById('powerBoardWidget3ds').setAttribute('style', '')
+    document.getElementById('pluginWidget3ds').innerHTML = '';
+    document.getElementById('pluginWidget3ds').setAttribute('style', '')
 
-    const canvas = new window.cba.Canvas3ds('#powerBoardWidget3ds', preAuthResp._3ds.token);
+    const canvas = new window[pluginWidgetName].Canvas3ds('#pluginWidget3ds', preAuthResp._3ds.token);
     canvas.load();
 
-    document.getElementById('powerBoardWidgetCard_wrapper').setAttribute('style', 'display: none')
+    document.getElementById('pluginWidgetCard_wrapper').setAttribute('style', 'display: none')
 
     let result = false;
     canvas.on('chargeAuthSuccess', (chargeAuthEvent) => {
@@ -118,21 +123,21 @@ export default async (forcePermanentVault = false, newAmount = null) => {
 }
 
 function reloadWidget() {
-    const savedCards = document.querySelector('.power-board-select-saved-cards');
+    const savedCards = document.querySelector('.plugin-select-saved-cards');
     if (savedCards !== null) {
         savedCards.style = 'display: block';
     }
-    const settings = window.wc.wcSettings.getSetting('power_board_data', {});
+    const settings = window.wc.wcSettings.getSetting(pluginPrefix + '_data', {});
     settings.selectedToken = '';
     const paymentSourceToken = document.querySelector('[name="payment_source_token"]');
     paymentSourceToken.value = null;
-    window.widgetPowerBoard.reload();
+    window.pluginCardWidget.reload();
     window.widgetReloaded = true;
 }
 
 function showCardWidget() {
-    document.getElementById('powerBoardWidgetCard_wrapper').setAttribute('style', '');
-    const canvas3dsWrapper = document.getElementById('powerBoardWidget3ds');
+    document.getElementById('pluginWidgetCard_wrapper').setAttribute('style', '');
+    const canvas3dsWrapper = document.getElementById('pluginWidget3ds');
     canvas3dsWrapper.innerHTML = '';
     canvas3dsWrapper.setAttribute('style', 'display: none');
 }

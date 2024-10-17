@@ -1,15 +1,15 @@
 <?php
 
-namespace PowerBoard\Abstracts;
+namespace WooPlugin\Abstracts;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Exception;
-use PowerBoard\Enums\OrderListColumns;
-use PowerBoard\Enums\OtherPaymentMethods;
-use PowerBoard\Repositories\LogRepository;
-use PowerBoard\Services\OrderService;
-use PowerBoard\Services\ProcessPayment\ApmProcessor;
-use PowerBoard\Services\SettingsService;
+use WooPlugin\Enums\OrderListColumns;
+use WooPlugin\Enums\OtherPaymentMethods;
+use WooPlugin\Repositories\LogRepository;
+use WooPlugin\Services\OrderService;
+use WooPlugin\Services\ProcessPayment\ApmProcessor;
+use WooPlugin\Services\SettingsService;
 
 abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 	/**
@@ -19,7 +19,7 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 		$settings      = SettingsService::getInstance();
 		$paymentMethod = $this->getAPMsType();
 
-		$this->id          = 'power_board_' . $paymentMethod->getId() . '_a_p_m_s_gateway';
+		$this->id          = PLUGIN_PREFIX . '_' . $paymentMethod->getId() . '_a_p_m_s_gateway';
 		$this->title       = $settings->getWidgetPaymentAPMTitle( $paymentMethod );
 		$this->description = $settings->getWidgetPaymentAPMDescription( $paymentMethod );
 
@@ -43,7 +43,7 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 		if ( ! wp_verify_nonce( $wpNonce, 'process_payment' ) ) {
 			throw new RouteException(
 				'woocommerce_rest_checkout_process_payment_error',
-				esc_html( __( 'Error: Security check', 'power-board' ) )
+				esc_html( __( 'Error: Security check', PLUGIN_TEXT_DOMAIN ) )
 			);
 		}
 
@@ -74,7 +74,7 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 				}
 
 				if ( empty( $parsed_api_error ) ) {
-					$parsed_api_error = __( 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later.', 'power-board' );
+					$parsed_api_error = __( 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later.', PLUGIN_TEXT_DOMAIN );
 				}
 
 				throw new Exception( esc_html( $parsed_api_error ) );
@@ -108,7 +108,7 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 			$order->payment_complete();
 			$order->update_meta_data( 'pb_directly_charged', 1 );
 		}
-		$order->update_meta_data( 'power_board_charge_id', $chargeId );
+		$order->update_meta_data( PLUGIN_PREFIX . '_charge_id', $chargeId );
 		$order->save();
 
 		WC()->cart->empty_cart();

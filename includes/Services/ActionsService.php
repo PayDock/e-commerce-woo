@@ -1,22 +1,22 @@
 <?php
 
-namespace PowerBoard\Services;
+namespace WooPlugin\Services;
 
 use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
-use PowerBoard\Abstracts\AbstractSingleton;
-use PowerBoard\Controllers\Admin\WidgetController;
-use PowerBoard\Controllers\Webhooks\PaymentController;
-use PowerBoard\Enums\SettingsTabs;
-use PowerBoard\Services\Checkout\BankAccountPaymentService;
-use PowerBoard\Util\AfterpayAPMsBlock;
-use PowerBoard\Util\AfterpayWalletBlock;
-use PowerBoard\Util\ApplePayWalletBlock;
-use PowerBoard\Util\BankAccountBlock;
-use PowerBoard\Util\GooglePayWalletBlock;
-use PowerBoard\Util\PayPalWalletBlock;
-use PowerBoard\Util\PowerBoardGatewayBlocks;
-use PowerBoard\Util\ZipAPMsBlock;
+use WooPlugin\Abstracts\AbstractSingleton;
+use WooPlugin\Controllers\Admin\WidgetController;
+use WooPlugin\Controllers\Webhooks\PaymentController;
+use WooPlugin\Enums\SettingsTabs;
+use WooPlugin\Services\Checkout\BankAccountPaymentService;
+use WooPlugin\Util\AfterpayAPMsBlock;
+use WooPlugin\Util\AfterpayWalletBlock;
+use WooPlugin\Util\ApplePayWalletBlock;
+use WooPlugin\Util\BankAccountBlock;
+use WooPlugin\Util\GooglePayWalletBlock;
+use WooPlugin\Util\PayPalWalletBlock;
+use WooPlugin\Util\PluginGatewayBlocks;
+use WooPlugin\Util\ZipAPMsBlock;
 
 class ActionsService extends AbstractSingleton {
 	protected const PROCESS_OPTIONS_FUNCTION = 'process_admin_options';
@@ -40,10 +40,10 @@ class ActionsService extends AbstractSingleton {
 			$this->addOrderActions();
 		} );
 
-		add_filter( 'gettext', array( $this, 'cba_refund_msg' ), 20, 3 );
+		add_filter( 'gettext', array( $this, 'custom_refund_msg' ), 20, 3 );
 	}
 
-	public function cba_refund_msg( $translated_text, $text, $domain ) {
+	public function custom_refund_msg( $translated_text, $text, $domain ) {
 
 		if ( 'woocommerce' === $domain ) {
 
@@ -61,13 +61,13 @@ class ActionsService extends AbstractSingleton {
 
 	protected function addCompatibilityWithWooCommerce(): void {
 		if ( class_exists( FeaturesUtil::class ) ) {
-			FeaturesUtil::declare_compatibility( 'custom_order_tables', POWER_BOARD_PLUGIN_FILE );
+			FeaturesUtil::declare_compatibility( 'custom_order_tables', PLUGIN_FILE );
 		}
 	}
 
 	protected function addPaymentActions() {
 		$payments = [
-			'power_board_bank_account_gateway' => new BankAccountPaymentService(),
+			PLUGIN_PREFIX . '_bank_account_gateway' => new BankAccountPaymentService(),
 		];
 		foreach ( $payments as $paymentKey => $payment ) {
 			add_action(
@@ -96,7 +96,7 @@ class ActionsService extends AbstractSingleton {
 		add_action( 'before_woocommerce_init', function () {
 			FeaturesUtil::declare_compatibility(
 				'cart_checkout_blocks',
-				POWER_BOARD_PLUGIN_FILE,
+				PLUGIN_FILE,
 				true
 			);
 		} );
@@ -104,7 +104,7 @@ class ActionsService extends AbstractSingleton {
 		add_action(
 			'woocommerce_blocks_payment_method_type_registration',
 			function ( PaymentMethodRegistry $payment_method_registry ) {
-				$payment_method_registry->register( new PowerBoardGatewayBlocks() );
+				$payment_method_registry->register( new PluginGatewayBlocks() );
 				$payment_method_registry->register( new BankAccountBlock() );
 				$payment_method_registry->register( new ApplePayWalletBlock() );
 				$payment_method_registry->register( new GooglePayWalletBlock() );
@@ -132,7 +132,7 @@ class ActionsService extends AbstractSingleton {
 
 	protected function addEndpoints() {
 		add_action( 'rest_api_init', function () {
-			register_rest_route( 'power-board/v1', '/wallets/charge',
+			register_rest_route( PLUGIN_TEXT_DOMAIN . '/v1', '/wallets/charge',
 				[ // nosemgrep: audit.php.wp.security.rest-route.permission-callback.return-true  -- /wallets/charge is a public endpoint and doesn't need any permission checks.
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => [ new WidgetController(), 'createWalletCharge' ],
@@ -144,16 +144,16 @@ class ActionsService extends AbstractSingleton {
 	protected function addOrderActions() {
 		$orderService      = new OrderService();
 		$paymentController = new PaymentController();
-		add_action( 'woocommerce_order_item_add_action_buttons', [ $orderService, 'iniPowerBoardOrderButtons' ], 10,
+		add_action( 'woocommerce_order_item_add_action_buttons', [ $orderService, 'iniPluginOrderButtons' ], 10,
 			2 );
 		add_action( 'woocommerce_order_status_changed', [ $orderService, 'statusChangeVerification' ], 20, 4 );
 		add_action( 'woocommerce_admin_order_totals_after_total',
 			[ $orderService, 'informationAboutPartialCaptured' ] );
 		add_action( 'admin_notices', [ $orderService, 'displayStatusChangeError' ] );
-		add_action( 'wp_ajax_power-board-capture-charge', [ $paymentController, 'capturePayment' ] );
-		add_action( 'wp_ajax_power-board-cancel-authorised', [ $paymentController, 'cancelAuthorised' ] );
+		add_action( 'wp_ajax_plugin-capture-charge', [ $paymentController, 'capturePayment' ] );
+		add_action( 'wp_ajax_plugin-cancel-authorised', [ $paymentController, 'cancelAuthorised' ] );
 		add_action( 'woocommerce_create_refund', [ $paymentController, 'refundProcess' ], 10, 2 );
 		add_action( 'woocommerce_order_refunded', [ $paymentController, 'afterRefundProcess' ], 10, 2 );
-		add_action( 'woocommerce_api_power-board-webhook', [ $paymentController, 'webhook' ] );
+		add_action( 'woocommerce_api_plugin-webhook', [ $paymentController, 'webhook' ] );
     }
 }

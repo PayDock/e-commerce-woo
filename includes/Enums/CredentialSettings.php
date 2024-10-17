@@ -1,8 +1,8 @@
 <?php
 
-namespace PowerBoard\Enums;
+namespace WooPlugin\Enums;
 
-use PowerBoard\Abstracts\AbstractEnum;
+use WooPlugin\Abstracts\AbstractEnum;
 
 class CredentialSettings extends AbstractEnum {
 	protected const SANDBOX = 'SANDBOX';
@@ -50,7 +50,7 @@ class CredentialSettings extends AbstractEnum {
 			case self::SANDBOX:
 				return 'Sandbox';
 			case self::TYPE:
-				return 'Connection to PowerBoard';
+				return 'Connection to ' . PLUGIN_TEXT_NAME;
 			default:
 				return '';
 		}

@@ -1,10 +1,10 @@
 <?php
 
-namespace PowerBoard\Services\Settings;
+namespace WooPlugin\Services\Settings;
 
-use PowerBoard\Abstracts\AbstractSettingService;
-use PowerBoard\Enums\SettingsTabs;
-use PowerBoard\Repositories\LogRepository;
+use WooPlugin\Abstracts\AbstractSettingService;
+use WooPlugin\Enums\SettingsTabs;
+use WooPlugin\Repositories\LogRepository;
 
 class LogsSettingService extends AbstractSettingService {
 	public function generate_settings_html( $form_fields = [], $echo = true ): ?string {

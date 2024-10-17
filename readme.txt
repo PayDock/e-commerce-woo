@@ -74,39 +74,35 @@ Also we use helper code that not need compile what contained in assets path.
 3. API side
 
 == Changelog ==
+*** Changelog ***
 
-= 1.0.19 =
-* Initial release
+2024-08-29 - version 3.1.3
+* Bugs fixed
 
-= 1.0.28 =
-* Bug fixes
+2024-08-02 - version 3.1.2
+* Small fixes
 
-= 1.4.0 =
-* First release on the plugins store
-
-= 1.5.7 =
-* Bug fixes
-
-= 2.0.37 =
-* Completely new plugin. This version includes new code, supports new versions of PHP, MySQL, WordPress, WooCommerce, and v2 API of the PowerBoard app.
-
-= 2.0.44 =
-* New features, readme, changelog, etc.
-
-= 2.0.46 =
-* Patch, small fixes
-
-= 2.0.53 =
-* Min-max feature
-
-= 3.0.4 =
-* Fixes, updates, tweaks
-
-= 3.0.5 =
+2024-07-23 - version 3.0.5
 * Statuses, openssl, paths
 
-= 3.1.2 =
-* Bug fixes
+2024-07-17 - version 3.0.4
+* Fixes, updates, tweaks
 
-= 3.1.3 =
-* More bugs fixed
+2024-07-09 - version 2.0.53
+* Min-max feature
+
+2024-05-30 - version 2.0.46
+* Patch, small fixes
+
+2024-05-28 - version 2.0.44
+* Screenshots, readme, changelog, etc.
+
+2024-05-22 - version 2.0.37
+* Completely new version
+
+2024-04-28 - version 1.0.28
+* Fix bugs
+
+2024-04-27 - version 1.0.19
+* Initial release
+

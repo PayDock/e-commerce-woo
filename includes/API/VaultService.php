@@ -1,13 +1,13 @@
 <?php
 
-namespace PowerBoard\API;
+namespace WooPlugin\API;
 
-use PowerBoard\Abstracts\AbstractApiService;
+use WooPlugin\Abstracts\AbstractApiService;
 
 class VaultService extends AbstractApiService {
 	const ENDPOINT = 'vault/payment_sources';
 
-	protected $allowedAction = [ 
+	protected $allowedAction = [
 		'create' => self::METHOD_POST,
 	];
 

@@ -1,12 +1,12 @@
 <?php
 
-namespace PowerBoard\Controllers\Admin;
+namespace WooPlugin\Controllers\Admin;
 
-use PowerBoard\Enums\WalletPaymentMethods;
-use PowerBoard\Helpers\ShippingHelper;
-use PowerBoard\Repositories\LogRepository;
-use PowerBoard\Services\SDKAdapterService;
-use PowerBoard\Services\SettingsService;
+use WooPlugin\Enums\WalletPaymentMethods;
+use WooPlugin\Helpers\ShippingHelper;
+use WooPlugin\Repositories\LogRepository;
+use WooPlugin\Services\SDKAdapterService;
+use WooPlugin\Services\SettingsService;
 use WP_REST_Request;
 
 class WidgetController {

@@ -1,24 +1,24 @@
 <?php
 
-namespace PowerBoard\Services;
+namespace WooPlugin\Services;
 
-use PowerBoard\Abstracts\AbstractSingleton;
-use PowerBoard\Enums\OrderListColumns;
-use PowerBoard\Enums\SettingsTabs;
-use PowerBoard\Hooks\ActivationHook;
-use PowerBoard\PowerBoardPlugin;
-use PowerBoard\Services\Checkout\AfterpayAPMsPaymentServiceService;
-use PowerBoard\Services\Checkout\AfterpayWalletService;
-use PowerBoard\Services\Checkout\ApplePayWalletService;
-use PowerBoard\Services\Checkout\BankAccountPaymentService;
-use PowerBoard\Services\Checkout\CardPaymentService;
-use PowerBoard\Services\Checkout\GooglePayWalletService;
-use PowerBoard\Services\Checkout\PayPalWalletService;
-use PowerBoard\Services\Checkout\ZipAPMsPaymentServiceService;
-use PowerBoard\Services\Settings\LiveConnectionSettingService;
-use PowerBoard\Services\Settings\LogsSettingService;
-use PowerBoard\Services\Settings\SandboxConnectionSettingService;
-use PowerBoard\Services\Settings\WidgetSettingService;
+use WooPlugin\Abstracts\AbstractSingleton;
+use WooPlugin\Enums\OrderListColumns;
+use WooPlugin\Enums\SettingsTabs;
+use WooPlugin\Hooks\ActivationHook;
+use WooPlugin\WooPluginPlugin;
+use WooPlugin\Services\Checkout\AfterpayAPMsPaymentServiceService;
+use WooPlugin\Services\Checkout\AfterpayWalletService;
+use WooPlugin\Services\Checkout\ApplePayWalletService;
+use WooPlugin\Services\Checkout\BankAccountPaymentService;
+use WooPlugin\Services\Checkout\CardPaymentService;
+use WooPlugin\Services\Checkout\GooglePayWalletService;
+use WooPlugin\Services\Checkout\PayPalWalletService;
+use WooPlugin\Services\Checkout\ZipAPMsPaymentServiceService;
+use WooPlugin\Services\Settings\LiveConnectionSettingService;
+use WooPlugin\Services\Settings\LogsSettingService;
+use WooPlugin\Services\Settings\SandboxConnectionSettingService;
+use WooPlugin\Services\Settings\WidgetSettingService;
 
 class FiltersService extends AbstractSingleton {
 	protected static $instance = null;
@@ -91,7 +91,7 @@ class FiltersService extends AbstractSingleton {
 	}
 
 	protected function addSettingsLink(): void {
-		add_filter( 'plugin_action_links_' . plugin_basename( POWER_BOARD_PLUGIN_FILE ), [ $this, 'getSettingLink' ] );
+		add_filter( 'plugin_action_links_' . plugin_basename( PLUGIN_FILE ), [ $this, 'getSettingLink' ] );
 	}
 
 	public function registerInWooCommercePaymentClass( array $methods ): array {
@@ -128,19 +128,19 @@ class FiltersService extends AbstractSingleton {
 
 	public function woocommerceThankyouOrderReceivedText( $text ) {
 		$orderId = absint( get_query_var( 'order-received' ) );
-		$options  = get_option( "power_board_fraud_{$orderId}" );
+		$options  = get_option( PLUGIN_PREFIX . "_fraud_{$orderId}" );
 		$order    = wc_get_order( $orderId );
 		$status   = $order->get_meta( ActivationHook::CUSTOM_STATUS_META_KEY );
 		$afterpay = filter_input( INPUT_GET, 'afterpay-error', FILTER_SANITIZE_STRING );
 
 		if ( ! empty( $afterpay ) && ( 'true' === $afterpay ) ) {
-			return __( 'Order has been cancelled', 'power-board' );
+			return __( 'Order has been cancelled', PLUGIN_TEXT_DOMAIN );
 		}
 		if ( false === $options && 'processing' !== $status ) {
-			return __( 'Thank you. Your order has been received.', 'power-board' );
+			return __( 'Thank you. Your order has been received.', PLUGIN_TEXT_DOMAIN );
 		}
 
-		return __( 'Your order is being processed. We\'ll get back to you shortly', 'power-board' );
+		return __( 'Your order is being processed. We\'ll get back to you shortly', PLUGIN_TEXT_DOMAIN );
 	}
 
 	public function getSettingLink( array $links ): array {
@@ -148,8 +148,8 @@ class FiltersService extends AbstractSingleton {
 			$links,
 			sprintf(
 				'<a href="%1$s">%2$s</a>',
-				admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . PowerBoardPlugin::PLUGIN_PREFIX ),
-				__( 'Settings', 'power-board' )
+				admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . WooPluginPlugin::PLUGIN_PREFIX ),
+				__( 'Settings', PLUGIN_TEXT_DOMAIN )
 			)
 		);
 

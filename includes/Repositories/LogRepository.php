@@ -1,12 +1,12 @@
 <?php
 
-namespace PowerBoard\Repositories;
+namespace WooPlugin\Repositories;
 
-use PowerBoard\Abstracts\AbstractRepository;
-use PowerBoard\Contracts\Repository;
+use WooPlugin\Abstracts\AbstractRepository;
+use WooPlugin\Contracts\Repository;
 
 class LogRepository extends AbstractRepository implements Repository {
-	private const AVAILABLE_SORT = [ 
+	private const AVAILABLE_SORT = [
 		'id',
 		'created_at',
 		'operation',
@@ -15,7 +15,7 @@ class LogRepository extends AbstractRepository implements Repository {
 	public const DEFAULT = 0;
 	public const SUCCESS = 1;
 	public const ERROR = 2;
-	public const AVAILABLE_TYPES = [ 
+	public const AVAILABLE_TYPES = [
 		self::DEFAULT ,
 		self::SUCCESS,
 		self::ERROR,

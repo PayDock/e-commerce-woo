@@ -10,7 +10,9 @@ import initButton from './wallets/init';
 import axios from 'axios';
 import canMakePayment from "./canMakePayment";
 
-const textDomain = 'power_board';
+const textDomain = window.widgetSettings.pluginTextDomain;
+const pluginPrefix = window.widgetSettings.pluginPrefix;
+
 const labels = {
     validationError: __('Please fill in the required fields of the form to display payment methods', textDomain),
     fillDataError: __('The payment service does not accept payment. Please try again later or choose another payment method.', textDomain),
@@ -25,8 +27,8 @@ let localState = {
 }
 
 export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
-    const settingKey = `power_board_${id}_wallet_block_data`;
-    const paymentName = `power_board_${id}_wallets_gateway`;
+    const settingKey = `${pluginPrefix}_${id}_wallet_block_data`;
+    const paymentName = `${pluginPrefix}_${id}_wallets_gateway`;
 
     const settings = getSetting(settingKey, {});
     const label = decodeEntities(settings.title) || __(defaultLabel, textDomain);
@@ -57,7 +59,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
             items: cart.getCartData().items
         }
 
-        const walletsChargeRoute = '/wp-json/power-board/v1/wallets/charge';
+        const walletsChargeRoute = '/wp-json/' + textDomain + '/v1/wallets/charge';
         const whitelist = [walletsChargeRoute];
 
         if (whitelist.includes(walletsChargeRoute)) {
@@ -80,13 +82,13 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
         const {eventRegistration, emitResponse} = props;
         const {onPaymentSetup, onCheckoutValidation, onShippingRateSelectSuccess} = eventRegistration;
         const billingAddress = cart.getCustomerData().billingAddress;
-        const afterpayCountriesError = jQuery('.power-board-country-available');
+        const afterpayCountriesError = jQuery('.plugin-country-available');
 
         let validationSuccess = validateData(billingAddress, dataFieldsRequired);
 
         jQuery('.wc-block-components-checkout-place-order-button').hide();
 
-        if (('powerBoardWalletAfterpayButton' === buttonId)
+        if (('pluginWalletAfterpayButton' === buttonId)
             && validationSuccess
             && !afterpayCountries.find((element) => element === billingAddress.country.toLowerCase())) {
             afterpayCountriesError.show()
@@ -175,15 +177,15 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
             paymentWasSuccessElement,
             createElement(
                 'div',
-                {id: 'powerBoardWidgetWallets', class: 'power-board-widget-content',},
+                {id: 'pluginWidgetWallets', class: 'plugin-widget-content',},
                 ...wallets
             ), createElement(
                 'div',
-                {class: 'power-board-validation-error', style: {display: validationSuccess ? 'none' : ''}},
+                {class: 'plugin-validation-error', style: {display: validationSuccess ? 'none' : ''}},
                 labels.validationError
             ), createElement(
                 "div",
-                {class: 'power-board-country-available', style: {display: 'none'}},
+                {class: 'plugin-country-available', style: {display: 'none'}},
                 labels.notAvailable
             ),
             input
@@ -196,12 +198,12 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
             createElement(
                 "div",
                 {
-                    className: 'power-board-payment-method-label'
+                    className: 'plugin-payment-method-label'
                 },
                 createElement("img", {
-                    src: `${window.powerBoardWidgetSettings.pluginUrlPrefix}assets/images/icons/${id}.png`,
+                    src: `${window.widgetSettings.pluginUrlPrefix}assets/images/icons/${id}.png`,
                     alt: label,
-                    className: `power-board-payment-method-label-icon ${id}`
+                    className: `plugin-payment-method-label-icon ${id}`
                 }),
                 "  " + label,
             )

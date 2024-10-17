@@ -1,10 +1,10 @@
 <?php
 
-namespace PowerBoard\Hooks;
+namespace WooPlugin\Hooks;
 
-use PowerBoard\Contracts\Hook;
-use PowerBoard\Contracts\Repository;
-use PowerBoard\PowerBoardPlugin;
+use WooPlugin\Contracts\Hook;
+use WooPlugin\Contracts\Repository;
+use WooPlugin\WooPluginPlugin;
 
 class ActivationHook implements Hook {
 
@@ -29,7 +29,7 @@ class ActivationHook implements Hook {
 		'wc-pb-p-refund'  => 'refunded',
 	];
 
-	public const CUSTOM_STATUS_META_KEY = 'power_board_custom_status';
+	public const CUSTOM_STATUS_META_KEY = PLUGIN_PREFIX . '_custom_status';
 
 	public function __construct() {
 	}
@@ -39,7 +39,7 @@ class ActivationHook implements Hook {
 
 		$repositories = array_map( function ( $className ) {
 			return new $className();
-		}, PowerBoardPlugin::REPOSITORIES );
+		}, WooPluginPlugin::REPOSITORIES );
 
 		array_map( [ $instance, 'runMigration' ], $repositories );
 

@@ -1,8 +1,9 @@
 import {createElement} from 'react';
 import {getSetting} from '@woocommerce/settings';
 
+const pluginPrefix = window.widgetSettings.pluginPrefix;
 export default (saveCardLabel = 'Save card') => {
-    const settings = getSetting('power_board_data', {});
+    const settings = getSetting(pluginPrefix + '_data', {});
 
     if (!settings.cardSaveCard || !settings.isUserLoggedIn) {
         return '';

@@ -1,8 +1,8 @@
 <?php
 
-namespace PowerBoard\Services;
+namespace WooPlugin\Services;
 
-use PowerBoard\PowerBoardPlugin;
+use WooPlugin\WooPluginPlugin;
 
 class HashService {
 	private const CIPHER = 'AES-128-CBC';
@@ -27,7 +27,7 @@ class HashService {
 			return AUTH_KEY;
 		}
 
-		return PowerBoardPlugin::PLUGIN_PREFIX;
+		return WooPluginPlugin::PLUGIN_PREFIX;
 	}
 
 	public static function decrypt( string $string ): string {

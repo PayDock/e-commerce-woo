@@ -1,12 +1,12 @@
 <?php
 
-namespace PowerBoard\Services\Checkout;
+namespace WooPlugin\Services\Checkout;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
-use PowerBoard\Abstracts\AbstractWalletPaymentService;
-use PowerBoard\Enums\OrderListColumns;
-use PowerBoard\Enums\WalletPaymentMethods;
-use PowerBoard\Repositories\LogRepository;
+use WooPlugin\Abstracts\AbstractWalletPaymentService;
+use WooPlugin\Enums\OrderListColumns;
+use WooPlugin\Enums\WalletPaymentMethods;
+use WooPlugin\Repositories\LogRepository;
 
 class AfterpayWalletService extends AbstractWalletPaymentService {
 
@@ -24,7 +24,7 @@ class AfterpayWalletService extends AbstractWalletPaymentService {
 		if ( ! wp_verify_nonce( $wpNonce, 'process_payment' ) ) {
 			throw new RouteException(
 				'woocommerce_rest_checkout_process_payment_error',
-				esc_html( __( 'Error: Security check', 'power-board' ) )
+				esc_html( __( 'Error: Security check', PLUGIN_TEXT_DOMAIN ) )
 			);
 		}
 
@@ -52,13 +52,13 @@ class AfterpayWalletService extends AbstractWalletPaymentService {
 		$wallet  = reset( $wallets );
 		$isFraud = ! empty( $wallet['fraud'] ) && $wallet['fraud'];
 		if ( $isFraud ) {
-			update_option( 'power_board_fraud_' . (string) $order->get_id(), [] );
+			update_option( PLUGIN_PREFIX . '_fraud_' . (string) $order->get_id(), [] );
 		}
 
 		$loggerRepository = new LogRepository();
 
 		$order->set_status( 'wc-pending' );
-		$order->update_meta_data( 'power_board_charge_id', $chargeId );
+		$order->update_meta_data( PLUGIN_PREFIX . '_charge_id', $chargeId );
 		$order->update_meta_data( OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(), $this->getWalletType()->getLabel() );
 		$order->save();
 

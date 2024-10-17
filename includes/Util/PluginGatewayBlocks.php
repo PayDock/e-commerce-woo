@@ -1,20 +1,20 @@
 <?php
 
-namespace PowerBoard\Util;
+namespace WooPlugin\Util;
 
-use PowerBoard\Abstracts\AbstractBlock;
-use PowerBoard\Repositories\UserTokenRepository;
-use PowerBoard\Services\Checkout\CardPaymentService;
-use PowerBoard\Services\SDKAdapterService;
-use PowerBoard\Services\SettingsService;
+use WooPlugin\Abstracts\AbstractBlock;
+use WooPlugin\Repositories\UserTokenRepository;
+use WooPlugin\Services\Checkout\CardPaymentService;
+use WooPlugin\Services\SDKAdapterService;
+use WooPlugin\Services\SettingsService;
 
-final class PowerBoardGatewayBlocks extends AbstractBlock {
+final class PluginGatewayBlocks extends AbstractBlock {
 	protected const SCRIPT = 'blocks';
-	protected $name = 'power_board';
+	protected $name = PLUGIN_PREFIX;
 	private $gateway;
 
 	public function initialize() {
-		$this->settings = get_option( 'woocommerce_power_board_settings', [] );
+		$this->settings = get_option( 'woocommerce_' . PLUGIN_PREFIX . '_settings', [] );
 		$this->gateway  = new CardPaymentService();
 	}
 

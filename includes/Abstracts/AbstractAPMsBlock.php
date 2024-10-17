@@ -1,10 +1,10 @@
 <?php
 
-namespace PowerBoard\Abstracts;
+namespace WooPlugin\Abstracts;
 
-use PowerBoard\Enums\OtherPaymentMethods;
-use PowerBoard\Repositories\UserCustomerRepository;
-use PowerBoard\Services\SettingsService;
+use WooPlugin\Enums\OtherPaymentMethods;
+use WooPlugin\Repositories\UserCustomerRepository;
+use WooPlugin\Services\SettingsService;
 
 abstract class AbstractAPMsBlock extends AbstractBlock {
 	protected $gateway;
@@ -12,7 +12,7 @@ abstract class AbstractAPMsBlock extends AbstractBlock {
 	public function __construct() {
 		$aPMsTypeId = $this->getType()->getId();
 
-		$this->name   = 'power_board_' . $aPMsTypeId . '_a_p_m_s_block';
+		$this->name   = PLUGIN_PREFIX . '_' . $aPMsTypeId . '_a_p_m_s_block';
 		$this->script = $aPMsTypeId . '-a-p-m-s';
 
 		parent::__construct();

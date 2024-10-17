@@ -2,8 +2,11 @@ import {useState} from 'react';
 import {__} from '@wordpress/i18n';
 import {getSetting} from '@woocommerce/settings';
 
+const pluginPrefix = window.widgetSettings.pluginPrefix;
+const pluginTextDomain = window.widgetSettings.pluginTextDomain;
+
 export default (label = 'Security number') => {
-    const settings = getSetting('power_board_data', {});
+    const settings = getSetting(pluginPrefix + '_data', {});
 
     const wrapperClassName = 'wc-block-components-text-input'
     const [hasError, setHasError] = useState(false)
@@ -11,7 +14,7 @@ export default (label = 'Security number') => {
 
     return (
         <div
-            className={wrapperClassName + ' power-board-cvv-code' + (hasError ? ' has-error' : '') + (isActive ? ' is-active' : '')}
+            className={wrapperClassName + ' plugin-cvv-code' + (hasError ? ' has-error' : '') + (isActive ? ' is-active' : '')}
             style={{display: 'none'}}>
             <input
                 id="cvv"

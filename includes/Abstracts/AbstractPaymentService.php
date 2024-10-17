@@ -1,8 +1,8 @@
 <?php
 
-namespace PowerBoard\Abstracts;
+namespace WooPlugin\Abstracts;
 
-use PowerBoard\Services\SettingsService;
+use WooPlugin\Services\SettingsService;
 use WC_Payment_Gateway;
 
 abstract class AbstractPaymentService extends WC_Payment_Gateway {
@@ -10,7 +10,7 @@ abstract class AbstractPaymentService extends WC_Payment_Gateway {
 	 * Constructor
 	 */
 	public function __construct() {
-		$this->icon       = apply_filters( 'woocommerce_power_board_gateway_icon', '' );
+		$this->icon       = apply_filters( 'woocommerce_' . PLUGIN_PREFIX . '_gateway_icon', '' );
 		$this->has_fields = true;
 		$this->supports   = [
 			'products',
@@ -24,9 +24,9 @@ abstract class AbstractPaymentService extends WC_Payment_Gateway {
 			'default_credit_card_form',
 		];
 
-		$this->method_title       = _x( 'PowerBoard payment', 'PowerBoard payment method',
+		$this->method_title       = _x( PLUGIN_TEXT_NAME . ' payment', PLUGIN_TEXT_NAME . ' payment method',
 			'woocommerce-gateway-ppwer-board' );
-		$this->method_description = __( 'Allows PowerBoard payments.', 'woocommerce-gateway-ppwer-board' );
+		$this->method_description = __( 'Allows ' . PLUGIN_TEXT_NAME . ' payments.', 'woocommerce-gateway-ppwer-board' );
 
 		$this->init_settings();
 	}
@@ -41,24 +41,36 @@ abstract class AbstractPaymentService extends WC_Payment_Gateway {
 			return '';
 		}
 
-		wp_enqueue_script( 'power-board-form', POWER_BOARD_PLUGIN_URL . 'assets/js/frontend/form.js', [], time(),
+		wp_enqueue_script( PLUGIN_TEXT_DOMAIN . '-form', PLUGIN_URL . 'assets/js/frontend/form.js', [], time(),
 			true );
-		wp_localize_script( 'power-board-form', 'powerBoardCardWidgetSettings', [
+		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-form', 'pluginCardWidgetSettings', [
 			'suportedCard'    => 'Visa, Mastercard, Adex',
 		] );
-		wp_localize_script( 'power-board-form', 'powerBoardWidgetSettings', [
-			'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL
+		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-form', 'widgetSettings', [
+				'pluginUrlPrefix' => PLUGIN_URL,
+				'pluginTextDomain' => PLUGIN_TEXT_DOMAIN,
+				'pluginTextName' => PLUGIN_TEXT_NAME,
+				'pluginPrefix' => PLUGIN_PREFIX,
+				'pluginWidgetName' => PLUGIN_WIDGET_NAME,
+				'pluginSandboxEnvironment' => PLUGIN_SANDBOX_ENVIRONMENT,
+				'pluginProductionEnvironment' => PLUGIN_PRODUCTION_ENVIRONMENT,
 		] );
 		wp_enqueue_style(
-			'power-board-widget-css',
-			POWER_BOARD_PLUGIN_URL . 'assets/css/frontend/widget.css',
+			PLUGIN_TEXT_DOMAIN . '-widget-css',
+			PLUGIN_URL . 'assets/css/frontend/widget.css',
 			[],
 			time()
 		);
 
-		wp_enqueue_script( 'power-board-api', SettingsService::getInstance()->getWidgetScriptUrl(), [], time(), true );
-		wp_localize_script( 'power-board-api', 'powerBoardWidgetSettings', [
-			'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL
+		wp_enqueue_script( PLUGIN_TEXT_DOMAIN . '-api', SettingsService::getInstance()->getWidgetScriptUrl(), [], time(), true );
+		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-api', 'widgetSettings', [
+				'pluginUrlPrefix' => PLUGIN_URL,
+				'pluginTextDomain' => PLUGIN_TEXT_DOMAIN,
+				'pluginTextName' => PLUGIN_TEXT_NAME,
+				'pluginPrefix' => PLUGIN_PREFIX,
+				'pluginWidgetName' => PLUGIN_WIDGET_NAME,
+				'pluginSandboxEnvironment' => PLUGIN_SANDBOX_ENVIRONMENT,
+				'pluginProductionEnvironment' => PLUGIN_PRODUCTION_ENVIRONMENT,
 		] );
 	}
 }
