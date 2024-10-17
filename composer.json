@@ -1,6 +1,6 @@
 {
-    "name": "power_board/sp-woocommerce",
-    "description": "PowerBoard simplify how you manage your payments. Reduce costs, technical headaches & streamline compliance using PowerBoard's payment orchestration.",
+    "name": "paydock/sp-woocommerce",
+    "description": "Paydock simplify how you manage your payments. Reduce costs, technical headaches & streamline compliance using Paydock's payment orchestration.",
     "type": "project",
     "license": "MIT",
     "minimum-stability": "dev",

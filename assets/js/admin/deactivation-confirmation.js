@@ -1,6 +1,9 @@
 jQuery(function ($) {
     $(document).ready(function () {
-        $('#deactivate-powerboard-for-woocommerce').on('click', function (e) {
+        const pluginName = window.widgetSettings.pluginName;
+        const deactivateClass = '#deactivate-' + pluginName.toLowerCase().replaceAll(' ', '-');
+
+        $(deactivateClass).on('click', function (e) {
             e.preventDefault();
 
             let urlRedirect = jQuery(this).attr('href');

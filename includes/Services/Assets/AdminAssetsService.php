@@ -58,13 +58,7 @@ class AdminAssetsService {
 			$scriptName = $this->getScriptName( $script );
 			wp_enqueue_script( $this->getScriptName( $script ),'',[],PLUGIN_VERSION,true );
 			wp_localize_script( $scriptName, 'widgetSettings', [
-				'pluginUrlPrefix' => PLUGIN_URL,
-				'pluginTextDomain' => PLUGIN_TEXT_DOMAIN,
-				'pluginTextName' => PLUGIN_TEXT_NAME,
-				'pluginPrefix' => PLUGIN_PREFIX,
-				'pluginWidgetName' => PLUGIN_WIDGET_NAME,
-				'pluginSandboxEnvironment' => PLUGIN_SANDBOX_ENVIRONMENT,
-				'pluginProductionEnvironment' => PLUGIN_PRODUCTION_ENVIRONMENT,
+				'pluginName' => PLUGIN_NAME,
 			] );
 		}
 	}
