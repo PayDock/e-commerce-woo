@@ -12,6 +12,9 @@ const pluginPrefix = window.widgetSettings.pluginPrefix;
 const textDomain = window.widgetSettings.pluginTextDomain;
 const textName = window.widgetSettings.pluginTextName;
 const pluginWidgetName = window.widgetSettings.pluginWidgetName;
+const pluginProductionEnvironment = window.widgetSettings.pluginProductionEnvironment;
+const pluginSandboxEnvironment = window.widgetSettings.pluginSandboxEnvironment;
+
 const labels = {
     defaultLabel: __(textName + ' Payments', textDomain),
     placeOrderButtonLabel: __('Place Order by ' + textName, textDomain),
@@ -173,7 +176,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
                         return result
                     })
                 }
-                button.setEnv(settings.isSandbox ? 'preproduction_cba' : 'production_cba')
+                button.setEnv(settings.isSandbox ? pluginSandboxEnvironment : pluginProductionEnvironment)
                 button.setMeta(meta);
                 button.on('finish', () => {
                     if (settings.directCharge) {

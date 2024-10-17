@@ -36,6 +36,8 @@ abstract class AbstractBlock extends AbstractPaymentMethodType {
 				'pluginTextName' => PLUGIN_TEXT_NAME,
 				'pluginPrefix' => PLUGIN_PREFIX,
 				'pluginWidgetName' => PLUGIN_WIDGET_NAME,
+				'pluginSandboxEnvironment' => PLUGIN_SANDBOX_ENVIRONMENT,
+				'pluginProductionEnvironment' => PLUGIN_PRODUCTION_ENVIRONMENT,
 			] );
 			wp_enqueue_style(
 				PLUGIN_TEXT_DOMAIN . '-widget-css',
@@ -58,6 +60,8 @@ abstract class AbstractBlock extends AbstractPaymentMethodType {
 				'pluginTextName' => PLUGIN_TEXT_NAME,
 				'pluginPrefix' => PLUGIN_PREFIX,
 				'pluginWidgetName' => PLUGIN_WIDGET_NAME,
+				'pluginSandboxEnvironment' => PLUGIN_SANDBOX_ENVIRONMENT,
+				'pluginProductionEnvironment' => PLUGIN_PRODUCTION_ENVIRONMENT,
 			] );
 
 			self::$isLoad = true;
@@ -79,6 +83,8 @@ abstract class AbstractBlock extends AbstractPaymentMethodType {
 				'pluginTextName' => PLUGIN_TEXT_NAME,
 				'pluginPrefix' => PLUGIN_PREFIX,
 				'pluginWidgetName' => PLUGIN_WIDGET_NAME,
+				'pluginSandboxEnvironment' => PLUGIN_SANDBOX_ENVIRONMENT,
+				'pluginProductionEnvironment' => PLUGIN_PRODUCTION_ENVIRONMENT,
 		] );
 		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-api', 'widgetSettings', [
 				'pluginUrlPrefix' => PLUGIN_URL,
@@ -86,6 +92,8 @@ abstract class AbstractBlock extends AbstractPaymentMethodType {
 				'pluginTextName' => PLUGIN_TEXT_NAME,
 				'pluginPrefix' => PLUGIN_PREFIX,
 				'pluginWidgetName' => PLUGIN_WIDGET_NAME,
+				'pluginSandboxEnvironment' => PLUGIN_SANDBOX_ENVIRONMENT,
+				'pluginProductionEnvironment' => PLUGIN_PRODUCTION_ENVIRONMENT,
 		] );
 		if ( function_exists( 'wp_set_script_translations' ) ) {
 			wp_set_script_translations( $scriptName );

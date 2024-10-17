@@ -9,4 +9,10 @@ return [
   'PLUGIN_TEXT_DOMAIN' => 'paydock',
   'PLUGIN_PREFIX' => 'paydock',
   'PLUGIN_WIDGET_NAME' => 'paydock',
+  'PLUGIN_PRODUCTION_API_URL' => 'https://api.paydock.com/v1/',
+  'PLUGIN_SANDBOX_API_URL' => 'https://api-sandbox.paydock.com/v1/',
+  'PLUGIN_PRODUCTION_ENVIRONMENT' => 'production',
+  'PLUGIN_SANDBOX_ENVIRONMENT' => 'sandbox',
+  'PLUGIN_PRODUCTION_WIDGET_URL' => 'https://widget.paydock.com/sdk/{version}/widget.umd.min.js',
+  'PLUGIN_SANDBOX_WIDGET_URL' => 'https://widget.paydock.com/sdk/{version}/widget.umd.min.js',
 ];

@@ -6,6 +6,8 @@ import {CART_STORE_KEY} from '@woocommerce/block-data';
 
 const pluginPrefix = window.widgetSettings.pluginPrefix;
 const pluginWidgetName = window.widgetSettings.pluginWidgetName;
+const pluginProductionEnvironment = window.widgetSettings.pluginProductionEnvironment;
+const pluginSandboxEnvironment = window.widgetSettings.pluginSandboxEnvironment;
 
 export default async (forcePermanentVault = false, newAmount = null) => {
     const settings = getSetting(pluginPrefix + '_data', {});
@@ -67,7 +69,7 @@ export default async (forcePermanentVault = false, newAmount = null) => {
         preAuthData.token = settings.paymentSourceToken
     }
 
-    const envVal = settings.isSandbox ? 'preproduction_cba' : 'production_cba'
+    const envVal = settings.isSandbox ? pluginSandboxEnvironment : pluginProductionEnvironment
     const preAuthResp = await new window[pluginWidgetName].Api(settings.publicKey)
         .setEnv(envVal)
         .charge()

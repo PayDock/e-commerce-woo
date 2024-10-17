@@ -1,5 +1,7 @@
 const pluginPrefix = window.widgetSettings.pluginPrefix;
 const pluginWidgetName = window.widgetSettings.pluginWidgetName;
+const pluginProductionEnvironment = window.widgetSettings.pluginProductionEnvironment;
+const pluginSandboxEnvironment = window.widgetSettings.pluginSandboxEnvironment;
 
 setTimeout(() => jQuery(function ($) {
     $(document).ready(function() {
@@ -294,7 +296,7 @@ setTimeout(() => jQuery(function ($) {
         }
 
         widget.setFormFields(["card_name*","card_number*", "card_ccv*"]);
-        widget.setEnv(pluginCardSettings.isSandbox ? 'preproduction_cba' : 'production_cba');
+        widget.setEnv(pluginCardSettings.isSandbox ? pluginSandboxEnvironment : pluginProductionEnvironment);
         widget.onFinishInsert('input[name="payment_source_token"]', 'payment_source');
         widget.interceptSubmitForm('#widget');
         widget.hideElements(['submit_button']);

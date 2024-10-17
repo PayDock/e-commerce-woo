@@ -40,10 +40,10 @@ class ActionsService extends AbstractSingleton {
 			$this->addOrderActions();
 		} );
 
-		add_filter( 'gettext', array( $this, 'cba_refund_msg' ), 20, 3 );
+		add_filter( 'gettext', array( $this, 'custom_refund_msg' ), 20, 3 );
 	}
 
-	public function cba_refund_msg( $translated_text, $text, $domain ) {
+	public function custom_refund_msg( $translated_text, $text, $domain ) {
 
 		if ( 'woocommerce' === $domain ) {
 

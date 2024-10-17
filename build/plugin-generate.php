@@ -69,6 +69,30 @@ if ( ! defined( 'PLUGIN_TEXT_NAME' ) ) {
   define( 'PLUGIN_TEXT_NAME', '{$config['PLUGIN_TEXT_NAME']}' );
 }
 
+if ( ! defined( 'PLUGIN_PRODUCTION_API_URL' ) ) {
+  define( 'PLUGIN_PRODUCTION_API_URL', '{$config['PLUGIN_PRODUCTION_API_URL']}' );
+}
+
+if ( ! defined( 'PLUGIN_SANDBOX_API_URL' ) ) {
+  define( 'PLUGIN_SANDBOX_API_URL', '{$config['PLUGIN_SANDBOX_API_URL']}' );
+}
+
+if ( ! defined( 'PLUGIN_PRODUCTION_ENVIRONMENT' ) ) {
+  define( 'PLUGIN_PRODUCTION_ENVIRONMENT', '{$config['PLUGIN_PRODUCTION_ENVIRONMENT']}' );
+}
+
+if ( ! defined( 'PLUGIN_SANDBOX_ENVIRONMENT' ) ) {
+  define( 'PLUGIN_SANDBOX_ENVIRONMENT', '{$config['PLUGIN_SANDBOX_ENVIRONMENT']}' );
+}
+
+if ( ! defined( 'PLUGIN_PRODUCTION_WIDGET_URL' ) ) {
+  define( 'PLUGIN_PRODUCTION_WIDGET_URL', '{$config['PLUGIN_PRODUCTION_WIDGET_URL']}' );
+}
+
+if ( ! defined( 'PLUGIN_SANDBOX_WIDGET_URL' ) ) {
+  define( 'PLUGIN_SANDBOX_WIDGET_URL', '{$config['PLUGIN_SANDBOX_WIDGET_URL']}' );
+}
+
 require_once 'vendor/autoload.php';
 
 WooPlugin\WooPluginPlugin::getInstance();
