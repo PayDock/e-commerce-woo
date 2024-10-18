@@ -9,10 +9,13 @@ use PowerBoard\Enums\WalletPaymentMethods;
 <span class="power-board-order-actions">
     <?php
         $pb_charge_meta = $order->get_meta( 'pb_directly_charged' );
-        $partiallyRefunded = in_array( $order->get_meta('power_board_refunded_status'), [
-          'wc-pb-p-refund',
-          'pb-p-refund'
-        ] );
+
+        $total_refunded = $order->get_total_refunded();
+        $order_total = $order->get_total();
+
+        $partiallyRefunded = $total_refunded > 0 && $total_refunded < $order_total;
+        $fullyRefunded = $total_refunded >= $order_total;
+
         $order_directly_charged = ! empty( $pb_charge_meta ) ? $pb_charge_meta : false;
         $showCancelButton = ! in_array( $order->get_meta(OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey()), [
             WalletPaymentMethods::PAY_PAL_SMART_BUTTON()->getLabel(),
@@ -29,7 +32,7 @@ use PowerBoard\Enums\WalletPaymentMethods;
 			Capture charge
 		</button>
     <?php endif; ?>
-	  <?php if ( $showCancelButton && !$partiallyRefunded) :?>
+	  <?php if ( $showCancelButton && ! $partiallyRefunded && ! $fullyRefunded ) : ?>
           <button type="button"
                   onclick="handlePowerBoardPaymentCapture(<?php echo esc_attr( $order->get_id() ); ?>, 'power-board-cancel-authorised')"
                   class="button">

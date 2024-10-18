@@ -73,11 +73,11 @@ class BankAccountPaymentService extends AbstractPaymentService {
 		$isAuthorization = $response['resource']['data']['authorization'] ?? 0;
 		$markAsSuccess   = false;
 		if ( $isAuthorization && 'Pending' == $status ) {
-			$status = 'wc-pb-authorize';
+			$status = 'on-hold';
 		} else {
 			$markAsSuccess = true;
 			$isCompleted   = 'Complete' === $status;
-			$status        = $isCompleted ? 'wc-pb-paid' : 'wc-pb-requested';
+			$status        = $isCompleted ? 'processing' : 'processing';
 		}
 
 		OrderService::updateStatus( $order->get_id(), $status );

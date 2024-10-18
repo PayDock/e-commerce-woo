@@ -98,13 +98,13 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 		$operation       = ucfirst( strtolower( $response['resource']['type'] ?? 'undefined' ) );
 		$isAuthorization = $response['resource']['data']['authorization'] ?? 0;
 		if ( $isAuthorization && 'Pending' == $status ) {
-			$status = 'wc-pb-authorize';
+			$status = 'on-hold';
 		} else {
 			$isCompleted = 'complete' === strtolower( $status );
-			$status      = $isCompleted ? 'wc-pb-paid' : 'wc-pb-pending';
+			$status      = $isCompleted ? 'processing' : 'pending';
 		}
 		OrderService::updateStatus( $order_id, $status );
-		if ( ! in_array( $status, [ 'wc-pb-authorize' ] ) ) {
+		if ( ! in_array( $status, [ 'on-hold' ] ) ) {
 			$order->payment_complete();
 			$order->update_meta_data( 'pb_directly_charged', 1 );
 		}
@@ -118,7 +118,7 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 			$operation,
 			$status,
 			'',
-			'wc-pb-paid' == $status ? LogRepository::SUCCESS : LogRepository::DEFAULT
+			'processing' == $status ? LogRepository::SUCCESS : LogRepository::DEFAULT
 		);
 
 		$order->update_meta_data( OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(), $this->getAPMsType()->getLabel() );
