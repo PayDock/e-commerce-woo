@@ -10,9 +10,12 @@ use PowerBoard\Enums\CredentialSettings;
 use PowerBoard\Enums\CredentialsTypes;
 use PowerBoard\Enums\OtherPaymentMethods;
 use PowerBoard\Enums\SettingGroups;
+use PowerBoard\Enums\SettingsTabs;
 use PowerBoard\Enums\WalletPaymentMethods;
 use PowerBoard\Enums\WalletSettings;
 use PowerBoard\Enums\WidgetSettings;
+use PowerBoard\Enums\ConfigAPI;
+use PowerBoard\Services\Settings\AdvancedSettingService;
 use PowerBoard\Services\Settings\LiveConnectionSettingService;
 use PowerBoard\Services\Settings\SandboxConnectionSettingService;
 use PowerBoard\Services\Settings\WidgetSettingService;
@@ -24,7 +27,7 @@ final class SettingsService {
 	private $widgetService = null;
 	private $settingService = null;
 
-	private $isSandbox = false;
+	private $environment = '';
 	private $isSafariOrIOS = false;
 
 	protected function __construct() {
@@ -46,29 +49,39 @@ final class SettingsService {
 				->get_option( 'enabled' );
 	}
 
-	public function isSandbox(): bool {
-		$this->getSettingsService();
+	public function getEnvironment( ?string $selectedTab = null ): string {
+		$this->getSettingsService( $selectedTab );
 
-		return $this->isSandbox;
+		return $this->environment;
 	}
 
-	private function getSettingsService(): AbstractSettingService {
-		if ( ! is_null( $this->settingService ) ) {
+	private function getSettingsService( ?string $selectedTab = null ): AbstractSettingService {
+		if ( ! is_null( $this->settingService ) && empty ( $selectedTab ) ) {
 			return $this->settingService;
 		}
 
-		$this->settingService = new SandboxConnectionSettingService();
+		$sandboxConnectionSettingService = new SandboxConnectionSettingService();
+		$advancedSettingService = new AdvancedSettingService();
 
-		$this->isSandbox = self::ENABLED_CONDITION == $this->settingService
-				->get_option(
-					$this->getOptionName( $this->settingService->id, [
-						SettingGroups::CREDENTIALS()->name,
-						CredentialSettings::SANDBOX()->name,
-					] )
-				);
+		$isSandboxEnabled = self::ENABLED_CONDITION == $sandboxConnectionSettingService
+		->get_option(
+			$this->getOptionName(
+			$sandboxConnectionSettingService->id, [ SettingGroups::CREDENTIALS()->name, CredentialSettings::SANDBOX()->name ]
+			)
+		);
 
-		if ( ! $this->isSandbox ) {
-			$this->settingService = new LiveConnectionSettingService();
+		$isDebuggingEnabled = self::ENABLED_CONDITION == $advancedSettingService->get_option( $this->getOptionName( $advancedSettingService->id, [ SettingGroups::ADVANCED()->name, 'Debugging' ] ) );
+
+		if ( $isSandboxEnabled || (! empty( $selectedTab ) && SettingsTabs::SANDBOX_CONNECTION()->value === $selectedTab ) ) {
+			$this->environment = $isDebuggingEnabled ? ConfigAPI::STAGING_ENVIRONMENT()->value : ConfigAPI::SANDBOX_ENVIRONMENT()->value;
+			$this->settingService = $sandboxConnectionSettingService;
+		} else {
+			if ( ! empty( $selectedTab ) && SettingsTabs::SANDBOX_CONNECTION()->value === $selectedTab ) {
+				return $this->settingService;
+			} else {
+				$this->environment = ConfigAPI::PRODUCTION_ENVIRONMENT()->value;
+				$this->settingService = new LiveConnectionSettingService();
+			}
 		}
 
 		return $this->settingService;
@@ -776,11 +789,13 @@ final class SettingsService {
 	}
 
 	public function getWidgetScriptUrl(): string {
-		if ( $this->isSandbox ) {
-			$sdkUrl = 'https://widget.preproduction.powerboard.commbank.com.au/sdk/{version}/widget.umd.js';
+		if ( $this->environment == ConfigAPI::STAGING_ENVIRONMENT()->value ) {
+			$sdkUrl = ConfigAPI::STAGING_WIDGET_URL()->value;
+		} else if( $this->environment == ConfigAPI::SANDBOX_ENVIRONMENT()->value ) {
+			$sdkUrl = ConfigAPI::SANDBOX_WIDGET_URL()->value;
 		} else {
-			$sdkUrl = 'https://widget.powerboard.commbank.com.au/sdk/{version}/widget.umd.js';
-		}
+			$sdkUrl = ConfigAPI::PRODUCTION_WIDGET_URL()->value;
+    	}
 
 		return strtr( $sdkUrl, [ '{version}' => self::getInstance()->getVersion() ] );
 	}

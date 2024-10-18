@@ -33,10 +33,12 @@ class ConfigService {
 	}
 
 	public static function buildApiUrl( ?string $endpoint = null ): string {
-		if ( ConfigAPI::PRODUCTION_ENVIRONMENT()->value === self::$environment ) {
+		if ( self::$environment === ConfigAPI::PRODUCTION_ENVIRONMENT()->value  ) {
 			return ConfigAPI::PRODUCTION_API_URL()->value . $endpoint;
+		} else if ( self::$environment === ConfigAPI::STAGING_ENVIRONMENT()->value ) {
+			return ConfigAPI::STAGING_API_URL()->value . $endpoint;
+		} else {
+			return ConfigAPI::SANDBOX_API_URL()->value . $endpoint;
 		}
-
-		return ConfigAPI::SANDBOX_API_URL()->value . $endpoint;
 	}
 }

@@ -1,5 +1,5 @@
 let buttons = {};
-export default (id, buttonId, data, isSandbox) => {
+export default (id, buttonId, data, environment) => {
     const paymentSourceElement = jQuery('#paymentSourceWalletsToken');
     const paymentCompleted = jQuery('#paymentCompleted');
     const orderButton = jQuery('.wc-block-components-checkout-place-order-button');
@@ -34,7 +34,7 @@ export default (id, buttonId, data, isSandbox) => {
     }
     buttons.current = new window.cba.WalletButtons(buttonId, data.resource.data.token, config)
 
-    buttons.current.setEnv(isSandbox ? 'preproduction_cba' : 'production_cba')
+    buttons.current.setEnv(environment)
 
     buttons.current.onPaymentSuccessful((result) => {
         result.payment = id.replace('-','_')
