@@ -77,7 +77,7 @@ class BankAccountPaymentService extends AbstractPaymentService {
 		} else {
 			$markAsSuccess = true;
 			$isCompleted   = 'Complete' === $status;
-			$status        = $isCompleted ? 'processing' : 'processing';
+			$status        = 'processing';
 		}
 
 		OrderService::updateStatus( $order->get_id(), $status );

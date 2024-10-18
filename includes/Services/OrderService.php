@@ -26,12 +26,12 @@ class OrderService {
 	public function iniPowerBoardOrderButtons( $order ) {
 		$orderStatus       = $order->get_status();
 		$capturedAmount    = $order->get_meta( 'capture_amount' );
-		$totalRefaund      = $order->get_total_refunded();
-		$orderTotal      = (float) $order->get_total(false);
+		$totalRefund       = $order->get_total_refunded();
+		$orderTotal        = (float) $order->get_total(false);
 
 		if ( in_array( $orderStatus, [ 'pending', 'failed', 'cancelled', 'on-hold', 'refunded' ] )
-		     || ( $orderTotal == $totalRefaund )
-		     || ( $capturedAmount == $totalRefaund )
+			|| ( $orderTotal == $totalRefund )
+			|| ( $capturedAmount == $totalRefund )
 		) {
 			wp_enqueue_style(
 				'hide-refund-button-styles',
@@ -71,24 +71,15 @@ class OrderService {
 			return;
 		}
 		$rulesForStatuses = [
-			'processing' => [
-				'refunded',
-				'cancelled',
-				'failed',
-				'pending',
-				'completed',
-			],
+			'processing' => [ 'refunded', 'cancelled', 'failed', 'pending', 'completed' ],
 			'refunded'   => [ 'cancelled', 'failed', 'refunded' ],
 			'cancelled'  => [ 'failed', 'cancelled' ],
 		];
 		if ( ! empty( $rulesForStatuses[ $oldStatusKey ] ) ) {
 			if ( ! in_array( $newStatusKey, $rulesForStatuses[ $oldStatusKey ] ) ) {
-				$newStatusName                                   = wc_get_order_status_name( $newStatusKey );
-				$oldStatusName                                   = wc_get_order_status_name( $oldStatusKey );
-				$error                                           = sprintf(
-				/* translators: %1$s: Old status of processing order.
-				 * translators: %2$s: New status of processing order.
-				 */
+				$newStatusName = wc_get_order_status_name( $newStatusKey );
+				$oldStatusName = wc_get_order_status_name( $oldStatusKey );
+				$error         = sprintf(
 					__( 'You can not change status from "%1$s"  to "%2$s"', 'power-board' ),
 					$oldStatusName,
 					$newStatusName
@@ -112,11 +103,7 @@ class OrderService {
 			$capturedAmount = $order->get_meta( 'capture_amount' );
 
 			if ( ! empty( $capturedAmount ) ) {
-
-				// if ( $order->get_total() > $capturedAmount ) {
-					$this->templateService->includeAdminHtml( 'information-about-partial-captured', compact( 'order', 'capturedAmount' ) );
-				// }
-
+				$this->templateService->includeAdminHtml( 'information-about-partial-captured', compact( 'order', 'capturedAmount' ) );
 			}
 
 		}
