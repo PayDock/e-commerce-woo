@@ -39,7 +39,7 @@
                 </a>
             </th>
             <th scope="col" class="manage-column column-order_status sorted
-			<?php if ( ! empty( $records['order'] ) && ( 'asc' == $records['order'] ) && ( 'id' == $records['orderBy'] ) ) : ?>
+			<?php if ( ! empty( $records['order'] ) && ( 'asc' == $records['order'] ) && ( 'created_at' == $records['orderBy'] ) ) : ?>
 			  asc
 			  <?php else : ?>
 			  desc
@@ -61,7 +61,7 @@
                 </a>
             </th>
             <th scope="col" class="manage-column column-order_status sorted
-			<?php if ( ! empty( $records['order'] ) && ( 'asc' == $records['order'] ) && ( 'id' == $records['orderBy'] ) ) : ?>
+			<?php if ( ! empty( $records['order'] ) && ( 'asc' == $records['order'] ) && ( 'operation' == $records['orderBy'] ) ) : ?>
 			  asc
 			  <?php else : ?>
 			  desc
@@ -83,7 +83,7 @@
                 </a>
             </th>
             <th scope="col" class="manage-column column-order_status sorted
-			<?php if ( ! empty( $records['order'] ) && ( 'asc' == $records['order'] ) && ( 'id' == $records['orderBy'] ) ) : ?>
+			<?php if ( ! empty( $records['order'] ) && ( 'asc' == $records['order'] ) && ( 'status' == $records['orderBy'] ) ) : ?>
 			  asc
 			  <?php else : ?>
 			  desc
@@ -124,17 +124,14 @@
                     <td>
 						<?php echo esc_html( $record->operation ); ?>
                     </td>
+                    <?php
+                        $allowed_statuses = [ 'completed', 'processing', 'on-hold', 'failed', 'refunded', 'cancelled', 'pending' ];
+                        $status = in_array( $record->status, $allowed_statuses ) ? $record->status : 'pending';
+                        $status_class = 'order-status status-' . sanitize_html_class( $status ) . ' tips';
+                    ?>
                     <td>
-                        <mark
-							<?php if ( 1 == $record->type ) : ?>
-                                class="order-status status-processing tips"
-							<?php elseif ( 2 == $record->type ) : ?>
-                                class="order-status status-on-hold tips"
-							<?php else : ?>
-                                class="order-status status-pending tips"
-							<?php endif; ?>
-                        >
-                            <span><?php echo esc_html( $record->status ); ?></span>
+                        <mark class="<?php echo esc_attr( $status_class ); ?>">
+                            <span><?php echo esc_html( ucfirst( $status ) ); ?></span>
                         </mark>
                     </td>
                     <td>
@@ -169,7 +166,7 @@
                 </a>
             </th>
             <th scope="col" class="manage-column column-order_status sorted
-			<?php if ( ! empty( $records['order'] ) && ( 'asc' == $records['order'] ) && ( 'id' == $records['orderBy'] ) ) : ?>
+			<?php if ( ! empty( $records['order'] ) && ( 'asc' == $records['order'] ) && ( 'created_at' == $records['orderBy'] ) ) : ?>
 			  asc
 			  <?php else : ?>
 			  desc
@@ -191,7 +188,7 @@
                 </a>
             </th>
             <th scope="col" class="manage-column column-order_status sorted
-			<?php if ( ! empty( $records['order'] ) && ( 'asc' == $records['order'] ) && ( 'id' == $records['orderBy'] ) ) : ?>
+			<?php if ( ! empty( $records['order'] ) && ( 'asc' == $records['order'] ) && ( 'operation' == $records['orderBy'] ) ) : ?>
 			  asc
 			  <?php else : ?>
 			  desc
@@ -213,7 +210,7 @@
                 </a>
             </th>
             <th scope="col" class="manage-column column-order_status sorted
-			<?php if ( ! empty( $records['order'] ) && ( 'asc' == $records['order'] ) && ( 'id' == $records['orderBy'] ) ) : ?>
+			<?php if ( ! empty( $records['order'] ) && ( 'asc' == $records['order'] ) && ( 'status' == $records['orderBy'] ) ) : ?>
 			  asc
 			  <?php else : ?>
 			  desc
@@ -252,12 +249,12 @@
                     <span class="tablenav-pages-navspan button disabled" aria-hidden="true">«</span>
                     <span class="tablenav-pages-navspan button disabled" aria-hidden="true">‹</span>
 				<?php else : ?>
-                    <a class="next-page button"
+                    <a class="first-page button"
                        href="<?php echo esc_url( add_query_arg( [ 'page_number' => 1 ] ) ); ?>">
 						<span class="screen-reader-text">First page</span>
 						<span aria-hidden="true">«</span>
 					</a>
-                    <a class="last-page button"
+                    <a class="prev-page button"
                        href="<?php echo esc_url( add_query_arg( [ 'page_number' => $records['current'] - 1 ] ) ); ?>">
 						<span class="screen-reader-text">Prev page</span>
 						<span aria-hidden="true">‹</span>
@@ -283,7 +280,9 @@
                        href="<?php echo esc_url( add_query_arg( [ 'page_number' => $records['last_page'] ] ) ); ?>">
 						<span class="screen-reader-text">Last page</span>
 						<span aria-hidden="true">»</span>
-					</a <?php endif; ?> </span>
+					</a>
+				<?php endif; ?>
+			</span>
         </div>
         <br class="clear">
     </div>
