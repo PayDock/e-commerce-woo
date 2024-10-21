@@ -4,11 +4,9 @@ on:
   push:
     branches:
       - power_board
-      - power_board_sync
   pull_request:
     branches:
       - power_board
-      - power_board_sync
   workflow_dispatch:
 
 jobs:
