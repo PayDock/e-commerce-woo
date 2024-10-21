@@ -306,13 +306,19 @@ setTimeout(() => jQuery(function ($) {
         })
 
         widget.on(window.cba.EVENT.FINISH, () => {
-            const widgetErrorInterval = setInterval(() => {
+            if (!!window.widgetErrorInterval) clearInterval(window.widgetErrorInterval);
+            let counter = 0;
+            window.widgetErrorInterval = setInterval(() => {
                 const errorBanner = document.querySelectorAll('.wc-block-components-notice-banner.is-error')[0];
                 const bannerContent = errorBanner?.querySelectorAll('.wc-block-components-notice-banner__content')[0];
                 if (bannerContent?.innerText.indexOf('widget_error') > -1) {
                     reloadWidget();
                     bannerContent.innerText = bannerContent?.innerText.replace('widget_error', '')
-                    clearInterval(widgetErrorInterval);
+                    clearInterval(window.widgetErrorInterval);
+                } else if (counter === 300) {
+                    clearInterval(window.widgetErrorInterval);
+                } else {
+                    counter++;
                 }
             }, 100)
         })
