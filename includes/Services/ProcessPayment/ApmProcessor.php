@@ -9,6 +9,7 @@ use WooPlugin\Helpers\ShippingHelper;
 use WooPlugin\Repositories\LogRepository;
 use WooPlugin\Repositories\UserCustomerRepository;
 use WooPlugin\Services\SDKAdapterService;
+use WooPlugin\Services\SettingsService;
 
 class ApmProcessor {
 	const CHARGE_METHOD = 'charge';
@@ -26,12 +27,37 @@ class ApmProcessor {
 	private $runMethod;
 	private $logger;
 
-	public function __construct( array $args = [] ) {
+	public function __construct( array $args = [], ?OtherPaymentMethods $paymentMethod = null ) {
+		$settingService = SettingsService::getInstance();
+		if ( ! empty( $paymentMethod ) ) {
+			$args['gatewaytype'] = strtolower( $paymentMethod->getId() );
+		}
+
+		if ( empty( $args['directcharge'] ) ) {
+			$args['directcharge'] = $settingService->isAPMsDirectCharge( $paymentMethod ) ? 'true' : 'false';
+		}
+
+		if ( empty( $args['fraud'] ) ) {
+			$args['fraud'] = $settingService->isAPMsFraud( $paymentMethod ) ? 'true' : 'false';
+		}
+
+		if ( empty( $args['fraudserviceid'] ) ) {
+			$args['fraudserviceid'] = $settingService->getAPMsFraudServiceId( $paymentMethod );
+		}
+
 		$this->logger = new LogRepository();
 		$this->args   = ArgsForProcessPayment::prepare( $args );
 	}
 
 	public function run( $order ): array {
+		if ( $this->args['payment_source'] && is_array( $this->args['payment_source'] ) ) {
+			$value                            = array_filter( $this->args['payment_source'] );
+			$this->args['paymentsourcetoken'] = reset( $value );
+		}
+		if ( empty( $this->args['amount'] ) ) {
+			$this->args['amount'] = $order->get_total( false );
+		}
+
 		$this->order = $order;
 		$this->setRunMethod();
 
@@ -64,7 +90,7 @@ class ApmProcessor {
 			'amount'    => $this->order->get_total(),
 			'currency'  => strtoupper( get_woocommerce_currency() ),
 			'token'     => $this->args['paymentsourcetoken'],
-			'capture'   => strtolower( OtherPaymentMethods::AFTERPAY()->name ) === $this->args['gatewaytype'] ? true : $this->args['directcharge'],
+			'capture'   => ( strtolower( OtherPaymentMethods::AFTERPAY()->name ) === $this->args['gatewaytype'] ) ? true : $this->args['directcharge'],
 			'reference' => (string) $this->order->get_id(),
 			'customer'  => [
 				'first_name'     => $this->order->get_billing_first_name(),

@@ -104,6 +104,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
 
         useEffect(() => {
             const onShipping = onShippingRateSelectSuccess(async () => {
+
                 const storedTotalPrice = localState.total;
                 const currentTotalPrice = cart.getCartTotals()?.total_price;
 

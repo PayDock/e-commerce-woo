@@ -85,7 +85,12 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
             } else if ((validationSuccess && 'afterpay' === id) && !wasInit) {
                 wasInit = true;
                 button = new window[pluginWidgetName].AfterpayCheckoutButton('#' + buttonId, settings.publicKey, settings.gatewayId);
-                meta = {
+
+                data.gatewayType = 'afterpay'
+            }
+
+            if (validationSuccess && 'afterpay' === id) {
+              meta = {
                     amount: getNewAmount(),
                     currency: settings.currency,
                     email: billingAddress.email,
@@ -99,8 +104,6 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
                     address_country: billingAddress.country,
                     phone: billingAddress.phone
                 }
-
-                data.gatewayType = 'afterpay'
             }
 
 
@@ -218,6 +221,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
                 }
 
                 data.paymentSourceToken = paymentSourceToken.value;
+                data.amount = getNewAmount();
                 if (data.paymentSourceToken.length > 0 || settings.selectedToken.length > 0) {
                     return {
                         type: emitResponse.responseTypes.SUCCESS,

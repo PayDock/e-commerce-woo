@@ -95,23 +95,33 @@ class FiltersService extends AbstractSingleton {
 	}
 
 	public function registerInWooCommercePaymentClass( array $methods ): array {
+
 		global $current_section;
 		global $current_tab;
 
-		$methods[] = LiveConnectionSettingService::class;
-		if ( 'checkout' != $current_tab
-		     || in_array(
-			     $current_section,
-			     array_map(
-				     function ( SettingsTabs $tab ) {
-					     return $tab->value;
-				     },
-				     SettingsTabs::secondary()
-			     )
-		     ) ) {
-			$methods[] = SandboxConnectionSettingService::class;
-			$methods[] = WidgetSettingService::class;
-			$methods[] = LogsSettingService::class;
+		if ( is_admin() ) {
+
+			$methods[] = LiveConnectionSettingService::class;
+
+			if (
+				'checkout' != $current_tab ||
+				in_array(
+					$current_section,
+					array_map(
+						function ( SettingsTabs $tab ) {
+							return $tab->value;
+						},
+						SettingsTabs::secondary()
+					)
+				)
+			) {
+				$methods[] = SandboxConnectionSettingService::class;
+				$methods[] = WidgetSettingService::class;
+				$methods[] = LogsSettingService::class;
+			}
+
+		} else {
+
 			$methods[] = CardPaymentService::class;
 			$methods[] = BankAccountPaymentService::class;
 			$methods[] = ApplePayWalletService::class;
@@ -120,10 +130,11 @@ class FiltersService extends AbstractSingleton {
 			$methods[] = PayPalWalletService::class;
 			$methods[] = AfterpayAPMsPaymentServiceService::class;
 			$methods[] = ZipAPMsPaymentServiceService::class;
+
 		}
 
-
 		return $methods;
+
 	}
 
 	public function woocommerceThankyouOrderReceivedText( $text ) {

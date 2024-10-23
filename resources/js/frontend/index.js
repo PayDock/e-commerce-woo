@@ -34,7 +34,7 @@ const label = decodeEntities(settings.title) || labels.defaultLabel;
 
 let formSubmittedAlready = false;
 const Content = (props) => {
-
+    const cart = select(CART_STORE_KEY);
     const {eventRegistration, emitResponse} = props;
     const {onPaymentSetup, onCheckoutValidation, onShippingRateSelectSuccess} = eventRegistration;
 
@@ -218,6 +218,7 @@ const Content = (props) => {
                 data.tokens = '';
                 data.styles = '';
                 data.supports = '';
+                data.amount = Number((cart.getCartTotals().total_price / 100).toFixed(3)).toFixed(2)
 
                 if(data.total_limitation){
                     delete data.total_limitation;

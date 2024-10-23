@@ -106,4 +106,10 @@ class BankAccountPaymentService extends AbstractPaymentService {
 	public function webhook() {
 
 	}
+
+	public function get_payment_method_data(): array
+    {
+        return [];
+    }
+
 }

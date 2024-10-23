@@ -21,7 +21,7 @@ export default async (forcePermanentVault = false, newAmount = null) => {
     const shippingAddress = cart.getCustomerData().shippingAddress;
 
     const preAuthData = {
-        amount: newAmount || settings.amount,
+        amount: Number((cart.getCartTotals().total_price / 100).toFixed(3)).toFixed(2),
         currency: settings.currency,
         customer: {
             first_name: billingAddress.first_name,
