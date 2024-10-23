@@ -46,7 +46,7 @@ if ( ! defined( 'PLUGIN_PATH' ) ) {
 }
 
 if ( ! defined( 'PLUGIN_URL' ) ) {
-  define( 'PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+  define( 'PLUGIN_URL', plugin_dir_url( __FILE__ ) . '/' );
 }
 
 if ( ! defined( 'PLUGIN_VERSION' ) ) {

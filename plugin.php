@@ -39,7 +39,7 @@ if ( ! defined( 'PLUGIN_PATH' ) ) {
 }
 
 if ( ! defined( 'PLUGIN_URL' ) ) {
-  define( 'PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+  define( 'PLUGIN_URL', plugin_dir_url( __FILE__ ) . '/' );
 }
 
 if ( ! defined( 'PLUGIN_VERSION' ) ) {
@@ -67,7 +67,7 @@ if ( ! defined( 'PLUGIN_PRODUCTION_API_URL' ) ) {
 }
 
 if ( ! defined( 'PLUGIN_SANDBOX_API_URL' ) ) {
-  define( 'PLUGIN_SANDBOX_API_URL', 'https://api.preproduction.powerboard.commbank.com.au/v1/' );
+  define( 'PLUGIN_SANDBOX_API_URL', 'https://api.staging.powerboard.commbank.com.au/v1/' );
 }
 
 if ( ! defined( 'PLUGIN_PRODUCTION_ENVIRONMENT' ) ) {
@@ -75,7 +75,7 @@ if ( ! defined( 'PLUGIN_PRODUCTION_ENVIRONMENT' ) ) {
 }
 
 if ( ! defined( 'PLUGIN_SANDBOX_ENVIRONMENT' ) ) {
-  define( 'PLUGIN_SANDBOX_ENVIRONMENT', 'preproduction_cba' );
+  define( 'PLUGIN_SANDBOX_ENVIRONMENT', 'staging_cba' );
 }
 
 if ( ! defined( 'PLUGIN_PRODUCTION_WIDGET_URL' ) ) {
@@ -83,7 +83,7 @@ if ( ! defined( 'PLUGIN_PRODUCTION_WIDGET_URL' ) ) {
 }
 
 if ( ! defined( 'PLUGIN_SANDBOX_WIDGET_URL' ) ) {
-  define( 'PLUGIN_SANDBOX_WIDGET_URL', 'https://widget.preproduction.powerboard.commbank.com.au/sdk/{version}/widget.umd.js' );
+  define( 'PLUGIN_SANDBOX_WIDGET_URL', 'https://widget.staging.powerboard.commbank.com.au/sdk/{version}/widget.umd.js' );
 }
 
 require_once 'vendor/autoload.php';

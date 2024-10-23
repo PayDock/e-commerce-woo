@@ -73,7 +73,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 		}
 
 		wp_enqueue_script( PLUGIN_TEXT_DOMAIN . '-form', PLUGIN_URL . 'assets/js/frontend/form.js', [], time(), true );
-		wp_enqueue_script( PLUGIN_TEXT_DOMAIN . '-classic-form', PLUGIN_URL . '/assets/js/frontend/classic-form.js', [], time(), true );
+		wp_enqueue_script( PLUGIN_TEXT_DOMAIN . '-classic-form', PLUGIN_URL . 'assets/js/frontend/classic-form.js', [], time(), true );
 		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-form', 'pluginCardWidgetSettings', [
 			'suportedCard'    => 'Visa, Mastercard, Adex',
 		] );
@@ -390,6 +390,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 		$template->includeCheckoutHtml( 'method-form', [
 			'description'      => $this->description,
 			'id'               => $this->id,
+  		'plugin_text_domain' => PLUGIN_TEXT_DOMAIN,
 			'card3DSFlow'      => $settings['card3DSFlow'],
 			'isSaveCardEnable' => $settings['cardSaveCard'],
 			'nonce'            => wp_create_nonce( 'process_payment' ),

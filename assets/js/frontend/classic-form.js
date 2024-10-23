@@ -279,7 +279,7 @@ jQuery(function ($) {
                     }
                 } else if (this.defaultFormTriger) {
                     const config = this.getConfigs();
-                    config.selectedToken = $('#classic_gateway-token').val();
+                    config.selectedToken = $('#classic-plugin_gateway-token').val();
                     this.listenForWidgetErrors();
                 }
             },
@@ -300,7 +300,7 @@ jQuery(function ($) {
                     )
                 let gatewayId = isPermanent ? config.gatewayId : 'not_configured';
 
-                this.currentForm.card = new cba.HtmlWidget('#classic_gateway', config.publicKey, gatewayId, "card", "card_payment_source_with_cvv");
+                this.currentForm.card = new cba.HtmlWidget('#classic-plugin_gateway', config.publicKey, gatewayId, "card", "card_payment_source_with_cvv");
                 this.currentForm.card.setFormPlaceholders({
                     card_name: 'Card holders name *',
                     card_number: 'Credit card number *',
@@ -325,7 +325,7 @@ jQuery(function ($) {
 
                 this.currentForm.card.setEnv(config.isSandbox ? pluginSandboxEnvironment : pluginProductionEnvironment);
                 this.currentForm.card.setFormFields(["card_name*","card_number*", "card_ccv*"]);
-                this.currentForm.card.onFinishInsert('#classic_gateway-token', 'payment_source');
+                this.currentForm.card.onFinishInsert('#classic-plugin_gateway-token', 'payment_source');
                 this.currentForm.card.interceptSubmitForm('#widget');
                 this.currentForm.card.hideElements(['submit_button']);
 
@@ -333,7 +333,7 @@ jQuery(function ($) {
 
                 this.currentForm.card.on(window.cba.EVENT.FINISH, () => {
                     const currentConfig = this.getConfigs();
-                    currentConfig.paymentSourceToken = $('#classic_gateway-token').val();
+                    currentConfig.paymentSourceToken = $('#classic-plugin_gateway-token').val();
                     switch (currentConfig.card3DS) {
                         case 'IN_BUILD':
                             this.init3DSInBuilt(currentConfig)
@@ -350,7 +350,7 @@ jQuery(function ($) {
 
                 $('#select-saved-cards').on('change', (event) => {
                     let value = event.target.value
-                    let widgetform = $('#classic_gateway-wrapper')
+                    let widgetform = $('#classic-plugin_gateway-wrapper')
                     let checkbox = $('#card_save_card').parent()
 
                     widgetform.hide()
@@ -363,21 +363,21 @@ jQuery(function ($) {
                         checkbox.hide()
                         this.defaultFormTriger = true;
                     }
-                    $('#classic_gateway-token').val(value)
+                    $('#classic-plugin_gateway-token').val(value)
                 })
             },
             showWidget() {
                 $('#select-saved-cards').val("");
                 $('#card_save_card').parent().show();
-                $('#classic_gateway-wrapper').show();
+                $('#classic-plugin_gateway-wrapper').show();
                 this.defaultFormTriger = false;
             },
             reloadCardWidget() {
                 this.showWidget();
                 const config = this.getConfigs();
                 config.selectedToken = "";
-                $('#classic_gateway-settings').val(JSON.stringify(config));
-                $('#classic_gateway-token').val(null);
+                $('#classic-plugin_gateway-settings').val(JSON.stringify(config));
+                $('#classic-plugin_gateway-token').val(null);
                 this.currentForm.card.reload();
                 this.currentForm.widgetReloaded = true;
             },
@@ -398,7 +398,7 @@ jQuery(function ($) {
                     config.selectedToken = await this.getVaultToken(config);
                 }
 
-                $('#classic_gateway-token').val(config.selectedToken)
+                $('#classic-plugin_gateway-token').val(config.selectedToken)
 
                 let address = this.getAddressData(false);
                 const preAuthData = {
@@ -449,7 +449,7 @@ jQuery(function ($) {
                 }
 
                 $("#plugin-3ds-container").show()
-                $('#classic_gateway').hide()
+                $('#classic-plugin_gateway').hide()
 
                 const canvas = new window.cba.Canvas3ds("#plugin-3ds-container", preAuthResp._3ds.token);
                 canvas.load();
@@ -461,7 +461,7 @@ jQuery(function ($) {
                 canvas.on('chargeAuthReject', (data) => {
                     if (data.status === 'not_authenticated') {
                         $("#plugin-3ds-container").hide();
-                        $('#classic_gateway').show();
+                        $('#classic-plugin_gateway').show();
                     }
                     $('#charge3dsid').val(data.charge_3ds_id);
                     this.form.submit();
@@ -469,7 +469,7 @@ jQuery(function ($) {
             },
             async getVaultToken(config) {
                 data = {...config}
-                data.paymentSourceToken = $('#classic_gateway-token').val()
+                data.paymentSourceToken = $('#classic-plugin_gateway-token').val()
                 data.action = 'get_vault_token';
                 data._wpnonce = PluginAjax.wpnonce_3ds;
                 data.tokens = '';
@@ -491,7 +491,7 @@ jQuery(function ($) {
             async getStandalone3dsToken(config) {
                 const data = {...config};
                 data.action = 'get_vault_token';
-                data.paymentSourceToken = $('#classic_gateway-token').val();
+                data.paymentSourceToken = $('#classic-plugin_gateway-token').val();
                 data.type = 'standalone-3ds-token';
                 data._wpnonce = PluginAjax.wpnonce_3ds;
                 let address = this.getAddressData(false);
@@ -519,7 +519,7 @@ jQuery(function ($) {
                     config.selectedToken = await this.getVaultToken(config)
                 }
 
-                $('#classic_gateway-token').val(config.selectedToken)
+                $('#classic-plugin_gateway-token').val(config.selectedToken)
 
                 const threeDsToken = await this.getStandalone3dsToken(config)
 

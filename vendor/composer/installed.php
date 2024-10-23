@@ -3,7 +3,7 @@
         'name' => 'power_board/sp-woocommerce',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => 'a5b546cda819f306ee0ce1dd4c3e4f90d2e8aa8d',
+        'reference' => 'c645cab8685f4ab2027b7dd8dac9b1acf5c84472',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         'power_board/sp-woocommerce' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'a5b546cda819f306ee0ce1dd4c3e4f90d2e8aa8d',
+            'reference' => 'c645cab8685f4ab2027b7dd8dac9b1acf5c84472',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

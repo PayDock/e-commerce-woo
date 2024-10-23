@@ -10,9 +10,9 @@ return [
   'PLUGIN_PREFIX' => 'power_board',
   'PLUGIN_WIDGET_NAME' => 'cba',
   'PLUGIN_PRODUCTION_API_URL' => 'https://api.powerboard.commbank.com.au/v1/',
-  'PLUGIN_SANDBOX_API_URL' => 'https://api.preproduction.powerboard.commbank.com.au/v1/',
+  'PLUGIN_SANDBOX_API_URL' => 'https://api.staging.powerboard.commbank.com.au/v1/',
   'PLUGIN_PRODUCTION_ENVIRONMENT' => 'production_cba',
-  'PLUGIN_SANDBOX_ENVIRONMENT' => 'preproduction_cba',
+  'PLUGIN_SANDBOX_ENVIRONMENT' => 'staging_cba',
   'PLUGIN_PRODUCTION_WIDGET_URL' => 'https://widget.powerboard.commbank.com.au/sdk/{version}/widget.umd.js',
-  'PLUGIN_SANDBOX_WIDGET_URL' => 'https://widget.preproduction.powerboard.commbank.com.au/sdk/{version}/widget.umd.js',
+  'PLUGIN_SANDBOX_WIDGET_URL' => 'https://widget.staging.powerboard.commbank.com.au/sdk/{version}/widget.umd.js',
 ];

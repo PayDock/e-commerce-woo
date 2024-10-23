@@ -9,7 +9,7 @@ echo wpautop( wp_kses_post( esc_attr( $description ) ) );
         <div class="plugin-select-saved-cards">
             <label style="font-size: 1rem; font-weight: bold; line-height: 2"
                    for="select-saved-cards">
-				<?php echo esc_html( __( 'Saved payment details', PLUGIN_TEXT_DOMAIN ) ) ?>
+				<?php echo esc_html( __( 'Saved payment details', $plugin_text_domain ) ) ?>
             </label>
             <select id="select-saved-cards">
                 <option value="">New card</option>
@@ -32,7 +32,7 @@ echo wpautop( wp_kses_post( esc_attr( $description ) ) );
     <div id="plugin-3ds-container"></div>
 	<?php if ( in_array( $id, [ 'plugin_afterpay_a_p_m_s_gateway', 'plugin_zip_a_p_m_s_gateway' ] ) ): ?>
         <button id="classic-<?php echo esc_attr( $id ) ?>" class="btn-apm" type="button">
-            <img src="/wp-content/plugins/<?php echo PLUGIN_TEXT_DOMAIN ?>/assets/images/<?php echo esc_attr( str_replace( [
+            <img src="/wp-content/plugins/<?php echo $plugin_text_domain ?>/assets/images/<?php echo esc_attr( str_replace( [
 				'plugin_',
 				'_a_p_m_s_gateway'
 			], '', $id ) ) ?>.png">
@@ -43,11 +43,11 @@ echo wpautop( wp_kses_post( esc_attr( $description ) ) );
         </div>
 	<?php endif; ?>
     <div id="classic-<?php echo esc_attr( $id ) ?>-error" class="plugin-validation-error" style="display: none;">
-		<?php echo esc_html( __( 'Please fill in the required fields of the form to display payment methods.', PLUGIN_TEXT_DOMAIN ) ) ?>
+		<?php echo esc_html( __( 'Please fill in the required fields of the form to display payment methods.', $plugin_text_domain ) ) ?>
     </div>
     <div id="classic-<?php echo esc_attr( $id ) ?>-error-countries" class="plugin-validation-error"
          style="display: none;">
-		<?php echo esc_html( __( 'The payment method is not available in your country.', PLUGIN_TEXT_DOMAIN ) ) ?>
+		<?php echo esc_html( __( 'The payment method is not available in your country.', $plugin_text_domain ) ) ?>
     </div>
 	<?php if ( 'plugin_gateway' === $id ): ?>
         <input id="charge3dsid" type="hidden" name="charge3dsid">
@@ -65,7 +65,7 @@ echo wpautop( wp_kses_post( esc_attr( $description ) ) );
                    value="yes"
                    name="cardsavecardchecked">
             <span class="wc-block-components-checkbox__label">
-            <?php echo esc_html( __( 'Save payment details', PLUGIN_TEXT_DOMAIN ) ) ?>
+            <?php echo esc_html( __( 'Save payment details', $plugin_text_domain ) ) ?>
         </span>
         </label>
 	<?php endif; ?>

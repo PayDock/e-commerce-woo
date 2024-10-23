@@ -45,12 +45,12 @@ abstract class AbstractPaymentService extends WC_Payment_Gateway {
 
 		wp_enqueue_script( PLUGIN_TEXT_DOMAIN . '-api', SettingsService::getInstance()->getWidgetScriptUrl(), [], time(), true );
     wp_enqueue_script( 'axios', 'https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js', [], time(), true );
-    wp_enqueue_script( PLUGIN_TEXT_DOMAIN . '-form', PLUGIN_URL . '/assets/js/frontend/form.js', [], time(), true );
-    wp_enqueue_script( PLUGIN_TEXT_DOMAIN . '-classic-form', PLUGIN_URL . '/assets/js/frontend/classic-form.js', [], time(), true );
+    wp_enqueue_script( PLUGIN_TEXT_DOMAIN . '-form', PLUGIN_URL . 'assets/js/frontend/form.js', [], time(), true );
+    wp_enqueue_script( PLUGIN_TEXT_DOMAIN . '-classic-form', PLUGIN_URL . 'assets/js/frontend/classic-form.js', [], time(), true );
 		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-form', 'pluginCardWidgetSettings', [
 			'suportedCard'    => 'Visa, Mastercard, Adex',
 		] );
-		wp_enqueue_style( PLUGIN_TEXT_DOMAIN . '-widget-css', PLUGIN_URL . '/assets/css/frontend/widget.css', [], time() );
+		wp_enqueue_style( PLUGIN_TEXT_DOMAIN . '-widget-css', PLUGIN_URL . 'assets/css/frontend/widget.css', [], time() );
 
 		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-form', 'widgetSettings', [
 				'pluginUrlPrefix' => PLUGIN_URL,
@@ -89,6 +89,7 @@ abstract class AbstractPaymentService extends WC_Payment_Gateway {
   		$template->includeCheckoutHtml( 'method-form', [
   			'description' => $this->description,
   			'id'          => $this->id,
+  			'plugin_text_domain' => PLUGIN_TEXT_DOMAIN,
   			'settings'    => wp_json_encode( $this->get_payment_method_data() ),
   			'cart_hash'   => $cart_hash,
   			'nonce'       => wp_create_nonce( 'process_payment' ),
