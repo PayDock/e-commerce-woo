@@ -24,7 +24,7 @@ jobs:
           ./build/build-powerboard.prod.sh
 
       - name: Create PowerBoard build file
-        run:
+        run: |
           cd power-board
           zip -r ../power-board.zip . -x 'build/*' '.git/*' '.github/*' '.gitignore' '.gitlab-ci.yml' 'node.sh' '*.zip'
 
