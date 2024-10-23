@@ -29,7 +29,7 @@ jobs:
 
       - name: Create PowerBoard build file
         run:
-          zip -r power-board.zip . -x 'build/*' '.git/*' '.github/*' '.gitignore' '.gitlab-ci.yml' 'node.sh' '*.zip'
+          zip -r power-board.zip .
 
       - name: Prepare Paydock build file
         run: |
