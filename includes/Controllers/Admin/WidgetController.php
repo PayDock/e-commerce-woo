@@ -13,8 +13,8 @@ class WidgetController {
 	public function createWalletChargeClassic() {
 		$data    = [];
 		$wpNonce = ! empty( $_POST['_wpnonce'] ) ? sanitize_text_field( $_POST['_wpnonce'] ) : null;
-		if ( ! wp_verify_nonce( $wpNonce, 'power-board-create-wallet-charge' ) ) {
-			wp_send_json_error( [ 'message' => __( 'Error: Security check', 'power-board' ) ] );
+		if ( ! wp_verify_nonce( $wpNonce, 'create-wallet-charge' ) ) {
+			wp_send_json_error( [ 'message' => __( 'Error: Security check', PLUGIN_TEXT_DOMAIN ) ] );
 
 			return;
 		}

@@ -78,8 +78,8 @@ abstract class AbstractPaymentService extends WC_Payment_Gateway {
 				'pluginWidgetName' => PLUGIN_WIDGET_NAME,
 				'pluginSandboxEnvironment' => PLUGIN_SANDBOX_ENVIRONMENT,
 				'pluginProductionEnvironment' => PLUGIN_PRODUCTION_ENVIRONMENT,
-		wp_enqueue_script( 'axios', 'https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js', [], time(), true );
 		] );
+		wp_enqueue_script( 'axios', 'https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js', [], time(), true );
 	}
 
 	public function payment_fields() {

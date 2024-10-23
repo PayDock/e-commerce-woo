@@ -21,10 +21,10 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 		$paymentMethod = $this->getAPMsType();
 		$id            = $paymentMethod->getId();
 
-		$this->id    = PLUGIN_PREFIX . '_' . $id . '_wallets_gateway';
+		$this->id    = 'plugin_' . $id . '_wallets_gateway';
 		$this->title = $settings->getWidgetPaymentAPMTitle( $paymentMethod );
 
-		$this->id          = PLUGIN_PREFIX . '_' . $paymentMethod->getId() . '_a_p_m_s_gateway';
+		$this->id          = 'plugin_' . $paymentMethod->getId() . '_a_p_m_s_gateway';
 		$this->description = $settings->getWidgetPaymentAPMDescription( $paymentMethod );
 
 		parent::__construct();
@@ -36,9 +36,9 @@ abstract class AbstractAPMsPaymentService extends AbstractPaymentService {
 		$paymentMethod = $this->getAPMsType();
 
 		if ( is_checkout() ) {
-			$this->title = '<img src="/wp-content/plugins/power-board/assets/images/icons/' .
+			$this->title = '<img src="/wp-content/plugins/' . PLUGIN_TEXT_DOMAIN . '/assets/images/icons/' .
 			               $paymentMethod->getId() .
-			               '.png" height="25" class="power-board-payment-method-label-icon ' .
+			               '.png" height="25" class="plugin-payment-method-label-icon ' .
 			               $paymentMethod->getId() .
 			               '">' .
 			               SettingsService::getInstance()->getWidgetPaymentAPMTitle( $paymentMethod );

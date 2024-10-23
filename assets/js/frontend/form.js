@@ -13,12 +13,12 @@ setTimeout(() => jQuery(function ($) {
             baseCheckboxIdName: 'radio-control-wc-payment-method-options',
             errorMessageClassName: 'wc-block-components-validation-error',
             paymentOptionsNames: [
-                pluginPrefix + '_gateway',
-                pluginPrefix + '_google-pay_wallets_gateway',
-                pluginPrefix + '_afterpay_wallets_gateway',
-                pluginPrefix + '_pay-pal_wallets_gateway',
-                pluginPrefix + '_afterpay_a_p_m_s_gateway',
-                pluginPrefix + '_zip_a_p_m_s_gateway',
+                'plugin_gateway',
+                'plugin_google-pay_wallets_gateway',
+                'plugin_afterpay_wallets_gateway',
+                'plugin_pay-pal_wallets_gateway',
+                'plugin_afterpay_a_p_m_s_gateway',
+                'plugin_zip_a_p_m_s_gateway',
             ],
             phonePattern: /^\+[1-9]{1}[0-9]{3,14}$/,
             errorMessageHtml: `<div class="wc-block-components-validation-error" role="alert"><p>Please enter your phone number in international format, starting with "+"</p></div>`,
@@ -182,8 +182,8 @@ setTimeout(() => jQuery(function ($) {
 
     window.pluginValidation = pluginValidation;
 
-    const idPluginWidgetCard = 'radio-control-wc-payment-method-options-' + pluginPrefix + '_gateway';
-    const idPluginWidgetBankAccount = 'radio-control-wc-payment-method-options-' + pluginPrefix + '_bank_account_gateway';
+    const idPluginWidgetCard = 'radio-control-wc-payment-method-options-plugin_gateway';
+    const idPluginWidgetBankAccount = 'radio-control-wc-payment-method-options-plugin_bank_account_gateway';
 
     const searchParams = new URLSearchParams(window.location.search);
     function initPluginWidgetBankAccount() {
@@ -346,20 +346,20 @@ setTimeout(() => jQuery(function ($) {
         $('.wc-block-components-radio-control__input').on('change', (event) => {
             const $orderButton = $('.wc-block-components-checkout-place-order-button');
             switch (event.target.value) {
-                case pluginPrefix + '_gateway':
+                case 'plugin_gateway':
                     initPluginWidgetCard();
                     $orderButton.show();
                     break;
-                case pluginPrefix + '_bank_account_gateway':
+                case 'plugin_bank_account_gateway':
                     initPluginWidgetBankAccount();
                     $orderButton.show();
                     break;
-                case pluginPrefix + '_google-pay_wallets_gateway':
-                case pluginPrefix + '_apple-pay_wallets_gateway':
-                case pluginPrefix + '_afterpay-pay_wallets_gateway':
-                case pluginPrefix + '_pay-pal_wallets_gateway':
-                case pluginPrefix + '_afterpay_a_p_m_s_gateway':
-                case pluginPrefix + '_zip_a_p_m_s_gateway':
+                case 'plugin_google-pay_wallets_gateway':
+                case 'plugin_apple-pay_wallets_gateway':
+                case 'plugin_afterpay-pay_wallets_gateway':
+                case 'plugin_pay-pal_wallets_gateway':
+                case 'plugin_afterpay_a_p_m_s_gateway':
+                case 'plugin_zip_a_p_m_s_gateway':
                     $orderButton.hide();
                     break;
                 default:

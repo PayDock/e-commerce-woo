@@ -31,7 +31,7 @@ abstract class AbstractSettingService extends \WC_Payment_Gateway {
 
 		$this->title = __( PLUGIN_TEXT_NAME . ' Gateway', PLUGIN_TEXT_DOMAIN );
 
-		$this->icon = POWER_BOARD_PLUGIN_URL . 'assets/images/logo.png';
+		$this->icon = PLUGIN_URL . 'assets/images/logo.png';
 
 		$this->init_settings();
 		$this->init_form_fields();

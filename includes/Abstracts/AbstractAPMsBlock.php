@@ -12,7 +12,7 @@ abstract class AbstractAPMsBlock extends AbstractBlock {
 	public function __construct() {
 		$aPMsTypeId = $this->getType()->getId();
 
-		$this->name   = PLUGIN_PREFIX . '_' . $aPMsTypeId . '_a_p_m_s_block';
+		$this->name   = 'plugin_' . $aPMsTypeId . '_a_p_m_s_block';
 		$this->script = $aPMsTypeId . '-a-p-m-s';
 
 		parent::__construct();

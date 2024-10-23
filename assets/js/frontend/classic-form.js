@@ -1,4 +1,7 @@
 jQuery(function ($) {
+    const pluginWidgetName = window.widgetSettings.pluginWidgetName;
+    const pluginProductionEnvironment = window.widgetSettings.pluginProductionEnvironment;
+    const pluginSandboxEnvironment = window.widgetSettings.pluginSandboxEnvironment;
     $(document).ready(() => {
         const CONFIG = {
             phoneInputIds: {
@@ -8,12 +11,12 @@ jQuery(function ($) {
             baseCheckboxIdName: 'payment_method',
             errorMessageClassName: 'wc-block-components-validation-error',
             paymentOptionsNames: [
-                'power_board_gateway',
-                'power_board_google-pay_wallets_gateway',
-                'power_board_afterpay_wallets_gateway',
-                'power_board_pay-pal_wallets_gateway',
-                'power_board_afterpay_a_p_m_s_gateway',
-                'power_board_zip_a_p_m_s_gateway',
+                'plugin_gateway',
+                'plugin_google-pay_wallets_gateway',
+                'plugin_afterpay_wallets_gateway',
+                'plugin_pay-pal_wallets_gateway',
+                'plugin_afterpay_a_p_m_s_gateway',
+                'plugin_zip_a_p_m_s_gateway',
             ],
             phonePattern: /^\+[1-9]{1}[0-9]{3,14}$/,
             errorMessageHtml: `<div class="wc-block-components-validation-error" role="alert"><p>Please enter your phone number in international format, starting with "+"</p></div>`,
@@ -81,7 +84,7 @@ jQuery(function ($) {
 
         initPhoneNumberValidation();
 
-        const powerBoardHelper = {
+        const pluginHelper = {
             paymentMethod: null,
             currentForm: {
                 card: null,
@@ -103,10 +106,10 @@ jQuery(function ($) {
             showErrorMessage(errorMessage) {
                 $('.woocommerce-notices-wrapper:first').html("");
                 $('.woocommerce-NoticeGroup.woocommerce-NoticeGroup-checkout').html("");
-                jQuery.post(PowerBoardAjax.url, {
-                    _wpnonce: PowerBoardAjax.wpnonce_error,
+                jQuery.post(PluginAjax.url, {
+                    _wpnonce: PluginAjax.wpnonce_error,
                     dataType: 'html',
-                    action: 'power_board_create_error_notice',
+                    action: 'create_error_notice',
                     error: errorMessage,
                 }).then(message => {
                     var doc = new DOMParser().parseFromString(message, "text/html");
@@ -207,26 +210,26 @@ jQuery(function ($) {
 
                 $(`#classic-${methodName}-error-countries`).hide();
                 switch (methodName) {
-                    case 'power_board_gateway':
+                    case 'plugin_gateway':
                         this.initCardForm();
                         orderButton.show();
                         break;
-                    case 'power_board_apple-pay_wallets_gateway':
+                    case 'plugin_apple-pay_wallets_gateway':
                         this.initAppleForm();
                         break;
-                    case 'power_board_google-pay_wallets_gateway':
+                    case 'plugin_google-pay_wallets_gateway':
                         this.initGoogleForm({});
                         break;
-                    case 'power_board_afterpay_wallets_gateway':
+                    case 'plugin_afterpay_wallets_gateway':
                         this.initAfterpayV2Form();
                         break;
-                    case 'power_board_pay-pal_wallets_gateway':
+                    case 'plugin_pay-pal_wallets_gateway':
                         this.initPayPalForm();
                         break;
-                    case 'power_board_afterpay_a_p_m_s_gateway':
+                    case 'plugin_afterpay_a_p_m_s_gateway':
                         this.initAfterpayV1Form();
                         break;
-                    case 'power_board_zip_a_p_m_s_gateway':
+                    case 'plugin_zip_a_p_m_s_gateway':
                         this.initZipForm();
                         break;
                     default:
@@ -248,7 +251,7 @@ jQuery(function ($) {
             },
             customSubmitForm(event) {
                 $('.woocommerce-notices-wrapper:first').html('')
-                if (('power_board_gateway' === this.paymentMethod) && !this.defaultFormTriger) {
+                if (('plugin_gateway' === this.paymentMethod) && !this.defaultFormTriger) {
                     event.preventDefault();
                     let config = this.getConfigs();
                     if (!((Array.isArray(config.tokens) && config.tokens.length > 0 && config.selectedToken !== "") || this.currentForm.card.isValidForm())) {
@@ -276,12 +279,12 @@ jQuery(function ($) {
                     }
                 } else if (this.defaultFormTriger) {
                     const config = this.getConfigs();
-                    config.selectedToken = $('#classic-power_board_gateway-token').val();
+                    config.selectedToken = $('#classic_gateway-token').val();
                     this.listenForWidgetErrors();
                 }
             },
             initCardForm() {
-                $("#power-board-3ds-container").hide();
+                $("#plugin-3ds-container").hide();
 
                 if (!!this.currentForm.card) {
                     this.reloadCardWidget();
@@ -297,7 +300,7 @@ jQuery(function ($) {
                     )
                 let gatewayId = isPermanent ? config.gatewayId : 'not_configured';
 
-                this.currentForm.card = new cba.HtmlWidget('#classic-power_board_gateway', config.publicKey, gatewayId, "card", "card_payment_source_with_cvv");
+                this.currentForm.card = new cba.HtmlWidget('#classic_gateway', config.publicKey, gatewayId, "card", "card_payment_source_with_cvv");
                 this.currentForm.card.setFormPlaceholders({
                     card_name: 'Card holders name *',
                     card_number: 'Credit card number *',
@@ -320,9 +323,9 @@ jQuery(function ($) {
                     this.currentForm.card.setSupportedCardIcons(supportedCard, true);
                 }
 
-                this.currentForm.card.setEnv(config.isSandbox ? 'preproduction_cba' : 'production_cba');
+                this.currentForm.card.setEnv(config.isSandbox ? pluginSandboxEnvironment : pluginProductionEnvironment);
                 this.currentForm.card.setFormFields(["card_name*","card_number*", "card_ccv*"]);
-                this.currentForm.card.onFinishInsert('#classic-power_board_gateway-token', 'payment_source');
+                this.currentForm.card.onFinishInsert('#classic_gateway-token', 'payment_source');
                 this.currentForm.card.interceptSubmitForm('#widget');
                 this.currentForm.card.hideElements(['submit_button']);
 
@@ -330,7 +333,7 @@ jQuery(function ($) {
 
                 this.currentForm.card.on(window.cba.EVENT.FINISH, () => {
                     const currentConfig = this.getConfigs();
-                    currentConfig.paymentSourceToken = $('#classic-power_board_gateway-token').val();
+                    currentConfig.paymentSourceToken = $('#classic_gateway-token').val();
                     switch (currentConfig.card3DS) {
                         case 'IN_BUILD':
                             this.init3DSInBuilt(currentConfig)
@@ -347,7 +350,7 @@ jQuery(function ($) {
 
                 $('#select-saved-cards').on('change', (event) => {
                     let value = event.target.value
-                    let widgetform = $('#classic-power_board_gateway-wrapper')
+                    let widgetform = $('#classic_gateway-wrapper')
                     let checkbox = $('#card_save_card').parent()
 
                     widgetform.hide()
@@ -360,21 +363,21 @@ jQuery(function ($) {
                         checkbox.hide()
                         this.defaultFormTriger = true;
                     }
-                    $('#classic-power_board_gateway-token').val(value)
+                    $('#classic_gateway-token').val(value)
                 })
             },
             showWidget() {
                 $('#select-saved-cards').val("");
                 $('#card_save_card').parent().show();
-                $('#classic-power_board_gateway-wrapper').show();
+                $('#classic_gateway-wrapper').show();
                 this.defaultFormTriger = false;
             },
             reloadCardWidget() {
                 this.showWidget();
                 const config = this.getConfigs();
                 config.selectedToken = "";
-                $('#classic-power_board_gateway-settings').val(JSON.stringify(config));
-                $('#classic-power_board_gateway-token').val(null);
+                $('#classic_gateway-settings').val(JSON.stringify(config));
+                $('#classic_gateway-token').val(null);
                 this.currentForm.card.reload();
                 this.currentForm.widgetReloaded = true;
             },
@@ -395,7 +398,7 @@ jQuery(function ($) {
                     config.selectedToken = await this.getVaultToken(config);
                 }
 
-                $('#classic-power_board_gateway-token').val(config.selectedToken)
+                $('#classic_gateway-token').val(config.selectedToken)
 
                 let address = this.getAddressData(false);
                 const preAuthData = {
@@ -433,22 +436,22 @@ jQuery(function ($) {
                 } else {
                     preAuthData.token = config.paymentSourceToken;
                 }
-                const envVal = config.isSandbox ? 'preproduction_cba' : 'production_cba'
+                const envVal = config.isSandbox ? pluginSandboxEnvironment : pluginProductionEnvironment
                 const preAuthResp = await new window.cba.Api(config.publicKey)
                     .setEnv(envVal)
                     .charge()
                     .preAuth(preAuthData);
 
                 if (typeof preAuthResp._3ds.token === "undefined") {
-                    this.showErrorMessage('Payment has been rejected by PowerBoard. Please try a different payment method');
+                    this.showErrorMessage('Payment has been rejected by ' + pluginWidgetName + '. Please try a different payment method');
                     this.reloadCardWidget();
                     return false;
                 }
 
-                $("#power-board-3ds-container").show()
-                $('#classic-power_board_gateway').hide()
+                $("#plugin-3ds-container").show()
+                $('#classic_gateway').hide()
 
-                const canvas = new window.cba.Canvas3ds("#power-board-3ds-container", preAuthResp._3ds.token);
+                const canvas = new window.cba.Canvas3ds("#plugin-3ds-container", preAuthResp._3ds.token);
                 canvas.load();
 
                 canvas.on('chargeAuthSuccess', (chargeAuthEvent) => {
@@ -457,8 +460,8 @@ jQuery(function ($) {
                 })
                 canvas.on('chargeAuthReject', (data) => {
                     if (data.status === 'not_authenticated') {
-                        $("#power-board-3ds-container").hide();
-                        $('#classic-power_board_gateway').show();
+                        $("#plugin-3ds-container").hide();
+                        $('#classic_gateway').show();
                     }
                     $('#charge3dsid').val(data.charge_3ds_id);
                     this.form.submit();
@@ -466,9 +469,9 @@ jQuery(function ($) {
             },
             async getVaultToken(config) {
                 data = {...config}
-                data.paymentSourceToken = $('#classic-power_board_gateway-token').val()
-                data.action = 'power_board_get_vault_token';
-                data._wpnonce = PowerBoardAjax.wpnonce_3ds;
+                data.paymentSourceToken = $('#classic_gateway-token').val()
+                data.action = 'get_vault_token';
+                data._wpnonce = PluginAjax.wpnonce_3ds;
                 data.tokens = '';
                 data.styles = '';
                 data.supports = '';
@@ -479,7 +482,7 @@ jQuery(function ($) {
                     data.cardsavecardchecked = 'true'
                 }
 
-                return jQuery.post(PowerBoardAjax.url, data).then();
+                return jQuery.post(PluginAjax.url, data).then();
             },
             async sleep(ms) {
                 clearInterval(this.sleepSetTimeout_ctrl);
@@ -487,10 +490,10 @@ jQuery(function ($) {
             },
             async getStandalone3dsToken(config) {
                 const data = {...config};
-                data.action = 'power_board_get_vault_token';
-                data.paymentSourceToken = $('#classic-power_board_gateway-token').val();
+                data.action = 'get_vault_token';
+                data.paymentSourceToken = $('#classic_gateway-token').val();
                 data.type = 'standalone-3ds-token';
-                data._wpnonce = PowerBoardAjax.wpnonce_3ds;
+                data._wpnonce = PluginAjax.wpnonce_3ds;
                 let address = this.getAddressData(false);
                 if (address.address.first_name !== null) {
                     data.first_name = address.address.first_name
@@ -509,20 +512,20 @@ jQuery(function ($) {
                 data.styles = '';
                 data.supports = '';
 
-                return jQuery.post(PowerBoardAjax.url, data).then();
+                return jQuery.post(PluginAjax.url, data).then();
             },
             async init3DSStandalone(config) {
                 if (config.selectedToken.trim().length === 0) {
                     config.selectedToken = await this.getVaultToken(config)
                 }
 
-                $('#classic-power_board_gateway-token').val(config.selectedToken)
+                $('#classic_gateway-token').val(config.selectedToken)
 
                 const threeDsToken = await this.getStandalone3dsToken(config)
 
 
-                const canvas = new window.cba.Canvas3ds("#power-board-3ds-container", threeDsToken);
-                canvas.setEnv(config.isSandbox ? 'preproduction_cba' : 'production_cba');
+                const canvas = new window.cba.Canvas3ds("#plugin-3ds-container", threeDsToken);
+                canvas.setEnv(config.isSandbox ? pluginSandboxEnvironment : pluginProductionEnvironment);
 
                 canvas.on('chargeAuthSuccess', (data) => {
                     $('#charge3dsid').val(data.charge_3ds_id)
@@ -553,7 +556,7 @@ jQuery(function ($) {
             },
             initGoogleForm() {
                 const type = 'google-pay';
-                if ('power_board_google-pay_wallets_gateway' !== this.paymentMethod) {
+                if ('plugin_google-pay_wallets_gateway' !== this.paymentMethod) {
                     delete this.currentForm.wallets.google;
                     this.currentForm.wallets.google = null;
                 }
@@ -564,7 +567,7 @@ jQuery(function ($) {
             },
             initAppleForm() {
                 const type = 'apple-pay';
-                if ('power_board_apple-pay_wallets_gateway' !== this.paymentMethod) {
+                if ('plugin_apple-pay_wallets_gateway' !== this.paymentMethod) {
                     delete this.currentForm.wallets.apple;
                     this.currentForm.wallets.apple = null;
                 }
@@ -576,7 +579,7 @@ jQuery(function ($) {
             },
             initAfterpayV2Form() {
                 const type = 'afterpay';
-                if ('power_board_afterpay_wallets_gateway' !== this.paymentMethod) {
+                if ('plugin_afterpay_wallets_gateway' !== this.paymentMethod) {
                     delete this.currentForm.wallets.afterpay;
                     this.currentForm.wallets.afterpay = null;
                 }
@@ -585,7 +588,7 @@ jQuery(function ($) {
             },
             initPayPalForm() {
                 const type = 'pay-pal';
-                if ('power_board_pay-pal_wallets_gateway' !== this.paymentMethod) {
+                if ('plugin_pay-pal_wallets_gateway' !== this.paymentMethod) {
                     delete this.currentForm.wallets.pay_pal;
                     this.currentForm.wallets.pay_pal = null;
                 }
@@ -597,8 +600,8 @@ jQuery(function ($) {
             initAfterpayV1Form() {
                 const countries = ['au', 'nz', 'us', 'ca', 'uk', 'gb', 'fr', 'it', 'es', 'de'];
 
-                let countriesErrorElement = $('#classic-power_board_afterpay_a_p_m_s_gateway-error-countries');
-                let button = $('#classic-power_board_afterpay_a_p_m_s_gateway')
+                let countriesErrorElement = $('#classic-plugin_afterpay_a_p_m_s_gateway-error-countries');
+                let button = $('#classic-plugin_afterpay_a_p_m_s_gateway')
 
                 if (!countries.includes(this.getAddressData(false)?.address?.country?.toLowerCase())) {
                     countriesErrorElement.show();
@@ -611,7 +614,7 @@ jQuery(function ($) {
 
                 let settings = this.getConfigs('afterpay_a_p_m_s')
                 this.currentForm.apms.afterpay = new window.cba.AfterpayCheckoutButton(
-                    '#classic-power_board_afterpay_a_p_m_s_gateway',
+                    '#classic-plugin_afterpay_a_p_m_s_gateway',
                     settings.publicKey,
                     settings.gatewayId
                 )
@@ -620,8 +623,8 @@ jQuery(function ($) {
             },
             initZipForm() {
                 const countries = ['au', 'nz', 'us', 'ca'];
-                let countriesErrorElement = $('#classic-power_board_zip_a_p_m_s_gateway-error-countries');
-                let button = $('#classic-power_board_zip_a_p_m_s_gateway')
+                let countriesErrorElement = $('#classic-plugin_zip_a_p_m_s_gateway-error-countries');
+                let button = $('#classic-plugin_zip_a_p_m_s_gateway')
 
                 if (!countries.includes(this.getAddressData(false)?.address?.country?.toLowerCase())) {
                     countriesErrorElement.show();
@@ -634,7 +637,7 @@ jQuery(function ($) {
 
                 let settings = this.getConfigs('zip_a_p_m_s')
                 this.currentForm.apms.zip = new window.cba.ZipmoneyCheckoutButton(
-                    '#classic-power_board_zip_a_p_m_s_gateway',
+                    '#classic-plugin_zip_a_p_m_s_gateway',
                     settings.publicKey,
                     settings.gatewayId
                 )
@@ -675,38 +678,38 @@ jQuery(function ($) {
                 } else {
                     type = ''
                 }
-                let settings = $(`#classic-power_board_${type}gateway-settings`).val()
+                let settings = $(`#classic-plugin_${type}gateway-settings`).val()
                 settings = JSON.parse(settings)
 
                 return settings;
             },
             initWallet(type, isSandbox, config = {}) {
                 jQuery.ajax({
-                    url: '/?wc-ajax=power-board-create-wallet-charge',
+                    url: '/?wc-ajax=create-wallet-charge',
                     type: 'POST',
                     data: {
-                        _wpnonce: PowerBoardAjax.wpnonce,
+                        _wpnonce: PluginAjax.wpnonce,
                         type: type,
                         address: this.getAddressData()
                     },
                     success: (response) => {
                         config.country = response?.data?.data?.county
                         const index = type.replace('pay', '');
-                        document.getElementById(`classic-power_board_${type}_wallets_gateway`).innerHTML = '';
+                        document.getElementById(`classic-plugin_${type}_wallets_gateway`).innerHTML = '';
 
                         this.currentForm.wallets[index] = new window.cba.WalletButtons(
-                            `#classic-power_board_${type}_wallets_gateway`,
+                            `#classic-plugin_${type}_wallets_gateway`,
                             response?.data?.data?.resource?.data?.token,
                             config
                         );
 
-                        this.currentForm.wallets[index].setEnv(isSandbox ? 'preproduction_cba' : 'production_cba')
+                        this.currentForm.wallets[index].setEnv(isSandbox ? pluginSandboxEnvironment : pluginProductionEnvironment)
 
                         this.currentForm.wallets[index].onPaymentError(() => {
                             this.form.submit()
                         });
 
-                        let paymentSourceElement = $(`#classic-power_board_${type}_wallets_gateway-token`);
+                        let paymentSourceElement = $(`#classic-plugin_${type}_wallets_gateway-token`);
 
                         this.currentForm.wallets[index].onPaymentSuccessful((result) => {
                             paymentSourceElement.val(JSON.stringify(result))
@@ -771,9 +774,9 @@ jQuery(function ($) {
                     items: settings.items
                 }
 
-                this.currentForm.apms[type].setEnv(settings.isSandbox ? 'preproduction_cba' : 'production_cba')
+                this.currentForm.apms[type].setEnv(settings.isSandbox ? pluginSandboxEnvironment : pluginProductionEnvironment)
                 this.currentForm.apms[type].setMeta(meta)
-                this.currentForm.apms[type].onFinishInsert(`#classic-power_board_${type}_a_p_m_s_gateway-token`, 'payment_source_token');
+                this.currentForm.apms[type].onFinishInsert(`#classic-plugin_${type}_a_p_m_s_gateway-token`, 'payment_source_token');
                 this.currentForm.apms[type].on('finish', () => {
                     this.form.submit()
                 })
@@ -816,7 +819,7 @@ jQuery(function ($) {
         }
         setTimeout(() => {
             $('.woocommerce-notices-wrapper:first').html("");
-            powerBoardHelper.init()
+            pluginHelper.init()
         }, 2000)
     });
 })

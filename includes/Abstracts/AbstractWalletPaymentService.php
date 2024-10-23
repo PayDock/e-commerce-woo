@@ -15,7 +15,7 @@ abstract class AbstractWalletPaymentService extends AbstractPaymentService {
 		$paymentMethod = $this->getWalletType();
 		$id            = $paymentMethod->getId();
 
-		$this->id          = PLUGIN_PREFIX . '_' . $paymentMethod->getId() . '_wallets_gateway';
+		$this->id          ='plugin_' . $paymentMethod->getId() . '_wallets_gateway';
 		$this->title       = $settings->getWidgetPaymentWalletTitle( $paymentMethod );
 		$this->description = $settings->getWidgetPaymentWalletDescription( $paymentMethod );
 
@@ -27,9 +27,9 @@ abstract class AbstractWalletPaymentService extends AbstractPaymentService {
 	public function is_available() {
 		if ( is_checkout() ) {
 			$paymentMethod = $this->getWalletType();
-			$this->title   = '<img src="/wp-content/plugins/power-board/assets/images/icons/' .
+			$this->title   = '<img src="/wp-content/plugins/' . PLUGIN_TEXT_DOMAIN . '/assets/images/icons/' .
 			                 $paymentMethod->getId() .
-			                 '.png" height="25" class="power-board-payment-method-label-icon ' .
+			                 '.png" height="25" class="plugin-payment-method-label-icon ' .
 			                 $paymentMethod->getId() .
 			                 '">' .
 			                 SettingsService::getInstance()->getWidgetPaymentWalletTitle( $paymentMethod );

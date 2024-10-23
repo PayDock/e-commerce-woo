@@ -10,7 +10,7 @@ use WooPlugin\Services\SettingsService;
 final class BankAccountBlock extends AbstractBlock {
 	protected const SCRIPT = 'bank-account-form';
 
-	protected $name = PLUGIN_PREFIX . '_bank_account_block';
+	protected $name = 'plugin_bank_account_block';
 
 	protected $gateway;
 

@@ -19,14 +19,14 @@ const pluginContent = () => {
         ), wp.element.createElement(
             "input", {
                 type: 'hidden',
-                name: 'power_board_payment_source_token'
+                name: 'payment_source_token'
             }
         )
     );
 };
 
 const Block_Plugin_Gateway = {
-    name: pluginPrefix + '_gateway',
+    name: 'plugin_gateway',
     label: pluginLabel,
     content: Object(window.wp.element.createElement)(pluginContent, null),
     edit: Object(window.wp.element.createElement)(pluginContent, null),

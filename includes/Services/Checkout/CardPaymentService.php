@@ -21,7 +21,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 	 * Constructor
 	 */
 	public function __construct() {
-		$this->id         = PLUGIN_PREFIX . '_gateway';
+		$this->id         = 'plugin_gateway';
 		$this->icon       = apply_filters( 'woocommerce_' . PLUGIN_PREFIX . '_gateway_icon', '' );
 		$this->has_fields = true;
 		$this->supports   = [
@@ -58,10 +58,10 @@ class CardPaymentService extends WC_Payment_Gateway {
 
 		add_action( 'wp_enqueue_scripts', [ $this, 'payment_scripts' ] );
 
-		add_action( 'wp_ajax_nopriv_get_vault_token', [ $this, 'power_board_get_vault_token' ] );
-		add_action( 'wp_ajax_power_board_get_vault_token', [ $this, 'power_board_get_vault_token' ] );
-		add_action( 'wp_ajax_nopriv_power_board_create_error_notice', [ $this, 'power_board_create_error_notice' ], 20 );
-		add_action( 'wp_ajax_power_board_create_error_notice', [ $this, 'power_board_create_error_notice' ], 20 );
+		add_action( 'wp_ajax_nopriv_get_vault_token', [ $this, 'get_vault_token' ] );
+		add_action( 'wp_ajax_get_vault_token', [ $this, 'get_vault_token' ] );
+		add_action( 'wp_ajax_nopriv_create_error_notice', [ $this, 'create_error_notice' ], 20 );
+		add_action( 'wp_ajax_create_error_notice', [ $this, 'create_error_notice' ], 20 );
 
 		add_action( 'woocommerce_after_checkout_billing_form', [ $this, 'woocommerce_before_checkout_form' ], 10, 1 );
 		add_action( 'woocommerce_checkout_fields', [$this, 'setup_phone_fields_settings'], 10, 1);
@@ -73,7 +73,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 		}
 
 		wp_enqueue_script( PLUGIN_TEXT_DOMAIN . '-form', PLUGIN_URL . 'assets/js/frontend/form.js', [], time(), true );
-		wp_enqueue_script( PLUGIN_TEXT_DOMAIN . '-classic-form', POWER_BOARD_PLUGIN_URL . '/assets/js/frontend/classic-form.js', [], time(), true );
+		wp_enqueue_script( PLUGIN_TEXT_DOMAIN . '-classic-form', PLUGIN_URL . '/assets/js/frontend/classic-form.js', [], time(), true );
 		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-form', 'pluginCardWidgetSettings', [
 			'suportedCard'    => 'Visa, Mastercard, Adex',
 		] );
@@ -101,14 +101,14 @@ class CardPaymentService extends WC_Payment_Gateway {
 
 	public function is_available() {
 		if ( is_checkout() && ! is_order_received_page() ) {
-			$this->title = '<img src="/wp-content/plugins/power-board/assets/images/icons/card.png"
+			$this->title = '<img src="/wp-content/plugins/' . PLUGIN_TEXT_DOMAIN . '/assets/images/icons/card.png"
 								  height="25"
-								  class="power-board-payment-method-label-icon card">
-							 <span class="power-board-payment-method-label-title card">' .
+								  class="plugin-payment-method-label-icon card">
+							 <span class="plugin-payment-method-label-title card">' .
 			               SettingsService::getInstance()->getWidgetPaymentCardTitle() .
-			               '</span> <img class="power-board-payment-method-label-icon card logo"
-							  src="' . POWER_BOARD_PLUGIN_URL . 'assets/images/logo.png"
-		                     class="power-board-payment-method-label-logo"
+			               '</span> <img class="plugin-payment-method-label-icon card logo"
+							  src="' . PLUGIN_URL . 'assets/images/logo.png"
+		                     class="plugin-payment-method-label-logo"
 							 height="36">';
 		}
 
@@ -310,10 +310,10 @@ class CardPaymentService extends WC_Payment_Gateway {
 	/**
 	 * Ajax function
 	 */
-	public function power_board_get_vault_token(): void {
+	public function get_vault_token(): void {
 		$wpNonce = ! empty( $_POST['_wpnonce'] ) ? sanitize_text_field( $_POST['_wpnonce'] ) : null;
-		if ( ! wp_verify_nonce( $wpNonce, 'power_board_get_vault_token' ) &&
-			 ! wp_verify_nonce( $wpNonce, 'power-board-create-wallet-charge' ) ) {
+		if ( ! wp_verify_nonce( $wpNonce, 'get_vault_token' ) &&
+			 ! wp_verify_nonce( $wpNonce, 'create-wallet-charge' ) ) {
 			die( 'Security check' );
 		}
 
@@ -358,8 +358,8 @@ class CardPaymentService extends WC_Payment_Gateway {
 	/**
 	 * Ajax function
 	 */
-	public function power_board_create_error_notice() {
-		wc_add_notice( __( $_POST['error'], 'power-board' ), 'error' );
+	public function create_error_notice() {
+		wc_add_notice( __( $_POST['error'], PLUGIN_TEXT_DOMAIN ), 'error' );
 		$response['data'] = wc_print_notices();
 		return $response;
 	}

@@ -16,7 +16,7 @@ class BankAccountPaymentService extends AbstractPaymentService {
 	public function __construct() {
 		$settings = SettingsService::getInstance();
 
-		$this->id          = PLUGIN_PREFIX . '_bank_account_gateway';
+		$this->id          = 'plugin_bank_account_gateway';
 		$this->title       = $settings->getWidgetPaymentBankAccountTitle();
 		$this->description = $settings->getWidgetPaymentBankAccountDescription();
 

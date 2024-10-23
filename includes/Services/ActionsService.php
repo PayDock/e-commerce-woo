@@ -67,7 +67,7 @@ class ActionsService extends AbstractSingleton {
 
 	protected function addPaymentActions() {
 		$payments = [
-			PLUGIN_PREFIX . '_bank_account_gateway' => new BankAccountPaymentService(),
+			'plugin_bank_account_gateway' => new BankAccountPaymentService(),
 		];
 		foreach ( $payments as $paymentKey => $payment ) {
 			add_action(
