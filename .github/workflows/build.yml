@@ -27,14 +27,14 @@ jobs:
         run:
           zip -r power-board.zip . -x 'build/*' '.git/*' '.github/*' '.gitignore' '.gitlab-ci.yml' 'node.sh' '*.zip'
 
-      - name: Prepare Paydock build file
-        run: |
-          chmod +x ./build/build-paydock.prod.sh
-          ./build/build-paydock.prod.sh
+#      - name: Prepare Paydock build file
+#        run: |
+#          chmod +x ./build/build-paydock.prod.sh
+#          ./build/build-paydock.prod.sh
 
-      - name: Create Paydock build file
-        run:
-          zip -r paydock.zip . -x 'build/*' '.git/*' '.github/*' '.gitignore' '.gitlab-ci.yml' 'node.sh' '*.zip'
+#      - name: Create Paydock build file
+#        run:
+#          zip -r paydock.zip . -x 'build/*' '.git/*' '.github/*' '.gitignore' '.gitlab-ci.yml' 'node.sh' '*.zip'
 
       - name: Upload PowerBoard artifact
         uses: actions/upload-artifact@v4
@@ -42,11 +42,11 @@ jobs:
           name: power-board
           path: power-board.zip
 
-      - name: Upload Paydock artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: paydock
-          path: paydock.zip
+#      - name: Upload Paydock artifact
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: paydock
+#          path: paydock.zip
 
       - name: List ZIP contents
         run:
