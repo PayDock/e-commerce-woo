@@ -25,10 +25,6 @@ jobs:
           npm install
           npm run build
 
-      - name: List contents
-        run:
-          ls
-
       - name: Create PowerBoard build file
         run:
           rsync -av --exclude='build/*' --exclude='.git/' --exclude='.github/' --exclude='.gitignore' --exclude='.gitlab-ci.yml' --exclude='node.sh' --exclude='*.zip' --exclude='node_modules/*' ./ artifacts/
@@ -39,29 +35,31 @@ jobs:
           name: power-board
           path: artifacts/
 
-#  paydock:
-#    runs-on: ubuntu-latest
-#
-#    steps:
-#      - name: Checkout code
-#        uses: actions/checkout@v4
-#
-#      - name: Set up PHP
-#        uses: shivammathur/setup-php@v2
-#        with:
-#          php-version: '8.2'
+  paydock:
+    runs-on: ubuntu-latest
 
-#      - name: Prepare Paydock build file
-#        run: |
-#          chmod +x ./build/build-paydock.prod.sh
-#          ./build/build-paydock.prod.sh
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-#      - name: Create Paydock build file
-#        run:
-#          zip -r paydock.zip . -x 'build/*' '.git/*' '.github/*' '.gitignore' '.gitlab-ci.yml' 'node.sh' '*.zip'
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
 
-#      - name: Upload Paydock artifact
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: paydock
-#          path: paydock.zip
+      - name: Prepare Paydock build file
+        run: |
+          chmod +x ./build/build-paydock.prod.sh
+          ./build/build-paydock.prod.sh
+          npm install
+          npm run build
+
+      - name: Create Paydock build file
+        run:
+          rsync -av --exclude='build/*' --exclude='.git/' --exclude='.github/' --exclude='.gitignore' --exclude='.gitlab-ci.yml' --exclude='node.sh' --exclude='*.zip' --exclude='node_modules/*' ./ artifacts/
+
+      - name: Upload Paydock artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: paydock
+          path: artifacts/
