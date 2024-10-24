@@ -18,10 +18,6 @@ jobs:
         with:
           php-version: '8.2'
 
-      - name: List folders
-        run:
-          ls
-
       - name: Prepare PowerBoard build file
         run: |
           chmod +x ./build/build-powerboard.prod.sh
@@ -29,7 +25,7 @@ jobs:
 
       - name: Create PowerBoard build file
         run:
-          zip -r power-board.zip .
+          zip -r power-board.zip . -x 'build/*' '.git/*' '.github/*' '.gitignore' '.gitlab-ci.yml' 'node.sh' '*.zip'
 
       - name: Prepare Paydock build file
         run: |
@@ -51,6 +47,10 @@ jobs:
         with:
           name: paydock
           path: paydock.zip
+
+      - name: List ZIP contents
+        run:
+          unzip -l power-board.zip
 
 #      - name: Upload to Google Drive
 #        uses: google-github-actions/upload-cloud-storage@v0.8.0
