@@ -6,7 +6,7 @@ on:
       - plugin-single-code-base
 
 jobs:
-  build:
+  power_board:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,10 +22,39 @@ jobs:
         run: |
           chmod +x ./build/build-powerboard.prod.sh
           ./build/build-powerboard.prod.sh
+          npm install
+          npm run build
+
+      - name: List contents
+        run:
+          ls
 
       - name: Create PowerBoard build file
+        uses: montudor/action-zip@v1
+        with:
+          args: zip -r power-board.zip . -x 'build/*' '.git/*' '.github/*' '.gitignore' '.gitlab-ci.yml' 'node.sh' '*.zip' 'node_modules/*'
+
+      - name: Upload PowerBoard artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: power-board
+          path: ./power-board.zip
+
+      - name: List ZIP contents
         run:
-          zip -r power-board.zip . -x 'build/*' '.git/*' '.github/*' '.gitignore' '.gitlab-ci.yml' 'node.sh' '*.zip'
+          unzip -l power-board.zip
+
+  paydock:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
 
 #      - name: Prepare Paydock build file
 #        run: |
@@ -36,21 +65,8 @@ jobs:
 #        run:
 #          zip -r paydock.zip . -x 'build/*' '.git/*' '.github/*' '.gitignore' '.gitlab-ci.yml' 'node.sh' '*.zip'
 
-      - name: Upload PowerBoard artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: power-board
-          path: power-board
-
 #      - name: Upload Paydock artifact
 #        uses: actions/upload-artifact@v4
 #        with:
 #          name: paydock
 #          path: paydock.zip
-
-#      - name: Upload to Google Drive
-#        uses: google-github-actions/upload-cloud-storage@v0.8.0
-#        with:
-#          path: paydock.zip
-#          destination: 1mwR5ruoRrGF4cYa1TMlSyy-FYm-m2ZmP/paydock.zip
-#          credentials: ${{ secrets.GDRIVE_SA_KEY }}
