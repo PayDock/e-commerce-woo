@@ -1,8 +1,8 @@
 <?php
 
-namespace PowerBoard\Enums;
+namespace WooPlugin\Enums;
 
-use PowerBoard\Abstracts\AbstractEnum;
+use WooPlugin\Abstracts\AbstractEnum;
 
 class OtherPaymentMethods extends AbstractEnum {
 	protected const AFTERPAY = 'AFTERPAY';

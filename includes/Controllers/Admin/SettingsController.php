@@ -1,6 +1,6 @@
 <?php
 
-namespace PowerBoard\Controllers\Admin;
+namespace WooPlugin\Controllers\Admin;
 
 class SettingsController {
 

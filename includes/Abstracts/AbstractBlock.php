@@ -1,10 +1,10 @@
 <?php
 
-namespace PowerBoard\Abstracts;
+namespace WooPlugin\Abstracts;
 
 use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
-use PowerBoard\PowerBoardPlugin;
-use PowerBoard\Services\SettingsService;
+use WooPlugin\WooPluginPlugin;
+use WooPlugin\Services\SettingsService;
 
 abstract class AbstractBlock extends AbstractPaymentMethodType {
 	private static $isLoad = false;
@@ -23,33 +23,45 @@ abstract class AbstractBlock extends AbstractPaymentMethodType {
 	public function get_payment_method_script_handles() {
 		if ( ! self::$isLoad && is_checkout() ) {
 			wp_enqueue_script(
-				'power-board-form',
-				POWER_BOARD_PLUGIN_URL . 'assets/js/frontend/form.js',
+				PLUGIN_TEXT_DOMAIN . '-form',
+				PLUGIN_URL . 'assets/js/frontend/form.js',
 				[],
-				POWER_BOARD_PLUGIN_VERSION,
+				PLUGIN_VERSION,
 				true
 			);
 
-			wp_localize_script( 'power-board-form', 'powerBoardWidgetSettings', [
-				'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL
+			wp_localize_script( PLUGIN_TEXT_DOMAIN . '-form', 'widgetSettings', [
+				'pluginUrlPrefix' => PLUGIN_URL,
+				'pluginTextDomain' => PLUGIN_TEXT_DOMAIN,
+				'pluginTextName' => PLUGIN_TEXT_NAME,
+				'pluginPrefix' => PLUGIN_PREFIX,
+				'pluginWidgetName' => PLUGIN_WIDGET_NAME,
+				'pluginSandboxEnvironment' => PLUGIN_SANDBOX_ENVIRONMENT,
+				'pluginProductionEnvironment' => PLUGIN_PRODUCTION_ENVIRONMENT,
 			] );
 			wp_enqueue_style(
-				'power-board-widget-css',
-				POWER_BOARD_PLUGIN_URL . 'assets/css/frontend/widget.css',
+				PLUGIN_TEXT_DOMAIN . '-widget-css',
+				PLUGIN_URL . 'assets/css/frontend/widget.css',
 				[],
-				POWER_BOARD_PLUGIN_VERSION,
+				PLUGIN_VERSION,
 				true
 			);
 
 			wp_enqueue_script(
-				'power-board-api',
+				PLUGIN_TEXT_DOMAIN . '-api',
 				SettingsService::getInstance()->getWidgetScriptUrl(),
 				[],
-				POWER_BOARD_PLUGIN_VERSION,
+				PLUGIN_VERSION,
 				true
 			);
-			wp_localize_script( 'power-board-api', 'powerBoardWidgetSettings', [
-				'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL
+			wp_localize_script( PLUGIN_TEXT_DOMAIN . '-api', 'widgetSettings', [
+				'pluginUrlPrefix' => PLUGIN_URL,
+				'pluginTextDomain' => PLUGIN_TEXT_DOMAIN,
+				'pluginTextName' => PLUGIN_TEXT_NAME,
+				'pluginPrefix' => PLUGIN_PREFIX,
+				'pluginWidgetName' => PLUGIN_WIDGET_NAME,
+				'pluginSandboxEnvironment' => PLUGIN_SANDBOX_ENVIRONMENT,
+				'pluginProductionEnvironment' => PLUGIN_PRODUCTION_ENVIRONMENT,
 			] );
 
 			self::$isLoad = true;
@@ -57,19 +69,31 @@ abstract class AbstractBlock extends AbstractPaymentMethodType {
 
 		$scriptPath      = 'assets/build/js/frontend/' . $this->script . '.js';
 		$scriptAssetPath = 'assets/build/js/frontend/' . $this->script . '.asset.php';
-		$scriptUrl       = plugins_url( $scriptPath, POWER_BOARD_PLUGIN_FILE );
-		$scriptName      = PowerBoardPlugin::PLUGIN_PREFIX . '-' . $this->script;
+		$scriptUrl       = plugins_url( $scriptPath, PLUGIN_FILE );
+		$scriptName      = WooPluginPlugin::PLUGIN_PREFIX . '-' . $this->script;
 
 		$scriptAsset = file_exists( $scriptAssetPath ) ? require( $scriptAssetPath ) : [
 			'dependencies' => [],
-			'version'      => POWER_BOARD_PLUGIN_VERSION,
+			'version'      => PLUGIN_VERSION,
 		];
 		wp_register_script( $scriptName, $scriptUrl, $scriptAsset['dependencies'], $scriptAsset['version'], true );
-		wp_localize_script( $scriptName, 'powerBoardWidgetSettings', [
-			'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL
+		wp_localize_script( $scriptName, 'widgetSettings', [
+				'pluginUrlPrefix' => PLUGIN_URL,
+				'pluginTextDomain' => PLUGIN_TEXT_DOMAIN,
+				'pluginTextName' => PLUGIN_TEXT_NAME,
+				'pluginPrefix' => PLUGIN_PREFIX,
+				'pluginWidgetName' => PLUGIN_WIDGET_NAME,
+				'pluginSandboxEnvironment' => PLUGIN_SANDBOX_ENVIRONMENT,
+				'pluginProductionEnvironment' => PLUGIN_PRODUCTION_ENVIRONMENT,
 		] );
-		wp_localize_script( 'power-board-api', 'powerBoardWidgetSettings', [
-			'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL
+		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-api', 'widgetSettings', [
+				'pluginUrlPrefix' => PLUGIN_URL,
+				'pluginTextDomain' => PLUGIN_TEXT_DOMAIN,
+				'pluginTextName' => PLUGIN_TEXT_NAME,
+				'pluginPrefix' => PLUGIN_PREFIX,
+				'pluginWidgetName' => PLUGIN_WIDGET_NAME,
+				'pluginSandboxEnvironment' => PLUGIN_SANDBOX_ENVIRONMENT,
+				'pluginProductionEnvironment' => PLUGIN_PRODUCTION_ENVIRONMENT,
 		] );
 		if ( function_exists( 'wp_set_script_translations' ) ) {
 			wp_set_script_translations( $scriptName );

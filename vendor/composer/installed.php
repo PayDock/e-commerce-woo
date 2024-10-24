@@ -1,22 +1,22 @@
 <?php return array(
     'root' => array(
+        'name' => 'power_board/sp-woocommerce',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
+        'reference' => '54d525a212b4d7e7187cdbc578a1d050f7dc336f',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => 'b6829383f1940e2fc077b38573af696a9ba92dcf',
-        'name' => 'power_board/sp-woocommerce',
         'dev' => true,
     ),
     'versions' => array(
         'power_board/sp-woocommerce' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
+            'reference' => '54d525a212b4d7e7187cdbc578a1d050f7dc336f',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => 'b6829383f1940e2fc077b38573af696a9ba92dcf',
             'dev_requirement' => false,
         ),
     ),

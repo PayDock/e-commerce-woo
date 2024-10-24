@@ -1,16 +1,16 @@
 <?php
 
-namespace PowerBoard\Services\ProcessPayment;
+namespace WooPlugin\Services\ProcessPayment;
 
 use Exception;
-use PowerBoard\Enums\DSTypes;
-use PowerBoard\Enums\FraudTypes;
-use PowerBoard\Enums\SaveCardOptions;
-use PowerBoard\Helpers\ArgsForProcessPayment;
-use PowerBoard\Helpers\VaultTokenHelper;
-use PowerBoard\Repositories\LogRepository;
-use PowerBoard\Repositories\UserTokenRepository;
-use PowerBoard\Services\SDKAdapterService;
+use WooPlugin\Enums\DSTypes;
+use WooPlugin\Enums\FraudTypes;
+use WooPlugin\Enums\SaveCardOptions;
+use WooPlugin\Helpers\ArgsForProcessPayment;
+use WooPlugin\Helpers\VaultTokenHelper;
+use WooPlugin\Repositories\LogRepository;
+use WooPlugin\Repositories\UserTokenRepository;
+use WooPlugin\Services\SDKAdapterService;
 
 class CardProcessor {
 	const FRAUD_3DS_CHARGE_METHOD = 'fraud3DsCharge';
@@ -52,7 +52,7 @@ class CardProcessor {
 		$this->setRunMethod();
 
 		if ( ! in_array( $this->runMethod, self::ALLOWED_METHODS ) ) {
-			throw new Exception( esc_html( __( 'Undefined run method', 'power-board' ) ) );
+			throw new Exception( esc_html( __( 'Undefined run method', PLUGIN_TEXT_DOMAIN ) ) );
 		}
 
 		return call_user_func( [ $this, $this->runMethod ] );
@@ -170,7 +170,7 @@ class CardProcessor {
 			}
 
 			if ( empty( $parsed_api_error ) ) {
-				$parsed_api_error = __( 'The 3DS charge failed to be created', 'power-board' );
+				$parsed_api_error = __( 'The 3DS charge failed to be created', PLUGIN_TEXT_DOMAIN );
 			}
 
 			$parsed_api_error .= ' widget_error';
@@ -330,7 +330,7 @@ class CardProcessor {
 		] );
 
 		if ( empty( $response['error'] ) && ! empty( $response['resource']['data']['_id'] ) ) {
-			update_option( 'power_board_fraud_' . (string) $this->order->get_id(), $options );
+			update_option( PLUGIN_PREFIX . '_fraud_' . (string) $this->order->get_id(), $options );
 		}
 
 		return $response;
@@ -376,7 +376,7 @@ class CardProcessor {
 		] );
 
 		if ( empty( $response['error'] ) && ! empty( $response['resource']['data']['_id'] ) ) {
-			update_option( 'power_board_fraud_' . (string) $this->order->get_id(), $options );
+			update_option( PLUGIN_PREFIX . '_fraud_' . (string) $this->order->get_id(), $options );
 		}
 
 		return $response;
@@ -583,7 +583,7 @@ class CardProcessor {
 		] );
 
 		if ( empty( $response['error'] ) && ! empty( $response['resource']['data']['_id'] ) ) {
-			update_option( 'power_board_fraud_' . (string) $this->order->get_id(), $options );
+			update_option( PLUGIN_PREFIX . '_fraud_' . (string) $this->order->get_id(), $options );
 		}
 
 		return $response;
@@ -642,7 +642,7 @@ class CardProcessor {
 				}
 
 				if ( empty( $parsed_api_error ) ) {
-					$parsed_api_error = __( 'Unable to create the PowerBoard customer record', 'power-board' );
+					$parsed_api_error = __( 'Unable to create the ' . PLUGIN_TEXT_NAME . ' customer record', PLUGIN_TEXT_DOMAIN );
 				}
 
 				$parsed_api_error .= ' widget_error';
@@ -719,7 +719,7 @@ class CardProcessor {
 			}
 
 			if ( empty( $parsed_api_error ) ) {
-				$parsed_api_error = __( 'The customer charge failed to be created', 'power-board' );
+				$parsed_api_error = __( 'The customer charge failed to be created', PLUGIN_TEXT_DOMAIN );
 			}
 
 			$parsed_api_error .= ' widget_error';
@@ -784,7 +784,7 @@ class CardProcessor {
 			}
 
 			if ( empty( $parsed_api_error ) ) {
-				$parsed_api_error = __( 'Unable to create the PowerBoard customer record', 'power-board' );
+				$parsed_api_error = __( 'Unable to create the ' . PLUGIN_TEXT_NAME . ' customer record', PLUGIN_TEXT_DOMAIN );
 			}
 
 			$parsed_api_error .= ' widget_error';

@@ -1,20 +1,21 @@
 <?php
 
-namespace PowerBoard\Abstracts;
+namespace WooPlugin\Abstracts;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
-use PowerBoard\Enums\OrderListColumns;
-use PowerBoard\Enums\WalletPaymentMethods;
-use PowerBoard\Repositories\LogRepository;
-use PowerBoard\Services\OrderService;
-use PowerBoard\Services\SettingsService;
+use WooPlugin\Enums\OrderListColumns;
+use WooPlugin\Enums\WalletPaymentMethods;
+use WooPlugin\Repositories\LogRepository;
+use WooPlugin\Services\OrderService;
+use WooPlugin\Services\SettingsService;
 
 abstract class AbstractWalletPaymentService extends AbstractPaymentService {
 	public function __construct() {
 		$settings      = SettingsService::getInstance();
 		$paymentMethod = $this->getWalletType();
+		$id            = $paymentMethod->getId();
 
-		$this->id          = 'power_board_' . $paymentMethod->getId() . '_wallets_gateway';
+		$this->id          ='plugin_' . $paymentMethod->getId() . '_wallets_gateway';
 		$this->title       = $settings->getWidgetPaymentWalletTitle( $paymentMethod );
 		$this->description = $settings->getWidgetPaymentWalletDescription( $paymentMethod );
 
@@ -24,12 +25,18 @@ abstract class AbstractWalletPaymentService extends AbstractPaymentService {
 	abstract protected function getWalletType(): WalletPaymentMethods;
 
 	public function is_available() {
+		if ( is_checkout() ) {
+			$paymentMethod = $this->getWalletType();
+			$this->title   = '<img src="/wp-content/plugins/' . PLUGIN_TEXT_DOMAIN . '/assets/images/icons/' .
+			                 $paymentMethod->getId() .
+			                 '.png" height="25" class="plugin-payment-method-label-icon ' .
+			                 $paymentMethod->getId() .
+			                 '">' .
+			                 SettingsService::getInstance()->getWidgetPaymentWalletTitle( $paymentMethod );
+		}
+
 		return SettingsService::getInstance()->isEnabledPayment()
 		       && SettingsService::getInstance()->isWalletEnabled( $this->getWalletType() );
-	}
-
-	public function payment_scripts() {
-		return SettingsService::getInstance()->getWidgetScriptUrl();
 	}
 
 	public function process_payment( $order_id, $retry = true, $force_customer = false ) {
@@ -37,19 +44,28 @@ abstract class AbstractWalletPaymentService extends AbstractPaymentService {
 		if ( ! wp_verify_nonce( $wpNonce, 'process_payment' ) ) {
 			throw new RouteException(
 				'woocommerce_rest_checkout_process_payment_error',
-				esc_html( __( 'Error: Security check', 'power-board' ) )
+				esc_html( __( 'Error: Security check', PLUGIN_TEXT_DOMAIN ) )
 			);
 		}
 
 		$order    = wc_get_order( $order_id );
 		$data     = [];
+		$jsonData = '';
 		$chargeId = null;
 		if ( ! empty( $_POST['payment_response'] ) ) {
-			$data = json_decode( sanitize_text_field( $_POST['payment_response'] ), true );
+			$jsonData = $_POST['payment_response'];
+		} elseif ( ! empty( $_POST['payment_source'] ) && is_array( $_POST['payment_source'] ) ) {
+			$jsonData = array_filter( $_POST['payment_source'] );
+			$jsonData = reset( $jsonData );
+			$jsonData = str_replace( '\\"', '"', $jsonData );
 		}
 
-		if ( ( json_last_error() === JSON_ERROR_NONE ) && ! empty( $_POST['payment_response'] ) ) {
-			$chargeId = $data['data']['id'];
+		if ( ! empty( $jsonData ) ) {
+			$data = json_decode( sanitize_text_field( $jsonData ), true );
+		}
+
+		if ( ( json_last_error() === JSON_ERROR_NONE ) && ! empty( $data ) ) {
+			$chargeId = $data['data']['id'] ?? $data['data']['data']['id'];
 		}
 
 		$wallets = [];
@@ -63,7 +79,7 @@ abstract class AbstractWalletPaymentService extends AbstractPaymentService {
 		$wallet  = reset( $wallets );
 		$isFraud = ! empty( $wallet['fraud'] ) && $wallet['fraud'];
 		if ( $isFraud ) {
-			update_option( 'power_board_fraud_' . (string) $order->get_id(), [] );
+			update_option( PLUGIN_PREFIX . '_fraud_' . (string) $order->get_id(), [] );
 		}
 
 		$loggerRepository = new LogRepository();
@@ -83,7 +99,7 @@ abstract class AbstractWalletPaymentService extends AbstractPaymentService {
 			$order->payment_complete();
 			$order->update_meta_data( 'pb_directly_charged', 1 );
 		}
-		$order->update_meta_data( 'power_board_charge_id', $chargeId );
+		$order->update_meta_data( PLUGIN_PREFIX . '_charge_id', $chargeId );
 		$order->update_meta_data( OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(), $this->getWalletType()->getLabel() );
 		$order->save();
 
@@ -97,6 +113,9 @@ abstract class AbstractWalletPaymentService extends AbstractPaymentService {
 			'wc-pb-authorize' === $status ? LogRepository::DEFAULT : LogRepository::SUCCESS
 		);
 
+		$order->set_payment_method_title( SettingsService::getInstance()->getWidgetPaymentWalletTitle( $this->getWalletType() ) );
+		$order->save();
+
 		return [
 			'result'   => 'success',
 			'redirect' => $this->get_return_url( $order ),
@@ -105,4 +124,31 @@ abstract class AbstractWalletPaymentService extends AbstractPaymentService {
 
 	public function webhook() {
 	}
+
+	public function get_payment_method_data(): array {
+		$settings = SettingsService::getInstance();
+		$payment  = $this->getWalletType();
+
+		$result = [
+			'title'       => $settings->getWidgetPaymentWalletTitle( $payment ),
+			'description' => $settings->getWidgetPaymentWalletDescription( $payment ),
+			'publicKey'   => $settings->getPublicKey(),
+			'isSandbox'   => $settings->isSandbox(),
+			'styles'      => $settings->getWidgetStyles(),
+		];
+
+		$result['wallets'][ strtolower( $payment->name ) ] = [
+			'gatewayId'      => $settings->getWalletGatewayId( $payment ),
+			'fraud'          => $settings->isWalletFraud( $payment ),
+			'fraudServiceId' => $settings->getWalletFraudServiceId( $payment ),
+			'directCharge'   => $settings->getWalletFraudServiceId( $payment ),
+		];
+
+		if ( WalletPaymentMethods::PAY_PAL_SMART_BUTTON()->name === $payment->name ) {
+			$result[ strtolower( $payment->name ) ]['payLater'] = $settings->isPayPallSmartButtonPayLater();
+		}
+
+		return $result;
+	}
+
 }

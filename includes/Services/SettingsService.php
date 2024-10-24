@@ -1,21 +1,21 @@
 <?php
 
-namespace PowerBoard\Services;
+namespace WooPlugin\Services;
 
-use PowerBoard\Abstracts\AbstractSettingService;
-use PowerBoard\Enums\APMsSettings;
-use PowerBoard\Enums\BankAccountSettings;
-use PowerBoard\Enums\CardSettings;
-use PowerBoard\Enums\CredentialSettings;
-use PowerBoard\Enums\CredentialsTypes;
-use PowerBoard\Enums\OtherPaymentMethods;
-use PowerBoard\Enums\SettingGroups;
-use PowerBoard\Enums\WalletPaymentMethods;
-use PowerBoard\Enums\WalletSettings;
-use PowerBoard\Enums\WidgetSettings;
-use PowerBoard\Services\Settings\LiveConnectionSettingService;
-use PowerBoard\Services\Settings\SandboxConnectionSettingService;
-use PowerBoard\Services\Settings\WidgetSettingService;
+use WooPlugin\Abstracts\AbstractSettingService;
+use WooPlugin\Enums\APMsSettings;
+use WooPlugin\Enums\BankAccountSettings;
+use WooPlugin\Enums\CardSettings;
+use WooPlugin\Enums\CredentialSettings;
+use WooPlugin\Enums\CredentialsTypes;
+use WooPlugin\Enums\OtherPaymentMethods;
+use WooPlugin\Enums\SettingGroups;
+use WooPlugin\Enums\WalletPaymentMethods;
+use WooPlugin\Enums\WalletSettings;
+use WooPlugin\Enums\WidgetSettings;
+use WooPlugin\Services\Settings\LiveConnectionSettingService;
+use WooPlugin\Services\Settings\SandboxConnectionSettingService;
+use WooPlugin\Services\Settings\WidgetSettingService;
 
 final class SettingsService {
 	private const ENABLED_CONDITION = 'yes';
@@ -776,11 +776,7 @@ final class SettingsService {
 	}
 
 	public function getWidgetScriptUrl(): string {
-		if ( $this->isSandbox ) {
-			$sdkUrl = 'https://widget.preproduction.powerboard.commbank.com.au/sdk/{version}/widget.umd.js';
-		} else {
-			$sdkUrl = 'https://widget.powerboard.commbank.com.au/sdk/{version}/widget.umd.js';
-		}
+		$sdkUrl = $this->isSandbox ? PLUGIN_SANDBOX_WIDGET_URL : PLUGIN_PRODUCTION_WIDGET_URL;
 
 		return strtr( $sdkUrl, [ '{version}' => self::getInstance()->getVersion() ] );
 	}

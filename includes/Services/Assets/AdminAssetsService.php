@@ -1,8 +1,8 @@
 <?php
 
-namespace PowerBoard\Services\Assets;
+namespace WooPlugin\Services\Assets;
 
-use PowerBoard\PowerBoardPlugin;
+use WooPlugin\WooPluginPlugin;
 
 class AdminAssetsService {
 	private const SCRIPTS = [
@@ -37,16 +37,16 @@ class AdminAssetsService {
 		foreach ( self::SCRIPTS as $script ) {
 			wp_register_script(
 				$this->getScriptName( $script ),
-				plugins_url( $this->getScriptPath( $script ), POWER_BOARD_PLUGIN_FILE ),
+				plugins_url( $this->getScriptPath( $script ), PLUGIN_FILE ),
 				[],
-				POWER_BOARD_PLUGIN_VERSION,
+				PLUGIN_VERSION,
 				true
 			);
 		}
 	}
 
 	private function getScriptName( string $script ): string {
-		return implode( '_', [ PowerBoardPlugin::PLUGIN_PREFIX, self::PREFIX, self::SCRIPT_PREFIX, $script ] );
+		return implode( '_', [ WooPluginPlugin::PLUGIN_PREFIX, self::PREFIX, self::SCRIPT_PREFIX, $script ] );
 	}
 
 	private function getScriptPath( string $script ): string {
@@ -56,9 +56,16 @@ class AdminAssetsService {
 	public function loadScripts(): void {
 		foreach ( self::SCRIPTS as $script ) {
 			$scriptName = $this->getScriptName( $script );
-			wp_enqueue_script( $this->getScriptName( $script ),'',[],POWER_BOARD_PLUGIN_VERSION,true );
-			wp_localize_script( $scriptName, 'powerBoardWidgetSettings', [
-				'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL
+			wp_enqueue_script( $this->getScriptName( $script ),'',[],PLUGIN_VERSION,true );
+			wp_localize_script( $scriptName, 'widgetSettings', [
+				'pluginName' => PLUGIN_NAME,
+				'pluginUrlPrefix' => PLUGIN_URL,
+				'pluginTextDomain' => PLUGIN_TEXT_DOMAIN,
+				'pluginTextName' => PLUGIN_TEXT_NAME,
+				'pluginPrefix' => PLUGIN_PREFIX,
+				'pluginWidgetName' => PLUGIN_WIDGET_NAME,
+				'pluginSandboxEnvironment' => PLUGIN_SANDBOX_ENVIRONMENT,
+				'pluginProductionEnvironment' => PLUGIN_PRODUCTION_ENVIRONMENT,
 			] );
 		}
 	}
@@ -67,15 +74,15 @@ class AdminAssetsService {
 		foreach ( self::STYLES as $style ) {
 			wp_enqueue_style(
 				$this->getStyleName( $style ),
-				plugins_url( $this->getStylePath( $style ), POWER_BOARD_PLUGIN_FILE ),
+				plugins_url( $this->getStylePath( $style ), PLUGIN_FILE ),
 				[],
-				POWER_BOARD_PLUGIN_VERSION
+				PLUGIN_VERSION
 			);
 		}
 	}
 
 	private function getStyleName( string $script ): string {
-		return implode( '_', [ PowerBoardPlugin::PLUGIN_PREFIX, self::PREFIX, self::STYLE_PREFIX, $script ] );
+		return implode( '_', [ WooPluginPlugin::PLUGIN_PREFIX, self::PREFIX, self::STYLE_PREFIX, $script ] );
 	}
 
 	private function getStylePath( string $script ): string {

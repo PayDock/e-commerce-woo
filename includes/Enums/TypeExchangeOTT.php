@@ -1,8 +1,8 @@
 <?php
 
-namespace PowerBoard\Enums;
+namespace WooPlugin\Enums;
 
-use PowerBoard\Abstracts\AbstractEnum;
+use WooPlugin\Abstracts\AbstractEnum;
 
 class TypeExchangeOTT extends AbstractEnum {
 	protected const PERMANENT_VAULT = 'With vault';

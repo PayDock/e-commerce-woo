@@ -1,8 +1,8 @@
 <?php
 
-namespace PowerBoard\Enums;
+namespace WooPlugin\Enums;
 
-use PowerBoard\Abstracts\AbstractEnum;
+use WooPlugin\Abstracts\AbstractEnum;
 
 class CustomDescriptionStyles extends AbstractEnum {
 	protected const COLOR = 'color';

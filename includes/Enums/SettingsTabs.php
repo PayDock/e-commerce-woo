@@ -1,21 +1,21 @@
 <?php
 
-namespace PowerBoard\Enums;
+namespace WooPlugin\Enums;
 
-use PowerBoard\Abstracts\AbstractEnum;
-use PowerBoard\PowerBoardPlugin;
-use PowerBoard\Services\Settings\LiveConnectionSettingService;
-use PowerBoard\Services\Settings\LogsSettingService;
-use PowerBoard\Services\Settings\SandboxConnectionSettingService;
-use PowerBoard\Services\Settings\WebHooksSettingService;
-use PowerBoard\Services\Settings\WidgetSettingService;
+use WooPlugin\Abstracts\AbstractEnum;
+use WooPlugin\WooPluginPlugin;
+use WooPlugin\Services\Settings\LiveConnectionSettingService;
+use WooPlugin\Services\Settings\LogsSettingService;
+use WooPlugin\Services\Settings\SandboxConnectionSettingService;
+use WooPlugin\Services\Settings\WebHooksSettingService;
+use WooPlugin\Services\Settings\WidgetSettingService;
 
 class SettingsTabs extends AbstractEnum {
-	protected const LIVE_CONNECTION = PowerBoardPlugin::PLUGIN_PREFIX;
-	protected const SANDBOX_CONNECTION = PowerBoardPlugin::PLUGIN_PREFIX . '_sandbox';
-	protected const WEBHOOKS = PowerBoardPlugin::PLUGIN_PREFIX . '_webhooks';
-	protected const WIDGET = PowerBoardPlugin::PLUGIN_PREFIX . '_widget';
-	protected const LOG = PowerBoardPlugin::PLUGIN_PREFIX . '_log';
+	protected const LIVE_CONNECTION = WooPluginPlugin::PLUGIN_PREFIX;
+	protected const SANDBOX_CONNECTION = WooPluginPlugin::PLUGIN_PREFIX . '_sandbox';
+	protected const WEBHOOKS = WooPluginPlugin::PLUGIN_PREFIX . '_webhooks';
+	protected const WIDGET = WooPluginPlugin::PLUGIN_PREFIX . '_widget';
+	protected const LOG = WooPluginPlugin::PLUGIN_PREFIX . '_log';
 
 	public static function secondary(): array {
 		$allTabs = self::allCases(); // Use a custom method to simulate enum cases.

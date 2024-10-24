@@ -1,6 +1,6 @@
 <?php
 
-namespace PowerBoard\Abstracts;
+namespace WooPlugin\Abstracts;
 
 abstract class AbstractSingleton {
 	abstract protected function __construct();

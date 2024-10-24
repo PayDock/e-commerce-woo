@@ -1,14 +1,15 @@
 <?php
 
-namespace PowerBoard\Services\ProcessPayment;
+namespace WooPlugin\Services\ProcessPayment;
 
 use Exception;
-use PowerBoard\Enums\OtherPaymentMethods;
-use PowerBoard\Helpers\ArgsForProcessPayment;
-use PowerBoard\Helpers\ShippingHelper;
-use PowerBoard\Repositories\LogRepository;
-use PowerBoard\Repositories\UserCustomerRepository;
-use PowerBoard\Services\SDKAdapterService;
+use WooPlugin\Enums\OtherPaymentMethods;
+use WooPlugin\Helpers\ArgsForProcessPayment;
+use WooPlugin\Helpers\ShippingHelper;
+use WooPlugin\Repositories\LogRepository;
+use WooPlugin\Repositories\UserCustomerRepository;
+use WooPlugin\Services\SDKAdapterService;
+use WooPlugin\Services\SettingsService;
 
 class ApmProcessor {
 	const CHARGE_METHOD = 'charge';
@@ -26,17 +27,42 @@ class ApmProcessor {
 	private $runMethod;
 	private $logger;
 
-	public function __construct( array $args = [] ) {
+	public function __construct( array $args = [], ?OtherPaymentMethods $paymentMethod = null ) {
+		$settingService = SettingsService::getInstance();
+		if ( ! empty( $paymentMethod ) ) {
+			$args['gatewaytype'] = strtolower( $paymentMethod->getId() );
+		}
+
+		if ( empty( $args['directcharge'] ) ) {
+			$args['directcharge'] = $settingService->isAPMsDirectCharge( $paymentMethod ) ? 'true' : 'false';
+		}
+
+		if ( empty( $args['fraud'] ) ) {
+			$args['fraud'] = $settingService->isAPMsFraud( $paymentMethod ) ? 'true' : 'false';
+		}
+
+		if ( empty( $args['fraudserviceid'] ) ) {
+			$args['fraudserviceid'] = $settingService->getAPMsFraudServiceId( $paymentMethod );
+		}
+
 		$this->logger = new LogRepository();
 		$this->args   = ArgsForProcessPayment::prepare( $args );
 	}
 
 	public function run( $order ): array {
+		if ( $this->args['payment_source'] && is_array( $this->args['payment_source'] ) ) {
+			$value                            = array_filter( $this->args['payment_source'] );
+			$this->args['paymentsourcetoken'] = reset( $value );
+		}
+		if ( empty( $this->args['amount'] ) ) {
+			$this->args['amount'] = $order->get_total( false );
+		}
+
 		$this->order = $order;
 		$this->setRunMethod();
 
 		if ( ! in_array( $this->runMethod, self::ALLOWED_METHODS ) ) {
-			throw new Exception( esc_html( __( 'Undefined run method', 'power-board' ) ) );
+			throw new Exception( esc_html( __( 'Undefined run method', PLUGIN_TEXT_DOMAIN ) ) );
 		}
 
 		return call_user_func( [ $this, $this->runMethod ] );
@@ -64,7 +90,7 @@ class ApmProcessor {
 			'amount'    => $this->order->get_total(),
 			'currency'  => strtoupper( get_woocommerce_currency() ),
 			'token'     => $this->args['paymentsourcetoken'],
-			'capture'   => strtolower( OtherPaymentMethods::AFTERPAY()->name ) === $this->args['gatewaytype'] ? true : $this->args['directcharge'],
+			'capture'   => ( strtolower( OtherPaymentMethods::AFTERPAY()->name ) === $this->args['gatewaytype'] ) ? true : $this->args['directcharge'],
 			'reference' => (string) $this->order->get_id(),
 			'customer'  => [
 				'first_name'     => $this->order->get_billing_first_name(),
@@ -121,7 +147,7 @@ class ApmProcessor {
 			}
 
 			if ( empty( $parsed_api_error ) ) {
-				$parsed_api_error = __( 'Unable to create the PowerBoard customer record', 'power-board' );
+				$parsed_api_error = __( 'Unable to create the ' . PLUGIN_TEXT_NAME . ' customer record', PLUGIN_TEXT_DOMAIN );
 			}
 
 			throw new Exception( esc_html( $parsed_api_error ) );

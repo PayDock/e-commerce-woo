@@ -1,17 +1,19 @@
 <?php
 
-namespace PowerBoard\Services\Checkout;
+namespace WooPlugin\Services\Checkout;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Exception;
-use PowerBoard\Enums\OrderListColumns;
-use PowerBoard\Enums\SettingsTabs;
-use PowerBoard\Enums\WidgetSettings;
-use PowerBoard\Repositories\LogRepository;
-use PowerBoard\Repositories\UserTokenRepository;
-use PowerBoard\Services\OrderService;
-use PowerBoard\Services\ProcessPayment\CardProcessor;
-use PowerBoard\Services\SettingsService;
+use WooPlugin\Enums\OrderListColumns;
+use WooPlugin\Enums\SettingsTabs;
+use WooPlugin\Enums\WidgetSettings;
+use WooPlugin\Repositories\LogRepository;
+use WooPlugin\Repositories\UserTokenRepository;
+use WooPlugin\Services\OrderService;
+use WooPlugin\Services\ProcessPayment\CardProcessor;
+use WooPlugin\Services\SDKAdapterService;
+use WooPlugin\Services\SettingsService;
+use WooPlugin\Services\TemplateService;
 use WC_Payment_Gateway;
 
 class CardPaymentService extends WC_Payment_Gateway {
@@ -19,8 +21,8 @@ class CardPaymentService extends WC_Payment_Gateway {
 	 * Constructor
 	 */
 	public function __construct() {
-		$this->id         = 'power_board_gateway';
-		$this->icon       = apply_filters( 'woocommerce_power_board_gateway_icon', '' );
+		$this->id         = 'plugin_gateway';
+		$this->icon       = apply_filters( 'woocommerce_' . PLUGIN_PREFIX . '_gateway_icon', '' );
 		$this->has_fields = true;
 		$this->supports   = [
 			'products',
@@ -34,28 +36,21 @@ class CardPaymentService extends WC_Payment_Gateway {
 			'default_credit_card_form',
 		];
 
-		$this->method_title       = _x( 'PowerBoard payment', 'PowerBoard payment method', 'power-board' );
-		$this->method_description = __( 'Allows PowerBoard payments.', 'power-board' );
+		$this->method_title       = _x( PLUGIN_TEXT_NAME . ' payment', PLUGIN_TEXT_NAME . ' payment method', PLUGIN_TEXT_DOMAIN );
+		$this->method_description = __( 'Allows ' . PLUGIN_TEXT_NAME . ' payments.', PLUGIN_TEXT_DOMAIN );
 
 		// Load the settings.
 		$this->init_settings();
 
 		// Define user set variables.
-		$service        = SettingsService::getInstance();
-		$keyTitle       = $service->getOptionName( SettingsTabs::WIDGET()->value, [
-			WidgetSettings::PAYMENT_CARD_TITLE()->name,
-		] );
-		$keyDescription = $service->getOptionName(
-			SettingsTabs::WIDGET()->value,
-			[ WidgetSettings::PAYMENT_CARD_DESCRIPTION()->name ]
-		);
+		$service = SettingsService::getInstance();
+		$this->title       = SettingsService::getInstance()->getWidgetPaymentCardTitle();
+		$this->description = $service->getWidgetPaymentCardDescription();
 
-		$this->title       = get_option( $keyTitle );
-		$this->description = get_option( $keyDescription );
 		// Actions.
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, [ $this, 'process_admin_options' ] );
 		add_action(
-			'woocommerce_scheduled_subscription_payment_power_board',
+			'woocommerce_scheduled_subscription_payment_' . PLUGIN_PREFIX,
 			[ $this, 'process_subscription_payment' ],
 			10,
 			2
@@ -65,8 +60,11 @@ class CardPaymentService extends WC_Payment_Gateway {
 
 		add_action( 'wp_ajax_nopriv_get_vault_token', [ $this, 'get_vault_token' ] );
 		add_action( 'wp_ajax_get_vault_token', [ $this, 'get_vault_token' ] );
+		add_action( 'wp_ajax_nopriv_create_error_notice', [ $this, 'create_error_notice' ], 20 );
+		add_action( 'wp_ajax_create_error_notice', [ $this, 'create_error_notice' ], 20 );
 
 		add_action( 'woocommerce_after_checkout_billing_form', [ $this, 'woocommerce_before_checkout_form' ], 10, 1 );
+		add_action( 'woocommerce_checkout_fields', [$this, 'setup_phone_fields_settings'], 10, 1);
 	}
 
 	public function payment_scripts() {
@@ -74,27 +72,46 @@ class CardPaymentService extends WC_Payment_Gateway {
 			return '';
 		}
 
-		wp_enqueue_script( 'power-board-form', POWER_BOARD_PLUGIN_URL . 'assets/js/frontend/form.js', [], time(), true );
-		wp_localize_script( 'power-board-form', 'powerBoardCardWidgetSettings', [
+		wp_enqueue_script( PLUGIN_TEXT_DOMAIN . '-form', PLUGIN_URL . 'assets/js/frontend/form.js', [], time(), true );
+		wp_enqueue_script( PLUGIN_TEXT_DOMAIN . '-classic-form', PLUGIN_URL . 'assets/js/frontend/classic-form.js', [], time(), true );
+		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-form', 'pluginCardWidgetSettings', [
 			'suportedCard'    => 'Visa, Mastercard, Adex',
 		] );
-		wp_localize_script( 'power-board-form', 'powerBoardWidgetSettings', [
-			'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL
+		wp_enqueue_style( PLUGIN_TEXT_DOMAIN . '-widget-css', PLUGIN_URL . 'assets/css/frontend/widget.css', [], time() );
+		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-form', 'widgetSettings', [
+				'pluginUrlPrefix' => PLUGIN_URL,
+				'pluginTextDomain' => PLUGIN_TEXT_DOMAIN,
+				'pluginTextName' => PLUGIN_TEXT_NAME,
+				'pluginPrefix' => PLUGIN_PREFIX,
+				'pluginWidgetName' => PLUGIN_WIDGET_NAME,
+				'pluginSandboxEnvironment' => PLUGIN_SANDBOX_ENVIRONMENT,
+				'pluginProductionEnvironment' => PLUGIN_PRODUCTION_ENVIRONMENT,
 		] );
-		wp_enqueue_style( 'power-board-widget-css', POWER_BOARD_PLUGIN_URL . 'assets/css/frontend/widget.css', [], time() );
 
-		wp_localize_script( 'power-board-form', 'PowerBoardAjax', [
+		wp_localize_script( PLUGIN_TEXT_DOMAIN . '-form', 'PluginAjax', [
 			'url'     => admin_url( 'admin-ajax.php' ),
-			'wpnonce' => wp_create_nonce( 'get_vault_token' )
+			'wpnonce'     => wp_create_nonce( 'create-wallet-charge' ),
+			'wpnonce_3ds' => wp_create_nonce( 'get_vault_token' ),
 		] );
-		wp_localize_script( 'power-board-form', 'powerBoardWidgetSettings', [
-			'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL
-		] );
+
+		wp_enqueue_script( 'axios', 'https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js', [], time(), true );
 
 		return '';
 	}
 
 	public function is_available() {
+		if ( is_checkout() && ! is_order_received_page() ) {
+			$this->title = '<img src="/wp-content/plugins/' . PLUGIN_TEXT_DOMAIN . '/assets/images/icons/card.png"
+								  height="25"
+								  class="plugin-payment-method-label-icon card">
+							 <span class="plugin-payment-method-label-title card">' .
+			               SettingsService::getInstance()->getWidgetPaymentCardTitle() .
+			               '</span> <img class="plugin-payment-method-label-icon card logo"
+							  src="' . PLUGIN_URL . 'assets/images/logo.png"
+		                     class="plugin-payment-method-label-logo"
+							 height="36">';
+		}
+
 		return SettingsService::getInstance()->isEnabledPayment()
 		       && SettingsService::getInstance()->isCardEnabled();
 	}
@@ -113,7 +130,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 		if ( ! wp_verify_nonce( $wpNonce, 'process_payment' ) ) {
 			throw new RouteException(
 				'woocommerce_rest_checkout_process_payment_error',
-				esc_html( __( 'Error: Security check', 'power-board' ) )
+				esc_html( __( 'Error: Security check', PLUGIN_TEXT_DOMAIN ) )
 			);
 		}
 
@@ -124,7 +141,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 		/* Translators: %1$s: number of orders
 		*  Translators: %2$s: Site name
 		*/
-			__( 'Order №%1$s from %2$s.', 'power-board' ),
+			__( 'Order №%1$s from %2$s.', PLUGIN_TEXT_DOMAIN ),
 			$order->get_order_number(),
 			$siteName
 		);
@@ -136,7 +153,8 @@ class CardPaymentService extends WC_Payment_Gateway {
 			$cardProcessor = new CardProcessor( array_merge( [
 				'amount'      => (float) $order->get_total(),
 				'description' => $description,
-			], $_POST ) );
+			], $this->getSettings(), $_POST ) );
+
 
 			$response = $cardProcessor->run( $order );
 
@@ -157,7 +175,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 				}
 
 				if ( empty( $parsed_api_error ) ) {
-					$parsed_api_error = __( 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later.', 'power-board' );
+					$parsed_api_error = __( 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later.', PLUGIN_TEXT_DOMAIN );
 				}
 
 				$parsed_api_error .= ' widget_error';
@@ -192,7 +210,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 			throw new RouteException(
 				'woocommerce_rest_checkout_process_payment_error',
 				/* Translators: %s Error message from API. */
-				esc_html( sprintf( __( 'Error: %s', 'power-board' ), $e->getMessage() ) )
+				esc_html( sprintf( __( 'Error: %s', PLUGIN_TEXT_DOMAIN ), $e->getMessage() ) )
 			);
 		}
 
@@ -220,8 +238,10 @@ class CardPaymentService extends WC_Payment_Gateway {
 			$order->payment_complete();
 			$order->update_meta_data( 'pb_directly_charged', 1 );
 		}
-		$order->update_meta_data( 'power_board_charge_id', $chargeId );
+
+		$order->update_meta_data( PLUGIN_PREFIX . '_charge_id', $chargeId );
 		$order->update_meta_data( OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(), 'Card' );
+
 		WC()->cart->empty_cart();
 		$order->save();
 
@@ -239,12 +259,61 @@ class CardPaymentService extends WC_Payment_Gateway {
 		];
 	}
 
+	public function getSettings() {
+		$settingsService = SettingsService::getInstance();
+		$userTokens      = [];
+		if ( is_user_logged_in() ) {
+			$userTokens = ( new UserTokenRepository() )->getUserTokens();
+		}
+
+		return [
+			'tokens'                 => $userTokens,
+			// Wordpress data
+			'_wpnonce'               => wp_create_nonce( 'process_payment' ),
+			'isUserLoggedIn'         => is_user_logged_in(),
+			'isSandbox'              => $settingsService->isSandbox(),
+			// Woocommerce data
+			'amount'                 => WC()->cart->total,
+			'currency'               => strtoupper( get_woocommerce_currency() ),
+			// Widget
+			'title'                  => $settingsService->getWidgetPaymentCardTitle(),
+			'description'            => $settingsService->getWidgetPaymentCardDescription(),
+			'styles'                 => $settingsService->getWidgetStyles(),
+			// Tokens & keys
+			'publicKey'              => $settingsService->getPublicKey(),
+			'selectedToken'          => '',
+			'paymentSourceToken'     => '',
+			'cvv'                    => '',
+			// Card
+			'cardSupportedCardTypes' => $settingsService->getCardSupportedCardTypes(),
+			'gatewayId'              => $settingsService->getCardGatewayId(),
+			// 3DS
+			'card3DS'                => $settingsService->getCard3DS(),
+			'card3DSServiceId'       => $settingsService->getCard3DSServiceId(),
+			'card3DSFlow'            => $settingsService->getCardTypeExchangeOtt(),
+			'charge3dsId'            => '',
+			// Fraud
+			'cardFraud'              => $settingsService->getCardFraud(),
+			'cardFraudServiceId'     => $settingsService->getCardFraudServiceId(),
+			// DirectCharge
+			'cardDirectCharge'       => $settingsService->getCardDirectCharge(),
+			// SaveCard
+			'cardSaveCard'           => $settingsService->getCardSaveCard(),
+			'cardSaveCardOption'     => $settingsService->getCardSaveCardOption(),
+			'cardSaveCardChecked'    => false,
+			// Other
+			'supports'               => array_filter( $this->supports, [ $this, 'supports' ] ),
+		];
+	}
+
+
 	/**
 	 * Ajax function
 	 */
 	public function get_vault_token(): void {
 		$wpNonce = ! empty( $_POST['_wpnonce'] ) ? sanitize_text_field( $_POST['_wpnonce'] ) : null;
-		if ( ! wp_verify_nonce( $wpNonce, 'get_vault_token' ) ) {
+		if ( ! wp_verify_nonce( $wpNonce, 'get_vault_token' ) &&
+			 ! wp_verify_nonce( $wpNonce, 'create-wallet-charge' ) ) {
 			die( 'Security check' );
 		}
 
@@ -275,7 +344,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 				throw new RouteException(
 					'woocommerce_rest_checkout_process_payment_error',
 					/* Translators: %s Error message from API. */
-					esc_html( sprintf( __( 'Error: %s', 'power-board' ), $e->getMessage() ) )
+					esc_html( sprintf( __( 'Error: %s', PLUGIN_TEXT_DOMAIN ), $e->getMessage() ) )
 				);
 			}
 		} else {
@@ -286,6 +355,49 @@ class CardPaymentService extends WC_Payment_Gateway {
 		die();
 	}
 
+	/**
+	 * Ajax function
+	 */
+	public function create_error_notice() {
+		wc_add_notice( __( $_POST['error'], PLUGIN_TEXT_DOMAIN ), 'error' );
+		$response['data'] = wc_print_notices();
+		return $response;
+	}
+
 	public function woocommerce_before_checkout_form( $arg ) {
 	}
+
+  function setup_phone_fields_settings($address_fields) {
+      $address_fields['billing']['billing_phone']['required'] = false;
+      $address_fields['shipping']['shipping_phone'] = array(
+       'label' => 'Phone',
+       'type' => 'tel',
+       'required' => false,
+       'class' => array( 'form-row-wide' ),
+       'validate' => array( 'phone' ),
+       'autocomplete' => 'tel',
+       'priority' => 95,
+      );
+      return $address_fields;
+  }
+
+	public function payment_fields() {
+		$template = new TemplateService ( $this );
+		SDKAdapterService::getInstance();
+
+		$settings = $this->getSettings();
+
+		$template->includeCheckoutHtml( 'method-form', [
+			'description'      => $this->description,
+			'id'               => $this->id,
+  		'plugin_text_domain' => PLUGIN_TEXT_DOMAIN,
+			'card3DSFlow'      => $settings['card3DSFlow'],
+			'isSaveCardEnable' => $settings['cardSaveCard'],
+			'nonce'            => wp_create_nonce( 'process_payment' ),
+			'isUserLoggedIn'   => is_user_logged_in(),
+			'tokens'           => $settings['tokens'],
+			'settings'         => wp_json_encode( $settings )
+		] );
+	}
+
 }

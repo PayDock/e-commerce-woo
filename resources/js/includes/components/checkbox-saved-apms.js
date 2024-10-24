@@ -1,8 +1,10 @@
 import {createElement} from 'react';
 import {getSetting} from '@woocommerce/settings';
 
+const pluginPrefix = window.widgetSettings.pluginPrefix;
+
 export default (saveCardLabel = 'Save card') => {
-    const settings = getSetting('power_board_apms_data', {});
+    const settings = getSetting(pluginPrefix + '_apms_data', {});
 
     if (!settings.isUserLoggedIn || (settings.afterpaySaveCard === false && settings.zippaySaveCard === false)) {
         return '';

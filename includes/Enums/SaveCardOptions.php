@@ -1,8 +1,8 @@
 <?php
 
-namespace PowerBoard\Enums;
+namespace WooPlugin\Enums;
 
-use PowerBoard\Abstracts\AbstractEnum;
+use WooPlugin\Abstracts\AbstractEnum;
 
 class SaveCardOptions extends AbstractEnum {
 	protected const VAULT = 'Vault token';
