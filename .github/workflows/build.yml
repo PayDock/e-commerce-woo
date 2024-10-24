@@ -34,7 +34,8 @@ jobs:
           zip -r power-board.zip . -x 'build/*' '.git/*' '.github/*' '.gitignore' '.gitlab-ci.yml' 'node.sh' '*.zip' 'node_modules/*'
 
       - name: List contents
-        run:
+        run: |
+          cd ..
           ls
 
       - name: Upload PowerBoard artifact
@@ -44,8 +45,9 @@ jobs:
           path: ./power-board.zip
 
       - name: List ZIP contents
-        run:
+        run: |
           unzip -l power-board.zip
+          cd ..
 
   paydock:
     runs-on: ubuntu-latest
