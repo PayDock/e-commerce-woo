@@ -31,23 +31,13 @@ jobs:
 
       - name: Create PowerBoard build file
         run:
-          zip -r power-board.zip . -x 'build/*' '.git/*' '.github/*' '.gitignore' '.gitlab-ci.yml' 'node.sh' '*.zip' 'node_modules/*'
-
-      - name: List contents
-        run: |
-          cd ..
-          ls
+          rsync -av --exclude='build/*' --exclude='.git/' --exclude='.github/' --exclude='.gitignore' --exclude='.gitlab-ci.yml' --exclude='node.sh' --exclude='*.zip' --exclude='node_modules/*' ./ artifacts/
 
       - name: Upload PowerBoard artifact
         uses: actions/upload-artifact@v4
         with:
           name: power-board
-          path: ./power-board.zip
-
-      - name: List ZIP contents
-        run: |
-          unzip -l power-board.zip
-          cd ..
+          path: artifacts/
 
 #  paydock:
 #    runs-on: ubuntu-latest
