@@ -5,7 +5,6 @@ namespace WooPlugin\Hooks;
 use WooPlugin\Contracts\Hook;
 use WooPlugin\Contracts\Repository;
 use WooPlugin\WooPluginPlugin;
-use WooPlugin\Plugin;
 
 class DeactivationHook implements Hook {
 

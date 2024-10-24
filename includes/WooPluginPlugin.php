@@ -5,6 +5,7 @@ namespace WooPlugin;
 use WooPlugin\Abstracts\AbstractSingleton;
 use WooPlugin\Hooks\ActivationHook;
 use WooPlugin\Hooks\DeactivationHook;
+use WooPlugin\Hooks\UninstallHook;
 use WooPlugin\Repositories\LogRepository;
 use WooPlugin\Services\ActionsService;
 use WooPlugin\Services\FiltersService;
@@ -27,6 +28,7 @@ if ( ! class_exists( '\WooPlugin\WooPluginPlugin' ) ) {
 		protected function __construct() {
 			register_activation_hook( PLUGIN_FILE, [ ActivationHook::class, 'handle' ] );
 			register_deactivation_hook( PLUGIN_FILE, [ DeactivationHook::class, 'handle' ] );
+			register_uninstall_hook( PLUGIN_FILE, [ UninstallHook::class, 'handle' ] );
 
 			ActionsService::getInstance();
 			FiltersService::getInstance();
