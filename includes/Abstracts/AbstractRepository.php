@@ -3,6 +3,7 @@
 namespace WooPlugin\Abstracts;
 
 use WooPlugin\Contracts\Repository;
+use WooPlugin\WooPluginPlugin;
 
 abstract class AbstractRepository implements Repository {
 	protected $wordpressDB;
@@ -28,6 +29,6 @@ abstract class AbstractRepository implements Repository {
 	}
 
 	public function getFullTableName( string $table ): string {
-		return $this->tablePrefix . PLUGIN_TEXT_DOMAIN . '_' . $table;
+		return $this->tablePrefix . WooPluginPlugin::PLUGIN_TEXT_DOMAIN . '_' . $table;
 	}
 }

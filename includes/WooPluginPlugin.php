@@ -16,6 +16,7 @@ if ( ! class_exists( '\WooPlugin\WooPluginPlugin' ) ) {
 		];
 
 		public const PLUGIN_PREFIX = PLUGIN_PREFIX;
+		public const PLUGIN_TEXT_DOMAIN = PLUGIN_TEXT_DOMAIN;
 
 		public const VERSION = '1.0.0';
 
