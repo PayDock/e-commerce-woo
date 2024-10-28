@@ -247,9 +247,11 @@ jQuery(function ($) {
                 }
             },
             customSubmitForm(event) {
-                $('.woocommerce-notices-wrapper:first').html('')
+                $('.woocommerce-notices-wrapper:first').html('');
+
                 if (('power_board_gateway' === this.paymentMethod) && !this.defaultFormTriger) {
                     event.preventDefault();
+                    event.stopPropagation();
                     let config = this.getConfigs();
                     if (!((Array.isArray(config.tokens) && config.tokens.length > 0 && config.selectedToken !== "") || this.currentForm.card.isValidForm())) {
                         var invalid_fields = [];
@@ -275,8 +277,6 @@ jQuery(function ($) {
                         this.currentForm.card.trigger(window.cba.TRIGGER.SUBMIT_FORM);
                     }
                 } else if (this.defaultFormTriger) {
-                    const config = this.getConfigs();
-                    config.selectedToken = $('#classic-power_board_gateway-token').val();
                     this.listenForWidgetErrors();
                 }
             },
@@ -339,7 +339,7 @@ jQuery(function ($) {
                             this.init3DSStandalone(currentConfig)
                             break;
                         default:
-                            this.form.submit()
+                            this.form.submit();
                     }
 
                     this.listenForWidgetErrors();
@@ -360,7 +360,10 @@ jQuery(function ($) {
                         checkbox.hide()
                         this.defaultFormTriger = true;
                     }
-                    $('#classic-power_board_gateway-token').val(value)
+                    const config = this.getConfigs();
+                    config.selectedToken = value;
+                    $('#classic-power_board_gateway-settings').val(JSON.stringify(config));
+                    $('#selectedToken').val(value);
                 })
             },
             showWidget() {
@@ -806,10 +809,6 @@ jQuery(function ($) {
                         console.error(e)
                     }
                 })
-
-                this.form.submit((event) => {
-                    this.customSubmitForm(event)
-                });
 
                 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
             },
