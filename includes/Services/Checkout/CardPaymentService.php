@@ -55,7 +55,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 
 		add_action( 'wp_enqueue_scripts', [ $this, 'payment_scripts' ] );
 
-		add_action( 'wp_ajax_nopriv_get_vault_token', [ $this, 'power_board_get_vault_token' ] );
+		add_action( 'wp_ajax_nopriv_power_board_get_vault_token', [ $this, 'power_board_get_vault_token' ] );
 		add_action( 'wp_ajax_power_board_get_vault_token', [ $this, 'power_board_get_vault_token' ] );
 		add_action( 'wp_ajax_nopriv_power_board_create_error_notice', [ $this, 'power_board_create_error_notice' ], 20 );
 		add_action( 'wp_ajax_power_board_create_error_notice', [ $this, 'power_board_create_error_notice' ], 20 );
