@@ -84,18 +84,18 @@ abstract class AbstractWalletPaymentService extends AbstractPaymentService {
 
 		$loggerRepository = new LogRepository();
 		if ( 'inreview' === $data['data']['status'] ) {
-			$status = 'wc-pb-requested';
+			$status = 'processing';
 		} elseif (
 			( 'pending' === $data['data']['status'] )
 			|| ( ! empty( $_GET['direct_charge'] ) && ( 'true' == $_GET['direct_charge'] ) )
 		) {
-			$status = 'wc-pb-authorize';
+			$status = 'on-hold';
 		} else {
-			$status = 'wc-pb-paid';
+			$status = 'processing';
 		}
 
 		OrderService::updateStatus( $order_id, $status );
-		if ( ! in_array( $status, [ 'wc-pb-authorize' ] ) ) {
+		if ( ! in_array( $status, [ 'on-hold' ] ) ) {
 			$order->payment_complete();
 			$order->update_meta_data( 'pb_directly_charged', 1 );
 		}
@@ -110,7 +110,7 @@ abstract class AbstractWalletPaymentService extends AbstractPaymentService {
 			'Charge',
 			$status,
 			'Successful',
-			'wc-pb-authorize' === $status ? LogRepository::DEFAULT : LogRepository::SUCCESS
+			'on-hold' === $status ? LogRepository::DEFAULT : LogRepository::SUCCESS
 		);
 
 		$order->set_payment_method_title( SettingsService::getInstance()->getWidgetPaymentWalletTitle( $this->getWalletType() ) );

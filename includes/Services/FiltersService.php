@@ -141,7 +141,7 @@ class FiltersService extends AbstractSingleton {
 		$orderId = absint( get_query_var( 'order-received' ) );
 		$options  = get_option( PLUGIN_PREFIX . "_fraud_{$orderId}" );
 		$order    = wc_get_order( $orderId );
-		$status   = $order->get_meta( ActivationHook::CUSTOM_STATUS_META_KEY );
+		$status   = $order->get_status();
 		$afterpay = filter_input( INPUT_GET, 'afterpay-error', FILTER_SANITIZE_STRING );
 
 		if ( ! empty( $afterpay ) && ( 'true' === $afterpay ) ) {
