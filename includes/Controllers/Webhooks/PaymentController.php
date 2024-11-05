@@ -325,12 +325,12 @@ class PaymentController {
 		}
 
 		$order = wc_get_order( $orderId );
+		$chargeId        = $data['_id'] ?? '';
 
-		if ( false === $order || 'checkout-draft' === $order->get_status() ) {
+		if ( false === $order || 'checkout-draft' === $order->get_status() || !$chargeId || $chargeId !== $order->get_meta('power_board_charge_id')) {
 			return false;
 		}
 
-		$chargeId        = $data['_id'] ?? '';
 		$status          = ucfirst( strtolower( $data['status'] ?? 'undefined' ) );
 		$operation       = ucfirst( strtolower( $data['type'] ?? 'undefined' ) );
 		$isAuthorization = $data['authorization'] ?? 0;
