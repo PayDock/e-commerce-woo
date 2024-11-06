@@ -10,6 +10,6 @@
         }
     },
     "require": {
-        "phpseclib/phpseclib": "dev-master"
+        "phpseclib/phpseclib": "~2.0"
     }
 }
