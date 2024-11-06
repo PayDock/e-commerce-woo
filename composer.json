@@ -8,5 +8,8 @@
         "psr-4": {
             "PowerBoard\\": "includes/"
         }
+    },
+    "require": {
+        "phpseclib/phpseclib": "dev-master"
     }
 }
