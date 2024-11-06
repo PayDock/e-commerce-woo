@@ -22,16 +22,6 @@ class HashService {
 
 			return 'sodium:' . base64_encode( $nonce . $ciphertext );
 
-		} elseif ( function_exists( 'openssl_encrypt' ) ) {
-
-			$ivlen = openssl_cipher_iv_length( self::CIPHER );
-			$iv = openssl_random_pseudo_bytes( $ivlen );
-			$key = self::getKey( 16 );
-			$ciphertext_raw = openssl_encrypt( $string, self::CIPHER, $key, self::OPTION, $iv );
-			$hmac = hash_hmac( 'sha256', $ciphertext_raw, $key, true );
-
-			return 'openssl:' . base64_encode( $iv . $hmac . $ciphertext_raw );
-
 		} elseif ( class_exists( 'phpseclib3\Crypt\AES' ) ) {
 
 			$aes = new AES( 'cbc' );
@@ -44,6 +34,16 @@ class HashService {
 			$hmac = hash_hmac( 'sha256', $ciphertext_raw, $key, true );
 
 			return 'phpseclib:' . base64_encode( $iv . $hmac . $ciphertext_raw );
+
+		} elseif ( function_exists( 'openssl_encrypt' ) ) {
+
+			$ivlen = openssl_cipher_iv_length( self::CIPHER );
+			$iv = openssl_random_pseudo_bytes( $ivlen );
+			$key = self::getKey( 16 );
+			$ciphertext_raw = openssl_encrypt( $string, self::CIPHER, $key, self::OPTION, $iv );
+			$hmac = hash_hmac( 'sha256', $ciphertext_raw, $key, true );
+
+			return 'openssl:' . base64_encode( $iv . $hmac . $ciphertext_raw );
 
 		} else {
 
@@ -69,28 +69,6 @@ class HashService {
 
 			return $plaintext;
 
-		} elseif ( strpos( $string, 'openssl:' ) === 0 ) {
-
-			$string = substr( $string, 8 );
-			$c = base64_decode( $string );
-			$ivlen = openssl_cipher_iv_length( self::CIPHER );
-			$iv = substr( $c, 0, $ivlen );
-			$hmac = substr( $c, $ivlen, $sha2len = 32 );
-			$ciphertext_raw = substr( $c, $ivlen + $sha2len );
-			$key = self::getKey( 16 );
-			$original_plaintext = openssl_decrypt( $ciphertext_raw, self::CIPHER, $key, self::OPTION, $iv );
-			$calcmac = hash_hmac( 'sha256', $ciphertext_raw, $key, true );
-
-			if ( false === $original_plaintext ) {
-				return $string;
-			}
-
-			if ( hash_equals( $hmac, $calcmac ) ) {
-				return $original_plaintext;
-			}
-
-			return $string;
-
 		} elseif ( strpos( $string, 'phpseclib:' ) === 0 ) {
 
 			$string = substr( $string, 10 );
@@ -104,6 +82,28 @@ class HashService {
 			$aes->setKey( $key );
 			$aes->setIV( $iv );
 			$original_plaintext = $aes->decrypt( $ciphertext_raw );
+			$calcmac = hash_hmac( 'sha256', $ciphertext_raw, $key, true );
+
+			if ( false === $original_plaintext ) {
+				return $string;
+			}
+
+			if ( hash_equals( $hmac, $calcmac ) ) {
+				return $original_plaintext;
+			}
+
+			return $string;
+
+		} elseif ( strpos( $string, 'openssl:' ) === 0 ) {
+
+			$string = substr( $string, 8 );
+			$c = base64_decode( $string );
+			$ivlen = openssl_cipher_iv_length( self::CIPHER );
+			$iv = substr( $c, 0, $ivlen );
+			$hmac = substr( $c, $ivlen, $sha2len = 32 );
+			$ciphertext_raw = substr( $c, $ivlen + $sha2len );
+			$key = self::getKey( 16 );
+			$original_plaintext = openssl_decrypt( $ciphertext_raw, self::CIPHER, $key, self::OPTION, $iv );
 			$calcmac = hash_hmac( 'sha256', $ciphertext_raw, $key, true );
 
 			if ( false === $original_plaintext ) {
