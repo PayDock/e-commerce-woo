@@ -3,7 +3,8 @@
 namespace PowerBoard\Services;
 
 use PowerBoard\PowerBoardPlugin;
-use phpseclib3\Crypt\AES;
+use phpseclib\Crypt\AES;
+use phpseclib\Crypt\Base;
 
 class HashService {
 
@@ -22,10 +23,11 @@ class HashService {
 
 			return 'sodium:' . base64_encode( $nonce . $ciphertext );
 
-		} elseif ( class_exists( 'phpseclib3\Crypt\AES' ) ) {
+		} elseif ( class_exists( 'phpseclib\Crypt\AES' ) ) {
 
-			$aes = new AES( 'cbc' );
-			$key = self::getKey(16);
+			$aes = new AES( AES::MODE_CBC );
+			$aes->setPreferredEngine( Base::ENGINE_INTERNAL );
+			$key = self::getKey( 16 );
 			$ivlen = 16;
 			$iv = random_bytes( $ivlen );
 			$aes->setKey( $key );
@@ -50,6 +52,7 @@ class HashService {
 			throw new \Exception( 'There is no available data encryption module' );
 
 		}
+
 	}
 
 	public static function decrypt( string $string ): string {
@@ -78,7 +81,8 @@ class HashService {
 			$hmac = substr( $c, $ivlen, $sha2len = 32 );
 			$ciphertext_raw = substr( $c, $ivlen + $sha2len );
 			$key = self::getKey( 16 );
-			$aes = new AES( 'cbc' );
+			$aes = new AES( AES::MODE_CBC );
+			$aes->setPreferredEngine( Base::ENGINE_INTERNAL );
 			$aes->setKey( $key );
 			$aes->setIV( $iv );
 			$original_plaintext = $aes->decrypt( $ciphertext_raw );
@@ -121,6 +125,7 @@ class HashService {
 			return $string;
 
 		}
+
 	}
 
 	private static function getKey( int $length ): string {
@@ -134,4 +139,5 @@ class HashService {
 		return substr( hash( 'sha256', $keyMaterial, true ), 0, $length );
 
 	}
+
 }
