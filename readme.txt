@@ -75,38 +75,5 @@ Also we use helper code that not need compile what contained in assets path.
 
 == Changelog ==
 
-= 1.0.19 =
-* Initial release
-
-= 1.0.28 =
-* Bug fixes
-
-= 1.4.0 =
-* First release on the plugins store
-
-= 1.5.7 =
-* Bug fixes
-
-= 2.0.37 =
-* Completely new plugin. This version includes new code, supports new versions of PHP, MySQL, WordPress, WooCommerce, and v2 API of the PowerBoard app.
-
-= 2.0.44 =
-* New features, readme, changelog, etc.
-
-= 2.0.46 =
-* Patch, small fixes
-
-= 2.0.53 =
-* Min-max feature
-
-= 3.0.4 =
-* Fixes, updates, tweaks
-
-= 3.0.5 =
-* Statuses, openssl, paths
-
-= 3.1.2 =
-* Bug fixes
-
 = 3.1.3 =
-* More bugs fixed
+* Initial PowerBoard plugin for WooCommerce
