@@ -325,12 +325,12 @@ class PaymentController {
 		}
 
 		$order = wc_get_order( $orderId );
+		$chargeId        = $data['_id'] ?? '';
 
-		if ( false === $order || 'checkout-draft' === $order->get_status() ) {
+		if ( false === $order || 'checkout-draft' === $order->get_status() || !$chargeId || $chargeId !== $order->get_meta('power_board_charge_id')) {
 			return false;
 		}
 
-		$chargeId        = $data['_id'] ?? '';
 		$status          = ucfirst( strtolower( $data['status'] ?? 'undefined' ) );
 		$operation       = ucfirst( strtolower( $data['type'] ?? 'undefined' ) );
 		$isAuthorization = $data['authorization'] ?? 0;
@@ -390,6 +390,11 @@ class PaymentController {
 		} else {
 			$referenceArray = explode( '_', $data['reference'] );
 			$orderId        = (int) reset( $referenceArray );
+		}
+
+		$chargeId     = $data['_id'] ?? '';
+		if ( !$chargeId || $chargeId !== $order->get_meta('power_board_charge_id') ) {
+			return false;
 		}
 
 		$order       = wc_get_order( $orderId );
@@ -533,8 +538,9 @@ class PaymentController {
 		}
 
 		$order = wc_get_order( $orderId );
+		$chargeId     = $data['_id'] ?? '';
 
-		if ( false === $order || $order->get_meta( 'api_refunded_id' ) === $data['transaction']['_id'] ) {
+		if ( false === $order || $order->get_meta( 'api_refunded_id' ) === $data['transaction']['_id'] || !$chargeId || $chargeId !== $order->get_meta('power_board_charge_id') ) {
 			return false;
 		}
 
@@ -544,7 +550,6 @@ class PaymentController {
 			$orderTotal = $captureAmount;
 		}
 
-		$chargeId     = $data['_id'] ?? '';
 		$status       = ucfirst( strtolower( $data['status'] ?? 'undefined' ) );
 		$operation    = ucfirst( strtolower( $data['type'] ?? 'undefined' ) );
 		$refundAmount = wc_format_decimal( $data['transaction']['amount'] );
