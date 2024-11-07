@@ -55,10 +55,13 @@ class CardPaymentService extends WC_Payment_Gateway {
 
 		add_action( 'wp_enqueue_scripts', [ $this, 'payment_scripts' ] );
 
+		add_action( 'wp_ajax_nopriv_power_board_get_vault_token', [ $this, 'power_board_get_vault_token' ] );
 		add_action( 'wp_ajax_power_board_get_vault_token', [ $this, 'power_board_get_vault_token' ] );
+		add_action( 'wp_ajax_nopriv_power_board_create_error_notice', [ $this, 'power_board_create_error_notice' ], 20 );
 		add_action( 'wp_ajax_power_board_create_error_notice', [ $this, 'power_board_create_error_notice' ], 20 );
 
 		add_action( 'woocommerce_after_checkout_billing_form', [ $this, 'woocommerce_before_checkout_form' ], 10, 1 );
+		add_action( 'woocommerce_checkout_fields', [$this, 'setup_phone_fields_settings'], 10, 1);
 	}
 
 	public function payment_scripts() {
@@ -74,6 +77,11 @@ class CardPaymentService extends WC_Payment_Gateway {
 		wp_enqueue_style( 'power-board-widget-css', POWER_BOARD_PLUGIN_URL . 'assets/css/frontend/widget.css', [], time() );
 
 		wp_localize_script( 'power-board-form', 'PowerBoardAjax', [
+			'url'         => admin_url( 'admin-ajax.php' ),
+			'wpnonce'     => wp_create_nonce( 'power-board-create-wallet-charge' ),
+			'wpnonce_3ds' => wp_create_nonce( 'power_board_get_vault_token' ),
+		] );
+		wp_localize_script( 'power-board-classic-form', 'PowerBoardAjax', [
 			'url'         => admin_url( 'admin-ajax.php' ),
 			'wpnonce'     => wp_create_nonce( 'power-board-create-wallet-charge' ),
 			'wpnonce_3ds' => wp_create_nonce( 'power_board_get_vault_token' ),
@@ -350,6 +358,20 @@ class CardPaymentService extends WC_Payment_Gateway {
 
 	public function woocommerce_before_checkout_form( $arg ) {
 	}
+
+  function setup_phone_fields_settings($address_fields) {
+      $address_fields['billing']['billing_phone']['required'] = false;
+      $address_fields['shipping']['shipping_phone'] = array(
+       'label' => 'Phone',
+       'type' => 'tel',
+       'required' => false,
+       'class' => array( 'form-row-wide' ),
+       'validate' => array( 'phone' ),
+       'autocomplete' => 'tel',
+       'priority' => 95,
+      );
+      return $address_fields;
+  }
 
 	public function payment_fields() {
 		$template = new TemplateService ( $this );

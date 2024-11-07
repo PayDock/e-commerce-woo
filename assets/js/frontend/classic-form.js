@@ -1,7 +1,10 @@
 jQuery(function ($) {
     $(document).ready(() => {
         const CONFIG = {
-            phoneInputId: '#billing_phone',
+            phoneInputIds: {
+                shipping: '#shipping_phone',
+                billing: '#billing_phone',
+            },
             baseCheckboxIdName: 'payment_method',
             errorMessageClassName: 'wc-block-components-validation-error',
             paymentOptionsNames: [
@@ -16,7 +19,15 @@ jQuery(function ($) {
             errorMessageHtml: `<div class="wc-block-components-validation-error" role="alert"><p>Please enter your phone number in international format, starting with "+"</p></div>`,
         };
 
-        const getPhoneInput = () => $(CONFIG.phoneInputId);
+        const $shippingWrapper = $('#shipping-fields .wc-block-components-address-address-wrapper');
+
+        const getPhoneInputs = () =>
+          Object.entries(CONFIG.phoneInputIds)
+            .reduce((acc, [key, selector]) => {
+                const $input = $(selector);
+                if ($input.length) acc[key] = $input;
+                return acc;
+            }, {});
 
         const getPaymentOptionsComponents = () =>
           CONFIG.paymentOptionsNames
@@ -35,26 +46,37 @@ jQuery(function ($) {
             return true;
         };
 
-        const updateVisibility = (phoneInput) => {
-            const validPhone = validatePhone(phoneInput);
-            $('button#place_order').styles = 'visibility:' + (validPhone ? 'visible' : 'hidden');
+        const updateVisibility = (phoneInputs) => {
+            const validationResults = Object.entries(phoneInputs).reduce((acc, [key, $input]) => {
+                acc[key] = validatePhone($input);
+                return acc;
+            }, {});
+
+            const allValid = Object.values(validationResults).every(Boolean);
+            const shippingValid = validationResults.shipping;
+
+            if (!shippingValid) $shippingWrapper.addClass('is-editing');
+            $('button#place_order').styles = 'visibility:' + (allValid ? 'visible' : 'hidden');
 
             getPaymentOptionsComponents().forEach($component => {
                   $component.css({
-                      opacity: validPhone ? 1 : 0.5,
-                      pointerEvents: validPhone ? 'auto' : 'none',
+                      opacity: allValid ? 1 : 0.5,
+                      pointerEvents: allValid ? 'auto' : 'none',
                   })
               }
             );
         };
 
         const initPhoneNumberValidation = () => {
-            const phoneInput = getPhoneInput();
-            if (!phoneInput) return;
+            const phoneInputs = getPhoneInputs();
+            if (!Object.keys(phoneInputs).length) return;
 
-            phoneInput.on('blur input', () => updateVisibility(phoneInput));
+            Object.values(phoneInputs).forEach($input =>
+              $input.on('blur input', () => updateVisibility(phoneInputs))
+            );
 
-            updateVisibility(phoneInput);
+
+            updateVisibility(phoneInputs);
         };
 
         initPhoneNumberValidation();
@@ -136,6 +158,9 @@ jQuery(function ($) {
                 prefixes.map((prefix) => {
                     fieldsNames.map((field) => {
                         if ('shipping_' === prefix && ['email', 'phone'].includes(field)) {
+                            return;
+                        }
+                        if ('billing_' === prefix && ['phone'].includes(field)) {
                             return;
                         }
                         result.push(`${prefix}${field}`)
@@ -222,9 +247,11 @@ jQuery(function ($) {
                 }
             },
             customSubmitForm(event) {
-                $('.woocommerce-notices-wrapper:first').html('')
+                $('.woocommerce-notices-wrapper:first').html('');
+
                 if (('power_board_gateway' === this.paymentMethod) && !this.defaultFormTriger) {
                     event.preventDefault();
+                    event.stopPropagation();
                     let config = this.getConfigs();
                     if (!((Array.isArray(config.tokens) && config.tokens.length > 0 && config.selectedToken !== "") || this.currentForm.card.isValidForm())) {
                         var invalid_fields = [];
@@ -250,8 +277,6 @@ jQuery(function ($) {
                         this.currentForm.card.trigger(window.cba.TRIGGER.SUBMIT_FORM);
                     }
                 } else if (this.defaultFormTriger) {
-                    const config = this.getConfigs();
-                    config.selectedToken = $('#classic-power_board_gateway-token').val();
                     this.listenForWidgetErrors();
                 }
             },
@@ -314,7 +339,7 @@ jQuery(function ($) {
                             this.init3DSStandalone(currentConfig)
                             break;
                         default:
-                            this.form.submit()
+                            this.form.submit();
                     }
 
                     this.listenForWidgetErrors();
@@ -335,7 +360,10 @@ jQuery(function ($) {
                         checkbox.hide()
                         this.defaultFormTriger = true;
                     }
-                    $('#classic-power_board_gateway-token').val(value)
+                    const config = this.getConfigs();
+                    config.selectedToken = value;
+                    $('#classic-power_board_gateway-settings').val(JSON.stringify(config));
+                    $('#selectedToken').val(value);
                 })
             },
             showWidget() {
@@ -781,10 +809,6 @@ jQuery(function ($) {
                         console.error(e)
                     }
                 })
-
-                this.form.submit((event) => {
-                    this.customSubmitForm(event)
-                });
 
                 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
             },

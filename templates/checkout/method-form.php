@@ -51,6 +51,7 @@ echo wpautop( wp_kses_post( esc_attr( $description ) ) );
     </div>
 	<?php if ( 'power_board_gateway' === $id ): ?>
         <input id="charge3dsid" type="hidden" name="charge3dsid">
+        <input id="selectedToken" type="hidden" name="selectedToken">
 	<?php endif; ?>
     <input id="classic-<?php echo esc_attr( $id ) ?>-token" type="hidden" name="payment_source[]">
     <input id="classic-<?php echo esc_attr( $id ) ?>-nonce" type="hidden" name="_wpnonce"
