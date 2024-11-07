@@ -6,14 +6,26 @@ namespace Composer\Autoload;
 
 class ComposerStaticInit5def1875a6e5e3afb49cf3519ebccdea
 {
+    public static $files = array (
+        'decc78cc4436b1292c6c0d151b19445c' => __DIR__ . '/..' . '/phpseclib/phpseclib/phpseclib/bootstrap.php',
+    );
+
     public static $prefixLengthsPsr4 = array (
+        'p' => 
+        array (
+            'phpseclib\\' => 10,
+        ),
         'P' => 
         array (
-            'PowerBoard\\' => 8,
+            'PowerBoard\\' => 11,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
+        'phpseclib\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/phpseclib/phpseclib/phpseclib',
+        ),
         'PowerBoard\\' => 
         array (
             0 => __DIR__ . '/../..' . '/includes',

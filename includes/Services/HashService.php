@@ -3,55 +3,141 @@
 namespace PowerBoard\Services;
 
 use PowerBoard\PowerBoardPlugin;
+use phpseclib\Crypt\AES;
+use phpseclib\Crypt\Base;
 
 class HashService {
-	private const CIPHER = 'AES-128-CBC';
+
+	private const CIPHER = 'aes-128-cbc';
 	private const OPTION = OPENSSL_RAW_DATA;
+	private const NONCE_LENGTH = 24;
+	private const KEY_LENGTH = 32;
 
 	public static function encrypt( string $string ): string {
 
-		if ( ! function_exists( 'openssl_encrypt' ) ) {
-			return base64_encode( $string );
+		if ( function_exists( 'sodium_crypto_secretbox' ) ) {
+
+			$key = self::getKey( self::KEY_LENGTH );
+			$nonce = random_bytes( self::NONCE_LENGTH );
+			$ciphertext = sodium_crypto_secretbox( $string, $nonce, $key );
+
+			return 'sodium:' . base64_encode( $nonce . $ciphertext );
+
+		} elseif ( class_exists( 'phpseclib\Crypt\AES' ) ) {
+
+			$aes = new AES( AES::MODE_CBC );
+			$aes->setPreferredEngine( Base::ENGINE_INTERNAL );
+			$key = self::getKey( 16 );
+			$ivlen = 16;
+			$iv = random_bytes( $ivlen );
+			$aes->setKey( $key );
+			$aes->setIV( $iv );
+			$ciphertext_raw = $aes->encrypt( $string );
+			$hmac = hash_hmac( 'sha256', $ciphertext_raw, $key, true );
+
+			return 'phpseclib:' . base64_encode( $iv . $hmac . $ciphertext_raw );
+
+		} elseif ( function_exists( 'openssl_encrypt' ) ) {
+
+			$ivlen = openssl_cipher_iv_length( self::CIPHER );
+			$iv = openssl_random_pseudo_bytes( $ivlen );
+			$key = self::getKey( 16 );
+			$ciphertext_raw = openssl_encrypt( $string, self::CIPHER, $key, self::OPTION, $iv );
+			$hmac = hash_hmac( 'sha256', $ciphertext_raw, $key, true );
+
+			return 'openssl:' . base64_encode( $iv . $hmac . $ciphertext_raw );
+
+		} else {
+
+			throw new \Exception( 'There is no available data encryption module' );
+
 		}
 
-		$ivlen = openssl_cipher_iv_length( self::CIPHER );
-		$iv = openssl_random_pseudo_bytes( $ivlen );
-		$ciphertext_raw = openssl_encrypt( $string, self::CIPHER, self::getKey(), self::OPTION, $iv );
-		$hmac = hash_hmac( 'sha256', $ciphertext_raw, self::getKey(), true );
-
-		return base64_encode( $iv . $hmac . $ciphertext_raw );
-	}
-
-	private static function getKey(): string {
-		if ( defined( 'AUTH_KEY' ) ) {
-			return AUTH_KEY;
-		}
-
-		return PowerBoardPlugin::PLUGIN_PREFIX;
 	}
 
 	public static function decrypt( string $string ): string {
 
-		if ( ! function_exists( 'openssl_decrypt' ) ) {
-			return base64_decode( $string );
-		}
+		if ( strpos( $string, 'sodium:' ) === 0 ) {
 
-		$c = base64_decode( $string );
-		$ivlen = openssl_cipher_iv_length( self::CIPHER );
-		$iv = substr( $c, 0, $ivlen );
-		$hmac = substr( $c, $ivlen, $sha2len = 32 );
-		$ciphertext_raw = substr( $c, $ivlen + $sha2len );
-		$original_plaintext = openssl_decrypt( $ciphertext_raw, self::CIPHER, self::getKey(), self::OPTION, $iv );
-		$calcmac = hash_hmac( 'sha256', $ciphertext_raw, self::getKey(), true );
+			$string = substr( $string, 7 );
+			$decoded = base64_decode( $string );
+			$nonce = substr( $decoded, 0, self::NONCE_LENGTH );
+			$ciphertext = substr( $decoded, self::NONCE_LENGTH );
+			$key = self::getKey( self::KEY_LENGTH );
+			$plaintext = sodium_crypto_secretbox_open( $ciphertext, $nonce, $key );
 
-		if ( false === $original_plaintext ) {
+			if ( $plaintext === false ) {
+				return $string;
+			}
+
+			return $plaintext;
+
+		} elseif ( strpos( $string, 'phpseclib:' ) === 0 ) {
+
+			$string = substr( $string, 10 );
+			$c = base64_decode( $string );
+			$ivlen = 16;
+			$iv = substr( $c, 0, $ivlen );
+			$hmac = substr( $c, $ivlen, $sha2len = 32 );
+			$ciphertext_raw = substr( $c, $ivlen + $sha2len );
+			$key = self::getKey( 16 );
+			$aes = new AES( AES::MODE_CBC );
+			$aes->setPreferredEngine( Base::ENGINE_INTERNAL );
+			$aes->setKey( $key );
+			$aes->setIV( $iv );
+			$original_plaintext = $aes->decrypt( $ciphertext_raw );
+			$calcmac = hash_hmac( 'sha256', $ciphertext_raw, $key, true );
+
+			if ( false === $original_plaintext ) {
+				return $string;
+			}
+
+			if ( hash_equals( $hmac, $calcmac ) ) {
+				return $original_plaintext;
+			}
+
 			return $string;
+
+		} elseif ( strpos( $string, 'openssl:' ) === 0 ) {
+
+			$string = substr( $string, 8 );
+			$c = base64_decode( $string );
+			$ivlen = openssl_cipher_iv_length( self::CIPHER );
+			$iv = substr( $c, 0, $ivlen );
+			$hmac = substr( $c, $ivlen, $sha2len = 32 );
+			$ciphertext_raw = substr( $c, $ivlen + $sha2len );
+			$key = self::getKey( 16 );
+			$original_plaintext = openssl_decrypt( $ciphertext_raw, self::CIPHER, $key, self::OPTION, $iv );
+			$calcmac = hash_hmac( 'sha256', $ciphertext_raw, $key, true );
+
+			if ( false === $original_plaintext ) {
+				return $string;
+			}
+
+			if ( hash_equals( $hmac, $calcmac ) ) {
+				return $original_plaintext;
+			}
+
+			return $string;
+
+		} else {
+
+			return $string;
+
 		}
 
-		if ( hash_equals( $hmac, $calcmac ) ) {
-			return $original_plaintext;
-		}
-
-		return $string;
 	}
+
+	private static function getKey( int $length ): string {
+
+		if ( defined( 'AUTH_KEY' ) ) {
+			$keyMaterial = AUTH_KEY;
+		} else {
+			$keyMaterial = PowerBoardPlugin::PLUGIN_PREFIX;
+		}
+
+		return substr( hash( 'sha256', $keyMaterial, true ), 0, $length );
+
+	}
+
 }
