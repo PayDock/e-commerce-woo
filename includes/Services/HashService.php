@@ -39,7 +39,11 @@ class HashService {
 
 	}
 
-	public static function decrypt( string $string ): string {
+	public static function decrypt( ?string $string ): string {
+
+		if ( $string === null ) {
+			return '';
+		}
 
 		if ( strpos( $string, 'sodium:' ) === 0 ) {
 

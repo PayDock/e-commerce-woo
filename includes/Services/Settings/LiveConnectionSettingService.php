@@ -42,6 +42,65 @@ class LiveConnectionSettingService extends AbstractSettingService {
 				}
 			}
 		}
+
+		foreach ( CardSettings::cases() as $cardSettings ) {
+			if ( CardSettings::GATEWAY_ID() == $cardSettings ) {
+				$key = $service->getOptionName( $this->id, [
+					SettingGroups::CARD()->name,
+					$cardSettings->name,
+				] );
+
+				if ( ! empty( $this->settings[ $key ] ) ) {
+					$this->settings[ $key ] = HashService::decrypt( $this->settings[ $key ] );
+				}
+			}
+		}
+
+		foreach ( BankAccountSettings::cases() as $bankAccountSettings ) {
+			if ( BankAccountSettings::GATEWAY_ID() == $bankAccountSettings ) {
+				$key = $service->getOptionName( $this->id, [
+					SettingGroups::BANK_ACCOUNT()->name,
+					$bankAccountSettings->name,
+				] );
+
+				if ( ! empty( $this->settings[ $key ] ) ) {
+					$this->settings[ $key ] = HashService::decrypt( $this->settings[ $key ] );
+				}
+			}
+		}
+
+		foreach ( WalletPaymentMethods::cases() as $walletPaymentMethods ) {
+			foreach ( WalletSettings::cases() as $walletSettings ) {
+				if ( WalletSettings::GATEWAY_ID() == $walletSettings ) {
+					$key = $service->getOptionName( $this->id, [
+						SettingGroups::WALLETS()->name,
+						$walletPaymentMethods->name,
+						$walletSettings->name,
+					] );
+
+					if ( ! empty( $this->settings[ $key ] ) ) {
+						$this->settings[ $key ] = HashService::decrypt( $this->settings[ $key ] );
+					}
+				}
+			}
+		}
+
+		foreach ( OtherPaymentMethods::cases() as $otherPaymentMethods ) {
+			foreach ( APMsSettings::cases() as $APMsSetting ) {
+				if ( APMsSettings::GATEWAY_ID() == $APMsSetting ) {
+					$key = $service->getOptionName( $this->id, [
+						SettingGroups::A_P_M_S()->name,
+						$otherPaymentMethods->name,
+						$APMsSetting->name,
+					] );
+
+					if ( ! empty( $this->settings[ $key ] ) ) {
+						$this->settings[ $key ] = HashService::decrypt( $this->settings[ $key ] );
+					}
+				}
+			}
+		}
+
 	}
 
 	public function init_form_fields(): void {
@@ -303,6 +362,54 @@ class LiveConnectionSettingService extends AbstractSettingService {
 			}
 		}
 
+		$hashedGatewayKeys = [];
+
+		foreach ( CardSettings::cases() as $cardSettings ) {
+			if ( CardSettings::GATEWAY_ID() == $cardSettings ) {
+				$key = $service->getOptionName( $this->id, [
+					SettingGroups::CARD()->name,
+					$cardSettings->name,
+				] );
+				$hashedGatewayKeys[ $key ] = $cardSettings;
+			}
+		}
+
+		foreach ( BankAccountSettings::cases() as $bankAccountSettings ) {
+			if ( BankAccountSettings::GATEWAY_ID() == $bankAccountSettings ) {
+				$key = $service->getOptionName( $this->id, [
+					SettingGroups::BANK_ACCOUNT()->name,
+					$bankAccountSettings->name,
+				] );
+				$hashedGatewayKeys[ $key ] = $bankAccountSettings;
+			}
+		}
+
+		foreach ( WalletPaymentMethods::cases() as $walletPaymentMethods ) {
+			foreach ( WalletSettings::cases() as $walletSettings ) {
+				if ( WalletSettings::GATEWAY_ID() == $walletSettings ) {
+					$key = $service->getOptionName( $this->id, [
+						SettingGroups::WALLETS()->name,
+						$walletPaymentMethods->name,
+						$walletSettings->name,
+					] );
+					$hashedGatewayKeys[ $key ] = $walletSettings;
+				}
+			}
+		}
+
+		foreach ( OtherPaymentMethods::cases() as $otherPaymentMethods ) {
+			foreach ( APMsSettings::cases() as $APMsSetting ) {
+				if ( APMsSettings::GATEWAY_ID() == $APMsSetting ) {
+					$key = $service->getOptionName( $this->id, [
+						SettingGroups::A_P_M_S()->name,
+						$otherPaymentMethods->name,
+						$APMsSetting->name,
+					] );
+					$hashedGatewayKeys[ $key ] = $APMsSetting;
+				}
+			}
+		}
+
 		foreach ( $this->get_form_fields() as $key => $field ) {
 			$type = $this->get_field_type( $field );
 
@@ -315,7 +422,7 @@ class LiveConnectionSettingService extends AbstractSettingService {
 				$value = $this->validate_text_field( $key, $value );
 			}
 
-			if ( array_key_exists( $key, $hashedCredentialKeys ) ) {
+			if ( array_key_exists( $key, $hashedCredentialKeys ) || array_key_exists( $key, $hashedGatewayKeys ) ) {
 				if ( $value === '********************' || $value === null ) {
 					$value = $this->get_option( $key );
 				} elseif ( $value === '' ) {
@@ -331,6 +438,29 @@ class LiveConnectionSettingService extends AbstractSettingService {
 			$isEncrypted = HashService::decrypt( $this->settings[ $key ] ) !== $this->settings[ $key ];
 
 			if ( ! empty( $this->settings[ $key ] ) && !$isEncrypted) {
+
+				try {
+
+					$this->settings[ $key ] = HashService::encrypt( $this->settings[ $key ] );
+
+				} catch ( \Exception $e ) {
+
+					$this->error_message = $e->getMessage();
+					add_action( 'admin_notices', array( $this, 'display_error_message' ) );
+
+					return;
+
+				}
+
+			}
+
+		}
+
+		foreach ( $hashedGatewayKeys as $key => $gatewaySetting ) {
+
+			$isEncrypted = HashService::decrypt( $this->settings[ $key ] ) !== $this->settings[ $key ];
+
+			if ( ! empty( $this->settings[ $key ] ) && !$isEncrypted ) {
 
 				try {
 
@@ -388,6 +518,72 @@ class LiveConnectionSettingService extends AbstractSettingService {
 					$this->settings[ $key ] = '********************';
 				} else {
 					$this->settings[ $key ] = '';
+				}
+			}
+		}
+
+		foreach ( CardSettings::cases() as $cardSettings ) {
+			if ( CardSettings::GATEWAY_ID() == $cardSettings ) {
+				$key = $service->getOptionName( $this->id, [
+					SettingGroups::CARD()->name,
+					$cardSettings->name,
+				]);
+
+				if ( ! empty( $this->settings[ $key ] ) ) {
+					$this->settings[ $key ] = '********************';
+				} else {
+					$this->settings[ $key ] = '';
+				}
+			}
+		}
+
+		foreach ( BankAccountSettings::cases() as $bankAccountSettings ) {
+			if ( BankAccountSettings::GATEWAY_ID() == $bankAccountSettings ) {
+				$key = $service->getOptionName( $this->id, [
+					SettingGroups::BANK_ACCOUNT()->name,
+					$bankAccountSettings->name,
+				]);
+
+				if ( ! empty( $this->settings[ $key ] ) ) {
+					$this->settings[ $key ] = '********************';
+				} else {
+					$this->settings[ $key ] = '';
+				}
+			}
+		}
+
+		foreach ( WalletPaymentMethods::cases() as $walletPaymentMethods ) {
+			foreach ( WalletSettings::cases() as $walletSettings ) {
+				if ( WalletSettings::GATEWAY_ID() == $walletSettings ) {
+					$key = $service->getOptionName( $this->id, [
+						SettingGroups::WALLETS()->name,
+						$walletPaymentMethods->name,
+						$walletSettings->name,
+					]);
+
+					if ( ! empty( $this->settings[ $key ] ) ) {
+						$this->settings[ $key ] = '********************';
+					} else {
+						$this->settings[ $key ] = '';
+					}
+				}
+			}
+		}
+
+		foreach ( OtherPaymentMethods::cases() as $otherPaymentMethods ) {
+			foreach ( APMsSettings::cases() as $APMsSetting ) {
+				if ( APMsSettings::GATEWAY_ID() == $APMsSetting ) {
+					$key = $service->getOptionName( $this->id, [
+						SettingGroups::A_P_M_S()->name,
+						$otherPaymentMethods->name,
+						$APMsSetting->name,
+					]);
+
+					if ( ! empty( $this->settings[ $key ] ) ) {
+						$this->settings[ $key ] = '********************';
+					} else {
+						$this->settings[ $key ] = '';
+					}
 				}
 			}
 		}
