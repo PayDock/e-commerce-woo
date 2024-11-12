@@ -24,6 +24,8 @@ use PowerBoard\Services\Validation\ConnectionValidationService;
 
 class LiveConnectionSettingService extends AbstractSettingService {
 
+	private $error_message = '';
+
 	public function __construct() {
 		parent::__construct();
 
@@ -328,7 +330,18 @@ class LiveConnectionSettingService extends AbstractSettingService {
             $isEncrypted = HashService::decrypt($this->settings[ $key ]) !== $this->settings[ $key ];
 
             if ( ! empty( $this->settings[ $key ] ) && !$isEncrypted) {
-                $this->settings[ $key ] = HashService::encrypt( $this->settings[ $key ] );
+
+				try {
+					$this->settings[ $key ] = HashService::encrypt( $this->settings[ $key ] );
+				} catch ( \Exception $e ) {
+
+					$this->error_message = $e->getMessage();
+					add_action( 'admin_notices', array( $this, 'display_error_message' ) );
+
+					return;
+
+				}
+
             }
         }
 
@@ -387,5 +400,12 @@ class LiveConnectionSettingService extends AbstractSettingService {
 		return '';
 	}
 
+	public function display_error_message() {
+
+		if ( ! empty( $this->error_message ) ) {
+			echo '<div class="notice notice-error"><p>' . esc_html( $this->error_message ) . '</p></div>';
+		}
+
+	}
 
 }
