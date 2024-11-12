@@ -256,7 +256,7 @@ class LiveConnectionSettingService extends AbstractSettingService {
 
 			foreach ( APMsSettings::cases() as $APMsSettings ) {
 				if ( OtherPaymentMethods::AFTERPAY()->name === $otherPaymentMethods->name &&
-				     APMsSettings::DIRECT_CHARGE()->name === $APMsSettings->name ) {
+					 APMsSettings::DIRECT_CHARGE()->name === $APMsSettings->name ) {
 					continue;
 				}
 
@@ -326,13 +326,16 @@ class LiveConnectionSettingService extends AbstractSettingService {
 			$this->settings[ $key ] = $value;
 		}
 
-        foreach ( $hashedCredentialKeys as $key => $credentialSettings ) {
-            $isEncrypted = HashService::decrypt($this->settings[ $key ]) !== $this->settings[ $key ];
+		foreach ( $hashedCredentialKeys as $key => $credentialSettings ) {
 
-            if ( ! empty( $this->settings[ $key ] ) && !$isEncrypted) {
+			$isEncrypted = HashService::decrypt( $this->settings[ $key ] ) !== $this->settings[ $key ];
+
+			if ( ! empty( $this->settings[ $key ] ) && !$isEncrypted) {
 
 				try {
+
 					$this->settings[ $key ] = HashService::encrypt( $this->settings[ $key ] );
+
 				} catch ( \Exception $e ) {
 
 					$this->error_message = $e->getMessage();
@@ -342,8 +345,9 @@ class LiveConnectionSettingService extends AbstractSettingService {
 
 				}
 
-            }
-        }
+			}
+
+		}
 
 		foreach ( $validationService->getErrors() as $error ) {
 			$this->add_error( $error );
