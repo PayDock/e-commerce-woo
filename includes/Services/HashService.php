@@ -3,8 +3,6 @@
 namespace PowerBoard\Services;
 
 use PowerBoard\PowerBoardPlugin;
-use phpseclib\Crypt\AES;
-use phpseclib\Crypt\Base;
 
 class HashService {
 
@@ -23,20 +21,6 @@ class HashService {
 
 			return 'sodium:' . base64_encode( $nonce . $ciphertext );
 
-		} elseif ( class_exists( 'phpseclib\Crypt\AES' ) ) {
-
-			$aes = new AES( AES::MODE_CBC );
-			$aes->setPreferredEngine( Base::ENGINE_INTERNAL );
-			$key = self::getKey( 16 );
-			$ivlen = 16;
-			$iv = random_bytes( $ivlen );
-			$aes->setKey( $key );
-			$aes->setIV( $iv );
-			$ciphertext_raw = $aes->encrypt( $string );
-			$hmac = hash_hmac( 'sha256', $ciphertext_raw, $key, true );
-
-			return 'phpseclib:' . base64_encode( $iv . $hmac . $ciphertext_raw );
-
 		} elseif ( function_exists( 'openssl_encrypt' ) ) {
 
 			$ivlen = openssl_cipher_iv_length( self::CIPHER );
@@ -49,13 +33,17 @@ class HashService {
 
 		} else {
 
-			throw new \Exception( 'There is no available data encryption module' );
+			throw new \Exception( 'There is no available data encryption module.' );
 
 		}
 
 	}
 
-	public static function decrypt( string $string ): string {
+	public static function decrypt( ?string $string ): string {
+
+		if ( $string === null ) {
+			return '';
+		}
 
 		if ( strpos( $string, 'sodium:' ) === 0 ) {
 
@@ -71,32 +59,6 @@ class HashService {
 			}
 
 			return $plaintext;
-
-		} elseif ( strpos( $string, 'phpseclib:' ) === 0 ) {
-
-			$string = substr( $string, 10 );
-			$c = base64_decode( $string );
-			$ivlen = 16;
-			$iv = substr( $c, 0, $ivlen );
-			$hmac = substr( $c, $ivlen, $sha2len = 32 );
-			$ciphertext_raw = substr( $c, $ivlen + $sha2len );
-			$key = self::getKey( 16 );
-			$aes = new AES( AES::MODE_CBC );
-			$aes->setPreferredEngine( Base::ENGINE_INTERNAL );
-			$aes->setKey( $key );
-			$aes->setIV( $iv );
-			$original_plaintext = $aes->decrypt( $ciphertext_raw );
-			$calcmac = hash_hmac( 'sha256', $ciphertext_raw, $key, true );
-
-			if ( false === $original_plaintext ) {
-				return $string;
-			}
-
-			if ( hash_equals( $hmac, $calcmac ) ) {
-				return $original_plaintext;
-			}
-
-			return $string;
 
 		} elseif ( strpos( $string, 'openssl:' ) === 0 ) {
 

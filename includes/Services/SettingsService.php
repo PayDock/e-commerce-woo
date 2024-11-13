@@ -169,59 +169,83 @@ final class SettingsService {
 	public function getCardGatewayId(): ?string {
 		$settingService = $this->getSettingsService();
 
-		return $settingService->get_option(
-			$this->getOptionName(
-				$settingService->id,
-				[
-					SettingGroups::CARD()->name,
-					CardSettings::GATEWAY_ID()->name,
-				]
-			)
+		$key = $this->getOptionName(
+			$settingService->id,
+			[
+				SettingGroups::CARD()->name,
+				CardSettings::GATEWAY_ID()->name,
+			]
 		);
+
+		$value = $settingService->get_option( $key );
+
+		if ( $value !== null ) {
+			return HashService::decrypt( $value );
+		} else {
+			return null;
+		}
 	}
 
 	public function getBankAccountGatewayId(): ?string {
 		$settingService = $this->getSettingsService();
 
-		return $settingService->get_option(
-			$this->getOptionName(
-				$settingService->id,
-				[
-					SettingGroups::BANK_ACCOUNT()->name,
-					BankAccountSettings::GATEWAY_ID()->name,
-				]
-			)
+		$key = $this->getOptionName(
+			$settingService->id,
+			[
+				SettingGroups::BANK_ACCOUNT()->name,
+				BankAccountSettings::GATEWAY_ID()->name,
+			]
 		);
+
+		$value = $settingService->get_option( $key );
+
+		if ( $value !== null ) {
+			return HashService::decrypt( $value );
+		} else {
+			return null;
+		}
 	}
 
 	public function getWalletGatewayId( WalletPaymentMethods $methods ): ?string {
 		$settingService = $this->getSettingsService();
 
-		return $settingService->get_option(
-			$this->getOptionName(
-				$settingService->id,
-				[
-					SettingGroups::WALLETS()->name,
-					$methods->name,
-					WalletSettings::GATEWAY_ID()->name,
-				]
-			)
+		$key = $this->getOptionName(
+			$settingService->id,
+			[
+				SettingGroups::WALLETS()->name,
+				$methods->name,
+				WalletSettings::GATEWAY_ID()->name,
+			]
 		);
+
+		$value = $settingService->get_option( $key );
+
+		if ( $value !== null ) {
+			return HashService::decrypt( $value );
+		} else {
+			return null;
+		}
 	}
 
 	public function getAPMsGatewayId( OtherPaymentMethods $methods ): ?string {
 		$settingService = $this->getSettingsService();
 
-		return $settingService->get_option(
-			$this->getOptionName(
-				$settingService->id,
-				[
-					SettingGroups::A_P_M_S()->name,
-					$methods->name,
-					APMsSettings::GATEWAY_ID()->name,
-				]
-			)
+		$key = $this->getOptionName(
+			$settingService->id,
+			[
+				SettingGroups::A_P_M_S()->name,
+				$methods->name,
+				APMsSettings::GATEWAY_ID()->name,
+			]
 		);
+
+		$value = $settingService->get_option( $key );
+
+		if ( $value !== null ) {
+			return HashService::decrypt( $value );
+		} else {
+			return null;
+		}
 	}
 
 	public function isCardEnabled(): bool {

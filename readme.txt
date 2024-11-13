@@ -26,6 +26,8 @@ Prerequisites to install and configure the PowerBoard plugin, you will need a Wo
 * [WooCommerce Server Requirements](https://woocommerce.com/document/server-requirements/)
 * [WooCommerce PHP and Wordpress Support](https://woocommerce.com/document/update-php-wordpress/)
 
+Note: Encryption of admin values within the plugin requires Sodium or as a fallback OpenSSL to be enabled.
+
 ### Step-by-Step Installation
 
 1. **Download the Plugin**
