@@ -116,7 +116,7 @@ class WidgetController {
 			$chargeRequest = [
 				'amount'    => round( $data['total']['total_price'] / 100, 2 ),
 				'currency'  => $data['total']['currency_code'],
-				'reference' => (string) $reference,
+				'reference' => (string) get_bloginfo( 'name' ) . $reference,
 				'customer'  => [
 					'first_name'     => $billingAdress['first_name'],
 					'last_name'      => $billingAdress['last_name'],

@@ -706,7 +706,7 @@ jQuery(function ($) {
                         this.currentForm.wallets[index].setEnv(isSandbox ? 'preproduction_cba' : 'production_cba')
 
                         this.currentForm.wallets[index].onPaymentError(() => {
-                            this.form.submit()
+                            this.showErrorMessage('The payment service does not accept payment. Please try again later or choose another payment method.')
                         });
 
                         let paymentSourceElement = $(`#classic-power_board_${type}_wallets_gateway-token`);
