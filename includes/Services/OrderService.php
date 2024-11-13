@@ -14,38 +14,24 @@ class OrderService {
 		}
 	}
 
-	public static function updateStatus( $id, $custom_status, $status_note = null ) {
+	public static function updateStatus( $id, $new_status, $status_note = null ) {
 		$order = wc_get_order( $id );
 
 		if ( is_object( $order ) ) {
-				$order->set_status( ActivationHook::CUSTOM_STATUSES[ $custom_status ], $status_note );
-				$order->update_meta_data( ActivationHook::CUSTOM_STATUS_META_KEY, $custom_status );
-				$order->save();
+			$order->set_status( $new_status, $status_note );
+			$order->save();
 		}
 	}
 
 	public function iniPluginOrderButtons( $order ) {
-		$orderCustomStatus = $order->get_meta( ActivationHook::CUSTOM_STATUS_META_KEY );
 		$orderStatus       = $order->get_status();
 		$capturedAmount    = $order->get_meta( 'capture_amount' );
-		$totalRefaund      = $order->get_total_refunded();
-		$orderTotal      = (float) $order->get_total(false);
-		if ( in_array( $orderStatus, [
-				'pending',
-				'failed',
-				'cancelled',
-				'on-hold',
-			] )
-		     || in_array( $orderCustomStatus, [
-				'pb-requested',
-				'wc-pb-requested',
-				'pb-refunded',
-				'WC-pb-refunded',
-				'pb-authorize',
-				'wc-pb-authorize'
-			] )
-		     || ( $orderTotal == $totalRefaund )
-		     || ( $capturedAmount == $totalRefaund )
+		$totalRefund       = $order->get_total_refunded();
+		$orderTotal        = (float) $order->get_total(false);
+
+		if ( in_array( $orderStatus, [ 'pending', 'failed', 'cancelled', 'on-hold', 'refunded' ] )
+			|| ( $orderTotal == $totalRefund )
+			|| ( $capturedAmount == $totalRefund )
 		) {
 			wp_enqueue_style(
 				'hide-refund-button-styles',
@@ -54,17 +40,7 @@ class OrderService {
 				PLUGIN_VERSION
 			);
 		}
-		if ( in_array( $orderStatus, [
-				'processing',
-				'on-hold',
-			] ) && in_array( $orderCustomStatus, [
-				'pb-authorize',
-				'wc-pb-authorize',
-				'pb-paid',
-				'wc-pb-paid',
-				'wc-pb-p-paid',
-				'pb-p-paid'
-			] ) ) {
+		if ( in_array( $orderStatus, [ 'processing', 'on-hold', ] ) ) {
 			$this->templateService->includeAdminHtml( PLUGIN_TEXT_DOMAIN . '-capture-block', compact( 'order' ) );
 			wp_enqueue_script(
 				PLUGIN_TEXT_DOMAIN . '-capture-block',
@@ -95,25 +71,16 @@ class OrderService {
 			return;
 		}
 		$rulesForStatuses = [
-			'processing' => [
-				'refunded',
-				'cancelled',
-				'failed',
-				'pending',
-				'completed'
-			],
+			'processing' => [ 'refunded', 'cancelled', 'failed', 'pending', 'completed' ],
 			'refunded'   => [ 'cancelled', 'failed', 'refunded' ],
 			'cancelled'  => [ 'failed', 'cancelled' ],
 		];
 		if ( ! empty( $rulesForStatuses[ $oldStatusKey ] ) ) {
 			if ( ! in_array( $newStatusKey, $rulesForStatuses[ $oldStatusKey ] ) ) {
-				$newStatusName                                   = wc_get_order_status_name( $newStatusKey );
-				$oldStatusName                                   = wc_get_order_status_name( $oldStatusKey );
-				$error                                           = sprintf(
-				/* translators: %1$s: Old status of processing order.
-				 * translators: %2$s: New status of processing order.
-				 */
-					__( 'You can not change status from "%1$s"  to "%2$s"', PLUGIN_PREFIX ),
+				$newStatusName = wc_get_order_status_name( $newStatusKey );
+				$oldStatusName = wc_get_order_status_name( $oldStatusKey );
+				$error         = sprintf(
+					__( 'You can not change status from "%1$s"  to "%2$s"', 'power-board' ),
 					$oldStatusName,
 					$newStatusName
 				);
@@ -136,11 +103,7 @@ class OrderService {
 			$capturedAmount = $order->get_meta( 'capture_amount' );
 
 			if ( ! empty( $capturedAmount ) ) {
-
-				// if ( $order->get_total() > $capturedAmount ) {
-					$this->templateService->includeAdminHtml( 'information-about-partial-captured', compact( 'order', 'capturedAmount' ) );
-				// }
-
+				$this->templateService->includeAdminHtml( 'information-about-partial-captured', compact( 'order', 'capturedAmount' ) );
 			}
 
 		}

@@ -1,5 +1,5 @@
 <?php if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+    exit;
 }
 
 use WooPlugin\Enums\OrderListColumns;
@@ -9,10 +9,13 @@ use WooPlugin\Enums\WalletPaymentMethods;
 <span class="plugin-order-actions">
     <?php
         $pb_charge_meta = $order->get_meta( 'pb_directly_charged' );
-        $partiallyRefunded = in_array( $order->get_meta(PLUGIN_PREFIX . '_refunded_status'), [
-          'wc-pb-p-refund',
-          'pb-p-refund'
-        ] );
+
+        $total_refunded = $order->get_total_refunded();
+        $order_total = $order->get_total();
+
+        $partiallyRefunded = $total_refunded > 0 && $total_refunded < $order_total;
+        $fullyRefunded = $total_refunded >= $order_total;
+
         $order_directly_charged = ! empty( $pb_charge_meta ) ? $pb_charge_meta : false;
         $showCancelButton = ! in_array( $order->get_meta(OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey()), [
             WalletPaymentMethods::PAY_PAL_SMART_BUTTON()->getLabel(),
@@ -26,10 +29,10 @@ use WooPlugin\Enums\WalletPaymentMethods;
         <button type="button"
                 onclick="paymentCapture(<?php echo esc_attr( $order->get_id() ); ?>, 'plugin-capture-charge')"
                 class="button">
-			Capture charge
-		</button>
+            Capture charge
+        </button>
     <?php endif; ?>
-	  <?php if ( $showCancelButton && !$partiallyRefunded) :?>
+      <?php if ( $showCancelButton && ! $partiallyRefunded && ! $fullyRefunded ) : ?>
           <button type="button"
                   onclick="handlePluginPaymentCapture(<?php echo esc_attr( $order->get_id() ); ?>, 'plugin-cancel-authorised')"
                   class="button">
@@ -42,13 +45,13 @@ use WooPlugin\Enums\WalletPaymentMethods;
         <tr>
             <td class="label"><?php esc_html_e( 'Total available to capture', 'woocommerce' ); ?>:</td>
             <td class="total available-to-capture" data-value="<?php echo esc_html( $order->get_total() ); ?>">
-				<?php echo wp_kses_post( wc_price( $order->get_total(), [ 'currency' => $order->get_currency() ] ) ); ?>
+                <?php echo wp_kses_post( wc_price( $order->get_total(), [ 'currency' => $order->get_currency() ] ) ); ?>
             </td>
         </tr>
         <tr>
             <td class="label">
                 <label for="refund_amount">
-					<?php esc_html_e( 'Capture amount', 'woocommerce' ); ?>:
+                    <?php esc_html_e( 'Capture amount', 'woocommerce' ); ?>:
                 </label>
             </td>
             <td class="total">
@@ -63,18 +66,18 @@ use WooPlugin\Enums\WalletPaymentMethods;
     </table>
     <div class="clear"></div>
     <div class="refund-actions manual-capture-actions">
-		<?php /* translators: capture amount  */ ?>
+        <?php /* translators: capture amount  */ ?>
         <button type="button"
                 onclick="handlePluginPaymentCapture(<?php echo esc_attr( $order->get_id() ); ?>, 'plugin-capture-charge')"
                 class="button button-primary">
-			<?php esc_html_e( 'Capture ', 'woocommerce' );
-			$currency_symbol = get_woocommerce_currency_symbol( $order->get_currency() );;
-			echo esc_html( $currency_symbol );
-			?>
+            <?php esc_html_e( 'Capture ', 'woocommerce' );
+            $currency_symbol = get_woocommerce_currency_symbol( $order->get_currency() );;
+            echo esc_html( $currency_symbol );
+            ?>
             <span class="capture-amount-btn">
                 <?php echo esc_attr( $order->get_total() ); ?>
             </span>
-			<?php esc_html_e( ' manually', 'woocommerce' ); ?>
+            <?php esc_html_e( ' manually', 'woocommerce' ); ?>
         </button>
         <button type="button" class="button cancel-action"
                 onclick="cancelActionManualCapture()"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></button>
