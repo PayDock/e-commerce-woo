@@ -88,6 +88,7 @@ class FiltersService extends AbstractSingleton {
 		add_filter( 'manage_woocommerce_page_wc-orders_custom_column', [ $this, 'ordersListNewColumnContent' ], 10, 2 );
 		add_filter( 'woocommerce_get_formatted_order_total', [ $this, 'changeOrderAmount' ], 10, 2 );
 		add_filter( 'manage_edit-shop_order_columns', [ $this, 'addCaptureAmountCustomColumn' ], 20 );
+		add_filter( 'woocommerce_my_account_my_orders_actions', [ $this, 'my_account_classic_payment_edit' ], 20, 2 );
 	}
 
 	protected function addSettingsLink(): void {
@@ -155,4 +156,18 @@ class FiltersService extends AbstractSingleton {
 
 		return $links;
 	}
+
+	public function my_account_classic_payment_edit( $actions, $order ) {
+
+		$order_status = $order->get_status();
+
+		if ( $order_status == 'pending' ) {
+			unset( $actions['pay'] );
+			unset( $actions['cancel'] );
+		}
+
+		return $actions;
+
+	}
+
 }
