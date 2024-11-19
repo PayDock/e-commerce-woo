@@ -17,6 +17,7 @@ use PowerBoard\Enums\SettingGroups;
 use PowerBoard\Enums\SettingsTabs;
 use PowerBoard\Enums\WalletPaymentMethods;
 use PowerBoard\Enums\WalletSettings;
+use PowerBoard\Services\HashService;
 use PowerBoard\Services\SDKAdapterService;
 use PowerBoard\Services\SettingsService;
 
@@ -67,11 +68,20 @@ class ConnectionValidationService {
 	}
 
 	private function prepareFormData(): void {
+
 		$post_data = $this->service->get_post_data();
+
 		foreach ( $this->service->get_form_fields() as $key => $field ) {
+
 			try {
-				$this->data[ $key ] = $this->service->get_field_value( $key, $field, $post_data );
-				$this->result[ $key ] = $this->data[ $key ];
+				$value = $this->service->get_field_value( $key, $field, $post_data );
+
+				if ( isset( $field['type'] ) && $field['type'] === 'password' ) {
+					$value = HashService::decrypt( $value );
+				}
+
+				$this->data[ $key ] = $value;
+				$this->result[ $key ] = $value;
 
 				if ( 'select' === $field['type'] || 'checkbox' === $field['type'] ) {
 					do_action( 'woocommerce_update_non_option_setting', [ 
@@ -80,13 +90,15 @@ class ConnectionValidationService {
 						'value' => $this->data[ $key ],
 					] );
 				}
-			} catch (Exception $e) {
+			} catch ( Exception $e ) {
 				$this->service->add_error( $e->getMessage() );
 			}
+
 		}
+
 	}
 
-	private function validate(): void {
+	public function validate(): void {
 		if ( $this->validateCredential() ) {
 			$this->validateCard();
 			$this->validateWallets();
@@ -95,7 +107,7 @@ class ConnectionValidationService {
 		}
 	}
 
-	private function validateCredential(): bool {
+	public function validateCredential(): bool {
 		$accessKey = SettingsService::getInstance()
 			->getOptionName( $this->service->id, [ 
 				SettingGroups::CREDENTIALS()->name,
@@ -173,6 +185,7 @@ class ConnectionValidationService {
 
 		return $result;
 	}
+
 	private function saveOldCredential() {
 		$this->oldAccessToken = ConfigService::$accessToken;
 		$this->oldWidgetAccessToken = ConfigService::$widgetAccessToken;
@@ -186,6 +199,7 @@ class ConnectionValidationService {
 		ConfigService::$publicKey = $this->oldPublicKey;
 		ConfigService::$secretKey = $this->oldSecretKey;
 	}
+
 	private function checkWidgetKeyConnection( ?string $widgetAccessToken ): bool {
 		$this->saveOldCredential();
 		if ( $widgetAccessToken === '********************' || $widgetAccessToken === null ) {
@@ -239,7 +253,7 @@ class ConnectionValidationService {
 		return $result;
 	}
 
-	private function validateCard(): void {
+	public function validateCard(): void {
 		$enableKey = SettingsService::getInstance()
 			->getOptionName( $this->service->id, [ 
 				SettingGroups::CARD()->name,
@@ -345,7 +359,7 @@ class ConnectionValidationService {
 		}
 	}
 
-	private function validateId( string $id, bool $fraudPassiveMode = false ): bool {
+	public function validateId( string $id, bool $fraudPassiveMode = false ): bool {
 		foreach ( $this->getawayIds['resource']['data'] as $getawayId ) {
 			if ( $getawayId['_id'] == $id ) {
 				return true;
@@ -381,7 +395,7 @@ class ConnectionValidationService {
 		return false;
 	}
 
-	private function validateBankAccount(): void {
+	public function validateBankAccount(): void {
 		return;
 
 		$enabledKey = SettingsService::getInstance()
@@ -410,7 +424,7 @@ class ConnectionValidationService {
 		}
 	}
 
-	private function validateWallets(): void {
+	public function validateWallets(): void {
 		foreach ( WalletPaymentMethods::cases() as $method ) {
 			$result = true;
 			$enabledKey = SettingsService::getInstance()
@@ -471,7 +485,7 @@ class ConnectionValidationService {
 		}
 	}
 
-	private function validateAPMs(): void {
+	public function validateAPMs(): void {
 		foreach ( OtherPaymentMethods::cases() as $method ) {
 			$result = true;
 			$enabledKey = SettingsService::getInstance()
@@ -594,4 +608,9 @@ class ConnectionValidationService {
 	public function getErrors(): array {
 		return $this->errors;
 	}
+
+	public function hasErrors(): bool {
+		return ! empty( $this->errors );
+	}
+
 }

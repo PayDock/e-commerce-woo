@@ -5,6 +5,7 @@ namespace PowerBoard\Enums;
 use PowerBoard\Abstracts\AbstractEnum;
 
 class BankAccountSettings extends AbstractEnum {
+
 	protected const ENABLE = 'ENABLE';
 	protected const GATEWAY_ID = 'GATEWAY_ID';
 	protected const SAVE_CARD = 'SAVE_CARD';
@@ -28,7 +29,7 @@ class BankAccountSettings extends AbstractEnum {
 	public function getInputType(): string {
 		switch ( $this->name ) {
 			case self::GATEWAY_ID:
-				return 'text';
+				return 'password';
 			case self::ENABLE:
 			case self::SAVE_CARD:
 				return 'checkbox';
@@ -45,4 +46,17 @@ class BankAccountSettings extends AbstractEnum {
 				return '';
 		}
 	}
+
+	public function getInputAttributes(): array {
+
+		$attributes = [];
+
+		if ( $this->getInputType() === 'password' ) {
+			$attributes['autocomplete'] = 'off';
+		}
+
+		return $attributes;
+
+	}
+
 }
