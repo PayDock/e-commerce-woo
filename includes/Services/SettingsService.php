@@ -308,15 +308,15 @@ final class SettingsService {
 	public function getCard3DSServiceId(): string {
 		$settingService = $this->getSettingsService();
 
-		return $settingService->get_option(
-			$this->getOptionName(
-				$settingService->id,
-				[
-					SettingGroups::CARD()->name,
-					CardSettings::DS_SERVICE_ID()->name,
-				]
-			)
+		$key = $this->getOptionName(
+			$settingService->id,
+			[
+				SettingGroups::CARD()->name,
+				CardSettings::DS_SERVICE_ID()->name,
+			]
 		);
+
+		return HashService::decrypt( $settingService->get_option( $key ) );
 	}
 
 	public function getCardFraud(): string {
@@ -336,15 +336,15 @@ final class SettingsService {
 	public function getCardFraudServiceId(): string {
 		$settingService = $this->getSettingsService();
 
-		return $settingService->get_option(
-			$this->getOptionName(
-				$settingService->id,
-				[
-					SettingGroups::CARD()->name,
-					CardSettings::FRAUD_SERVICE_ID()->name,
-				]
-			)
+		$key = $this->getOptionName(
+			$settingService->id,
+			[
+				SettingGroups::CARD()->name,
+				CardSettings::FRAUD_SERVICE_ID()->name,
+			]
 		);
+
+		return HashService::decrypt( $settingService->get_option( $key ) );
 	}
 
 	public function getCardDirectCharge(): bool {
@@ -493,16 +493,16 @@ final class SettingsService {
 	public function getWalletFraudServiceId( WalletPaymentMethods $methods ): string {
 		$settingService = $this->getSettingsService();
 
-		return $settingService->get_option(
-			$this->getOptionName(
-				$settingService->id,
-				[
-					SettingGroups::WALLETS()->name,
-					$methods->name,
-					WalletSettings::FRAUD_SERVICE_ID()->name,
-				]
-			)
+		$key = $this->getOptionName(
+			$settingService->id,
+			[
+				SettingGroups::WALLETS()->name,
+				$methods->name,
+				WalletSettings::FRAUD_SERVICE_ID()->name,
+			]
 		);
+
+		return HashService::decrypt( $settingService->get_option( $key ) );
 	}
 
 	public function isPayPallSmartButtonPayLater(): string {
@@ -538,16 +538,16 @@ final class SettingsService {
 	public function getAPMsFraudServiceId( OtherPaymentMethods $methods ): ?string {
 		$settingService = $this->getSettingsService();
 
-		return $settingService->get_option(
-			$this->getOptionName(
-				$settingService->id,
-				[
-					SettingGroups::A_P_M_S()->name,
-					$methods->name,
-					APMsSettings::FRAUD_SERVICE_ID()->name,
-				]
-			)
+		$key = $this->getOptionName(
+			$settingService->id,
+			[
+				SettingGroups::A_P_M_S()->name,
+				$methods->name,
+				APMsSettings::FRAUD_SERVICE_ID()->name,
+			]
 		);
+
+		return HashService::decrypt( $settingService->get_option( $key ) );
 	}
 
 	public function isAPMsDirectCharge( OtherPaymentMethods $methods ): bool {

@@ -5,12 +5,10 @@ namespace PowerBoard\Enums;
 use PowerBoard\Abstracts\AbstractEnum;
 
 class CardSettings extends AbstractEnum {
+
 	protected const ENABLE = 'ENABLE';
-
 	protected const SUPPORTED_CARD_TYPES = 'SUPPORTED_CARD_TYPES';
-
 	protected const GATEWAY_ID = 'GATEWAY_ID';
-
 	protected const DS = 'DS';
 	protected const DS_SERVICE_ID = 'DS_SERVICE_ID';
 	protected const TYPE_EXCHANGE_OTT = 'TYPE_EXCHANGE_OTT';
@@ -25,7 +23,7 @@ class CardSettings extends AbstractEnum {
 			case self::GATEWAY_ID:
 			case self::DS_SERVICE_ID:
 			case self::FRAUD_SERVICE_ID:
-				return 'text';
+				return 'password';
 			case self::ENABLE:
 			case self::DIRECT_CHARGE:
 			case self::SAVE_CARD:
@@ -70,4 +68,17 @@ class CardSettings extends AbstractEnum {
 				return '';
 		}
 	}
+
+	public function getInputAttributes(): array {
+
+		$attributes = [];
+
+		if ( $this->getInputType() === 'password' ) {
+			$attributes['autocomplete'] = 'off';
+		}
+
+		return $attributes;
+
+	}
+
 }

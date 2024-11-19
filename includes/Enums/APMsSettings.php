@@ -5,6 +5,7 @@ namespace PowerBoard\Enums;
 use PowerBoard\Abstracts\AbstractEnum;
 
 class APMsSettings extends AbstractEnum {
+
 	protected const ENABLE = 'ENABLE';
 	protected const GATEWAY_ID = 'GATEWAY_ID';
 	protected const FRAUD = 'FRAUD';
@@ -17,19 +18,15 @@ class APMsSettings extends AbstractEnum {
 		switch ( $this->name ) {
 			case self::GATEWAY_ID:
 			case self::FRAUD_SERVICE_ID:
-				return 'text';
-
+				return 'password';
 			case self::ENABLE:
 			case self::FRAUD:
 			case self::DIRECT_CHARGE:
 			case self::SAVE_CARD:
 				return 'checkbox';
-
 			case self::SAVE_CARD_OPTION:
 				return 'select';
-
 			default:
-				// Consider adding a default case if applicable
 				return '';
 		}
 	}
@@ -66,4 +63,17 @@ class APMsSettings extends AbstractEnum {
 				return '';
 		}
 	}
+
+	public function getInputAttributes(): array {
+
+		$attributes = [];
+
+		if ( $this->getInputType() === 'password' ) {
+			$attributes['autocomplete'] = 'off';
+		}
+
+		return $attributes;
+
+	}
+
 }

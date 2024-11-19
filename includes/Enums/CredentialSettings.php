@@ -5,6 +5,7 @@ namespace PowerBoard\Enums;
 use PowerBoard\Abstracts\AbstractEnum;
 
 class CredentialSettings extends AbstractEnum {
+
 	protected const SANDBOX = 'SANDBOX';
 	protected const TYPE = 'TYPE';
 	protected const PUBLIC_KEY = 'PUBLIC_KEY';
@@ -74,4 +75,17 @@ class CredentialSettings extends AbstractEnum {
 				return '';
 		}
 	}
+
+	public function getInputAttributes(): array {
+
+		$attributes = [];
+
+		if ( $this->getInputType() === 'password' ) {
+			$attributes['autocomplete'] = 'off';
+		}
+
+		return $attributes;
+
+	}
+
 }
