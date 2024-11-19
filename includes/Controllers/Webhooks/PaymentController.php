@@ -76,11 +76,11 @@ class PaymentController {
 					'message' => __( 'The capture process was successful.', 'woocommerce' ),
 				] );
 			} else {
-				if ( ! empty( $result['error'] ) ) {
-					if ( is_array( $result['error'] ) ) {
-						$result['error'] = wp_json_encode( $result['error'] );
+				if ( ! empty( $charge['error'] ) ) {
+					if ( is_array( $charge['error'] ) ) {
+						$charge['error'] = wp_json_encode( $charge['error'] );
 					}
-					$error = $result['error'];
+					$error = $charge['error'];
 				} else {
 					$error = __( 'The capture process has failed; please try again.', 'woocommerce' );
 				}
