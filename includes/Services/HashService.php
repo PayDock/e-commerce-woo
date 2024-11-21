@@ -11,7 +11,10 @@ class HashService {
 	private const NONCE_LENGTH = 24;
 	private const KEY_LENGTH = 32;
 
-	public static function encrypt( string $string ): string {
+	public static function encrypt( ?string $string ): ?string {
+		if ($string == null || str_contains($string, 'sodium:') || str_contains($string, 'openssl:')) {
+			return $string;
+		}
 
 		if ( function_exists( 'sodium_crypto_secretbox' ) ) {
 
@@ -36,7 +39,6 @@ class HashService {
 			throw new \Exception( 'There is no available data encryption module.' );
 
 		}
-
 	}
 
 	public static function decrypt( ?string $string ): string {

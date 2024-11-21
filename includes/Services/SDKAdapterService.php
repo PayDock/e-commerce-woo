@@ -14,6 +14,7 @@ use PowerBoard\Enums\ConfigAPI;
 use PowerBoard\Enums\CredentialSettings;
 use PowerBoard\Enums\CredentialsTypes;
 use PowerBoard\Enums\SettingGroups;
+use PowerBoard\Services\HashService;
 use PowerBoard\Services\Settings\LiveConnectionSettingService;
 use PowerBoard\Services\Settings\SandboxConnectionSettingService;
 
@@ -40,33 +41,33 @@ class SDKAdapterService {
 		}
 
 		$isAccessToken = CredentialsTypes::ACCESS_KEY()->name == $settings->get_option(
-			$settingsService->getOptionName( $settings->id, [ 
+			$settingsService->getOptionName( $settings->id, [
 				SettingGroups::CREDENTIALS()->name,
 				CredentialSettings::TYPE()->name,
 			] )
 		);
 
 		if ( $isAccessToken ) {
-			$secretKey = $settings->get_option( $settingsService->getOptionName( $settings->id, [ 
+			$secretKey = $settings->get_option( $settingsService->getOptionName( $settings->id, [
 				SettingGroups::CREDENTIALS()->name,
 				CredentialSettings::ACCESS_KEY()->name,
 			] ) );
-			$publicKey = $settings->get_option( $settingsService->getOptionName( $settings->id, [ 
+			$publicKey = $settings->get_option( $settingsService->getOptionName( $settings->id, [
 				SettingGroups::CREDENTIALS()->name,
 				CredentialSettings::WIDGET_KEY()->name,
 			] ) );
 		} else {
-			$publicKey = $settings->get_option( $settingsService->getOptionName( $settings->id, [ 
+			$publicKey = $settings->get_option( $settingsService->getOptionName( $settings->id, [
 				SettingGroups::CREDENTIALS()->name,
 				CredentialSettings::PUBLIC_KEY()->name,
 			] ) );
-			$secretKey = $settings->get_option( $settingsService->getOptionName( $settings->id, [ 
+			$secretKey = $settings->get_option( $settingsService->getOptionName( $settings->id, [
 				SettingGroups::CREDENTIALS()->name,
 				CredentialSettings::SECRET_KEY()->name,
 			] ) );
 		}
 
-		ConfigService::init( $env, $secretKey, $publicKey ?? null );
+		ConfigService::init( $env, HashService::decrypt( $secretKey ), HashService::decrypt( $publicKey ) ?? null );
 	}
 
 	private function isProd( ?bool $forcedProdEnv = null ): bool {
@@ -74,7 +75,7 @@ class SDKAdapterService {
 			$settings = new SandboxConnectionSettingService();
 
 			return self::ENABLED_CONDITION !== $settings->get_option(
-				SettingsService::getInstance()->getOptionName( $settings->id, [ 
+				SettingsService::getInstance()->getOptionName( $settings->id, [
 					SettingGroups::CREDENTIALS()->name,
 					CredentialSettings::SANDBOX()->name,
 				] )
