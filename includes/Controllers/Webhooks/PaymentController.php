@@ -397,13 +397,13 @@ class PaymentController {
 		$fraudId     = $data['_id'];
 		$fraudStatus = $data['status'];
 
-		$optionName = "power_board_fraud_{$orderId}";
-
 		if ( 'complete' !== $fraudStatus ) {
 			$operation = ucfirst( strtolower( $data['type'] ?? 'undefined' ) );
 			$status    = 'wc-pb-failed';
 
-			delete_option( $optionName );
+			$order->delete_meta_data( 'power_board_fraud' );
+			$order->save();
+
 			OrderService::updateStatus( $orderId, $status );
 
 			$loggerRepository->createLogRecord(
@@ -416,15 +416,16 @@ class PaymentController {
 			return true;
 		}
 
-		$options = get_option( $optionName );
+		$power_board_fraud = $order->get_meta( 'power_board_fraud' );
 
-		if ( false === $options || false === $order ) {
+		if ( false === $power_board_fraud || false === $order ) {
 			return false;
 		}
 
 		$paymentSource = $data['customer']['payment_source'];
-		if ( ! empty( $options['gateway_id'] ) ) {
-			$paymentSource['gateway_id'] = $options['gateway_id'];
+
+		if ( ! empty( $power_board_fraud['gateway_id'] ) ) {
+			$paymentSource['gateway_id'] = $power_board_fraud['gateway_id'];
 		}
 
 		$chargeArgs = [
@@ -439,19 +440,19 @@ class PaymentController {
 				'payment_source' => $paymentSource,
 			],
 			'fraud_charge_id' => $fraudId,
-			'capture'         => $options['capture'],
+			'capture'         => $power_board_fraud['capture'],
 		];
 
-		if ( ! empty( $options['charge3dsid'] ) ) {
-			$chargeArgs['_3ds_charge_id'] = $options['charge3dsid'];
+		if ( ! empty( $power_board_fraud['charge3dsid'] ) ) {
+			$chargeArgs['_3ds_charge_id'] = $power_board_fraud['charge3dsid'];
 		}
 
-		if ( ! empty( $options['_3ds'] ) ) {
-			$chargeArgs['_3ds'] = $options['_3ds'];
+		if ( ! empty( $power_board_fraud['_3ds'] ) ) {
+			$chargeArgs['_3ds'] = $power_board_fraud['_3ds'];
 		}
 
-		if ( ! empty( $options['cvv'] ) ) {
-			$chargeArgs['customer']['payment_source']['card_ccv'] = $options['cvv'];
+		if ( ! empty( $power_board_fraud['cvv'] ) ) {
+			$chargeArgs['customer']['payment_source']['card_ccv'] = $power_board_fraud['cvv'];
 		}
 
 		delete_option( $optionName );
@@ -472,7 +473,7 @@ class PaymentController {
 			return false;
 		}
 
-		if ( ! empty( $options['_3ds'] ) ) {
+		if ( ! empty( $power_board_fraud['_3ds'] ) ) {
 			$attachResponse = SDKAdapterService::getInstance()->fraudAttach( $chargeId,
 				[ 'fraud_charge_id' => $fraudId ] );
 			if ( ! empty( $attachResponse['error'] ) ) {
