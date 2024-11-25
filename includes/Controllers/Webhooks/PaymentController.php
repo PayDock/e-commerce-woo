@@ -4,7 +4,6 @@ namespace PowerBoard\Controllers\Webhooks;
 
 use PowerBoard\Enums\ChargeStatuses;
 use PowerBoard\Enums\NotificationEvents;
-use PowerBoard\Hooks\ActivationHook;
 use PowerBoard\PowerBoardPlugin;
 use PowerBoard\Repositories\LogRepository;
 use PowerBoard\Services\OrderService;
@@ -455,7 +454,8 @@ class PaymentController {
 			$chargeArgs['customer']['payment_source']['card_ccv'] = $power_board_fraud['cvv'];
 		}
 
-		delete_option( $optionName );
+		$order->delete_meta_data( 'power_board_fraud' );
+		$order->save();
 
 		$response = SDKAdapterService::getInstance()->createCharge( $chargeArgs );
 		$chargeId = ! empty( $response['resource']['data']['_id'] ) ? $response['resource']['data']['_id'] : '';
