@@ -417,7 +417,7 @@ class PaymentController {
 
 		$power_board_fraud = $order->get_meta( 'power_board_fraud' );
 
-		if ( false === $power_board_fraud || false === $order ) {
+		if ( "" === $power_board_fraud || false === $order ) {
 			return false;
 		}
 
