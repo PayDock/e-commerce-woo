@@ -129,15 +129,16 @@ class FiltersService extends AbstractSingleton {
 
 	public function woocommerceThankyouOrderReceivedText( $text ) {
 		$orderId = absint( get_query_var( 'order-received' ) );
-		$options  = get_option( "power_board_fraud_{$orderId}" );
-		$order    = wc_get_order( $orderId );
-		$status   = $order->get_meta( ActivationHook::CUSTOM_STATUS_META_KEY );
+		$order = wc_get_order( $orderId );
+		$power_board_fraud = $order->get_meta( 'power_board_fraud' );
+		$status = $order->get_meta( ActivationHook::CUSTOM_STATUS_META_KEY );
 		$afterpay = filter_input( INPUT_GET, 'afterpay-error', FILTER_SANITIZE_STRING );
 
 		if ( ! empty( $afterpay ) && ( 'true' === $afterpay ) ) {
 			return __( 'Order has been cancelled', 'power-board' );
 		}
-		if ( false === $options && 'processing' !== $status ) {
+
+		if ( "" === $power_board_fraud && 'processing' !== $status ) {
 			return __( 'Thank you. Your order has been received.', 'power-board' );
 		}
 

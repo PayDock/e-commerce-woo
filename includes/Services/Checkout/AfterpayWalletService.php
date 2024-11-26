@@ -52,7 +52,8 @@ class AfterpayWalletService extends AbstractWalletPaymentService {
 		$wallet  = reset( $wallets );
 		$isFraud = ! empty( $wallet['fraud'] ) && $wallet['fraud'];
 		if ( $isFraud ) {
-			update_option( 'power_board_fraud_' . (string) $order->get_id(), [] );
+			$order->update_meta_data( 'power_board_fraud', [] );
+			$order->save();
 		}
 
 		$loggerRepository = new LogRepository();

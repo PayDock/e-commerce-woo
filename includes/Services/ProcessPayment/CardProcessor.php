@@ -330,7 +330,8 @@ class CardProcessor {
 		] );
 
 		if ( empty( $response['error'] ) && ! empty( $response['resource']['data']['_id'] ) ) {
-			update_option( 'power_board_fraud_' . (string) $this->order->get_id(), $options );
+			$this->order->update_meta_data( 'power_board_fraud', $options );
+			$this->order->save();
 		}
 
 		return $response;
@@ -376,7 +377,8 @@ class CardProcessor {
 		] );
 
 		if ( empty( $response['error'] ) && ! empty( $response['resource']['data']['_id'] ) ) {
-			update_option( 'power_board_fraud_' . (string) $this->order->get_id(), $options );
+			$this->order->update_meta_data( 'power_board_fraud', $options );
+			$this->order->save();
 		}
 
 		return $response;
@@ -583,7 +585,8 @@ class CardProcessor {
 		] );
 
 		if ( empty( $response['error'] ) && ! empty( $response['resource']['data']['_id'] ) ) {
-			update_option( 'power_board_fraud_' . (string) $this->order->get_id(), $options );
+			$this->order->update_meta_data( 'power_board_fraud', $options );
+			$this->order->save();
 		}
 
 		return $response;
