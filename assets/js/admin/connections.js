@@ -1,5 +1,4 @@
 jQuery(document).ready(function ($) {
-    const DISABLE_TEXT = 'DISABLE';
     const types = {
         select: 'select', checkbox: 'checkbox'
     };
@@ -15,12 +14,6 @@ jQuery(document).ready(function ($) {
         type: types.select,
         hide: ['CREDENTIALS_ACCESS_KEY'],
         show: ['CUSTOM_VERSION',],
-    }, {
-        element: 'CREDENTIALS_TYPE',
-        condition: 'CREDENTIALS',
-        type: types.select,
-        hide: ['CREDENTIALS_ACCESS_KEY', 'CREDENTIALS_WIDGET_KEY'],
-        show: ['CREDENTIALS_PUBLIC_KEY', 'CREDENTIALS_SECRET_KEY'],
     }, {
         element: 'CARD_SAVE_CARD',
         condition: 'DISABLE',
@@ -115,7 +108,7 @@ jQuery(document).ready(function ($) {
         element.find('option').each((index, el) => {
             const option = jQuery(el);
             if (typeof value === "object") {
-                if (option.val(), value.includes(option.val())) {
+                if (option.val() && value.includes(option.val())) {
                     return
                 }
             } else {
@@ -241,7 +234,7 @@ jQuery(document).ready(function ($) {
 
     const optionsCache = {};
     prefixes.map((prefix) => {
-        if (document.getElementById(prefix + 'CREDENTIALS_TYPE') === null) {
+        if (document.getElementById(prefix + 'CREDENTIALS_ACCESS_KEY') === null) {
             return;
         }
 
@@ -252,7 +245,7 @@ jQuery(document).ready(function ($) {
         $('#' + prefix + 'A_P_M_S_AFTERPAY_SAVE_CARD_OPTION').closest('tr').remove()
         // todo: remove when api for save card will ready
 
-        //checkoboxes
+        //checkboxes
         const saveCard = document.getElementById(prefix + 'CARD_SAVE_CARD');
         const saveCardOption = document.getElementById(prefix + 'CARD_SAVE_CARD_OPTION');
 

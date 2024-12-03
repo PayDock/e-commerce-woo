@@ -37,14 +37,6 @@ abstract class AbstractApiService {
 
 		if ( ! empty( ConfigService::$accessToken ) ) {
 			$args['headers']['x-access-token'] = ConfigService::$accessToken;
-		} else {
-			if ( ! empty( ConfigService::$secretKey ) ) {
-				$args['headers']['x-user-secret-key'] = ConfigService::$secretKey;
-			}
-
-			if ( ! empty( ConfigService::$publicKey ) ) {
-				$args['headers']['x-user-public-key'] = ConfigService::$publicKey;
-			}
 		}
 
 		return $this->runCall($args);

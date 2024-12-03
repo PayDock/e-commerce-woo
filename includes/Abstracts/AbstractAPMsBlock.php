@@ -51,7 +51,7 @@ abstract class AbstractAPMsBlock extends AbstractBlock {
 			'enable'             => $settingsService->isAPMsEnabled( $payment ),
 			'gatewayId'          => $settingsService->getAPMsGatewayId( $payment ),
 			// Tokens & keys
-			'publicKey'          => $settingsService->getPublicKey(),
+			'widgetToken'          => $settingsService->getWidgetAccessToken(),
 			'paymentSourceToken' => '',
 			// SaveCard
 			'saveCard'           => $settingsService->isAPMsSaveCard( $payment ),
