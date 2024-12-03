@@ -7,19 +7,19 @@
  * LICENSE file in the root directory of this source tree.
  *
  * Plugin Name: PowerBoard for WooCommerce
- * Plugin URI: https://github.com/PayDock/jsp-woocommerce/tree/power_board
+ * Plugin URI: https://github.com/CommBank-PowerBoard/powerboard-e-commerce-woo
  * Description: PowerBoard simplify how you manage your payments. Reduce costs, technical headaches & streamline compliance using PowerBoard's payment orchestration.
  * Author: PowerBoard
  * Author URI: https://www.commbank.com.au/business/payments/take-online-payments/powerboard.html#getting-started
- * Version: 3.1.3
- * Requires at least: 6.4.2
+ * Version: 3.3.0
+ * Requires at least: 6.5
  * Text Domain: power-board
- * Tested up to: 6.6
- * Stable tag: 3.1.3
+ * Tested up to: 6.7
+ * Stable tag: 3.3.0
  * License: GPL-3.0
  * License URI: http://www.gnu.org/licenses/gpl-3.0.html
- * WC requires at least: 6.4.2
- * WC tested up to: 8.5
+ * WC requires at least: 6.5
+ * WC tested up to: 9.4.1
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -39,7 +39,7 @@ if ( ! defined( 'POWER_BOARD_PLUGIN_URL' ) ) {
 }
 
 if ( ! defined( 'POWER_BOARD_PLUGIN_VERSION' ) ) {
-	define( 'POWER_BOARD_PLUGIN_VERSION', '3.1.3' );
+	define( 'POWER_BOARD_PLUGIN_VERSION', '3.3.0' );
 }
 
 require_once __DIR__ . '/vendor/autoload.php';
