@@ -12,7 +12,12 @@ class HashService {
 	private const KEY_LENGTH = 32;
 
 	public static function encrypt( ?string $string ): ?string {
-		if ($string == null || str_contains($string, 'sodium:') || str_contains($string, 'openssl:')) {
+
+		if (
+			$string == null ||
+			strpos( $string, 'sodium:' ) !== false ||
+			strpos( $string, 'openssl:' ) !== false
+		) {
 			return $string;
 		}
 
@@ -39,6 +44,7 @@ class HashService {
 			throw new \Exception( 'There is no available data encryption module.' );
 
 		}
+
 	}
 
 	public static function decrypt( ?string $string ): string {
