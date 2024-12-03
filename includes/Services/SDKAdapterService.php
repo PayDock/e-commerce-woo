@@ -12,7 +12,6 @@ use PowerBoard\API\TokenService;
 use PowerBoard\API\VaultService;
 use PowerBoard\Enums\ConfigAPI;
 use PowerBoard\Enums\CredentialSettings;
-use PowerBoard\Enums\CredentialsTypes;
 use PowerBoard\Enums\SettingGroups;
 use PowerBoard\Services\HashService;
 use PowerBoard\Services\Settings\LiveConnectionSettingService;
@@ -40,34 +39,16 @@ class SDKAdapterService {
 			$env = ConfigAPI::SANDBOX_ENVIRONMENT()->value;
 		}
 
-		$isAccessToken = CredentialsTypes::ACCESS_KEY()->name == $settings->get_option(
-			$settingsService->getOptionName( $settings->id, [
-				SettingGroups::CREDENTIALS()->name,
-				CredentialSettings::TYPE()->name,
-			] )
-		);
+		$accessKey = $settings->get_option( $settingsService->getOptionName( $settings->id, [
+		SettingGroups::CREDENTIALS()->name,
+		CredentialSettings::ACCESS_KEY()->name,
+		] ) );
+		$widgetKey = $settings->get_option( $settingsService->getOptionName( $settings->id, [
+		SettingGroups::CREDENTIALS()->name,
+		CredentialSettings::WIDGET_KEY()->name,
+		] ) );
 
-		if ( $isAccessToken ) {
-			$secretKey = $settings->get_option( $settingsService->getOptionName( $settings->id, [
-				SettingGroups::CREDENTIALS()->name,
-				CredentialSettings::ACCESS_KEY()->name,
-			] ) );
-			$publicKey = $settings->get_option( $settingsService->getOptionName( $settings->id, [
-				SettingGroups::CREDENTIALS()->name,
-				CredentialSettings::WIDGET_KEY()->name,
-			] ) );
-		} else {
-			$publicKey = $settings->get_option( $settingsService->getOptionName( $settings->id, [
-				SettingGroups::CREDENTIALS()->name,
-				CredentialSettings::PUBLIC_KEY()->name,
-			] ) );
-			$secretKey = $settings->get_option( $settingsService->getOptionName( $settings->id, [
-				SettingGroups::CREDENTIALS()->name,
-				CredentialSettings::SECRET_KEY()->name,
-			] ) );
-		}
-
-		ConfigService::init( $env, HashService::decrypt( $secretKey ), HashService::decrypt( $publicKey ) ?? null );
+		ConfigService::init( $env, HashService::decrypt( $accessKey ), HashService::decrypt( $widgetKey ) ?? null );
 	}
 
 	private function isProd( ?bool $forcedProdEnv = null ): bool {

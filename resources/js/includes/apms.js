@@ -73,12 +73,12 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
         setTimeout(() => {
             if ((validationSuccess && 'zip' === id) && !wasInit) {
                 wasInit = true;
-                button = new window.cba.ZipmoneyCheckoutButton('#' + buttonId, settings.publicKey, settings.gatewayId);
+                button = new window.cba.ZipmoneyCheckoutButton('#' + buttonId, settings.widgetToken, settings.gatewayId);
 
                 data.gatewayType = 'zippay'
             } else if ((validationSuccess && 'afterpay' === id) && !wasInit) {
                 wasInit = true;
-                button = new window.cba.AfterpayCheckoutButton('#' + buttonId, settings.publicKey, settings.gatewayId);
+                button = new window.cba.AfterpayCheckoutButton('#' + buttonId, settings.widgetToken, settings.gatewayId);
                 meta = {
                     amount: getNewAmount(),
                     currency: settings.currency,

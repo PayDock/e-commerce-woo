@@ -259,7 +259,7 @@ class WidgetSettings extends AbstractEnum {
 	public function getDescription(): string {
 		switch ( $this->name ) {
 			case self::STYLE_CUSTOM:
-				return 'Enter the API public key for the live environment.
+				return 'Enter the API token for the live environment.
 						This key is used for authentication to ensure secure communication
 						with the Payment Gateway.';
 			default:

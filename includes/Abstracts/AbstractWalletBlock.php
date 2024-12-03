@@ -27,7 +27,7 @@ abstract class AbstractWalletBlock extends AbstractBlock {
 			'_wpnonce'         => wp_create_nonce( 'process_payment' ),
 			'title'            => $settings->getWidgetPaymentWalletTitle( $payment ),
 			'description'      => $settings->getWidgetPaymentWalletDescription( $payment ),
-			'publicKey'        => $settings->getPublicKey(),
+			'widgetToken'        => $settings->getWidgetAccessToken(),
 			'isSandbox'        => $settings->isSandbox(),
 			'styles'           => $settings->getWidgetStyles(),
 		];

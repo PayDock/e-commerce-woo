@@ -8,7 +8,6 @@ use PowerBoard\API\ConfigService;
 use PowerBoard\Enums\BankAccountSettings;
 use PowerBoard\Enums\CardSettings;
 use PowerBoard\Enums\CredentialSettings;
-use PowerBoard\Enums\CredentialsTypes;
 use PowerBoard\Enums\DSTypes;
 use PowerBoard\Enums\FraudTypes;
 use PowerBoard\Enums\NotificationEvents;
@@ -24,8 +23,6 @@ use PowerBoard\Services\SettingsService;
 class ConnectionValidationService {
 	private $oldAccessToken = null;
 	private $oldWidgetAccessToken = null;
-	private $oldPublicKey = null;
-	private $oldSecretKey = null;
 	private const ENABLED_CONDITION = 'yes';
 
 	private const UNSELECTED_CRD_VALUE = 'Please select payment methods...';
@@ -120,39 +117,11 @@ class ConnectionValidationService {
 				CredentialSettings::WIDGET_KEY()->name,
 			] );
 
-		$publicKey = SettingsService::getInstance()
-			->getOptionName( $this->service->id, [
-				SettingGroups::CREDENTIALS()->name,
-				CredentialSettings::PUBLIC_KEY()->name,
-			] );
-
-		$secretKey = SettingsService::getInstance()
-			->getOptionName( $this->service->id, [
-				SettingGroups::CREDENTIALS()->name,
-				CredentialSettings::SECRET_KEY()->name,
-			] );
-
-		$typeKey = SettingsService::getInstance()
-			->getOptionName( $this->service->id, [
-				SettingGroups::CREDENTIALS()->name,
-				CredentialSettings::TYPE()->name,
-			] );
-
-		$isAccessKey = CredentialsTypes::ACCESS_KEY()->name == $this->data[ $typeKey ];
-
 		if (
-			(
-				$isAccessKey
-				&& ! empty( $this->data[ $accessKey ] )
+				! empty( $this->data[ $accessKey ] )
 				&& ! empty( $this->data[ $widgetKey ] )
 				&& $this->checkAccessKeyConnection( $this->data[ $accessKey ] )
 				&& $this->checkWidgetKeyConnection( $this->data[ $widgetKey ] )
-			) || (
-				! $isAccessKey
-				&& ! empty( $this->data[ $publicKey ] )
-				&& ! empty( $this->data[ $secretKey ] )
-				&& $this->checkCredentialConnection( $this->data[ $publicKey ], $this->data[ $secretKey ] )
-			)
 		) {
 			return true;
 		}
@@ -166,8 +135,6 @@ class ConnectionValidationService {
 		$this->saveOldCredential();
 
 		ConfigService::$accessToken = $accessToken;
-		ConfigService::$publicKey = null;
-		ConfigService::$secretKey = null;
 
 		$this->getawayIds = $this->adapterService->searchGateway( [ 'sort_direction' => 'DESC' ] );
 		$this->servicesIds = $this->adapterService->searchServices( [ 'sort_direction' => 'DESC' ] );
@@ -186,59 +153,23 @@ class ConnectionValidationService {
 	private function saveOldCredential() {
 		$this->oldAccessToken = HashService::encrypt( ConfigService::$accessToken );
 		$this->oldWidgetAccessToken = HashService::encrypt( ConfigService::$widgetAccessToken );
-		$this->oldPublicKey = HashService::encrypt( ConfigService::$publicKey );
-		$this->oldSecretKey = HashService::encrypt( ConfigService::$secretKey );
 	}
 
 	private function restoreCredential() {
 		ConfigService::$accessToken = HashService::decrypt( $this->oldAccessToken );
 		ConfigService::$widgetAccessToken = HashService::decrypt( $this->oldWidgetAccessToken );
-		ConfigService::$publicKey = HashService::decrypt( $this->oldPublicKey );
-		ConfigService::$secretKey = HashService::decrypt( $this->oldSecretKey );
 	}
 
 	private function checkWidgetKeyConnection( ?string $widgetAccessToken ): bool {
 		$this->saveOldCredential();
 
 		ConfigService::$widgetAccessToken = $widgetAccessToken;
-		ConfigService::$publicKey = null;
-		ConfigService::$secretKey = null;
 
 		$result = $this->adapterService->token([ 'gateway_id' => '', 'type' => '' ], true);
 		$result = empty( $result['error'] );
 
 		$this->restoreCredential();
 
-		return $result;
-	}
-
-	private function checkCredentialConnection( ?string $public, ?string $secret ): bool {
-		$this->saveOldCredential();
-
-		ConfigService::$publicKey = $public;
-		ConfigService::$secretKey = $secret;
-		ConfigService::$accessToken = null;
-		ConfigService::$widgetAccessToken = null;
-
-		$result = $this->checkPublicKey() && $this->checkSecretKey();
-
-		if (!$result) {
-			$this->restoreCredential();
-		}
-		return $result;
-	}
-
-	private function checkPublicKey(): bool {
-		$result = $this->adapterService->token();
-		$result = empty( $result['error'] );
-		return $result;
-	}
-
-	private function checkSecretKey(): bool {
-		$this->getawayIds = $this->adapterService->searchGateway( [ 'sort_direction' => 'DESC' ] );
-		$this->servicesIds = $this->adapterService->searchServices( [ 'sort_direction' => 'DESC' ] );
-
-		$result = empty( $this->getawayIds['error'] );
 		return $result;
 	}
 

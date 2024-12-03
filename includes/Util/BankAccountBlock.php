@@ -29,7 +29,7 @@ final class BankAccountBlock extends AbstractBlock {
 			WC()->cart->calculate_totals();
 		}
 
-		return array_merge( $userTokens, [ 
+		return array_merge( $userTokens, [
 			'isActive' => $this->is_active(),
 			// Wordpress data
 			'_wpnonce' => wp_create_nonce( 'process_payment' ),
@@ -48,7 +48,7 @@ final class BankAccountBlock extends AbstractBlock {
 			'bankAccountSaveAccount' => $settingsService->getBankAccountSaveAccount(),
 			'bankAccountSaveAccountOption' => $settingsService->getBankAccountSaveAccountOption(),
 			// Tokens & keys
-			'publicKey' => $settingsService->getPublicKey(),
+			'widgetToken' => $settingsService->getWidgetAccessToken(),
 			'selectedToken' => '',
 			'paymentSourceToken' => '',
 			// Other

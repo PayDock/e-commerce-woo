@@ -202,7 +202,7 @@ setTimeout(() => jQuery(function ($) {
         bankAccount.setFormFields(['account_routing']);
 
         powerBoardValidation.createWidgetDiv('powerBoardWidgetBankAccount');
-        const widget = new cba.HtmlWidget('#powerBoardWidgetBankAccount', powerBoardBankAccountSettings.publicKey, 'not_configured', 'bank_account', 'payment_source');
+        const widget = new cba.HtmlWidget('#powerBoardWidgetBankAccount', powerBoardBankAccountSettings.widgetToken, 'not_configured', 'bank_account', 'payment_source');
         widget.setFormFields(['account_routing']);
 
         window.widgetPowerBoardBankAccount = widget;
@@ -252,7 +252,7 @@ setTimeout(() => jQuery(function ($) {
 
         let gatewayId = isPermanent ? powerBoardCardSettings.gatewayId : 'not_configured';
 
-        widget = new cba.HtmlWidget('#powerBoardWidgetCard', powerBoardCardSettings.publicKey, gatewayId, "card", "card_payment_source_with_cvv");
+        widget = new cba.HtmlWidget('#powerBoardWidgetCard', powerBoardCardSettings.widgetToken, gatewayId, "card", "card_payment_source_with_cvv");
         widget.setFormPlaceholders({
             card_name: 'Card holders name *',
             card_number: 'Credit card number *',

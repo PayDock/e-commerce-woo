@@ -7,7 +7,6 @@ use PowerBoard\Enums\APMsSettings;
 use PowerBoard\Enums\BankAccountSettings;
 use PowerBoard\Enums\CardSettings;
 use PowerBoard\Enums\CredentialSettings;
-use PowerBoard\Enums\CredentialsTypes;
 use PowerBoard\Enums\DSTypes;
 use PowerBoard\Enums\FraudTypes;
 use PowerBoard\Enums\OtherPaymentMethods;
@@ -91,10 +90,6 @@ class LiveConnectionSettingService extends AbstractSettingService {
 				if ( $description ) {
 					$fields[ $key ]['description'] = $description;
 					$fields[ $key ]['desc_tip']    = true;
-				}
-
-				if ( CredentialSettings::TYPE() == $credentialSettings ) {
-					$fields[ $key ]['options'] = CredentialsTypes::toArray();
 				}
 			}
 		}

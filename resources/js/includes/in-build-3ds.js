@@ -65,7 +65,7 @@ export default async (forcePermanentVault = false, newAmount = null) => {
     }
 
     const envVal = settings.isSandbox ? 'preproduction_cba' : 'production_cba'
-    const preAuthResp = await new window.cba.Api(settings.publicKey)
+    const preAuthResp = await new window.cba.Api(settings.widgetToken)
         .setEnv(envVal)
         .charge()
         .preAuth(preAuthData);

@@ -47,7 +47,7 @@ final class PowerBoardGatewayBlocks extends AbstractBlock {
 			'description'            => $settingsService->getWidgetPaymentCardDescription(),
 			'styles'                 => $settingsService->getWidgetStyles(),
 			// Tokens & keys
-			'publicKey'              => $settingsService->getPublicKey(),
+			'widgetToken'              => $settingsService->getWidgetAccessToken(),
 			'selectedToken'          => '',
 			'paymentSourceToken'     => '',
 			'cvv'                    => '',

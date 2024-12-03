@@ -7,7 +7,6 @@ use PowerBoard\Enums\APMsSettings;
 use PowerBoard\Enums\BankAccountSettings;
 use PowerBoard\Enums\CardSettings;
 use PowerBoard\Enums\CredentialSettings;
-use PowerBoard\Enums\CredentialsTypes;
 use PowerBoard\Enums\OtherPaymentMethods;
 use PowerBoard\Enums\SettingGroups;
 use PowerBoard\Enums\WalletPaymentMethods;
@@ -76,62 +75,6 @@ final class SettingsService {
 
 	public function getOptionName( string $id, array $fragments ): string {
 		return implode( '_', array_merge( [ $id ], $fragments ) );
-	}
-
-	public function isAccessToken(): bool {
-		$settingService = $this->getSettingsService();
-
-		$typeKey = $this->getOptionName( $settingService->id, [
-			SettingGroups::CREDENTIALS()->name,
-			CredentialSettings::TYPE()->name,
-		] );
-
-		return CredentialsTypes::ACCESS_KEY()->name === $settingService->get_option( $typeKey );
-	}
-
-	public function getPublicKey(): ?string {
-		$settingService = $this->getSettingsService();
-
-		if ( $this->isAccessToken() ) {
-			return $this->getWidgetAccessToken();
-		}
-
-		return HashService::decrypt(
-			$settingService->get_option(
-				$this->getOptionName(
-					$settingService->id,
-					[
-						SettingGroups::CREDENTIALS()->name,
-						CredentialSettings::PUBLIC_KEY()->name,
-					]
-				)
-			)
-		);
-	}
-
-	public function getSecretKey(): ?string {
-		$settingService = $this->getSettingsService();
-
-		$typeKey = $this->getOptionName( $settingService->id, [
-			SettingGroups::CREDENTIALS()->name,
-			CredentialSettings::TYPE()->name,
-		] );
-
-		if ( CredentialsTypes::ACCESS_KEY()->name === $settingService->get_option( $typeKey ) ) {
-			return $this->getAccessToken();
-		}
-
-		return HashService::decrypt(
-			$settingService->get_option(
-				$this->getOptionName(
-					$settingService->id,
-					[
-						SettingGroups::CREDENTIALS()->name,
-						CredentialSettings::SECRET_KEY()->name,
-					]
-				)
-			)
-		);
 	}
 
 	public function getWidgetAccessToken() {
