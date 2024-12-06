@@ -13,6 +13,12 @@ class PaymentController {
 	private $status_update_hooks = [];
 
 	public function capturePayment() {
+		if ( ! is_admin() ) {
+			wp_send_json_error( [ 'message' => __( 'Permission denied', 'power-board' ) ] );
+
+			return;
+		}
+
 		$wpNonce = ! empty( $_POST['_wpnonce'] ) ? sanitize_text_field( $_POST['_wpnonce'] ) : null;
 		if ( ! wp_verify_nonce( $wpNonce, 'capture-or-cancel' ) ) {
 			wp_send_json_error( [ 'message' => __( 'Error: Security check', 'power-board' ) ] );
@@ -92,6 +98,12 @@ class PaymentController {
 	}
 
 	public function cancelAuthorised() {
+		if ( ! is_admin() ) {
+			wp_send_json_error( [ 'message' => __( 'Permission denied', 'power-board' ) ] );
+
+			return;
+		}
+
 		$wpNonce = ! empty( $_POST['_wpnonce'] ) ? sanitize_text_field( $_POST['_wpnonce'] ) : null;
 		if ( ! wp_verify_nonce( $wpNonce, 'capture-or-cancel' ) ) {
 			wp_send_json_error( [ 'message' => __( 'Error: Security check', 'power-board' ) ] );

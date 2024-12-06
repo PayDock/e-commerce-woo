@@ -7,7 +7,6 @@ import {CART_STORE_KEY, CHECKOUT_STORE_KEY} from '@woocommerce/block-data';
 import {createElement, useEffect} from 'react';
 import validateData from './wallets/validate-form';
 import initButton from './wallets/init';
-import axios from 'axios';
 import canMakePayment from "./canMakePayment";
 
 const textDomain = 'power_board';
@@ -23,6 +22,7 @@ let localState = {
     initData: null,
     total: 0,
 }
+const wpnonce = powerBoardWidgetSettings.wpnonce_wallet;
 
 export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
     const settingKey = `power_board_${id}_wallet_block_data`;
@@ -47,32 +47,33 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired) => {
 
         button.each((index, element) => element.innerHTML = '')
 
-        let billingData = {
-            type: id,
-            order_id: store.getOrderId(),
-            total: cart.getCartTotals(),
-            address: cart.getCustomerData().billingAddress,
-            shipping_address: cart.getCustomerData().shippingAddress,
-            shipping_rates: cart.getShippingRates(),
-            items: cart.getCartData().items
-        }
-
-        const walletsChargeRoute = '/wp-json/power-board/v1/wallets/charge';
-        const whitelist = [walletsChargeRoute];
-
-        if (whitelist.includes(walletsChargeRoute)) {
-            axios.post(walletsChargeRoute, billingData).then((response) => {
-                localState.initData = response.data
-                setTimeout(() => {
-                    initButton(id, '#' + buttonId, localState.initData, settings.isSandbox, localState.reload)
-                }, 0);
-            }).catch((e) => {
-                localState.wasInit = false;
-            })
-        } else {
-            console.error('Request for unsafe URL: ', walletsChargeRoute);
-            localState.wasInit = false;
-        }
+        jQuery.ajax({
+            url: '/wp-admin/admin-ajax.php',
+            type: 'POST',
+            data: {
+                action: 'create_wallet_charge',
+                data: {
+                    type: id,
+                    order_id: store.getOrderId(),
+                    total: cart.getCartTotals(),
+                    address: cart.getCustomerData().billingAddress,
+                    shipping_address: cart.getCustomerData().shippingAddress,
+                    shipping_rates: cart.getShippingRates(),
+                    items: cart.getCartData().items,
+                    _wpnonce: wpnonce
+                }
+            },
+            success: function (response) {
+                if (response.data.error) {
+                    localState.wasInit = false;
+                } else {
+                    localState.initData = response.data
+                    setTimeout(() => {
+                        initButton(id, '#' + buttonId, localState.initData, settings.isSandbox, localState.reload)
+                    }, 0);
+                }
+            }
+        });
     }
     const Content = (props) => {
         button = jQuery('#' + buttonId)

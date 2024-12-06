@@ -3,6 +3,7 @@
 namespace PowerBoard\Abstracts;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
+use PowerBoard\Controllers\Admin\WidgetController;
 use PowerBoard\Enums\OrderListColumns;
 use PowerBoard\Enums\WalletPaymentMethods;
 use PowerBoard\Repositories\LogRepository;
@@ -17,6 +18,9 @@ abstract class AbstractWalletPaymentService extends AbstractPaymentService {
 		$this->id          = 'power_board_' . $paymentMethod->getId() . '_wallets_gateway';
 		$this->title       = $settings->getWidgetPaymentWalletTitle( $paymentMethod );
 		$this->description = $settings->getWidgetPaymentWalletDescription( $paymentMethod );
+
+		add_action( 'wp_ajax_nopriv_create_wallet_charge', [ $this, 'create_wallet_charge' ] );
+		add_action( 'wp_ajax_create_wallet_charge', [ $this, 'create_wallet_charge' ] );
 
 		parent::__construct();
 	}
@@ -103,6 +107,35 @@ abstract class AbstractWalletPaymentService extends AbstractPaymentService {
 			'result'   => 'success',
 			'redirect' => $this->get_return_url( $order ),
 		];
+	}
+
+	public function create_wallet_charge(): void {
+		$wpNonce = ! empty( $_POST['data']['_wpnonce'] ) ? sanitize_text_field( $_POST['data']['_wpnonce'] ) : null;
+		if ( ! wp_verify_nonce( $wpNonce, 'create_wallet_charge' ) ) {
+			die( 'Security check' );
+		}
+
+		if ( ! empty( $_SERVER['HTTP_X_REQUESTED_WITH'] ) && strtolower(
+			                                                     sanitize_text_field( $_SERVER['HTTP_X_REQUESTED_WITH'] )
+		                                                     ) == 'xmlhttprequest' ) {
+			$widgetController = new WidgetController( );
+			$createWalletChargeResult = $widgetController->createWalletCharge($_POST['data']);
+
+			if ( $createWalletChargeResult['error'] ) {
+				wp_send_json_error( [ 'error' => $createWalletChargeResult['error'] ] );
+			} else {
+				wp_send_json_success([
+				 'token' => $createWalletChargeResult['resource']['data']['token'],
+				 'county' => $createWalletChargeResult['county'],
+				 'pay_later' => ! empty( $createWalletChargeResult['pay_later'] ) ? $createWalletChargeResult['pay_later'] : null,
+				 ]);
+			}
+		} else {
+			$referer = ! empty( $_SERVER['HTTP_REFERER'] ) ? sanitize_text_field( $_SERVER['HTTP_REFERER'] ) : '/';
+			header( 'Location: ' . $referer );
+		}
+
+		die();
 	}
 
 	public function webhook() {

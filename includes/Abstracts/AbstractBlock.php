@@ -66,7 +66,8 @@ abstract class AbstractBlock extends AbstractPaymentMethodType {
 		];
 		wp_register_script( $scriptName, $scriptUrl, $scriptAsset['dependencies'], $scriptAsset['version'], true );
 		wp_localize_script( $scriptName, 'powerBoardWidgetSettings', [
-			'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL
+			'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL,
+			'wpnonce_wallet' => wp_create_nonce( 'create_wallet_charge' ),
 		] );
 		wp_localize_script( 'power-board-api', 'powerBoardWidgetSettings', [
 			'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL

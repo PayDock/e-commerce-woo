@@ -33,7 +33,7 @@ Note: Encryption of admin values within the plugin requires Sodium or as a fallb
 ## Third Party API and libraries
 
 This plugin provides the ability to use payment methods through the PowerBoard API:
-* for sandbox https://api.preproduction.powerboard.commbank.com.au/v1/
+* for sandbox https://api.staging.powerboard.commbank.com.au/v1/
 * for live https://api.powerboard.commbank.com.au/v1/
 
 We also use a PowerBoard widget to implement front-end features ([More here](https://developer.powerboard.commbank.com.au/reference/powerboard-widget))

@@ -85,6 +85,7 @@ class CardPaymentService extends WC_Payment_Gateway {
 
 		wp_localize_script( 'power-board-form', 'PowerBoardAjax', [
 			'url'     => admin_url( 'admin-ajax.php' ),
+			'wpnonce'     => wp_create_nonce( 'create_wallet_charge' ),
 			'wpnonce' => wp_create_nonce( 'get_vault_token' )
 		] );
 		wp_localize_script( 'power-board-form', 'powerBoardWidgetSettings', [
