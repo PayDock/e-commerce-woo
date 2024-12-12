@@ -170,7 +170,7 @@ export default (id, defaultLabel, buttonId, dataFieldsRequired, countries) => {
                         return result
                     })
                 }
-                button.setEnv(settings.isSandbox ? 'staging_cba' : 'production_cba')
+                button.setEnv(settings.isSandbox ? 'preproduction_cba' : 'production_cba')
                 button.setMeta(meta);
                 button.on('finish', () => {
                     if (settings.directCharge) {
