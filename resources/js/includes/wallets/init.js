@@ -22,9 +22,7 @@ export default (id, buttonId, data, isSandbox) => {
     }
 
     if ('#powerBoardWalletAfterpayButton' === buttonId) {
-        jQuery('#powerBoardWalletAfterpayButton').each((index, element) => element.addEventListener("click", (event) => {
-            data.payment = id.replace('-', '_')
-            paymentSourceElement.val(JSON.stringify(data))
+        jQuery('#powerBoardWalletAfterpayButton').each((index, element) => element.addEventListener("click", () => {
             orderButton.click();
         }, true))
     }
@@ -32,7 +30,8 @@ export default (id, buttonId, data, isSandbox) => {
     if(buttons.current){
         delete buttons.current;
     }
-    buttons.current = new window.cba.WalletButtons(buttonId, data.resource.data.token, config)
+
+    buttons.current = new window.cba.WalletButtons(buttonId, data.token, config)
 
     buttons.current.setEnv(isSandbox ? 'preproduction_cba' : 'production_cba')
 
@@ -45,7 +44,7 @@ export default (id, buttonId, data, isSandbox) => {
         orderButton.click();
     })
 
-    buttons.current.onPaymentError((data) => {
+    buttons.current.onPaymentError(() => {
         orderButton.click();
     });
 

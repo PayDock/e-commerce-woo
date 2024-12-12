@@ -7,16 +7,13 @@ use PowerBoard\Helpers\ShippingHelper;
 use PowerBoard\Repositories\LogRepository;
 use PowerBoard\Services\SDKAdapterService;
 use PowerBoard\Services\SettingsService;
-use WP_REST_Request;
 
 class WidgetController {
-	public function createWalletCharge( WP_REST_Request $request ) {
+	public function createWalletCharge( $request ) {
 		$settings = SettingsService::getInstance();
 		$order    = wc_get_order( $request['order_id'] );
 
 		$loggerRepository = new LogRepository();
-
-		$request    = $request->get_json_params();
 		$result     = [];
 		$isAfterPay = false;
 
@@ -38,7 +35,7 @@ class WidgetController {
 
 		$key = strtolower( $payment->name );
 		if ( $settings->isWalletEnabled( $payment ) ) {
-			$reference = $request['order_id'];
+			$reference = (string) str_replace(" ", "-", get_bloginfo( 'name' )) . $request['order_id'];
 
 			$items = [];
 			foreach ( $request['items'] as $item ) {
@@ -48,7 +45,7 @@ class WidgetController {
 					'amount'   => round( $item['prices']['price'] / 100, 2 ),
 					'name'     => $item['name'],
 					'type'     => $item['type'],
-					'quantity' => $item['quantity'],
+					'quantity' => (int) $item['quantity'],
 					'item_uri' => $item['permalink'],
 				];
 
@@ -70,7 +67,7 @@ class WidgetController {
 			$chargeRequest = [
 				'amount'    => round( $request['total']['total_price'] / 100, 2 ),
 				'currency'  => $request['total']['currency_code'],
-				'reference' => (string) str_replace(" ", "-", get_bloginfo( 'name' )) . $reference,
+				'reference' => $reference,
 				'customer'  => [
 					'first_name'     => $billingAdress['first_name'],
 					'last_name'      => $billingAdress['last_name'],
@@ -179,6 +176,6 @@ class WidgetController {
 			}
 		}
 
-		return rest_ensure_response( $result );
+		return $result;
 	}
 }

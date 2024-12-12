@@ -37,7 +37,6 @@ abstract class AbstractAPMsBlock extends AbstractBlock {
 
 		return array_merge( $userCustomers, [
 			// Wordpress data
-			'_wpnonce'           => wp_create_nonce( 'process_payment' ),
 			'isUserLoggedIn'     => is_user_logged_in(),
 			'isSandbox'          => $settingsService->isSandbox(),
 			// Woocommerce data
