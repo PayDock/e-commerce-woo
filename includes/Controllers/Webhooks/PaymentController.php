@@ -13,7 +13,7 @@ class PaymentController {
 	private $status_update_hooks = [];
 
 	public function capturePayment() {
-		if ( ! is_admin() ) {
+		if ( ! current_user_can('administrator') ) {
 			wp_send_json_error( [ 'message' => __( 'Permission denied', 'power-board' ) ] );
 
 			return;
@@ -98,7 +98,7 @@ class PaymentController {
 	}
 
 	public function cancelAuthorised() {
-		if ( ! is_admin() ) {
+		if ( ! current_user_can('administrator') ) {
 			wp_send_json_error( [ 'message' => __( 'Permission denied', 'power-board' ) ] );
 
 			return;
