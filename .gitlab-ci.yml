@@ -1,8 +1,11 @@
 stages:
  - test
- - security
+ - quality
 
 include:
   - project: 'paydock/platform/gitlab-templates'
-    ref: main
-    file: '/security/gitlab-defectdojo.yaml'
+    ref: feature/FND-579/clean-up-pipeline
+    file: '/security/gitlab-security-scans.yaml'
+  - project: 'paydock/platform/gitlab-templates'
+    ref: feature/FND-579/clean-up-pipeline
+    file: '/code_quality.yml'
