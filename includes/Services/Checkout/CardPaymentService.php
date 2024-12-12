@@ -110,14 +110,6 @@ class CardPaymentService extends WC_Payment_Gateway {
 	 * @since 1.0.0
 	 */
 	public function process_payment( $order_id, $retry = true, $force_customer = false ) {
-		$wpNonce = ! empty( $_POST['_wpnonce'] ) ? sanitize_text_field( $_POST['_wpnonce'] ) : null;
-		if ( ! wp_verify_nonce( $wpNonce, 'process_payment' ) ) {
-			throw new RouteException(
-				'woocommerce_rest_checkout_process_payment_error',
-				esc_html( __( 'Error: Security check', 'power-board' ) )
-			);
-		}
-
 		$order = wc_get_order( $order_id );
 
 		$siteName    = remove_accents( wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) );
