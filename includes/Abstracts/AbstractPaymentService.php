@@ -52,8 +52,6 @@ abstract class AbstractPaymentService extends WC_Payment_Gateway {
 		wp_localize_script( 'power-board-form', 'PowerBoardAjax', [
     			'url'         => admin_url( 'admin-ajax.php' ),
     			'wpnonce'     => wp_create_nonce( 'create_wallet_charge' ),
-    			'wpnonce_3ds' => wp_create_nonce( 'power_board_get_vault_token' ),
-    			'wpnonce_error' => wp_create_nonce( 'power_board_create_error_notice' ),
     		] );
 		wp_enqueue_style(
 			'power-board-widget-css',

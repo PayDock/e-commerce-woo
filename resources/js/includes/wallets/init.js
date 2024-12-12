@@ -31,9 +31,6 @@ export default (id, buttonId, data, isSandbox) => {
         delete buttons.current;
     }
 
-    console.log(window.cba);
-    console.log(buttonId, data.token, config, isSandbox);
-    
     buttons.current = new window.cba.WalletButtons(buttonId, data.token, config)
 
     buttons.current.setEnv(isSandbox ? 'preproduction_cba' : 'production_cba')
