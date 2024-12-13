@@ -1,3 +1,5 @@
 plugins:
   phpcodesniffer:
     enabled: true
+    config:
+      standard: "WordPress"
