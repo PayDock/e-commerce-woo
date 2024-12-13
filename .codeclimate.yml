@@ -3,3 +3,5 @@ plugins:
     enabled: true
     config:
       standard: "WordPress"
+      exclude_patterns:
+        - "assets/build/js/frontend/*"
