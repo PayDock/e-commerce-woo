@@ -27,7 +27,7 @@ publish_power_board:
     - VERSION=$(cat version)
     - MAJOR_MINOR=$(cat power-board.php | grep "POWER_BOARD_PLUGIN_VERSION'," | sed -e "s/^.*\([0-9].[0-9].[0-9]\).*$/\1/")
     - apk add zip
-    - zip -r woo_powerboard_$MAJOR_MINOR_$VERSION.zip ./ -x '.git/*' -x .gitignore -x '.github/*' -x .gitlab-ci.yml -x .codeclimate.yml -x '.idea/*'
+    - zip -r woo_powerboard-$MAJOR_MINOR-$VERSION.zip ./ -x '.git/*' -x .gitignore -x '.github/*' -x .gitlab-ci.yml -x .codeclimate.yml -x '.idea/*'
   artifacts:
     name: woo-powerboard.zip
     paths:
