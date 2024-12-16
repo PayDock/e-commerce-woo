@@ -28,3 +28,6 @@ Thumbs.db
 /wc-apidocs/
 
 webhook.txt
+
+# Vendor
+/vendor/

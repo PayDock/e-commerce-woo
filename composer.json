@@ -8,5 +8,21 @@
         "psr-4": {
             "PowerBoard\\": "includes/"
         }
+    },
+    "require": {
+        "php": ">=7.4"
+    },
+    "require-dev": {
+        "squizlabs/php_codesniffer": "3.*",
+        "woocommerce/woocommerce-sniffs": "dev-trunk",
+        "phpcompatibility/phpcompatibility-wp": "*"
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    },
+    "scripts": {
+        "phpcs": "phpcs --standard=phpcs.xml"
     }
 }

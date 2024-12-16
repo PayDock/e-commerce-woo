@@ -1,17 +1,21 @@
 {
-	"name": "woocommerce-gateway-ppwer-board",
+	"name": "woocommerce-gateway-power-board",
 	"title": "WooCommerce PowerBoard Payment",
-	"version": "0.2.4",
-	"author": "JSP",
+	"version": "3.4.0",
+	"author": "Paydock",
 	"keywords": [],
 	"engines": {
 		"node": ">=6.9.4",
 		"npm": ">=1.1.0"
 	},
 	"devDependencies": {
+		"@eslint/js": "9.17.0",
 		"@woocommerce/dependency-extraction-webpack-plugin": "2.2.0",
+		"@woocommerce/eslint-plugin": "2.3.0",
 		"@wordpress/scripts": "26.19.0",
 		"cross-env": "7.0.3",
+		"eslint": "8.57.1",
+		"globals": "15.13.0",
 		"webpack": "5.94.0",
 		"webpack-cli": "4.10.0"
 	},

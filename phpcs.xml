@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<ruleset name="WooCommerce Coding Standards">
+    <description>My projects ruleset.</description>
+
+    <!-- Exclude the Composer Vendor directory. -->
+    <exclude-pattern>/vendor/*</exclude-pattern>
+
+    <!-- Exclude the Node Modules directory. -->
+    <exclude-pattern>/node_modules/*</exclude-pattern>
+    <!-- Exclude the generated files' directory. -->
+    <exclude-pattern>/assets/build/*</exclude-pattern>
+    <!-- Exclude minified Javascript files. -->
+    <exclude-pattern>*.min.js</exclude-pattern>
+
+    <exclude-pattern>*/assets/build/js/*</exclude-pattern>
+
+    <exclude-pattern>*/.git/*</exclude-pattern>
+
+    <!-- Configs -->
+    <config name="minimum_supported_wp_version" value="6.5" />
+
+    <!-- Rules -->
+    <rule ref="WooCommerce-Core" />
+
+    <rule ref="Wordpress-Extra" />
+
+    <rule ref="WordPress.WP.I18n">
+        <properties>
+            <property name="text_domain" type="array" value="my-project-text-domain" />
+        </properties>
+    </rule>
+
+    <config name="testVersion" value="7.4-"/>
+    <rule ref="PHPCompatibility" />
+
+</ruleset>
