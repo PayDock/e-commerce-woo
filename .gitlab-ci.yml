@@ -1,11 +1,51 @@
+image: alpine:latest
+
 stages:
  - test
+ - publish
  - quality
 
 include:
+  - project: 'paydock/platform/gitlab-templates'
+    ref: feature/FND-579/clean-up-pipeline
+    file: '/deploy/version.yml'
   - project: 'paydock/platform/gitlab-templates'
     ref: feature/FND-579/clean-up-pipeline
     file: '/security/gitlab-security-scans.yaml'
   - project: 'paydock/platform/gitlab-templates'
     ref: feature/FND-579/clean-up-pipeline
     file: '/code_quality.yml'
+
+publish_power_board:
+  stage: publish
+  only:
+    - power_board
+  needs:
+    - job: create_version
+      artifacts: true
+  script:
+    - VERSION=$(cat version)
+    - MAJOR_MINOR=$(cat power-board.php | grep "POWER_BOARD_PLUGIN_VERSION'," | sed -e "s/^.*\([0-9].[0-9].[0-9]\).*$/\1/")
+    - apk add zip
+    - zip -r woo_powerboard_$MAJOR_MINOR_$VERSION.zip ./ -x '.git/*' -x .gitignore -x '.github/*' -x .gitlab-ci.yml -x .codeclimate.yml -x '.idea/*'
+  artifacts:
+    name: woo-powerboard.zip
+    paths:
+      - woo_powerboard*.zip
+
+publish_paydock:
+  stage: publish
+  only:
+    - main
+  needs:
+    - job: create_version
+      artifacts: true
+  script:
+    - VERSION=$(cat version)
+    - MAJOR_MINOR=$(cat paydock.php | grep "PAYDOCK_PLUGIN_VERSION'," | sed -e "s/^.*\([0-9].[0-9].[0-9]\).*$/\1/")
+    - apk add zip
+    - zip -r woo_$MAJOR_MINOR_$VERSION.zip ./ -x '.git/*' -x .gitignore -x '.github/*' -x .gitlab-ci.yml -x .codeclimate.yml -x '.idea/*'
+  artifacts:
+    name: woo.zip
+    paths:
+      - woo*.zip
