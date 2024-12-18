@@ -26,7 +26,7 @@ def convert_to_code_climate(file_path, message):
     return {
             "description": message['message'],
             "check_name": message['source'],
-            "fingerprint": fingerprint_json(message),
+            "fingerprint": fingerprint_phpcs_finding(message, file_path),
             "severity": severity,
             "location": {
                 "path": file_path,
@@ -36,11 +36,12 @@ def convert_to_code_climate(file_path, message):
             }
         }
 
-def fingerprint_json(json_obj):
-    if isinstance(json_obj, str):
-        json_obj = json.loads(json_obj)
-    sorted_json = json.dumps(json_obj, sort_keys=True)
-    hash_object = hashlib.sha256(sorted_json.encode())
+def fingerprint_phpcs_finding(finding, file_path):
+    if isinstance(finding, str):
+        finding = json.loads(finding)
+    sorted_finding = json.dumps(finding, sort_keys=True)
+    sorted_finding = sorted_finding + file_path
+    hash_object = hashlib.sha256(sorted_finding.encode())
     return hash_object.hexdigest()
 
 with open('phpcs-report.json', 'r') as file:
