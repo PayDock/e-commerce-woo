@@ -1,11 +1,15 @@
 import hashlib
 import json
+import os
+
+current_dir = os.getcwd()
 
 def process(phpcs_data):
     code_climate_results = []
 
     files = phpcs_data['files']
     for file_path, file_info in files.items():
+        file_path = file_path.replace(current_dir, ".")
         if 'messages' in file_info:
             for message in file_info['messages']:
                 code_climate = convert_to_code_climate(file_path, message)
