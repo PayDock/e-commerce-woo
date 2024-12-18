@@ -1,4 +1,3 @@
-
 jQuery(document).ready(function () {
     const capturedAmount = jQuery('.wc-order-totals .captured-amount');
 

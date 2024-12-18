@@ -6,53 +6,58 @@ use PowerBoard\Hooks\ActivationHook;
 
 class OrderService {
 
-	protected $templateService;
+	protected $template_service;
 
 	public function __construct() {
-
 		if ( is_admin() ) {
-			$this->templateService = new TemplateService( $this );
-			add_action( 'admin_notices', [ $this, 'displayStatusChangeError' ] );
+			$this->template_service = new TemplateService( $this );
 		}
-
 	}
 
 	public static function updateStatus( $id, $custom_status, $status_note = null ) {
-
 		$order = wc_get_order( $id );
 
 		if ( is_object( $order ) ) {
-			try {
 				$order->set_status( ActivationHook::CUSTOM_STATUSES[ $custom_status ], $status_note );
 				$order->update_meta_data( ActivationHook::CUSTOM_STATUS_META_KEY, $custom_status );
 				$order->save();
-			} catch ( \Exception $e ) {
-				set_transient( 'power_board_status_change_error_' . get_current_user_id(), $e->getMessage(), 300 );
-			}
 		}
-
 	}
 
 	public function iniPowerBoardOrderButtons( $order ) {
-
 		$orderCustomStatus = $order->get_meta( ActivationHook::CUSTOM_STATUS_META_KEY );
-		$orderStatus = $order->get_status();
-		$capturedAmount = $order->get_meta( 'capture_amount' );
-		$totalRefund = $order->get_total_refunded();
-		$orderTotal = (float) $order->get_total( false );
-
-		if ( in_array( $orderStatus, [ 'pending', 'failed', 'cancelled', 'on-hold' ] )
-			 || in_array( $orderCustomStatus, [ 'pb-requested', 'wc-pb-requested', 'pb-refunded', 'WC-pb-refunded', 'pb-authorize', 'wc-pb-authorize' ] )
-			 || ( $orderTotal == $totalRefund )
-			 || ( $capturedAmount == $totalRefund )
+		$orderStatus       = $order->get_status();
+		$capturedAmount    = $order->get_meta( 'capture_amount' );
+		$totalRefaund      = $order->get_total_refunded();
+		$orderTotal      = (float) $order->get_total(false);
+		if ( in_array( $orderStatus, [
+				'pending',
+				'failed',
+				'cancelled',
+				'on-hold',
+			] )
+		     || in_array( $orderCustomStatus, [
+				'pb-requested',
+				'wc-pb-requested',
+				'pb-refunded',
+				'WC-pb-refunded',
+				'pb-authorize',
+				'wc-pb-authorize'
+			] )
+		     || ( $orderTotal == $totalRefaund )
+		     || ( $capturedAmount == $totalRefaund )
 		) {
 			wp_enqueue_style(
-				'hide-refund-button-styles', POWER_BOARD_PLUGIN_URL . 'assets/css/admin/hide-refund-button.css', [], POWER_BOARD_PLUGIN_VERSION
+				'hide-refund-button-styles',
+				POWER_BOARD_PLUGIN_URL . 'assets/css/admin/hide-refund-button.css',
+				[],
+				POWER_BOARD_PLUGIN_VERSION
 			);
 		}
-
-		if ( in_array( $orderStatus, [ 'processing', 'on-hold' ] ) &&
-			in_array( $orderCustomStatus, [
+		if ( in_array( $orderStatus, [
+				'processing',
+				'on-hold',
+			] ) && in_array( $orderCustomStatus, [
 				'pb-authorize',
 				'wc-pb-authorize',
 				'pb-paid',
@@ -60,59 +65,66 @@ class OrderService {
 				'wc-pb-p-paid',
 				'pb-p-paid'
 			] ) ) {
-
-			$this->templateService->includeAdminHtml( 'power-board-capture-block', compact( 'order' ) );
-
+			$this->template_service->includeAdminHtml( 'power-board-capture-block', compact( 'order' ) );
 			wp_enqueue_script(
-				'power-board-capture-block', POWER_BOARD_PLUGIN_URL . 'assets/js/admin/power-board-capture-block.js', [], time(), true
+				'power-board-capture-block',
+				POWER_BOARD_PLUGIN_URL . 'assets/js/admin/power-board-capture-block.js',
+				[],
+				time(),
+				true
 			);
-
-			wp_localize_script(
-				'power-board-capture-block', 'powerBoardCaptureBlockSettings', [ 'wpnonce' => esc_attr( wp_create_nonce( 'capture-or-cancel' ) ), ]
-			);
-
+			wp_localize_script( 'power-board-capture-block', 'powerBoardCaptureBlockSettings', [
+				'wpnonce' => esc_attr( wp_create_nonce( 'capture-or-cancel' ) ),
+			] );
 		}
-
-		if ( $orderStatus == 'on-hold' ) {
+		if ( in_array( $orderStatus, [
+				'on-hold',
+			] ) ) {
 			wp_enqueue_style(
-				'hide-on-hold-buttons', POWER_BOARD_PLUGIN_URL . 'assets/css/admin/hide-on-hold-buttons.css', [], POWER_BOARD_PLUGIN_VERSION
+				'hide-on-hold-buttons',
+				POWER_BOARD_PLUGIN_URL . 'assets/css/admin/hide-on-hold-buttons.css',
+				[],
+				POWER_BOARD_PLUGIN_VERSION
 			);
 		}
-
 	}
 
 	public function statusChangeVerification( $orderId, $oldStatusKey, $newStatusKey, $order ) {
-
-		$order->update_meta_data( 'status_change_verification_failed', '' );
-
+		$order->update_meta_data( 'status_change_verification_failed', "" );
 		if ( ( $oldStatusKey == $newStatusKey ) || ! empty( $GLOBALS['power_board_is_updating_order_status'] ) || null === $orderId ) {
 			return;
 		}
-
 		$rulesForStatuses = [
-			'processing' => [ 'refunded', 'cancelled', 'failed', 'pending', 'completed' ],
+			'processing' => [
+				'refunded',
+				'cancelled',
+				'failed',
+				'pending',
+				'completed'
+			],
 			'refunded'   => [ 'cancelled', 'failed', 'refunded' ],
 			'cancelled'  => [ 'failed', 'cancelled' ],
 		];
-
 		if ( ! empty( $rulesForStatuses[ $oldStatusKey ] ) ) {
-
 			if ( ! in_array( $newStatusKey, $rulesForStatuses[ $oldStatusKey ] ) ) {
-
-				$newStatusName = wc_get_order_status_name( $newStatusKey );
-				$oldStatusName = wc_get_order_status_name( $oldStatusKey );
-				$error_message = sprintf( __( 'You can not change status from "%1$s"  to "%2$s"', 'power-board' ), $oldStatusName, $newStatusName );
+				$newStatusName                                   = wc_get_order_status_name( $newStatusKey );
+				$oldStatusName                                   = wc_get_order_status_name( $oldStatusKey );
+				$error                                           = sprintf(
+				/* translators: %1$s: Old status of processing order.
+				 * translators: %2$s: New status of processing order.
+				 */
+					__( 'You can not change status from "%1$s"  to "%2$s"', 'power-board' ),
+					$oldStatusName,
+					$newStatusName
+				);
 				$GLOBALS['power_board_is_updating_order_status'] = true;
 				$order->update_meta_data( 'status_change_verification_failed', 1 );
-				$order->update_status( $oldStatusKey, $error_message );
-				set_transient( 'power_board_status_change_error_' . get_current_user_id(), $error_message, 300 );
+				$order->update_status( $oldStatusKey, $error );
+				update_option( 'power_board_status_change_error', $error );
 				unset( $GLOBALS['power_board_is_updating_order_status'] );
-				throw new \Exception( esc_html( $error_message ) );
-
+				throw new \Exception( esc_html( $error ) );
 			}
-
 		}
-
 	}
 
 	public function informationAboutPartialCaptured( $orderId ) {
@@ -124,7 +136,11 @@ class OrderService {
 			$capturedAmount = $order->get_meta( 'capture_amount' );
 
 			if ( ! empty( $capturedAmount ) ) {
-				$this->templateService->includeAdminHtml( 'information-about-partial-captured', compact( 'order', 'capturedAmount' ) );
+
+				// if ( $order->get_total() > $capturedAmount ) {
+					$this->template_service->includeAdminHtml( 'information-about-partial-captured', compact( 'order', 'capturedAmount' ) );
+				// }
+
 			}
 
 		}
@@ -132,22 +148,13 @@ class OrderService {
 	}
 
 	public function displayStatusChangeError() {
-
-		$error_message = get_transient( 'power_board_status_change_error_' . get_current_user_id() );
-
-		if ( $error_message ) {
-
-			echo '<div id="power-board-error-message" class="notice notice-error is-dismissible"><p>' . esc_html( $error_message ) . '</p></div>';
-			echo '<script type="text/javascript">
-			jQuery(document).ready(function($) {
-				$("#message.updated.notice.notice-success").hide();
-			});
-			</script>';
-
-			delete_transient( 'power_board_status_change_error_' . get_current_user_id() );
-
+		$screen = get_current_screen();
+		if ( 'woocommerce_page_wc-orders' == $screen->id ) {
+			$message = get_option( 'power_board_status_change_error', '' );
+			if ( ! empty( $message ) ) {
+				echo '<div class=\'notice notice-error is-dismissible\'><p>' . esc_html( $message ) . '</p></div>';
+				delete_option( 'power_board_status_change_error' );
+			}
 		}
-
 	}
-
 }

@@ -3,7 +3,6 @@
 namespace PowerBoard\Abstracts;
 
 use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
-use PowerBoard\PowerBoardPlugin;
 use PowerBoard\Services\SettingsService;
 
 abstract class AbstractBlock extends AbstractPaymentMethodType {
@@ -43,7 +42,7 @@ abstract class AbstractBlock extends AbstractPaymentMethodType {
 
 			wp_enqueue_script(
 				'power-board-api',
-				SettingsService::getInstance()->getWidgetScriptUrl(),
+				SettingsService::get_instance()->get_widget_script_url(),
 				[],
 				POWER_BOARD_PLUGIN_VERSION,
 				true
@@ -58,7 +57,7 @@ abstract class AbstractBlock extends AbstractPaymentMethodType {
 		$scriptPath      = 'assets/build/js/frontend/' . $this->script . '.js';
 		$scriptAssetPath = 'assets/build/js/frontend/' . $this->script . '.asset.php';
 		$scriptUrl       = plugins_url( $scriptPath, POWER_BOARD_PLUGIN_FILE );
-		$scriptName      = PowerBoardPlugin::PLUGIN_PREFIX . '-' . $this->script;
+		$scriptName      = PLUGIN_PREFIX  . '-' . $this->script;
 
 		$scriptAsset = file_exists( $scriptAssetPath ) ? require( $scriptAssetPath ) : [
 			'dependencies' => [],
@@ -66,8 +65,7 @@ abstract class AbstractBlock extends AbstractPaymentMethodType {
 		];
 		wp_register_script( $scriptName, $scriptUrl, $scriptAsset['dependencies'], $scriptAsset['version'], true );
 		wp_localize_script( $scriptName, 'powerBoardWidgetSettings', [
-			'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL,
-			'wpnonce_wallet' => wp_create_nonce( 'create_wallet_charge' ),
+			'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL
 		] );
 		wp_localize_script( 'power-board-api', 'powerBoardWidgetSettings', [
 			'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL

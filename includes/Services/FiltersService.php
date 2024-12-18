@@ -6,19 +6,9 @@ use PowerBoard\Abstracts\AbstractSingleton;
 use PowerBoard\Enums\OrderListColumns;
 use PowerBoard\Enums\SettingsTabs;
 use PowerBoard\Hooks\ActivationHook;
-use PowerBoard\PowerBoardPlugin;
-use PowerBoard\Services\Checkout\AfterpayAPMsPaymentServiceService;
-use PowerBoard\Services\Checkout\AfterpayWalletService;
-use PowerBoard\Services\Checkout\ApplePayWalletService;
-use PowerBoard\Services\Checkout\BankAccountPaymentService;
-use PowerBoard\Services\Checkout\CardPaymentService;
-use PowerBoard\Services\Checkout\GooglePayWalletService;
-use PowerBoard\Services\Checkout\PayPalWalletService;
-use PowerBoard\Services\Checkout\ZipAPMsPaymentServiceService;
-use PowerBoard\Services\Settings\LiveConnectionSettingService;
+use PowerBoard\Services\Checkout\MasterWidgetPaymentService;
+use PowerBoard\Services\Settings\WidgetConfigurationSettingService;
 use PowerBoard\Services\Settings\LogsSettingService;
-use PowerBoard\Services\Settings\SandboxConnectionSettingService;
-use PowerBoard\Services\Settings\WidgetSettingService;
 
 class FiltersService extends AbstractSingleton {
 	protected static $instance = null;
@@ -35,7 +25,7 @@ class FiltersService extends AbstractSingleton {
 			$new_columns[ $column_name ] = $column_info;
 
 			if ( OrderListColumns::AFTER_COLUMN === $column_name ) {
-				$new_columns[ OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey() ] = OrderListColumns::PAYMENT_SOURCE_TYPE()->getLabel();
+				$new_columns[ OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey() ] = OrderListColumns::PAYMENT_SOURCE_TYPE()->get_label();
 			}
 		}
 
@@ -88,7 +78,6 @@ class FiltersService extends AbstractSingleton {
 		add_filter( 'manage_woocommerce_page_wc-orders_custom_column', [ $this, 'ordersListNewColumnContent' ], 10, 2 );
 		add_filter( 'woocommerce_get_formatted_order_total', [ $this, 'changeOrderAmount' ], 10, 2 );
 		add_filter( 'manage_edit-shop_order_columns', [ $this, 'addCaptureAmountCustomColumn' ], 20 );
-		add_filter( 'woocommerce_my_account_my_orders_actions', [ $this, 'my_account_classic_payment_edit' ], 20, 2 );
 	}
 
 	protected function addSettingsLink(): void {
@@ -96,49 +85,50 @@ class FiltersService extends AbstractSingleton {
 	}
 
 	public function registerInWooCommercePaymentClass( array $methods ): array {
+
 		global $current_section;
 		global $current_tab;
 
-		$methods[] = LiveConnectionSettingService::class;
-		if ( 'checkout' != $current_tab
-		     || in_array(
-			     $current_section,
-			     array_map(
-				     function ( SettingsTabs $tab ) {
-					     return $tab->value;
-				     },
-				     SettingsTabs::secondary()
-			     )
-		     ) ) {
-			$methods[] = SandboxConnectionSettingService::class;
-			$methods[] = WidgetSettingService::class;
-			$methods[] = LogsSettingService::class;
-			$methods[] = CardPaymentService::class;
-			$methods[] = BankAccountPaymentService::class;
-			$methods[] = ApplePayWalletService::class;
-			$methods[] = GooglePayWalletService::class;
-			$methods[] = AfterpayWalletService::class;
-			$methods[] = PayPalWalletService::class;
-			$methods[] = AfterpayAPMsPaymentServiceService::class;
-			$methods[] = ZipAPMsPaymentServiceService::class;
+		if ( is_admin() ) {
+
+			$methods[] = WidgetConfigurationSettingService::class;
+
+			if (
+				'checkout' != $current_tab ||
+				in_array(
+					$current_section,
+					array_map(
+						function ( SettingsTabs $tab ) {
+							return $tab->value;
+						},
+						SettingsTabs::secondary()
+					)
+				)
+			) {
+				$methods[] = LogsSettingService::class;
+			}
+
+		} else {
+
+			$methods[] = MasterWidgetPaymentService::class;
+
 		}
 
-
 		return $methods;
+
 	}
 
 	public function woocommerceThankyouOrderReceivedText( $text ) {
 		$orderId = absint( get_query_var( 'order-received' ) );
-		$order = wc_get_order( $orderId );
-		$power_board_fraud = $order->get_meta( 'power_board_fraud' );
-		$status = $order->get_meta( ActivationHook::CUSTOM_STATUS_META_KEY );
+		$options  = get_option( "power_board_fraud_{$orderId}" );
+		$order    = wc_get_order( $orderId );
+		$status   = $order->get_meta( ActivationHook::CUSTOM_STATUS_META_KEY );
 		$afterpay = filter_input( INPUT_GET, 'afterpay-error', FILTER_SANITIZE_STRING );
 
 		if ( ! empty( $afterpay ) && ( 'true' === $afterpay ) ) {
 			return __( 'Order has been cancelled', 'power-board' );
 		}
-
-		if ( "" === $power_board_fraud && 'processing' !== $status ) {
+		if ( false === $options && 'processing' !== $status ) {
 			return __( 'Thank you. Your order has been received.', 'power-board' );
 		}
 
@@ -150,7 +140,7 @@ class FiltersService extends AbstractSingleton {
 			$links,
 			sprintf(
 				'<a href="%1$s">%2$s</a>',
-				admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . PowerBoardPlugin::PLUGIN_PREFIX ),
+				admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . PLUGIN_PREFIX ),
 				__( 'Settings', 'power-board' )
 			)
 		);
@@ -162,7 +152,7 @@ class FiltersService extends AbstractSingleton {
 
 		$order_status = $order->get_status();
 
-		if ( $order_status == 'pending' ) {
+		if ( $order_status != 'pending' ) {
 			unset( $actions['pay'] );
 			unset( $actions['cancel'] );
 		}

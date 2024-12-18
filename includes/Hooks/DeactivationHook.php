@@ -4,8 +4,7 @@ namespace PowerBoard\Hooks;
 
 use PowerBoard\Contracts\Hook;
 use PowerBoard\Contracts\Repository;
-use PowerBoard\PowerBoardPlugin;
-use PowerBoard\Plugin;
+use PowerBoard\Enums\PowerBoardPluginEnum;
 
 class DeactivationHook implements Hook {
 
@@ -17,7 +16,7 @@ class DeactivationHook implements Hook {
 
 		$repositories = array_map( function ($className) {
 			return new $className();
-		}, PowerBoardPlugin::REPOSITORIES );
+		}, PowerBoardPluginEnum::REPOSITORIES );
 
 		array_map( [ $instance, 'runMigration' ], $repositories );
 	}

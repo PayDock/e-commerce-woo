@@ -13,7 +13,6 @@ abstract class AbstractSingleton {
 		return static::$instance;
 	}
 
-
 	/**
 	 * Cloning instances is forbidden due to singleton pattern.
 	 *

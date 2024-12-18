@@ -21,8 +21,8 @@ abstract class AbstractApiService {
 			],
 		];
 
-		if (! empty( ConfigService::$widgetAccessToken )) {
-			$args['headers']['x-access-token'] = ConfigService::$widgetAccessToken;
+		if (! empty( ConfigService::$widget_access_token )) {
+			$args['headers']['x-access-token'] = ConfigService::$widget_access_token;
 		}
 
 		return $this->runCall($args);
@@ -35,8 +35,8 @@ abstract class AbstractApiService {
 			],
 		];
 
-		if ( ! empty( ConfigService::$accessToken ) ) {
-			$args['headers']['x-access-token'] = ConfigService::$accessToken;
+		if ( ! empty( ConfigService::$access_token ) ) {
+			$args['headers']['x-access-token'] = ConfigService::$access_token;
 		}
 
 		return $this->runCall($args);

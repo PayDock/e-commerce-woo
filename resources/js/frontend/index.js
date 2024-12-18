@@ -3,270 +3,167 @@ import {registerPaymentMethod} from '@woocommerce/blocks-registry';
 import {decodeEntities} from '@wordpress/html-entities';
 import {getSetting} from '@woocommerce/settings';
 import {createElement, useEffect} from 'react';
-import {
-    checkboxSavedCardsComponent,
-    inBuild3Ds,
-    selectSavedCardsComponent,
-    sleep,
-    standalone3Ds
-} from '../includes/wc-power-board';
 import {select} from '@wordpress/data';
-import {CART_STORE_KEY} from '@woocommerce/block-data';
+import {CART_STORE_KEY,CHECKOUT_STORE_KEY} from '@woocommerce/block-data';
+import canMakePayment from "../includes/canMakePayment";
 
+const store = select(CHECKOUT_STORE_KEY);
 const cart = select(CART_STORE_KEY);
 const settings = getSetting('power_board_data', {});
 
 const textDomain = 'power-board';
-const labels = {
-    defaultLabel: __('PowerBoard Payments', textDomain),
-    saveCardLabel: __('Save payment details', textDomain),
-    selectTokenLabel: __('Saved payment details', textDomain),
-    fillDataError: __('Please fill in the card data', textDomain),
-    notSupport3DS: __('Payment has been rejected by PowerBoard. Please try a different payment method'),
-    fillCCDataError: __('Please fill in the required credit card form fields', textDomain),
-    requiredDataError: __('Please fill in the required fields of the form to display payment methods', textDomain),
-    additionalDataRejected: __('Payment has been rejected by PowerBoard. Please try again in a few minutes', textDomain)
-}
+const defaultLabel = __('PowerBoard Payments', textDomain);
 
-const label = decodeEntities(settings.title) || labels.defaultLabel;
+const label = decodeEntities(settings.title) || defaultLabel;
 
-let formSubmittedAlready = false;
-const Content = (props) => {
-    const {eventRegistration, emitResponse} = props;
-    const {onPaymentSetup, onCheckoutValidation, onShippingRateSelectSuccess} = eventRegistration;
+const toggleWidgetVisibility = (hide) => {
+    let widget = document.getElementById('standaloneWidget');
+    let widgetList = document.getElementById('list');
+    let widgetSpinner = document.getElementById('spinner');
 
-    jQuery('.wc-block-components-checkout-place-order-button').show();
+    if (hide) {
+        if (widget) widget.style.display = 'none';
+        if (widgetList) widgetList.style.display = 'none';
+        if (widgetSpinner) widgetSpinner.style.display = 'none';
+    } else {
+        if (widget) widget.style.display = 'flex';
+        if (widgetList) widgetList.style.display = 'flex';
+        if (widgetSpinner) widgetSpinner.style.display = 'flex';
+    }
+};
 
-    useEffect(() => {
-        let newAmount = null;
+const initMasterWidgetCheckout = () => {
+    if (canMakePayment(settings.total_limitation, cart.getCartTotals()?.total_price)) {
+        jQuery.ajax({
+            url: '/?wc-ajax=power-board-create-charge-intent',
+            type: 'POST',
+            data: {
+                _wpnonce: PowerBoardAjax.wpnonce,
+                order_id: store.getOrderId(),
+                total: cart.getCartTotals(),
+                address: cart.getCustomerData().billingAddress,
+            },
+            success: (response) => {
+                setTimeout(() => {
+                    toggleWidgetVisibility(false);
+                    window.widgetPowerBoard = new cba.Checkout('#powerBoardCheckout_wrapper', response.data.resource.data.token);
+                    window.widgetPowerBoard.setEnv(settings.environment)
+                    const orderButton = jQuery('.wc-block-components-checkout-place-order-button');
+                    const paymentSourceElement = jQuery('#paymentSourceToken');
 
-        const unsubscribeFromShippingEvent = onShippingRateSelectSuccess(async () => {
-            const { total_price: currentTotalPrice } = cart.getCartTotals();
+                    window.widgetPowerBoard.onPaymentSuccessful(function (data) {
+                        paymentSourceElement.val(JSON.stringify(data));
+                        orderButton.show();
+                        orderButton.click();
 
-            newAmount = Number(currentTotalPrice / 100).toFixed(2);
-        });
-
-        const validation = onCheckoutValidation(async () => {
-            var errorMessageDismissButton = document.querySelectorAll('.wc-block-components-notice-banner__dismiss')[0]
-            if (errorMessageDismissButton) {
-                errorMessageDismissButton.click();
-            }
-
-            formSubmittedAlready = window.widgetReloaded ? false : formSubmittedAlready
-
-            if (window.hasOwnProperty('powerBoardValidation')) {
-                if (!powerBoardValidation.powerboardCCFormValidation()) {
-                    var validationState = window.widgetPowerBoard.getValidationState();
-
-                    var invalid_fields = [];
-                    validationState.invalid_fields.forEach(field => {
-                        switch(field) {
-                            case "card_name":
-                                invalid_fields.push("Card Name");
-                                break;
-                            case "card_number":
-                                invalid_fields.push("Card Number");
-                                break;
-                            case "expiry_date":
-                                invalid_fields.push("Expiry Date");
-                                break;
-                            case "card_ccv":
-                                invalid_fields.push("Card CCV");
-                                break;
-                        }
+                        window.widgetPowerBoard = null;
                     });
 
-                    var errorMessage = labels.fillCCDataError + (invalid_fields.length ? `: ${invalid_fields.join(", ")}` : "");
+                    window.widgetPowerBoard.onPaymentFailure(function (error) {
+                        paymentSourceElement.val(JSON.stringify({
+                            errorMessage: error.message
+                        }));
+                        orderButton.show();
+                        orderButton.click();
 
-                    return {
-                        type: emitResponse.responseTypes.ERROR,
-                        errorMessage: errorMessage
-                    }
-                }
+                        window.widgetPowerBoard = null;
+                    });
 
-                if (!powerBoardValidation.wcFormValidation()) {
-                    return {
-                        type: emitResponse.responseTypes.ERROR,
-                        errorMessage: labels.requiredDataError
-                    }
-                }
-            }
+                    window.widgetPowerBoard.onPaymentExpired(function () {
+                        paymentSourceElement.val(JSON.stringify({
+                            errorMessage: 'Your payment session has expired. Please try again.',
+                        }));
+                        orderButton.show();
+                        orderButton.click();
 
-            if (settings.selectedToken.length > 0) {
-                const selectedToken = settings.tokens.find(item => item.vault_token === settings.selectedToken)
-                if (!!selectedToken && selectedToken.hasOwnProperty('customer_id')) {
-                    return true;
-                } else {
-                    if (['IN_BUILD', 'STANDALONE'].includes(settings.card3DS)) {
-                        settings.charge3dsId = settings.card3DS === 'IN_BUILD'
-                            ? await inBuild3Ds(true, newAmount)
-                            : await standalone3Ds();
-
-                        if (settings.charge3dsId === false) {
-                            return {
-                                type: emitResponse.responseTypes.ERROR,
-                                errorMessage: labels.notSupport3DS,
-                            }
-                        }
-
-                        if ('error' === settings.charge3dsId) {
-                            return {
-                                type: emitResponse.responseTypes.ERROR,
-                                errorMessage: labels.additionalDataRejected,
-                            }
-                        }
-
-                    }
-                }
-
-                return true;
-            }
-
-            if (formSubmittedAlready) {
-                return true;
-            }
-
-            let phoneValue = '';
-            if (document.getElementById('shipping-phone') !== null) {
-                phoneValue = document.getElementById('shipping-phone').value
-            }
-
-            if (document.getElementById('billing-phone') !== null) {
-                phoneValue = document.getElementById('billing-phone').value
-            }
-
-            window.widgetPowerBoard.updateFormValues({
-                email: document.getElementById('email').value,
-                phone: phoneValue
-            });
-            window.widgetPowerBoard.trigger(window.cba.TRIGGER.SUBMIT_FORM);
-
-            let result = false;
-            window.widgetPowerBoard.on(window.cba.EVENT.FINISH, () => {
-                result = true
-
-                const savedCards = document.querySelector('.power-board-select-saved-cards')
-                if (savedCards !== null) {
-                    savedCards.style = 'display: none'
-                }
-            })
-
-            const paymentSourceToken = document.querySelector('[name="payment_source_token"]')
-            for (let second = 1; second <= 100; second++) {
-                await sleep(100);
-                if (paymentSourceToken !== null && paymentSourceToken.value.length) {
-                    if (paymentSourceToken.value === 'error') {
-                        return {
-                            type: emitResponse.responseTypes.ERROR,
-                            errorMessage: labels.additionalDataRejected,
-                        }
-                    }
-                    if (settings.paymentSourceToken.length === 0 || window.widgetReloaded) {
-                        settings.paymentSourceToken = paymentSourceToken.value
-                    }
-                    result = true
-                }
-
-                if (result) {
-                    formSubmittedAlready = true
-                    break;
-                }
-            }
-
-            if (result) {
-                if (['IN_BUILD', 'STANDALONE'].includes(settings.card3DS)) {
-                    settings.charge3dsId = settings.card3DS === 'IN_BUILD'
-                        ? await inBuild3Ds(false, newAmount)
-                        : await standalone3Ds();
-
-                    if (settings.charge3dsId === false) {
-                        return {
-                            type: emitResponse.responseTypes.ERROR,
-                            errorMessage: labels.notSupport3DS,
-                        }
-                    }
-
-                    if ('error' === settings.charge3dsId) {
-                        return {
-                            type: emitResponse.responseTypes.ERROR,
-                            errorMessage: labels.additionalDataRejected,
-                        }
-                    }
-                }
-
-                return true;
-            }
-
-            return {
-                type: emitResponse.responseTypes.ERROR,
-                errorMessage: labels.fillDataError,
+                        window.widgetPowerBoard = null;
+                    });
+                }, 0);
             }
         });
+    }
+}
+const handleFormChanged = () => {
+    let isFormValid = jQuery('.wc-block-components-form')[0].checkValidity();
+    let error = jQuery('#fields-validation-error')[0];
+    let loading = jQuery('#loading')[0];
+    toggleWidgetVisibility(true);
+    if (isFormValid) {
+        loading.classList.remove('hide');
+        error.classList.add('hide');
+        initMasterWidgetCheckout();
+    } else {
+        loading.classList.add('hide');
+        error.classList.remove('hide');
+    }
+}
+
+const Content = (props) => {
+    jQuery('.wc-block-components-checkout-place-order-button').show();
+    const {eventRegistration, emitResponse} = props;
+    const {onPaymentSetup} = eventRegistration;
+
+    useEffect(() => {
+        if (!window.unsubscribeFromFormChanges) {
+            window.unsubscribeFromFormChanges = jQuery('.wc-block-components-form')[0].addEventListener("change", handleFormChanged);
+        }
 
         const unsubscribe = onPaymentSetup(async () => {
-            const paymentSourceToken = document.querySelector('[name="payment_source_token"]')
-            if (paymentSourceToken === null) {
-                return;
-            }
-
-            settings.paymentSourceToken = paymentSourceToken.value;
-            if (settings.paymentSourceToken.length > 0 || settings.selectedToken.length > 0) {
-                const data = {...settings}
-                data.tokens = '';
-                data.styles = '';
-                data.supports = '';
-
-                if(data.total_limitation){
-                    delete data.total_limitation;
-                }
-
+            const paymentData = document.getElementById('paymentSourceToken')?.value
+            const paymentDataParsed = JSON.parse(document.getElementById('paymentSourceToken')?.value)
+            if (!!paymentData && !paymentDataParsed.errorMessage) {
                 return {
-                    type: emitResponse.responseTypes.SUCCESS,
-                    meta: {
-                        paymentMethodData: data
+                    type: emitResponse.responseTypes.SUCCESS, meta: {
+                        paymentMethodData: {
+                            payment_response: paymentData,
+                            chargeId: paymentDataParsed['charge_id'],
+                            _wpnonce: settings._wpnonce
+                        }
                     },
                 };
             }
 
+            initMasterWidgetCheckout();
             return {
-                type: emitResponse.responseTypes.ERROR,
-                message: labels.fillDataError,
-            };
+                type: emitResponse.responseTypes.ERROR, message: __(paymentDataParsed.errorMessage, textDomain),
+            }
         });
+
         return () => {
-            validation() && unsubscribe() && unsubscribeFromShippingEvent();
+            jQuery('.wc-block-components-form')[0].removeEventListener("change", handleFormChanged);
+            unsubscribe();
         };
-    }, [
-        emitResponse.responseTypes.ERROR,
-        emitResponse.responseTypes.SUCCESS,
-        onPaymentSetup,
-        onCheckoutValidation,
-    ]);
+    }, [emitResponse.responseTypes.ERROR, emitResponse.responseTypes.SUCCESS, onPaymentSetup]);
+
+    const input = createElement("input", {
+        type: 'hidden', id: 'paymentSourceToken'
+    });
 
     return createElement('div',
-        null,
+      {className: 'master-widget-wrapper'},
+      createElement(
+        "div",
+        {id: 'loading'},
+          createElement(
+            "p",
+            {className: 'loading-text'},
+            'Loading...',
+          ),
+        ),
+      createElement(
+        "div",
+        {id: 'fields-validation-error', className: 'hide'},
+          createElement(
+            "p",
+            {className: 'power-board-validation-error'},
+            'Please fill in the required fields of the form to display payment methods',
+          ),
+        ),
         createElement(
             "div",
-            null,
-            decodeEntities(settings.description || '')
+            {id: 'powerBoardCheckout_wrapper'}
         ),
-        selectSavedCardsComponent(labels.selectTokenLabel),
-        createElement(
-            "div",
-            {id: 'powerBoardWidgetCard_wrapper'}
-        ),
-        createElement(
-            "div",
-            {id: 'powerBoardWidget3ds'}
-        ),
-        createElement(
-            "input",
-            {
-                type: 'hidden',
-                name: 'payment_source_token'
-            }
-        ),
-        checkboxSavedCardsComponent(labels.saveCardLabel)
+      input
     );
 };
 
@@ -278,12 +175,7 @@ const Paydok = {
             {
                 className: 'power-board-payment-method-label'
             },
-            createElement("img", {
-                src: `${window.powerBoardWidgetSettings.pluginUrlPrefix}assets/images/icons/card.png`,
-                alt: label,
-                className: 'power-board-payment-method-label-icon card'
-            }),
-            "  " + label,
+            label,
             createElement("img", {
                 src: `${window.powerBoardWidgetSettings.pluginUrlPrefix}assets/images/commBank_logo.png`,
                 alt: label,

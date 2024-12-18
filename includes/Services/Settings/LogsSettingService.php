@@ -21,9 +21,9 @@ class LogsSettingService extends AbstractSettingService {
 		$records = ( new LogRepository() )->getLogs( $page, $perPage, $orderBy, $order );
 
 		if ( $echo ) {
-			$this->templateService->includeAdminHtml( 'admin', compact( 'tabs', 'records' ) );
+			$this->template_service->includeAdminHtml( 'admin', compact( 'tabs', 'records' ) );
 		} else {
-			return $this->templateService->getAdminHtml( 'admin', compact( 'tabs', 'records' ) );
+			return $this->template_service->getAdminHtml( 'admin', compact( 'tabs', 'records' ) );
 		}
 
 		return null;

@@ -5,32 +5,18 @@ namespace PowerBoard\Enums;
 use PowerBoard\Abstracts\AbstractEnum;
 
 class SettingGroups extends AbstractEnum {
+	protected const ENVIRONMENT = 'ENVIRONMENT';
 	protected const CREDENTIALS = 'CREDENTIALS';
-	protected const CARD = 'CARD';
-	protected const BANK_ACCOUNT = 'BANK_ACCOUNT';
-	protected const WALLETS = 'WALLETS';
-	protected const A_P_M_S = 'A_P_M_S';
+	protected const CHECKOUT = 'CHECKOUT';
 
-	public static function cases(): array {
-		$items = parent::cases();
-
-		return array_filter( $items, function ($item) {
-			return self::BANK_ACCOUNT()->name !== $item->name;
-		} );
-	}
-
-	public function getLabel(): string {
+	public function get_label(): string {
 		switch ( $this->name ) {
-			case self::CARD:
-				return 'Cards';
-			case self::WALLETS:
-				return 'Wallets:';
-			case self::A_P_M_S:
-				return 'APMs:';
-			case self::BANK_ACCOUNT:
-				return 'Bank account:';
+			case self::ENVIRONMENT:
+				return 'Environment';
 			case self::CREDENTIALS:
-				return 'API Credential:';
+				return 'API Credential';
+			case self::CHECKOUT:
+				return 'Checkout';
 			default:
 				return '';
 		}

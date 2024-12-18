@@ -26,11 +26,15 @@
 
     <rule ref="WordPress.WP.I18n">
         <properties>
-            <property name="text_domain" type="array" value="my-project-text-domain" />
+            <property name="text_domain" type="array" value="power-board" />
         </properties>
     </rule>
 
     <config name="testVersion" value="7.4-"/>
     <rule ref="PHPCompatibility" />
-
+    <rule ref="WordPress">
+        <exclude name="Squiz.Commenting.ClassComment"/>
+        <exclude name="Squiz.Commenting.FunctionComment"/>
+        <exclude name="Squiz.Commenting.VariableComment"/>
+    </rule>
 </ruleset>

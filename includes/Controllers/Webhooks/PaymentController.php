@@ -4,24 +4,22 @@ namespace PowerBoard\Controllers\Webhooks;
 
 use PowerBoard\Enums\ChargeStatuses;
 use PowerBoard\Enums\NotificationEvents;
-use PowerBoard\PowerBoardPlugin;
 use PowerBoard\Repositories\LogRepository;
 use PowerBoard\Services\OrderService;
 use PowerBoard\Services\SDKAdapterService;
 
 class PaymentController {
-	private $status_update_hooks = [];
 
 	public function capturePayment() {
-		if ( ! current_user_can('administrator') ) {
-			wp_send_json_error( [ 'message' => __( 'Permission denied', 'power-board' ) ] );
+		if ( ! current_user_can( 'administrator' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Permission denied', 'power-board' ) ) );
 
 			return;
 		}
 
-		$wpNonce = ! empty( $_POST['_wpnonce'] ) ? sanitize_text_field( $_POST['_wpnonce'] ) : null;
-		if ( ! wp_verify_nonce( $wpNonce, 'capture-or-cancel' ) ) {
-			wp_send_json_error( [ 'message' => __( 'Error: Security check', 'power-board' ) ] );
+		$wp_nonce = ! empty( $_POST['_wpnonce'] ) ? sanitize_text_field( $_POST['_wpnonce'] ) : null;
+		if ( ! wp_verify_nonce( $wp_nonce, 'capture-or-cancel' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Error: Security check', 'power-board' ) ) );
 
 			return;
 		}
@@ -29,15 +27,9 @@ class PaymentController {
 		$orderId = ! empty( $_POST['order_id'] ) ? sanitize_text_field( $_POST['order_id'] ) : null;
 		$error   = null;
 		if ( ! $orderId ) {
-			$error = __( 'The order is not found.', 'power-board'  );
+			$error = __( 'The order is not found.', 'power-board' );
 		} else {
 			$order = wc_get_order( $orderId );
-			/*if ( ! in_array( $order->get_meta( ActivationHook::CUSTOM_STATUS_META_KEY ), [
-				'pb-authorize',
-				'wc-pb-authorize'
-			] ) ) {
-				$error = __( 'The order has been authorized and is awaiting approval.', 'power-board'  );
-			}*/
 		}
 
 		if ( is_object( $order ) ) {
@@ -47,19 +39,17 @@ class PaymentController {
 			$orderTotal = false;
 		}
 
-		// if ( ! empty( $orderTotal ) ) {
-		// 	$amount = $orderTotal;
-		// } else {
-			$amount = wc_format_decimal( $_POST['amount'] );
-		// }
+        $amount = wc_format_decimal( $_POST['amount'] );
 
 		$loggerRepository   = new LogRepository();
 		$powerBoardChargeId = $order->get_meta( 'power_board_charge_id' );
 		if ( ! $error ) {
-			$charge = SDKAdapterService::getInstance()->capture( [
-				'charge_id' => $powerBoardChargeId,
-				'amount'    => $amount,
-			] );
+			$charge = SDKAdapterService::get_instance()->capture(
+				array(
+					'charge_id' => $powerBoardChargeId,
+					'amount'    => $amount,
+				)
+			);
 			if ( ! empty( $charge['resource']['data']['status'] ) && 'complete' == $charge['resource']['data']['status'] ) {
 				$newChargeId = $charge['resource']['data']['_id'];
 				$newStatus   = $orderTotal > $amount ? 'pb-p-paid' : 'pb-paid';
@@ -77,36 +67,36 @@ class PaymentController {
 				$order->save();
 
 				OrderService::updateStatus( $orderId, $newStatus );
-				wp_send_json_success( [
-					'message' => __( 'The capture process was successful.', 'woocommerce' ),
-				] );
-			} else {
-				if ( ! empty( $charge['error'] ) ) {
-					if ( is_array( $charge['error'] ) ) {
-						$charge['error'] = wp_json_encode( $charge['error'] );
-					}
-					$error = $charge['error'];
-				} else {
-					$error = __( 'The capture process has failed; please try again.', 'woocommerce' );
+				wp_send_json_success(
+					array(
+						'message' => __( 'The capture process was successful.', 'woocommerce' ),
+					)
+				);
+			} elseif ( ! empty( $charge['error'] ) ) {
+				if ( is_array( $charge['error'] ) ) {
+					$charge['error'] = wp_json_encode( $charge['error'] );
 				}
+					$error = $charge['error'];
+			} else {
+				$error = __( 'The capture process has failed; please try again.', 'woocommerce' );
 			}
 		}
 		if ( $error ) {
 			$loggerRepository->createLogRecord( $powerBoardChargeId, 'Capture', 'error', $error, LogRepository::ERROR );
-			wp_send_json_error( [ 'message' => $error ] );
+			wp_send_json_error( array( 'message' => $error ) );
 		}
 	}
 
 	public function cancelAuthorised() {
-		if ( ! current_user_can('administrator') ) {
-			wp_send_json_error( [ 'message' => __( 'Permission denied', 'power-board' ) ] );
+		if ( ! current_user_can( 'administrator' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Permission denied', 'power-board' ) ) );
 
 			return;
 		}
 
-		$wpNonce = ! empty( $_POST['_wpnonce'] ) ? sanitize_text_field( $_POST['_wpnonce'] ) : null;
-		if ( ! wp_verify_nonce( $wpNonce, 'capture-or-cancel' ) ) {
-			wp_send_json_error( [ 'message' => __( 'Error: Security check', 'power-board' ) ] );
+		$wp_nonce = ! empty( $_POST['_wpnonce'] ) ? sanitize_text_field( $_POST['_wpnonce'] ) : null;
+		if ( ! wp_verify_nonce( $wp_nonce, 'capture-or-cancel' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Error: Security check', 'power-board' ) ) );
 
 			return;
 		}
@@ -120,7 +110,7 @@ class PaymentController {
 		$loggerRepository   = new LogRepository();
 		$powerBoardChargeId = $order->get_meta( 'power_board_charge_id' );
 		if ( ! $error ) {
-			$result = SDKAdapterService::getInstance()->cancelAuthorised( [ 'charge_id' => $powerBoardChargeId ] );
+			$result = SDKAdapterService::get_instance()->cancel_authorised( array( 'charge_id' => $powerBoardChargeId ) );
 
 			if ( ! empty( $result['resource']['data']['status'] ) && 'cancelled' == $result['resource']['data']['status'] ) {
 				$loggerRepository->createLogRecord(
@@ -133,17 +123,15 @@ class PaymentController {
 				$order->payment_complete();
 				OrderService::updateStatus( $orderId, 'pb-cancelled' );
 				wp_send_json_success(
-					[ 'message' => __( 'The payment has been cancelled successfully. ', 'woocommerce' ) ]
+					array( 'message' => __( 'The payment has been cancelled successfully. ', 'woocommerce' ) )
 				);
-			} else {
-				if ( ! empty( $result['error'] ) ) {
-					if ( is_array( $result['error'] ) ) {
-						$result['error'] = wp_json_encode( $result['error'] );
-					}
-					$error = $result['error'];
-				} else {
-					$error = __( 'The payment cancellation process has failed. Please try again.', 'woocommerce' );
+			} elseif ( ! empty( $result['error'] ) ) {
+				if ( is_array( $result['error'] ) ) {
+					$result['error'] = wp_json_encode( $result['error'] );
 				}
+					$error = $result['error'];
+			} else {
+				$error = __( 'The payment cancellation process has failed. Please try again.', 'woocommerce' );
 			}
 		}
 		if ( $error ) {
@@ -154,7 +142,7 @@ class PaymentController {
 				$error,
 				LogRepository::ERROR
 			);
-			wp_send_json_error( [ 'message' => $error ] );
+			wp_send_json_error( array( 'message' => $error ) );
 		}
 	}
 
@@ -163,10 +151,10 @@ class PaymentController {
 			return;
 		}
 
-		$orderId       = $args['order_id'];
-		$order         = wc_get_order( $orderId );
+		$orderId = $args['order_id'];
+		$order   = wc_get_order( $orderId );
 
-		if ( empty($args['amount']) && is_object( $order ) ) {
+		if ( empty( $args['amount'] ) && is_object( $order ) ) {
 			$amount = $order->get_total();
 		} else {
 			$amount = $args['amount'];
@@ -175,11 +163,14 @@ class PaymentController {
 		$captureAmount = (float) $order->get_meta( 'capture_amount' );
 		$totalRefunded = (float) $order->get_total_refunded();
 
-		if ( ! in_array( $order->get_status(), [
+		if ( ! in_array(
+			$order->get_status(),
+			array(
 				'processing',
 				'refunded',
-				'completed'
-			] ) || ( false === strpos( $order->get_payment_method(), PowerBoardPlugin::PLUGIN_PREFIX ) ) ) {
+				'completed',
+			)
+		) || ( false === strpos( $order->get_payment_method(), PLUGIN_PREFIX ) ) ) {
 			return;
 		}
 
@@ -191,9 +182,9 @@ class PaymentController {
 		}
 
 		$directlyCharged = $order->get_meta( 'pb_directly_charged' );
-		if ($_POST['action'] === 'edit_order') {
-			$amountToRefund =  !$directlyCharged && $captureAmount <= $amount ? ($captureAmount * 100 - $totalRefunded * 100) / 100 : $amount;
-			$refund->set_amount($amountToRefund);
+		if ( $_POST['action'] === 'edit_order' ) {
+			$amountToRefund = ! $directlyCharged && $captureAmount <= $amount ? ( $captureAmount * 100 - $totalRefunded * 100 ) / 100 : $amount;
+			$refund->set_amount( $amountToRefund );
 			$refund->set_total( $amountToRefund * -1 );
 		} else {
 			$amountToRefund = $amount;
@@ -201,20 +192,22 @@ class PaymentController {
 
 		$statusChangeVerificationFailed = $order->get_meta( 'status_change_verification_failed' );
 		if ( $_POST['action'] === 'edit_order' && $statusChangeVerificationFailed ) {
-			$refund->set_amount(0);
-			$refund->set_total(0);
+			$refund->set_amount( 0 );
+			$refund->set_total( 0 );
 			$refund->set_parent_id( 0 );
 			return;
 		}
 
-		$result = SDKAdapterService::getInstance()->refunds( [
-			'charge_id' => $powerBoardChargeId,
-			'amount'    => $amountToRefund,
-		] );
+		$result = SDKAdapterService::get_instance()->refunds(
+			array(
+				'charge_id' => $powerBoardChargeId,
+				'amount'    => $amountToRefund,
+			)
+		);
 		if ( ! empty( $result['resource']['data']['status'] ) && in_array(
-				$result['resource']['data']['status'],
-				[ 'refunded', 'refund_requested' ]
-			) ) {
+			$result['resource']['data']['status'],
+			array( 'refunded', 'refund_requested' )
+		) ) {
 			$newRefundedId = end( $result['resource']['data']['transactions'] )['_id'];
 			if ( $captureAmount ) {
 				$status = $totalRefunded < $captureAmount ? 'wc-pb-p-refund' : 'wc-pb-refunded';
@@ -224,8 +217,8 @@ class PaymentController {
 
 			$order->update_meta_data( 'power_board_refunded_status', $status );
 			$status_note = __( 'The refund', 'woocommerce' )
-			               . " {$amountToRefund} "
-			               . __( 'has been successfully.', 'woocommerce' );
+							. " {$amountToRefund} "
+							. __( 'has been successfully.', 'woocommerce' );
 
 			$order->payment_complete();
 
@@ -236,11 +229,10 @@ class PaymentController {
 			$order->save();
 
 			$loggerRepository->createLogRecord( $newRefundedId, 'Refunded', $status, '', LogRepository::SUCCESS );
-		} else {
-			if ( ! empty( $result['error'] ) ) {
-				if ( is_array( $result['error'] ) ) {
-					$result['error'] = implode( '; ', $result['error'] );
-				}
+		} elseif ( ! empty( $result['error'] ) ) {
+			if ( is_array( $result['error'] ) ) {
+				$result['error'] = implode( '; ', $result['error'] );
+			}
 				$loggerRepository->createLogRecord(
 					$powerBoardChargeId,
 					'Refund',
@@ -249,12 +241,16 @@ class PaymentController {
 					LogRepository::ERROR
 				);
 				throw new \Exception( esc_html( $result['error'] ) );
-			} else {
-				$error = __( 'The refund process has failed; please try again.', 'woocommerce' );
-				$loggerRepository->createLogRecord( $powerBoardChargeId, 'Refunded', 'error', $error,
-					LogRepository::ERROR );
-				throw new \Exception( esc_html( $error ) );
-			}
+		} else {
+			$error = __( 'The refund process has failed; please try again.', 'woocommerce' );
+			$loggerRepository->createLogRecord(
+				$powerBoardChargeId,
+				'Refunded',
+				'error',
+				$error,
+				LogRepository::ERROR
+			);
+			throw new \Exception( esc_html( $error ) );
 		}
 	}
 
@@ -271,9 +267,7 @@ class PaymentController {
 				$order->update_meta_data( 'power_board_refunded_status', '' );
 				$order->save();
 			}
-
 		}
-
 	}
 
 	public function webhook(): void {
@@ -296,22 +290,7 @@ class PaymentController {
 			switch ( strtoupper( $input['event'] ) ) {
 				case NotificationEvents::TRANSACTION_SUCCESS()->name:
 				case NotificationEvents::TRANSACTION_FAILURE()->name:
-				case NotificationEvents::FRAUD_CHECK_IN_REVIEW()->name:
-				case NotificationEvents::FRAUD_CHECK_IN_REVIEW_ASYNC_APPROVED()->name:
-				case NotificationEvents::FRAUD_CHECK_TRANSACTION_IN_REVIEW_ASYNC_APPROVED()->name:
-				case NotificationEvents::FRAUD_CHECK_SUCCESS()->name:
-				case NotificationEvents::FRAUD_CHECK_TRANSACTION_IN_REVIEW_APPROVED()->name:
-				case NotificationEvents::FRAUD_CHECK_FAILED()->name:
-				case NotificationEvents::FRAUD_CHECK_TRANSACTION_IN_REVIEW_DECLINED()->name:
 					$result = $this->webhookProcess( $input );
-					break;
-				case NotificationEvents::STANDALONE_FRAUD_CHECK_SUCCESS()->name:
-				case NotificationEvents::STANDALONE_FRAUD_CHECK_FAILED()->name:
-				case NotificationEvents::STANDALONE_FRAUD_CHECK_IN_REVIEW_APPROVED()->name:
-				case NotificationEvents::STANDALONE_FRAUD_CHECK_IN_REVIEW_DECLINED()->name:
-				case NotificationEvents::STANDALONE_FRAUD_CHECK_IN_REVIEW_ASYNC_APPROVED()->name:
-				case NotificationEvents::STANDALONE_FRAUD_CHECK_IN_REVIEW_ASYNC_DECLINED()->name:
-					$result = $this->fraudProcess( $input );
 					break;
 				case NotificationEvents::REFUND_SUCCESS()->name:
 					$result = $this->refundSuccessProcess( $input );
@@ -336,13 +315,13 @@ class PaymentController {
 			$orderId        = (int) reset( $referenceArray );
 		}
 
-		$order = wc_get_order( $orderId );
+		$order    = wc_get_order( $orderId );
+		$chargeId = $data['_id'] ?? '';
 
-		if ( false === $order || 'checkout-draft' === $order->get_status() ) {
+		if ( false === $order || 'checkout-draft' === $order->get_status() || ! $chargeId || $chargeId !== $order->get_meta( 'power_board_charge_id' ) ) {
 			return false;
 		}
 
-		$chargeId        = $data['_id'] ?? '';
 		$status          = ucfirst( strtolower( $data['status'] ?? 'undefined' ) );
 		$operation       = ucfirst( strtolower( $data['type'] ?? 'undefined' ) );
 		$isAuthorization = $data['authorization'] ?? 0;
@@ -386,145 +365,10 @@ class PaymentController {
 			$operation,
 			$orderStatus,
 			'',
-			in_array( $orderStatus, [ 'wc-pb-paid', 'wc-pb-p-paid', 'wc-pb-authorize', 'wc-pb-pending' ]
+			in_array(
+				$orderStatus,
+				array( 'wc-pb-paid', 'wc-pb-p-paid', 'wc-pb-authorize', 'wc-pb-pending' )
 			) ? LogRepository::SUCCESS : LogRepository::DEFAULT
-		);
-
-		return true;
-	}
-
-	private function fraudProcess( array $input ): bool {
-		$loggerRepository = new LogRepository();
-		$data             = $input['data'];
-
-		if ( strpos( $data['reference'], '_' ) === false ) {
-			$orderId = (int) $data['reference'];
-		} else {
-			$referenceArray = explode( '_', $data['reference'] );
-			$orderId        = (int) reset( $referenceArray );
-		}
-
-		$order       = wc_get_order( $orderId );
-		$fraudId     = $data['_id'];
-		$fraudStatus = $data['status'];
-
-		if ( 'complete' !== $fraudStatus ) {
-			$operation = ucfirst( strtolower( $data['type'] ?? 'undefined' ) );
-			$status    = 'wc-pb-failed';
-
-			$order->delete_meta_data( 'power_board_fraud' );
-			$order->save();
-
-			OrderService::updateStatus( $orderId, $status );
-
-			$loggerRepository->createLogRecord(
-				$fraudId,
-				$operation,
-				$status,
-				''
-			);
-
-			return true;
-		}
-
-		$power_board_fraud = $order->get_meta( 'power_board_fraud' );
-
-		if ( "" === $power_board_fraud || false === $order ) {
-			return false;
-		}
-
-		$paymentSource = $data['customer']['payment_source'];
-
-		if ( ! empty( $power_board_fraud['gateway_id'] ) ) {
-			$paymentSource['gateway_id'] = $power_board_fraud['gateway_id'];
-		}
-
-		$chargeArgs = [
-			'amount'          => (float) $order->get_total(),
-			'reference'       => (string) $order->get_id(),
-			'currency'        => strtoupper( $order->get_currency() ),
-			'customer'        => [
-				'first_name'     => $order->get_billing_first_name(),
-				'last_name'      => $order->get_billing_last_name(),
-				'email'          => $order->get_billing_email(),
-				'phone'          => $order->get_billing_phone(),
-				'payment_source' => $paymentSource,
-			],
-			'fraud_charge_id' => $fraudId,
-			'capture'         => $power_board_fraud['capture'],
-		];
-
-		if ( ! empty( $power_board_fraud['charge3dsid'] ) ) {
-			$chargeArgs['_3ds_charge_id'] = $power_board_fraud['charge3dsid'];
-		}
-
-		if ( ! empty( $power_board_fraud['_3ds'] ) ) {
-			$chargeArgs['_3ds'] = $power_board_fraud['_3ds'];
-		}
-
-		if ( ! empty( $power_board_fraud['cvv'] ) ) {
-			$chargeArgs['customer']['payment_source']['card_ccv'] = $power_board_fraud['cvv'];
-		}
-
-		$order->delete_meta_data( 'power_board_fraud' );
-		$order->save();
-
-		$response = SDKAdapterService::getInstance()->createCharge( $chargeArgs );
-		$chargeId = ! empty( $response['resource']['data']['_id'] ) ? $response['resource']['data']['_id'] : '';
-
-		if ( ! empty( $response['error'] ) ) {
-			$message = SDKAdapterService::getInstance()->errorMessageToString( $response );
-			$loggerRepository->createLogRecord(
-				$chargeId ?? '',
-				'Charge',
-				'UnfulfilledCondition',
-				__( 'Can\'t charge.', 'power-board' ) . $message,
-				LogRepository::ERROR
-			);
-
-			return false;
-		}
-
-		if ( ! empty( $power_board_fraud['_3ds'] ) ) {
-			$attachResponse = SDKAdapterService::getInstance()->fraudAttach( $chargeId,
-				[ 'fraud_charge_id' => $fraudId ] );
-			if ( ! empty( $attachResponse['error'] ) ) {
-				$message = SDKAdapterService::getInstance()->errorMessageToString( $attachResponse );
-				$loggerRepository->createLogRecord(
-					$chargeId ?? '',
-					'Fraud Attach',
-					'UnfulfilledCondition',
-					__( 'Can\'t fraud attach.', 'power-board' ) . $message,
-					LogRepository::ERROR
-				);
-
-				return false;
-			}
-		}
-
-		$status          = ucfirst( strtolower( $response['resource']['data']['status'] ?? 'undefined' ) );
-		$operation       = ucfirst( strtolower( $response['resource']['data']['type'] ?? 'undefined' ) );
-		$isAuthorization = $response['resource']['data']['authorization'] ?? 0;
-		$markAsSuccess   = false;
-
-		if ( $isAuthorization && in_array( $status, [ 'Pending', 'Pre_authentication_pending' ] ) ) {
-			$status = 'wc-pb-authorize';
-		} else {
-			$markAsSuccess = true;
-			$isCompleted   = 'Complete' === $status;
-			$status        = $isCompleted ? 'wc-pb-paid' : 'wc-pb-pending';
-		}
-
-		OrderService::updateStatus( $orderId, $status );
-		$order->update_meta_data( 'power_board_charge_id', $chargeId );
-		$order->save();
-
-		$loggerRepository->createLogRecord(
-			$chargeId,
-			$operation,
-			$status,
-			'',
-			$markAsSuccess ? LogRepository::SUCCESS : LogRepository::DEFAULT
 		);
 
 		return true;
@@ -546,9 +390,10 @@ class PaymentController {
 			$orderId        = (int) reset( $referenceArray );
 		}
 
-		$order = wc_get_order( $orderId );
+		$order    = wc_get_order( $orderId );
+		$chargeId = $data['_id'] ?? '';
 
-		if ( false === $order || $order->get_meta( 'api_refunded_id' ) === $data['transaction']['_id'] ) {
+		if ( false === $order || $order->get_meta( 'api_refunded_id' ) === $data['transaction']['_id'] || ! $chargeId || $chargeId !== $order->get_meta( 'power_board_charge_id' ) ) {
 			return false;
 		}
 
@@ -558,7 +403,6 @@ class PaymentController {
 			$orderTotal = $captureAmount;
 		}
 
-		$chargeId     = $data['_id'] ?? '';
 		$status       = ucfirst( strtolower( $data['status'] ?? 'undefined' ) );
 		$operation    = ucfirst( strtolower( $data['type'] ?? 'undefined' ) );
 		$refundAmount = wc_format_decimal( $data['transaction']['amount'] );
@@ -579,21 +423,23 @@ class PaymentController {
 		}
 
 		$status_notes = __( 'The refund', 'woocommerce' )
-		                . " {$refundAmount} "
-		                . __( 'has been successfully.', 'woocommerce' );
+						. " {$refundAmount} "
+						. __( 'has been successfully.', 'woocommerce' );
 		$order->payment_complete();
 		OrderService::updateStatus( $orderId, $orderStatus, $status_notes );
 
-		$result = wc_create_refund( [
-			'amount'         => $refundAmount,
-			'reason'         => __( 'The refund', 'woocommerce' ) . " {$refundAmount} " . __(
+		$result = wc_create_refund(
+			array(
+				'amount'         => $refundAmount,
+				'reason'         => __( 'The refund', 'woocommerce' ) . " {$refundAmount} " . __(
 					'has been successfully.',
 					'woocommerce'
 				),
-			'order_id'       => $orderId,
-			'refund_payment' => false,
-			'from_webhook'   => true,
-		] );
+				'order_id'       => $orderId,
+				'refund_payment' => false,
+				'from_webhook'   => true,
+			)
+		);
 
 		$loggerRepository = new LogRepository();
 		$loggerRepository->createLogRecord(
@@ -601,7 +447,9 @@ class PaymentController {
 			$operation,
 			$orderStatus,
 			$result instanceof \WP_Error ? $result->get_error_message() : '',
-			in_array( $orderStatus, [ 'wc-pb-paid', 'wc-pb-authorize', 'wc-pb-pending' ]
+			in_array(
+				$orderStatus,
+				array( 'wc-pb-paid', 'wc-pb-authorize', 'wc-pb-pending' )
 			) ? LogRepository::SUCCESS : LogRepository::DEFAULT
 		);
 

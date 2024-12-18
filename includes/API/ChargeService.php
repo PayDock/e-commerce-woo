@@ -6,67 +6,42 @@ use PowerBoard\Abstracts\AbstractApiService;
 
 class ChargeService extends AbstractApiService {
 	const ENDPOINT = 'charges';
-	const WALLETS_INITIALIZE_ENDPOINT = 'wallet';
-	const STANDALONE_FRAUD_ENDPOINT = 'fraud';
-	const STANDALONE_3DS_ENDPOINT = 'standalone-3ds';
+	const CREATE_INTENT_ENDPOINT = 'checkouts/intent';
+	const GET_TEMPLATES_ENDPOINT = 'checkouts/templates';
 	const CAPTURE_ENDPOINT = 'capture';
 	const REFUNDS_ENDPOINT = 'refunds';
-	const FRAUD_ATTACH_ENDPOINT = 'fraud/attach';
 
 	protected $directCharge = null;
 
 	protected $id = null;
-	protected $allowedAction = [ 
-		'create' => self::METHOD_POST,
-		'update' => self::METHOD_POST,
-		'wallet-initialize' => self::METHOD_POST,
-		'standalone-fraud' => self::METHOD_POST,
-		'standalone-3ds' => self::METHOD_POST,
+	protected $allowedAction = [
+		'create-intent' => self::METHOD_POST,
+		'templates' => self::METHOD_GET,
 		'capture' => self::METHOD_POST,
 		'refunds' => self::METHOD_POST,
 		'cancel-authorised' => self::METHOD_DELETE,
-		'fraud-attach' => self::METHOD_POST,
 	];
 
-	public function create( array $params ): self {
+	public function createCheckoutIntent( array $params): self {
 		$this->parameters = $params;
 
-		$this->setAction( 'create' );
+		$this->setAction( 'create-intent' );
 
 		return $this;
 	}
 
-	public function update( string $id, array $params ): self {
-		$this->id = $id;
-		$this->parameters = $params;
+	public function get_configuration_templates_ids( string $version ): self {
+		$this->parameters = ['type' => 'configuration', 'version' => $version ];
 
-		$this->setAction( 'update' );
-
-		return $this;
-	}
-
-	public function standaloneFraud( array $params ): self {
-		$this->parameters = $params;
-
-		$this->setAction( 'standalone-fraud' );
+		$this->setAction( 'templates' );
 
 		return $this;
 	}
 
-	public function standalone3Ds( array $params ): self {
-		$this->parameters = $params;
+	public function get_customisation_templates_ids( string $version ): self {
+		$this->parameters = ['type' => 'customisation', 'version' => $version ];
 
-		$this->setAction( 'standalone-3ds' );
-
-		return $this;
-	}
-
-	public function walletsInitialize( array $params, ?bool $directCharge ): self {
-		$this->parameters = $params;
-
-		$this->setAction( 'wallet-initialize' );
-
-		$this->directCharge = $directCharge;
+		$this->setAction( 'templates' );
 
 		return $this;
 	}
@@ -96,30 +71,8 @@ class ChargeService extends AbstractApiService {
 		return $this;
 	}
 
-	public function fraudAttach( string $id, array $params ): self {
-		$this->id = $id;
-		$this->parameters = $params;
-
-		$this->setAction( 'fraud-attach' );
-
-		return $this;
-	}
-
 	protected function buildEndpoint(): ?string {
 		switch ( $this->action ) {
-			case 'create':
-				$result = self::ENDPOINT;
-				if ( isset( $this->parameters['capture'] ) ) {
-					$result .= '?capture=' . ( $this->parameters['capture'] ? 'true' : 'false' );
-					unset( $this->parameters['capture'] );
-				}
-				break;
-			case 'standalone-fraud':
-				$result = self::ENDPOINT . '/' . self::STANDALONE_FRAUD_ENDPOINT;
-				break;
-			case 'standalone-3ds':
-				$result = self::ENDPOINT . '/' . self::STANDALONE_3DS_ENDPOINT;
-				break;
 			case 'refunds':
 				$result = self::ENDPOINT . '/' . $this->parameters['charge_id'] . '/' . self::REFUNDS_ENDPOINT;
 				unset( $this->parameters['charge_id'] );
@@ -129,21 +82,15 @@ class ChargeService extends AbstractApiService {
 				$result = self::ENDPOINT . '/' . $this->parameters['charge_id'] . '/' . self::CAPTURE_ENDPOINT;
 				unset( $this->parameters['charge_id'] );
 				break;
-			case 'wallet-initialize':
-				$result = self::ENDPOINT . '/' . self::WALLETS_INITIALIZE_ENDPOINT;
+			case 'create-intent':
+				$result = self::CREATE_INTENT_ENDPOINT;
 				break;
-			case 'update':
-				$result = self::ENDPOINT . '/' . $this->id;
-				break;
-			case 'fraud-attach':
-				$result = self::ENDPOINT . '/' . $this->id . '/' . self::FRAUD_ATTACH_ENDPOINT;
+			case 'templates':
+				$result = self::GET_TEMPLATES_ENDPOINT . '?type=' . $this->parameters['type'];
+				unset( $this->parameters['charge_id'] );
 				break;
 			default:
 				$result = self::ENDPOINT;
-		}
-
-		if ( isset( $this->directCharge ) && ! is_null( $this->directCharge ) ) {
-			$result .= '?capture=' . ( $this->directCharge ? 'true' : 'false' );
 		}
 
 		return $result;

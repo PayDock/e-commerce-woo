@@ -1,10 +1,6 @@
 <?php if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
-
-use PowerBoard\Enums\OrderListColumns;
-use PowerBoard\Enums\OtherPaymentMethods;
-use PowerBoard\Enums\WalletPaymentMethods;
 ?>
 <span class="power-board-order-actions">
     <?php
@@ -14,12 +10,7 @@ use PowerBoard\Enums\WalletPaymentMethods;
           'pb-p-refund'
         ] );
         $order_directly_charged = ! empty( $pb_charge_meta ) ? $pb_charge_meta : false;
-        $showCancelButton = ! in_array( $order->get_meta(OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey()), [
-            WalletPaymentMethods::PAY_PAL_SMART_BUTTON()->getLabel(),
-            WalletPaymentMethods::AFTERPAY()->getLabel(),
-            OtherPaymentMethods::AFTERPAY()->getLabel(),
-            OtherPaymentMethods::ZIPPAY()->getLabel(),
-          ] ) || $order_directly_charged == false;
+        $showCancelButton = $order_directly_charged == false;
 
         if ( $order_directly_charged == false ) :
     ?>

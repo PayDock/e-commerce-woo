@@ -8,15 +8,7 @@ use PowerBoard\Abstracts\AbstractSingleton;
 use PowerBoard\Controllers\Admin\WidgetController;
 use PowerBoard\Controllers\Webhooks\PaymentController;
 use PowerBoard\Enums\SettingsTabs;
-use PowerBoard\Services\Checkout\BankAccountPaymentService;
-use PowerBoard\Util\AfterpayAPMsBlock;
-use PowerBoard\Util\AfterpayWalletBlock;
-use PowerBoard\Util\ApplePayWalletBlock;
-use PowerBoard\Util\BankAccountBlock;
-use PowerBoard\Util\GooglePayWalletBlock;
-use PowerBoard\Util\PayPalWalletBlock;
-use PowerBoard\Util\PowerBoardGatewayBlocks;
-use PowerBoard\Util\ZipAPMsBlock;
+use PowerBoard\Util\MasterWidgetBlock;
 
 class ActionsService extends AbstractSingleton {
 	protected const PROCESS_OPTIONS_FUNCTION = 'process_admin_options';
@@ -27,7 +19,6 @@ class ActionsService extends AbstractSingleton {
 	protected function __construct() {
 		add_action( 'before_woocommerce_init', function () {
 			$this->addCompatibilityWithWooCommerce();
-			$this->addPaymentActions();
 			$this->addPaymentMethodToChekout();
 			$this->addSettingsActions();
 			$this->addOrderActions();
@@ -58,26 +49,6 @@ class ActionsService extends AbstractSingleton {
 		}
 	}
 
-	protected function addPaymentActions() {
-		$payments = [
-			'power_board_bank_account_gateway' => new BankAccountPaymentService(),
-		];
-		foreach ( $payments as $paymentKey => $payment ) {
-			add_action(
-				'woocommerce_update_options_payment_gateways_' . $paymentKey,
-				[ $payment, 'process_admin_options' ]
-			);
-			add_action( 'woocommerce_scheduled_subscription_payment_' . $paymentKey, [
-				$payment,
-				'process_subscription_payment',
-			], 10, 2 );
-			add_action( 'woocommerce_after_checkout_billing_form', [
-				$payment,
-				'woocommerce_before_checkout_form',
-			], 10, 1 );
-		}
-	}
-
 	/**
 	 * Add new payment method on chekout page
 	 */
@@ -97,14 +68,7 @@ class ActionsService extends AbstractSingleton {
 		add_action(
 			'woocommerce_blocks_payment_method_type_registration',
 			function ( PaymentMethodRegistry $payment_method_registry ) {
-				$payment_method_registry->register( new PowerBoardGatewayBlocks() );
-				$payment_method_registry->register( new BankAccountBlock() );
-				$payment_method_registry->register( new ApplePayWalletBlock() );
-				$payment_method_registry->register( new GooglePayWalletBlock() );
-				$payment_method_registry->register( new AfterpayWalletBlock() );
-				$payment_method_registry->register( new PayPalWalletBlock() );
-				$payment_method_registry->register( new AfterpayAPMsBlock() );
-				$payment_method_registry->register( new ZipAPMsBlock() );
+				$payment_method_registry->register( new MasterWidgetBlock() );
 			}
 		);
 	}
@@ -126,6 +90,8 @@ class ActionsService extends AbstractSingleton {
 	protected function addOrderActions() {
 		$orderService      = new OrderService();
 		$paymentController = new PaymentController();
+		$widgetController = new WidgetController();
+
 		add_action( 'woocommerce_order_item_add_action_buttons', [ $orderService, 'iniPowerBoardOrderButtons' ], 10,
 			2 );
 		add_action( 'woocommerce_order_status_changed', [ $orderService, 'statusChangeVerification' ], 20, 4 );
@@ -137,5 +103,6 @@ class ActionsService extends AbstractSingleton {
 		add_action( 'woocommerce_create_refund', [ $paymentController, 'refundProcess' ], 10, 2 );
 		add_action( 'woocommerce_order_refunded', [ $paymentController, 'afterRefundProcess' ], 10, 2 );
 		add_action( 'woocommerce_api_power-board-webhook', [ $paymentController, 'webhook' ] );
+		add_action( 'wc_ajax_power-board-create-charge-intent', [ $widgetController, 'create_checkout_intent'], 10, 1 );
     }
 }

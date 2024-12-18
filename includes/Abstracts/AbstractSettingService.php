@@ -5,20 +5,24 @@ namespace PowerBoard\Abstracts;
 use PowerBoard\Enums\SettingsTabs;
 use PowerBoard\Services\Assets\AdminAssetsService;
 use PowerBoard\Services\TemplateService;
+use WC_Payment_Gateway;
 
-abstract class AbstractSettingService extends \WC_Payment_Gateway {
-	public $currentSection = null;
-	protected $templateService;
+abstract class AbstractSettingService extends WC_Payment_Gateway {
+	public $current_section = null;
+	protected $template_service;
 
 	public function __construct() {
-		$available_sections = array_map( function ( $item ) {
-			return strtolower( $item->value );
-		}, SettingsTabs::allCases() );
+		$available_sections = array_map(
+			function ( $item ) {
+				return strtolower( $item->value );
+			},
+			SettingsTabs::allCases()
+		);
 
 		$section = filter_input( INPUT_GET, 'section', FILTER_SANITIZE_STRING );
 
-		if ( in_array( $section, $available_sections ) ) {
-			$this->currentSection = $section;
+		if ( in_array( $section, $available_sections, true ) ) {
+			$this->current_section = $section;
 		}
 
 		$this->id                 = $this->getId();
@@ -31,25 +35,26 @@ abstract class AbstractSettingService extends \WC_Payment_Gateway {
 
 		$this->title = __( 'PowerBoard Gateway', 'power-board' );
 
-		$this->icon = plugins_url( 'assets/images/logo.svg' );
+		$this->icon = POWER_BOARD_PLUGIN_URL . 'assets/images/logo.png';
 
 		$this->init_settings();
 		$this->init_form_fields();
 
+		$this->has_fields = is_checkout() && \WC_Blocks_Utils::has_block_in_page( wc_get_page_id( 'checkout' ), 'woocommerce/checkout' );
+
 		if ( is_admin() ) {
 			new AdminAssetsService();
-			$this->templateService = new TemplateService( $this );
+			$this->template_service = new TemplateService( $this );
 		}
-
 	}
 
 	abstract protected function getId(): string;
 
-	public function parentGenerateSettingsHtml( $formFields = [], $echo = true ): ?string {
+	public function parent_generate_settings_html( $formFields = array(), $echo = true ): ?string {
 		return parent::generate_settings_html( $formFields, $echo );
 	}
 
-	public function generate_settings_html( $form_fields = [], $echo = true ): ?string {
+	public function generate_settings_html( $form_fields = array(), $echo = true ): ?string {
 		if ( empty( $form_fields ) ) {
 			$form_fields = $this->get_form_fields();
 		}
@@ -57,70 +62,32 @@ abstract class AbstractSettingService extends \WC_Payment_Gateway {
 		$tabs = $this->getTabs();
 
 		if ( $echo ) {
-			$this->templateService->includeAdminHtml( 'admin', compact( 'tabs', 'form_fields' ) );
+			$this->template_service->includeAdminHtml( 'admin', compact( 'tabs', 'form_fields' ) );
 		} else {
-			return $this->templateService->getAdminHtml( 'admin', compact( 'tabs', 'form_fields' ) );
+			return $this->template_service->getAdminHtml( 'admin', compact( 'tabs', 'form_fields' ) );
 		}
 
 		return null;
 	}
 
 	protected function getTabs(): array {
-		return [
-			SettingsTabs::LIVE_CONNECTION()->value    => [
-				'label'  => __( 'Live Connection', 'power-board' ),
-				'active' => SettingsTabs::LIVE_CONNECTION()->value == $this->currentSection,
-			],
-			SettingsTabs::SANDBOX_CONNECTION()->value => [
-				'label'  => __( 'Sandbox Connection', 'power-board' ),
-				'active' => SettingsTabs::SANDBOX_CONNECTION()->value == $this->currentSection,
-			],
-			SettingsTabs::WIDGET()->value             => [
+		return array(
+			SettingsTabs::WIDGET_CONFIGURATION()->value => array(
 				'label'  => __( 'Widget Configuration', 'power-board' ),
-				'active' => SettingsTabs::WIDGET()->value == $this->currentSection,
-			],
-			SettingsTabs::LOG()->value                => [
+				'active' => SettingsTabs::WIDGET_CONFIGURATION()->value === $this->current_section,
+			),
+			SettingsTabs::LOG()->value                  => array(
 				'label'  => __( 'Logs', 'power-board' ),
-				'active' => SettingsTabs::LOG()->value == $this->currentSection,
-			],
-		];
+				'active' => SettingsTabs::LOG()->value === $this->current_section,
+			),
+		);
 	}
 
 	public function generate_label_html( $key, $value ) {
-		return $this->templateService->getAdminHtml( 'label', compact( 'key', 'value' ) );
+		return $this->template_service->getAdminHtml( 'label', compact( 'key', 'value' ) );
 	}
 
 	public function generate_big_label_html( $key, $value ) {
-		return $this->templateService->getAdminHtml( 'big-label', compact( 'key', 'value' ) );
-	}
-
-	public function generate_card_select_html( $key, $data ) {
-		$field_key = $this->get_field_key( $key );
-
-		$defaults = [
-			'title'             => '',
-			'disabled'          => false,
-			'class'             => '',
-			'css'               => '',
-			'placeholder'       => '',
-			'type'              => 'text',
-			'desc_tip'          => false,
-			'description'       => '',
-			'custom_attributes' => [],
-			'options'           => [],
-		];
-
-		$data  = wp_parse_args( $data, $defaults );
-		$value = $this->get_option( $key );
-
-		return $this->templateService->getAdminHtml(
-			'card-select',
-			compact(
-				'data',
-				'value',
-				'field_key',
-				'data'
-			)
-		);
+		return $this->template_service->getAdminHtml( 'big-label', compact( 'key', 'value' ) );
 	}
 }

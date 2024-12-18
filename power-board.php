@@ -42,6 +42,10 @@ if ( ! defined( 'POWER_BOARD_PLUGIN_VERSION' ) ) {
 	define( 'POWER_BOARD_PLUGIN_VERSION', '3.3.0' );
 }
 
+if ( ! defined( 'PLUGIN_PREFIX' ) ) {
+	define( 'PLUGIN_PREFIX', 'power_board' );
+}
+
 require_once __DIR__ . '/vendor/autoload.php';
 
 PowerBoard\PowerBoardPlugin::getInstance();

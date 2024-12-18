@@ -4,7 +4,7 @@ namespace PowerBoard\Hooks;
 
 use PowerBoard\Contracts\Hook;
 use PowerBoard\Contracts\Repository;
-use PowerBoard\PowerBoardPlugin;
+use PowerBoard\Enums\PowerBoardPluginEnum;
 
 class UninstallHook implements Hook {
 
@@ -14,7 +14,7 @@ class UninstallHook implements Hook {
 	public static function handle(): void {
 		$repositories = array_map( function (string $className) {
 			return new $className();
-		}, PowerBoardPlugin::REPOSITORIES );
+		}, PowerBoardPluginEnum::REPOSITORIES );
 		array_map( [ new self(), 'runMigration' ], $repositories );
 	}
 
