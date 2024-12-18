@@ -1,5 +1,3 @@
-image: alpine:latest
-
 stages:
  - test
  - publish
@@ -17,6 +15,7 @@ include:
     file: '/code_quality.yml'
 
 publish_power_board:
+  image: alpine:latest
   stage: publish
   only:
     - power_board
@@ -34,6 +33,7 @@ publish_power_board:
       - woo_powerboard*.zip
 
 publish_paydock:
+  image: alpine:latest
   stage: publish
   only:
     - main
@@ -50,14 +50,27 @@ publish_paydock:
     paths:
       - woo*.zip
 
-code_quality_phpcs:
+run_phpcs:
   image: composer:lts
   stage: quality
   script:
     - composer install
-    - ./vendor/bin/phpcs . > phpcs-report.json || true
+    - ./vendor/bin/phpcs --report=json . > phpcs-report.json || true
     - ls phpcs-report.json
   artifacts:
     name: phpcs-report.json
     paths:
       - phpcs-report.json
+
+phpcs_report:
+  image: python:3.9-slim
+  stage: quality
+  needs:
+    - job: run_phpcs
+      artifacts: true
+  script:
+    - python phpcs2codeclimate.py
+  artifacts:
+    reports:
+      codequality:
+        - code_climate_phpcs_report.json
