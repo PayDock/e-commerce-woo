@@ -49,3 +49,15 @@ publish_paydock:
     name: woo.zip
     paths:
       - woo*.zip
+
+code_quality_phpcs:
+  image: composer:lts
+  stage: quality
+  script:
+    - composer install
+    - ./vendor/bin/phpcs . > phpcs-report.json || true
+    - ls phpcs-report.json
+  artifacts:
+    name: phpcs-report.json
+    paths:
+      - phpcs-report.json
