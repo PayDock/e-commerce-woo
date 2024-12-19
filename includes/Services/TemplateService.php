@@ -3,7 +3,6 @@
 namespace PowerBoard\Services;
 
 use PowerBoard\Enums\SettingsTabs;
-use PowerBoard\Services\SettingsService;
 
 class TemplateService {
 	private const TEMPLATE_DIR = 'templates';

@@ -63,7 +63,7 @@ class ChargeService extends AbstractApiService {
 		return $this;
 	}
 
-	public function cancelAuthorised( array $params ): self {
+	public function cancel_authorised( array $params ): self {
 		$this->parameters = $params;
 
 		$this->setAction( 'cancel-authorised' );

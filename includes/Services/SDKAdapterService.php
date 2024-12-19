@@ -8,10 +8,6 @@ use PowerBoard\API\GatewayService;
 use PowerBoard\API\NotificationService;
 use PowerBoard\API\ServiceService;
 use PowerBoard\API\TokenService;
-use PowerBoard\Enums\ConfigAPI;
-use PowerBoard\Enums\CredentialSettings;
-use PowerBoard\Enums\SettingGroups;
-use PowerBoard\Enums\SettingsTabs;
 use PowerBoard\Services\Settings\WidgetConfigurationSettingService;
 
 class SDKAdapterService {
@@ -19,6 +15,8 @@ class SDKAdapterService {
 	private static $instance = null;
 
 	public function __construct() {
+		$settings = new WidgetConfigurationSettingService();
+		$this->initialise( $settings->get_environment(), $settings->get_access_token(), $settings->get_widget_access_token() );
 	}
 
 	public function initialise( ?string $env, ?string $access_token, ?string $widget_access_token ): void {
@@ -77,7 +75,7 @@ class SDKAdapterService {
 
 	public function cancel_authorised( array $params ): array {
 		$this->init_charge_service();
-		return $this->charge_service->cancelAuthorised( $params )->call();
+		return $this->charge_service->cancel_authorised( $params )->call();
 	}
 
 	public function refunds( array $params ): array {

@@ -3,7 +3,6 @@
 namespace PowerBoard\Services\Checkout;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
-use Exception;
 use PowerBoard\Enums\OrderListColumns;
 use PowerBoard\Services\OrderService;
 use PowerBoard\Services\SDKAdapterService;

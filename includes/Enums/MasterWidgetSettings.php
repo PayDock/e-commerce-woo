@@ -6,12 +6,13 @@ use PowerBoard\Abstracts\AbstractEnum;
 use PowerBoard\Services\Settings\APIAdapterService;
 
 class MasterWidgetSettings extends AbstractEnum {
-	private $api_adapter_service     = null;
-	private $configuration_templates = null;
-	private $customisation_templates = null;
 	protected const VERSION          = 'VERSION';
 	protected const CONFIGURATION_ID = 'CONFIGURATION_ID';
 	protected const CUSTOMISATION_ID = 'CUSTOMISATION_ID';
+
+	private $api_adapter_service     = null;
+	private $configuration_templates = null;
+	private $customisation_templates = null;
 
 	public function get_input_type(): string {
 		switch ( $this->name ) {

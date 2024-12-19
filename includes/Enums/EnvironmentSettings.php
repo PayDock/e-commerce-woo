@@ -3,7 +3,6 @@
 namespace PowerBoard\Enums;
 
 use PowerBoard\Abstracts\AbstractEnum;
-use PowerBoard\Enums\ConfigAPI;
 
 class EnvironmentSettings extends AbstractEnum {
 	protected const ENVIRONMENT = 'ENVIRONMENT';

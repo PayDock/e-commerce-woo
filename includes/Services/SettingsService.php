@@ -2,9 +2,7 @@
 
 namespace PowerBoard\Services;
 
-use PowerBoard\Abstracts\AbstractSettingService;
 use PowerBoard\Enums\ConfigAPI;
-use PowerBoard\Enums\CredentialSettings;
 use PowerBoard\Enums\SettingGroups;
 use PowerBoard\Enums\MasterWidgetSettings;
 use PowerBoard\Services\Settings\WidgetConfigurationSettingService;

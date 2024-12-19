@@ -98,10 +98,10 @@ class ActionsService extends AbstractSingleton {
 		add_action( 'woocommerce_admin_order_totals_after_total',
 			[ $orderService, 'informationAboutPartialCaptured' ] );
 		add_action( 'admin_notices', [ $orderService, 'displayStatusChangeError' ] );
-		add_action( 'wp_ajax_power-board-capture-charge', [ $paymentController, 'capturePayment' ] );
-		add_action( 'wp_ajax_power-board-cancel-authorised', [ $paymentController, 'cancelAuthorised' ] );
-		add_action( 'woocommerce_create_refund', [ $paymentController, 'refundProcess' ], 10, 2 );
-		add_action( 'woocommerce_order_refunded', [ $paymentController, 'afterRefundProcess' ], 10, 2 );
+		add_action( 'wp_ajax_power-board-capture-charge', [ $paymentController, 'capture_payment' ] );
+		add_action( 'wp_ajax_power-board-cancel-authorised', [ $paymentController, 'cancel_authorised' ] );
+		add_action( 'woocommerce_create_refund', [ $paymentController, 'refund_process' ], 10, 2 );
+		add_action( 'woocommerce_order_refunded', [ $paymentController, 'after_refund_process' ], 10, 2 );
 		add_action( 'woocommerce_api_power-board-webhook', [ $paymentController, 'webhook' ] );
 		add_action( 'wc_ajax_power-board-create-charge-intent', [ $widgetController, 'create_checkout_intent'], 10, 1 );
     }

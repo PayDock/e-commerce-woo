@@ -111,19 +111,17 @@ class WidgetConfigurationSettingService extends AbstractSettingService {
 				)
 			);
 
-			if ( MasterWidgetSettings::VERSION()->name !== $checkout_settings->name ) {
-				$fields[ $key ] = array(
-					'type'  => $checkout_settings->get_input_type(),
-					'title' => preg_replace( array( '/ Id/', '/ id/' ), ' ID', $checkout_settings->get_label() ),
-				);
+			$fields[ $key ] = array(
+				'type'  => $checkout_settings->get_input_type(),
+				'title' => preg_replace( array( '/ Id/', '/ id/' ), ' ID', $checkout_settings->get_label() ),
+			);
 
-				if ( ! empty( $environment ) ) {
-					$options = $checkout_settings->get_options( $environment, $access_token, $widget_access_token, $version );
+			if ( ! empty( $environment ) ) {
+				$options = $checkout_settings->get_options( $environment, $access_token, $widget_access_token, $version );
 
-					if ( ! empty( $options ) && ( 'select' === $checkout_settings->get_input_type() ) ) {
-						$fields[ $key ]['options'] = $options;
-						$fields[ $key ]['default'] = $checkout_settings->get_default();
-					}
+				if ( ! empty( $options ) && ( 'select' === $checkout_settings->get_input_type() ) ) {
+					$fields[ $key ]['options'] = $options;
+					$fields[ $key ]['default'] = $checkout_settings->get_default();
 				}
 			}
 		}

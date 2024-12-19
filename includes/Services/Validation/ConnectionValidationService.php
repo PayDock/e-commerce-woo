@@ -9,7 +9,6 @@ use PowerBoard\Enums\EnvironmentSettings;
 use PowerBoard\Enums\MasterWidgetSettings;
 use PowerBoard\Enums\NotificationEvents;
 use PowerBoard\Enums\SettingGroups;
-use PowerBoard\Services\HashService;
 use PowerBoard\Services\SDKAdapterService;
 use PowerBoard\Services\Settings\APIAdapterService;
 use PowerBoard\Services\SettingsService;
@@ -44,8 +43,6 @@ class ConnectionValidationService {
 		$this->set_api_init_variables();
 
 		$this->api_adapter_service        = SDKAdapterService::get_instance();
-		$this->api_adapter_service->initialise( $this->environment_settings, $this->access_token_settings, $this->widget_access_token_settings );
-
 		$this->widget_api_adapter_service = APIAdapterService::get_instance();
 		$this->widget_api_adapter_service->initialise( $this->environment_settings, $this->access_token_settings, $this->widget_access_token_settings );
 

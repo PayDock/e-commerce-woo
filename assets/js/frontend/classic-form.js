@@ -210,14 +210,18 @@ jQuery(function ($) {
                 loading.show();
                 error.hide();
 
-                if (!isOrderPayPage && !this.isValidForm(methodName)) {
+                if (!this.isValidForm(methodName)) {
                     this.toggleWidgetVisibility(true);
                     loading.hide();
                     error.show();
                     return;
                 }
 
-                this.toggleWidgetVisibility(true);
+                if (methodName !== 'power_board_gateway' ) {
+                    this.toggleWidgetVisibility(true);
+                    loading.show();
+                    error.hide();
+                }
 
                 let orderButton = $('button#place_order')
 
@@ -347,18 +351,27 @@ jQuery(function ($) {
                 return settings;
             },
             init() {
+                const paymentMethodInterval = setInterval(() => {
+                    let paymentMethod = $('input[name="payment_method"]:checked').val();
+
+                    if (paymentMethod && !this.paymentMethod) {
+                        clearInterval(paymentMethodInterval)
+                        this.setPaymentMethod(paymentMethod)
+                    }
+                }, 100)
+
                 this.form = $('form[name="checkout"]');
 
-                this.form.on('change', () => {
+                this.form.on('change', (event) => {
                     try {
                         clearTimeout(this.formChangedTimer);
                         this.formChangedTimer = setTimeout(() => {
                             const currentAddress = JSON.stringify(this.getAddressData().address);
-                            if (this.lastAddressVerified !== currentAddress || e.target.classList.contains('shipping_method')) {
+                            if (this.lastAddressVerified !== currentAddress || event.target.classList.contains('shipping_method')|| event.target.id.includes('payment_method')) {
                                 this.lastAddressVerified = currentAddress;
                                 this.setPaymentMethod($('input[name="payment_method"]:checked').val(), true)
                             }
-                        }, 2000);
+                        }, 1000);
                     } catch (e) {
                         console.error(e)
                     }
