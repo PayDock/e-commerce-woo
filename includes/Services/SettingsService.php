@@ -27,7 +27,7 @@ final class SettingsService {
 								|| (bool) $browser['browser_ios_webview'];
 	}
 
-	public function get_environment(): string {
+	public function get_environment(): ?string {
 		$widget_service    = $this->get_settings_service();
 		$this->environment = $widget_service->get_environment();
 		return $this->environment;
@@ -47,12 +47,12 @@ final class SettingsService {
 		return implode( '_', array_merge( array( $id ), $fragments ) );
 	}
 
-	public function get_widget_access_token(): string {
+	public function get_widget_access_token(): ?string {
 		$widget_service = $this->get_settings_service();
 		return $widget_service->get_widget_access_token();
 	}
 
-	public function get_access_token(): string {
+	public function get_access_token(): ?string {
 		$widget_service = $this->get_settings_service();
 		return $widget_service->get_access_token();
 	}

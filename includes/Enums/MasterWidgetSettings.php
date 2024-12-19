@@ -3,6 +3,7 @@
 namespace PowerBoard\Enums;
 
 use PowerBoard\Abstracts\AbstractEnum;
+use PowerBoard\Helpers\MasterWidgetTemplatesHelper;
 use PowerBoard\Services\Settings\APIAdapterService;
 
 class MasterWidgetSettings extends AbstractEnum {
@@ -64,15 +65,7 @@ class MasterWidgetSettings extends AbstractEnum {
 
 		$this->init_api_adapter( $env, $access_token, $widget_access_token );
 		$result = $this->api_adapter_service->get_configuration_templates_ids( $version );
-
-		if ( ! empty( $result['error'] ) ) {
-			$this->configuration_templates = array();
-		} else {
-			$data = $result['resource']['data'];
-			foreach ( $data as $configuration_template ) {
-				$this->configuration_templates[ $configuration_template['_id'] ] = $configuration_template['label'] . ' | ' . $configuration_template['_id'];
-			}
-		}
+        $this->configuration_templates = MasterWidgetTemplatesHelper::mapTemplates($result['resource']['data'], ! empty( $result['error'] ));
 
 		set_transient( 'configuration_templates_' . $env, $this->configuration_templates, 60 );
 		return $this->configuration_templates;
@@ -86,16 +79,7 @@ class MasterWidgetSettings extends AbstractEnum {
 
 		$this->init_api_adapter( $env, $access_token, $widget_access_token );
 		$result = $this->api_adapter_service->get_customisation_templates_ids( $version );
-
-		if ( ! empty( $result['error'] ) ) {
-			$this->customisation_templates = array();
-		} else {
-			$data = $result['resource']['data'];
-			foreach ( $data as $customisation_template ) {
-				$this->customisation_templates[ $customisation_template['_id'] ] = $customisation_template['label'] . ' | ' . $customisation_template['_id'];
-			}
-			$this->customisation_templates = ! empty( $this->customisation_templates ) ? $this->customisation_templates + array( '' => '' ) : array();
-		}
+        $this->customisation_templates = MasterWidgetTemplatesHelper::mapTemplates($result['resource']['data'], ! empty( $result['error'] ));
 
 		set_transient( 'customisation_templates_' . $env, $this->customisation_templates, 60 );
 		return $this->customisation_templates;

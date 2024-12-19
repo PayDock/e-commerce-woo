@@ -26,7 +26,6 @@ abstract class AbstractSettingService extends WC_Payment_Gateway {
 		}
 
 		$this->id                 = $this->getId();
-		$this->enabled            = $this->get_option( 'enabled' );
 		$this->method_title       = __( 'PowerBoard Gateway', 'power-board' );
 		$this->method_description = __(
 			'PowerBoard simplify how you manage your payments. Reduce costs, technical headaches & streamline compliance using PowerBoard\'s payment orchestration.',

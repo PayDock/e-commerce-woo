@@ -156,48 +156,60 @@ class WidgetConfigurationSettingService extends AbstractSettingService {
 		return $fields;
 	}
 
-	public function get_access_token() {
-		return HashService::decrypt(
-			$this->settings[ $this->service->get_option_name(
-				$this->id,
-				array(
-					SettingGroups::CREDENTIALS()->name,
-					CredentialSettings::ACCESS_KEY()->name,
-				)
-			) ]
-		);
+	public function get_access_token(): ?string {
+        $token_key = $this->service->get_option_name(
+            $this->id,
+            array(
+                SettingGroups::CREDENTIALS()->name,
+                CredentialSettings::ACCESS_KEY()->name,
+            )
+        );
+        if ( array_key_exists( $token_key, $this->settings ) ) {
+            return HashService::decrypt( $this->settings[ $token_key ] );
+        }
+		return null;
 	}
 
-	public function get_widget_access_token() {
-		return HashService::decrypt(
-			$this->settings[ $this->service->get_option_name(
-				$this->id,
-				array(
-					SettingGroups::CREDENTIALS()->name,
-					CredentialSettings::WIDGET_KEY()->name,
-				)
-			) ]
-		);
+	public function get_widget_access_token(): ?string {
+        $widget_token_key = $this->service->get_option_name(
+            $this->id,
+            array(
+                SettingGroups::CREDENTIALS()->name,
+                CredentialSettings::WIDGET_KEY()->name,
+            )
+        );
+        if ( array_key_exists( $widget_token_key, $this->settings ) ) {
+            return HashService::decrypt( $this->settings[ $widget_token_key ] );
+        }
+        return null;
 	}
 
-	public function get_environment() {
-		return $this->settings[ $this->service->get_option_name(
-			$this->id,
-			array(
-				SettingGroups::ENVIRONMENT()->name,
-				EnvironmentSettings::ENVIRONMENT()->name,
-			)
-		) ];
+	public function get_environment(): ?string {
+        $environment_key = $this->service->get_option_name(
+            $this->id,
+            array(
+                SettingGroups::ENVIRONMENT()->name,
+                EnvironmentSettings::ENVIRONMENT()->name,
+            )
+        );
+        if ( array_key_exists( $environment_key, $this->settings ) ) {
+            return $this->settings[ $environment_key ];
+        }
+        return null;
 	}
 
-	public function get_version() {
-		return $this->settings[ $this->service->get_option_name(
-			$this->id,
-			array(
-				SettingGroups::CHECKOUT()->name,
-				MasterWidgetSettings::VERSION()->name,
-			)
-		) ];
+	public function get_version(): ?string {
+        $version_key = $this->service->get_option_name(
+            $this->id,
+            array(
+                SettingGroups::CHECKOUT()->name,
+                MasterWidgetSettings::VERSION()->name,
+            )
+        );
+        if ( array_key_exists( $version_key, $this->settings ) ) {
+            return $this->settings[ $version_key ];
+        }
+        return null;
 	}
 
 	public function process_admin_options() {

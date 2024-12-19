@@ -9,6 +9,7 @@ use PowerBoard\Enums\EnvironmentSettings;
 use PowerBoard\Enums\MasterWidgetSettings;
 use PowerBoard\Enums\NotificationEvents;
 use PowerBoard\Enums\SettingGroups;
+use PowerBoard\Helpers\MasterWidgetTemplatesHelper;
 use PowerBoard\Services\SDKAdapterService;
 use PowerBoard\Services\Settings\APIAdapterService;
 use PowerBoard\Services\SettingsService;
@@ -184,30 +185,22 @@ class ConnectionValidationService {
 
 	private function get_configuration_templates() {
 		$configuration_templates_result = $this->widget_api_adapter_service->get_configuration_templates_ids( $this->version_settings );
+        $has_error = ! empty( $configuration_templates_result['error'] );
+        $this->configuration_templates = MasterWidgetTemplatesHelper::mapTemplates($configuration_templates_result['resource']['data'], $has_error);
 
-		if ( ! empty( $configuration_templates_result['error'] ) ) {
-			$this->configuration_templates        = array();
+		if ( $has_error ) {
 			$this->access_token_validation_failed = true;
 		} else {
-			$data = $configuration_templates_result['resource']['data'];
-			foreach ( $data as $configuration_template ) {
-				$this->configuration_templates[ $configuration_template['_id'] ] = $configuration_template['label'] . ' | ' . $configuration_template['_id'];
-			}
-
 			set_transient( 'configuration_templates_' . $this->environment_settings, $this->configuration_templates, 60 );
 		}
 	}
 
 	private function get_customisation_templates() {
 		$customisation_templates_result = $this->widget_api_adapter_service->get_customisation_templates_ids( $this->version_settings );
-		if ( ! empty( $customisation_templates_result['error'] ) ) {
-			$this->customisation_templates = array();
-		} else {
-			$data = $customisation_templates_result['resource']['data'];
-			foreach ( $data as $customisation_template ) {
-				$this->customisation_templates[ $customisation_template['_id'] ] = $customisation_template['label'] . ' | ' . $customisation_template['_id'];
-			}
-			$this->customisation_templates = ! empty( $this->customisation_templates ) ? $this->customisation_templates + array( '' => '' ) : array();
+        $has_error = ! empty( $customisation_templates_result['error'] );
+        $this->configuration_templates = MasterWidgetTemplatesHelper::mapTemplates($customisation_templates_result['resource']['data'], $has_error);
+
+        if ( ! $has_error ) {
 			set_transient( 'customisation_templates_' . $this->environment_settings, $this->customisation_templates, 60 );
 		}
 	}
