@@ -80,25 +80,39 @@ setTimeout(() => jQuery(function ($) {
     });
 
     function setPaymentMethodWatcher() {
-        $('.wc-block-components-radio-control__input').on('change', (event) => {
-            const $orderButton = $('.wc-block-components-checkout-place-order-button');
-            switch (event.target.value) {
-                case 'power_board_gateway':
-                    $orderButton.hide();
-                    break;
-                default:
-                    window.widgetPowerBoard = null;
-                    $orderButton.show();
-            }
-        })
+        $('.wc-block-components-radio-control__input').on('change', (event) => setPaymentMethod(event.target.value));
+    }
+
+    function setPaymentMethod(method) {
+        const $orderButton = $('.wc-block-components-checkout-place-order-button');
+        switch (method) {
+            case 'power_board_gateway':
+                $orderButton.hide();
+                break;
+            default:
+                window.widgetPowerBoard = null;
+                $orderButton.show();
+        }
+    }
+
+    function triggerFirstPaymentMethodChanges() {
+        const $checkedInputs = Object.values($('.wc-block-components-radio-control__input:checked'));
+        const $paymentMethodInput = $checkedInputs.filter(inputEl => {
+            return inputEl.id?.includes('payment-method')
+        });
+        if ($paymentMethodInput.length > 0) {
+            setPaymentMethod($paymentMethodInput[0].value);
+            jQuery('.wc-block-components-form')[0].dispatchEvent(new Event("change"));
+        }
     }
 
     const firstInitInterval = setInterval(() => {
         const $radioSelectPaymentMethod = $('.wc-block-components-radio-control__input');
         if (!!$radioSelectPaymentMethod) {
-            setPaymentMethodWatcher();
             clearInterval(firstInitInterval);
+            triggerFirstPaymentMethodChanges();
+            setPaymentMethodWatcher();
         }
-    }, 100)
+    }, 200)
 
 }), 1000)
