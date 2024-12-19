@@ -66,7 +66,7 @@ class PaymentController {
 				$order->payment_complete();
 				$order->save();
 
-				OrderService::updateStatus( $order_id, $new_status );
+				OrderService::update_status( $order_id, $new_status );
 				wp_send_json_success(
 					array(
 						'message' => __( 'The capture process was successful.', 'power-board' ),
@@ -121,7 +121,7 @@ class PaymentController {
 					LogRepository::SUCCESS
 				);
 				$order->payment_complete();
-				OrderService::updateStatus( $order_id, 'pb-cancelled' );
+				OrderService::update_status( $order_id, 'pb-cancelled' );
 				wp_send_json_success(
 					array( 'message' => __( 'The payment has been cancelled successfully. ', 'power-board' ) )
 				);
@@ -224,7 +224,7 @@ class PaymentController {
 			$order->payment_complete();
 
 			remove_action( 'woocommerce_order_status_refunded', 'wc_order_fully_refunded' );
-			OrderService::updateStatus( $order_id, $status, $status_note );
+			OrderService::update_status( $order_id, $status, $status_note );
 
 			$order->update_meta_data( 'api_refunded_id', $new_refunded_id );
 			$order->save();
@@ -263,7 +263,7 @@ class PaymentController {
 			$power_board_refunded_status = $order->get_meta( 'power_board_refunded_status' );
 			if ( $power_board_refunded_status ) {
 				remove_action( 'woocommerce_order_status_refunded', 'wc_order_fully_refunded' );
-				OrderService::updateStatus( $order_id, $power_board_refunded_status );
+				OrderService::update_status( $order_id, $power_board_refunded_status );
 				$order->update_meta_data( 'power_board_refunded_status', '' );
 				$order->save();
 			}
@@ -355,7 +355,7 @@ class PaymentController {
 				$order_status = $order->get_status();
 		}
 
-		OrderService::updateStatus( $order_id, $order_status );
+		OrderService::update_status( $order_id, $order_status );
 		$order->update_meta_data( 'power_board_charge_id', $charge_id );
 		$order->save();
 
@@ -427,7 +427,7 @@ class PaymentController {
 						. " {$refund_amount} "
 						. __( 'has been successfully.', 'power-board' );
 		$order->payment_complete();
-		OrderService::updateStatus( $order_id, $order_status, $status_notes );
+		OrderService::update_status( $order_id, $order_status, $status_notes );
 
 		$result = wc_create_refund(
 			array(

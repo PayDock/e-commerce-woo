@@ -102,7 +102,7 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 	 */
 	public function process_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
-		OrderService::updateStatus( $order_id, 'wc-pb-paid' );
+		OrderService::update_status( $order_id, 'wc-pb-paid' );
 		$order->payment_complete();
 		$order->update_meta_data( 'power_board_charge_id', $_POST['chargeid'] );
 		$order->update_meta_data( 'pb_directly_charged', 1 );
