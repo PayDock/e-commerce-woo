@@ -243,7 +243,7 @@ class WidgetConfigurationSettingService extends AbstractSettingService {
 			}
 
 			if ( array_key_exists( $key, $hashed_credential_keys ) ) {
-				if ( '********************' === $value || null === $value ) {
+				if ( '********************' === $value || "" === $value ) {
 					$value = $this->get_option( $key );
 				}
 			}

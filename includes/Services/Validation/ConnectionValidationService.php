@@ -149,10 +149,8 @@ class ConnectionValidationService {
 
 	private function validate_credential(): bool {
 		if (
-				! empty( $this->access_token_settings )
-				&& ! empty( $this->widget_access_token_settings )
-				&& $this->check_access_key_connection( $this->access_token_settings )
-				&& $this->check_widget_key_connection( $this->widget_access_token_settings )
+			$this->check_access_key_connection( $this->access_token_settings )
+			&& $this->check_widget_key_connection( $this->widget_access_token_settings )
 		) {
 			return true;
 		}
@@ -165,7 +163,7 @@ class ConnectionValidationService {
 	private function check_access_key_connection( ?string $access_token ): bool {
 		$this->access_token_validation_failed = false;
 		$this->save_old_credential();
-		if ( '********************' === $access_token || null === $access_token ) {
+		if ( '********************' === $access_token ) {
 			$access_token = $this->old_access_token;
 		}
 
@@ -176,7 +174,7 @@ class ConnectionValidationService {
 
 		$this->restore_credential();
 
-		if ( $this->access_token_validation_failed ) {
+		if ( ! $this->access_token_validation_failed ) {
 			ConfigService::$access_token = $access_token;
 		}
 
@@ -217,7 +215,7 @@ class ConnectionValidationService {
 
 	private function check_widget_key_connection( ?string $widget_access_token ): bool {
 		$this->save_old_credential();
-		if ( '********************' === $widget_access_token || null === $widget_access_token ) {
+		if ( '********************' === $widget_access_token ) {
 			$widget_access_token = $this->old_widget_access_token;
 		}
 
