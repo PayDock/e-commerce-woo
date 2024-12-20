@@ -5,13 +5,10 @@ stages:
 
 include:
   - project: 'paydock/platform/gitlab-templates'
-    ref: feature/FND-579/clean-up-pipeline
     file: '/deploy/version.yml'
   - project: 'paydock/platform/gitlab-templates'
-    ref: feature/FND-579/clean-up-pipeline
     file: '/security/gitlab-security-scans.yaml'
   - project: 'paydock/platform/gitlab-templates'
-    ref: feature/FND-579/clean-up-pipeline
     file: '/code_quality.yml'
 
 publish_power_board:
