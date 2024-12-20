@@ -20,6 +20,8 @@ Use PowerBoard to add a payment gateway for credit cards, bank transfers, PayPal
 
 == Installation ==
 
+Please note that WooCommerce must be installed and active before this plugin can be used.
+
 Prerequisites to install and configure the PowerBoard plugin, you will need a WordPress instance running:
 
 * WooCommerce versions: 8.9.3 or 9.4.1

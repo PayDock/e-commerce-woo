@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Copyright (c) PowerBoard, Inc. and its affiliates. All Rights Reserved
  *
@@ -20,6 +19,7 @@
  * License URI: http://www.gnu.org/licenses/gpl-3.0.html
  * WC requires at least: 6.5
  * WC tested up to: 9.4.1
+ * Requires Plugins: woocommerce
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
