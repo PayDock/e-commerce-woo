@@ -39,11 +39,9 @@ class CredentialSettings extends AbstractEnum {
 	public function get_description(): string {
 		switch ( $this->name ) {
 			case self::ACCESS_KEY:
-				return 'Enter the API Access Token for authentication. This key is used for authentication to ensure'
-						. ' secure communication with the payment gateway.';
+				return 'Enter your API Access Token. This token is used to securely authenticate your payment operations. It is also used to retrieve the values for the Checkout Template ID fields shown below.';
 			case self::WIDGET_KEY:
-				return 'Enter the Widget Access Token for authentication. This key is used for authentication to ensure'
-						. ' secure communication with the payment gateway.';
+				return 'Enter your Widget access token. This token is used to render the payment methods, buttons and forms on your checkout page.';
 			default:
 				return '';
 		}

@@ -1,106 +1,106 @@
 #powerBoardCheckout_wrapper,
 #classic-powerBoardCheckout_wrapper,
 #wc-classic-power-board-checkout {
-    min-height: 92px;
-    scrollbar-width: thin;
-    position: relative;
+	min-height: 92px;
+	scrollbar-width: thin;
+	position: relative;
 }
 
 #loading {
-    font-size: 12px;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 0;
+	font-size: 12px;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	z-index: 0;
 
-    p {
-        margin: 0;
-    }
+	p {
+		margin: 0;
+	}
 
-    &.hide {
-        display: none;
-    }
+	&.hide {
+		display: none;
+	}
 }
 
 #classic-powerBoardCheckout_wrapper {
-    position: relative;
-    z-index: 1;
+	position: relative;
+	z-index: 1;
 }
 
 #wc-classic-power-board-checkout {
-    background: transparent;
-    padding: 0;
-    margin: 0;
-    border: none;
+	background: transparent;
+	padding: 0;
+	margin: 0;
+	border: none;
 }
 
 .logo-comm-bank {
-    text-align: center;
+	text-align: center;
 }
 
 .woocommerce-page .logo-comm-bank img {
-    height: 50px;
+	height: 50px;
 }
 
 .form-widget {
-    overflow: hidden;
+	overflow: hidden;
 }
 
 .power-board-payment-method-label {
-    display: flex;
-    align-content: center;
-    box-sizing: content-box;
-    width: 100%;
+	display: flex;
+	align-content: center;
+	box-sizing: content-box;
+	width: 100%;
 }
 
 .power-board-payment-method-label-logo {
-    margin: -6px 1em -6px auto;
-    height: 36px !important;
-    max-height: 36px !important;
+	margin: -6px 1em -6px auto;
+	height: 36px !important;
+	max-height: 36px !important;
 }
 .wc-orders-list-table .status-power-board-p-paid .order_total>span {
-    display: none;
+	display: none;
 }
 
 #classic-power_board_gateway{
-    min-height: 260px;
-    scrollbar-width: thin;
-    position: relative;
+	min-height: 260px;
+	scrollbar-width: thin;
+	position: relative;
 }
 
 #classic-power_board_gateway iframe {
-    border: 0;
-    width: 100%;
-    height: 280px;
+	border: 0;
+	width: 100%;
+	height: 280px;
 }
 
 #fields-validation-error {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    left: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	right: 0;
+	left: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 
-    &.hide {
-        display: none;
-    }
+	&.hide {
+		display: none;
+	}
 
-    .power-board-validation-error {
-        color: red;
-        text-align: center;
-        margin: 0;
-    }
+	.power-board-validation-error {
+		color: red;
+		text-align: center;
+		margin: 0;
+	}
 }
 
 .payment_box p{
-    width: 100%;
+	width: 100%;
 }
 
 .master-widget-wrapper {
-    position: relative;
+	position: relative;
 }
 

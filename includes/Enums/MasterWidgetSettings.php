@@ -30,9 +30,9 @@ class MasterWidgetSettings extends AbstractEnum {
 			case self::VERSION:
 				return 'Version';
 			case self::CONFIGURATION_ID:
-				return 'Configuration ID';
+				return 'Configuration Template ID';
 			case self::CUSTOMISATION_ID:
-				return 'Customisation ID';
+				return 'Customisation Template ID (optional)';
 			default:
 				return ucfirst( strtolower( str_replace( '_', ' ', $this->name ) ) );
 		}
