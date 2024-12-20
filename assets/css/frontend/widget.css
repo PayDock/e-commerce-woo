@@ -43,19 +43,15 @@
 	height: 50px;
 }
 
-.form-widget {
-	overflow: hidden;
-}
-
 .power-board-payment-method-label {
 	display: flex;
-	align-content: center;
+	align-items: center;
 	box-sizing: content-box;
 	width: 100%;
 }
 
 .power-board-payment-method-label-logo {
-	margin: -6px 1em -6px auto;
+	margin: 0;
 	height: 36px !important;
 	max-height: 36px !important;
 }
@@ -103,4 +99,3 @@
 .master-widget-wrapper {
 	position: relative;
 }
-
