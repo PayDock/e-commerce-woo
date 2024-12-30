@@ -11,6 +11,7 @@ class OrderService {
 	public function __construct() {
 		if ( is_admin() ) {
 			$this->template_service = new TemplateService( $this );
+			add_action( 'admin_notices', [ $this, 'display_status_change_error' ] );
 		}
 	}
 
@@ -18,8 +19,8 @@ class OrderService {
 		$order = wc_get_order( $id );
 
 		if ( is_object( $order ) ) {
-				$order->set_status( $new_status, $status_note );
-				$order->save();
+			$order->set_status( $new_status, $status_note );
+			$order->save();
 		}
 	}
 
@@ -72,7 +73,7 @@ class OrderService {
 				$GLOBALS['power_board_is_updating_order_status'] = true;
 				$order->update_meta_data( 'status_change_verification_failed', 1 );
 				$order->update_status( $old_status_key, $error );
-				update_option( 'power_board_status_change_error', $error );
+				set_transient( 'power_board_status_change_error_' . get_current_user_id(), $error, 300 );
 				unset( $GLOBALS['power_board_is_updating_order_status'] );
 				throw new \Exception( esc_html( $error ) );
 			}
@@ -94,13 +95,15 @@ class OrderService {
 	}
 
 	public function display_status_change_error() {
-		$screen = get_current_screen();
-		if ( 'woocommerce_page_wc-orders' === $screen->id ) {
-			$message = get_option( 'power_board_status_change_error', '' );
-			if ( ! empty( $message ) ) {
-				echo '<div class=\'notice notice-error is-dismissible\'><p>' . esc_html( $message ) . '</p></div>';
-				delete_option( 'power_board_status_change_error' );
-			}
+		$error_message = get_transient( 'power_board_status_change_error_' . get_current_user_id() );
+		if ( $error_message ) {
+			echo '<div id="power-board-error-message" class="notice notice-error is-dismissible"><p>' . esc_html( $error_message ) . '</p></div>';
+			echo '<script type="text/javascript">
+			jQuery(document).ready(function($) {
+				$("#message.updated.notice.notice-success").hide();
+			});
+			</script>';
+			delete_transient( 'power_board_status_change_error_' . get_current_user_id() );
 		}
 	}
 }
