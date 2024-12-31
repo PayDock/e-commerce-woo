@@ -34,13 +34,14 @@ function validationManualCapture(elem) {
 }
 
 function handlePowerBoardPaymentCapture(orderId, operation) {
+    const captureAmountEl = jQuery('#capture_amount');
     if (operation === 'power-board-capture-charge') {
-        let validSumManualCapture = validationManualCapture(jQuery('#capture_amount'));
+        let validSumManualCapture = validationManualCapture(captureAmountEl);
         if (!validSumManualCapture) {
             return;
         }
     }
-    const captureAmount = Number(jQuery('#capture_amount').val());
+    const captureAmount = Number(captureAmountEl.val());
     jQuery.blockUI({
         message: '',
         overlayCSS: {backgroundColor: '#fff', opacity: 0.6, cursor: 'wait'}
@@ -58,7 +59,7 @@ function handlePowerBoardPaymentCapture(orderId, operation) {
             if (response.data.message !== undefined) {
                 alert(response.data.message);
             }
-            if (response.success == 1) {
+            if (response.success === 1) {
                 location.reload();
             } else {
                 jQuery.unblockUI();
