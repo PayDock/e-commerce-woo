@@ -94,8 +94,8 @@ jQuery(function ($) {
                     action: 'power_board_create_error_notice',
                     error: errorMessage,
                 }).then(message => {
-                    var doc = new DOMParser().parseFromString(message, "text/html");
-                    var noticeBanner = doc.querySelectorAll("div.wc-block-components-notice-banner");
+                    var doc = new DOMParser().parseFromString(message.toString(), "text/html");
+                    var noticeBanner = doc.querySelectorAll("div.wc-block-components-notice-banner")[0];
                     $('.woocommerce-notices-wrapper:first').append(noticeBanner)
                     $('html, body').animate({
                         scrollTop: ($('div.woocommerce-notices-wrapper').offset().top - 100)
@@ -331,7 +331,6 @@ jQuery(function ($) {
                         let elements = document.querySelectorAll(`${type}[name="${fieldName}"]`);
                         let value = elements.length > 0 ? elements[0].value : null;
 
-                        let fieldKey = fieldName;
                         let isShipping = fieldName.includes('shipping');
 
                         if (!value && typeof orderData !== 'undefined') {
