@@ -2,7 +2,7 @@ jQuery(function ($) {
 
     $(document).ready(() => {
 
-        var isOrderPayPage = typeof isOrderPayPage !== 'undefined' && isOrderPayPage === 'true';
+        var isOrderPayPage = typeof isOrderPayPage !== 'undefined' && isOrderPayPage === true;
 
         const CONFIG = {
             phoneInputIds: {
