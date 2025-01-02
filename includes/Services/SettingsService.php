@@ -20,8 +20,8 @@ final class SettingsService {
 		} else {
 			$user_agent = 'undefined';
 		}
-		$browser                = $detector->getBrowser( $user_agent );
-		$os                     = $detector->getOS( $user_agent );
+		$browser                = $detector->get_browser( $user_agent );
+		$os                     = $detector->get_os( $user_agent );
 		$this->is_safari_or_ios = ( 'iOS' === $os['os_name'] )
 								|| (bool) $browser['browser_safari_original']
 								|| (bool) $browser['browser_ios_webview'];
