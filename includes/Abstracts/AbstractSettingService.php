@@ -25,7 +25,7 @@ abstract class AbstractSettingService extends WC_Payment_Gateway {
 			$this->current_section = $section;
 		}
 
-		$this->id                 = $this->getId();
+		$this->id                 = $this->get_id();
 		$this->method_title       = __( 'PowerBoard Gateway', 'power-board' );
 		$this->method_description = __(
 			'PowerBoard simplify how you manage your payments. Reduce costs, technical headaches & streamline compliance using PowerBoard\'s payment orchestration.',
@@ -47,7 +47,7 @@ abstract class AbstractSettingService extends WC_Payment_Gateway {
 		}
 	}
 
-	abstract protected function getId(): string;
+	abstract protected function get_id(): string;
 
 	public function parent_generate_settings_html( $formFields = array(), $echo = true ): ?string {
 		return parent::generate_settings_html( $formFields, $echo );
@@ -61,9 +61,9 @@ abstract class AbstractSettingService extends WC_Payment_Gateway {
 		$tabs = $this->getTabs();
 
 		if ( $echo ) {
-			$this->template_service->includeAdminHtml( 'admin', compact( 'tabs', 'form_fields' ) );
+			$this->template_service->include_admin_html( 'admin', compact( 'tabs', 'form_fields' ) );
 		} else {
-			return $this->template_service->getAdminHtml( 'admin', compact( 'tabs', 'form_fields' ) );
+			return $this->template_service->get_admin_html( 'admin', compact( 'tabs', 'form_fields' ) );
 		}
 
 		return null;
@@ -83,10 +83,10 @@ abstract class AbstractSettingService extends WC_Payment_Gateway {
 	}
 
 	public function generate_label_html( $key, $value ) {
-		return $this->template_service->getAdminHtml( 'label', compact( 'key', 'value' ) );
+		return $this->template_service->get_admin_html( 'label', compact( 'key', 'value' ) );
 	}
 
 	public function generate_big_label_html( $key, $value ) {
-		return $this->template_service->getAdminHtml( 'big-label', compact( 'key', 'value' ) );
+		return $this->template_service->get_admin_html( 'big-label', compact( 'key', 'value' ) );
 	}
 }

@@ -4,9 +4,7 @@ namespace PowerBoard\Services;
 
 use PowerBoard\API\ChargeService;
 use PowerBoard\API\ConfigService;
-use PowerBoard\API\GatewayService;
 use PowerBoard\API\NotificationService;
-use PowerBoard\API\ServiceService;
 use PowerBoard\API\TokenService;
 use PowerBoard\Services\Settings\WidgetConfigurationSettingService;
 
@@ -31,18 +29,6 @@ class SDKAdapterService {
 		return self::$instance;
 	}
 
-	public function search_gateway( array $parameters = array() ): array {
-		$gateway_service = new GatewayService();
-
-		return $gateway_service->search( $parameters )->call();
-	}
-
-	public function search_services( array $parameters = array() ): array {
-		$service_service = new ServiceService();
-
-		return $service_service->search( $parameters )->call();
-	}
-
 	public function search_notifications( array $parameters = array() ): array {
 		$notification_service = new NotificationService();
 
@@ -62,7 +48,7 @@ class SDKAdapterService {
 		$token_service = new TokenService();
 
 		if ( $use_widget_access_token ) {
-			return $token_service->create( $params )->callWithWidgetAccessToken();
+			return $token_service->create( $params )->call_with_widget_access_token();
 		}
 
 		return $token_service->create( $params )->call();

@@ -35,7 +35,7 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		$this->init_settings();
 
 		// Define user set variables.
-		$service           = SettingsService::get_instance();
+		SettingsService::get_instance();
 		$this->title       = $this->method_title;
 		$this->description = $this->method_description;
 
@@ -106,7 +106,7 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		$order->payment_complete();
 		$order->update_meta_data( 'power_board_charge_id', $_POST['chargeid'] );
 		$order->update_meta_data( 'pb_directly_charged', 1 );
-		$order->update_meta_data( OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey(), 'PowerBoard' );
+		$order->update_meta_data( OrderListColumns::PAYMENT_SOURCE_TYPE()->get_key(), 'PowerBoard' );
 		WC()->cart->empty_cart();
 		$order->save();
 
@@ -168,7 +168,7 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 
 		$settings = $this->get_settings();
 
-		$template->includeCheckoutHtml(
+		$template->include_checkout_html(
 			'method-form',
 			array(
 				'description' => $this->description,

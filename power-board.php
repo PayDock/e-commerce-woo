@@ -30,10 +30,6 @@ if ( ! defined( 'POWER_BOARD_PLUGIN_FILE' ) ) {
 	define( 'POWER_BOARD_PLUGIN_FILE', __FILE__ );
 }
 
-if ( ! defined( 'POWER_BOARD_PLUGIN_PATH' ) ) {
-	define( 'POWER_BOARD_PLUGIN_PATH', dirname( __FILE__ ) );
-}
-
 if ( ! defined( 'POWER_BOARD_PLUGIN_URL' ) ) {
 	define( 'POWER_BOARD_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 }

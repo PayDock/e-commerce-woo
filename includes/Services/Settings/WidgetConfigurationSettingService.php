@@ -145,7 +145,7 @@ class WidgetConfigurationSettingService extends AbstractSettingService {
 				'title' => preg_replace( array( '/ Id/', '/ id/' ), ' ID', $environment_settings->get_label() ),
 			);
 
-			$options = $environment_settings->getOptions();
+			$options = $environment_settings->get_options();
 
 			if ( ! empty( $options ) && ( 'select' === $environment_settings->get_input_type() ) ) {
 				$fields[ $key ]['options'] = $options;
@@ -274,7 +274,7 @@ class WidgetConfigurationSettingService extends AbstractSettingService {
 		);
 	}
 
-	protected function getId(): string {
+	protected function get_id(): string {
 		return SettingsTabs::WIDGET_CONFIGURATION()->value;
 	}
 

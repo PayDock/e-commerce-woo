@@ -7,19 +7,19 @@ use PowerBoard\Abstracts\AbstractApiService;
 class TokenService extends AbstractApiService {
 	const ENDPOINT = 'payment_sources/tokens';
 
-	protected $allowedAction = [ 
+	protected $allowed_action = [ 
 		'create' => self::METHOD_POST,
 	];
 
 	public function create( array $params ): TokenService {
 		$this->parameters = $params;
 
-		$this->setAction( 'create' );
+		$this->set_action( 'create' );
 
 		return $this;
 	}
 
-	protected function buildEndpoint(): ?string {
+	protected function build_endpoint(): ?string {
 		return self::ENDPOINT;
 	}
 }

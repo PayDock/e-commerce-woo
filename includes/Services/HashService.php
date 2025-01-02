@@ -2,8 +2,6 @@
 
 namespace PowerBoard\Services;
 
-use PowerBoard\PowerBoardPlugin;
-
 class HashService {
 
 	private const CIPHER = 'aes-128-cbc';
@@ -23,7 +21,7 @@ class HashService {
 
 		if ( function_exists( 'sodium_crypto_secretbox' ) ) {
 
-			$key = self::getKey( self::KEY_LENGTH );
+			$key = self::get_key( self::KEY_LENGTH );
 			$nonce = random_bytes( self::NONCE_LENGTH );
 			$ciphertext = sodium_crypto_secretbox( $string, $nonce, $key );
 
@@ -33,7 +31,7 @@ class HashService {
 
 			$ivlen = openssl_cipher_iv_length( self::CIPHER );
 			$iv = openssl_random_pseudo_bytes( $ivlen );
-			$key = self::getKey( 16 );
+			$key = self::get_key( 16 );
 			$ciphertext_raw = openssl_encrypt( $string, self::CIPHER, $key, self::OPTION, $iv );
 			$hmac = hash_hmac( 'sha256', $ciphertext_raw, $key, true );
 
@@ -59,7 +57,7 @@ class HashService {
 			$decoded = base64_decode( $string );
 			$nonce = substr( $decoded, 0, self::NONCE_LENGTH );
 			$ciphertext = substr( $decoded, self::NONCE_LENGTH );
-			$key = self::getKey( self::KEY_LENGTH );
+			$key = self::get_key( self::KEY_LENGTH );
 			$plaintext = sodium_crypto_secretbox_open( $ciphertext, $nonce, $key );
 
 			if ( $plaintext === false ) {
@@ -76,7 +74,7 @@ class HashService {
 			$iv = substr( $c, 0, $ivlen );
 			$hmac = substr( $c, $ivlen, $sha2len = 32 );
 			$ciphertext_raw = substr( $c, $ivlen + $sha2len );
-			$key = self::getKey( 16 );
+			$key = self::get_key( 16 );
 			$original_plaintext = openssl_decrypt( $ciphertext_raw, self::CIPHER, $key, self::OPTION, $iv );
 			$calcmac = hash_hmac( 'sha256', $ciphertext_raw, $key, true );
 
@@ -98,12 +96,12 @@ class HashService {
 
 	}
 
-	private static function getKey( int $length ): string {
+	private static function get_key( int $length ): string {
 
 		if ( defined( 'AUTH_KEY' ) ) {
 			$keyMaterial = AUTH_KEY;
 		} else {
-			$keyMaterial = PowerBoardPlugin::PLUGIN_PREFIX;
+			$keyMaterial = PLUGIN_PREFIX;
 		}
 
 		return substr( hash( 'sha256', $keyMaterial, true ), 0, $length );

@@ -7,7 +7,7 @@ use PowerBoard\Abstracts\AbstractApiService;
 class ServiceService extends AbstractApiService {
 	const ENDPOINT = 'services';
 
-	protected $allowedAction = [ 
+	protected $allowed_action = [ 
 		'get' => self::METHOD_GET,
 		'search' => self::METHOD_GET,
 	];
@@ -15,7 +15,7 @@ class ServiceService extends AbstractApiService {
 	private $id;
 
 	public function get(): ServiceService {
-		$this->setAction( 'get' );
+		$this->set_action( 'get' );
 
 		return $this;
 	}
@@ -27,13 +27,13 @@ class ServiceService extends AbstractApiService {
 	}
 
 	public function search( array $parameters = [] ): ServiceService {
-		$this->setAction( 'search' );
+		$this->set_action( 'search' );
 		$this->parameters = $parameters;
 
 		return $this;
 	}
 
-	protected function buildEndpoint(): ?string {
+	protected function build_endpoint(): ?string {
 		switch ( $this->action ) {
 			case 'get':
 				$result = self::ENDPOINT . '/' . urlencode( $this->id );

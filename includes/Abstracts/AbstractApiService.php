@@ -6,91 +6,103 @@ use PowerBoard\API\ConfigService;
 use WP_Error;
 
 abstract class AbstractApiService {
-	const METHOD_GET = 'GET';
-	const METHOD_POST = 'POST';
+	const METHOD_GET    = 'GET';
+	const METHOD_POST   = 'POST';
 	const METHOD_DELETE = 'DELETE';
 
 	protected $action;
-	protected $parameters = [];
-	protected $allowedAction = [];
+	protected $parameters     = array();
+	protected $allowed_action = array();
 
-	public function callWithWidgetAccessToken(): array {
-		$args = [
-			'headers' => [
+	public function call_with_widget_access_token(): array {
+		$args = array(
+			'headers' => array(
 				'content-type' => 'application/json',
-			],
-		];
+			),
+		);
 
-		if (! empty( ConfigService::$widget_access_token )) {
+		if ( ! empty( ConfigService::$widget_access_token ) ) {
 			$args['headers']['x-access-token'] = ConfigService::$widget_access_token;
 		}
 
-		return $this->runCall($args);
+		return $this->run_call( $args );
 	}
 
 	public function call(): array {
-		$args = [
-			'headers' => [
+		$args = array(
+			'headers' => array(
 				'content-type' => 'application/json',
-			],
-		];
+			),
+		);
 
 		if ( ! empty( ConfigService::$access_token ) ) {
 			$args['headers']['x-access-token'] = ConfigService::$access_token;
 		}
 
-		return $this->runCall($args);
+		return $this->run_call( $args );
 	}
 
-	protected function runCall($args): array {
-		$url  = ConfigService::buildApiUrl( $this->buildEndpoint() );
+	protected function run_call( $args ): array {
+		$url                                   = ConfigService::build_api_url( $this->build_endpoint() );
 		$args['headers']['X-Power-Board-Meta'] = 'V'
-		                                         . POWER_BOARD_PLUGIN_VERSION
-		                                         . '_woocommerce_'
-		                                         . WC()->version;
+												. POWER_BOARD_PLUGIN_VERSION
+												. '_woocommerce_'
+												. WC()->version;
 
-		switch ( $this->allowedAction[ $this->action ] ) {
+		switch ( $this->allowed_action[ $this->action ] ) {
 			case 'POST':
 				$args['body'] = wp_json_encode( $this->parameters, JSON_PRETTY_PRINT );
-				$parsed_args  = wp_parse_args( $args, [
-					'method'  => 'POST',
-					'timeout' => 10,
-				] );
+				$parsed_args  = wp_parse_args(
+					$args,
+					array(
+						'method'  => 'POST',
+						'timeout' => 10,
+					)
+				);
 				break;
 			case 'DELETE':
-				$parsed_args = wp_parse_args( $args, [
-					'method'  => 'DELETE',
-					'timeout' => 10,
-				] );
+				$parsed_args = wp_parse_args(
+					$args,
+					array(
+						'method'  => 'DELETE',
+						'timeout' => 10,
+					)
+				);
 				break;
 			default:
-				$parsed_args = wp_parse_args( $args, [
-					'method'  => 'GET',
-					'timeout' => 10,
-				] );
+				$parsed_args = wp_parse_args(
+					$args,
+					array(
+						'method'  => 'GET',
+						'timeout' => 10,
+					)
+				);
 		}
 
 		$request = _wp_http_get_object()->request( $url, $parsed_args );
 
 		if ( $request instanceof WP_Error ) {
-			return [ 'status' => 403, 'error' => $request ];
+			return array(
+				'status' => 403,
+				'error'  => $request,
+			);
 		}
 
 		$body = json_decode( $request['body'], true );
 
 		if ( null === $body && json_last_error() !== JSON_ERROR_NONE ) {
-			return [
+			return array(
 				'status' => 403,
-				'error'  => [ 'message' => 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later. ' ],
-				'body'   => $request['body']
-			];
+				'error'  => array( 'message' => 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later. ' ),
+				'body'   => $request['body'],
+			);
 		}
 
 		return $body;
 	}
 
-	protected function setAction( $action ): void {
-		if ( empty( $this->allowedAction[ $action ] ) ) {
+	protected function set_action( $action ): void {
+		if ( empty( $this->allowed_action[ $action ] ) ) {
 			/* translators: %s: Missing action name. */
 			throw new \LogicException( esc_html( sprintf( __( 'Not allowed action: %s', 'power-board' ), $action ) ) );
 		}

@@ -124,7 +124,7 @@ class OrderService {
 			$captured_amount = $order->get_meta( 'capture_amount' );
 
 			if ( ! empty( $captured_amount ) ) {
-				$this->template_service->includeAdminHtml( 'information-about-partial-captured', compact( 'order', 'captured_amount' ) );
+				$this->template_service->include_admin_html( 'information-about-partial-captured', compact( 'order', 'captured_amount' ) );
 			}
 		}
 	}

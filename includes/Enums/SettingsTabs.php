@@ -28,7 +28,7 @@ class SettingsTabs extends AbstractEnum {
 		}, array_keys( $RefClass->getConstants() ) );
 	}
 
-	public function getSettingService() {
+	public function get_setting_service() {
 		switch ( $this->value ) {
 			case self::WIDGET_CONFIGURATION:
 				return new WidgetConfigurationSettingService();

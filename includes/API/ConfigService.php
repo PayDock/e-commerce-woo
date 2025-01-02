@@ -15,7 +15,7 @@ class ConfigService {
 		self::$widget_access_token = $widgetAccessToken;
 	}
 
-	public static function buildApiUrl( ?string $endpoint = null ): string {
+	public static function build_api_url( ?string $endpoint = null ): string {
   		if ( self::$environment === ConfigAPI::PRODUCTION_ENVIRONMENT()->value  ) {
   			return ConfigAPI::PRODUCTION_API_URL()->value . $endpoint;
   		} else if ( self::$environment === ConfigAPI::STAGING_ENVIRONMENT()->value ) {

@@ -13,7 +13,6 @@ class AdminAssetsService {
 	private const PREFIX = 'admin';
 
 	private const SCRIPT_PREFIX = 'script';
-	private const STYLE_PREFIX = 'style';
 
 	private const URL_SCRIPT_PREFIX = 'assets/js/admin/';
 	private const URL_SCRIPT_POSTFIX = '.js';

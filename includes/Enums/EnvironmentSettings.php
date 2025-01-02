@@ -24,7 +24,7 @@ class EnvironmentSettings extends AbstractEnum {
 		}
 	}
 
-	public function getOptions(): array {
+	public function get_options(): array {
 		switch ( $this->name ) {
 			case self::ENVIRONMENT:
 				return $this->getEnvironments();

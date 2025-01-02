@@ -21,15 +21,15 @@ class LogsSettingService extends AbstractSettingService {
 		$records = ( new LogRepository() )->getLogs( $page, $perPage, $orderBy, $order );
 
 		if ( $echo ) {
-			$this->template_service->includeAdminHtml( 'admin', compact( 'tabs', 'records' ) );
+			$this->template_service->include_admin_html( 'admin', compact( 'tabs', 'records' ) );
 		} else {
-			return $this->template_service->getAdminHtml( 'admin', compact( 'tabs', 'records' ) );
+			return $this->template_service->get_admin_html( 'admin', compact( 'tabs', 'records' ) );
 		}
 
 		return null;
 	}
 
-	protected function getId(): string {
+	protected function get_id(): string {
 		return SettingsTabs::LOG()->value;
 	}
 }

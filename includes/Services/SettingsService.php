@@ -11,7 +11,7 @@ final class SettingsService {
 	private static $instance  = null;
 	private $widget_service   = null;
 	private $environment      = null;
-	private $is_safari_or_ios = false;
+	private $is_safari_or_ios;
 
 	protected function __construct() {
 		$detector = new BrowserDetection();

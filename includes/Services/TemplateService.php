@@ -11,9 +11,9 @@ class TemplateService {
 
 	private const TEMPLATE_END = '.php';
 	protected $current_section = '';
-	private $settingService = null;
+	private $setting_service;
 
-	private $templateAdminDir = '';
+	private $templateAdminDir;
 
 	public function __construct( $service = null ) {
 		$this->setting_service = $service;
@@ -28,7 +28,7 @@ class TemplateService {
 		$this->templateCheckoutDir = implode( DIRECTORY_SEPARATOR, [ self::TEMPLATE_DIR, self::CHECKOUT_TEMPLATE_DIR ] );
 	}
 
-	public function includeAdminHtml( string $template, array $data = [] ): void {
+	public function include_admin_html( string $template, array $data = [] ): void {
 
 		$settings = SettingsService::get_instance();
 		$data['settings'] = $settings;
@@ -39,54 +39,46 @@ class TemplateService {
 			extract( $data );
 		}
 
-		$path = $this->getAdminPath( $template );
+		$path = $this->get_admin_path( $template );
 
 		if ( file_exists( $path ) ) {
-			include $path; // nosemgrep: audit.php.lang.security.file.inclusion-arg  --  the following require is safe because we are checking if the file exists and it is not a user input.
+			include $path; // nosemgrep: audit.php.lang.security.file.inclusion-arg  --  the following require is safe because we are checking if the file exists, and it is not a user input.
 		}
 	}
 
-	public function getAdminHtml( string $template, array $data = [] ): string {
+	public function get_admin_html( string $template, array $data = [] ): string {
 		ob_start();
 
-		$this->includeAdminHtml( $template, $data );
+		$this->include_admin_html( $template, $data );
 
 		return ob_get_clean();
 	}
 
-	private function getAdminPath( string $template ): string {
+	private function get_admin_path( string $template ): string {
 
-		return $this->getTemplatePath( $this->templateAdminDir . DIRECTORY_SEPARATOR . $template );
+		return $this->get_template_path( $this->templateAdminDir . DIRECTORY_SEPARATOR . $template );
 	}
 
-	private function getTemplatePath( string $template ): string {
+	private function get_template_path( string $template ): string {
 		return plugin_dir_path( POWER_BOARD_PLUGIN_FILE ) . $template . self::TEMPLATE_END;
 	}
 
-	public function includeCheckoutHtml( string $template, array $data = [] ): void {
+	public function include_checkout_html( string $template, array $data = [] ): void {
 		$data['template_service'] = $this;
 
 		if ( ! empty( $data ) ) {
 			extract( $data );
 		}
 
-		$path = $this->getCheckoutPath( $template );
+		$path = $this->get_checkout_path( $template );
 
 		if ( file_exists( $path ) ) {
-			include $path; // nosemgrep: audit.php.lang.security.file.inclusion-arg  --  the following require is safe because we are checking if the file exists and it is not a user input.
+			include $path; // nosemgrep: audit.php.lang.security.file.inclusion-arg  --  the following require is safe because we are checking if the file exists, and it is not a user input.
 		}
 	}
 
-	public function getCheckoutHtml( string $template, array $data = [] ): string {
-		ob_start();
+	private function get_checkout_path( string $template ): string {
 
-		$this->includeCheckoutHtml( $template, $data );
-
-		return ob_get_clean();
-	}
-
-	private function getCheckoutPath( string $template ): string {
-
-		return $this->getTemplatePath( $this->templateCheckoutDir . DIRECTORY_SEPARATOR . $template );
+		return $this->get_template_path( $this->templateCheckoutDir . DIRECTORY_SEPARATOR . $template );
 	}
 }
