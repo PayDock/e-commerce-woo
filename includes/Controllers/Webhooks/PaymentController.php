@@ -295,8 +295,6 @@ class PaymentController {
 				case NotificationEvents::REFUND_SUCCESS()->name:
 					$result = $this->refund_success_process( $input );
 					break;
-				default:
-					$result = false;
 			}
 		}
 
