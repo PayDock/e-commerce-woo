@@ -1,4 +1,5 @@
 import {__} from '@wordpress/i18n';
+import { addNotice } from '@wordpress/notices';
 import {registerPaymentMethod} from '@woocommerce/blocks-registry';
 import {decodeEntities} from '@wordpress/html-entities';
 import {getSetting} from '@woocommerce/settings';
@@ -59,9 +60,9 @@ const initMasterWidgetCheckout = () => {
                         window.widgetPowerBoard = null;
                     });
 
-                    window.widgetPowerBoard.onPaymentFailure(function (error) {
+                    window.widgetPowerBoard.onPaymentFailure(function () {
                         paymentSourceElement.val(JSON.stringify({
-                            errorMessage: error.message
+                            errorMessage: 'Transaction failed. Please check your payment details or contact your bank',
                         }));
                         orderButton.show();
                         orderButton.click();
@@ -71,7 +72,7 @@ const initMasterWidgetCheckout = () => {
 
                     window.widgetPowerBoard.onPaymentExpired(function () {
                         paymentSourceElement.val(JSON.stringify({
-                            errorMessage: 'Your payment session has expired. Please try again.',
+                            errorMessage: 'Your payment session has expired. Please retry your payment',
                         }));
                         orderButton.show();
                         orderButton.click();
@@ -98,6 +99,29 @@ const handleFormChanged = () => {
     }
 }
 
+const handleWidgetError = () => {
+    let loading = document.getElementById('loading');
+    toggleWidgetVisibility(true);
+    loading.classList.remove('hide');
+    initMasterWidgetCheckout();
+
+    const paymentMethodsContainer = document.querySelectorAll('.wc-block-checkout__payment-method')[0];
+    const checkout = paymentMethodsContainer.querySelectorAll('.wc-block-components-checkout-step__content')[0];
+    const notices = checkout.querySelectorAll('.wc-block-components-notices')[0];
+    const removeErrorTimeout = setTimeout(() => {
+        if (notices.children.length > 0) {
+            clearTimeout(removeErrorTimeout);
+            setInterval(() => {
+                for (let notice of notices.children) {
+                    if (notice.classList.contains('is-error')) {
+                        notice.remove();
+                    }
+                }
+            }, 5000);
+        }
+    }, 200 );
+};
+
 const Content = (props) => {
     jQuery('.wc-block-components-checkout-place-order-button').show();
     const {eventRegistration, emitResponse} = props;
@@ -123,7 +147,7 @@ const Content = (props) => {
                 };
             }
 
-            initMasterWidgetCheckout();
+            handleWidgetError();
             return {
                 type: emitResponse.responseTypes.ERROR, message: __(paymentDataParsed.errorMessage, textDomain),
             }

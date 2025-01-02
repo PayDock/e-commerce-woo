@@ -72,6 +72,7 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 			array(
 				'url'     => admin_url( 'admin-ajax.php' ),
 				'wpnonce' => wp_create_nonce( 'power-board-create-charge-intent' ),
+				'wpnonce_error' => wp_create_nonce( 'power-board-create-error-notice' ),
 			)
 		);
 		wp_localize_script(
@@ -80,6 +81,7 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 			array(
 				'url'     => admin_url( 'admin-ajax.php' ),
 				'wpnonce' => wp_create_nonce( 'power-board-create-charge-intent' ),
+                'wpnonce_error' => wp_create_nonce( 'power-board-create-error-notice' ),
 			)
 		);
 		wp_enqueue_script( 'axios', 'https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js', array(), time(), true );
@@ -140,9 +142,15 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 	 * Ajax function
 	 */
 	public function power_board_create_error_notice() {
-		wc_add_notice( __( $_POST['error'], 'power-board' ), 'error' );
-		$response['data'] = wc_print_notices();
-		return $response;
+        $wp_nonce = ! empty( $_POST['_wpnonce'] ) ? sanitize_text_field( $_POST['_wpnonce'] ) : null;
+        if ( ! wp_verify_nonce( $wp_nonce, 'power-board-create-error-notice' ) ) {
+            wp_send_json_error( array( 'message' => __( 'Error: Security check', 'power-board' ) ) );
+
+            return;
+        }
+        wc_add_notice( __( $_POST['error'], 'power-board' ), 'error' );
+        $response['data'] = wc_print_notices();
+        return $response;
 	}
 
 	public function woocommerce_before_checkout_form( $arg ) {
