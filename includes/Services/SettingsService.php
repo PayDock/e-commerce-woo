@@ -100,6 +100,10 @@ final class SettingsService {
 	}
 
 	public function get_widget_script_url(): string {
+		if ( empty( $this->environment ) ) {
+			$this->get_environment();
+		}
+
 		if ( ConfigAPI::PRODUCTION_ENVIRONMENT()->value === $this->environment ) {
 			$sdk_url = ConfigAPI::PRODUCTION_WIDGET_URL()->value;
 		} elseif ( ConfigAPI::STAGING_ENVIRONMENT()->value === $this->environment ) {

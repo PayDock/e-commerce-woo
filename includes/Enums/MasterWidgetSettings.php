@@ -64,8 +64,8 @@ class MasterWidgetSettings extends AbstractEnum {
 		}
 
 		$this->init_api_adapter( $env, $access_token, $widget_access_token );
-		$result = $this->api_adapter_service->get_configuration_templates_ids( $version );
-        $this->configuration_templates = MasterWidgetTemplatesHelper::mapTemplates($result['resource']['data'], ! empty( $result['error'] ));
+		$result                        = $this->api_adapter_service->get_configuration_templates_ids( $version );
+		$this->configuration_templates = MasterWidgetTemplatesHelper::mapTemplates( $result['resource']['data'], ! empty( $result['error'] ) );
 
 		set_transient( 'configuration_templates_' . $env, $this->configuration_templates, 60 );
 		return $this->configuration_templates;
@@ -78,8 +78,8 @@ class MasterWidgetSettings extends AbstractEnum {
 		}
 
 		$this->init_api_adapter( $env, $access_token, $widget_access_token );
-		$result = $this->api_adapter_service->get_customisation_templates_ids( $version );
-        $this->customisation_templates = MasterWidgetTemplatesHelper::mapTemplates($result['resource']['data'], ! empty( $result['error'] ));
+		$result                        = $this->api_adapter_service->get_customisation_templates_ids( $version );
+		$this->customisation_templates = MasterWidgetTemplatesHelper::mapTemplates( $result['resource']['data'], ! empty( $result['error'] ) );
 
 		set_transient( 'customisation_templates_' . $env, $this->customisation_templates, 60 );
 		return $this->customisation_templates;
@@ -88,14 +88,10 @@ class MasterWidgetSettings extends AbstractEnum {
 	public function get_default() {
 		switch ( $this->name ) {
 			case self::VERSION:
-				$result = '1';
-				break;
+				return '1';
 			default:
-				$result = null;
-				break;
+				return null;
 		}
-
-		return $result;
 	}
 
 	protected function init_api_adapter( $env, $access_token, $widget_access_token ) {

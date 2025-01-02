@@ -107,8 +107,7 @@ class ConnectionValidationService {
 				MasterWidgetSettings::VERSION()->name,
 			)
 		);
-		// Change $this->service->settings to $this->data when we start showing version select box on form.
-		$this->version_settings = $this->service->settings[ $version_settings_key ];
+		$this->version_settings = $this->data[ $version_settings_key ];
 
 		$access_token_settings_key   = SettingsService::get_instance()
 		->get_option_name(
