@@ -14,42 +14,21 @@ class OrderService {
 		}
 	}
 
-	public static function update_status( $id, $custom_status, $status_note = null ) {
+	public static function update_status( $id, $new_status, $status_note = null ) {
 		$order = wc_get_order( $id );
 
 		if ( is_object( $order ) ) {
-				$order->set_status( ActivationHook::CUSTOM_STATUSES[ $custom_status ], $status_note );
-				$order->update_meta_data( ActivationHook::CUSTOM_STATUS_META_KEY, $custom_status );
+				$order->set_status( $new_status, $status_note );
 				$order->save();
 		}
 	}
 
 	public function init_power_board_order_buttons( $order ) {
-		$order_custom_status = $order->get_meta( ActivationHook::CUSTOM_STATUS_META_KEY );
 		$order_status        = $order->get_status();
 		$captured_amount     = $order->get_meta( 'capture_amount' );
 		$total_refaund       = $order->get_total_refunded();
 		$order_total         = (float) $order->get_total( false );
-		if ( in_array(
-			$order_status,
-			array(
-				'pending',
-				'failed',
-				'cancelled',
-				'on-hold',
-			)
-		)
-			|| in_array(
-				$order_custom_status,
-				array(
-					'pb-requested',
-					'wc-pb-requested',
-					'pb-refunded',
-					'WC-pb-refunded',
-					'pb-authorize',
-					'wc-pb-authorize',
-				)
-			)
+		if ( in_array( $order_status, array( 'pending', 'failed', 'cancelled', 'on-hold', 'refunded' ) )
 			|| ( $order_total === $total_refaund )
 			|| ( $captured_amount === $total_refaund )
 		) {
@@ -61,12 +40,7 @@ class OrderService {
 			);
 		}
 
-		if ( in_array(
-			$order_status,
-			array(
-				'on-hold',
-			)
-		) ) {
+		if ( $order_status == 'on-hold' ) {
 			wp_enqueue_style(
 				'hide-on-hold-buttons',
 				POWER_BOARD_PLUGIN_URL . 'assets/css/admin/hide-on-hold-buttons.css',
@@ -82,13 +56,7 @@ class OrderService {
 			return;
 		}
 		$rulesForStatuses = array(
-			'processing' => array(
-				'refunded',
-				'cancelled',
-				'failed',
-				'pending',
-				'completed',
-			),
+			'processing' => array( 'refunded', 'cancelled', 'failed', 'pending', 'completed' ),
 			'refunded'   => array( 'cancelled', 'failed', 'refunded' ),
 			'cancelled'  => array( 'failed', 'cancelled' ),
 		);
@@ -97,10 +65,6 @@ class OrderService {
 				$new_status_name = wc_get_order_status_name( $new_status_key );
 				$old_status_name = wc_get_order_status_name( $old_status_key );
 				$error           = sprintf(
-				/*
-				 * Translators: %1$s: Old status of processing order.
-				 * translators: %2$s: New status of processing order.
-				 */
 					__( 'You can not change status from "%1$s"  to "%2$s"', 'power-board' ),
 					$old_status_name,
 					$new_status_name

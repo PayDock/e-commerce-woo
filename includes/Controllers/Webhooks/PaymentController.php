@@ -52,7 +52,7 @@ class PaymentController {
 			);
 			if ( ! empty( $charge['resource']['data']['status'] ) && 'complete' === $charge['resource']['data']['status'] ) {
 				$new_charge_id = $charge['resource']['data']['_id'];
-				$new_status    = $order_total > $amount ? 'pb-p-paid' : 'pb-paid';
+				$new_status    = 'processing';
 				$logger_repository->createLogRecord(
 					$new_charge_id,
 					'Capture',
@@ -116,12 +116,12 @@ class PaymentController {
 				$logger_repository->createLogRecord(
 					$power_board_charge_id,
 					'Cancel-authorised',
-					'wc-pb-cancelled',
+					'cancelled',
 					'',
 					LogRepository::SUCCESS
 				);
 				$order->payment_complete();
-				OrderService::update_status( $order_id, 'pb-cancelled' );
+				OrderService::update_status( $order_id, 'cancelled' );
 				wp_send_json_success(
 					array( 'message' => __( 'The payment has been cancelled successfully. ', 'power-board' ) )
 				);
@@ -210,11 +210,8 @@ class PaymentController {
 			true
 		) ) {
 			$new_refunded_id = end( $result['resource']['data']['transactions'] )['_id'];
-			if ( $capture_amount ) {
-				$status = $total_refunded < $capture_amount ? 'wc-pb-p-refund' : 'wc-pb-refunded';
-			} else {
-				$status = $total_refunded < $order->get_total() ? 'wc-pb-p-refund' : 'wc-pb-refunded';
-			}
+
+			$status = 'refunded';
 
 			$order->update_meta_data( 'power_board_refunded_status', $status );
 			$status_note = __( 'The refund', 'power-board' )
@@ -328,26 +325,26 @@ class PaymentController {
 		switch ( strtoupper( $status ) ) {
 			case ChargeStatuses::COMPLETE()->name:
 				$capture_amount = wc_format_decimal( $data['transaction']['amount'] );
-				$order_status   = $order_total > $capture_amount ? 'wc-pb-p-paid' : 'wc-pb-paid';
+				$order_status   = 'processing';
 				$order->update_meta_data( 'capture_amount', $capture_amount );
 				$order->save();
 				break;
 			case ChargeStatuses::PENDING()->name:
 			case ChargeStatuses::PRE_AUTHENTICATION_PENDING()->name:
-				$order_status = $is_authorization ? 'wc-pb-authorize' : 'wc-pb-pending';
+				$order_status = $is_authorization ? 'on-hold' : 'pending';
 				break;
 			case ChargeStatuses::CANCELLED()->name:
-				$order_status = 'wc-pb-cancelled';
+				$order_status = 'cancelled';
 				break;
 			case ChargeStatuses::REFUNDED()->name:
-				$order_status = 'wc-pb-refunded';
+				$order_status = 'refunded';
 				break;
 			case ChargeStatuses::REQUESTED()->name:
-				$order_status = 'wc-pb-requested';
+				$order_status = 'processing';
 				break;
 			case ChargeStatuses::DECLINED()->name:
 			case ChargeStatuses::FAILED()->name:
-				$order_status = 'wc-pb-failed';
+				$order_status = 'failed';
 				break;
 			default:
 				$order_status = $order->get_status();
@@ -365,7 +362,7 @@ class PaymentController {
 			'',
 			in_array(
 				$order_status,
-				array( 'wc-pb-paid', 'wc-pb-p-paid', 'wc-pb-authorize', 'wc-pb-pending' ),
+				array( 'processing', 'on-hold', 'pending' ),
 				true
 			) ? LogRepository::SUCCESS : LogRepository::DEFAULT
 		);
@@ -409,11 +406,7 @@ class PaymentController {
 		switch ( strtoupper( $status ) ) {
 			case ChargeStatuses::REFUNDED()->name:
 			case ChargeStatuses::REFUND_REQUESTED()->name:
-				if ( $refund_amount < $order_total ) {
-					$order_status = 'wc-pb-p-refund';
-				} else {
-					$order_status = 'wc-pb-refunded';
-				}
+				$order_status = 'refunded';
 				$order->update_meta_data( 'power_board_refunded_status', $order_status );
 				$order->save();
 				break;
@@ -448,7 +441,7 @@ class PaymentController {
 			$result instanceof \WP_Error ? $result->get_error_message() : '',
 			in_array(
 				$order_status,
-				array( 'wc-pb-paid', 'wc-pb-authorize', 'wc-pb-pending' ),
+				array( 'processing', 'on-hold', 'pending' ),
 				true
 			) ? LogRepository::SUCCESS : LogRepository::DEFAULT
 		);

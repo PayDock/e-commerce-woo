@@ -43,7 +43,7 @@
 				</a>
 			</th>
 			<th scope="col" class="manage-column column-order_status sorted
-			<?php if ( ! empty( $records['order'] ) && ( 'asc' === $records['order'] ) && ( 'id' === $records['orderBy'] ) ) : ?>
+			<?php if ( ! empty( $records['order'] ) && ( 'asc' === $records['order'] ) && ( 'created_at' === $records['orderBy'] ) ) : ?>
 				asc
 				<?php else : ?>
 				desc
@@ -69,7 +69,7 @@
 				</a>
 			</th>
 			<th scope="col" class="manage-column column-order_status sorted
-			<?php if ( ! empty( $records['order'] ) && ( 'asc' === $records['order'] ) && ( 'id' === $records['orderBy'] ) ) : ?>
+			<?php if ( ! empty( $records['order'] ) && ( 'asc' === $records['order'] ) && ( 'operation' === $records['orderBy'] ) ) : ?>
 				asc
 				<?php else : ?>
 				desc
@@ -95,7 +95,7 @@
 				</a>
 			</th>
 			<th scope="col" class="manage-column column-order_status sorted
-			<?php if ( ! empty( $records['order'] ) && ( 'asc' === $records['order'] ) && ( 'id' === $records['orderBy'] ) ) : ?>
+			<?php if ( ! empty( $records['order'] ) && ( 'asc' === $records['order'] ) && ( 'status' === $records['orderBy'] ) ) : ?>
 				asc
 				<?php else : ?>
 				desc
@@ -140,17 +140,14 @@
 					<td>
 						<?php echo esc_html( $record->operation ); ?>
 					</td>
+					<?php
+						$allowed_statuses = [ 'completed', 'processing', 'on-hold', 'failed', 'refunded', 'cancelled', 'pending' ];
+						$status = in_array( $record->status, $allowed_statuses ) ? $record->status : 'pending';
+						$status_class = 'order-status status-' . sanitize_html_class( $status ) . ' tips';
+					?>
 					<td>
-						<mark
-							<?php if ( 1 === $record->type ) : ?>
-								class="order-status status-processing tips"
-							<?php elseif ( 2 === $record->type ) : ?>
-								class="order-status status-on-hold tips"
-							<?php else : ?>
-								class="order-status status-pending tips"
-							<?php endif; ?>
-						>
-							<span><?php echo esc_html( $record->status ); ?></span>
+						<mark class="<?php echo esc_attr( $status_class ); ?>">
+							<span><?php echo esc_html( ucfirst( $status ) ); ?></span>
 						</mark>
 					</td>
 					<td>
