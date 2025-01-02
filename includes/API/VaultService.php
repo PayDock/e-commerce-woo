@@ -7,19 +7,19 @@ use PowerBoard\Abstracts\AbstractApiService;
 class VaultService extends AbstractApiService {
 	const ENDPOINT = 'vault/payment_sources';
 
-	protected $allowedAction = [ 
+	protected $allowed_action = [ 
 		'create' => self::METHOD_POST,
 	];
 
 	public function create( array $params ): self {
 		$this->parameters = $params;
 
-		$this->setAction( 'create' );
+		$this->set_action( 'create' );
 
 		return $this;
 	}
 
-	protected function buildEndpoint(): ?string {
+	protected function build_endpoint(): ?string {
 		return self::ENDPOINT;
 	}
 }

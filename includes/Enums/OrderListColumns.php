@@ -17,7 +17,7 @@ class OrderListColumns extends AbstractEnum {
 		}
 	}
 
-	public function getKey(): string {
+	public function get_key(): string {
 		switch ( $this->name ) {
 			case self::PAYMENT_SOURCE_TYPE:
 				return PLUGIN_PREFIX . '_payment_source_type';

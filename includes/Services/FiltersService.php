@@ -19,13 +19,13 @@ class FiltersService extends AbstractSingleton {
 	}
 
 	public function ordersListNewColumn( $columns ) {
-		$new_columns = [];
+		$new_columns = array();
 
 		foreach ( $columns as $column_name => $column_info ) {
 			$new_columns[ $column_name ] = $column_info;
 
 			if ( OrderListColumns::AFTER_COLUMN === $column_name ) {
-				$new_columns[ OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey() ] = OrderListColumns::PAYMENT_SOURCE_TYPE()->get_label();
+				$new_columns[ OrderListColumns::PAYMENT_SOURCE_TYPE()->get_key() ] = OrderListColumns::PAYMENT_SOURCE_TYPE()->get_label();
 			}
 		}
 
@@ -33,8 +33,8 @@ class FiltersService extends AbstractSingleton {
 	}
 
 	public function ordersListNewColumnContent( $column, $order ) {
-		if ( OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey() === $column ) {
-			$status = $order->get_meta( OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey() );
+		if ( OrderListColumns::PAYMENT_SOURCE_TYPE()->get_key() === $column ) {
+			$status = $order->get_meta( OrderListColumns::PAYMENT_SOURCE_TYPE()->get_key() );
 
 			echo esc_html( is_array( $status ) ? reset( $status ) : $status );
 		}
@@ -107,7 +107,6 @@ class FiltersService extends AbstractSingleton {
 			) {
 				$methods[] = LogsSettingService::class;
 			}
-
 		} else {
 
 			$methods[] = MasterWidgetPaymentService::class;
@@ -115,11 +114,10 @@ class FiltersService extends AbstractSingleton {
 		}
 
 		return $methods;
-
 	}
 
 	public function woocommerceThankyouOrderReceivedText( $text ) {
-		$orderId = absint( get_query_var( 'order-received' ) );
+		$orderId  = absint( get_query_var( 'order-received' ) );
 		$options  = get_option( "power_board_fraud_{$orderId}" );
 		$order    = wc_get_order( $orderId );
 		$status   = $order->get_meta( ActivationHook::CUSTOM_STATUS_META_KEY );
@@ -158,7 +156,5 @@ class FiltersService extends AbstractSingleton {
 		}
 
 		return $actions;
-
 	}
-
 }

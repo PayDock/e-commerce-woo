@@ -23,7 +23,7 @@ class APIAdapterService {
 
 	public function create_checkout_intent( array $params ): array {
 		$this->init_charge_service();
-		return $this->charge_service->createCheckoutIntent( $params )->call();
+		return $this->charge_service->create_checkout_intent( $params )->call();
 	}
 
 	public function get_configuration_templates_ids( string $version ): array {

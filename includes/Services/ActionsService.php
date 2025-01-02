@@ -19,7 +19,7 @@ class ActionsService extends AbstractSingleton {
 	protected function __construct() {
 		add_action( 'before_woocommerce_init', function () {
 			$this->addCompatibilityWithWooCommerce();
-			$this->addPaymentMethodToChekout();
+			$this->add_payment_method_to_checkout();
 			$this->addSettingsActions();
 			$this->addOrderActions();
 		} );
@@ -50,9 +50,9 @@ class ActionsService extends AbstractSingleton {
 	}
 
 	/**
-	 * Add new payment method on chekout page
+	 * Add new payment method on checkout page
 	 */
-	protected function addPaymentMethodToChekout() {
+	protected function add_payment_method_to_checkout() {
 		if ( ! class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) ) {
 			return;
 		}
@@ -76,7 +76,7 @@ class ActionsService extends AbstractSingleton {
 	protected function addSettingsActions(): void {
 		foreach ( SettingsTabs::cases() as $settingsTab ) {
 			add_action( self::PROCESS_OPTIONS_HOOK_PREFIX . $settingsTab->value, [
-				$settingsTab->getSettingService(),
+				$settingsTab->get_setting_service(),
 				self::PROCESS_OPTIONS_FUNCTION,
 			] );
 			add_action( self::SECTION_HOOK, function ( $systemTabs ) use ( $settingsTab ) {

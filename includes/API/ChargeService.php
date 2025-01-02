@@ -11,10 +11,8 @@ class ChargeService extends AbstractApiService {
 	const CAPTURE_ENDPOINT = 'capture';
 	const REFUNDS_ENDPOINT = 'refunds';
 
-	protected $directCharge = null;
-
 	protected $id = null;
-	protected $allowedAction = [
+	protected $allowed_action = [
 		'create-intent' => self::METHOD_POST,
 		'templates' => self::METHOD_GET,
 		'capture' => self::METHOD_POST,
@@ -22,10 +20,10 @@ class ChargeService extends AbstractApiService {
 		'cancel-authorised' => self::METHOD_DELETE,
 	];
 
-	public function createCheckoutIntent( array $params): self {
+	public function create_checkout_intent( array $params): self {
 		$this->parameters = $params;
 
-		$this->setAction( 'create-intent' );
+		$this->set_action( 'create-intent' );
 
 		return $this;
 	}
@@ -33,7 +31,7 @@ class ChargeService extends AbstractApiService {
 	public function get_configuration_templates_ids( string $version ): self {
 		$this->parameters = ['type' => 'configuration', 'version' => $version ];
 
-		$this->setAction( 'templates' );
+		$this->set_action( 'templates' );
 
 		return $this;
 	}
@@ -41,7 +39,7 @@ class ChargeService extends AbstractApiService {
 	public function get_customisation_templates_ids( string $version ): self {
 		$this->parameters = ['type' => 'customisation', 'version' => $version ];
 
-		$this->setAction( 'templates' );
+		$this->set_action( 'templates' );
 
 		return $this;
 	}
@@ -49,7 +47,7 @@ class ChargeService extends AbstractApiService {
 	public function capture( array $params ): self {
 		$this->parameters = $params;
 
-		$this->setAction( 'capture' );
+		$this->set_action( 'capture' );
 
 		return $this;
 	}
@@ -58,7 +56,7 @@ class ChargeService extends AbstractApiService {
 	public function refunds( array $params ): self {
 		$this->parameters = $params;
 
-		$this->setAction( 'refunds' );
+		$this->set_action( 'refunds' );
 
 		return $this;
 	}
@@ -66,12 +64,12 @@ class ChargeService extends AbstractApiService {
 	public function cancel_authorised( array $params ): self {
 		$this->parameters = $params;
 
-		$this->setAction( 'cancel-authorised' );
+		$this->set_action( 'cancel-authorised' );
 
 		return $this;
 	}
 
-	protected function buildEndpoint(): ?string {
+	protected function build_endpoint(): ?string {
 		switch ( $this->action ) {
 			case 'refunds':
 				$result = self::ENDPOINT . '/' . $this->parameters['charge_id'] . '/' . self::REFUNDS_ENDPOINT;

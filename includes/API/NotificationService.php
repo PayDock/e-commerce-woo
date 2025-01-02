@@ -7,28 +7,26 @@ use PowerBoard\Abstracts\AbstractApiService;
 class NotificationService extends AbstractApiService {
 	const ENDPOINT = 'notifications';
 
-	protected $allowedAction = [ 
+	protected $allowed_action = [
 		'create' => self::METHOD_POST,
 		'search' => self::METHOD_GET,
 	];
 
-	private $id;
-
 	public function create( $params ): NotificationService {
-		$this->setAction( 'create' );
+		$this->set_action( 'create' );
 		$this->parameters = $params;
 
 		return $this;
 	}
 
 	public function search( array $parameters = [] ): NotificationService {
-		$this->setAction( 'search' );
+		$this->set_action( 'search' );
 		$this->parameters = $parameters;
 
 		return $this;
 	}
 
-	protected function buildEndpoint(): ?string {
+	protected function build_endpoint(): ?string {
 		switch ( $this->action ) {
 			case 'create':
 				$result = self::ENDPOINT;

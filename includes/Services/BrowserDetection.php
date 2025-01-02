@@ -61,49 +61,6 @@ class BrowserDetection {
 	private $result_64bits_mode;
 
 	/**
-	 * The method returns all possible environment data from User-Agent
-	 *
-	 * @param  string  $ua             The User-Agent string
-	 * @param  string  $result_format  If specified, method returns result as JSON
-	 *
-	 * @return mixed Returns User-Agent parsing result as array or JSON string (optional)
-	 */
-
-	public function getAll( $ua, $result_format = '' ) {
-		$this->useragent = trim( $ua );
-		$this->get_mode = 'all';
-		$this->resetProperties();
-		$this->getResult();
-		$result = [ 
-			'os_type' => $this->result_os_type,
-			'os_family' => $this->result_os_family,
-			'os_name' => $this->result_os_name,
-			'os_version' => $this->result_os_version,
-			'os_title' => $this->result_os_title,
-			'device_type' => $this->result_device_type,
-			'browser_name' => $this->result_browser_name,
-			'browser_version' => $this->result_browser_version,
-			'browser_title' => $this->result_browser_title,
-			'browser_chrome_original' => $this->result_browser_chrome_original,
-			'browser_firefox_original' => $this->result_browser_firefox_original,
-			'browser_safari_original' => $this->result_browser_safari_original,
-			'browser_chromium_version' => $this->result_browser_chromium_version,
-			'browser_gecko_version' => $this->result_browser_gecko_version,
-			'browser_webkit_version' => $this->result_browser_webkit_version,
-			'browser_android_webview' => $this->result_browser_android_webview,
-			'browser_ios_webview' => $this->result_browser_ios_webview,
-			'browser_desktop_mode' => $this->result_browser_desktop_mode,
-			'64bits_mode' => $this->result_64bits_mode,
-		];
-
-		if ( strtolower( $result_format ) === 'json' ) {
-			$result = wp_json_encode( $result );
-		}
-
-		return $result;
-	}
-
-	/**
 	 * Reset all common defined properties method
 	 *
 	 * @return null
@@ -139,7 +96,7 @@ class BrowserDetection {
 
 	/**
 	 * Common User-Agent parsing
-	 * The method will try to recognize environment data from $useragent property and will placed it in defined
+	 * The method will try to recognize environment data from $useragent property and will be placed it in defined
 	 * properties.
 	 *
 	 * @return null
@@ -592,7 +549,6 @@ class BrowserDetection {
 						break;
 					}
 				}
-				$os_list = null;
 			}
 
 			// Other Mobile OS(es)
@@ -715,7 +671,7 @@ class BrowserDetection {
 				$darwin_os_version = (float) $matches[2];
 			}
 
-			$darwin_macos_map = [ 
+			$darwin_macos_map = [
 				'1.3' => '0',
 				'1.4' => '1',
 				'5.1' => '1',
@@ -755,7 +711,7 @@ class BrowserDetection {
 				'22.0' => '18',
 				'22.3' => '18',
 			];
-			$darwin_ios_map = [ 
+			$darwin_ios_map = [
 				'9.0' => '1',
 				'9.8' => '1',
 				'10.0' => '4',
@@ -810,7 +766,6 @@ class BrowserDetection {
 			$darwin_map_min = null;
 			$darwin_macos_map = null;
 			$darwin_ios_map = null;
-			$os_need_continue = false;
 		}
 
 		// Set OS title and type
@@ -921,27 +876,27 @@ class BrowserDetection {
 			}
 		}
 
-		// Cross-device browsers (Yandex, Edge, Firefox, Opera, Puffin, Vivaldi, QQBrowser, Whale, Brave etc)
+		// Cross-device browsers (Yandex, Edge, Firefox, Opera, Puffin, Vivaldi, QQBrowser, Whale, Brave etc.)
 
 		if ( $browser_need_continue && 0 == $this->result_browser_chrome_original && 0 == $this->result_browser_firefox_original ) {
 			$browser_list[] = [ 'Yandex Browser', 'YaBrowser', '/YaBrowser\/([0-9]+\.[0-9]+)/', '1', 'YaApp_' ];
 			$browser_list[] = [ 'Edge', 'Edg', '/Edg(|e|A|iOS)\/([0-9]+)\./', '2', '' ];
 			$browser_list[] = [ 'Opera', ' OPR/', '/OPR\/(\d+)/', '1', 'Opera Mini|OPiOS|OPT/|OPRGX/|AlohaBrowser' ];
-			$browser_list[] = [ 
+			$browser_list[] = [
 				'Opera',
 				'Opera',
 				'/Opera.*Version\/([0-9]+\.[0-9]+)/',
 				'1',
 				'Opera Mini|OPiOS|OPT/|InettvBrowser/',
 			];
-			$browser_list[] = [ 
+			$browser_list[] = [
 				'Opera',
 				'Opera',
 				'/Opera(\s|\/)([0-9]+\.[0-9]+)/',
 				'2',
 				'Opera Mini|OPiOS|OPT/|InettvBrowser/',
 			];
-			$browser_list[] = [ 
+			$browser_list[] = [
 				'UC Browser',
 				'UBrowser|UCBrowser|UCMini',
 				'/(UBrowser|UCBrowser|UCMini)\/([0-9]+\.[0-9]+)/',
@@ -957,7 +912,7 @@ class BrowserDetection {
 			$browser_list[] = [ 'Brave', 'Brave', '/Brave(?: Chrome)?\/([0-9]+)/', '1', '' ];
 			$browser_list[] = [ 'Maxthon', 'Maxthon/', '/Maxthon\/([0-9]+\.[0-9]+)/', '1', '' ];
 			$browser_list[] = [ 'Maxthon', 'MxBrowser/', '/MxBrowser\/([0-9]+\.[0-9]+)/', '1', '' ];
-			$browser_list[] = [ 
+			$browser_list[] = [
 				'2345 Explorer',
 				'2345Explorer|2345Browser',
 				'/(2345Explorer|2345Browser)(?: |\/)?([0-9]+\.[0-9]+)/',
@@ -966,7 +921,7 @@ class BrowserDetection {
 			];
 			$browser_list[] = [ 'IceCat', 'IceCat/', '/IceCat\/([0-9]+)/', '1', '' ];
 			$browser_list[] = [ 'Lunascape', 'Lunascape', '/Lunascape(?: |\/)?([0-9]+\.[0-9]+)/', '1', '' ];
-			$browser_list[] = [ 
+			$browser_list[] = [
 				'Seznam Browser',
 				'Seznam.cz/|SznProhlizec/',
 				'/(Seznam\.cz|SznProhlizec)\/([0-9]+\.[0-9]+)/',
@@ -1070,14 +1025,14 @@ class BrowserDetection {
 		if ( $browser_need_continue && 0 == $this->result_browser_chrome_original && 0 == $this->result_browser_firefox_original && 0 == $this->result_mobile ) {
 			// Safari
 
-			$browser_list[] = [ 
+			$browser_list[] = [
 				'Safari',
 				'/AppleWebKit\/[.0-9]+.*Gecko\)\sSafari\/[.0-9A-Za-z]+$/',
 				'/Safari\/(\d+)/',
 				'1',
 				'Version/',
 			];
-			$browser_list[] = [ 
+			$browser_list[] = [
 				'Safari',
 				'/Version\/([0-9]+\.[0-9]+).*Safari/',
 				'/Version\/([0-9]+\.[0-9]+).*Safari/',
@@ -1112,7 +1067,7 @@ class BrowserDetection {
 			$browser_list[] = [ 'OhHai Browser', 'OhHaiBrowser/', '/OhHaiBrowser\/([0-9]+\.[0-9]+)/', '1', '' ];
 			$browser_list[] = [ 'Sizzy', 'Sizzy', '/Sizzy\/([0-9]+\.[0-9]+)/', '1', '' ];
 			$browser_list[] = [ 'AOL Desktop', 'ADG/', '/ADG\/([0-9]+\.[0-9]+)/', '1', '' ];
-			$browser_list[] = [ 
+			$browser_list[] = [
 				'Elements Browser',
 				'Elements Browser',
 				'/Elements\sBrowser\/([0-9]+\.[0-9]+)/',
@@ -1138,7 +1093,7 @@ class BrowserDetection {
 			$browser_list[] = [ 'Iceweasel', '/[iI]ce[wW]easel/', '/[iI]ce[wW]easel/', '1', '' ];
 			$browser_list[] = [ 'IceApe', 'Iceape/', '/Iceape\/([0-9]+\.[0-9]+)/', '1', '' ];
 			$browser_list[] = [ 'Comodo Ice Dragon', 'IceDragon/', '/IceDragon\/([0-9]+\.[0-9]+)/', '1', '' ];
-			$browser_list[] = [ 
+			$browser_list[] = [
 				'QtWeb',
 				'QtWeb Internet Browser/',
 				'/QtWeb\sInternet\sBrowser\/([0-9]+\.[0-9]+)/',
@@ -1150,7 +1105,7 @@ class BrowserDetection {
 			$browser_list[] = [ 'WebKitGTK', 'WebKitGTK+/', '/WebKitGTK\+\/([0-9]+\.[0-9]+)/', '1', '' ];
 			$browser_list[] = [ 'Konqueror', 'Konqueror', '/Konqueror\/([0-9]+\.[0-9]+)/', '1', 'QtWebEngine' ];
 			$browser_list[] = [ 'Konqueror', 'konqueror', '/konqueror\/([0-9]+\.[0-9]+)/', '1', 'QtWebEngine' ];
-			$browser_list[] = [ 
+			$browser_list[] = [
 				'Konqueror',
 				'Konqueror',
 				'/\sQtWebEngine\/([0-9]+\.[0-9]+)(|[.0-9]+)\sChrome\/[.0-9]+.*\sSafari\/[.0-9]+.*Konqueror\s/',
@@ -1176,7 +1131,7 @@ class BrowserDetection {
 			$browser_list[] = [ 'Steam Overlay', ' Valve ', '/Valve\sSteam\sGameOverlay/', '1', 'Tenfoot|Client/' ];
 			$browser_list[] = [ 'Rekonq', ' rekonq', '/rekonq\/([0-9]+\.[0-9]+)/', '1', '' ];
 			$browser_list[] = [ 'Odyssey Web Browser', 'Odyssey Web Browser', '/OWB\/([0-9]+\.[0-9]+)/', '1', '' ];
-			$browser_list[] = [ 
+			$browser_list[] = [
 				'Safari SDK',
 				'/^Safari\/[.0-9]+\sCFNetwork\/[.0-9]+\sDarwin\/[.0-9]+/',
 				'/Safari\//',
@@ -1264,35 +1219,35 @@ class BrowserDetection {
 		if ( $browser_need_continue && 0 == $this->result_browser_chrome_original && 0 == $this->result_browser_firefox_original && 1 == $this->result_mobile ) {
 			// Mobile browsers with detectable versions
 
-			$browser_list[] = [ 
+			$browser_list[] = [
 				'Safari Mobile',
 				'/(iPhone|iphone|iPad|iPod).*AppleWebKit\/[.0-9]+\s\(KHTML,\slike\sGecko\)\s.*Version\/[.0-9]+\sMobile\//',
 				'/Version\/([0-9]+\.[0-9]+)(|\.[0-9]+)\sMobile\//',
 				'1',
 				'RDDocuments|AlohaBrowser|DuckDuckGo|MiuiBrowser|Snapchat|NAVER(inapp;|1Password',
 			];
-			$browser_list[] = [ 
+			$browser_list[] = [
 				'Safari Mobile',
 				'/(Intel\sMac\sOS\sX).*AppleWebKit\/.*Version\/[.0-9]+\s(?:|Mobile\/\w+\s)Safari\/[.0-9A-Za-z]+(|\/[0-9]+|\s\(.*\))+$/',
 				'/Version\/([0-9]+\.[0-9]+)(|\.[0-9]+)/',
 				'1',
 				'RDDocuments|AlohaBrowser|DuckDuckGo|MiuiBrowser|Snapchat|NAVER(inapp;|1Password',
 			];
-			$browser_list[] = [ 
+			$browser_list[] = [
 				'Android Browser',
 				'/Android.*Version\/[.0-9]+\s(?:Mobile\s)?Safari\/[.0-9]+(|\-[0-9]+)$/',
 				'/Android.*Version\/([0-9]+\.[0-9]+)/',
 				'1',
 				'Chrome/',
 			];
-			$browser_list[] = [ 
+			$browser_list[] = [
 				'Android Browser',
 				'Dalvik/',
 				'/Dalvik\/([.0-9]+)\s\(Linux;\sU;\sAndroid\s/',
 				'2',
 				'Chrome/',
 			];
-			$browser_list[] = [ 
+			$browser_list[] = [
 				'Samsung Browser',
 				'SamsungBrowser',
 				'/SamsungBrowser\/([0-9]+\.[0-9]+)/',
@@ -1307,14 +1262,14 @@ class BrowserDetection {
 			$browser_list[] = [ 'DuckDuckGo', 'DuckDuckGo/', '/DuckDuckGo\/([0-9]+)/', '1', '' ];
 			$browser_list[] = [ 'MIUI Browser', 'MiuiBrowser/', '/MiuiBrowser\/([0-9]+\.[0-9]+)/', '1', '' ];
 			$browser_list[] = [ 'Mint Browser', 'Mint Browser/', '/Mint\sBrowser\/([0-9]+\.[0-9]+)/', '1', '' ];
-			$browser_list[] = [ 
+			$browser_list[] = [
 				'Avast Browser',
 				'AvastSecureBrowser/',
 				'/AvastSecureBrowser\/([0-9]+\.[0-9]+)/',
 				'1',
 				'',
 			];
-			$browser_list[] = [ 
+			$browser_list[] = [
 				'Google App',
 				'/(iPhone|iphone|iPad|iPod).*\)\sGSA\/([0-9]+)/',
 				'/(iPhone|iphone|iPad|iPod).*\)\sGSA\/([0-9]+)/',
@@ -1322,7 +1277,7 @@ class BrowserDetection {
 				'',
 			];
 			$browser_list[] = [ 'Google App', '/\sGSA\//', '/\sGSA\/([0-9]+)/', '1', '' ];
-			$browser_list[] = [ 
+			$browser_list[] = [
 				'Facebook App',
 				'FBAV/|FBSV/',
 				'/(FBAV|FBSV)\/([0-9]+)\./',
@@ -1330,7 +1285,7 @@ class BrowserDetection {
 				'FBAN/Messenger|FB_IAB/MESSENGER',
 			];
 			$browser_list[] = [ 'Instagram App', 'Instagram', '/Instagram\s([0-9]+)\./', '1', '' ];
-			$browser_list[] = [ 
+			$browser_list[] = [
 				'Facebook Messenger',
 				'FBAN/Messenger|FB_IAB/MESSENGER',
 				'/(FBAV|FBSV)\/([0-9]+)\./',
@@ -1346,7 +1301,7 @@ class BrowserDetection {
 			$browser_list[] = [ 'Flipboard App', 'Flipboard/', '/Flipboard\/([0-9]+\.[0-9]+)/', '1', '' ];
 			$browser_list[] = [ 'FreeU', 'FreeU|Freeu', '/(FreeU|Freeu)\/([0-9]+\.[0-9]+)/', '2', '' ];
 			$browser_list[] = [ 'Iron', 'Iron Safari|MobileIron', '/Chrome\/([0-9]+)/', '1', '' ];
-			$browser_list[] = [ 
+			$browser_list[] = [
 				'Sogou Mobile Browser',
 				'SogouMobileBrowser/',
 				'/SogouMobileBrowser\/([0-9]+\.[0-9]+)/',
@@ -1354,7 +1309,7 @@ class BrowserDetection {
 				'',
 			];
 			$browser_list[] = [ 'Meizu Browser', 'MZBrowser/', '/MZBrowser\/([0-9]+\.[0-9]+)/', '1', '' ];
-			$browser_list[] = [ 
+			$browser_list[] = [
 				'360 Mobile Browser',
 				'360 Aphone',
 				'/360\sAphone\sBrowser\s\(([0-9]+\.[0-9]+)/',
@@ -1371,7 +1326,7 @@ class BrowserDetection {
 			$browser_list[] = [ 'CM Mobile', 'ACHEETAHI', '/Chrome\/([0-9]+)/', '1', '' ];
 			$browser_list[] = [ 'Bing App', ' BingWeb', '/BingWeb\/([0-9]+\.[0-9]+)/', '1', '' ];
 			$browser_list[] = [ 'Firefox Klar', 'Klar/', '/Klar\/([0-9]+\.[0-9]+)/', '1', '' ];
-			$browser_list[] = [ 
+			$browser_list[] = [
 				'Super Fast Browser',
 				'SFBrowser|tssomas',
 				'/(SFBrowser|tssomas)\/([0-9]+\.[0-9]+)/',
@@ -1383,7 +1338,7 @@ class BrowserDetection {
 			$browser_list[] = [ 'JioBrowser', 'JioBrowser/', '/JioBrowser\/([0-9]+\.[0-9]+)/', '1', '' ];
 			$browser_list[] = [ 'Qwant Mobile', 'QwantBrowser', '/QwantBrowser\/([0-9]+)/', '1', '' ];
 			$browser_list[] = [ 'Qwant Mobile', 'QwantMobile', '/QwantMobile\/([0-9]+\.[0-9]+)/', '1', '' ];
-			$browser_list[] = [ 
+			$browser_list[] = [
 				'Cake Browser',
 				'; Cake) ',
 				'/\;\sCake\).*AppleWebKit.*Version\/([0-9]+\.[0-9]+)/',
@@ -1396,7 +1351,7 @@ class BrowserDetection {
 			$browser_list[] = [ 'Baidu Browser for Tablet', 'BaiduHD/', '/BaiduHD\/([0-9]+\.[0-9]+)/', '1', '' ];
 			$browser_list[] = [ 'VmWare Browser', 'AirWatch Browser', '/AirWatch\sBrowser\sv([0-9]+\.[0-9]+)/', '1', '' ];
 			$browser_list[] = [ 'Iron Mobile', 'MobileIron/', '/MobileIron\/([0-9]+\.[0-9]+)/', '1', '' ];
-			$browser_list[] = [ 
+			$browser_list[] = [
 				'NineSky',
 				'Ninesky-android-mobile/',
 				'/Ninesky\-android\-mobile\/([0-9]+\.[0-9]+)/',
@@ -1410,7 +1365,7 @@ class BrowserDetection {
 			$browser_list[] = [ 'Nox Browser', 'NoxBrowser/', '/NoxBrowser\/([0-9]+\.[0-9]+)/', '1', '' ];
 			$browser_list[] = [ 'Quark Browser', 'Quark/', '/Quark\/([0-9]+\.[0-9]+)/', '1', '' ];
 			$browser_list[] = [ 'Yaani Browser', 'YaaniBrowser', '/YaaniBrowser\/([0-9]+\.[0-9]+)/', '1', '' ];
-			$browser_list[] = [ 
+			$browser_list[] = [
 				'Tizen Browser',
 				'/Tizen(?: )?(?:\/)?[.0-9]+.*AppleWebKit\/.*(Version|SLP Browser|Tizen Browser|TizenBrowser)\/([0-9]+\.[0-9]+)/',
 				'/Tizen(?: )?(?:\/)?[.0-9]+.*AppleWebKit\/.*(Version|SLP Browser|Tizen Browser|TizenBrowser)\/([0-9]+\.[0-9]+)/',
@@ -1418,7 +1373,7 @@ class BrowserDetection {
 				'',
 			];
 			$browser_list[] = [ 'Internet Explorer Mobile', 'IEMobile', '/IEMobile(?: )?(?:\/)?([0-9]+)/', '1', '' ];
-			$browser_list[] = [ 
+			$browser_list[] = [
 				'Internet Explorer Mobile',
 				'Trident/',
 				'/Trident\/[.0-9].*Touch;*.rv\:([0-9]+)/',
@@ -1428,7 +1383,7 @@ class BrowserDetection {
 			$browser_list[] = [ 'ZetaKey', 'Zetakey/', '/Zetakey\/([0-9]+\.[0-9]+)/', '1', '' ];
 			$browser_list[] = [ 'Nokia Browser', 'NokiaBrowser/', '/NokiaBrowser\/([0-9]+\.[0-9]+)/', '1', '' ];
 			$browser_list[] = [ 'NetFront', 'NetFront/', '/NetFront\/([0-9]+\.[0-9]+)/', '1', '' ];
-			$browser_list[] = [ 
+			$browser_list[] = [
 				'BlackBerry Browser',
 				'/(BB10;|BlackBerry|PlayBook).*AppleWebKit.*Version\/([0-9]+\.[0-9]+)/',
 				'/(BB10;|BlackBerry|PlayBook).*AppleWebKit.*Version\/([0-9]+\.[0-9]+)/',
@@ -1441,7 +1396,7 @@ class BrowserDetection {
 			$browser_list[] = [ 'EUI Browser', 'EUI Browser', '/EUI\sBrowser\/([0-9]+\.[0-9]+)/', '1', '' ];
 			$browser_list[] = [ 'iCab Mobile', 'iCabMobile', '/iCabMobile(\s|\/)([0-9]+\.[0-9]+)/', '2', '' ];
 			$browser_list[] = [ 'Mercury', 'Mercury/', '/Mercury\/([0-9]+\.[0-9]+)/', '1', '' ];
-			$browser_list[] = [ 
+			$browser_list[] = [
 				'Samsung Browser',
 				'; SAMSUNG S|; SAMSUNG G',
 				'/\;\sSAMSUNG\s(S|G)+.*\sBuild\/.*\)\sAppleWebKit\/.*Version\/([0-9]+\.[0-9]+)\sChrome\/[.0-9]+.*\sSafari\/[.0-9]+$/',
@@ -1450,14 +1405,14 @@ class BrowserDetection {
 			];
 			$browser_list[] = [ 'Documents App', 'RDDocuments/', '/RDDocuments\/([0-9]+\.[0-9]+)/', '1', '' ];
 			$browser_list[] = [ 'Opera Coast', 'Coast/', '/Coast\/([0-9]+)/', '1', '' ];
-			$browser_list[] = [ 
+			$browser_list[] = [
 				'Android Browser',
 				'/Android.*Version\/[.0-9]+\s(?:Mobile\s)?Safari(|\/[.0-9]+\sCyanogenMod.*)+$/',
 				'/Android.*Version\/([0-9]+\.[0-9]+)/',
 				'1',
 				'Chrome/',
 			];
-			$browser_list[] = [ 
+			$browser_list[] = [
 				'Playstation Browser',
 				'/(PlayStation\s|PLAYSTATION\s)/',
 				'/(PlayStation\s|PLAYSTATION\s)/',
@@ -1465,7 +1420,7 @@ class BrowserDetection {
 				'',
 			];
 			$browser_list[] = [ 'WeChat App', 'MicroMessenger/', '/MicroMessenger\/([0-9]+\.[0-9]+)/', '1', '' ];
-			$browser_list[] = [ 
+			$browser_list[] = [
 				'Naver Search App',
 				'NAVER(inapp;',
 				'/NAVER\(inapp;\ssearch;\s\d+;\s([0-9]+\.[0-9]+)/',
@@ -1547,8 +1502,6 @@ class BrowserDetection {
 					}
 				}
 			}
-
-			$browser_list = null;
 
 			// End of mobile browsers detection
 		}
@@ -1858,7 +1811,7 @@ class BrowserDetection {
 	 * Common User-Agent matching
 	 *
 	 * @param  string   $data    The string to data search for
-	 * @param  boolean  $case_s  Determines if we do a case-sensitive search (false) or a case insensitive (true)
+	 * @param  boolean  $case_s  Determines if we do a case-sensitive search (false) or a case-insensitive (true)
 	 *
 	 * @return boolean Returns true if $data found in $useragent property, false otherwise.
 	 */
@@ -1924,11 +1877,11 @@ class BrowserDetection {
 	}
 
 	/**
-	 * Method to call User-Agent matching method if matching data is case insensitive
+	 * Method to call User-Agent matching method if matching data is case-insensitive
 	 *
 	 * @param  string  $data  The string to data search for
 	 *
-	 * @return boolean Returns true if case insensitive $data found in $useragent property, false otherwise.
+	 * @return boolean Returns true if case-insensitive $data found in $useragent property, false otherwise.
 	 */
 
 	private function matchi_ua( $data ) {
@@ -1936,11 +1889,11 @@ class BrowserDetection {
 	}
 
 	/**
-	 * Convert MacOS numeric version to MacOS codename
+	 * Convert MacOS numeric version to macOS codename
 	 *
-	 * @param  int  $version  The given MacOS version
+	 * @param  int  $version  The given macOS version
 	 *
-	 * @return string Returns MacOS codename string
+	 * @return string Returns macOS codename string
 	 */
 
 	private function macos_codename( $version ) {
@@ -2024,7 +1977,7 @@ class BrowserDetection {
 		$this->get_mode = 'os';
 		$this->resetProperties();
 		$this->getResult();
-		$result = [ 
+		$result = [
 			'os_type' => $this->result_os_type,
 			'os_family' => $this->result_os_family,
 			'os_name' => $this->result_os_name,
@@ -2054,7 +2007,7 @@ class BrowserDetection {
 		$this->get_mode = 'browser';
 		$this->resetProperties();
 		$this->getResult();
-		$result = [ 
+		$result = [
 			'browser_name' => $this->result_browser_name,
 			'browser_version' => $this->result_browser_version,
 			'browser_title' => $this->result_browser_title,
@@ -2074,41 +2027,5 @@ class BrowserDetection {
 		}
 
 		return $result;
-	}
-
-	/**
-	 * The method returns Device Type data from User-Agent
-	 *
-	 * @param  string  $ua             The User-Agent string
-	 * @param  string  $result_format  If specified, method returns result as JSON
-	 *
-	 * @return mixed Returns User-Agent parsing result as array or JSON string (optional)
-	 */
-
-	public function getDevice( $ua, $result_format = '' ) {
-		$this->useragent = trim( $ua );
-		$this->get_mode = 'device';
-		$this->resetProperties();
-		$this->getResult();
-		$result = [ 'device_type' => $this->result_device_type ];
-
-		if ( strtolower( $result_format ) === 'json' ) {
-			$result = wp_json_encode( $result );
-		}
-
-		return $result;
-	}
-
-	/**
-	 * This method is needed to detect mobile browsers in Desktop Mode (Android and iOS)
-	 * The method should call if browser supports Touch events (client-side JS detection is necessary)
-	 *
-	 * @return null
-	 */
-
-	public function setTouchSupport() {
-		$this->touch_support_mode = true;
-
-		return null;
 	}
 }

@@ -28,13 +28,12 @@ class ConnectionValidationService {
 	private $access_token_validation_failed = false;
 	private $configuration_templates        = array();
 	private $customisation_templates        = array();
-	private $api_adapter_service            = null;
-	private $widget_api_adapter_service     = null;
-
-	private $environment_settings         = null;
-	private $access_token_settings        = null;
-	private $widget_access_token_settings = null;
-	private $version_settings             = null;
+	private $environment_settings           = null;
+	private $access_token_settings          = null;
+	private $widget_access_token_settings   = null;
+	private $version_settings               = null;
+	private $api_adapter_service;
+	private $widget_api_adapter_service;
 
 
 	public function __construct( WidgetConfigurationSettingService $service ) {
@@ -183,8 +182,8 @@ class ConnectionValidationService {
 
 	private function get_configuration_templates() {
 		$configuration_templates_result = $this->widget_api_adapter_service->get_configuration_templates_ids( $this->version_settings );
-        $has_error = ! empty( $configuration_templates_result['error'] );
-        $this->configuration_templates = MasterWidgetTemplatesHelper::mapTemplates($configuration_templates_result['resource']['data'], $has_error);
+		$has_error                      = ! empty( $configuration_templates_result['error'] );
+		$this->configuration_templates  = MasterWidgetTemplatesHelper::mapTemplates( $configuration_templates_result['resource']['data'], $has_error );
 
 		if ( $has_error ) {
 			$this->access_token_validation_failed = true;
@@ -195,10 +194,10 @@ class ConnectionValidationService {
 
 	private function get_customisation_templates() {
 		$customisation_templates_result = $this->widget_api_adapter_service->get_customisation_templates_ids( $this->version_settings );
-        $has_error = ! empty( $customisation_templates_result['error'] );
-        $this->configuration_templates = MasterWidgetTemplatesHelper::mapTemplates($customisation_templates_result['resource']['data'], $has_error);
+		$has_error                      = ! empty( $customisation_templates_result['error'] );
+		$this->configuration_templates  = MasterWidgetTemplatesHelper::mapTemplates( $customisation_templates_result['resource']['data'], $has_error );
 
-        if ( ! $has_error ) {
+		if ( ! $has_error ) {
 			set_transient( 'customisation_templates_' . $this->environment_settings, $this->customisation_templates, 60 );
 		}
 	}
@@ -241,7 +240,7 @@ class ConnectionValidationService {
 			return;
 		}
 
-		$not_setted_webhooks   = $webhook_events;
+		$not_set_webhooks      = $webhook_events;
 		$webhook_site_url      = get_site_url() . '/wc-api/power-board-webhook/';
 		$should_create_webhook = true;
 		$webhook_request       = $this->api_adapter_service->search_notifications( array( 'type' => 'webhook' ) );
@@ -253,15 +252,15 @@ class ConnectionValidationService {
 				}
 			}
 
-			$not_setted_webhooks = array_diff( $webhook_events, $events );
-			if ( empty( $not_setted_webhooks ) ) {
+			$not_set_webhooks = array_diff( $webhook_events, $events );
+			if ( empty( $not_set_webhooks ) ) {
 				$should_create_webhook = false;
 			}
 		}
 
 		$webhook_ids = array();
 		if ( $should_create_webhook ) {
-			foreach ( $not_setted_webhooks as $event ) {
+			foreach ( $not_set_webhooks as $event ) {
 				$result = $this->api_adapter_service->create_notification(
 					array(
 						'event'            => $event,
