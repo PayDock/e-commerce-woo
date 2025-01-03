@@ -1501,7 +1501,7 @@ class BrowserDetection {
 				}
 			}
 
-			// End of mobile browsers detection.
+			// End of mobile browser's detection.
 		}
 
 		// Other browsers without version specified.

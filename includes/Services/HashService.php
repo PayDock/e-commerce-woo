@@ -2,6 +2,8 @@
 
 namespace PowerBoard\Services;
 
+use Exception;
+
 class HashService {
 
 	private const CIPHER = 'aes-128-cbc';
@@ -39,7 +41,7 @@ class HashService {
 
 		} else {
 
-			throw new \Exception( 'There is no available data encryption module.' );
+			throw new Exception( 'There is no available data encryption module.' );
 
 		}
 

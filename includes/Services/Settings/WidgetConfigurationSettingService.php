@@ -11,6 +11,7 @@ use PowerBoard\Enums\SettingsTabs;
 use PowerBoard\Services\HashService;
 use PowerBoard\Services\SettingsService;
 use PowerBoard\Services\Validation\ConnectionValidationService;
+use WC_Admin_Settings;
 
 class WidgetConfigurationSettingService extends AbstractSettingService {
 	protected $service = null;
@@ -261,7 +262,7 @@ class WidgetConfigurationSettingService extends AbstractSettingService {
 
 		foreach ( $validation_service->get_errors() as $error ) {
 			$this->add_error( $error );
-			\WC_Admin_Settings::add_error( $error );
+			WC_Admin_Settings::add_error( $error );
 		}
 
 		$option_key = $this->get_option_key();

@@ -44,7 +44,7 @@ We also use a PowerBoard widget to implement front-end features ([More here](htt
 
 You can find all relevant information here:
 
-- [Power Board Web site](https://www.commbank.com.au/business/payments/take-online-payments/powerboard.html)
+- [Power Board Website](https://www.commbank.com.au/business/payments/take-online-payments/powerboard.html)
 - [PowerBoard Terms and Conditions to supplement the Merchant Agreement](https://www.commbank.com.au/content/dam/commbank-assets/business/merchants/2022-09/powerboard-terms-and-conditions-july-2022.pdf)
 - [Group Privacy Statement](https://www.commbank.com.au/support/privacy.html?ei=CB-footer_privacy)
 - [Important documents](https://www.commbank.com.au/important-info.html?ei=CB-footer_ImportantDocs)

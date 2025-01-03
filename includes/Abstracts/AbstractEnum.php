@@ -2,6 +2,9 @@
 
 namespace PowerBoard\Abstracts;
 
+use Exception;
+use ReflectionClass;
+
 abstract class AbstractEnum {
 	private const NAME_PROPERTY_NAME  = 'name';
 	private const VALUE_PROPERTY_NAME = 'value';
@@ -16,7 +19,7 @@ abstract class AbstractEnum {
 			return new static( $name );
 		}
 
-		throw new \Exception( 'Wrong Enum declaration' );
+		throw new Exception( 'Wrong Enum declaration' );
 	}
 
 	private static function get_const_full_name( string $name ): string {
@@ -24,7 +27,7 @@ abstract class AbstractEnum {
 	}
 
 	public static function cases(): array {
-		$ref_class = new \ReflectionClass( static::class );
+		$ref_class = new ReflectionClass( static::class );
 
 		return array_map(
 			function ( string $name ) {
@@ -44,6 +47,6 @@ abstract class AbstractEnum {
 			return $this->{$name};
 		}
 
-		throw new \Exception( 'Try get access to non exists property.' );
+		throw new Exception( 'Try get access to non exists property.' );
 	}
 }
