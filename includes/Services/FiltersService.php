@@ -78,6 +78,7 @@ class FiltersService extends AbstractSingleton {
 		add_filter( 'manage_woocommerce_page_wc-orders_custom_column', [ $this, 'ordersListNewColumnContent' ], 10, 2 );
 		add_filter( 'woocommerce_get_formatted_order_total', [ $this, 'changeOrderAmount' ], 10, 2 );
 		add_filter( 'manage_edit-shop_order_columns', [ $this, 'addCaptureAmountCustomColumn' ], 20 );
+		add_filter( 'plugins_loaded', [ $this, 'woo_text_override' ] );
 	}
 
 	protected function addSettingsLink(): void {
@@ -157,4 +158,10 @@ class FiltersService extends AbstractSingleton {
 
 		return $actions;
 	}
+
+	public function woo_text_override() {
+		$mofile = plugin_dir_path( __FILE__ ) . 'languages/woo-override-en_US.mo';
+		load_textdomain( 'woocommerce', $mofile );
+	}
+
 }
