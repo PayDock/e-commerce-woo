@@ -22,6 +22,9 @@
     <!-- Check up to 8 files simultaneously. -->
     <arg name="parallel" value="8"/>
 
+    <!-- Cache runs for speed boost. -->
+    <arg name="cache" value=".phpcs.cache"/>
+
     <!-- Configs -->
     <config name="minimum_supported_wp_version" value="6.5" />
 
@@ -29,11 +32,48 @@
     <rule ref="WooCommerce-Core" />
 
     <rule ref="WordPress-Extra">
-        <exclude name="Squiz.Commenting.ClassComment"/>
-        <exclude name="Squiz.Commenting.FunctionComment"/>
-        <exclude name="Squiz.Commenting.VariableComment"/>
-        <exclude name="Squiz.Commenting.FileComment"/>
+        <!-- Disable dot of end string docblock -->
+        <exclude name="Squiz.Commenting.InlineComment.InvalidEndChar" />
+
+        <!-- Commenting should be optional to where required not mandatory -->
+        <exclude name="Squiz.Commenting.FileComment.Missing" />
+        <exclude name="Squiz.Commenting.FileComment.MissingPackageTag" />
+        <exclude name="Squiz.Commenting.ClassComment.Missing" />
+        <exclude name="Squiz.Commenting.FunctionComment.Missing" />
+        <exclude name="Squiz.Commenting.FunctionComment.SpacingAfterParamType" />
+        <exclude name="Squiz.Commenting.VariableComment.Missing" />
+        <exclude name="Squiz.Commenting.FunctionComment.MissingParamComment" />
+        <exclude name="Squiz.Commenting.FunctionComment.MissingParamTag" />
+
+        <!-- Allow standard class filenames (CamelCase) -->
+        <exclude name="WordPress.Files.FileName.InvalidClassFileName" />
+        <exclude name="WordPress.Files.FileName.NotHyphenatedLowercase" />
+
+        <!-- Allow short ternary syntax and short arrays and short open tag -->
+        <exclude name="Generic.Arrays.DisallowShortArraySyntax" />
+        <exclude name="WordPress.PHP.DisallowShortTernary.Found" />
+        <exclude name="Generic.PHP.DisallowShortOpenTag.EchoFound" />
+
+        <!-- Allow standard conditional expressions -->
+        <exclude name="WordPress.PHP.YodaConditions" />
+
     </rule>
+
+    <!-- AutoEscaped functions -->
+    <rule ref="WordPress.Security.EscapeOutput">
+        <properties>
+            <property name="customAutoEscapedFunctions" type="array">
+                <element value="rd_render_attributes" />
+                <element value="rd_get_picture_html" />
+            </property>
+        </properties>
+    </rule>
+
+    <!-- Disallow long array syntax. -->
+    <rule ref="Generic.Arrays.DisallowLongArraySyntax.Found"/>
+
+    <!-- Prohibit Yoda Conditions expressions -->
+    <rule ref="Generic.ControlStructures.DisallowYodaConditions"/>
 
     <rule ref="WordPress.WP.I18n">
         <properties>
