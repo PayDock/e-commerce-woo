@@ -4,7 +4,6 @@ namespace PowerBoard\Services\Checkout;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use PowerBoard\Enums\OrderListColumns;
-use PowerBoard\Services\OrderService;
 use PowerBoard\Services\SDKAdapterService;
 use PowerBoard\Services\SettingsService;
 use PowerBoard\Services\TemplateService;
@@ -62,16 +61,13 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 			return '';
 		}
 		wp_enqueue_script( 'power-board-api', SettingsService::get_instance()->get_widget_script_url(), array(), time(), true );
-		wp_enqueue_script( 'power-board-form', POWER_BOARD_PLUGIN_URL . '/assets/js/frontend/form.js', array(), time(), true );
-		wp_enqueue_script( 'power-board-classic-form', POWER_BOARD_PLUGIN_URL . '/assets/js/frontend/classic-form.js', array(), time(), true );
-		wp_enqueue_style( 'power-board-widget-css', POWER_BOARD_PLUGIN_URL . '/assets/css/frontend/widget.css', array(), time() );
 
 		wp_localize_script(
 			'power-board-form',
 			'PowerBoardAjax',
 			array(
-				'url'     => admin_url( 'admin-ajax.php' ),
-				'wpnonce' => wp_create_nonce( 'power-board-create-charge-intent' ),
+				'url'           => admin_url( 'admin-ajax.php' ),
+				'wpnonce'       => wp_create_nonce( 'power-board-create-charge-intent' ),
 				'wpnonce_error' => wp_create_nonce( 'power-board-create-error-notice' ),
 			)
 		);
@@ -79,11 +75,14 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 			'power-board-classic-form',
 			'PowerBoardAjax',
 			array(
-				'url'     => admin_url( 'admin-ajax.php' ),
-				'wpnonce' => wp_create_nonce( 'power-board-create-charge-intent' ),
-                'wpnonce_error' => wp_create_nonce( 'power-board-create-error-notice' ),
+				'url'           => admin_url( 'admin-ajax.php' ),
+				'wpnonce'       => wp_create_nonce( 'power-board-create-charge-intent' ),
+				'wpnonce_error' => wp_create_nonce( 'power-board-create-error-notice' ),
 			)
 		);
+		wp_enqueue_script( 'power-board-form', POWER_BOARD_PLUGIN_URL . '/assets/js/frontend/form.js', array(), time(), true );
+		wp_enqueue_script( 'power-board-classic-form', POWER_BOARD_PLUGIN_URL . '/assets/js/frontend/classic-form.js', array(), time(), true );
+		wp_enqueue_style( 'power-board-widget', POWER_BOARD_PLUGIN_URL . '/assets/css/frontend/widget.css', array(), time() );
 		wp_enqueue_script( 'axios', 'https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js', array(), time(), true );
 
 		return '';
@@ -142,21 +141,21 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 	 * Ajax function
 	 */
 	public function power_board_create_error_notice() {
-        $wp_nonce = ! empty( $_POST['_wpnonce'] ) ? sanitize_text_field( $_POST['_wpnonce'] ) : null;
-        if ( ! wp_verify_nonce( $wp_nonce, 'power-board-create-error-notice' ) ) {
-            wp_send_json_error( array( 'message' => __( 'Error: Security check', 'power-board' ) ) );
+		$wp_nonce = ! empty( $_POST['_wpnonce'] ) ? sanitize_text_field( $_POST['_wpnonce'] ) : null;
+		if ( ! wp_verify_nonce( $wp_nonce, 'power-board-create-error-notice' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Error: Security check', 'power-board' ) ) );
 
-            return;
-        }
-        wc_add_notice( __( $_POST['error'], 'power-board' ), 'error' );
-        $response['data'] = wc_print_notices();
-        return $response;
+			return;
+		}
+		wc_add_notice( __( $_POST['error'], 'power-board' ), 'error' );
+		$response['data'] = wc_print_notices();
+		return $response;
 	}
 
 	public function woocommerce_before_checkout_form( $arg ) {
 	}
 
-	function setup_phone_fields_settings( $address_fields ) {
+	public function setup_phone_fields_settings( $address_fields ) {
 		$address_fields['billing']['billing_phone']['required'] = false;
 		$address_fields['shipping']['shipping_phone']           = array(
 			'label'        => 'Phone',
