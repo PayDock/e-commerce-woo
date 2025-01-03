@@ -5,6 +5,7 @@ namespace PowerBoard\Abstracts;
 use PowerBoard\Enums\SettingsTabs;
 use PowerBoard\Services\Assets\AdminAssetsService;
 use PowerBoard\Services\TemplateService;
+use WC_Blocks_Utils;
 use WC_Payment_Gateway;
 
 abstract class AbstractSettingService extends WC_Payment_Gateway {
@@ -39,7 +40,7 @@ abstract class AbstractSettingService extends WC_Payment_Gateway {
 		$this->init_settings();
 		$this->init_form_fields();
 
-		$this->has_fields = is_checkout() && \WC_Blocks_Utils::has_block_in_page( wc_get_page_id( 'checkout' ), 'woocommerce/checkout' );
+		$this->has_fields = is_checkout() && WC_Blocks_Utils::has_block_in_page( wc_get_page_id( 'checkout' ), 'woocommerce/checkout' );
 
 		if ( is_admin() ) {
 			new AdminAssetsService();

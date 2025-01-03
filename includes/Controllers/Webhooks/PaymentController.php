@@ -2,11 +2,13 @@
 
 namespace PowerBoard\Controllers\Webhooks;
 
+use Exception;
 use PowerBoard\Enums\ChargeStatuses;
 use PowerBoard\Enums\NotificationEvents;
 use PowerBoard\Repositories\LogRepository;
 use PowerBoard\Services\OrderService;
 use PowerBoard\Services\SDKAdapterService;
+use WP_Error;
 
 class PaymentController {
 
@@ -238,7 +240,7 @@ class PaymentController {
 					$result['error'],
 					LogRepository::ERROR
 				);
-				throw new \Exception( esc_html( $result['error'] ) );
+				throw new Exception( esc_html( $result['error'] ) );
 		} else {
 			$error = __( 'The refund process has failed; please try again.', 'power-board' );
 			$logger_repository->createLogRecord(
@@ -248,7 +250,7 @@ class PaymentController {
 				$error,
 				LogRepository::ERROR
 			);
-			throw new \Exception( esc_html( $error ) );
+			throw new Exception( esc_html( $error ) );
 		}
 	}
 
@@ -438,7 +440,7 @@ class PaymentController {
 			$charge_id,
 			$operation,
 			$order_status,
-			$result instanceof \WP_Error ? $result->get_error_message() : '',
+			$result instanceof WP_Error ? $result->get_error_message() : '',
 			in_array(
 				$order_status,
 				array( 'processing', 'on-hold', 'pending' ),

@@ -6,6 +6,7 @@ use PowerBoard\Abstracts\AbstractEnum;
 use PowerBoard\Services\Settings\WidgetConfigurationSettingService;
 use PowerBoard\Services\Settings\LogsSettingService;
 use PowerBoard\Services\Settings\WebHooksSettingService;
+use ReflectionClass;
 
 class SettingsTabs extends AbstractEnum {
 	protected const WIDGET_CONFIGURATION = PLUGIN_PREFIX;
@@ -21,7 +22,7 @@ class SettingsTabs extends AbstractEnum {
 	}
 
 	public static function allCases(): array {
-		$RefClass = new \ReflectionClass( static::class);
+		$RefClass = new ReflectionClass( static::class);
 
 		return array_map( function (string $name) {
 			return static::{$name}();

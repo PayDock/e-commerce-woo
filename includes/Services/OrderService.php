@@ -2,6 +2,7 @@
 
 namespace PowerBoard\Services;
 
+use Exception;
 use PowerBoard\Hooks\ActivationHook;
 
 class OrderService {
@@ -75,7 +76,7 @@ class OrderService {
 				$order->update_status( $old_status_key, $error );
 				set_transient( 'power_board_status_change_error_' . get_current_user_id(), $error, 300 );
 				unset( $GLOBALS['power_board_is_updating_order_status'] );
-				throw new \Exception( esc_html( $error ) );
+				throw new Exception( esc_html( $error ) );
 			}
 		}
 	}
