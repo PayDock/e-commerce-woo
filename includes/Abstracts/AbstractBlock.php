@@ -15,9 +15,9 @@ abstract class AbstractBlock extends AbstractPaymentMethodType {
 		}
 	}
 
-	public function is_active() {
-		return $this->gateway->is_available();
-	}
+    public function is_active() {
+        return filter_var( $this->get_setting( 'enabled', false ), FILTER_VALIDATE_BOOLEAN );
+    }
 
 	public function get_payment_method_script_handles() {
 		if ( ! self::$is_load && is_checkout() ) {
