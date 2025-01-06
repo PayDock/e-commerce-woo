@@ -94,8 +94,8 @@ jQuery(function ($) {
                     action: 'power_board_create_error_notice',
                     error: errorMessage,
                 }).then(message => {
-                    var doc = new DOMParser().parseFromString(message.toString(), "text/html");
-                    var noticeBanner = doc.querySelectorAll("div.wc-block-components-notice-banner")[0];
+                    const doc = new DOMParser().parseFromString(message.toString(), "text/html");
+                    const noticeBanner = doc.querySelectorAll("div.wc-block-components-notice-banner")[0];
                     $('.woocommerce-notices-wrapper:first').append(noticeBanner)
                     $('html, body').animate({
                         scrollTop: ($('div.woocommerce-notices-wrapper').offset().top - 100)
@@ -398,8 +398,6 @@ jQuery(function ($) {
                         console.error(e)
                     }
                 })
-
-                axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
             },
         }
 
