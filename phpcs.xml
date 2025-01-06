@@ -53,6 +53,7 @@
 
         <!-- Allow short ternary syntax and short arrays and short open tag -->
         <exclude name="Generic.Arrays.DisallowShortArraySyntax" />
+        <exclude name="Universal.Arrays.DisallowShortArraySyntax" />
         <exclude name="WordPress.PHP.DisallowShortTernary.Found" />
         <exclude name="Generic.PHP.DisallowShortOpenTag.EchoFound" />
 
@@ -72,7 +73,7 @@
     </rule>
 
     <!-- Disallow long array syntax. -->
-    <rule ref="Generic.Arrays.DisallowLongArraySyntax.Found"/>
+    <rule ref="Generic.Arrays.DisallowLongArraySyntax"/>
 
     <!-- Prohibit Yoda Conditions expressions -->
     <rule ref="Generic.ControlStructures.DisallowYodaConditions"/>
