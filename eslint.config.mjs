@@ -10,7 +10,8 @@ export default [
     languageOptions: {
       globals: {
         ...globals.browser,
-        "jQuery": "readonly",
+        ...globals.node,
+        ...globals.jquery,
         "wp": "readonly",
         "__dirname": "readonly",
         "orderData": "readonly",
