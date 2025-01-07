@@ -1,6 +1,17 @@
-<?php if ( ! defined( 'ABSPATH' ) ) {
+<?php
+/**
+ * @var array $data
+ * @var WC_Order $order
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+if ( empty( $order ) ) {
+	$order = $data['order'];
+}
+
 ?>
 <span class="power-board-order-actions">
 	<?php

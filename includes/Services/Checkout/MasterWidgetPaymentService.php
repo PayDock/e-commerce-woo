@@ -40,12 +40,7 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 
 		// Actions.
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
-		add_action(
-			'woocommerce_scheduled_subscription_payment_power_board',
-			array( $this, 'process_subscription_payment' ),
-			10,
-			2
-		);
+		add_action( 'woocommerce_scheduled_subscription_payment_power_board', array( $this, 'process_subscription_payment' ), 10, 2 );
 
 		add_action( 'wp_enqueue_scripts', array( $this, 'payment_scripts' ) );
 
@@ -60,6 +55,7 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		if ( ! is_checkout() || ! $this->is_available() ) {
 			return '';
 		}
+
 		wp_enqueue_script( 'power-board-api', SettingsService::get_instance()->get_widget_script_url(), array(), time(), true );
 
 		wp_localize_script(
@@ -71,6 +67,7 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 				'wpnonce_error' => wp_create_nonce( 'power-board-create-error-notice' ),
 			)
 		);
+
 		wp_localize_script(
 			'power-board-classic-form',
 			'PowerBoardAjax',
@@ -80,9 +77,11 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 				'wpnonce_error' => wp_create_nonce( 'power-board-create-error-notice' ),
 			)
 		);
+
 		wp_enqueue_script( 'power-board-form', POWER_BOARD_PLUGIN_URL . '/assets/js/frontend/form.js', array(), time(), true );
 		wp_enqueue_script( 'power-board-classic-form', POWER_BOARD_PLUGIN_URL . '/assets/js/frontend/classic-form.js', array(), time(), true );
 		wp_enqueue_style( 'power-board-widget', POWER_BOARD_PLUGIN_URL . '/assets/css/frontend/widget.css', array(), time() );
+
 		wp_enqueue_script( 'axios', 'https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js', array(), time(), true );
 
 		return '';
@@ -174,12 +173,14 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		SDKAdapterService::get_instance();
 
 		$settings = $this->get_settings();
+		$nonce = wp_create_nonce( 'power-board-create-charge-intent' );
 
 		$template->include_checkout_html(
 			'method-form',
 			array(
 				'description' => $this->description,
 				'id'          => $this->id,
+				'nonce'       => $nonce,
 				'settings'    => wp_json_encode( $settings ),
 			)
 		);

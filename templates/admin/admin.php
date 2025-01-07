@@ -1,6 +1,16 @@
-<?php if ( ! defined( 'ABSPATH' ) ) {
+<?php
+/**
+ * @var array $tabs
+ * @var \PowerBoard\Services\TemplateService $template_service
+ * @var array $records
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
 	exit;
-} // Exit if accessed directly ?>
+}
+
+?>
+
 <nav class="nav-tab-wrapper woo-nav-tab-wrapper">
 	<?php foreach ( $tabs as $key => $value ) : ?>
 		<a href="/wp-admin/admin.php?page=wc-settings&tab=checkout&section=<?php echo esc_attr( $key ); ?>"

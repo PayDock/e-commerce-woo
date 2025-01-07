@@ -76,7 +76,7 @@ class ActionsService extends AbstractSingleton {
 
 		add_action( 'woocommerce_order_item_add_action_buttons', [ $orderService, 'init_power_board_order_buttons'], 10, 2 );
 		add_action( 'woocommerce_order_status_changed', [ $orderService, 'status_change_verification' ], 20, 4 );
-		add_action( 'woocommerce_admin_order_totals_after_total', [ $orderService, 'information_about_partial_captured' ] );
+		add_action( 'woocommerce_admin_order_totals_after_total', [ $orderService, 'information_about_partial_captured' ], 10, 1 );
 		add_action( 'wp_ajax_power-board-capture-charge', [ $paymentController, 'capture_payment' ] );
 		add_action( 'wp_ajax_power-board-cancel-authorised', [ $paymentController, 'cancel_authorised' ] );
 		add_action( 'woocommerce_create_refund', [ $paymentController, 'refund_process' ], 10, 2 );

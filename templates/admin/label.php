@@ -1,9 +1,16 @@
-<?php if ( ! defined( 'ABSPATH' ) ) {
+<?php
+/**
+ * @var array $value
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
 	exit;
-} // Exit if accessed directly ?>
+}
+
+?>
 <tr>
 	<th scope="row" class="titledesc">
-		<h3><?php echo wp_kses_post( $value['title'] ); ?></h3>
+		<h3><?php echo isset( $value['title'] ) ? wp_kses_post( $value['title'] ) : ''; ?></h3>
 	</th>
 	<td class="forminp">
 	</td>

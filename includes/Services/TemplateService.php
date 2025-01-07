@@ -53,6 +53,10 @@ class TemplateService {
 	public function get_admin_html( string $template, array $data = [] ): string {
 		ob_start();
 
+		if ( ! empty( $data ) ) {
+			extract( $data );
+		}
+
 		$this->include_admin_html( $template, $data );
 
 		return ob_get_clean();

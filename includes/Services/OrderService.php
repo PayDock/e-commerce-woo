@@ -82,7 +82,6 @@ class OrderService {
 	}
 
 	public function information_about_partial_captured( $order_id ) {
-
 		$order = wc_get_order( $order_id );
 
 		if ( is_object( $order ) ) {
