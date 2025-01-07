@@ -20,7 +20,7 @@ abstract class AbstractSettingService extends WC_Payment_Gateway {
 			SettingsTabs::allCases()
 		);
 
-		$section = filter_input( INPUT_GET, 'section', FILTER_SANITIZE_STRING );
+		$section = wp_strip_all_tags( filter_input( INPUT_GET, 'section' ) );
 
 		if ( in_array( $section, $available_sections, true ) ) {
 			$this->current_section = $section;
@@ -50,18 +50,18 @@ abstract class AbstractSettingService extends WC_Payment_Gateway {
 
 	abstract protected function get_id(): string;
 
-	public function parent_generate_settings_html( $formFields = array(), $echo = true ): ?string {
-		return parent::generate_settings_html( $formFields, $echo );
+	public function parent_generate_settings_html( $form_fields = [], $should_echo = true ): ?string {
+		return parent::generate_settings_html( $form_fields, $should_echo );
 	}
 
-	public function generate_settings_html( $form_fields = array(), $echo = true ): ?string {
+	public function generate_settings_html( $form_fields = [], $should_echo = true ): ?string {
 		if ( empty( $form_fields ) ) {
 			$form_fields = $this->get_form_fields();
 		}
 
 		$tabs = $this->getTabs();
 
-		if ( $echo ) {
+		if ( $should_echo ) {
 			$this->template_service->include_admin_html( 'admin', compact( 'tabs', 'form_fields' ) );
 		} else {
 			return $this->template_service->get_admin_html( 'admin', compact( 'tabs', 'form_fields' ) );
@@ -71,20 +71,16 @@ abstract class AbstractSettingService extends WC_Payment_Gateway {
 	}
 
 	protected function getTabs(): array {
-		return array(
-			SettingsTabs::WIDGET_CONFIGURATION()->value => array(
+		return [
+			SettingsTabs::WIDGET_CONFIGURATION()->value => [
 				'label'  => __( 'Widget Configuration', 'power-board' ),
 				'active' => SettingsTabs::WIDGET_CONFIGURATION()->value === $this->current_section,
-			),
-			SettingsTabs::LOG()->value                  => array(
+			],
+			SettingsTabs::LOG()->value                  => [
 				'label'  => __( 'Logs', 'power-board' ),
 				'active' => SettingsTabs::LOG()->value === $this->current_section,
-			),
-		);
-	}
-
-	public function generate_label_html( $key, $value ) {
-		return $this->template_service->get_admin_html( 'label', compact( 'key', 'value' ) );
+			],
+		];
 	}
 
 	public function generate_big_label_html( $key, $value ) {
