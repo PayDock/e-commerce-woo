@@ -108,7 +108,7 @@ setTimeout(() => jQuery(function ($) {
 
     const firstInitInterval = setInterval(() => {
         const $radioSelectPaymentMethod = $('.wc-block-components-radio-control__input');
-        if (!!$radioSelectPaymentMethod) {
+        if ($radioSelectPaymentMethod !== null ) {
             clearInterval(firstInitInterval);
             triggerFirstPaymentMethodChanges();
             setPaymentMethodWatcher();

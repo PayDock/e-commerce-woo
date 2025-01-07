@@ -94,15 +94,33 @@ jQuery(function ($) {
                     action: 'power_board_create_error_notice',
                     error: errorMessage,
                 }).then(message => {
-                    var doc = new DOMParser().parseFromString(message.toString(), "text/html");
-                    var noticeBanner = doc.querySelectorAll("div.wc-block-components-notice-banner")[0];
+                    const doc = new DOMParser().parseFromString(message.toString(), "text/html");
+                    const noticeBanner = doc.querySelectorAll("div.wc-block-components-notice-banner")[0];
                     $('.woocommerce-notices-wrapper:first').append(noticeBanner)
                     $('html, body').animate({
                         scrollTop: ($('div.woocommerce-notices-wrapper').offset().top - 100)
                     }, 800)
-
-                    this.initMasterWidget();
                 });
+            },
+            handleWidgetError() {
+                let loading = $('#loading');
+                this.toggleWidgetVisibility(true);
+                loading.show();
+                this.initMasterWidget();
+
+                const noticesWrapper = $('div.woocommerce-notices-wrapper')[0];
+                const removeErrorTimeout = setTimeout(() => {
+                    if (noticesWrapper?.children.length > 0) {
+                        clearTimeout(removeErrorTimeout);
+                        setInterval(() => {
+                            for (let notice of noticesWrapper.children) {
+                                if (notice.classList.contains('is-error')) {
+                                    notice.remove();
+                                }
+                            }
+                        }, 5000);
+                    }
+                }, 200 );
             },
             setFieldLikeInvalid(fieldName) {
                 let element = document.getElementById(`${fieldName}_field`);
@@ -263,6 +281,7 @@ jQuery(function ($) {
                         window.widgetPowerBoard = new cba.Checkout('#classic-powerBoardCheckout_wrapper', response.data.resource.data.token);
                         window.widgetPowerBoard.setEnv(this.getConfigs().environment)
                         const showError = (message) => this.showErrorMessage(message);
+                        const handleWidgetError = () => this.handleWidgetError();
                         const submitForm = () => this.form.submit();
 
                         window.widgetPowerBoard.onPaymentSuccessful(function (data) {
@@ -272,13 +291,17 @@ jQuery(function ($) {
                             window.widgetPowerBoard = null;
                         });
 
-                        window.widgetPowerBoard.onPaymentFailure(function (error) {
-                            showError(error.message);
+                        window.widgetPowerBoard.onPaymentFailure(function () {
+                            showError('Transaction failed. Please check your payment details or contact your bank');
+
+                            handleWidgetError();
                             window.widgetPowerBoard = null;
                         });
 
                         window.widgetPowerBoard.onPaymentExpired(function () {
-                            showError('Your payment session has expired. Please try again.');
+                            showError('Your payment session has expired. Please retry your payment');
+
+                            handleWidgetError();
                             window.widgetPowerBoard = null;
                         });
                     }
@@ -375,8 +398,6 @@ jQuery(function ($) {
                         console.error(e)
                     }
                 })
-
-                axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
             },
         }
 

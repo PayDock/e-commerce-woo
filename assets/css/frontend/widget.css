@@ -99,3 +99,9 @@
 .master-widget-wrapper {
 	position: relative;
 }
+
+.wc-block-components-notice-banner {
+	&.hide {
+		display: none;
+	}
+}

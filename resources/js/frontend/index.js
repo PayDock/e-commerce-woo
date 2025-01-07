@@ -34,6 +34,9 @@ const toggleWidgetVisibility = (hide) => {
 
 const initMasterWidgetCheckout = () => {
     if (canMakePayment(settings.total_limitation, cart.getCartTotals()?.total_price)) {
+        const orderButton = jQuery('.wc-block-components-checkout-place-order-button');
+        orderButton.hide();
+
         jQuery.ajax({
             url: '/?wc-ajax=power-board-create-charge-intent',
             type: 'POST',
@@ -59,9 +62,9 @@ const initMasterWidgetCheckout = () => {
                         window.widgetPowerBoard = null;
                     });
 
-                    window.widgetPowerBoard.onPaymentFailure(function (error) {
+                    window.widgetPowerBoard.onPaymentFailure(function () {
                         paymentSourceElement.val(JSON.stringify({
-                            errorMessage: error.message
+                            errorMessage: 'Transaction failed. Please check your payment details or contact your bank',
                         }));
                         orderButton.show();
                         orderButton.click();
@@ -71,7 +74,7 @@ const initMasterWidgetCheckout = () => {
 
                     window.widgetPowerBoard.onPaymentExpired(function () {
                         paymentSourceElement.val(JSON.stringify({
-                            errorMessage: 'Your payment session has expired. Please try again.',
+                            errorMessage: 'Your payment session has expired. Please retry your payment',
                         }));
                         orderButton.show();
                         orderButton.click();
@@ -89,14 +92,43 @@ const handleFormChanged = () => {
     let loading = jQuery('#loading')[0];
     toggleWidgetVisibility(true);
     if (isFormValid) {
-        loading.classList.remove('hide');
+        if (loading.classList.length > 0) loading.classList.remove('hide');
         error.classList.add('hide');
         initMasterWidgetCheckout();
     } else {
         loading.classList.add('hide');
-        error.classList.remove('hide');
+        if (error.classList.length > 0) error.classList.remove('hide');
     }
 }
+
+const handleWidgetError = () => {
+    let loading = document.getElementById('loading');
+    if (loading.classList.length > 0) {
+        loading.classList.remove('hide');
+    }
+    toggleWidgetVisibility(true);
+    initMasterWidgetCheckout();
+
+    const checkoutContainer = document.querySelectorAll('.wc-block-checkout')[0];
+    const topNotices = checkoutContainer.querySelectorAll('.wc-block-components-notices')[0];
+    const paymentMethodsContainer = document.querySelectorAll('.wc-block-checkout__payment-method')[0];
+    const checkoutPaymentStep = paymentMethodsContainer?.querySelectorAll('.wc-block-components-checkout-step__content')?.[0];
+    const checkoutPaymentNotices = checkoutPaymentStep?.querySelectorAll('.wc-block-components-notices')?.[0];
+    const removeErrorTimeout = setTimeout(() => {
+        if (checkoutPaymentNotices?.children.length > 0 || topNotices.children.length > 0) {
+            clearTimeout(removeErrorTimeout);
+            const removeNoticeInterval = setInterval(() => {
+                clearInterval(removeNoticeInterval);
+                const noticesToCheck = checkoutPaymentNotices?.children.length > 0 ? checkoutPaymentNotices : topNotices;
+                for (let notice of noticesToCheck.children) {
+                    if (notice.classList.contains('is-error')) {
+                        notice.classList.add('hide');
+                    }
+                }
+            }, 5000);
+        }
+    }, 200 );
+};
 
 const Content = (props) => {
     jQuery('.wc-block-components-checkout-place-order-button').show();
@@ -123,7 +155,7 @@ const Content = (props) => {
                 };
             }
 
-            initMasterWidgetCheckout();
+            handleWidgetError();
             return {
                 type: emitResponse.responseTypes.ERROR, message: __(paymentDataParsed.errorMessage, textDomain),
             }
@@ -167,7 +199,7 @@ const Content = (props) => {
     );
 };
 
-const Paydok = {
+const Paydock = {
     name: "power_board_gateway",
     label: createElement(() =>
         createElement(
@@ -192,4 +224,4 @@ const Paydok = {
     },
 };
 
-registerPaymentMethod(Paydok);
+registerPaymentMethod(Paydock);

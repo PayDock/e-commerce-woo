@@ -40,7 +40,7 @@
 		</tr>
 		<tr>
 			<td class="label">
-				<label for="refund_amount">
+				<label for="capture_amount">
 					<?php esc_html_e( 'Capture amount', 'woocommerce' ); ?>:
 				</label>
 			</td>

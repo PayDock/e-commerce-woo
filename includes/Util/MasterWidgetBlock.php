@@ -10,15 +10,10 @@ use PowerBoard\Services\SettingsService;
 final class MasterWidgetBlock extends AbstractBlock {
 	protected const SCRIPT = 'blocks';
 	protected $name        = 'power_board';
-	private $gateway;
 
 	public function initialize() {
 		$this->settings = get_option( 'woocommerce_power_board_settings', array() );
 		$this->gateway  = new MasterWidgetPaymentService();
-	}
-
-	public function is_active() {
-		return $this->gateway->is_available();
 	}
 
 	public function get_payment_method_data() {

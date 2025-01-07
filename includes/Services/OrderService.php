@@ -28,16 +28,16 @@ class OrderService {
 	public function init_power_board_order_buttons( $order ) {
 		$order_status        = $order->get_status();
 		$captured_amount     = $order->get_meta( 'capture_amount' );
-		$total_refaund       = $order->get_total_refunded();
+		$total_refund        = $order->get_total_refunded();
 		$order_total         = (float) $order->get_total( false );
 		if ( in_array( $order_status, array( 'pending', 'failed', 'cancelled', 'on-hold', 'refunded' ) )
-			|| ( $order_total === $total_refaund )
-			|| ( $captured_amount === $total_refaund )
+			|| ( $order_total === $total_refund )
+			|| ( $captured_amount === $total_refund )
 		) {
 			wp_enqueue_style(
 				'hide-refund-button-styles',
 				POWER_BOARD_PLUGIN_URL . 'assets/css/admin/hide-refund-button.css',
-				array(),
+				[],
 				POWER_BOARD_PLUGIN_VERSION
 			);
 		}
