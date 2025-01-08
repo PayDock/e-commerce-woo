@@ -341,12 +341,4 @@ class WidgetConfigurationSettingService extends AbstractSettingService {
 
 		return parent::generate_settings_html( $form_fields, $should_echo );
 	}
-
-	public function validate_big_label_field( $key, $value ) {
-		return '';
-	}
-
-	public function validate_label_field( $key, $value ) {
-		return '';
-	}
 }
