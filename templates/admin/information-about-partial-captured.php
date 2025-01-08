@@ -54,7 +54,7 @@ if ( empty( $captured_amount ) ) {
 	<tbody>
 	<tr>
 		<td class="label"><?php echo esc_html__( 'Captured Amount', 'power-board' ); ?>:</td>
-		<td width="1%"></td>
+		<td style="width: 1%"></td>
 		<td class="total  captured-amount">
 			<span class="woocommerce-Price-amount">
 				<bdi>

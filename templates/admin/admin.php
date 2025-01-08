@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 <nav class="nav-tab-wrapper woo-nav-tab-wrapper">
 	<?php foreach ( $tabs as $key => $value ) : ?>
-		<a href="/wp-admin/admin.php?page=wc-settings&tab=checkout&section=<?php echo esc_attr( $key ); ?>"
+        <a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . esc_attr( $key ) ) ); ?>"
 			class="nav-tab <?php echo $value['active'] ? 'nav-tab-active' : ''; ?>">
 			<?php echo esc_html( $value['label'] ); ?>
 		</a>
