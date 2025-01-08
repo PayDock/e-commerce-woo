@@ -7,7 +7,8 @@
  * @var array $data
  */
 
-echo wpautop( wp_kses_post( esc_attr( $data['description'] ) ) );
+echo wpautop( wp_kses_post( $data['description'] ) );
+
 ?>
 
 <fieldset id="wc-classic-power-board-checkout" class="wc-payment-form powerboard">
@@ -62,13 +63,13 @@ if ( $is_order_pay_page === 'true' ) {
 
         ?>
         <script type="text/javascript">
-            var orderData = <?php echo json_encode( $order_data ); ?>;
-            var isOrderPayPage = <?php echo $is_order_pay_page; ?>;
+            var orderData = <?php echo wp_json_encode( $order_data ); ?>;
+            var isOrderPayPage = <?php echo $is_order_pay_page === 'true' ? 'true' : 'false'; ?>;
         </script>
         <?php
 
     } else {
-        echo 'No order found';
+        echo esc_html__( 'No order found', 'power-board' );
         exit;
     }
 

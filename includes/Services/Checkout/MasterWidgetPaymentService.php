@@ -104,9 +104,12 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		$order = wc_get_order( $order_id );
 		$order->set_status( 'processing' );
 		$order->payment_complete();
-		$order->update_meta_data( 'power_board_charge_id', $_POST['chargeid'] );
+
+		$charge_id = sanitize_text_field( $_POST['chargeid'] ?? '' );
+		$order->update_meta_data( 'power_board_charge_id', $charge_id );
 		$order->update_meta_data( 'pb_directly_charged', 1 );
 		$order->update_meta_data( OrderListColumns::PAYMENT_SOURCE_TYPE()->get_key(), 'PowerBoard' );
+
 		WC()->cart->empty_cart();
 		$order->save();
 
@@ -146,8 +149,14 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 
 			return;
 		}
-		wc_add_notice( __( $_POST['error'], 'power-board' ), 'error' );
+
+		$error_message = sanitize_text_field( $_POST['error'] ?? '' );
+		if ( $error_message ) {
+		    wc_add_notice( __( $error_message, 'power-board' ), 'error' );
+		}
+
 		$response['data'] = wc_print_notices();
+
 		return $response;
 	}
 

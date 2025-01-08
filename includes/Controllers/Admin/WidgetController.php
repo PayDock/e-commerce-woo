@@ -7,8 +7,11 @@ use PowerBoard\Services\Settings\APIAdapterService;
 use PowerBoard\Services\SettingsService;
 
 class WidgetController {
+
 	public function create_checkout_intent() {
+
 		$wp_nonce = ! empty( $_POST['_wpnonce'] ) ? sanitize_text_field( $_POST['_wpnonce'] ) : null;
+
 		if ( ! wp_verify_nonce( $wp_nonce, 'power-board-create-charge-intent' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Error: Security check', 'power-board' ) ) );
 
@@ -27,20 +30,30 @@ class WidgetController {
 		);
 
 		if ( ! empty( $_POST['total'] ) ) {
-			$request['total'] = $_POST['total'];
+
+			if ( is_array( $_POST['total'] ) ) {
+				$request['total'] = array_map( 'sanitize_text_field', $_POST['total'] );
+			} else {
+				$request['total'] = sanitize_text_field( $_POST['total'] );
+			}
+
 		} else {
 			$request['total']['total_price']   = $cart->get_total( false ) * 100;
 			$request['total']['currency_code'] = get_woocommerce_currency();
 		}
 
 		if ( ! empty( $_POST['order_id'] ) ) {
-			$reference = $_POST['order_id'];
+			$reference = sanitize_text_field( $_POST['order_id'] );
 		} else {
 			$orders    = wc_get_orders( $args );
 			$reference = $orders[0]->ID;
 		}
 
-		$billing_address = ! empty( $_POST['address'] ) ? $_POST['address'] : array();
+		$billing_address = array();
+
+		if ( ! empty( $_POST['address'] ) && is_array( $_POST['address'] ) ) {
+			$billing_address = array_map( 'sanitize_text_field', $_POST['address'] );
+		}
 
 		$intent_request_params = array(
 			'amount'        => round( $request['total']['total_price'] / 100, 2 ),
@@ -91,5 +104,7 @@ class WidgetController {
 		}
 
 		wp_send_json_success( $result, 200 );
+
 	}
+
 }

@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 <tr>
 	<th scope="row" class="titledesc">
-		<h3><?php echo isset( $value['title'] ) ? wp_kses_post( $value['title'] ) : ''; ?></h3>
+		<h3><?php echo isset( $value['title'] ) ? esc_html( $value['title'] ) : ''; ?></h3>
 	</th>
 	<td class="forminp">
 	</td>

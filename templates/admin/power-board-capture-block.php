@@ -28,7 +28,7 @@ if ( empty( $order ) ) {
 		if ( $order_directly_charged == false ) :
 			?>
 		<button type="button"
-				onclick="powerBoardPaymentCapture(<?php echo esc_attr( $order->get_id() ); ?>, 'power-board-capture-charge')"
+				onclick="powerBoardPaymentCapture(<?php echo absint( $order->get_id() ); ?>, 'power-board-capture-charge')"
 				class="button">
 			Capture charge
 		</button>
@@ -45,7 +45,7 @@ if ( empty( $order ) ) {
 	<table class="wc-order-totals">
 		<tr>
 			<td class="label"><?php esc_html_e( 'Total available to capture', 'woocommerce' ); ?>:</td>
-			<td class="total available-to-capture" data-value="<?php echo esc_html( $order->get_total() ); ?>">
+			<td class="total available-to-capture" data-value="<?php echo esc_attr( wc_format_decimal( $order->get_total() ) ); ?>">
 				<?php echo wp_kses_post( wc_price( $order->get_total(), array( 'currency' => $order->get_currency() ) ) ); ?>
 			</td>
 		</tr>

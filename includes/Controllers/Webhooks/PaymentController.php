@@ -41,7 +41,7 @@ class PaymentController {
 			$order_total = false;
 		}
 
-		$amount = wc_format_decimal( $_POST['amount'] );
+		$amount = ! empty( $_POST['amount'] ) ? wc_format_decimal( $_POST['amount'] ) : 0;
 
 		$logger_repository     = new LogRepository();
 		$power_board_charge_id = $order->get_meta( 'power_board_charge_id' );
@@ -185,15 +185,25 @@ class PaymentController {
 		}
 
 		$directly_charged = $order->get_meta( 'pb_directly_charged' );
-		if ( 'edit_order' === $_POST['action'] ) {
-			$amount_to_refund = ! $directly_charged && $capture_amount <= $amount ? ( $capture_amount * 100 - $total_refunded * 100 ) / 100 : $amount;
+
+		$action = isset( $_POST['action'] ) ? sanitize_text_field( $_POST['action'] ) : '';
+
+		if ( 'edit_order' === $action ) {
+
+			if ( ! $directly_charged && $capture_amount <= $amount ) {
+				$amount_to_refund = ( $capture_amount * 100 - $total_refunded * 100 ) / 100;
+			} else {
+				$amount_to_refund = $amount;
+			}
+
 			$refund->set_amount( $amount_to_refund );
 			$refund->set_total( $amount_to_refund * -1 );
+
 		} else {
 			$amount_to_refund = $amount;
 		}
 
-		if ( 'edit_order' === $_POST['action'] && $order->get_meta( 'status_change_verification_failed' ) ) {
+		if ( 'edit_order' === $action && $order->get_meta( 'status_change_verification_failed' ) ) {
 			$refund->set_amount( 0 );
 			$refund->set_total( 0 );
 			$refund->set_parent_id( 0 );
@@ -450,4 +460,5 @@ class PaymentController {
 
 		return true;
 	}
+
 }

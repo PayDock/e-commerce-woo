@@ -235,7 +235,7 @@ class WidgetConfigurationSettingService extends AbstractSettingService {
 			$type = $this->get_field_type( $field );
 
 			$option_key = $this->plugin_id . $this->id . '_' . $key;
-			$value      = isset( $_POST[ $option_key ] ) ? wc_clean( wp_unslash( $_POST[ $option_key ] ) ) : null;
+			$value      = ! empty( $_POST[ $option_key ] ) ? wc_clean( wp_unslash( $_POST[ $option_key ] ) ) : null;
 
 			if ( method_exists( $this, 'validate_' . $type . '_field' ) ) {
 				$value = $this->{'validate_' . $type . '_field'}( $key, $value );
