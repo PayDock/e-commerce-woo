@@ -36,9 +36,6 @@ class PaymentController {
 
 		if ( is_object( $order ) ) {
 			$order->calculate_totals();
-			$order_total = $order->get_total();
-		} else {
-			$order_total = false;
 		}
 
 		$amount = wc_format_decimal( $_POST['amount'] );
@@ -397,9 +394,6 @@ class PaymentController {
 
 		$order_total    = $order->get_total();
 		$capture_amount = $order->get_meta( 'capture_amount' );
-		if ( $capture_amount && ( $order_total > $capture_amount ) ) {
-			$order_total = $capture_amount;
-		}
 
 		$status        = ucfirst( strtolower( $data['status'] ?? 'undefined' ) );
 		$operation     = ucfirst( strtolower( $data['type'] ?? 'undefined' ) );

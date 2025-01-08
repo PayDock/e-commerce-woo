@@ -3,7 +3,6 @@
 namespace PowerBoard\Services;
 
 use Exception;
-use PowerBoard\Hooks\ActivationHook;
 
 class OrderService {
 

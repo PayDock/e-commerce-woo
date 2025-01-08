@@ -10,8 +10,6 @@ class ChargeService extends AbstractApiService {
 	const GET_TEMPLATES_ENDPOINT = 'checkouts/templates';
 	const CAPTURE_ENDPOINT = 'capture';
 	const REFUNDS_ENDPOINT = 'refunds';
-
-	protected $id = null;
 	protected $allowed_action = [
 		'create-intent' => self::METHOD_POST,
 		'templates' => self::METHOD_GET,

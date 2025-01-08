@@ -5,7 +5,6 @@ namespace PowerBoard\Services;
 use PowerBoard\Abstracts\AbstractSingleton;
 use PowerBoard\Enums\OrderListColumns;
 use PowerBoard\Enums\SettingsTabs;
-use PowerBoard\Hooks\ActivationHook;
 use PowerBoard\Services\Checkout\MasterWidgetPaymentService;
 use PowerBoard\Services\Settings\WidgetConfigurationSettingService;
 use PowerBoard\Services\Settings\LogsSettingService;
@@ -145,18 +144,6 @@ class FiltersService extends AbstractSingleton {
 		);
 
 		return $links;
-	}
-
-	public function my_account_classic_payment_edit( $actions, $order ) {
-
-		$order_status = $order->get_status();
-
-		if ( $order_status != 'pending' ) {
-			unset( $actions['pay'] );
-			unset( $actions['cancel'] );
-		}
-
-		return $actions;
 	}
 
 	public function woo_text_override() {

@@ -18,14 +18,4 @@ class NotificationEvents extends AbstractEnum {
 
 		return $result;
 	}
-
-	public static function toArray(): array {
-		$result = [];
-
-		foreach ( self::cases() as $type ) {
-			$result[ $type->name ] = $type->value;
-		}
-
-		return $result;
-	}
 }

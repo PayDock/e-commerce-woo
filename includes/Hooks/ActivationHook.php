@@ -24,11 +24,4 @@ class ActivationHook implements Hook {
 	protected function runMigration( Repository $repository ): void {
 		$repository->createTable();
 	}
-
-	protected function updateOrderStatus( $orders, $new_status ) {
-		foreach ( $orders as $order ) {
-			$order->set_status( $new_status );
-			$order->save();
-		}
-	}
 }
