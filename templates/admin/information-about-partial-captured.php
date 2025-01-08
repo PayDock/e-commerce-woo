@@ -1,6 +1,28 @@
-<?php if ( ! defined( 'ABSPATH' ) ) {
+<?php
+/**
+ * @var WC_Order $order
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
 	exit;
-} // Exit if accessed directly ?>
+}
+
+if ( ! isset( $order ) || ! $order instanceof WC_Order ) {
+	exit;
+}
+
+if ( empty( $captured_amount ) ) {
+
+	$captured_amount = $order->get_meta( 'capture_amount' );
+
+	if ( empty( $captured_amount ) ) {
+		$captured_amount = 0;
+	}
+
+}
+
+?>
+
 <script type="text/javascript">
 	jQuery(document).ready(function () {
 		const capturedAmount = jQuery('.wc-order-totals .captured-amount');

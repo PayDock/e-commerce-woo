@@ -40,12 +40,7 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 
 		// Actions.
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
-		add_action(
-			'woocommerce_scheduled_subscription_payment_power_board',
-			array( $this, 'process_subscription_payment' ),
-			10,
-			2
-		);
+		add_action( 'woocommerce_scheduled_subscription_payment_power_board', array( $this, 'process_subscription_payment' ), 10, 2 );
 
 		add_action( 'wp_enqueue_scripts', array( $this, 'payment_scripts' ) );
 
@@ -60,27 +55,33 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		if ( ! is_checkout() || ! $this->is_available() ) {
 			return '';
 		}
+
 		wp_enqueue_script( 'power-board-api', SettingsService::get_instance()->get_widget_script_url(), array(), time(), true );
-		wp_enqueue_script( 'power-board-form', POWER_BOARD_PLUGIN_URL . '/assets/js/frontend/form.js', array(), time(), true );
-		wp_enqueue_script( 'power-board-classic-form', POWER_BOARD_PLUGIN_URL . '/assets/js/frontend/classic-form.js', array(), time(), true );
-		wp_enqueue_style( 'power-board-widget-css', POWER_BOARD_PLUGIN_URL . '/assets/css/frontend/widget.css', array(), time() );
 
 		wp_localize_script(
 			'power-board-form',
 			'PowerBoardAjax',
 			array(
-				'url'     => admin_url( 'admin-ajax.php' ),
-				'wpnonce' => wp_create_nonce( 'power-board-create-charge-intent' ),
+				'url'           => admin_url( 'admin-ajax.php' ),
+				'wpnonce'       => wp_create_nonce( 'power-board-create-charge-intent' ),
+				'wpnonce_error' => wp_create_nonce( 'power-board-create-error-notice' ),
 			)
 		);
+
 		wp_localize_script(
 			'power-board-classic-form',
 			'PowerBoardAjax',
 			array(
-				'url'     => admin_url( 'admin-ajax.php' ),
-				'wpnonce' => wp_create_nonce( 'power-board-create-charge-intent' ),
+				'url'           => admin_url( 'admin-ajax.php' ),
+				'wpnonce'       => wp_create_nonce( 'power-board-create-charge-intent' ),
+				'wpnonce_error' => wp_create_nonce( 'power-board-create-error-notice' ),
 			)
 		);
+
+		wp_enqueue_script( 'power-board-form', POWER_BOARD_PLUGIN_URL . '/assets/js/frontend/form.js', array(), time(), true );
+		wp_enqueue_script( 'power-board-classic-form', POWER_BOARD_PLUGIN_URL . '/assets/js/frontend/classic-form.js', array(), time(), true );
+		wp_enqueue_style( 'power-board-widget', POWER_BOARD_PLUGIN_URL . '/assets/css/frontend/widget.css', array(), time() );
+
 		wp_enqueue_script( 'axios', 'https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js', array(), time(), true );
 
 		return '';
@@ -139,6 +140,12 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 	 * Ajax function
 	 */
 	public function power_board_create_error_notice() {
+		$wp_nonce = ! empty( $_POST['_wpnonce'] ) ? sanitize_text_field( $_POST['_wpnonce'] ) : null;
+		if ( ! wp_verify_nonce( $wp_nonce, 'power-board-create-error-notice' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Error: Security check', 'power-board' ) ) );
+
+			return;
+		}
 		wc_add_notice( __( $_POST['error'], 'power-board' ), 'error' );
 		$response['data'] = wc_print_notices();
 		return $response;
@@ -147,7 +154,7 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 	public function woocommerce_before_checkout_form( $arg ) {
 	}
 
-	function setup_phone_fields_settings( $address_fields ) {
+	public function setup_phone_fields_settings( $address_fields ) {
 		$address_fields['billing']['billing_phone']['required'] = false;
 		$address_fields['shipping']['shipping_phone']           = array(
 			'label'        => 'Phone',
@@ -166,12 +173,14 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		SDKAdapterService::get_instance();
 
 		$settings = $this->get_settings();
+		$nonce = wp_create_nonce( 'power-board-create-charge-intent' );
 
 		$template->include_checkout_html(
 			'method-form',
 			array(
 				'description' => $this->description,
 				'id'          => $this->id,
+				'nonce'       => $nonce,
 				'settings'    => wp_json_encode( $settings ),
 			)
 		);

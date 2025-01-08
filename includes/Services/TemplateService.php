@@ -5,32 +5,36 @@ namespace PowerBoard\Services;
 use PowerBoard\Enums\SettingsTabs;
 
 class TemplateService {
-	private const TEMPLATE_DIR = 'templates';
-	private const ADMIN_TEMPLATE_DIR = 'admin';
+	private const TEMPLATE_DIR          = 'templates';
+	private const ADMIN_TEMPLATE_DIR    = 'admin';
 	private const CHECKOUT_TEMPLATE_DIR = 'checkout';
 
 	private const TEMPLATE_END = '.php';
 	protected $current_section = '';
 	private $setting_service;
 
-	private $templateAdminDir;
+	private $template_admin_dir;
+	private $template_checkout_dir;
 
 	public function __construct( $service = null ) {
 		$this->setting_service = $service;
-		$section              = filter_input( INPUT_GET, 'section', FILTER_SANITIZE_STRING );
-		$available_sections   = array_map( function ( $item ) {
-			return strtolower( $item->value );
-		}, SettingsTabs::allCases() );
-		if ( isset( $this->setting_service->current_section ) || in_array( $section, $available_sections ) ) {
+		$section               = wp_strip_all_tags( filter_input( INPUT_GET, 'section' ) );
+		$available_sections    = array_map(
+			function ( $item ) {
+				return strtolower( $item->value );
+			},
+			SettingsTabs::allCases()
+		);
+		if ( isset( $this->setting_service->current_section ) || in_array( $section, $available_sections, true ) ) {
 			$this->current_section = $this->setting_service->current_section ?? $section;
 		}
-		$this->templateAdminDir = implode( DIRECTORY_SEPARATOR, [ self::TEMPLATE_DIR, self::ADMIN_TEMPLATE_DIR ] );
-		$this->templateCheckoutDir = implode( DIRECTORY_SEPARATOR, [ self::TEMPLATE_DIR, self::CHECKOUT_TEMPLATE_DIR ] );
+		$this->template_admin_dir    = implode( DIRECTORY_SEPARATOR, [ self::TEMPLATE_DIR, self::ADMIN_TEMPLATE_DIR ] );
+		$this->template_checkout_dir = implode( DIRECTORY_SEPARATOR, [ self::TEMPLATE_DIR, self::CHECKOUT_TEMPLATE_DIR ] );
 	}
 
 	public function include_admin_html( string $template, array $data = [] ): void {
 
-		$settings = SettingsService::get_instance();
+		$settings         = SettingsService::get_instance();
 		$data['settings'] = $settings;
 
 		$data['template_service'] = $this;
@@ -49,6 +53,10 @@ class TemplateService {
 	public function get_admin_html( string $template, array $data = [] ): string {
 		ob_start();
 
+		if ( ! empty( $data ) ) {
+			extract( $data );
+		}
+
 		$this->include_admin_html( $template, $data );
 
 		return ob_get_clean();
@@ -56,7 +64,7 @@ class TemplateService {
 
 	private function get_admin_path( string $template ): string {
 
-		return $this->get_template_path( $this->templateAdminDir . DIRECTORY_SEPARATOR . $template );
+		return $this->get_template_path( $this->template_admin_dir . DIRECTORY_SEPARATOR . $template );
 	}
 
 	private function get_template_path( string $template ): string {
@@ -79,6 +87,6 @@ class TemplateService {
 
 	private function get_checkout_path( string $template ): string {
 
-		return $this->get_template_path( $this->templateCheckoutDir . DIRECTORY_SEPARATOR . $template );
+		return $this->get_template_path( $this->template_checkout_dir . DIRECTORY_SEPARATOR . $template );
 	}
 }

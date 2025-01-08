@@ -18,7 +18,7 @@ class FiltersService extends AbstractSingleton {
 	}
 
 	public function ordersListNewColumn( $columns ) {
-		$new_columns = array();
+		$new_columns = [];
 
 		foreach ( $columns as $column_name => $column_info ) {
 			$new_columns[ $column_name ] = $column_info;
@@ -40,21 +40,23 @@ class FiltersService extends AbstractSingleton {
 	}
 
 	public function changeOrderAmount( $formatted_total, $order ) {
-		$page = filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRING );
-		if ( ! empty( $page ) && 'wc-orders' === $page ) {
-			$capturedAmount = $order->get_meta( 'capture_amount' );
-			if ( ! empty( $capturedAmount ) ) {
+		$page = wp_strip_all_tags( filter_input( INPUT_GET, 'page' ) );
+		if ( ! empty( $page ) && $page === 'wc-orders' ) {
+			$captured_amount = $order->get_meta( 'capture_amount' );
+			if ( ! empty( $captured_amount ) ) {
 
-				if ( $capturedAmount == $order->get_total() ) {
+				if ( $captured_amount === $order->get_total() ) {
 					return $formatted_total;
 				}
 
-				$price           = wc_price( ( $capturedAmount - $order->get_total_refunded() ),
-					[ 'currency' => $order->get_currency() ] );
-				$originalPrice   = wc_price( $order->get_total(), [ 'currency' => $order->get_currency() ] );
+				$price           = wc_price(
+					( $captured_amount - $order->get_total_refunded() ),
+					[ 'currency' => $order->get_currency() ]
+				);
+				$original_price  = wc_price( $order->get_total(), [ 'currency' => $order->get_currency() ] );
 				$formatted_total = sprintf(
 					'<del aria-hidden="true">%1$s</del><ins>%2$s</ins>',
-					$originalPrice,
+					$original_price,
 					$price
 				);
 			}
@@ -94,7 +96,7 @@ class FiltersService extends AbstractSingleton {
 			$methods[] = WidgetConfigurationSettingService::class;
 
 			if (
-				'checkout' != $current_tab ||
+				$current_tab !== 'checkout' ||
 				in_array(
 					$current_section,
 					array_map(
@@ -102,7 +104,8 @@ class FiltersService extends AbstractSingleton {
 							return $tab->value;
 						},
 						SettingsTabs::secondary()
-					)
+					),
+					true
 				)
 			) {
 				$methods[] = LogsSettingService::class;
@@ -117,16 +120,16 @@ class FiltersService extends AbstractSingleton {
 	}
 
 	public function woocommerceThankyouOrderReceivedText( $text ) {
-		$orderId  = absint( get_query_var( 'order-received' ) );
-		$options  = get_option( "power_board_fraud_{$orderId}" );
-		$order    = wc_get_order( $orderId );
+		$order_id = absint( get_query_var( 'order-received' ) );
+		$options  = get_option( "power_board_fraud_{$order_id}" );
+		$order    = wc_get_order( $order_id );
 		$status   = $order->get_status();
-		$afterpay = filter_input( INPUT_GET, 'afterpay-error', FILTER_SANITIZE_STRING );
+		$afterpay = wp_strip_all_tags( filter_input( INPUT_GET, 'afterpay-error' ) );
 
-		if ( ! empty( $afterpay ) && ( 'true' === $afterpay ) ) {
+		if ( ! empty( $afterpay ) && ( $afterpay === 'true' ) ) {
 			return __( 'Order has been cancelled', 'power-board' );
 		}
-		if ( false === $options && 'processing' !== $status ) {
+		if ( $options === false && $status !== 'processing' ) {
 			return __( 'Thank you. Your order has been received.', 'power-board' );
 		}
 
@@ -146,9 +149,20 @@ class FiltersService extends AbstractSingleton {
 		return $links;
 	}
 
+	public function my_account_classic_payment_edit( $actions, $order ) {
+
+		$order_status = $order->get_status();
+
+		if ( $order_status !== 'pending' ) {
+			unset( $actions['pay'] );
+			unset( $actions['cancel'] );
+		}
+
+		return $actions;
+	}
+
 	public function woo_text_override() {
 		$mofile = plugin_dir_path( __FILE__ ) . 'languages/woo-override-en_US.mo';
 		load_textdomain( 'woocommerce', $mofile );
 	}
-
 }

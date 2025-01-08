@@ -1,5 +1,13 @@
 <?php
-echo wpautop( wp_kses_post( esc_attr( $description ) ) );
+/**
+ * @var string $description
+ * @var string $id
+ * @var string $nonce
+ * @var string $settings
+ * @var array $data
+ */
+
+echo wpautop( wp_kses_post( esc_attr( $data['description'] ) ) );
 ?>
 
 <fieldset id="wc-classic-power-board-checkout" class="wc-payment-form powerboard">
@@ -13,10 +21,10 @@ echo wpautop( wp_kses_post( esc_attr( $description ) ) );
     </div>
 
     <input id="chargeid" type="hidden" name="chargeid">
-    <input id="classic-<?php echo esc_attr( $id ) ?>-nonce" type="hidden" name="_wpnonce"
-           value="<?php echo esc_attr( $nonce ) ?>">
-    <input id="classic-<?php echo esc_attr( $id ) ?>-settings" type="hidden"
-           value='<?php echo esc_attr( wc_esc_json( $settings ) ); ?>'>
+    <input id="classic-<?php echo esc_attr( $data['id'] ) ?>-nonce" type="hidden" name="_wpnonce"
+           value="<?php echo esc_attr( $data['nonce'] ) ?>">
+    <input id="classic-<?php echo esc_attr( $data['id'] ) ?>-settings" type="hidden"
+           value='<?php echo esc_attr( wc_esc_json( $data['settings'] ) ); ?>'>
     <div id="paymentSourceToken"></div>
 </fieldset>
 

@@ -5,6 +5,7 @@ namespace PowerBoard\Abstracts;
 use PowerBoard\Enums\SettingsTabs;
 use PowerBoard\Services\Assets\AdminAssetsService;
 use PowerBoard\Services\TemplateService;
+use PowerBoard\Repositories\LogRepository;
 use WC_Blocks_Utils;
 use WC_Payment_Gateway;
 
@@ -20,7 +21,7 @@ abstract class AbstractSettingService extends WC_Payment_Gateway {
 			SettingsTabs::allCases()
 		);
 
-		$section = filter_input( INPUT_GET, 'section', FILTER_SANITIZE_STRING );
+		$section = wp_strip_all_tags( filter_input( INPUT_GET, 'section' ) );
 
 		if ( in_array( $section, $available_sections, true ) ) {
 			$this->current_section = $section;
@@ -50,36 +51,57 @@ abstract class AbstractSettingService extends WC_Payment_Gateway {
 
 	abstract protected function get_id(): string;
 
-	public function parent_generate_settings_html( $formFields = array(), $echo = true ): ?string {
-		return parent::generate_settings_html( $formFields, $echo );
+	public function parent_generate_settings_html( $form_fields = [], $should_echo = true ): ?string {
+		return parent::generate_settings_html( $form_fields, $should_echo );
 	}
 
-	public function generate_settings_html( $form_fields = array(), $echo = true ): ?string {
+	public function generate_settings_html( $form_fields = [], $should_echo = true ): ?string {
 		if ( empty( $form_fields ) ) {
 			$form_fields = $this->get_form_fields();
 		}
 
 		$tabs = $this->getTabs();
 
-		if ( $echo ) {
-			$this->template_service->include_admin_html( 'admin', compact( 'tabs', 'form_fields' ) );
+		$args = compact( 'tabs', 'form_fields' );
+
+		if ( $this->current_section === SettingsTabs::LOG()->value ) {
+			$args['records'] = $this->getLogs();
+		}
+
+		if ( $should_echo ) {
+			$this->template_service->include_admin_html( 'admin', $args );
 		} else {
-			return $this->template_service->get_admin_html( 'admin', compact( 'tabs', 'form_fields' ) );
+			return $this->template_service->get_admin_html( 'admin', $args );
 		}
 
 		return null;
 	}
 
 	protected function getTabs(): array {
-		return array(
-			SettingsTabs::WIDGET_CONFIGURATION()->value => array(
+		return [
+			SettingsTabs::WIDGET_CONFIGURATION()->value => [
 				'label'  => __( 'Widget Configuration', 'power-board' ),
 				'active' => SettingsTabs::WIDGET_CONFIGURATION()->value === $this->current_section,
-			),
-			SettingsTabs::LOG()->value                  => array(
+			],
+			SettingsTabs::LOG()->value                  => [
 				'label'  => __( 'Logs', 'power-board' ),
 				'active' => SettingsTabs::LOG()->value === $this->current_section,
-			),
-		);
+			],
+		];
+	}
+
+	protected function getLogs(): array {
+		$page = get_query_var( 'page_number' );
+		$page = ! empty( $page ) ? sanitize_text_field( $page ) : 1;
+		$perPage = get_query_var( 'per_page' );
+		$perPage = ! empty( $perPage ) ? sanitize_text_field( $perPage ) : 50;
+		$orderBy = get_query_var( 'orderBy' );
+		$orderBy = ! empty( $orderBy ) ? sanitize_text_field( $orderBy ) : 'created_at';
+		$order = get_query_var( 'order' );
+		$order = ! empty( $order ) ? sanitize_text_field( $order ) : 'desc';
+
+		$records = ( new LogRepository() )->getLogs( $page, $perPage, $orderBy, $order );
+
+		return $records;
 	}
 }
