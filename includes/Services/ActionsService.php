@@ -7,7 +7,8 @@ use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use PowerBoard\Abstracts\AbstractSingleton;
 use PowerBoard\Controllers\Admin\WidgetController;
 use PowerBoard\Controllers\Webhooks\PaymentController;
-use PowerBoard\Enums\SettingsTabs;
+use PowerBoard\Enums\SettingsTabsEnum;
+use PowerBoard\Helpers\SettingsTabsHelper;
 use PowerBoard\Util\MasterWidgetBlock;
 
 class ActionsService extends AbstractSingleton {
@@ -56,15 +57,13 @@ class ActionsService extends AbstractSingleton {
 	}
 
 	protected function addSettingsActions(): void {
-		foreach ( SettingsTabs::cases() as $settingsTab ) {
-			add_action( self::PROCESS_OPTIONS_HOOK_PREFIX . $settingsTab->value, [
-				$settingsTab->get_setting_service(),
+		foreach ( SettingsTabsEnum::cases() as $settings_tab ) {
+			add_action( self::PROCESS_OPTIONS_HOOK_PREFIX . $settings_tab, [
+				SettingsTabsHelper::get_setting_service( $settings_tab ),
 				self::PROCESS_OPTIONS_FUNCTION,
 			] );
-			add_action( self::SECTION_HOOK, function ( $systemTabs ) use ( $settingsTab ) {
-				return array_merge( $systemTabs, [
-					$settingsTab->value => '',
-				] );
+			add_action( self::SECTION_HOOK, function ( $system_tabs ) use ( $settings_tab ) {
+				return array_merge( $system_tabs, [ $settings_tab => '' ] );
 			} );
 		}
 	}

@@ -46,6 +46,7 @@
         <exclude name="Squiz.Commenting.FunctionComment.MissingParamTag" />
         <exclude name="Squiz.Commenting.FunctionComment.ParamCommentNotCapital" />
         <exclude name="Squiz.Commenting.FunctionComment.ParamCommentFullStop" />
+        <exclude name="Squiz.Commenting.FunctionComment.ThrowsNoFullStop" />
 
         <!-- Allow standard class filenames (CamelCase) -->
         <exclude name="WordPress.Files.FileName.InvalidClassFileName" />

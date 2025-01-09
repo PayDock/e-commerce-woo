@@ -3,10 +3,10 @@
 namespace PowerBoard\Services\Settings;
 
 use PowerBoard\Abstracts\AbstractSettingService;
-use PowerBoard\Enums\SettingsTabs;
+use PowerBoard\Enums\SettingsTabsEnum;
 
 class WebHooksSettingService extends AbstractSettingService {
 	protected function get_id(): string {
-		return SettingsTabs::WEBHOOKS()->value;
+		return SettingsTabsEnum::WEBHOOKS;
 	}
 }

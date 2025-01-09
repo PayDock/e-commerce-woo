@@ -2,7 +2,7 @@
 
 namespace PowerBoard\Abstracts;
 
-use PowerBoard\Enums\SettingsTabs;
+use PowerBoard\Enums\SettingsTabsEnum;
 use PowerBoard\Services\Assets\AdminAssetsService;
 use PowerBoard\Services\TemplateService;
 use PowerBoard\Repositories\LogRepository;
@@ -18,7 +18,7 @@ abstract class AbstractSettingService extends WC_Payment_Gateway {
 			function ( $item ) {
 				return strtolower( $item->value );
 			},
-			SettingsTabs::allCases()
+			SettingsTabsEnum::cases()
 		);
 
 		$section = wp_strip_all_tags( filter_input( INPUT_GET, 'section' ) );
@@ -64,7 +64,7 @@ abstract class AbstractSettingService extends WC_Payment_Gateway {
 
 		$args = compact( 'tabs', 'form_fields' );
 
-		if ( $this->current_section === SettingsTabs::LOG()->value ) {
+		if ( $this->current_section === SettingsTabsEnum::LOG ) {
 			$args['records'] = $this->getLogs();
 		}
 
@@ -79,13 +79,13 @@ abstract class AbstractSettingService extends WC_Payment_Gateway {
 
 	protected function getTabs(): array {
 		return [
-			SettingsTabs::WIDGET_CONFIGURATION()->value => [
+			SettingsTabsEnum::WIDGET_CONFIGURATION => [
 				'label'  => __( 'Widget Configuration', 'power-board' ),
-				'active' => SettingsTabs::WIDGET_CONFIGURATION()->value === $this->current_section,
+				'active' => SettingsTabsEnum::WIDGET_CONFIGURATION === $this->current_section,
 			],
-			SettingsTabs::LOG()->value                  => [
+			SettingsTabsEnum::LOG                  => [
 				'label'  => __( 'Logs', 'power-board' ),
-				'active' => SettingsTabs::LOG()->value === $this->current_section,
+				'active' => SettingsTabsEnum::LOG === $this->current_section,
 			],
 		];
 	}
@@ -95,16 +95,16 @@ abstract class AbstractSettingService extends WC_Payment_Gateway {
 	}
 
 	protected function getLogs(): array {
-		$page = get_query_var( 'page_number' );
-		$page = ! empty( $page ) ? sanitize_text_field( $page ) : 1;
-		$perPage = get_query_var( 'per_page' );
-		$perPage = ! empty( $perPage ) ? sanitize_text_field( $perPage ) : 50;
-		$orderBy = get_query_var( 'orderBy' );
-		$orderBy = ! empty( $orderBy ) ? sanitize_text_field( $orderBy ) : 'created_at';
-		$order = get_query_var( 'order' );
-		$order = ! empty( $order ) ? sanitize_text_field( $order ) : 'desc';
+		$page     = get_query_var( 'page_number' );
+		$page     = ! empty( $page ) ? sanitize_text_field( $page ) : 1;
+		$per_page = get_query_var( 'per_page' );
+		$per_page = ! empty( $per_page ) ? sanitize_text_field( $per_page ) : 50;
+		$order_by = get_query_var( 'orderBy' );
+		$order_by = ! empty( $order_by ) ? sanitize_text_field( $order_by ) : 'created_at';
+		$order    = get_query_var( 'order' );
+		$order    = ! empty( $order ) ? sanitize_text_field( $order ) : 'desc';
 
-		$records = ( new LogRepository() )->getLogs( $page, $perPage, $orderBy, $order );
+		$records = ( new LogRepository() )->getLogs( $page, $per_page, $order_by, $order );
 
 		return $records;
 	}

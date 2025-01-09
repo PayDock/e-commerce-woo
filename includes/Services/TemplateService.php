@@ -2,16 +2,16 @@
 
 namespace PowerBoard\Services;
 
-use PowerBoard\Enums\SettingsTabs;
+use PowerBoard\Enums\SettingsTabsEnum;
 
 class TemplateService {
+    public $setting_service;
 	private const TEMPLATE_DIR          = 'templates';
 	private const ADMIN_TEMPLATE_DIR    = 'admin';
 	private const CHECKOUT_TEMPLATE_DIR = 'checkout';
 
 	private const TEMPLATE_END = '.php';
 	protected $current_section = '';
-	private $setting_service;
 
 	private $template_admin_dir;
 	private $template_checkout_dir;
@@ -23,7 +23,7 @@ class TemplateService {
 			function ( $item ) {
 				return strtolower( $item->value );
 			},
-			SettingsTabs::allCases()
+            SettingsTabsEnum::cases()
 		);
 		if ( isset( $this->setting_service->current_section ) || in_array( $section, $available_sections, true ) ) {
 			$this->current_section = $this->setting_service->current_section ?? $section;

@@ -11,7 +11,10 @@ class HashService {
 	private const NONCE_LENGTH = 24;
 	private const KEY_LENGTH = 32;
 
-	public static function encrypt( ?string $string ): ?string {
+    /**
+     * @throws Exception If there is no data encryption module or sodium encryption available
+     */
+    public static function encrypt(?string $string ): ?string {
 
 		if (
 			$string == null ||
@@ -22,13 +25,15 @@ class HashService {
 		}
 
 		if ( function_exists( 'sodium_crypto_secretbox' ) ) {
+            try {
+                $key = self::get_key( self::KEY_LENGTH );
+                $nonce = random_bytes( self::NONCE_LENGTH );
+                $ciphertext = sodium_crypto_secretbox( $string, $nonce, $key );
 
-			$key = self::get_key( self::KEY_LENGTH );
-			$nonce = random_bytes( self::NONCE_LENGTH );
-			$ciphertext = sodium_crypto_secretbox( $string, $nonce, $key );
-
-			return 'sodium:' . base64_encode( $nonce . $ciphertext );
-
+                return 'sodium:' . base64_encode( $nonce . $ciphertext );
+            } catch ( Exception $error ) {
+                throw new Exception( $error );
+            }
 		} elseif ( function_exists( 'openssl_encrypt' ) ) {
 
 			$ivlen = openssl_cipher_iv_length( self::CIPHER );
@@ -40,36 +45,37 @@ class HashService {
 			return 'openssl:' . base64_encode( $iv . $hmac . $ciphertext_raw );
 
 		} else {
-
 			throw new Exception( 'There is no available data encryption module.' );
-
 		}
-
 	}
 
-	public static function decrypt( ?string $string ): string {
+    /**
+     * @throws Exception If sodium decryption not available
+     */
+    public static function decrypt(?string $string ): string {
 
 		if ( $string === null ) {
 			return '';
 		}
 
 		if ( strpos( $string, 'sodium:' ) === 0 ) {
-
 			$string = substr( $string, 7 );
 			$decoded = base64_decode( $string );
 			$nonce = substr( $decoded, 0, self::NONCE_LENGTH );
 			$ciphertext = substr( $decoded, self::NONCE_LENGTH );
 			$key = self::get_key( self::KEY_LENGTH );
-			$plaintext = sodium_crypto_secretbox_open( $ciphertext, $nonce, $key );
+            try {
+                $plaintext = sodium_crypto_secretbox_open( $ciphertext, $nonce, $key );
 
-			if ( $plaintext === false ) {
-				return $string;
-			}
+                if ( $plaintext === false ) {
+                    return $string;
+                }
 
-			return $plaintext;
-
+                return $plaintext;
+            } catch ( Exception $error ) {
+                throw new Exception( $error );
+            }
 		} elseif ( strpos( $string, 'openssl:' ) === 0 ) {
-
 			$string = substr( $string, 8 );
 			$c = base64_decode( $string );
 			$ivlen = openssl_cipher_iv_length( self::CIPHER );
@@ -91,9 +97,7 @@ class HashService {
 			return $string;
 
 		} else {
-
 			return $string;
-
 		}
 
 	}

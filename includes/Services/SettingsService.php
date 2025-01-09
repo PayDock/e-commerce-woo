@@ -2,9 +2,9 @@
 
 namespace PowerBoard\Services;
 
-use PowerBoard\Enums\ConfigAPI;
-use PowerBoard\Enums\SettingGroups;
-use PowerBoard\Enums\MasterWidgetSettings;
+use PowerBoard\Enums\ConfigAPIEnum;
+use PowerBoard\Enums\MasterWidgetSettingsEnum;
+use PowerBoard\Enums\SettingGroupsEnum;
 use PowerBoard\Services\Settings\WidgetConfigurationSettingService;
 
 final class SettingsService {
@@ -64,9 +64,9 @@ final class SettingsService {
 			$this->get_option_name(
 				$widget_service->id,
 				[
-					SettingGroups::CHECKOUT()->name,
-					MasterWidgetSettings::VERSION()->name,
-				]
+                    SettingGroupsEnum::CHECKOUT,
+                    MasterWidgetSettingsEnum::VERSION,
+                ]
 			)
 		);
 	}
@@ -78,9 +78,9 @@ final class SettingsService {
 			$this->get_option_name(
 				$widget_service->id,
 				[
-					SettingGroups::CHECKOUT()->name,
-					MasterWidgetSettings::CUSTOMISATION_ID()->name,
-				]
+                    SettingGroupsEnum::CHECKOUT,
+                    MasterWidgetSettingsEnum::CUSTOMISATION_ID,
+                ]
 			)
 		);
 	}
@@ -92,9 +92,9 @@ final class SettingsService {
 			$this->get_option_name(
 				$widget_service->id,
 				[
-					SettingGroups::CHECKOUT()->name,
-					MasterWidgetSettings::CONFIGURATION_ID()->name,
-				]
+                    SettingGroupsEnum::CHECKOUT,
+                    MasterWidgetSettingsEnum::CONFIGURATION_ID,
+                ]
 			)
 		);
 	}
@@ -104,12 +104,12 @@ final class SettingsService {
 			$this->get_environment();
 		}
 
-		if ( ConfigAPI::PRODUCTION_ENVIRONMENT()->value === $this->environment ) {
-			$sdk_url = ConfigAPI::PRODUCTION_WIDGET_URL()->value;
-		} elseif ( ConfigAPI::STAGING_ENVIRONMENT()->value === $this->environment ) {
-			$sdk_url = ConfigAPI::STAGING_WIDGET_URL()->value;
+		if ( ConfigAPIEnum::PRODUCTION_ENVIRONMENT === $this->environment ) {
+			$sdk_url = ConfigAPIEnum::PRODUCTION_WIDGET_URL;
+		} elseif ( ConfigAPIEnum::STAGING_ENVIRONMENT === $this->environment ) {
+			$sdk_url = ConfigAPIEnum::STAGING_WIDGET_URL;
 		} else {
-			$sdk_url = ConfigAPI::SANDBOX_WIDGET_URL()->value;
+			$sdk_url = ConfigAPIEnum::SANDBOX_WIDGET_URL;
 		}
 
 		return strtr( $sdk_url, [ '{version}' => 'v1.113.6-beta' ] );

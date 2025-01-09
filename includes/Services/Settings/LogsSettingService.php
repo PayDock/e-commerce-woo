@@ -3,7 +3,7 @@
 namespace PowerBoard\Services\Settings;
 
 use PowerBoard\Abstracts\AbstractSettingService;
-use PowerBoard\Enums\SettingsTabs;
+use PowerBoard\Enums\SettingsTabsEnum;
 use PowerBoard\Repositories\LogRepository;
 
 class LogsSettingService extends AbstractSettingService {
@@ -30,6 +30,6 @@ class LogsSettingService extends AbstractSettingService {
 	}
 
 	protected function get_id(): string {
-		return SettingsTabs::LOG()->value;
+		return SettingsTabsEnum::LOG;
 	}
 }

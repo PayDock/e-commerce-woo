@@ -4,16 +4,16 @@ namespace PowerBoard\Services\Validation;
 
 use Exception;
 use PowerBoard\API\ConfigService;
-use PowerBoard\Enums\CredentialSettings;
-use PowerBoard\Enums\EnvironmentSettings;
-use PowerBoard\Enums\MasterWidgetSettings;
-use PowerBoard\Enums\NotificationEvents;
-use PowerBoard\Enums\SettingGroups;
+use PowerBoard\Enums\CredentialSettingsEnum;
+use PowerBoard\Enums\EnvironmentSettingsEnum;
+use PowerBoard\Enums\MasterWidgetSettingsEnum;
+use PowerBoard\Enums\SettingGroupsEnum;
 use PowerBoard\Helpers\MasterWidgetTemplatesHelper;
+use PowerBoard\Helpers\NotificationEventsHelper;
 use PowerBoard\Services\SDKAdapterService;
 use PowerBoard\Services\Settings\APIAdapterService;
-use PowerBoard\Services\SettingsService;
 use PowerBoard\Services\Settings\WidgetConfigurationSettingService;
+use PowerBoard\Services\SettingsService;
 
 class ConnectionValidationService {
 	private $old_access_token        = null;
@@ -93,8 +93,8 @@ class ConnectionValidationService {
 		->get_option_name(
 			$this->service->id,
 			[
-				SettingGroups::ENVIRONMENT()->name,
-				EnvironmentSettings::ENVIRONMENT()->name,
+                SettingGroupsEnum::ENVIRONMENT,
+				EnvironmentSettingsEnum::ENVIRONMENT,
 			]
 		);
 		$this->environment_settings = $this->data[ $environment_settings_key ];
@@ -103,8 +103,8 @@ class ConnectionValidationService {
 		->get_option_name(
 			$this->service->id,
 			[
-				SettingGroups::CHECKOUT()->name,
-				MasterWidgetSettings::VERSION()->name,
+                SettingGroupsEnum::CHECKOUT,
+                MasterWidgetSettingsEnum::VERSION,
 			]
 		);
 		$this->version_settings = $this->data[ $version_settings_key ];
@@ -113,9 +113,9 @@ class ConnectionValidationService {
 		->get_option_name(
 			$this->service->id,
 			[
-				SettingGroups::CREDENTIALS()->name,
-				CredentialSettings::ACCESS_KEY()->name,
-			]
+                SettingGroupsEnum::CREDENTIALS,
+                CredentialSettingsEnum::ACCESS_KEY,
+            ]
 		);
 		$this->access_token_settings = $this->data[ $access_token_settings_key ];
 		if ( $this->access_token_settings === '********************' || $this->access_token_settings === null ) {
@@ -126,9 +126,9 @@ class ConnectionValidationService {
 		->get_option_name(
 			$this->service->id,
 			[
-				SettingGroups::CREDENTIALS()->name,
-				CredentialSettings::WIDGET_KEY()->name,
-			]
+                SettingGroupsEnum::CREDENTIALS,
+                CredentialSettingsEnum::WIDGET_KEY,
+            ]
 		);
 		$this->widget_access_token_settings = $this->data[ $widget_access_token_settings_key ];
 		if ( $this->widget_access_token_settings === '********************' || $this->widget_access_token_settings === null ) {
@@ -204,7 +204,7 @@ class ConnectionValidationService {
 	private function get_customisation_templates() {
 		$customisation_templates_result = $this->widget_api_adapter_service->get_customisation_templates_ids( $this->version_settings );
 		$has_error                      = ! empty( $customisation_templates_result['error'] );
-		$this->customisation_templates  = MasterWidgetTemplatesHelper::map_templates( $customisation_templates_result['resource']['data'], $has_error );
+		$this->customisation_templates  = MasterWidgetTemplatesHelper::map_templates( $customisation_templates_result['resource']['data'], $has_error, true );
 
 		if ( ! $has_error ) {
 			set_transient( 'customisation_templates_' . $this->environment_settings, $this->customisation_templates, 60 );
@@ -254,7 +254,7 @@ class ConnectionValidationService {
 	}
 
 	private function set_webhooks(): void {
-		$webhook_events = NotificationEvents::events();
+		$webhook_events = NotificationEventsHelper::events();
 		if ( strpos( get_site_url(), 'localhost' ) !== false ) {
 			return;
 		}
