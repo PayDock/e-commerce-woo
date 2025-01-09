@@ -55,6 +55,10 @@ abstract class AbstractSettingService extends WC_Payment_Gateway {
 		return parent::generate_settings_html( $form_fields, $should_echo );
 	}
 
+    public function generate_big_label_html( $key, $value ) {
+        return $this->template_service->get_admin_html( 'big-label', compact( 'key', 'value' ) );
+    }
+
 	public function generate_settings_html( $form_fields = [], $should_echo = true ): ?string {
 		if ( empty( $form_fields ) ) {
 			$form_fields = $this->get_form_fields();
