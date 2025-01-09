@@ -1,4 +1,5 @@
-#file: noinspection ComposeMissingKeys
+image: 412245956714.dkr.ecr.ap-southeast-2.amazonaws.com/docker-hub/library/amazoncorretto:21-alpine
+
 stages:
  - test
  - publish
