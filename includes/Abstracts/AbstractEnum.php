@@ -2,7 +2,6 @@
 
 namespace PowerBoard\Abstracts;
 
-use Exception;
 use ReflectionClass;
 
 abstract class AbstractEnum {
