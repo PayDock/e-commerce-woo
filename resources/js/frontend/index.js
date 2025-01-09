@@ -130,6 +130,7 @@ const handleWidgetError = () => {
     }, 200 );
 };
 
+// eslint-disable-next-line no-unused-vars
 const Content = (props) => {
     jQuery('.wc-block-components-checkout-place-order-button').show();
     const {eventRegistration, emitResponse} = props;

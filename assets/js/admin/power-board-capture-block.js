@@ -1,9 +1,11 @@
+// eslint-disable-next-line no-unused-vars
 function powerBoardPaymentCapture() {
     jQuery('span.power-board-order-actions').hide();
     jQuery('div.wc-order-totals-items').slideUp();
     jQuery('#woocommerce-order-items').find('div.wc-order-partial-paid-items').show();
 }
 
+// eslint-disable-next-line no-unused-vars
 function cancelActionManualCapture() {
     jQuery('span.power-board-order-actions').show();
     jQuery('div.wc-order-totals-items').slideDown();
@@ -33,6 +35,7 @@ function validationManualCapture(elem) {
     return true;
 }
 
+// eslint-disable-next-line no-unused-vars
 function handlePowerBoardPaymentCapture(orderId, operation) {
     const captureAmountEl = jQuery('#capture_amount');
     if (operation === 'power-board-capture-charge') {
