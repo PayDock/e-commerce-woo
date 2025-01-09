@@ -54,13 +54,14 @@ prepare_power_board_version:
       dotenv: VERSION.TXT
 
 publish_power_board:
+  image: composer:lts
   stage: publish
   only:
     - power_board
   needs:
     - prepare_power_board_version
   script:
-    - echo $ARTIFACT_NAME
+    - composer install
     - /bin/sh cleanup_files_for_zip.sh
   artifacts:
     name: $ARTIFACT_NAME
@@ -83,13 +84,14 @@ prepare_paydock_version:
       dotenv: VERSION.TXT
 
 publish_paydock:
+  image: composer:lts
   stage: publish
   only:
     - main
   needs:
     - prepare_paydock_version
   script:
-    - echo $ARTIFACT_NAME
+    - composer install
     - /bin/sh cleanup_files_for_zip.sh
   artifacts:
     name: $ARTIFACT_NAME
