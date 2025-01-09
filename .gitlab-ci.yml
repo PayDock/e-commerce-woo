@@ -61,24 +61,11 @@ publish_power_board:
     - prepare_power_board_version
   script:
     - echo $ARTIFACT_NAME
+    - /bin/sh cleanup_files_for_zip.sh
   artifacts:
     name: $ARTIFACT_NAME
     paths:
       - ./*
-    exclude:
-      - .git/*
-      - .gitignore
-      - .github/*
-      - .gitlab-ci.yml
-      - .codeclimate.yml
-      - .idea/*
-      - screenshot-*.png
-      - phpstan.neon
-      - phpcs2codeclimate.py
-      - phpcs.xml
-      - eslint.config.mjs
-      - Dockerfile.powerboard
-      - Dockerfile.paydock
 
 prepare_paydock_version:
   stage: publish
@@ -103,21 +90,8 @@ publish_paydock:
     - prepare_paydock_version
   script:
     - echo $ARTIFACT_NAME
+    - /bin/sh cleanup_files_for_zip.sh
   artifacts:
     name: $ARTIFACT_NAME
     paths:
       - ./*
-    exclude:
-      - .git/*
-      - .gitignore
-      - .github/*
-      - .gitlab-ci.yml
-      - .codeclimate.yml
-      - .idea/*
-      - screenshot-*.png
-      - phpstan.neon
-      - phpcs2codeclimate.py
-      - phpcs.xml
-      - eslint.config.mjs
-      - Dockerfile.powerboard
-      - Dockerfile.paydock
