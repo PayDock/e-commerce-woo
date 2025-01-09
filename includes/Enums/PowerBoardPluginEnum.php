@@ -2,10 +2,9 @@
 
 namespace PowerBoard\Enums;
 
-use PowerBoard\Abstracts\AbstractEnum;
 use PowerBoard\Repositories\LogRepository;
 
-final class PowerBoardPluginEnum extends AbstractEnum {
+final class PowerBoardPluginEnum {
 	public const REPOSITORIES = [
 		LogRepository::class,
 	];

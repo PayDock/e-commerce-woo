@@ -10,10 +10,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 ?>
-
 <nav class="nav-tab-wrapper woo-nav-tab-wrapper">
 	<?php foreach ( $tabs as $key => $value ) : ?>
-		<a href="/wp-admin/admin.php?page=wc-settings&tab=checkout&section=<?php echo esc_attr( $key ); ?>"
+        <a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . esc_attr( $key ) ) ); ?>"
 			class="nav-tab <?php echo $value['active'] ? 'nav-tab-active' : ''; ?>">
 			<?php echo esc_html( $value['label'] ); ?>
 		</a>
@@ -22,86 +21,85 @@ if ( ! defined( 'ABSPATH' ) ) {
 <?php if ( 'power_board_log' !== $this->current_section && isset( $form_fields ) ) : ?>
 	<?php $template_service->setting_service->parent_generate_settings_html( $form_fields, true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped  --  the following require is safe it is not a user input. ?>
 <?php else : ?>
-	<table
-			class="wp-list-table widefat fixed striped table-view-list orders wc-orders-list-table wc-orders-list-table-shop_order">
+	<table class="wp-list-table widefat fixed striped table-view-list orders wc-orders-list-table wc-orders-list-table-shop_order">
 		<thead>
 		<tr>
 			<th scope="col" class="manage-column column-order_status sorted
-			<?php if ( ! empty( $records['order'] ) && ( 'asc' === $records['order'] ) && ( 'id' === $records['orderBy'] ) ) : ?>
-				asc
-				<?php else : ?>
-				desc
-			<?php endif; ?>
+				<?php if ( ! empty( $records['order'] ) && ( 'asc' === $records['order'] ) && ( 'id' === $records['orderBy'] ) ) : ?>
+					asc
+					<?php else : ?>
+					desc
+				<?php endif; ?>
 			">
 				<a href="
 					<?php
-					echo esc_url(
-						add_query_arg(
-							array(
-								'orderBy' => 'id',
-								'order'   => 'desc' === $records['order'] ? 'asc' : 'desc',
+						echo esc_url(
+							add_query_arg(
+								array(
+									'orderBy' => 'id',
+									'order'   => 'desc' === $records['order'] ? 'asc' : 'desc',
+								)
 							)
-						)
-					);
+						);
 					?>
 					">
 					<span>ID</span>
 					<span class="sorting-indicators">
-							<span class="sorting-indicator asc" aria-hidden="true"></span>
-							<span class="sorting-indicator desc" aria-hidden="true"></span>
-						</span>
+						<span class="sorting-indicator asc" aria-hidden="true"></span>
+						<span class="sorting-indicator desc" aria-hidden="true"></span>
+					</span>
 				</a>
 			</th>
 			<th scope="col" class="manage-column column-order_status sorted
-			<?php if ( ! empty( $records['order'] ) && ( 'asc' === $records['order'] ) && ( 'created_at' === $records['orderBy'] ) ) : ?>
-				asc
-				<?php else : ?>
-				desc
-			<?php endif; ?>
+				<?php if ( ! empty( $records['order'] ) && ( 'asc' === $records['order'] ) && ( 'created_at' === $records['orderBy'] ) ) : ?>
+					asc
+					<?php else : ?>
+					desc
+				<?php endif; ?>
 			">
 				<a href="
 					<?php
-					echo esc_url(
-						add_query_arg(
-							array(
-								'orderBy' => 'created_at',
-								'order'   => 'desc' === $records['order'] ? 'asc' : 'desc',
+						echo esc_url(
+							add_query_arg(
+								array(
+									'orderBy' => 'created_at',
+									'order'   => 'desc' === $records['order'] ? 'asc' : 'desc',
+								)
 							)
-						)
-					);
+						);
 					?>
 					">
-					<span>Date</span>
+					<span><?php echo esc_html__( 'Date', 'power-board' ); ?></span>
 					<span class="sorting-indicators">
-							<span class="sorting-indicator asc" aria-hidden="true"></span>
-							<span class="sorting-indicator desc" aria-hidden="true"></span>
-						</span>
+						<span class="sorting-indicator asc" aria-hidden="true"></span>
+						<span class="sorting-indicator desc" aria-hidden="true"></span>
+					</span>
 				</a>
 			</th>
 			<th scope="col" class="manage-column column-order_status sorted
-			<?php if ( ! empty( $records['order'] ) && ( 'asc' === $records['order'] ) && ( 'operation' === $records['orderBy'] ) ) : ?>
-				asc
-				<?php else : ?>
-				desc
-			<?php endif; ?>
+				<?php if ( ! empty( $records['order'] ) && ( 'asc' === $records['order'] ) && ( 'operation' === $records['orderBy'] ) ) : ?>
+					asc
+					<?php else : ?>
+					desc
+				<?php endif; ?>
 			">
 				<a href="
 					<?php
-					echo esc_url(
-						add_query_arg(
-							array(
-								'orderBy' => 'operation',
-								'order'   => 'desc' === $records['order'] ? 'asc' : 'desc',
+						echo esc_url(
+							add_query_arg(
+								array(
+									'orderBy' => 'operation',
+									'order'   => 'desc' === $records['order'] ? 'asc' : 'desc',
+								)
 							)
-						)
-					);
+						);
 					?>
 					">
-					<span>Operation</span>
+					<span><?php echo esc_html__( 'Operation', 'power-board' ); ?></span>
 					<span class="sorting-indicators">
-							<span class="sorting-indicator asc" aria-hidden="true"></span>
-							<span class="sorting-indicator desc" aria-hidden="true"></span>
-						</span>
+						<span class="sorting-indicator asc" aria-hidden="true"></span>
+						<span class="sorting-indicator desc" aria-hidden="true"></span>
+					</span>
 				</a>
 			</th>
 			<th scope="col" class="manage-column column-order_status sorted
@@ -113,30 +111,30 @@ if ( ! defined( 'ABSPATH' ) ) {
 			">
 				<a href="
 					<?php
-					echo esc_url(
-						add_query_arg(
-							array(
-								'orderBy' => 'status',
-								'order'   => 'desc' === $records['order'] ? 'asc' : 'desc',
+						echo esc_url(
+							add_query_arg(
+								array(
+									'orderBy' => 'status',
+									'order'   => 'desc' === $records['order'] ? 'asc' : 'desc',
+								)
 							)
-						)
-					);
+						);
 					?>
 					">
-					<span>Status</span>
+					<span><?php echo esc_html__( 'Status', 'power-board' ); ?></span>
 					<span class="sorting-indicators">
-							<span class="sorting-indicator asc" aria-hidden="true"></span>
-							<span class="sorting-indicator desc" aria-hidden="true"></span>
-						</span>
+						<span class="sorting-indicator asc" aria-hidden="true"></span>
+						<span class="sorting-indicator desc" aria-hidden="true"></span>
+					</span>
 				</a>
 			</th>
-			<th scope="col" class="manage-column column-order_status">Message</th>
+			<th scope="col" class="manage-column column-order_status"><?php echo esc_html__( 'Message', 'power-board' ); ?></th>
 		</tr>
 		</thead>
 		<tbody id="the-list" data-wp-lists="list:order">
 		<?php if ( empty( $records['data'] ) ) : ?>
 			<tr class="no-items">
-				<td class="colspanchange" colspan="3">No items found.</td>
+				<td class="colspanchange" colspan="3"><?php echo esc_html__( 'No items found', 'power-board' ); ?></td>
 			</tr>
 		<?php else : ?>
 			<?php foreach ( $records['data'] as $record ) : ?>
@@ -170,29 +168,29 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<tfoot>
 		<tr>
 			<th scope="col" class="manage-column column-order_status sorted
-			<?php if ( ! empty( $records['order'] ) && ( 'asc' === $records['order'] ) && ( 'id' === $records['orderBy'] ) ) : ?>
-				asc
-				<?php else : ?>
-				desc
-			<?php endif; ?>
+				<?php if ( ! empty( $records['order'] ) && ( 'asc' === $records['order'] ) && ( 'id' === $records['orderBy'] ) ) : ?>
+					asc
+					<?php else : ?>
+					desc
+				<?php endif; ?>
 			">
 				<a href="
 					<?php
-					echo esc_url(
-						add_query_arg(
-							array(
-								'orderBy' => 'id',
-								'order'   => 'desc' === $records['order'] ? 'asc' : 'desc',
+						echo esc_url(
+							add_query_arg(
+								array(
+									'orderBy' => 'id',
+									'order'   => 'desc' === $records['order'] ? 'asc' : 'desc',
+								)
 							)
-						)
-					);
+						);
 					?>
 					">
 					<span>ID</span>
 					<span class="sorting-indicators">
-							<span class="sorting-indicator asc" aria-hidden="true"></span>
-							<span class="sorting-indicator desc" aria-hidden="true"></span>
-						</span>
+						<span class="sorting-indicator asc" aria-hidden="true"></span>
+						<span class="sorting-indicator desc" aria-hidden="true"></span>
+					</span>
 				</a>
 			</th>
 			<th scope="col" class="manage-column column-order_status sorted
@@ -204,21 +202,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 			">
 				<a href="
 					<?php
-					echo esc_url(
-						add_query_arg(
-							array(
-								'orderBy' => 'created_at',
-								'order'   => 'desc' === $records['order'] ? 'asc' : 'desc',
+						echo esc_url(
+							add_query_arg(
+								array(
+									'orderBy' => 'created_at',
+									'order'   => 'desc' === $records['order'] ? 'asc' : 'desc',
+								)
 							)
-						)
-					);
+						);
 					?>
 					">
-					<span>Date</span>
+					<span><?php echo esc_html__( 'Date', 'power-board' ); ?></span>
 					<span class="sorting-indicators">
-							<span class="sorting-indicator asc" aria-hidden="true"></span>
-							<span class="sorting-indicator desc" aria-hidden="true"></span>
-						</span>
+						<span class="sorting-indicator asc" aria-hidden="true"></span>
+						<span class="sorting-indicator desc" aria-hidden="true"></span>
+					</span>
 				</a>
 			</th>
 			<th scope="col" class="manage-column column-order_status sorted
@@ -230,50 +228,50 @@ if ( ! defined( 'ABSPATH' ) ) {
 			">
 				<a href="
 					<?php
-					echo esc_url(
-						add_query_arg(
-							array(
-								'orderBy' => 'operation',
-								'order'   => 'desc' === $records['order'] ? 'asc' : 'desc',
+						echo esc_url(
+							add_query_arg(
+								array(
+									'orderBy' => 'operation',
+									'order'   => 'desc' === $records['order'] ? 'asc' : 'desc',
+								)
 							)
-						)
-					);
+						);
 					?>
 					">
-					<span>Operation</span>
+					<span><?php echo esc_html__( 'Operation', 'power-board' ); ?></span>
 					<span class="sorting-indicators">
-							<span class="sorting-indicator asc" aria-hidden="true"></span>
-							<span class="sorting-indicator desc" aria-hidden="true"></span>
-						</span>
+						<span class="sorting-indicator asc" aria-hidden="true"></span>
+						<span class="sorting-indicator desc" aria-hidden="true"></span>
+					</span>
 				</a>
 			</th>
 			<th scope="col" class="manage-column column-order_status sorted
-			<?php if ( ! empty( $records['order'] ) && ( 'asc' === $records['order'] ) && ( 'id' === $records['orderBy'] ) ) : ?>
-				asc
-				<?php else : ?>
-				desc
-			<?php endif; ?>
+				<?php if ( ! empty( $records['order'] ) && ( 'asc' === $records['order'] ) && ( 'id' === $records['orderBy'] ) ) : ?>
+					asc
+					<?php else : ?>
+					desc
+				<?php endif; ?>
 			">
 				<a href="
 					<?php
-					echo esc_url(
-						add_query_arg(
-							array(
-								'orderBy' => 'status',
-								'order'   => 'desc' === $records['order'] ? 'asc' : 'desc',
+						echo esc_url(
+							add_query_arg(
+								array(
+									'orderBy' => 'status',
+									'order'   => 'desc' === $records['order'] ? 'asc' : 'desc',
+								)
 							)
-						)
-					);
+						);
 					?>
 					">
-					<span>Status</span>
+					<span><?php echo esc_html__( 'Status', 'power-board' ); ?></span>
 					<span class="sorting-indicators">
-							<span class="sorting-indicator asc" aria-hidden="true"></span>
-							<span class="sorting-indicator desc" aria-hidden="true"></span>
-						</span>
+						<span class="sorting-indicator asc" aria-hidden="true"></span>
+						<span class="sorting-indicator desc" aria-hidden="true"></span>
+					</span>
 				</a>
 			</th>
-			<th scope="col" class="manage-column column-order_status">Message</th>
+			<th scope="col" class="manage-column column-order_status"><?php echo esc_html__( 'Message', 'power-board' ); ?></th>
 		</tr>
 		</tfoot>
 	</table>
@@ -302,7 +300,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<span aria-hidden="true">‹</span>
 					</a>
 				<?php endif; ?>
-				<span class="screen-reader-text">Current Page</span>
+				<span class="screen-reader-text"><?php echo esc_html__( 'Current Page', 'power-board' ); ?></span>
 				<span id="table-paging" class="paging-input">
 					<span class="tablenav-paging-text">
 						<?php echo esc_html( $records['current'] ); ?> of <span
@@ -322,10 +320,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 						href="<?php echo esc_url( add_query_arg( array( 'page_number' => $records['last_page'] ) ) ); ?>">
 						<span class="screen-reader-text">Last page</span>
 						<span aria-hidden="true">»</span>
-					</a <?php endif; ?> </span>
+					</a>
+				<?php endif; ?>
+			</span>
 		</div>
 		<br class="clear">
 	</div>
+
 	<?php for ( $i = 1; $i <= $records['last_page']; $i++ ) : ?>
 
 	<?php endfor; ?>

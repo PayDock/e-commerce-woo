@@ -2,7 +2,7 @@
 
 namespace PowerBoard\API;
 
-use PowerBoard\Enums\ConfigAPI;
+use PowerBoard\Enums\ConfigAPIEnum;
 
 class ConfigService {
 	public static $environment = null;
@@ -16,12 +16,12 @@ class ConfigService {
 	}
 
 	public static function build_api_url( ?string $endpoint = null ): string {
-  		if ( self::$environment === ConfigAPI::PRODUCTION_ENVIRONMENT()->value  ) {
-  			return ConfigAPI::PRODUCTION_API_URL()->value . $endpoint;
-  		} else if ( self::$environment === ConfigAPI::STAGING_ENVIRONMENT()->value ) {
-  			return ConfigAPI::STAGING_API_URL()->value . $endpoint;
+  		if ( self::$environment === ConfigAPIEnum::PRODUCTION_ENVIRONMENT  ) {
+  			return ConfigAPIEnum::PRODUCTION_API_URL . $endpoint;
+  		} else if ( self::$environment === ConfigAPIEnum::STAGING_ENVIRONMENT ) {
+  			return ConfigAPIEnum::STAGING_API_URL . $endpoint;
   		} else {
-  			return ConfigAPI::SANDBOX_API_URL()->value . $endpoint;
+  			return ConfigAPIEnum::SANDBOX_API_URL . $endpoint;
   		}
   	}
 }

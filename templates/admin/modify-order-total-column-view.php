@@ -19,6 +19,16 @@ if ( empty( $order ) ) {
 
 }
 
-?>
+if ( $order instanceof WC_Order ) {
 
-<del aria-hidden="true"><?php wc_price( $order->get_total(), [ 'currency' => $order->get_currency() ] ) ?></del><ins><?php wc_price( $capturedAmount, [ 'currency' => $order->get_currency() ] ) ?></ins>
+	if ( ! empty( $capturedAmount ) ) {
+		$capturedAmount = (float) $capturedAmount;
+	} else {
+		$capturedAmount = 0;
+	}
+
+	?>
+	<del aria-hidden="true"><?php wc_price( $order->get_total(), [ 'currency' => $order->get_currency() ] ) ?></del><ins><?php wc_price( $capturedAmount, [ 'currency' => $order->get_currency() ] ) ?></ins>
+	<?php
+
+}

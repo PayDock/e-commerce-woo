@@ -3,11 +3,12 @@
 namespace PowerBoard\Services;
 
 use PowerBoard\Abstracts\AbstractSingleton;
-use PowerBoard\Enums\OrderListColumns;
-use PowerBoard\Enums\SettingsTabs;
+use PowerBoard\Enums\OrderListColumnsEnum;
+use PowerBoard\Enums\SettingsTabsEnum;
+use PowerBoard\Helpers\OrderListColumnsHelper;
 use PowerBoard\Services\Checkout\MasterWidgetPaymentService;
-use PowerBoard\Services\Settings\WidgetConfigurationSettingService;
 use PowerBoard\Services\Settings\LogsSettingService;
+use PowerBoard\Services\Settings\WidgetConfigurationSettingService;
 
 class FiltersService extends AbstractSingleton {
 	protected static $instance = null;
@@ -23,8 +24,8 @@ class FiltersService extends AbstractSingleton {
 		foreach ( $columns as $column_name => $column_info ) {
 			$new_columns[ $column_name ] = $column_info;
 
-			if ( OrderListColumns::AFTER_COLUMN === $column_name ) {
-				$new_columns[ OrderListColumns::PAYMENT_SOURCE_TYPE()->get_key() ] = OrderListColumns::PAYMENT_SOURCE_TYPE()->get_label();
+			if ( OrderListColumnsEnum::AFTER_COLUMN === $column_name ) {
+				$new_columns[ OrderListColumnsHelper::get_key(OrderListColumnsEnum::PAYMENT_SOURCE_TYPE) ] = OrderListColumnsEnum::PAYMENT_SOURCE_TYPE;
 			}
 		}
 
@@ -32,8 +33,8 @@ class FiltersService extends AbstractSingleton {
 	}
 
 	public function ordersListNewColumnContent( $column, $order ) {
-		if ( OrderListColumns::PAYMENT_SOURCE_TYPE()->get_key() === $column ) {
-			$status = $order->get_meta( OrderListColumns::PAYMENT_SOURCE_TYPE()->get_key() );
+		if ( OrderListColumnsHelper::get_key(OrderListColumnsEnum::PAYMENT_SOURCE_TYPE) === $column ) {
+			$status = $order->get_meta( OrderListColumnsHelper::get_key(OrderListColumnsEnum::PAYMENT_SOURCE_TYPE) );
 
 			echo esc_html( is_array( $status ) ? reset( $status ) : $status );
 		}
@@ -99,13 +100,7 @@ class FiltersService extends AbstractSingleton {
 				$current_tab !== 'checkout' ||
 				in_array(
 					$current_section,
-					array_map(
-						function ( SettingsTabs $tab ) {
-							return $tab->value;
-						},
-						SettingsTabs::secondary()
-					),
-					true
+					SettingsTabsEnum::cases()
 				)
 			) {
 				$methods[] = LogsSettingService::class;

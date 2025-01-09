@@ -52,8 +52,21 @@ if ( ! empty( $order ) && is_object( $order ) ) {
 									do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order, false );
 								?>
 							</td>
-							<td class="product-quantity"><?php echo apply_filters( 'woocommerce_order_item_quantity_html', ' <strong class="product-quantity">' . sprintf( '&times;&nbsp;%s', esc_html( $item->get_quantity() ) ) . '</strong>', $item ); ?></td><?php // @codingStandardsIgnoreLine ?>
-							<td class="product-subtotal"><?php echo $order->get_formatted_line_subtotal( $item ); ?></td><?php // @codingStandardsIgnoreLine ?>
+							<td class="product-quantity">
+								<?php
+									echo apply_filters(
+										'woocommerce_order_item_quantity_html',
+										' <strong class="product-quantity">' . sprintf(
+											'&times;&nbsp;%s',
+											esc_html( $item->get_quantity() )
+										) . '</strong>',
+										$item
+									);
+								?>
+							</td>
+							<td class="product-subtotal">
+								<?php echo wp_kses_post( $order->get_formatted_line_subtotal( $item ) ); ?>
+							</td>
 						</tr>
 					<?php endforeach; ?>
 				<?php endif; ?>
@@ -62,8 +75,8 @@ if ( ! empty( $order ) && is_object( $order ) ) {
 				<?php if ( $totals ) : ?>
 					<?php foreach ( $totals as $total ) : ?>
 						<tr>
-							<th scope="row" colspan="2"><?php echo $total['label']; ?></th><?php // @codingStandardsIgnoreLine ?>
-							<td class="product-total"><?php echo $total['value']; ?></td><?php // @codingStandardsIgnoreLine ?>
+							<th scope="row" colspan="2"><?php echo esc_html( $total['label'] ); ?></th>
+							<td class="product-total"><?php echo wp_kses_post( $total['value'] ); ?></td>
 						</tr>
 					<?php endforeach; ?>
 				<?php endif; ?>

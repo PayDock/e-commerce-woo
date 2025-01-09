@@ -25,11 +25,11 @@ class OrderService {
 	}
 
 	public function init_power_board_order_buttons( $order ) {
-		$order_status        = $order->get_status();
-		$captured_amount     = $order->get_meta( 'capture_amount' );
-		$total_refund        = $order->get_total_refunded();
-		$order_total         = (float) $order->get_total( false );
-		if ( in_array( $order_status, array( 'pending', 'failed', 'cancelled', 'on-hold', 'refunded' ) )
+		$order_status    = $order->get_status();
+		$captured_amount = $order->get_meta( 'capture_amount' );
+		$total_refund    = $order->get_total_refunded();
+		$order_total     = (float) $order->get_total( false );
+		if ( in_array( $order_status, [ 'pending', 'failed', 'cancelled', 'on-hold', 'refunded' ] )
 			|| ( $order_total === $total_refund )
 			|| ( $captured_amount === $total_refund )
 		) {
@@ -41,28 +41,33 @@ class OrderService {
 			);
 		}
 
-		if ( $order_status == 'on-hold' ) {
+		if ( $order_status === 'on-hold' ) {
 			wp_enqueue_style(
 				'hide-on-hold-buttons',
 				POWER_BOARD_PLUGIN_URL . 'assets/css/admin/hide-on-hold-buttons.css',
-				array(),
+				[],
 				POWER_BOARD_PLUGIN_VERSION
 			);
 		}
 	}
 
+	/**
+	 * Checks if status change is allowed
+	 *
+	 * @throws Exception If status change is not allowed
+	 */
 	public function status_change_verification( $order_id, $old_status_key, $new_status_key, $order ) {
 		$order->update_meta_data( 'status_change_verification_failed', '' );
-		if ( ( $old_status_key == $new_status_key ) || ! empty( $GLOBALS['power_board_is_updating_order_status'] ) || null === $order_id ) {
+		if ( ( $old_status_key === $new_status_key ) || ! empty( $GLOBALS['power_board_is_updating_order_status'] ) || $order_id === null ) {
 			return;
 		}
-		$rulesForStatuses = array(
-			'processing' => array( 'refunded', 'cancelled', 'failed', 'pending', 'completed' ),
-			'refunded'   => array( 'cancelled', 'failed', 'refunded' ),
-			'cancelled'  => array( 'failed', 'cancelled' ),
-		);
-		if ( ! empty( $rulesForStatuses[ $old_status_key ] ) ) {
-			if ( ! in_array( $new_status_key, $rulesForStatuses[ $old_status_key ] ) ) {
+		$statuses_rules = [
+			'processing' => [ 'refunded', 'cancelled', 'failed', 'pending', 'completed' ],
+			'refunded'   => [ 'cancelled', 'failed', 'refunded' ],
+			'cancelled'  => [ 'failed', 'cancelled' ],
+		];
+		if ( ! empty( $statuses_rules[ $old_status_key ] ) ) {
+			if ( ! in_array( $new_status_key, $statuses_rules[ $old_status_key ] ) ) {
 				$new_status_name = wc_get_order_status_name( $new_status_key );
 				$old_status_name = wc_get_order_status_name( $old_status_key );
 				$error           = sprintf(

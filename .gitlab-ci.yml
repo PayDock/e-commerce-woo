@@ -1,4 +1,5 @@
-#file: noinspection ComposeMissingKeys
+image: 412245956714.dkr.ecr.ap-southeast-2.amazonaws.com/docker-hub/library/amazoncorretto:21-alpine
+
 stages:
  - test
  - publish
@@ -11,42 +12,6 @@ include:
     file: '/security/gitlab-security-scans.yaml'
   - project: 'paydock/platform/gitlab-templates'
     file: '/code_quality.yml'
-
-publish_power_board:
-  image: alpine:latest
-  stage: publish
-  only:
-    - power_board
-  needs:
-    - job: create_version
-      artifacts: true
-  script:
-    - VERSION=$(cat version)
-    - MAJOR_MINOR=$(cat power-board.php | grep "POWER_BOARD_PLUGIN_VERSION'," | sed -e "s/^.*\([0-9].[0-9].[0-9]\).*$/\1/")
-    - apk add zip
-    - zip -r woo_powerboard-$MAJOR_MINOR-$VERSION.zip ./ -x '.git/*' -x .gitignore -x '.github/*' -x .gitlab-ci.yml -x .codeclimate.yml -x '.idea/*'
-  artifacts:
-    name: woo-powerboard.zip
-    paths:
-      - woo_powerboard*.zip
-
-publish_paydock:
-  image: alpine:latest
-  stage: publish
-  only:
-    - main
-  needs:
-    - job: create_version
-      artifacts: true
-  script:
-    - VERSION=$(cat version)
-    - MAJOR_MINOR=$(cat paydock.php | grep "PAYDOCK_PLUGIN_VERSION'," | sed -e "s/^.*\([0-9].[0-9].[0-9]\).*$/\1/")
-    - apk add zip
-    - zip -r woo_$MAJOR_MINOR_$VERSION.zip ./ -x '.git/*' -x .gitignore -x '.github/*' -x .gitlab-ci.yml -x .codeclimate.yml -x '.idea/*'
-  artifacts:
-    name: woo.zip
-    paths:
-      - woo*.zip
 
 run_phpcs:
   image: composer:lts
@@ -72,3 +37,61 @@ phpcs_report:
     reports:
       codequality:
         - code_climate_phpcs_report.json
+
+prepare_power_board_version:
+  stage: publish
+  only:
+    - power_board
+  needs:
+    - job: create_version
+      artifacts: true
+  script:
+    - VERSION=$(cat version)
+    - MAJOR_MINOR=$(cat power-board.php | grep "POWER_BOARD_PLUGIN_VERSION'," | sed -e "s/^.*\([0-9].[0-9].[0-9]\).*$/\1/")
+    - echo "ARTIFACT_NAME=woo_powerboard-$MAJOR_MINOR-$VERSION" > VERSION.TXT
+  artifacts:
+    reports:
+      dotenv: VERSION.TXT
+
+publish_power_board:
+  stage: publish
+  only:
+    - power_board
+  needs:
+    - prepare_power_board_version
+  script:
+    - echo $ARTIFACT_NAME
+    - /bin/sh cleanup_files_for_zip.sh
+  artifacts:
+    name: $ARTIFACT_NAME
+    paths:
+      - ./*
+
+prepare_paydock_version:
+  stage: publish
+  only:
+    - main
+  needs:
+    - job: create_version
+      artifacts: true
+  script:
+    - VERSION=$(cat version)
+    - MAJOR_MINOR=$(cat paydock.php | grep "PAYDOCK_PLUGIN_VERSION'," | sed -e "s/^.*\([0-9].[0-9].[0-9]\).*$/\1/")
+    - echo "ARTIFACT_NAME=woo_paydock-$MAJOR_MINOR-$VERSION" > VERSION.TXT
+  artifacts:
+    reports:
+      dotenv: VERSION.TXT
+
+publish_paydock:
+  stage: publish
+  only:
+    - main
+  needs:
+    - prepare_paydock_version
+  script:
+    - echo $ARTIFACT_NAME
+    - /bin/sh cleanup_files_for_zip.sh
+  artifacts:
+    name: $ARTIFACT_NAME
+    paths:
+      - ./*
