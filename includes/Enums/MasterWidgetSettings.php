@@ -5,6 +5,7 @@ namespace PowerBoard\Enums;
 use PowerBoard\Abstracts\AbstractEnum;
 use PowerBoard\Helpers\MasterWidgetTemplatesHelper;
 use PowerBoard\Services\Settings\APIAdapterService;
+use PowerBoard\Services\SettingsService;
 
 class MasterWidgetSettings extends AbstractEnum {
 	protected const VERSION          = 'VERSION';
@@ -38,59 +39,84 @@ class MasterWidgetSettings extends AbstractEnum {
 		}
 	}
 
-	public function get_options( $env, $access_token, $widget_access_token, $version ): array {
+	public function get_options_for_ui( $env, $access_token, $widget_access_token, $version ): array {
 		switch ( $this->name ) {
 			case self::VERSION:
-				return $this->get_versions();
+				return $this->get_versions_for_ui();
 			case self::CONFIGURATION_ID:
-				return $this->get_configuration_ids( $env, $access_token, $widget_access_token, $version );
+				return $this->get_configuration_ids_for_ui( $env, $access_token, $widget_access_token, $version );
 			case self::CUSTOMISATION_ID:
-				return $this->get_customisation_ids( $env, $access_token, $widget_access_token, $version );
+				return $this->get_customisation_ids_for_ui( $env, $access_token, $widget_access_token, $version );
 			default:
-				return array();
+				return [];
 		}
 	}
 
-	public function get_versions(): array {
-		return array(
-			'1' => '1',
-		);
+	public function get_versions_for_ui(): array {
+		return [ '1' => '1' ];
 	}
 
-	public function get_configuration_ids( $env, $access_token, $widget_access_token, $version ): array {
+	public function get_configuration_ids_for_ui( $env, $access_token, $widget_access_token, $version ): array {
 		$stored_configuration_templates = get_transient( 'configuration_templates_' . $env );
+		$has_error                      = false;
 		if ( ! empty( $stored_configuration_templates ) ) {
-			return $stored_configuration_templates;
+			$this->configuration_templates = $stored_configuration_templates;
+		} else {
+			$this->init_api_adapter( $env, $access_token, $widget_access_token );
+			$result                        = $this->api_adapter_service->get_configuration_templates_ids( $version );
+			$has_error                     = $result['error'];
+			$this->configuration_templates = MasterWidgetTemplatesHelper::map_templates( $result['resource']['data'], ! empty( $has_error ) );
+
+			set_transient( 'configuration_templates_' . $env, $this->configuration_templates, 60 );
 		}
 
-		$this->init_api_adapter( $env, $access_token, $widget_access_token );
-		$result                        = $this->api_adapter_service->get_configuration_templates_ids( $version );
-		$this->configuration_templates = MasterWidgetTemplatesHelper::mapTemplates( $result['resource']['data'], ! empty( $result['error'] ) );
+		$configuration_id_key = SettingsService::get_instance()
+			->get_option_name(
+				'power_board',
+				[
+					SettingGroups::CHECKOUT()->name,
+					self::CONFIGURATION_ID()->name,
+				]
+			);
+		MasterWidgetTemplatesHelper::validate_or_update_template_id( $this->configuration_templates, ! empty( $has_error ), $configuration_id_key );
 
-		set_transient( 'configuration_templates_' . $env, $this->configuration_templates, 60 );
 		return $this->configuration_templates;
 	}
 
-	public function get_customisation_ids( $env, $access_token, $widget_access_token, $version ): array {
+	public function get_customisation_ids_for_ui( $env, $access_token, $widget_access_token, $version ): array {
 		$stored_customisation_templates = get_transient( 'customisation_templates_' . $env );
+		$has_error                      = false;
 		if ( ! empty( $stored_customisation_templates ) ) {
-			return $stored_customisation_templates;
+			$this->customisation_templates = $stored_customisation_templates;
+		} else {
+
+			$this->init_api_adapter( $env, $access_token, $widget_access_token );
+			$result                        = $this->api_adapter_service->get_customisation_templates_ids( $version );
+			$has_error                     = $result['error'];
+			$this->customisation_templates = MasterWidgetTemplatesHelper::map_templates( $result['resource']['data'], ! empty( $has_error ), true );
+
+			set_transient( 'customisation_templates_' . $env, $this->customisation_templates, 60 );
 		}
 
-		$this->init_api_adapter( $env, $access_token, $widget_access_token );
-		$result                        = $this->api_adapter_service->get_customisation_templates_ids( $version );
-		$this->customisation_templates = MasterWidgetTemplatesHelper::mapTemplates( $result['resource']['data'], ! empty( $result['error'] ) );
+		$customisation_id_key = SettingsService::get_instance()
+			->get_option_name(
+				'power_board',
+				[
+					SettingGroups::CHECKOUT()->name,
+					self::CUSTOMISATION_ID()->name,
+				]
+			);
+		MasterWidgetTemplatesHelper::validate_or_update_template_id( $this->customisation_templates, ! empty( $has_error ), $customisation_id_key );
 
-		set_transient( 'customisation_templates_' . $env, $this->customisation_templates, 60 );
 		return $this->customisation_templates;
 	}
 
-	public function get_default() {
+	public function get_default(): string {
 		switch ( $this->name ) {
 			case self::VERSION:
 				return '1';
 			default:
-				return null;
+				return '';
 		}
 	}
 

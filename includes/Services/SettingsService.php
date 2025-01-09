@@ -8,9 +8,9 @@ use PowerBoard\Enums\MasterWidgetSettings;
 use PowerBoard\Services\Settings\WidgetConfigurationSettingService;
 
 final class SettingsService {
-	private static $instance  = null;
-	private $widget_service   = null;
-	private $environment      = null;
+	private static $instance = null;
+	private $widget_service  = null;
+	private $environment     = null;
 	private $is_safari_or_ios;
 
 	protected function __construct() {
@@ -44,7 +44,7 @@ final class SettingsService {
 	}
 
 	public function get_option_name( string $id, array $fragments ): string {
-		return implode( '_', array_merge( array( $id ), $fragments ) );
+		return implode( '_', array_merge( [ $id ], $fragments ) );
 	}
 
 	public function get_widget_access_token(): ?string {
@@ -63,10 +63,10 @@ final class SettingsService {
 		return $widget_service->get_option(
 			$this->get_option_name(
 				$widget_service->id,
-				array(
+				[
 					SettingGroups::CHECKOUT()->name,
 					MasterWidgetSettings::VERSION()->name,
-				)
+				]
 			)
 		);
 	}
@@ -77,10 +77,10 @@ final class SettingsService {
 		return $widget_service->get_option(
 			$this->get_option_name(
 				$widget_service->id,
-				array(
+				[
 					SettingGroups::CHECKOUT()->name,
 					MasterWidgetSettings::CUSTOMISATION_ID()->name,
-				)
+				]
 			)
 		);
 	}
@@ -91,10 +91,10 @@ final class SettingsService {
 		return $widget_service->get_option(
 			$this->get_option_name(
 				$widget_service->id,
-				array(
+				[
 					SettingGroups::CHECKOUT()->name,
 					MasterWidgetSettings::CONFIGURATION_ID()->name,
-				)
+				]
 			)
 		);
 	}
@@ -112,7 +112,7 @@ final class SettingsService {
 			$sdk_url = ConfigAPI::SANDBOX_WIDGET_URL()->value;
 		}
 
-		return strtr( $sdk_url, array( '{version}' => 'v1.113.6-beta' ) );
+		return strtr( $sdk_url, [ '{version}' => 'v1.113.6-beta' ] );
 	}
 
 	public static function get_instance(): self {

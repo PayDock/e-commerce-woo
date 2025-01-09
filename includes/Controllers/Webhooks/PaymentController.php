@@ -11,7 +11,6 @@ use PowerBoard\Services\SDKAdapterService;
 use WP_Error;
 
 class PaymentController {
-
 	public function capture_payment() {
 		if ( ! current_user_can( 'administrator' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Permission denied', 'power-board' ) ) );

@@ -24,10 +24,10 @@ class WidgetConfigurationSettingService extends AbstractSettingService {
 			if ( in_array( $credential_settings->name, CredentialSettings::get_hashed(), true ) ) {
 				$key = $this->service->get_option_name(
 					$this->id,
-					array(
+					[
 						SettingGroups::CREDENTIALS()->name,
 						$credential_settings->name,
-					)
+					]
 				);
 
 				if ( ! empty( $this->settings[ $key ] ) ) {
@@ -41,16 +41,16 @@ class WidgetConfigurationSettingService extends AbstractSettingService {
 		foreach ( SettingGroups::cases() as $setting_group ) {
 			$key = PLUGIN_PREFIX . '_' . $this->service->get_option_name(
 				$this->id,
-				array(
+				[
 					$setting_group->name,
 					'label',
-				)
+				]
 			);
 
-			$this->form_fields[ $key ] = array(
+			$this->form_fields[ $key ] = [
 				'type'  => 'big_label',
 				'title' => $setting_group->get_label(),
-			);
+			];
 
 			switch ( $setting_group->name ) {
 				case SettingGroups::ENVIRONMENT()->name:
@@ -63,7 +63,7 @@ class WidgetConfigurationSettingService extends AbstractSettingService {
 					$merged_options = $this->get_checkout_options();
 					break;
 				default:
-					$merged_options = array();
+					$merged_options = [];
 					break;
 			}
 
@@ -72,20 +72,20 @@ class WidgetConfigurationSettingService extends AbstractSettingService {
 	}
 
 	private function get_credential_options(): array {
-		$fields = array();
+		$fields = [];
 
 		foreach ( CredentialSettings::cases() as $credential_settings ) {
 			$key            = $this->service->get_option_name(
 				$this->id,
-				array(
+				[
 					SettingGroups::CREDENTIALS()->name,
 					$credential_settings->name,
-				)
+				]
 			);
-			$fields[ $key ] = array(
+			$fields[ $key ] = [
 				'type'  => $credential_settings->get_input_type(),
 				'title' => $credential_settings->get_label(),
-			);
+			];
 			$description    = $credential_settings->get_description();
 			if ( $description ) {
 				$fields[ $key ]['description'] = $description;
@@ -97,7 +97,7 @@ class WidgetConfigurationSettingService extends AbstractSettingService {
 	}
 
 	private function get_checkout_options(): array {
-		$fields              = array();
+		$fields              = [];
 		$access_token        = $this->get_access_token();
 		$widget_access_token = $this->get_widget_access_token();
 		$environment         = $this->get_environment();
@@ -106,22 +106,23 @@ class WidgetConfigurationSettingService extends AbstractSettingService {
 		foreach ( MasterWidgetSettings::cases() as $checkout_settings ) {
 			$key = $this->service->get_option_name(
 				$this->id,
-				array(
+				[
 					SettingGroups::CHECKOUT()->name,
 					$checkout_settings->name,
-				)
+				]
 			);
 
-			$fields[ $key ] = array(
+			$fields[ $key ] = [
 				'type'  => $checkout_settings->get_input_type(),
-				'title' => preg_replace( array( '/ Id/', '/ id/' ), ' ID', $checkout_settings->get_label() ),
-			);
+				'title' => preg_replace( [ '/ Id/', '/ id/' ], ' ID', $checkout_settings->get_label() ),
+			];
 
 			if ( MasterWidgetSettings::VERSION()->name === $checkout_settings->name || ! empty( $environment ) ) {
-				$options = $checkout_settings->get_options( $environment, $access_token, $widget_access_token, $version );
+				$options = $checkout_settings->get_options_for_ui( $environment, $access_token, $widget_access_token, $version );
 
-				if ( ! empty( $options ) && ( 'select' === $checkout_settings->get_input_type() ) ) {
+				if ( ! empty( $options ) && ( $checkout_settings->get_input_type() === 'select' ) ) {
 					$fields[ $key ]['options'] = $options;
+					$fields[ $key ]['class']   = PLUGIN_PREFIX . '-settings' . ( MasterWidgetSettings::CUSTOMISATION_ID()->name === $checkout_settings->name ? ' is-optional' : '' );
 					$fields[ $key ]['default'] = $checkout_settings->get_default();
 				}
 			}
@@ -131,25 +132,26 @@ class WidgetConfigurationSettingService extends AbstractSettingService {
 	}
 
 	private function get_environment_options(): array {
-		$fields = array();
+		$fields = [];
 		foreach ( EnvironmentSettings::cases() as $environment_settings ) {
 			$key = $this->service->get_option_name(
 				$this->id,
-				array(
+				[
 					SettingGroups::ENVIRONMENT()->name,
 					$environment_settings->name,
-				)
+				]
 			);
 
-			$fields[ $key ] = array(
+			$fields[ $key ] = [
 				'type'  => $environment_settings->get_input_type(),
-				'title' => preg_replace( array( '/ Id/', '/ id/' ), ' ID', $environment_settings->get_label() ),
-			);
+				'title' => preg_replace( [ '/ Id/', '/ id/' ], ' ID', $environment_settings->get_label() ),
+			];
 
-			$options = $environment_settings->get_options();
+			$options = $environment_settings->get_options_for_ui();
 
-			if ( ! empty( $options ) && ( 'select' === $environment_settings->get_input_type() ) ) {
+			if ( ! empty( $options ) && ( $environment_settings->get_input_type() === 'select' ) ) {
 				$fields[ $key ]['options'] = $options;
+				$fields[ $key ]['class']   = PLUGIN_PREFIX . '-settings';
 				$fields[ $key ]['default'] = $environment_settings->get_default();
 			}
 		}
@@ -160,10 +162,10 @@ class WidgetConfigurationSettingService extends AbstractSettingService {
 	public function get_access_token(): ?string {
 		$token_key = $this->service->get_option_name(
 			$this->id,
-			array(
+			[
 				SettingGroups::CREDENTIALS()->name,
 				CredentialSettings::ACCESS_KEY()->name,
-			)
+			]
 		);
 		if ( array_key_exists( $token_key, $this->settings ) ) {
 			return HashService::decrypt( $this->settings[ $token_key ] );
@@ -174,10 +176,10 @@ class WidgetConfigurationSettingService extends AbstractSettingService {
 	public function get_widget_access_token(): ?string {
 		$widget_token_key = $this->service->get_option_name(
 			$this->id,
-			array(
+			[
 				SettingGroups::CREDENTIALS()->name,
 				CredentialSettings::WIDGET_KEY()->name,
-			)
+			]
 		);
 		if ( array_key_exists( $widget_token_key, $this->settings ) ) {
 			return HashService::decrypt( $this->settings[ $widget_token_key ] );
@@ -188,10 +190,10 @@ class WidgetConfigurationSettingService extends AbstractSettingService {
 	public function get_environment(): ?string {
 		$environment_key = $this->service->get_option_name(
 			$this->id,
-			array(
+			[
 				SettingGroups::ENVIRONMENT()->name,
 				EnvironmentSettings::ENVIRONMENT()->name,
-			)
+			]
 		);
 		if ( array_key_exists( $environment_key, $this->settings ) ) {
 			return $this->settings[ $environment_key ];
@@ -202,10 +204,10 @@ class WidgetConfigurationSettingService extends AbstractSettingService {
 	public function get_version(): ?string {
 		$version_key = $this->service->get_option_name(
 			$this->id,
-			array(
+			[
 				SettingGroups::CHECKOUT()->name,
 				MasterWidgetSettings::VERSION()->name,
-			)
+			]
 		);
 		if ( array_key_exists( $version_key, $this->settings ) ) {
 			return $this->settings[ $version_key ];
@@ -217,15 +219,15 @@ class WidgetConfigurationSettingService extends AbstractSettingService {
 		$this->init_settings();
 		$validation_service = new ConnectionValidationService( $this );
 
-		$hashed_credential_keys = array();
+		$hashed_credential_keys = [];
 		foreach ( CredentialSettings::cases() as $credential_settings ) {
 			if ( in_array( $credential_settings->name, CredentialSettings::get_hashed(), true ) ) {
 				$key                            = $this->service->get_option_name(
 					$this->id,
-					array(
+					[
 						SettingGroups::CREDENTIALS()->name,
 						$credential_settings->name,
-					)
+					]
 				);
 				$hashed_credential_keys[ $key ] = $credential_settings;
 			}
@@ -244,7 +246,7 @@ class WidgetConfigurationSettingService extends AbstractSettingService {
 			}
 
 			if ( array_key_exists( $key, $hashed_credential_keys ) ) {
-				if ( '********************' === $value || '' === $value ) {
+				if ( $value === '********************' || $value === '' ) {
 					$value = $this->get_option( $key );
 				}
 			}
@@ -266,7 +268,7 @@ class WidgetConfigurationSettingService extends AbstractSettingService {
 		}
 
 		$option_key = $this->get_option_key();
-		do_action( 'woocommerce_update_option', array( 'id' => $option_key ) );
+		do_action( 'woocommerce_update_option', [ 'id' => $option_key ] );
 
 		return update_option(
 			$option_key,
@@ -279,7 +281,7 @@ class WidgetConfigurationSettingService extends AbstractSettingService {
 		return SettingsTabs::WIDGET_CONFIGURATION()->value;
 	}
 
-	public function generate_settings_html( $form_fields = array(), $echo = true ): ?string {
+	public function generate_settings_html( $form_fields = [], $should_echo = true ): ?string {
 
 		if ( empty( $form_fields ) ) {
 			$form_fields = $this->get_form_fields();
@@ -289,10 +291,10 @@ class WidgetConfigurationSettingService extends AbstractSettingService {
 			if ( in_array( $credential_settings->name, CredentialSettings::get_hashed() ) ) {
 				$key = $this->service->get_option_name(
 					$this->id,
-					array(
+					[
 						SettingGroups::CREDENTIALS()->name,
 						$credential_settings->name,
-					)
+					]
 				);
 
 				if ( ! empty( $this->settings[ $key ] ) ) {
@@ -303,7 +305,7 @@ class WidgetConfigurationSettingService extends AbstractSettingService {
 			}
 		}
 
-		return parent::generate_settings_html( $form_fields, $echo );
+		return parent::generate_settings_html( $form_fields, $should_echo );
 	}
 
 	public function validate_big_label_field( $key, $value ) {

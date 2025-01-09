@@ -22,12 +22,12 @@ class ConnectionValidationService {
 	private const IS_WEBHOOK_SET_OPTION = 'is_power_board_webhook_set';
 
 	public $service                         = null;
-	private $errors                         = array();
-	private $result                         = array();
-	private $data                           = array();
+	private $errors                         = [];
+	private $result                         = [];
+	private $data                           = [];
 	private $access_token_validation_failed = false;
-	private $configuration_templates        = array();
-	private $customisation_templates        = array();
+	private $configuration_templates        = [];
+	private $customisation_templates        = [];
 	private $environment_settings           = null;
 	private $access_token_settings          = null;
 	private $widget_access_token_settings   = null;
@@ -49,7 +49,7 @@ class ConnectionValidationService {
 		$this->validate();
 
 		$option_key = $service->get_option_key();
-		do_action( 'woocommerce_update_option', array( 'id' => $option_key ) );
+		do_action( 'woocommerce_update_option', [ 'id' => $option_key ] );
 
 		update_option(
 			$option_key,
@@ -65,14 +65,14 @@ class ConnectionValidationService {
 				$this->data[ $key ]   = $this->service->get_field_value( $key, $field, $post_data );
 				$this->result[ $key ] = $this->data[ $key ];
 
-				if ( 'select' === $field['type'] || 'checkbox' === $field['type'] ) {
+				if ( $field['type'] === 'select' || $field['type'] === 'checkbox' ) {
 					do_action(
 						'woocommerce_update_non_option_setting',
-						array(
+						[
 							'id'    => $key,
 							'type'  => $field['type'],
 							'value' => $this->data[ $key ],
-						)
+						]
 					);
 				}
 			} catch ( Exception $e ) {
@@ -92,46 +92,46 @@ class ConnectionValidationService {
 		$environment_settings_key   = SettingsService::get_instance()
 		->get_option_name(
 			$this->service->id,
-			array(
+			[
 				SettingGroups::ENVIRONMENT()->name,
 				EnvironmentSettings::ENVIRONMENT()->name,
-			)
+			]
 		);
 		$this->environment_settings = $this->data[ $environment_settings_key ];
 
-		$version_settings_key = SettingsService::get_instance()
+		$version_settings_key   = SettingsService::get_instance()
 		->get_option_name(
 			$this->service->id,
-			array(
+			[
 				SettingGroups::CHECKOUT()->name,
 				MasterWidgetSettings::VERSION()->name,
-			)
+			]
 		);
 		$this->version_settings = $this->data[ $version_settings_key ];
 
 		$access_token_settings_key   = SettingsService::get_instance()
 		->get_option_name(
 			$this->service->id,
-			array(
+			[
 				SettingGroups::CREDENTIALS()->name,
 				CredentialSettings::ACCESS_KEY()->name,
-			)
+			]
 		);
 		$this->access_token_settings = $this->data[ $access_token_settings_key ];
-		if ( '********************' === $this->access_token_settings || null === $this->access_token_settings ) {
+		if ( $this->access_token_settings === '********************' || $this->access_token_settings === null ) {
 			$this->access_token_settings = $this->service->get_access_token();
 		}
 
 		$widget_access_token_settings_key   = SettingsService::get_instance()
 		->get_option_name(
 			$this->service->id,
-			array(
+			[
 				SettingGroups::CREDENTIALS()->name,
 				CredentialSettings::WIDGET_KEY()->name,
-			)
+			]
 		);
 		$this->widget_access_token_settings = $this->data[ $widget_access_token_settings_key ];
-		if ( '********************' === $this->widget_access_token_settings || null === $this->widget_access_token_settings ) {
+		if ( $this->widget_access_token_settings === '********************' || $this->widget_access_token_settings === null ) {
 			$this->widget_access_token_settings = $this->service->get_widget_access_token();
 		}
 	}
@@ -161,7 +161,7 @@ class ConnectionValidationService {
 	private function check_access_key_connection( ?string $access_token ): bool {
 		$this->access_token_validation_failed = false;
 		$this->save_old_credential();
-		if ( '********************' === $access_token ) {
+		if ( $access_token === '********************' ) {
 			$access_token = $this->old_access_token;
 		}
 
@@ -182,23 +182,43 @@ class ConnectionValidationService {
 	private function get_configuration_templates() {
 		$configuration_templates_result = $this->widget_api_adapter_service->get_configuration_templates_ids( $this->version_settings );
 		$has_error                      = ! empty( $configuration_templates_result['error'] );
-		$this->configuration_templates  = MasterWidgetTemplatesHelper::mapTemplates( $configuration_templates_result['resource']['data'], $has_error );
+		$this->configuration_templates  = MasterWidgetTemplatesHelper::map_templates( $configuration_templates_result['resource']['data'], $has_error );
 
 		if ( $has_error ) {
 			$this->access_token_validation_failed = true;
 		} else {
 			set_transient( 'configuration_templates_' . $this->environment_settings, $this->configuration_templates, 60 );
 		}
+
+		$configuration_id_key = SettingsService::get_instance()
+			->get_option_name(
+				$this->service->id,
+				[
+					SettingGroups::CHECKOUT()->name,
+					MasterWidgetSettings::CONFIGURATION_ID()->name,
+				]
+			);
+		MasterWidgetTemplatesHelper::validate_or_update_template_id( $this->configuration_templates, $has_error, $configuration_id_key );
 	}
 
 	private function get_customisation_templates() {
 		$customisation_templates_result = $this->widget_api_adapter_service->get_customisation_templates_ids( $this->version_settings );
 		$has_error                      = ! empty( $customisation_templates_result['error'] );
-		$this->configuration_templates  = MasterWidgetTemplatesHelper::mapTemplates( $customisation_templates_result['resource']['data'], $has_error );
+		$this->customisation_templates  = MasterWidgetTemplatesHelper::map_templates( $customisation_templates_result['resource']['data'], $has_error );
 
 		if ( ! $has_error ) {
 			set_transient( 'customisation_templates_' . $this->environment_settings, $this->customisation_templates, 60 );
 		}
+
+		$customisation_id_key = SettingsService::get_instance()
+			->get_option_name(
+				$this->service->id,
+				[
+					SettingGroups::CHECKOUT()->name,
+					MasterWidgetSettings::CUSTOMISATION_ID()->name,
+				]
+			);
+		MasterWidgetTemplatesHelper::validate_or_update_template_id( $this->customisation_templates, $has_error, $customisation_id_key );
 	}
 
 	private function save_old_credential() {
@@ -213,17 +233,17 @@ class ConnectionValidationService {
 
 	private function check_widget_key_connection( ?string $widget_access_token ): bool {
 		$this->save_old_credential();
-		if ( '********************' === $widget_access_token ) {
+		if ( $widget_access_token === '********************' ) {
 			$widget_access_token = $this->old_widget_access_token;
 		}
 
 		ConfigService::$widget_access_token = $widget_access_token;
 
 		$result = $this->api_adapter_service->token(
-			array(
+			[
 				'gateway_id' => '',
 				'type'       => '',
-			),
+			],
 			true
 		);
 		$result = empty( $result['error'] );
@@ -235,16 +255,16 @@ class ConnectionValidationService {
 
 	private function set_webhooks(): void {
 		$webhook_events = NotificationEvents::events();
-		if ( false !== strpos( get_site_url(), 'localhost' ) ) {
+		if ( strpos( get_site_url(), 'localhost' ) !== false ) {
 			return;
 		}
 
 		$not_set_webhooks      = $webhook_events;
 		$webhook_site_url      = get_site_url() . '/wc-api/power-board-webhook/';
 		$should_create_webhook = true;
-		$webhook_request       = $this->api_adapter_service->search_notifications( array( 'type' => 'webhook' ) );
+		$webhook_request       = $this->api_adapter_service->search_notifications( [ 'type' => 'webhook' ] );
 		if ( ! empty( $webhook_request['resource']['data'] ) ) {
-			$events = array();
+			$events = [];
 			foreach ( $webhook_request['resource']['data'] as $webhook ) {
 				if ( $webhook['destination'] === $webhook_site_url ) {
 					$events[] = $webhook['event'];
@@ -257,16 +277,16 @@ class ConnectionValidationService {
 			}
 		}
 
-		$webhook_ids = array();
+		$webhook_ids = [];
 		if ( $should_create_webhook ) {
 			foreach ( $not_set_webhooks as $event ) {
 				$result = $this->api_adapter_service->create_notification(
-					array(
+					[
 						'event'            => $event,
 						'destination'      => $webhook_site_url,
 						'type'             => 'webhook',
 						'transaction_only' => false,
-					)
+					]
 				);
 
 				if ( ! empty( $result['resource']['data']['_id'] ) ) {
