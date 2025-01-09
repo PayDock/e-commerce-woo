@@ -13,6 +13,31 @@ include:
   - project: 'paydock/platform/gitlab-templates'
     file: '/code_quality.yml'
 
+run_phpcs:
+  image: composer:lts
+  stage: quality
+  script:
+    - composer install
+    - ./vendor/bin/phpcs --report=json . > phpcs-report.json || true
+    - ls phpcs-report.json
+  artifacts:
+    name: phpcs-report.json
+    paths:
+      - phpcs-report.json
+
+phpcs_report:
+  image: python:3.9-slim
+  stage: quality
+  needs:
+    - job: run_phpcs
+      artifacts: true
+  script:
+    - python phpcs2codeclimate.py
+  artifacts:
+    reports:
+      codequality:
+        - code_climate_phpcs_report.json
+
 prepare_power_board_version:
   stage: publish
   only:
@@ -96,28 +121,3 @@ publish_paydock:
       - eslint.config.mjs
       - Dockerfile.powerboard
       - Dockerfile.paydock
-
-run_phpcs:
-  image: composer:lts
-  stage: quality
-  script:
-    - composer install
-    - ./vendor/bin/phpcs --report=json . > phpcs-report.json || true
-    - ls phpcs-report.json
-  artifacts:
-    name: phpcs-report.json
-    paths:
-      - phpcs-report.json
-
-phpcs_report:
-  image: python:3.9-slim
-  stage: quality
-  needs:
-    - job: run_phpcs
-      artifacts: true
-  script:
-    - python phpcs2codeclimate.py
-  artifacts:
-    reports:
-      codequality:
-        - code_climate_phpcs_report.json
