@@ -13,8 +13,7 @@ include:
   - project: 'paydock/platform/gitlab-templates'
     file: '/code_quality.yml'
 
-publish_power_board:
-  image: alpine:latest
+prepare_power_board_version:
   stage: publish
   only:
     - power_board
@@ -24,15 +23,39 @@ publish_power_board:
   script:
     - VERSION=$(cat version)
     - MAJOR_MINOR=$(cat power-board.php | grep "POWER_BOARD_PLUGIN_VERSION'," | sed -e "s/^.*\([0-9].[0-9].[0-9]\).*$/\1/")
-    - apk add zip
-    - zip -r woo_powerboard-$MAJOR_MINOR-$VERSION.zip ./ -x '.git/*' -x .gitignore -x '.github/*' -x .gitlab-ci.yml -x .codeclimate.yml -x '.idea/*'
+    - echo "ARTIFACT_NAME=woo_powerboard-$MAJOR_MINOR-$VERSION" > VERSION.TXT
   artifacts:
-    name: woo-powerboard.zip
-    paths:
-      - woo_powerboard*.zip
+    reports:
+      dotenv: VERSION.TXT
 
-publish_paydock:
-  image: alpine:latest
+publish_power_board:
+  stage: publish
+  only:
+    - power_board
+  needs:
+    - prepare_power_board_version
+  script:
+    - echo $ARTIFACT_NAME
+  artifacts:
+    name: $ARTIFACT_NAME
+    paths:
+      - ./*
+    exclude:
+      - .git/*
+      - .gitignore
+      - .github/*
+      - .gitlab-ci.yml
+      - .codeclimate.yml
+      - .idea/*
+      - screenshot-*.png
+      - phpstan.neon
+      - phpcs2codeclimate.py
+      - phpcs.xml
+      - eslint.config.mjs
+      - Dockerfile.powerboard
+      - Dockerfile.paydock
+
+prepare_paydock_version:
   stage: publish
   only:
     - main
@@ -42,12 +65,37 @@ publish_paydock:
   script:
     - VERSION=$(cat version)
     - MAJOR_MINOR=$(cat paydock.php | grep "PAYDOCK_PLUGIN_VERSION'," | sed -e "s/^.*\([0-9].[0-9].[0-9]\).*$/\1/")
-    - apk add zip
-    - zip -r woo_$MAJOR_MINOR_$VERSION.zip ./ -x '.git/*' -x .gitignore -x '.github/*' -x .gitlab-ci.yml -x .codeclimate.yml -x '.idea/*'
+    - echo "ARTIFACT_NAME=woo_paydock-$MAJOR_MINOR-$VERSION" > VERSION.TXT
   artifacts:
-    name: woo.zip
+    reports:
+      dotenv: VERSION.TXT
+
+publish_paydock:
+  stage: publish
+  only:
+    - main
+  needs:
+    - prepare_paydock_version
+  script:
+    - echo $ARTIFACT_NAME
+  artifacts:
+    name: $ARTIFACT_NAME
     paths:
-      - woo*.zip
+      - ./*
+    exclude:
+      - .git/*
+      - .gitignore
+      - .github/*
+      - .gitlab-ci.yml
+      - .codeclimate.yml
+      - .idea/*
+      - screenshot-*.png
+      - phpstan.neon
+      - phpcs2codeclimate.py
+      - phpcs.xml
+      - eslint.config.mjs
+      - Dockerfile.powerboard
+      - Dockerfile.paydock
 
 run_phpcs:
   image: composer:lts
