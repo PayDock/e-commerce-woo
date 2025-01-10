@@ -4,10 +4,8 @@ namespace PowerBoard\Services;
 
 use PowerBoard\Abstracts\AbstractSingleton;
 use PowerBoard\Enums\OrderListColumnsEnum;
-use PowerBoard\Enums\SettingsTabsEnum;
 use PowerBoard\Helpers\OrderListColumnsHelper;
 use PowerBoard\Services\Checkout\MasterWidgetPaymentService;
-use PowerBoard\Services\Settings\LogsSettingService;
 use PowerBoard\Services\Settings\WidgetConfigurationSettingService;
 
 class FiltersService extends AbstractSingleton {
@@ -25,7 +23,7 @@ class FiltersService extends AbstractSingleton {
 			$new_columns[ $column_name ] = $column_info;
 
 			if ( OrderListColumnsEnum::AFTER_COLUMN === $column_name ) {
-				$new_columns[ OrderListColumnsHelper::get_key(OrderListColumnsEnum::PAYMENT_SOURCE_TYPE) ] = OrderListColumnsEnum::PAYMENT_SOURCE_TYPE;
+				$new_columns[ OrderListColumnsHelper::get_key( OrderListColumnsEnum::PAYMENT_SOURCE_TYPE ) ] = OrderListColumnsHelper::get_label( OrderListColumnsEnum::PAYMENT_SOURCE_TYPE );
 			}
 		}
 
@@ -33,8 +31,8 @@ class FiltersService extends AbstractSingleton {
 	}
 
 	public function ordersListNewColumnContent( $column, $order ) {
-		if ( OrderListColumnsHelper::get_key(OrderListColumnsEnum::PAYMENT_SOURCE_TYPE) === $column ) {
-			$status = $order->get_meta( OrderListColumnsHelper::get_key(OrderListColumnsEnum::PAYMENT_SOURCE_TYPE) );
+		if ( OrderListColumnsHelper::get_key( OrderListColumnsEnum::PAYMENT_SOURCE_TYPE ) === $column ) {
+			$status = $order->get_meta( OrderListColumnsHelper::get_key( OrderListColumnsEnum::PAYMENT_SOURCE_TYPE ) );
 
 			echo esc_html( is_array( $status ) ? reset( $status ) : $status );
 		}
@@ -88,27 +86,10 @@ class FiltersService extends AbstractSingleton {
 	}
 
 	public function registerInWooCommercePaymentClass( array $methods ): array {
-
-		global $current_section;
-		global $current_tab;
-
 		if ( is_admin() ) {
-
 			$methods[] = WidgetConfigurationSettingService::class;
-
-			if (
-				$current_tab !== 'checkout' ||
-				in_array(
-					$current_section,
-					SettingsTabsEnum::cases()
-				)
-			) {
-				$methods[] = LogsSettingService::class;
-			}
 		} else {
-
 			$methods[] = MasterWidgetPaymentService::class;
-
 		}
 
 		return $methods;
@@ -119,11 +100,7 @@ class FiltersService extends AbstractSingleton {
 		$options  = get_option( "power_board_fraud_{$order_id}" );
 		$order    = wc_get_order( $order_id );
 		$status   = $order->get_status();
-		$afterpay = wp_strip_all_tags( filter_input( INPUT_GET, 'afterpay-error' ) );
 
-		if ( ! empty( $afterpay ) && ( $afterpay === 'true' ) ) {
-			return __( 'Order has been cancelled', 'power-board' );
-		}
 		if ( $options === false && $status !== 'processing' ) {
 			return __( 'Thank you. Your order has been received.', 'power-board' );
 		}

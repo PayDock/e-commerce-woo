@@ -3,33 +3,48 @@
 namespace PowerBoard\Services\Settings;
 
 use Exception;
-use PowerBoard\Abstracts\AbstractSettingService;
 use PowerBoard\Enums\CredentialSettingsEnum;
 use PowerBoard\Enums\EnvironmentSettingsEnum;
 use PowerBoard\Enums\MasterWidgetSettingsEnum;
 use PowerBoard\Enums\SettingGroupsEnum;
-use PowerBoard\Enums\SettingsTabsEnum;
+use PowerBoard\Enums\SettingsSectionEnum;
 use PowerBoard\Helpers\CredentialSettingsHelper;
 use PowerBoard\Helpers\EnvironmentSettingsHelper;
 use PowerBoard\Helpers\MasterWidgetSettingsHelper;
 use PowerBoard\Helpers\SettingGroupsHelper;
+use PowerBoard\Services\Assets\AdminAssetsService;
 use PowerBoard\Services\HashService;
 use PowerBoard\Services\SettingsService;
+use PowerBoard\Services\TemplateService;
 use PowerBoard\Services\Validation\ConnectionValidationService;
 use WC_Admin_Settings;
+use WC_Blocks_Utils;
+use WC_Payment_Gateway;
 
-class WidgetConfigurationSettingService extends AbstractSettingService {
+class WidgetConfigurationSettingService extends WC_Payment_Gateway {
 	protected $service = null;
+	protected $template_service;
 
 	public function __construct() {
-		$this->service = SettingsService::get_instance();
-		parent::__construct();
-		wp_enqueue_style(
-			'widget-configuration',
-			POWER_BOARD_PLUGIN_URL . 'assets/css/admin/widget-configuration.css',
-			[],
-			POWER_BOARD_PLUGIN_VERSION
+		$this->service            = SettingsService::get_instance();
+		$this->id                 = $this->get_id();
+		$this->method_title       = __( 'PowerBoard Gateway', 'power-board' );
+		$this->title              = $this->method_title;
+		$this->method_description = __(
+			'PowerBoard simplify how you manage your payments. Reduce costs, technical headaches & streamline compliance using PowerBoard\'s payment orchestration.',
+			'power-board'
 		);
+		$this->icon               = POWER_BOARD_PLUGIN_URL . 'assets/images/logo.png';
+
+		$this->init_settings();
+		$this->init_form_fields();
+
+		$this->has_fields = is_checkout() && WC_Blocks_Utils::has_block_in_page( wc_get_page_id( 'checkout' ), 'woocommerce/checkout' );
+
+		if ( is_admin() ) {
+			new AdminAssetsService();
+			$this->template_service = new TemplateService( $this );
+		}
 
 		foreach ( CredentialSettingsEnum::cases() as $credential_settings ) {
 			$key = $this->service->get_option_name(
@@ -41,11 +56,11 @@ class WidgetConfigurationSettingService extends AbstractSettingService {
 			);
 
 			if ( ! empty( $this->settings[ $key ] ) ) {
-                try {
-                    $decrypted_key = HashService::decrypt( $this->settings[ $key ] );
-                } catch ( Exception $error ) {
-                    $decrypted_key = null;
-                }
+				try {
+					$decrypted_key = HashService::decrypt( $this->settings[ $key ] );
+				} catch ( Exception $error ) {
+					$decrypted_key = null;
+				}
 				$this->settings[ $key ] = $decrypted_key;
 			}
 		}
@@ -182,11 +197,11 @@ class WidgetConfigurationSettingService extends AbstractSettingService {
 			]
 		);
 		if ( array_key_exists( $token_key, $this->settings ) ) {
-            try {
-                $decrypted_key = HashService::decrypt( $this->settings[ $token_key ] );
-            } catch ( Exception $error ) {
-                $decrypted_key = null;
-            }
+			try {
+				$decrypted_key = HashService::decrypt( $this->settings[ $token_key ] );
+			} catch ( Exception $error ) {
+				$decrypted_key = null;
+			}
 			return $decrypted_key;
 		}
 		return null;
@@ -201,11 +216,11 @@ class WidgetConfigurationSettingService extends AbstractSettingService {
 			]
 		);
 		if ( array_key_exists( $widget_token_key, $this->settings ) ) {
-            try {
-                $decrypted_key = HashService::decrypt( $this->settings[ $widget_token_key ] );
-            } catch ( Exception $error ) {
-                $decrypted_key = null;
-            }
+			try {
+				$decrypted_key = HashService::decrypt( $this->settings[ $widget_token_key ] );
+			} catch ( Exception $error ) {
+				$decrypted_key = null;
+			}
 			return $decrypted_key;
 		}
 		return null;
@@ -277,23 +292,23 @@ class WidgetConfigurationSettingService extends AbstractSettingService {
 		}
 
 		foreach ( $hashed_credential_keys as $key => $credential_settings ) {
-            try {
-                $decrypted_key = HashService::decrypt( $this->settings[ $key ] );
-            } catch ( Exception $error ) {
-                $decrypted_key = null;
-                $this->add_error( $error );
-                WC_Admin_Settings::add_error( $error );
-            }
+			try {
+				$decrypted_key = HashService::decrypt( $this->settings[ $key ] );
+			} catch ( Exception $error ) {
+				$decrypted_key = null;
+				$this->add_error( $error );
+				WC_Admin_Settings::add_error( $error );
+			}
 			$is_encrypted = $decrypted_key !== $this->settings[ $key ];
 
 			if ( ! empty( $this->settings[ $key ] ) && ! $is_encrypted ) {
-                try {
-                    $encrypted_key = HashService::encrypt( $this->settings[ $key ] );
-                } catch ( Exception $error ) {
-                    $encrypted_key = null;
-                    $this->add_error( $error );
-                    WC_Admin_Settings::add_error( $error );
-                }
+				try {
+					$encrypted_key = HashService::encrypt( $this->settings[ $key ] );
+				} catch ( Exception $error ) {
+					$encrypted_key = null;
+					$this->add_error( $error );
+					WC_Admin_Settings::add_error( $error );
+				}
 				$this->settings[ $key ] = $encrypted_key;
 			}
 		}
@@ -314,17 +329,20 @@ class WidgetConfigurationSettingService extends AbstractSettingService {
 	}
 
 	protected function get_id(): string {
-		return SettingsTabsEnum::WIDGET_CONFIGURATION;
+		return SettingsSectionEnum::WIDGET_CONFIGURATION;
+	}
+
+	public function parent_generate_settings_html( $form_fields = [], $should_echo = true ): ?string {
+		return parent::generate_settings_html( $form_fields, $should_echo );
 	}
 
 	public function generate_settings_html( $form_fields = [], $should_echo = true ): ?string {
-
 		if ( empty( $form_fields ) ) {
 			$form_fields = $this->get_form_fields();
 		}
 
 		foreach ( CredentialSettingsEnum::cases() as $credential_settings ) {
-			$key = $this->service->get_option_name(
+			$credential_key = $this->service->get_option_name(
 				$this->id,
 				[
 					SettingGroupsEnum::CREDENTIALS,
@@ -332,13 +350,21 @@ class WidgetConfigurationSettingService extends AbstractSettingService {
 				]
 			);
 
-			if ( ! empty( $this->settings[ $key ] ) ) {
-				$this->settings[ $key ] = '********************';
-			} else {
-				$this->settings[ $key ] = '';
-			}
+			$this->settings[ $credential_key ] = ! empty( $this->settings[ $credential_key ] ) ? '********************' : '';
 		}
 
-		return parent::generate_settings_html( $form_fields, $should_echo );
+		$form_fields = compact( 'form_fields' );
+
+		if ( $should_echo ) {
+			$this->template_service->include_admin_html( 'admin', $form_fields );
+		} else {
+			return $this->template_service->get_admin_html( 'admin', $form_fields );
+		}
+
+		return null;
+	}
+
+	public function generate_big_label_html( $key, $value ) {
+		return $this->template_service->get_admin_html( 'big-label', compact( 'key', 'value' ) );
 	}
 }

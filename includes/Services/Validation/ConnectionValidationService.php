@@ -194,8 +194,8 @@ class ConnectionValidationService {
 			->get_option_name(
 				$this->service->id,
 				[
-					SettingGroups::CHECKOUT()->name,
-					MasterWidgetSettings::CONFIGURATION_ID()->name,
+					SettingGroupsEnum::CHECKOUT,
+                    MasterWidgetSettingsEnum::CONFIGURATION_ID,
 				]
 			);
 		MasterWidgetTemplatesHelper::validate_or_update_template_id( $this->configuration_templates, $has_error, $configuration_id_key );
@@ -214,8 +214,8 @@ class ConnectionValidationService {
 			->get_option_name(
 				$this->service->id,
 				[
-					SettingGroups::CHECKOUT()->name,
-					MasterWidgetSettings::CUSTOMISATION_ID()->name,
+					SettingGroupsEnum::CHECKOUT,
+					MasterWidgetSettingsEnum::CUSTOMISATION_ID,
 				]
 			);
 		MasterWidgetTemplatesHelper::validate_or_update_template_id( $this->customisation_templates, $has_error, $customisation_id_key );

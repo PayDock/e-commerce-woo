@@ -2,7 +2,7 @@
 
 namespace PowerBoard\Services;
 
-use PowerBoard\Enums\SettingsTabsEnum;
+use PowerBoard\Enums\SettingsSectionEnum;
 
 class TemplateService {
     public $setting_service;
@@ -11,23 +11,12 @@ class TemplateService {
 	private const CHECKOUT_TEMPLATE_DIR = 'checkout';
 
 	private const TEMPLATE_END = '.php';
-	protected $current_section = '';
 
 	private $template_admin_dir;
 	private $template_checkout_dir;
 
 	public function __construct( $service = null ) {
 		$this->setting_service = $service;
-		$section               = wp_strip_all_tags( filter_input( INPUT_GET, 'section' ) );
-		$available_sections    = array_map(
-			function ( $item ) {
-				return strtolower( $item->value );
-			},
-            SettingsTabsEnum::cases()
-		);
-		if ( isset( $this->setting_service->current_section ) || in_array( $section, $available_sections, true ) ) {
-			$this->current_section = $this->setting_service->current_section ?? $section;
-		}
 		$this->template_admin_dir    = implode( DIRECTORY_SEPARATOR, [ self::TEMPLATE_DIR, self::ADMIN_TEMPLATE_DIR ] );
 		$this->template_checkout_dir = implode( DIRECTORY_SEPARATOR, [ self::TEMPLATE_DIR, self::CHECKOUT_TEMPLATE_DIR ] );
 	}

@@ -22,21 +22,18 @@ class APIAdapterService {
 	}
 
 	public function create_checkout_intent( array $params ): array {
-		$this->init_charge_service();
-		return $this->charge_service->create_checkout_intent( $params )->call();
+		return $this->get_charge_service()->create_checkout_intent( $params )->call();
 	}
 
 	public function get_configuration_templates_ids( string $version ): array {
-		$this->init_charge_service();
-		return $this->charge_service->get_configuration_templates_ids( $version )->call();
+		return $this->get_charge_service()->get_configuration_templates_ids( $version )->call();
 	}
 
 	public function get_customisation_templates_ids( string $version ): array {
-		$this->init_charge_service();
-		return $this->charge_service->get_customisation_templates_ids( $version )->call();
+		return $this->get_charge_service()->get_customisation_templates_ids( $version )->call();
 	}
 
-	protected function init_charge_service(): ChargeService {
+	protected function get_charge_service(): ChargeService {
 		if ( empty( $this->charge_service ) ) {
 			$this->charge_service = new ChargeService();
 		}
