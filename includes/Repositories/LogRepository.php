@@ -6,7 +6,7 @@ use PowerBoard\Abstracts\AbstractRepository;
 use PowerBoard\Contracts\Repository;
 
 class LogRepository extends AbstractRepository implements Repository {
-	private const AVAILABLE_SORT = [ 
+	private const AVAILABLE_SORT = [
 		'id',
 		'created_at',
 		'operation',
@@ -15,46 +15,12 @@ class LogRepository extends AbstractRepository implements Repository {
 	public const DEFAULT = 0;
 	public const SUCCESS = 1;
 	public const ERROR = 2;
-	public const AVAILABLE_TYPES = [ 
+	public const AVAILABLE_TYPES = [
 		self::DEFAULT ,
 		self::SUCCESS,
 		self::ERROR,
 	];
 	protected $table = 'logs';
-
-	public function getLogs(
-		int $page = 1,
-		int $perPage = 50,
-		string $orderBy = 'created_at',
-		string $order = 'desc'
-	): array {
-		$page = max( $page, 1 );
-		$orderBy = in_array( $orderBy, self::AVAILABLE_SORT, true ) ? $orderBy : 'created_at';
-		$order = 'asc' == $order ? 'asc' : 'desc';
-
-		$fullTableName = $this->getFullTableName( $this->table );
-		$offset = ( $page - 1 ) * $perPage;
-
-		$result = [];
-
-		$result['data'] = $this->wordpressDB->get_results(
-			"SELECT * FROM `$fullTableName` ORDER BY `$orderBy` $order LIMIT $perPage OFFSET $offset;"
-		);
-
-		$result['count'] = $this->wordpressDB->get_row(
-			"SELECT COUNT(*) as `count` FROM `$fullTableName`;"
-		)->count;
-
-		$result['from'] = $result['count'] > 0 ? $offset + 1 : 0;
-		$max = $page * $perPage;
-		$result['to'] = $max < $result['count'] ? $max : $result['count'];
-		$result['last_page'] = $result['count'] > 0 ? ceil( $result['count'] / $perPage ) : 1;
-		$result['current'] = $page;
-		$result['order'] = $order;
-		$result['orderBy'] = $orderBy;
-
-		return $result;
-	}
 
 	public function createLogRecord(
 		string $id,

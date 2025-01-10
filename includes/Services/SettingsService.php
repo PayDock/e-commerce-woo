@@ -11,21 +11,6 @@ final class SettingsService {
 	private static $instance = null;
 	private $widget_service  = null;
 	private $environment     = null;
-	private $is_safari_or_ios;
-
-	protected function __construct() {
-		$detector = new BrowserDetection();
-		if ( isset( $_SERVER['HTTP_USER_AGENT'] ) && ! empty( $_SERVER['HTTP_USER_AGENT'] ) ) {
-			$user_agent = sanitize_text_field( $_SERVER['HTTP_USER_AGENT'] );
-		} else {
-			$user_agent = 'undefined';
-		}
-		$browser                = $detector->get_browser( $user_agent );
-		$os                     = $detector->get_os( $user_agent );
-		$this->is_safari_or_ios = ( 'iOS' === $os['os_name'] )
-								|| (bool) $browser['browser_safari_original']
-								|| (bool) $browser['browser_ios_webview'];
-	}
 
 	public function get_environment(): ?string {
 		$widget_service    = $this->get_settings_service();

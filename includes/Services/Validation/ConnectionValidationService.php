@@ -23,11 +23,8 @@ class ConnectionValidationService {
 
 	public $service                         = null;
 	private $errors                         = [];
-	private $result                         = [];
 	private $data                           = [];
 	private $access_token_validation_failed = false;
-	private $configuration_templates        = [];
-	private $customisation_templates        = [];
 	private $environment_settings           = null;
 	private $access_token_settings          = null;
 	private $widget_access_token_settings   = null;
@@ -62,8 +59,7 @@ class ConnectionValidationService {
 		$post_data = $this->service->get_post_data();
 		foreach ( $this->service->get_form_fields() as $key => $field ) {
 			try {
-				$this->data[ $key ]   = $this->service->get_field_value( $key, $field, $post_data );
-				$this->result[ $key ] = $this->data[ $key ];
+				$this->data[ $key ] = $this->service->get_field_value( $key, $field, $post_data );
 
 				if ( $field['type'] === 'select' || $field['type'] === 'checkbox' ) {
 					do_action(
@@ -182,12 +178,12 @@ class ConnectionValidationService {
 	private function get_configuration_templates() {
 		$configuration_templates_result = $this->widget_api_adapter_service->get_configuration_templates_ids( $this->version_settings );
 		$has_error                      = ! empty( $configuration_templates_result['error'] );
-		$this->configuration_templates  = MasterWidgetTemplatesHelper::map_templates( $configuration_templates_result['resource']['data'], $has_error );
+		$configuration_templates        = MasterWidgetTemplatesHelper::map_templates( $configuration_templates_result['resource']['data'], $has_error );
 
 		if ( $has_error ) {
 			$this->access_token_validation_failed = true;
 		} else {
-			set_transient( 'configuration_templates_' . $this->environment_settings, $this->configuration_templates, 60 );
+			set_transient( 'configuration_templates_' . $this->environment_settings, $configuration_templates, 60 );
 		}
 
 		$configuration_id_key = SettingsService::get_instance()
@@ -198,16 +194,16 @@ class ConnectionValidationService {
 					MasterWidgetSettingsEnum::CONFIGURATION_ID,
 				]
 			);
-		MasterWidgetTemplatesHelper::validate_or_update_template_id( $this->configuration_templates, $has_error, $configuration_id_key );
+		MasterWidgetTemplatesHelper::validate_or_update_template_id( $configuration_templates, $has_error, $configuration_id_key );
 	}
 
 	private function get_customisation_templates() {
 		$customisation_templates_result = $this->widget_api_adapter_service->get_customisation_templates_ids( $this->version_settings );
 		$has_error                      = ! empty( $customisation_templates_result['error'] );
-		$this->customisation_templates  = MasterWidgetTemplatesHelper::map_templates( $customisation_templates_result['resource']['data'], $has_error, true );
+		$customisation_templates        = MasterWidgetTemplatesHelper::map_templates( $customisation_templates_result['resource']['data'], $has_error, true );
 
 		if ( ! $has_error ) {
-			set_transient( 'customisation_templates_' . $this->environment_settings, $this->customisation_templates, 60 );
+			set_transient( 'customisation_templates_' . $this->environment_settings, $customisation_templates, 60 );
 		}
 
 		$customisation_id_key = SettingsService::get_instance()
@@ -218,7 +214,7 @@ class ConnectionValidationService {
 					MasterWidgetSettingsEnum::CUSTOMISATION_ID,
 				]
 			);
-		MasterWidgetTemplatesHelper::validate_or_update_template_id( $this->customisation_templates, $has_error, $customisation_id_key );
+		MasterWidgetTemplatesHelper::validate_or_update_template_id( $customisation_templates, $has_error, $customisation_id_key );
 	}
 
 	private function save_old_credential() {
@@ -304,8 +300,6 @@ class ConnectionValidationService {
 			if ( ! empty( $webhook_ids ) ) {
 				update_option( self::IS_WEBHOOK_SET_OPTION, $webhook_ids );
 			}
-		} else {
-			return;
 		}
 	}
 
