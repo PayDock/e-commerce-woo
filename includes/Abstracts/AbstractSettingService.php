@@ -94,10 +94,6 @@ abstract class AbstractSettingService extends WC_Payment_Gateway {
 		];
 	}
 
-	public function generate_big_label_html( $key, $value ) {
-		return $this->template_service->get_admin_html( 'big-label', compact( 'key', 'value' ) );
-	}
-
 	protected function getLogs(): array {
 		$page     = get_query_var( 'page_number' );
 		$page     = ! empty( $page ) ? sanitize_text_field( $page ) : 1;
