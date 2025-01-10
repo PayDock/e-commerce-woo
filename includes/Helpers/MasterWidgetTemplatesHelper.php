@@ -13,7 +13,7 @@ class MasterWidgetTemplatesHelper {
 			$templates[ $template['_id'] ] = $template['label'] . ' | ' . $template['_id'];
 		}
 
-        return ! empty( $templates ) ? [ '' => $is_optional ? 'Default' : 'Select an ID' ] + $templates : [];
+		return ! empty( $templates ) ? [ '' => $is_optional ? 'Unselect template ID' : 'Select a template ID' ] + $templates : [];
 	}
 
 	public static function validate_or_update_template_id( ?array $templates, bool $has_error, string $template_type_key ) {
