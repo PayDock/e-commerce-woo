@@ -6,9 +6,9 @@ jQuery( document ).ready(
 
 		prefixes.map(
 			(prefix) => {
-            elementsToHide.map(
+				elementsToHide.map(
 					(elementToHide) => {
-                    const element = $( '#' + prefix + elementToHide )
+						const element = $( '#' + prefix + elementToHide )
 						if (element.length === 0) {
 							return;
 						}

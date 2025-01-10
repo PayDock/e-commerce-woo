@@ -3,7 +3,6 @@
 namespace PowerBoard\Services;
 
 use PowerBoard\Abstracts\AbstractSingleton;
-use PowerBoard\Enums\SettingsTabsEnum;
 use PowerBoard\Services\Checkout\MasterWidgetPaymentService;
 use PowerBoard\Services\Settings\WidgetConfigurationSettingService;
 

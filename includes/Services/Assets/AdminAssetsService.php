@@ -4,8 +4,7 @@ namespace PowerBoard\Services\Assets;
 
 class AdminAssetsService {
 	private const SCRIPTS = [
-		'tabs',
-		'connections',
+		'hide-settings',
 		'handle-settings-select-option',
 		'deactivation-confirmation',
 	];

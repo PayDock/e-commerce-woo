@@ -97,7 +97,7 @@ final class SettingsService {
 			$sdk_url = ConfigAPIEnum::SANDBOX_WIDGET_URL;
 		}
 
-		return strtr( $sdk_url, [ '{version}' => 'v1.113.6-beta' ] );
+		return strtr( $sdk_url, [ '{version}' => 'v1.116.3-beta' ] );
 	}
 
 	public static function get_instance(): self {

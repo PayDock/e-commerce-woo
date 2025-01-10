@@ -211,7 +211,7 @@ const Paydock = {
             },
             label,
             createElement("img", {
-                src: `${window.powerBoardWidgetSettings.pluginUrlPrefix}assets/images/commBank_logo.png`,
+                src: `${window.powerBoardWidgetSettings.pluginUrlPrefix}assets/images/logo.png`,
                 alt: label,
                 className: 'power-board-payment-method-label-logo'
             })
