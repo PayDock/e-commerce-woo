@@ -11,146 +11,13 @@ use PowerBoard\Services\SDKAdapterService;
 use WP_Error;
 
 class PaymentController {
-	public function capture_payment() {
-		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( [ 'message' => __( 'Permission denied', 'power-board' ) ] );
-
-			return;
-		}
-
-		$wp_nonce = ! empty( $_POST['_wpnonce'] ) ? sanitize_text_field( $_POST['_wpnonce'] ) : null;
-		if ( ! wp_verify_nonce( $wp_nonce, 'capture-or-cancel' ) ) {
-			wp_send_json_error( [ 'message' => __( 'Error: Security check', 'power-board' ) ] );
-
-			return;
-		}
-
-		$order_id = ! empty( $_POST['order_id'] ) ? sanitize_text_field( $_POST['order_id'] ) : null;
-		$error    = null;
-		if ( ! $order_id ) {
-			$error = __( 'The order is not found.', 'power-board' );
-		} else {
-			$order = wc_get_order( $order_id );
-		}
-
-		if ( is_object( $order ) ) {
-			$order->calculate_totals();
-		}
-
-		$amount = ! empty( $_POST['amount'] ) ? wc_format_decimal( $_POST['amount'] ) : 0;
-
-		$logger_repository     = new LogRepository();
-		$power_board_charge_id = $order->get_meta( 'power_board_charge_id' );
-		if ( ! $error ) {
-			$charge = SDKAdapterService::get_instance()->capture(
-				[
-					'charge_id' => $power_board_charge_id,
-					'amount'    => $amount,
-				]
-			);
-			if ( ! empty( $charge['resource']['data']['status'] ) && 'complete' === $charge['resource']['data']['status'] ) {
-				$new_charge_id = $charge['resource']['data']['_id'];
-				$new_status    = 'processing';
-				$logger_repository->createLogRecord(
-					$new_charge_id,
-					'Capture',
-					$new_status,
-					'',
-					LogRepository::SUCCESS
-				);
-				$order->update_meta_data( 'capture_amount', $amount );
-				$order->update_meta_data( 'power_board_charge_id', $new_charge_id );
-				$order->update_meta_data( 'pb_directly_charged', 1 );
-				$order->payment_complete();
-				$order->save();
-
-				OrderService::update_status( $order_id, $new_status );
-				wp_send_json_success(
-					[
-						'message' => __( 'The capture process was successful.', 'power-board' ),
-					]
-				);
-			} elseif ( ! empty( $charge['error'] ) ) {
-				if ( is_array( $charge['error'] ) ) {
-					$charge['error'] = wp_json_encode( $charge['error'] );
-				}
-					$error = $charge['error'];
-			} else {
-				$error = __( 'The capture process has failed; please try again.', 'power-board' );
-			}
-		}
-		if ( $error ) {
-			$logger_repository->createLogRecord( $power_board_charge_id, 'Capture', 'error', $error, LogRepository::ERROR );
-			wp_send_json_error( [ 'message' => $error ] );
-		}
-	}
-
-	public function cancel_authorised() {
-		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( [ 'message' => __( 'Permission denied', 'power-board' ) ] );
-
-			return;
-		}
-
-		$wp_nonce = ! empty( $_POST['_wpnonce'] ) ? sanitize_text_field( $_POST['_wpnonce'] ) : null;
-		if ( ! wp_verify_nonce( $wp_nonce, 'capture-or-cancel' ) ) {
-			wp_send_json_error( [ 'message' => __( 'Error: Security check', 'power-board' ) ] );
-
-			return;
-		}
-
-		$order_id = ! empty( $_POST['order_id'] ) ? sanitize_text_field( $_POST['order_id'] ) : null;
-		$error    = null;
-		$order    = wc_get_order( $order_id );
-		if ( ! $order ) {
-			$error = __( 'The order is not found.', 'power-board' );
-		}
-		$logger_repository     = new LogRepository();
-		$power_board_charge_id = $order->get_meta( 'power_board_charge_id' );
-		if ( ! $error ) {
-			$result = SDKAdapterService::get_instance()->cancel_authorised( [ 'charge_id' => $power_board_charge_id ] );
-
-			if ( ! empty( $result['resource']['data']['status'] ) && 'cancelled' === $result['resource']['data']['status'] ) {
-				$logger_repository->createLogRecord(
-					$power_board_charge_id,
-					'Cancel-authorised',
-					'cancelled',
-					'',
-					LogRepository::SUCCESS
-				);
-				$order->payment_complete();
-				OrderService::update_status( $order_id, 'cancelled' );
-				wp_send_json_success(
-					[ 'message' => __( 'The payment has been cancelled successfully. ', 'power-board' ) ]
-				);
-			} elseif ( ! empty( $result['error'] ) ) {
-				if ( is_array( $result['error'] ) ) {
-					$result['error'] = wp_json_encode( $result['error'] );
-				}
-					$error = $result['error'];
-			} else {
-				$error = __( 'The payment cancellation process has failed. Please try again.', 'power-board' );
-			}
-		}
-		if ( $error ) {
-			$logger_repository->createLogRecord(
-				$power_board_charge_id,
-				'Cancel-authorised',
-				'error',
-				$error,
-				LogRepository::ERROR
-			);
-			wp_send_json_error( [ 'message' => $error ] );
-		}
-	}
-
 	/**
 	 * Handles refund process on PowerBoard
 	 *
 	 * @throws Exception If is refund has failed
 	 */
 	public function refund_process( $refund, $args ) {
-		if ( ! empty( $args['from_webhook'] ) && true === $args['from_webhook'] ) {
+		if ( ! empty( $args['from_webhook'] ) && $args['from_webhook'] === true ) {
 			return;
 		}
 
@@ -163,9 +30,6 @@ class PaymentController {
 			$amount = $args['amount'];
 		}
 
-		$capture_amount = (float) $order->get_meta( 'capture_amount' );
-		$total_refunded = (float) $order->get_total_refunded();
-
 		if ( ! in_array(
 			$order->get_status(),
 			[
@@ -174,28 +38,18 @@ class PaymentController {
 				'completed',
 			],
 			true
-		) || ( false === strpos( $order->get_payment_method(), PLUGIN_PREFIX ) ) ) {
+		) || ( strpos( $order->get_payment_method(), PLUGIN_PREFIX ) ) === false ) {
 			return;
 		}
 
 		$logger_repository = new LogRepository();
 
 		$power_board_charge_id = $order->get_meta( 'power_board_charge_id' );
-		if ( $capture_amount && $total_refunded > $capture_amount ) {
-			$total_refunded = $capture_amount;
-		}
-
-		$directly_charged = $order->get_meta( 'pb_directly_charged' );
 
 		$action = isset( $_POST['action'] ) ? sanitize_text_field( $_POST['action'] ) : '';
 
-		if ( 'edit_order' === $action ) {
-
-			if ( ! $directly_charged && $capture_amount <= $amount ) {
-				$amount_to_refund = ( $capture_amount * 100 - $total_refunded * 100 ) / 100;
-			} else {
-				$amount_to_refund = $amount;
-			}
+		if ( $action === 'edit_order' ) {
+			$amount_to_refund = $amount;
 
 			$refund->set_amount( $amount_to_refund );
 			$refund->set_total( $amount_to_refund * -1 );
@@ -204,7 +58,7 @@ class PaymentController {
 			$amount_to_refund = $amount;
 		}
 
-		if ( 'edit_order' === $action && $order->get_meta( 'status_change_verification_failed' ) ) {
+		if ( $action === 'edit_order' && $order->get_meta( 'status_change_verification_failed' ) ) {
 			$refund->set_amount( 0 );
 			$refund->set_total( 0 );
 			$refund->set_parent_id( 0 );
@@ -283,7 +137,7 @@ class PaymentController {
 	public function webhook(): void {
 		$input = json_decode( file_get_contents( 'php://input' ), true );
 
-		if ( ( null === $input && json_last_error() !== JSON_ERROR_NONE ) || empty( $input['event'] ) ) {
+		if ( ( $input === null && json_last_error() !== JSON_ERROR_NONE ) || empty( $input['event'] ) ) {
 			return;
 		}
 
@@ -326,20 +180,17 @@ class PaymentController {
 		$order     = wc_get_order( $order_id );
 		$charge_id = $data['_id'] ?? '';
 
-		if ( false === $order || 'checkout-draft' === $order->get_status() || ! $charge_id || $charge_id !== $order->get_meta( 'power_board_charge_id' ) ) {
+		if ( $order === false || $order->get_status() === 'checkout-draft' || ! $charge_id || $charge_id !== $order->get_meta( 'power_board_charge_id' ) ) {
 			return false;
 		}
 
 		$status           = ucfirst( strtolower( $data['status'] ?? 'undefined' ) );
 		$operation        = ucfirst( strtolower( $data['type'] ?? 'undefined' ) );
 		$is_authorization = $data['authorization'] ?? 0;
-		$order_total      = $order->get_total();
 
 		switch ( strtoupper( $status ) ) {
 			case ChargeStatusesEnum::COMPLETE:
-				$capture_amount = wc_format_decimal( $data['transaction']['amount'] );
-				$order_status   = 'processing';
-				$order->update_meta_data( 'capture_amount', $capture_amount );
+				$order_status = 'processing';
 				$order->save();
 				break;
 			case ChargeStatusesEnum::PENDING:
@@ -402,12 +253,9 @@ class PaymentController {
 		$order     = wc_get_order( $order_id );
 		$charge_id = $data['_id'] ?? '';
 
-		if ( false === $order || $order->get_meta( 'api_refunded_id' ) === $data['transaction']['_id'] || ! $charge_id || $charge_id !== $order->get_meta( 'power_board_charge_id' ) ) {
+		if ( $order === false || $order->get_meta( 'api_refunded_id' ) === $data['transaction']['_id'] || ! $charge_id || $charge_id !== $order->get_meta( 'power_board_charge_id' ) ) {
 			return false;
 		}
-
-		$order_total    = $order->get_total();
-		$capture_amount = $order->get_meta( 'capture_amount' );
 
 		$status        = ucfirst( strtolower( $data['status'] ?? 'undefined' ) );
 		$operation     = ucfirst( strtolower( $data['type'] ?? 'undefined' ) );

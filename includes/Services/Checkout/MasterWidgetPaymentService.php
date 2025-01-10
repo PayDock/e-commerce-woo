@@ -3,8 +3,6 @@
 namespace PowerBoard\Services\Checkout;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
-use PowerBoard\Enums\OrderListColumnsEnum;
-use PowerBoard\Helpers\OrderListColumnsHelper;
 use PowerBoard\Services\SDKAdapterService;
 use PowerBoard\Services\SettingsService;
 use PowerBoard\Services\TemplateService;
@@ -107,8 +105,6 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 
 		$charge_id = sanitize_text_field( $_POST['chargeid'] ?? '' );
 		$order->update_meta_data( 'power_board_charge_id', $charge_id );
-		$order->update_meta_data( 'pb_directly_charged', 1 );
-		$order->update_meta_data( OrderListColumnsHelper::get_key( OrderListColumnsEnum::PAYMENT_SOURCE_TYPE ), 'PowerBoard' );
 		WC()->cart->empty_cart();
 		$order->save();
 

@@ -54,16 +54,6 @@ class SDKAdapterService {
 		return $token_service->create( $params )->call();
 	}
 
-	public function capture( array $params ): array {
-		$this->init_charge_service();
-		return $this->charge_service->capture( $params )->call();
-	}
-
-	public function cancel_authorised( array $params ): array {
-		$this->init_charge_service();
-		return $this->charge_service->cancel_authorised( $params )->call();
-	}
-
 	public function refunds( array $params ): array {
 		$this->init_charge_service();
 

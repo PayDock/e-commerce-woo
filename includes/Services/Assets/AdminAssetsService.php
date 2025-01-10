@@ -8,7 +8,6 @@ class AdminAssetsService {
 		'connections',
 		'handle-settings-select-option',
 		'deactivation-confirmation',
-		// 'admin-helpers'
 	];
 
 	private const PREFIX = 'admin';

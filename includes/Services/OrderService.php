@@ -25,13 +25,11 @@ class OrderService {
 	}
 
 	public function init_power_board_order_buttons( $order ) {
-		$order_status    = $order->get_status();
-		$captured_amount = $order->get_meta( 'capture_amount' );
-		$total_refund    = $order->get_total_refunded();
-		$order_total     = (float) $order->get_total( false );
+		$order_status = $order->get_status();
+		$total_refund = $order->get_total_refunded();
+		$order_total  = (float) $order->get_total( false );
 		if ( in_array( $order_status, [ 'pending', 'failed', 'cancelled', 'on-hold', 'refunded' ] )
 			|| ( $order_total === $total_refund )
-			|| ( $captured_amount === $total_refund )
 		) {
 			wp_enqueue_style(
 				'hide-refund-button-styles',
@@ -81,19 +79,6 @@ class OrderService {
 				set_transient( 'power_board_status_change_error_' . get_current_user_id(), $error, 300 );
 				unset( $GLOBALS['power_board_is_updating_order_status'] );
 				throw new Exception( esc_html( $error ) );
-			}
-		}
-	}
-
-	public function information_about_partial_captured( $order_id ) {
-		$order = wc_get_order( $order_id );
-
-		if ( is_object( $order ) ) {
-
-			$captured_amount = $order->get_meta( 'capture_amount' );
-
-			if ( ! empty( $captured_amount ) ) {
-				$this->template_service->include_admin_html( 'information-about-partial-captured', compact( 'order', 'captured_amount' ) );
 			}
 		}
 	}
