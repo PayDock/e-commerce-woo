@@ -10,7 +10,10 @@
         }
     },
     "require": {
-        "php": ">=7.4"
+        "php": ">=7.4",
+        "ext-json": "*",
+        "ext-openssl": "*",
+        "ext-sodium": "*"
     },
     "require-dev": {
         "squizlabs/php_codesniffer": "3.*",
