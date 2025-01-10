@@ -83,11 +83,11 @@ class ActionsService extends AbstractSingleton {
 		$payment_controller = new PaymentController();
 		$widget_controller  = new WidgetController();
 
-		add_action( 'woocommerce_order_item_add_action_buttons', [ $orderService, 'init_power_board_order_buttons'], 10, 2 );
-		add_action( 'woocommerce_order_status_changed', [ $orderService, 'status_change_verification' ], 20, 4 );
-		add_action( 'woocommerce_create_refund', [ $paymentController, 'refund_process' ], 10, 2 );
-		add_action( 'woocommerce_order_refunded', [ $paymentController, 'after_refund_process' ], 10, 2 );
-		add_action( 'woocommerce_api_power-board-webhook', [ $paymentController, 'webhook' ] );
-		add_action( 'wc_ajax_power-board-create-charge-intent', [ $widgetController, 'create_checkout_intent'], 10, 1 );
-    }
+		add_action( 'woocommerce_order_item_add_action_buttons', [ $order_service, 'init_power_board_order_buttons' ], 10, 2 );
+		add_action( 'woocommerce_order_status_changed', [ $order_service, 'status_change_verification' ], 20, 4 );
+		add_action( 'woocommerce_create_refund', [ $payment_controller, 'refund_process' ], 10, 2 );
+		add_action( 'woocommerce_order_refunded', [ $payment_controller, 'after_refund_process' ], 10, 2 );
+		add_action( 'woocommerce_api_power-board-webhook', [ $payment_controller, 'webhook' ] );
+		add_action( 'wc_ajax_power-board-create-charge-intent', [ $widget_controller, 'create_checkout_intent' ], 10, 1 );
+	}
 }
