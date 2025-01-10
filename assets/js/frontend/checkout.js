@@ -23,6 +23,7 @@ const powerBoardContent = () => {
     );
 };
 
+// noinspection JSUnusedGlobalSymbols
 const Block_Power_Board_Gateway = {
     name: 'power_board_gateway',
     label: powerBoardLabel,

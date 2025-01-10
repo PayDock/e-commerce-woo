@@ -200,6 +200,7 @@ const Content = (props) => {
     );
 };
 
+// noinspection JSUnusedGlobalSymbols
 const Paydock = {
     name: "power_board_gateway",
     label: createElement(() =>
