@@ -11,15 +11,15 @@ abstract class AbstractApiService {
 	const METHOD_DELETE = 'DELETE';
 
 	protected $action;
-	protected $parameters     = array();
-	protected $allowed_action = array();
+	protected $parameters     = [];
+	protected $allowed_action = [];
 
 	public function call_with_widget_access_token(): array {
-		$args = array(
-			'headers' => array(
+		$args = [
+			'headers' => [
 				'content-type' => 'application/json',
-			),
-		);
+			],
+		];
 
 		if ( ! empty( ConfigService::$widget_access_token ) ) {
 			$args['headers']['x-access-token'] = ConfigService::$widget_access_token;
@@ -29,11 +29,11 @@ abstract class AbstractApiService {
 	}
 
 	public function call(): array {
-		$args = array(
-			'headers' => array(
+		$args = [
+			'headers' => [
 				'content-type' => 'application/json',
-			),
-		);
+			],
+		];
 
 		if ( ! empty( ConfigService::$access_token ) ) {
 			$args['headers']['x-access-token'] = ConfigService::$access_token;
@@ -54,48 +54,48 @@ abstract class AbstractApiService {
 				$args['body'] = wp_json_encode( $this->parameters, JSON_PRETTY_PRINT );
 				$parsed_args  = wp_parse_args(
 					$args,
-					array(
+					[
 						'method'  => 'POST',
 						'timeout' => 10,
-					)
+					]
 				);
 				break;
 			case 'DELETE':
 				$parsed_args = wp_parse_args(
 					$args,
-					array(
+					[
 						'method'  => 'DELETE',
 						'timeout' => 10,
-					)
+					]
 				);
 				break;
 			default:
 				$parsed_args = wp_parse_args(
 					$args,
-					array(
+					[
 						'method'  => 'GET',
 						'timeout' => 10,
-					)
+					]
 				);
 		}
 
 		$request = _wp_http_get_object()->request( $url, $parsed_args );
 
 		if ( $request instanceof WP_Error ) {
-			return array(
+			return [
 				'status' => 403,
 				'error'  => $request,
-			);
+			];
 		}
 
 		$body = json_decode( $request['body'], true );
 
 		if ( null === $body && json_last_error() !== JSON_ERROR_NONE ) {
-			return array(
+			return [
 				'status' => 403,
-				'error'  => array( 'message' => 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later. ' ),
+				'error'  => [ 'message' => 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later. ' ],
 				'body'   => $request['body'],
-			);
+			];
 		}
 
 		return $body;

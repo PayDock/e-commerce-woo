@@ -38,8 +38,8 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		$this->description = $this->method_description;
 
 		// Actions.
-		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
-		add_action( 'woocommerce_scheduled_subscription_payment_power_board', array( $this, 'process_subscription_payment' ), 10, 2 );
+		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, [ $this, 'process_admin_options' ] );
+		add_action( 'woocommerce_scheduled_subscription_payment_power_board', [ $this, 'process_subscription_payment' ], 10, 2 );
 
 		add_action( 'wp_enqueue_scripts', [ $this, 'payment_scripts' ] );
 
@@ -147,7 +147,7 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 
 		$error_message = sanitize_text_field( $_POST['error'] ?? '' );
 		if ( $error_message ) {
-		    wc_add_notice( __( $error_message, 'power-board' ), 'error' );
+			wc_add_notice( __( $error_message, 'power-board' ), 'error' );
 		}
 
 		$response['data'] = wc_print_notices();
@@ -177,7 +177,7 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		SDKAdapterService::get_instance();
 
 		$settings = $this->get_settings();
-		$nonce = wp_create_nonce( 'power-board-create-charge-intent' );
+		$nonce    = wp_create_nonce( 'power-board-create-charge-intent' );
 
 		$template->include_checkout_html(
 			'method-form',

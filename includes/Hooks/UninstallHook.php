@@ -12,9 +12,12 @@ class UninstallHook implements Hook {
 	}
 
 	public static function handle(): void {
-		$repositories = array_map( function (string $className) {
-			return new $className();
-		}, PowerBoardPluginEnum::REPOSITORIES );
+		$repositories = array_map(
+			function ( string $className ) {
+				return new $className();
+			},
+			PowerBoardPluginEnum::REPOSITORIES
+		);
 		array_map( [ new self(), 'runMigration' ], $repositories );
 	}
 

@@ -14,9 +14,12 @@ class DeactivationHook implements Hook {
 	public static function handle(): void {
 		$instance = new self();
 
-		$repositories = array_map( function ($className) {
-			return new $className();
-		}, PowerBoardPluginEnum::REPOSITORIES );
+		$repositories = array_map(
+			function ( $className ) {
+				return new $className();
+			},
+			PowerBoardPluginEnum::REPOSITORIES
+		);
 
 		array_map( [ $instance, 'runMigration' ], $repositories );
 	}

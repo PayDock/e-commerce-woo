@@ -1,5 +1,4 @@
 <?php
-
 /**
  *
  * PHP Browser Detection Class
@@ -334,12 +333,12 @@ class BrowserDetection {
 			// Linux family OS(es).
 
 			if ( $os_need_continue ) {
-				$os_list[] = array( 'Ubuntu' => '/Ubuntu(?: )?(?:\/)?([0-9]+\.[0-9]+)/' );
-				$os_list[] = array( 'Kubuntu' => '/Kubuntu(?: )?(?:\/)?([0-9]+\.[0-9]+)/' );
-				$os_list[] = array( 'Linux Mint' => '/Linux Mint\/([.0-9]+)/' );
-				$os_list[] = array( 'CentOS' => '/CentOS\/([0-9]+\.[0-9]+)/' );
-				$os_list[] = array( 'OpenSUSE' => '/SUSE\/([0-9]+\.[0-9]+)/' );
-				$os_list[] = array( 'Red Hat' => '/Red\sHat\/([0-9]+\.[0-9]+)/' );
+				$os_list[] = [ 'Ubuntu' => '/Ubuntu(?: )?(?:\/)?([0-9]+\.[0-9]+)/' ];
+				$os_list[] = [ 'Kubuntu' => '/Kubuntu(?: )?(?:\/)?([0-9]+\.[0-9]+)/' ];
+				$os_list[] = [ 'Linux Mint' => '/Linux Mint\/([.0-9]+)/' ];
+				$os_list[] = [ 'CentOS' => '/CentOS\/([0-9]+\.[0-9]+)/' ];
+				$os_list[] = [ 'OpenSUSE' => '/SUSE\/([0-9]+\.[0-9]+)/' ];
+				$os_list[] = [ 'Red Hat' => '/Red\sHat\/([0-9]+\.[0-9]+)/' ];
 
 				foreach ( $os_list as $os_list_va ) {
 					$k = key( $os_list_va );
@@ -360,17 +359,17 @@ class BrowserDetection {
 			// Other Desktop OS(es).
 
 			if ( $os_need_continue ) {
-				$other_os = array();
+				$other_os = [];
 
-				$other_os[] = array( 'Chrome OS' => 'CrOS' );
-				$other_os[] = array( 'Linux Mint' => 'Linux Mint' );
-				$other_os[] = array( 'Kubuntu' => 'Kubuntu' );
-				$other_os[] = array( 'Ubuntu' => 'Ubuntu' );
-				$other_os[] = array( 'Ubuntu' => 'ubuntu' );
-				$other_os[] = array( 'Debian' => 'Debian' );
-				$other_os[] = array( 'CentOS' => 'CentOS' );
-				$other_os[] = array( 'Fedora' => 'Fedora' );
-				$other_os[] = array( 'Arch Linux' => 'ArchLinux' );
+				$other_os[] = [ 'Chrome OS' => 'CrOS' ];
+				$other_os[] = [ 'Linux Mint' => 'Linux Mint' ];
+				$other_os[] = [ 'Kubuntu' => 'Kubuntu' ];
+				$other_os[] = [ 'Ubuntu' => 'Ubuntu' ];
+				$other_os[] = [ 'Ubuntu' => 'ubuntu' ];
+				$other_os[] = [ 'Debian' => 'Debian' ];
+				$other_os[] = [ 'CentOS' => 'CentOS' ];
+				$other_os[] = [ 'Fedora' => 'Fedora' ];
+				$other_os[] = [ 'Arch Linux' => 'ArchLinux' ];
 				$other_os[] = [ 'OpenSUSE' => 'SUSE' ];
 				$other_os[] = [ 'Red Hat' => 'Red Hat' ];
 				$other_os[] = [ 'Elementary' => ' elementary' ];

@@ -16,7 +16,7 @@ abstract class AbstractRepository implements Repository {
 	}
 
 	public function createTable(): void {
-		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
 		dbDelta( $this->getTableDeclaration() );
 	}

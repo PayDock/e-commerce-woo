@@ -12,7 +12,7 @@ final class MasterWidgetBlock extends AbstractBlock {
 	protected $name        = 'power_board';
 
 	public function initialize() {
-		$this->settings = get_option( 'woocommerce_power_board_settings', array() );
+		$this->settings = get_option( 'woocommerce_power_board_settings', [] );
 		$this->gateway  = new MasterWidgetPaymentService();
 	}
 
@@ -24,7 +24,7 @@ final class MasterWidgetBlock extends AbstractBlock {
 			WC()->cart->calculate_totals();
 		}
 
-		return array(
+		return [
 			// Wordpress data.
 			'widgetToken'             => $settings_service->get_widget_access_token(),
 			// Woocommerce data.
@@ -38,6 +38,6 @@ final class MasterWidgetBlock extends AbstractBlock {
 			'checkoutTemplateVersion' => $settings_service->get_checkout_template_version(),
 			'checkoutCustomisationId' => $settings_service->get_checkout_customisation_id(),
 			'checkoutConfigurationId' => $settings_service->get_checkout_configuration_id(),
-		);
+		];
 	}
 }

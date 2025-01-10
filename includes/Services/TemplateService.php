@@ -5,7 +5,7 @@ namespace PowerBoard\Services;
 use PowerBoard\Enums\SettingsSectionEnum;
 
 class TemplateService {
-    public $setting_service;
+	public $setting_service;
 	private const TEMPLATE_DIR          = 'templates';
 	private const ADMIN_TEMPLATE_DIR    = 'admin';
 	private const CHECKOUT_TEMPLATE_DIR = 'checkout';
@@ -16,7 +16,7 @@ class TemplateService {
 	private $template_checkout_dir;
 
 	public function __construct( $service = null ) {
-		$this->setting_service = $service;
+		$this->setting_service       = $service;
 		$this->template_admin_dir    = implode( DIRECTORY_SEPARATOR, [ self::TEMPLATE_DIR, self::ADMIN_TEMPLATE_DIR ] );
 		$this->template_checkout_dir = implode( DIRECTORY_SEPARATOR, [ self::TEMPLATE_DIR, self::CHECKOUT_TEMPLATE_DIR ] );
 	}

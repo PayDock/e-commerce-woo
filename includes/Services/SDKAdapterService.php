@@ -29,22 +29,22 @@ class SDKAdapterService {
 		return self::$instance;
 	}
 
-	public function search_notifications( array $parameters = array() ): array {
+	public function search_notifications( array $parameters = [] ): array {
 		$notification_service = new NotificationService();
 
 		return $notification_service->search( $parameters )->call();
 	}
 
-	public function create_notification( array $parameters = array() ): array {
+	public function create_notification( array $parameters = [] ): array {
 		$notification_service = new NotificationService();
 
 		return $notification_service->create( $parameters )->call();
 	}
 
-	public function token( array $params = array(
+	public function token( array $params = [
 		'gateway_id' => '',
 		'type'       => '',
-	), ?bool $use_widget_access_token = false ): array {
+	], ?bool $use_widget_access_token = false ): array {
 		$token_service = new TokenService();
 
 		if ( $use_widget_access_token ) {

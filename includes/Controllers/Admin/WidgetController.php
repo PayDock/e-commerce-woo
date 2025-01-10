@@ -13,21 +13,21 @@ class WidgetController {
 		$wp_nonce = ! empty( $_POST['_wpnonce'] ) ? sanitize_text_field( $_POST['_wpnonce'] ) : null;
 
 		if ( ! wp_verify_nonce( $wp_nonce, 'power-board-create-charge-intent' ) ) {
-			wp_send_json_error( array( 'message' => __( 'Error: Security check', 'power-board' ) ) );
+			wp_send_json_error( [ 'message' => __( 'Error: Security check', 'power-board' ) ] );
 
 			return;
 		}
 
-		$request           = array();
+		$request           = [];
 		$settings          = SettingsService::get_instance();
 		$logger_repository = new LogRepository();
 
 		$cart = WC()->cart;
 
-		$args = array(
+		$args = [
 			'limit'     => 1,
 			'cart_hash' => $cart->get_cart_hash(),
-		);
+		];
 
 		if ( ! empty( $_POST['total'] ) ) {
 
@@ -36,7 +36,6 @@ class WidgetController {
 			} else {
 				$request['total'] = sanitize_text_field( $_POST['total'] );
 			}
-
 		} else {
 			$request['total']['total_price']   = $cart->get_total( false ) * 100;
 			$request['total']['currency_code'] = get_woocommerce_currency();
@@ -49,20 +48,20 @@ class WidgetController {
 			$reference = $orders[0]->ID;
 		}
 
-		$billing_address = array();
+		$billing_address = [];
 
 		if ( ! empty( $_POST['address'] ) && is_array( $_POST['address'] ) ) {
 			$billing_address = array_map( 'sanitize_text_field', $_POST['address'] );
 		}
 
-		$intent_request_params = array(
+		$intent_request_params = [
 			'amount'        => round( $request['total']['total_price'] / 100, 2 ),
 			'version'       => (int) $settings->get_checkout_template_version(),
 			'currency'      => $request['total']['currency_code'],
 			'reference'     => (string) $reference,
-			'customer'      => array(
+			'customer'      => [
 				'email'           => $billing_address['email'],
-				'billing_address' => array(
+				'billing_address' => [
 					'first_name'       => $billing_address['first_name'],
 					'last_name'        => $billing_address['last_name'],
 					'address_line1'    => $billing_address['address_1'],
@@ -70,12 +69,12 @@ class WidgetController {
 					'address_state'    => $billing_address['state'],
 					'address_country'  => $billing_address['country'],
 					'address_postcode' => $billing_address['postcode'],
-				),
-			),
-			'configuration' => array(
+				],
+			],
+			'configuration' => [
 				'template_id' => $settings->get_checkout_configuration_id(),
-			),
-		);
+			],
+		];
 
 		if ( ! empty( $settings->get_checkout_customisation_id() ) ) {
 			$intent_request_params['customisation']['template_id'] = $settings->get_checkout_customisation_id();
@@ -104,7 +103,5 @@ class WidgetController {
 		}
 
 		wp_send_json_success( $result, 200 );
-
 	}
-
 }

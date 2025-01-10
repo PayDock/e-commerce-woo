@@ -22,7 +22,6 @@ if ( ! class_exists( '\PowerBoard\PowerBoardPlugin' ) ) {
 
 			ActionsService::getInstance();
 			FiltersService::getInstance();
-
 		}
 
 		public function my_account_order_pay_template( $template, $template_name, $template_path ) {
@@ -36,7 +35,7 @@ if ( ! class_exists( '\PowerBoard\PowerBoardPlugin' ) ) {
 			}
 
 			$plugin_path = untrailingslashit( plugin_dir_path( POWER_BOARD_PLUGIN_FILE ) ) . '/templates/';
-			$template = locate_template( [ $template_path . $template_name, $template_name ] );
+			$template    = locate_template( [ $template_path . $template_name, $template_name ] );
 
 			if ( file_exists( $plugin_path . $template_name ) ) {
 				$template = $plugin_path . $template_name;
@@ -47,9 +46,7 @@ if ( ! class_exists( '\PowerBoard\PowerBoardPlugin' ) ) {
 			}
 
 			return $template;
-
 		}
-
 	}
 
 }

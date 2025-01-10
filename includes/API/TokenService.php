@@ -7,7 +7,7 @@ use PowerBoard\Abstracts\AbstractApiService;
 class TokenService extends AbstractApiService {
 	const ENDPOINT = 'payment_sources/tokens';
 
-	protected $allowed_action = [ 
+	protected $allowed_action = [
 		'create' => self::METHOD_POST,
 	];
 

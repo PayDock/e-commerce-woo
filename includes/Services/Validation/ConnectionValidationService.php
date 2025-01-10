@@ -93,7 +93,7 @@ class ConnectionValidationService {
 		->get_option_name(
 			$this->service->id,
 			[
-                SettingGroupsEnum::ENVIRONMENT,
+				SettingGroupsEnum::ENVIRONMENT,
 				EnvironmentSettingsEnum::ENVIRONMENT,
 			]
 		);
@@ -103,8 +103,8 @@ class ConnectionValidationService {
 		->get_option_name(
 			$this->service->id,
 			[
-                SettingGroupsEnum::CHECKOUT,
-                MasterWidgetSettingsEnum::VERSION,
+				SettingGroupsEnum::CHECKOUT,
+				MasterWidgetSettingsEnum::VERSION,
 			]
 		);
 		$this->version_settings = $this->data[ $version_settings_key ];
@@ -113,9 +113,9 @@ class ConnectionValidationService {
 		->get_option_name(
 			$this->service->id,
 			[
-                SettingGroupsEnum::CREDENTIALS,
-                CredentialSettingsEnum::ACCESS_KEY,
-            ]
+				SettingGroupsEnum::CREDENTIALS,
+				CredentialSettingsEnum::ACCESS_KEY,
+			]
 		);
 		$this->access_token_settings = $this->data[ $access_token_settings_key ];
 		if ( $this->access_token_settings === '********************' || $this->access_token_settings === null ) {
@@ -126,9 +126,9 @@ class ConnectionValidationService {
 		->get_option_name(
 			$this->service->id,
 			[
-                SettingGroupsEnum::CREDENTIALS,
-                CredentialSettingsEnum::WIDGET_KEY,
-            ]
+				SettingGroupsEnum::CREDENTIALS,
+				CredentialSettingsEnum::WIDGET_KEY,
+			]
 		);
 		$this->widget_access_token_settings = $this->data[ $widget_access_token_settings_key ];
 		if ( $this->widget_access_token_settings === '********************' || $this->widget_access_token_settings === null ) {
@@ -195,7 +195,7 @@ class ConnectionValidationService {
 				$this->service->id,
 				[
 					SettingGroupsEnum::CHECKOUT,
-                    MasterWidgetSettingsEnum::CONFIGURATION_ID,
+					MasterWidgetSettingsEnum::CONFIGURATION_ID,
 				]
 			);
 		MasterWidgetTemplatesHelper::validate_or_update_template_id( $this->configuration_templates, $has_error, $configuration_id_key );

@@ -64,9 +64,9 @@ final class SettingsService {
 			$this->get_option_name(
 				$widget_service->id,
 				[
-                    SettingGroupsEnum::CHECKOUT,
-                    MasterWidgetSettingsEnum::VERSION,
-                ]
+					SettingGroupsEnum::CHECKOUT,
+					MasterWidgetSettingsEnum::VERSION,
+				]
 			)
 		);
 	}
@@ -78,9 +78,9 @@ final class SettingsService {
 			$this->get_option_name(
 				$widget_service->id,
 				[
-                    SettingGroupsEnum::CHECKOUT,
-                    MasterWidgetSettingsEnum::CUSTOMISATION_ID,
-                ]
+					SettingGroupsEnum::CHECKOUT,
+					MasterWidgetSettingsEnum::CUSTOMISATION_ID,
+				]
 			)
 		);
 	}
@@ -92,9 +92,9 @@ final class SettingsService {
 			$this->get_option_name(
 				$widget_service->id,
 				[
-                    SettingGroupsEnum::CHECKOUT,
-                    MasterWidgetSettingsEnum::CONFIGURATION_ID,
-                ]
+					SettingGroupsEnum::CHECKOUT,
+					MasterWidgetSettingsEnum::CONFIGURATION_ID,
+				]
 			)
 		);
 	}
