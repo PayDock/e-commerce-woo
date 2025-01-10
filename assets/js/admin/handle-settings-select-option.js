@@ -10,16 +10,16 @@ jQuery( document ).ready(
 		const element = $( '.power_board-settings' ).get();
 		element.map(
 			(el) => {
-            if ( ! el.classList.contains( 'is-optional' )) {
-                for (const elChild of el.children) {
-                    if ( elChild.value === '' ) {
-                        elChild.setAttribute( 'disabled', true );
-                    }
-                }
-            }
-            // The dropdown will show a blank value when default option is selected
+				if ( ! el.classList.contains( 'is-optional' )) {
+					for (const elChild of el.children) {
+						if ( elChild.value === '' ) {
+							elChild.setAttribute( 'disabled', true );
+						}
+					}
+				}
+				// The dropdown will show a blank value when default option is selected
 				el.selectedIndex = getSelectedIndex( el );
-            el.addEventListener(
+				el.addEventListener(
 					'change',
 					function () {
 						el.selectedIndex = getSelectedIndex( this );

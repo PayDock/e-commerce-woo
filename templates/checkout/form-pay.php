@@ -13,7 +13,6 @@ function get_order_from_query_var(): ?WC_Order {
 	}
 
 	return $order;
-
 }
 
 $order = $order ?? get_order_from_query_var();
@@ -93,7 +92,7 @@ if ( ! empty( $order ) && is_object( $order ) ) {
 					<?php
 					if ( ! empty( $available_gateways ) ) {
 						foreach ( $available_gateways as $gateway ) {
-							wc_get_template( 'checkout/payment-method.php', array( 'gateway' => $gateway ) );
+							wc_get_template( 'checkout/payment-method.php', [ 'gateway' => $gateway ] );
 						}
 					} else {
 						echo '<li>';

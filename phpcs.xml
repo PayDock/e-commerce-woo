@@ -61,6 +61,12 @@
         <!-- Allow standard conditional expressions -->
         <exclude name="WordPress.PHP.YodaConditions" />
 
+        <!-- Allow no spaces before and after operators -->
+        <exclude name="WordPress.WhiteSpace.OperatorSpacing.NoSpaceBefore" />
+        <exclude name="WordPress.WhiteSpace.OperatorSpacing.NoSpaceAfter" />
+
+        <!-- Prefer indenting from "Generic.WhiteSpace.ScopeIndent.Incorrect" -->
+        <exclude name="PEAR.Functions.FunctionCallSignature.Indent" />
     </rule>
 
     <!-- AutoEscaped functions -->

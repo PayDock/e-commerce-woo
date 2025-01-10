@@ -12,15 +12,15 @@ class LogRepository extends AbstractRepository implements Repository {
 		'operation',
 		'status',
 	];
-	public const DEFAULT = 0;
-	public const SUCCESS = 1;
-	public const ERROR = 2;
+	public const DEFAULT         = 0;
+	public const SUCCESS         = 1;
+	public const ERROR           = 2;
 	public const AVAILABLE_TYPES = [
-		self::DEFAULT ,
+		self::DEFAULT,
 		self::SUCCESS,
 		self::ERROR,
 	];
-	protected $table = 'logs';
+	protected $table             = 'logs';
 
 	public function createLogRecord(
 		string $id,
@@ -40,10 +40,10 @@ class LogRepository extends AbstractRepository implements Repository {
 	}
 
 	protected function getTableDeclaration(): string {
-		$fullTableName = $this->getFullTableName( $this->table );
-		$indexTypeName = implode( '_', [ $fullTableName, 'type', Repository::INDEX_POSTFIX ] );
+		$fullTableName       = $this->getFullTableName( $this->table );
+		$indexTypeName       = implode( '_', [ $fullTableName, 'type', Repository::INDEX_POSTFIX ] );
 		$indexCreatedAtdName = implode( '_', [ $fullTableName, 'created_at', Repository::INDEX_POSTFIX ] );
-		$indexGatewayName = implode( '_', [ $fullTableName, 'gateway', Repository::INDEX_POSTFIX ] );
+		$indexGatewayName    = implode( '_', [ $fullTableName, 'gateway', Repository::INDEX_POSTFIX ] );
 
 		return "
 			CREATE TABLE IF NOT EXISTS `$fullTableName` (
