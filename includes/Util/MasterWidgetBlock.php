@@ -11,6 +11,9 @@ final class MasterWidgetBlock extends AbstractBlock {
 	protected const SCRIPT = 'blocks';
 	protected $name        = 'power_board';
 
+	protected $settings;
+	protected $gateway;
+
 	public function initialize() {
 		$this->settings = get_option( 'woocommerce_power_board_settings', [] );
 		$this->gateway  = new MasterWidgetPaymentService();

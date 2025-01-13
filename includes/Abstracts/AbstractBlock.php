@@ -24,7 +24,7 @@ abstract class AbstractBlock extends AbstractPaymentMethodType {
 			wp_enqueue_script(
 				'power-board-form',
 				POWER_BOARD_PLUGIN_URL . 'assets/js/frontend/form.js',
-				[],
+				[ 'jquery' ],
 				POWER_BOARD_PLUGIN_VERSION,
 				true
 			);
@@ -36,12 +36,13 @@ abstract class AbstractBlock extends AbstractPaymentMethodType {
 					'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL,
 				]
 			);
+
 			wp_enqueue_style(
 				'power-board-widget-css',
 				POWER_BOARD_PLUGIN_URL . 'assets/css/frontend/widget.css',
 				[],
 				POWER_BOARD_PLUGIN_VERSION,
-				true
+				'all'
 			);
 
 			wp_enqueue_script(
@@ -51,6 +52,7 @@ abstract class AbstractBlock extends AbstractPaymentMethodType {
 				POWER_BOARD_PLUGIN_VERSION,
 				true
 			);
+
 			wp_localize_script(
 				'power-board-api',
 				'powerBoardWidgetSettings',
@@ -71,7 +73,14 @@ abstract class AbstractBlock extends AbstractPaymentMethodType {
 			'version'      => POWER_BOARD_PLUGIN_VERSION,
 		];
 
-		wp_register_script( $script_name, $script_url, $script_asset['dependencies'], $script_asset['version'], true );
+		wp_register_script(
+			$script_name,
+			$script_url,
+			$script_asset['dependencies'],
+			$script_asset['version'],
+			true
+		);
+
 		wp_localize_script(
 			$script_name,
 			'powerBoardWidgetSettings',
@@ -79,6 +88,7 @@ abstract class AbstractBlock extends AbstractPaymentMethodType {
 				'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL,
 			]
 		);
+
 		wp_localize_script(
 			'power-board-api',
 			'powerBoardWidgetSettings',
@@ -86,6 +96,7 @@ abstract class AbstractBlock extends AbstractPaymentMethodType {
 				'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL,
 			]
 		);
+
 		if ( function_exists( 'wp_set_script_translations' ) ) {
 			wp_set_script_translations( $script_name );
 		}

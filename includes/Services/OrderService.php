@@ -35,7 +35,8 @@ class OrderService {
 				'hide-refund-button-styles',
 				POWER_BOARD_PLUGIN_URL . 'assets/css/admin/hide-refund-button.css',
 				[],
-				POWER_BOARD_PLUGIN_VERSION
+				POWER_BOARD_PLUGIN_VERSION,
+				'all'
 			);
 		}
 
@@ -44,7 +45,8 @@ class OrderService {
 				'hide-on-hold-buttons',
 				POWER_BOARD_PLUGIN_URL . 'assets/css/admin/hide-on-hold-buttons.css',
 				[],
-				POWER_BOARD_PLUGIN_VERSION
+				POWER_BOARD_PLUGIN_VERSION,
+				'all'
 			);
 		}
 	}

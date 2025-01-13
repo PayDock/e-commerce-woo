@@ -54,7 +54,14 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		if ( ! is_checkout() || ! $this->is_available() ) {
 			return '';
 		}
-		wp_enqueue_script( 'power-board-api', SettingsService::get_instance()->get_widget_script_url(), [], time(), true );
+
+		wp_enqueue_script(
+			'power-board-api',
+			SettingsService::get_instance()->get_widget_script_url(),
+			[],
+			POWER_BOARD_PLUGIN_VERSION,
+			true
+		);
 
 		wp_localize_script(
 			'power-board-form',
@@ -76,11 +83,37 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 			]
 		);
 
-		wp_enqueue_script( 'power-board-form', POWER_BOARD_PLUGIN_URL . '/assets/js/frontend/form.js', [], time(), true );
-		wp_enqueue_script( 'power-board-classic-form', POWER_BOARD_PLUGIN_URL . '/assets/js/frontend/classic-form.js', [], time(), true );
-		wp_enqueue_style( 'power-board-widget', POWER_BOARD_PLUGIN_URL . '/assets/css/frontend/widget.css', [], time() );
+		wp_enqueue_script(
+			'power-board-form',
+			POWER_BOARD_PLUGIN_URL . '/assets/js/frontend/form.js',
+			[ 'jquery' ],
+			POWER_BOARD_PLUGIN_VERSION,
+			true
+		);
 
-		wp_enqueue_script( 'axios', 'https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js', [], time(), true );
+		wp_enqueue_script(
+			'power-board-classic-form',
+			POWER_BOARD_PLUGIN_URL . '/assets/js/frontend/classic-form.js',
+			[ 'jquery' ],
+			POWER_BOARD_PLUGIN_VERSION,
+			true
+		);
+
+		wp_enqueue_style(
+			'power-board-widget',
+			POWER_BOARD_PLUGIN_URL . '/assets/css/frontend/widget.css',
+			[],
+			POWER_BOARD_PLUGIN_VERSION,
+			'all'
+		);
+
+		wp_enqueue_script(
+			'axios',
+			'https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js',
+			[],
+			null,
+			true
+		);
 
 		return '';
 	}

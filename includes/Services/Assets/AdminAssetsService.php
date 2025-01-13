@@ -26,7 +26,7 @@ class AdminAssetsService {
 			wp_register_script(
 				$this->get_script_name( $script ),
 				plugins_url( $this->get_script_path( $script ), POWER_BOARD_PLUGIN_FILE ),
-				[],
+				[ 'jquery' ],
 				POWER_BOARD_PLUGIN_VERSION,
 				true
 			);
@@ -44,7 +44,15 @@ class AdminAssetsService {
 	public function load_scripts(): void {
 		foreach ( self::SCRIPTS as $script ) {
 			$script_name = $this->get_script_name( $script );
-			wp_enqueue_script( $this->get_script_name( $script ), '', [], POWER_BOARD_PLUGIN_VERSION, true );
+
+			wp_enqueue_script(
+				$this->get_script_name( $script ),
+				false,
+				[],
+				POWER_BOARD_PLUGIN_VERSION,
+				true
+			);
+
 			wp_localize_script(
 				$script_name,
 				'powerBoardWidgetSettings',
