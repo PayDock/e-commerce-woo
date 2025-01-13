@@ -3,8 +3,6 @@
 namespace PowerBoard;
 
 use PowerBoard\Abstracts\AbstractSingleton;
-use PowerBoard\Hooks\ActivationHook;
-use PowerBoard\Hooks\DeactivationHook;
 use PowerBoard\Services\ActionsService;
 use PowerBoard\Services\FiltersService;
 
@@ -16,9 +14,6 @@ if ( ! class_exists( '\PowerBoard\PowerBoardPlugin' ) ) {
 		protected function __construct() {
 
 			add_filter( 'woocommerce_locate_template', [ $this, 'my_account_order_pay_template' ], 10, 3 );
-
-			register_activation_hook( POWER_BOARD_PLUGIN_FILE, [ ActivationHook::class, 'handle' ] );
-			register_deactivation_hook( POWER_BOARD_PLUGIN_FILE, [ DeactivationHook::class, 'handle' ] );
 
 			ActionsService::getInstance();
 			FiltersService::getInstance();
