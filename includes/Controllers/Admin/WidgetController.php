@@ -2,7 +2,6 @@
 
 namespace PowerBoard\Controllers\Admin;
 
-use PowerBoard\Repositories\LogRepository;
 use PowerBoard\Services\Settings\APIAdapterService;
 use PowerBoard\Services\SettingsService;
 
@@ -20,7 +19,6 @@ class WidgetController {
 
 		$request           = [];
 		$settings          = SettingsService::get_instance();
-		$logger_repository = new LogRepository();
 
 		$cart = WC()->cart;
 
@@ -93,14 +91,6 @@ class WidgetController {
 		$result = $api_adapter_service->create_checkout_intent( $intent_request_params );
 
 		$result['county'] = $request['address']['country'] ?? '';
-
-		if ( ! empty( $result['error'] ) ) {
-			$operation = ucfirst( strtolower( $result['resource']['type'] ?? 'undefined' ) );
-			$status    = $result['error']['message'] ?? 'empty status';
-			$message   = $result['error']['details'][0]['gateway_specific_description'] ?? 'empty message';
-
-			$logger_repository->createLogRecord( '', $operation, $status, $message, LogRepository::ERROR );
-		}
 
 		wp_send_json_success( $result, 200 );
 	}

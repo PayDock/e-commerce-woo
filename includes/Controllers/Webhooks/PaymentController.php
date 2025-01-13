@@ -5,7 +5,6 @@ namespace PowerBoard\Controllers\Webhooks;
 use Exception;
 use PowerBoard\Enums\ChargeStatusesEnum;
 use PowerBoard\Enums\NotificationEventsEnum;
-use PowerBoard\Repositories\LogRepository;
 use PowerBoard\Services\OrderService;
 use PowerBoard\Services\SDKAdapterService;
 use WP_Error;
@@ -41,8 +40,6 @@ class PaymentController {
 		) || ( strpos( $order->get_payment_method(), PLUGIN_PREFIX ) ) === false ) {
 			return;
 		}
-
-		$logger_repository = new LogRepository();
 
 		$power_board_charge_id = $order->get_meta( 'power_board_charge_id' );
 
@@ -92,29 +89,13 @@ class PaymentController {
 
 			$order->update_meta_data( 'api_refunded_id', $new_refunded_id );
 			$order->save();
-
-			$logger_repository->createLogRecord( $new_refunded_id, 'Refunded', $status, '', LogRepository::SUCCESS );
 		} elseif ( ! empty( $result['error'] ) ) {
 			if ( is_array( $result['error'] ) ) {
 				$result['error'] = implode( '; ', $result['error'] );
 			}
-			$logger_repository->createLogRecord(
-				$power_board_charge_id,
-				'Refund',
-				'error',
-				$result['error'],
-				LogRepository::ERROR
-			);
 			throw new Exception( esc_html( $result['error'] ) );
 		} else {
 			$error = __( 'The refund process has failed; please try again.', 'power-board' );
-			$logger_repository->createLogRecord(
-				$power_board_charge_id,
-				'Refunded',
-				'error',
-				$error,
-				LogRepository::ERROR
-			);
 			throw new Exception( esc_html( $error ) );
 		}
 	}
@@ -140,14 +121,6 @@ class PaymentController {
 		if ( ( $input === null && json_last_error() !== JSON_ERROR_NONE ) || empty( $input['event'] ) ) {
 			return;
 		}
-
-		( new LogRepository() )->createLogRecord(
-			'',
-			'Webhook',
-			'Received',
-			$input['event'],
-			LogRepository::SUCCESS
-		);
 
 		$result = false;
 		if ( ! empty( $input['data']['reference'] ) ) {
@@ -218,19 +191,6 @@ class PaymentController {
 		$order->update_meta_data( 'power_board_charge_id', $charge_id );
 		$order->save();
 
-		$logger_repository = new LogRepository();
-		$logger_repository->createLogRecord(
-			$charge_id,
-			$operation,
-			$order_status,
-			'',
-			in_array(
-				$order_status,
-				[ 'processing', 'on-hold', 'pending' ],
-				true
-			) ? LogRepository::SUCCESS : LogRepository::DEFAULT
-		);
-
 		return true;
 	}
 
@@ -289,19 +249,6 @@ class PaymentController {
 				'refund_payment' => false,
 				'from_webhook'   => true,
 			]
-		);
-
-		$logger_repository = new LogRepository();
-		$logger_repository->createLogRecord(
-			$charge_id,
-			$operation,
-			$order_status,
-			$result instanceof WP_Error ? $result->get_error_message() : '',
-			in_array(
-				$order_status,
-				[ 'processing', 'on-hold', 'pending' ],
-				true
-			) ? LogRepository::SUCCESS : LogRepository::DEFAULT
 		);
 
 		return true;
