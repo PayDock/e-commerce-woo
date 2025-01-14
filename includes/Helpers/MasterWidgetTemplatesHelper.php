@@ -16,12 +16,17 @@ class MasterWidgetTemplatesHelper {
 		return ! empty( $templates ) ? [ '' => $is_optional ? 'Unselect template ID' : 'Select a template ID' ] + $templates : [];
 	}
 
+	/**
+	 * Uses functions (get_option and update_option) from WordPress
+	 */
 	public static function validate_or_update_template_id( ?array $templates, bool $has_error, string $template_type_key ) {
+		/* @noinspection PhpUndefinedFunctionInspection */
 		$settings = get_option( 'woocommerce_power_board_settings' );
 		if ( ! empty( $settings ) ) {
 			$selected_template = ! empty( $settings[ $template_type_key ] ) ? $settings[ $template_type_key ] : [];
 			if ( ! empty( $selected_template ) && ( $has_error || empty( $templates ) || ! array_key_exists( $selected_template, $templates ) ) ) {
 				$settings[ $template_type_key ] = '';
+				/* @noinspection PhpUndefinedFunctionInspection */
 				update_option( 'woocommerce_power_board_settings', $settings );
 			}
 		}

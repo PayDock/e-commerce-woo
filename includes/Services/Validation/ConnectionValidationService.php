@@ -33,6 +33,10 @@ class ConnectionValidationService {
 	private $widget_api_adapter_service;
 
 
+	/**
+	 * Uses functions (do_action, update_option and apply_filters) from WordPress
+	 * Uses a method (get_option_key) from WooCommerce
+	 */
 	public function __construct( WidgetConfigurationSettingService $service ) {
 		$this->service = $service;
 		$this->prepare_form_data();
@@ -44,10 +48,17 @@ class ConnectionValidationService {
 		$this->widget_api_adapter_service->initialise( $this->environment_settings, $this->access_token_settings, $this->widget_access_token_settings );
 
 		$this->validate();
-
+		/* @noinspection PhpUndefinedMethodInspection */
 		$option_key = $service->get_option_key();
+		/* @noinspection PhpUndefinedFunctionInspection */
 		do_action( 'woocommerce_update_option', [ 'id' => $option_key ] );
 
+		/**
+		 * Filter
+		 *
+		 * @noinspection PhpUndefinedFunctionInspection
+		 * @since 1.0.0
+		 */
 		update_option(
 			$option_key,
 			apply_filters( 'woocommerce_settings_api_sanitized_fields_' . $service->id, $service->settings ),
@@ -55,6 +66,9 @@ class ConnectionValidationService {
 		);
 	}
 
+	/**
+	 * Uses a function (do_action) from WordPress
+	 */
 	private function prepare_form_data(): void {
 		$post_data = $this->service->get_post_data();
 		foreach ( $this->service->get_form_fields() as $key => $field ) {
@@ -62,6 +76,7 @@ class ConnectionValidationService {
 				$this->data[ $key ] = $this->service->get_field_value( $key, $field, $post_data );
 
 				if ( $field['type'] === 'select' || $field['type'] === 'checkbox' ) {
+					/* @noinspection PhpUndefinedFunctionInspection */
 					do_action(
 						'woocommerce_update_non_option_setting',
 						[
@@ -175,6 +190,9 @@ class ConnectionValidationService {
 		return ! $this->access_token_validation_failed;
 	}
 
+	/**
+	 * Uses functions (set_transient) from WordPress
+	 */
 	private function get_configuration_templates() {
 		$configuration_templates_result = $this->widget_api_adapter_service->get_configuration_templates_ids( $this->version_settings );
 		$has_error                      = ! empty( $configuration_templates_result['error'] );
@@ -183,6 +201,7 @@ class ConnectionValidationService {
 		if ( $has_error ) {
 			$this->access_token_validation_failed = true;
 		} else {
+			/* @noinspection PhpUndefinedFunctionInspection */
 			set_transient( 'configuration_templates_' . $this->environment_settings, $configuration_templates, 60 );
 		}
 
@@ -197,12 +216,16 @@ class ConnectionValidationService {
 		MasterWidgetTemplatesHelper::validate_or_update_template_id( $configuration_templates, $has_error, $configuration_id_key );
 	}
 
+	/**
+	 * Uses functions (set_transient) from WordPress
+	 */
 	private function get_customisation_templates() {
 		$customisation_templates_result = $this->widget_api_adapter_service->get_customisation_templates_ids( $this->version_settings );
 		$has_error                      = ! empty( $customisation_templates_result['error'] );
 		$customisation_templates        = MasterWidgetTemplatesHelper::map_templates( $customisation_templates_result['resource']['data'], $has_error, true );
 
 		if ( ! $has_error ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
 			set_transient( 'customisation_templates_' . $this->environment_settings, $customisation_templates, 60 );
 		}
 
@@ -249,13 +272,18 @@ class ConnectionValidationService {
 		return $result;
 	}
 
+	/**
+	 * Uses a function (get_site_url, __, wp_json_encode, update_option) from WordPress
+	 */
 	private function set_webhooks(): void {
 		$webhook_events = NotificationEventsHelper::events();
+		/* @noinspection PhpUndefinedFunctionInspection */
 		if ( strpos( get_site_url(), 'localhost' ) !== false ) {
 			return;
 		}
 
-		$not_set_webhooks      = $webhook_events;
+		$not_set_webhooks = $webhook_events;
+		/* @noinspection PhpUndefinedFunctionInspection */
 		$webhook_site_url      = get_site_url() . '/wc-api/power-board-webhook/';
 		$should_create_webhook = true;
 		$webhook_request       = $this->api_adapter_service->search_notifications( [ 'type' => 'webhook' ] );
@@ -288,6 +316,7 @@ class ConnectionValidationService {
 				if ( ! empty( $result['resource']['data']['_id'] ) ) {
 					$webhook_ids[] = $result['resource']['data']['_id'];
 				} else {
+					/* @noinspection PhpUndefinedFunctionInspection */
 					$this->errors[] = __(
 						'Can\'t create webhook',
 						'power-board'
@@ -298,6 +327,7 @@ class ConnectionValidationService {
 			}
 
 			if ( ! empty( $webhook_ids ) ) {
+				/* @noinspection PhpUndefinedFunctionInspection */
 				update_option( self::IS_WEBHOOK_SET_OPTION, $webhook_ids );
 			}
 		}

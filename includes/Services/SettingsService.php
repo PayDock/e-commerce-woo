@@ -42,9 +42,13 @@ final class SettingsService {
 		return $widget_service->get_access_token();
 	}
 
+	/**
+	 * Uses a method (get_option) from WC_Payment_Gateway
+	 */
 	public function get_checkout_template_version(): ?string {
 		$widget_service = $this->get_settings_service();
 
+		/* @noinspection PhpUndefinedMethodInspection */
 		return $widget_service->get_option(
 			$this->get_option_name(
 				$widget_service->id,
@@ -56,9 +60,13 @@ final class SettingsService {
 		);
 	}
 
+	/**
+	 * Uses a method (get_option) from WC_Payment_Gateway
+	 */
 	public function get_checkout_customisation_id(): ?string {
 		$widget_service = $this->get_settings_service();
 
+		/* @noinspection PhpUndefinedMethodInspection */
 		return $widget_service->get_option(
 			$this->get_option_name(
 				$widget_service->id,
@@ -70,9 +78,13 @@ final class SettingsService {
 		);
 	}
 
+	/**
+	 * Uses a method (get_option) from WC_Payment_Gateway
+	 */
 	public function get_checkout_configuration_id(): ?string {
 		$widget_service = $this->get_settings_service();
 
+		/* @noinspection PhpUndefinedMethodInspection */
 		return $widget_service->get_option(
 			$this->get_option_name(
 				$widget_service->id,

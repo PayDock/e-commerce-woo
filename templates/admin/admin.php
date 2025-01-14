@@ -1,5 +1,7 @@
 <?php
 /**
+ * PowerBoard settings page
+ *
  * @var array $form_fields
  * @var \PowerBoard\Services\TemplateService $template_service
  */

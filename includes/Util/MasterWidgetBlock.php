@@ -1,37 +1,166 @@
 <?php
+/**
+ * This file uses classes from WooCommerce
+ *
+ * @noinspection PhpUndefinedClassInspection
+ * @noinspection PhpUndefinedNamespaceInspection
+ */
 
 namespace PowerBoard\Util;
 
-use PowerBoard\Abstracts\AbstractBlock;
+use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
 use PowerBoard\Services\Checkout\MasterWidgetPaymentService;
 use PowerBoard\Services\SDKAdapterService;
 use PowerBoard\Services\SettingsService;
 
-final class MasterWidgetBlock extends AbstractBlock {
-	protected const SCRIPT = 'blocks';
-	protected $name        = 'power_board';
+/**
+ * Settings property used comes from the extension AbstractPaymentMethodType from WooCommerce
+ *
+ * @property array $settings
+ */
+final class MasterWidgetBlock extends AbstractPaymentMethodType {
+	private static bool $is_load = false;
+	protected $name              = 'power_board';
+	protected $script            = 'blocks';
+	protected MasterWidgetPaymentService $gateway;
 
-	protected $settings;
-	protected $gateway;
-
+	/**
+	 * Uses a function (get_option) from WordPress
+	 */
 	public function initialize() {
+		/* @noinspection PhpUndefinedFunctionInspection */
 		$this->settings = get_option( 'woocommerce_power_board_settings', [] );
 		$this->gateway  = new MasterWidgetPaymentService();
 	}
 
-	public function get_payment_method_data() {
+	/**
+	 * Uses a method (get_setting) from AbstractPaymentMethodType
+	 */
+	public function is_active() {
+		/* @noinspection PhpUndefinedMethodInspection */
+		return filter_var( $this->get_setting( 'enabled', false ), FILTER_VALIDATE_BOOLEAN );
+	}
+
+	/**
+	 * Uses functions (is_checkout, wp_enqueue_script, wp_localize_script, plugin_url, wp_set_script_translations and is_admin) from WordPress
+	 * Uses functions (WC and get_woocommerce_currency) from WooCommerce
+	 */
+	public function get_payment_method_script_handles(): array {
+		/* @noinspection PhpUndefinedFunctionInspection */
+		if ( ! self::$is_load && is_checkout() ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			wp_enqueue_script(
+				'power-board-form',
+				POWER_BOARD_PLUGIN_URL . 'assets/js/frontend/form.js',
+				[ 'jquery' ],
+				POWER_BOARD_PLUGIN_VERSION,
+				true
+			);
+
+			/* @noinspection PhpUndefinedFunctionInspection */
+			wp_localize_script(
+				'power-board-form',
+				'powerBoardWidgetSettings',
+				[
+					'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL,
+				]
+			);
+
+			/* @noinspection PhpUndefinedFunctionInspection */
+			wp_enqueue_style(
+				'power-board-widget-css',
+				POWER_BOARD_PLUGIN_URL . 'assets/css/frontend/widget.css',
+				[],
+				POWER_BOARD_PLUGIN_VERSION,
+				'all'
+			);
+
+			/* @noinspection PhpUndefinedFunctionInspection */
+			wp_enqueue_script(
+				'power-board-api',
+				SettingsService::get_instance()->get_widget_script_url(),
+				[],
+				POWER_BOARD_PLUGIN_VERSION,
+				true
+			);
+
+			/* @noinspection PhpUndefinedFunctionInspection */
+			wp_localize_script(
+				'power-board-api',
+				'powerBoardWidgetSettings',
+				[
+					'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL,
+				]
+			);
+
+			self::$is_load = true;
+		}
+
+		$script_path       = 'assets/build/js/frontend/' . $this->script . '.js';
+		$script_asset_path = 'assets/build/js/frontend/' . $this->script . '.asset.php';
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$script_url   = plugins_url( $script_path, POWER_BOARD_PLUGIN_FILE );
+		$script_name  = PLUGIN_PREFIX . '-' . $this->script;
+		$script_asset = file_exists( $script_asset_path ) ? require $script_asset_path : [
+			'dependencies' => [],
+			'version'      => POWER_BOARD_PLUGIN_VERSION,
+		];
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		wp_register_script(
+			$script_name,
+			$script_url,
+			$script_asset['dependencies'],
+			$script_asset['version'],
+			true
+		);
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		wp_localize_script(
+			$script_name,
+			'powerBoardWidgetSettings',
+			[
+				'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL,
+			]
+		);
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		wp_localize_script(
+			'power-board-api',
+			'powerBoardWidgetSettings',
+			[
+				'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL,
+			]
+		);
+
+		if ( function_exists( 'wp_set_script_translations' ) ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			wp_set_script_translations( $script_name );
+		}
+
+		return [ $script_name ];
+	}
+
+	/**
+	 * Uses a function (is_admin) from WordPress
+	 * Uses functions (WC, get_woocommerce_currency) from WooCommerce
+	 */
+	public function get_payment_method_data(): array {
 		SDKAdapterService::get_instance();
 		$settings_service = SettingsService::get_instance();
 
+		/* @noinspection PhpUndefinedFunctionInspection */
 		if ( ! is_admin() ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
 			WC()->cart->calculate_totals();
 		}
 
+		/* @noinspection PhpUndefinedFunctionInspection */
 		return [
 			// Wordpress data.
 			'widgetToken'             => $settings_service->get_widget_access_token(),
 			// Woocommerce data.
-			'amount'                  => WC()->cart->total,
+			'amount'                  => WC()->cart->get_total(),
 			'currency'                => strtoupper( get_woocommerce_currency() ),
 			// Widget.
 			'title'                   => 'PowerBoard',

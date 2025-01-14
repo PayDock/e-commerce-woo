@@ -2,8 +2,6 @@
 
 namespace PowerBoard\Services;
 
-use PowerBoard\Enums\SettingsSectionEnum;
-
 class TemplateService {
 	public $setting_service;
 	private const TEMPLATE_DIR          = 'templates';
@@ -56,7 +54,11 @@ class TemplateService {
 		return $this->get_template_path( $this->template_admin_dir . DIRECTORY_SEPARATOR . $template );
 	}
 
+	/**
+	 * Uses a function (plugin_dir_path) from WordPress
+	 */
 	private function get_template_path( string $template ): string {
+		/* @noinspection PhpUndefinedFunctionInspection */
 		return plugin_dir_path( POWER_BOARD_PLUGIN_FILE ) . $template . self::TEMPLATE_END;
 	}
 

@@ -48,7 +48,11 @@ class MasterWidgetSettingsHelper {
 		return [ '1' => '1' ];
 	}
 
+	/**
+	 * Uses functions (get_transient and set_transient) from WordPress
+	 */
 	public static function get_configuration_ids_for_ui( $env, $access_token, $widget_access_token, $version ): array {
+		/* @noinspection PhpUndefinedFunctionInspection */
 		$stored_configuration_templates = get_transient( 'configuration_templates_' . $env );
 		$has_error                      = false;
 		if ( ! empty( $stored_configuration_templates ) ) {
@@ -59,6 +63,7 @@ class MasterWidgetSettingsHelper {
 			$has_error               = $result['error'];
 			$configuration_templates = MasterWidgetTemplatesHelper::map_templates( $result['resource']['data'], ! empty( $has_error ) );
 
+			/* @noinspection PhpUndefinedFunctionInspection */
 			set_transient( 'configuration_templates_' . $env, $configuration_templates, 60 );
 		}
 
@@ -75,7 +80,11 @@ class MasterWidgetSettingsHelper {
 		return $configuration_templates;
 	}
 
+	/**
+	 * Uses functions (set_transient and get_transient) from WordPress
+	 */
 	public static function get_customisation_ids_for_ui( $env, $access_token, $widget_access_token, $version ): array {
+		/* @noinspection PhpUndefinedFunctionInspection */
 		$stored_customisation_templates = get_transient( 'customisation_templates_' . $env );
 		$has_error                      = false;
 		if ( ! empty( $stored_customisation_templates ) ) {
@@ -86,6 +95,7 @@ class MasterWidgetSettingsHelper {
 			$has_error               = $result['error'];
 			$customisation_templates = MasterWidgetTemplatesHelper::map_templates( $result['resource']['data'], ! empty( $has_error ), true );
 
+			/* @noinspection PhpUndefinedFunctionInspection */
 			set_transient( 'customisation_templates_' . $env, $customisation_templates, 60 );
 		}
 
@@ -102,7 +112,7 @@ class MasterWidgetSettingsHelper {
 		return $customisation_templates;
 	}
 
-	public static function get_default( string $key ) {
+	public static function get_default( string $key ): string {
 		switch ( $key ) {
 			case MasterWidgetSettingsEnum::VERSION:
 				return '1';

@@ -5,7 +5,7 @@ namespace PowerBoard\Abstracts;
 abstract class AbstractSingleton {
 	abstract protected function __construct();
 
-	public static function getInstance() {
+	public static function get_instance() {
 		if ( is_null( static::$instance ) ) {
 			static::$instance = new static();
 		}
@@ -15,10 +15,12 @@ abstract class AbstractSingleton {
 
 	/**
 	 * Cloning instances is forbidden due to singleton pattern.
+	 * Uses a function from WooCommerce
 	 *
 	 * @since 1.0.0
 	 */
 	public function __clone() {
+		/* @noinspection PhpUndefinedFunctionInspection */
 		wc_doing_it_wrong(
 			__FUNCTION__,
 			sprintf( 'You cannot clone instances of %s.', get_class( $this ) ),
@@ -26,13 +28,14 @@ abstract class AbstractSingleton {
 		);
 	}
 
-
 	/**
 	 * Unserializing instances is forbidden due to singleton pattern.
+	 * Uses a function (wc_doing_it_wrong) from WooCommerce
 	 *
 	 * @since 1.0.0
 	 */
 	public function __wakeup() {
+		/* @noinspection PhpUndefinedFunctionInspection */
 		wc_doing_it_wrong(
 			__FUNCTION__,
 			sprintf( 'You cannot unserialize instances of %s.', get_class( $this ) ),

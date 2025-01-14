@@ -1,4 +1,9 @@
 <?php
+/**
+ * This file uses classes from WooCommerce
+ *
+ * @noinspection PhpUndefinedClassInspection
+ */
 
 namespace PowerBoard\Services\Settings;
 
@@ -21,26 +26,49 @@ use WC_Admin_Settings;
 use WC_Blocks_Utils;
 use WC_Payment_Gateway;
 
+/**
+ * Some properties used comes from the extension WC_Payment_Gateway from WooCommerce
+ *
+ * @property string $id
+ * @property string $title
+ * @property string $method_title
+ * @property string $method_description
+ * @property string $icon
+ * @property bool $has_fields
+ * @property string $plugin_id
+ * @property array $settings
+ * @property array $form_fields
+ */
 class WidgetConfigurationSettingService extends WC_Payment_Gateway {
 	protected $service = null;
 	protected $template_service;
 
+	/**
+	 * Uses functions (__, is_checkout and is_admin) from WordPress
+	 * Uses a function (wc_get_page_id) from WooCommerce
+	 * Uses a method (init_settings) from WC_Payment_Gateway
+	 */
 	public function __construct() {
-		$this->service            = SettingsService::get_instance();
-		$this->id                 = $this->get_id();
-		$this->method_title       = __( 'PowerBoard Gateway', 'power-board' );
-		$this->title              = $this->method_title;
+		$this->service = SettingsService::get_instance();
+		$this->id      = $this->get_id();
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$this->method_title = __( 'PowerBoard Gateway', 'power-board' );
+		$this->title        = $this->method_title;
+		/* @noinspection PhpUndefinedFunctionInspection */
 		$this->method_description = __(
 			'PowerBoard simplify how you manage your payments. Reduce costs, technical headaches & streamline compliance using PowerBoard\'s payment orchestration.',
 			'power-board'
 		);
 		$this->icon               = POWER_BOARD_PLUGIN_URL . 'assets/images/logo.png';
 
+		/* @noinspection PhpUndefinedMethodInspection */
 		$this->init_settings();
 		$this->init_form_fields();
 
+		/* @noinspection PhpUndefinedFunctionInspection */
 		$this->has_fields = is_checkout() && WC_Blocks_Utils::has_block_in_page( wc_get_page_id( 'checkout' ), 'woocommerce/checkout' );
 
+		/* @noinspection PhpUndefinedFunctionInspection */
 		if ( is_admin() ) {
 			new AdminAssetsService();
 			$this->template_service = new TemplateService( $this );
@@ -254,7 +282,13 @@ class WidgetConfigurationSettingService extends WC_Payment_Gateway {
 		return null;
 	}
 
+	/**
+	 * Uses functions (wp_unslash, do_action, update_option and apply_filters) from WordPress
+	 * Uses a function (wc_clean) from WooCommerce
+	 * Uses methods (init_settings, get_form_fields, get_field_type, validate_text_field, get_option, add_error and get_option_key) from WC_Payment_Gateway
+	 */
 	public function process_admin_options() {
+		/* @noinspection PhpUndefinedMethodInspection */
 		$this->init_settings();
 		$validation_service = new ConnectionValidationService( $this );
 
@@ -270,20 +304,25 @@ class WidgetConfigurationSettingService extends WC_Payment_Gateway {
 			$hashed_credential_keys[ $key ] = $credential_settings;
 		}
 
+		/* @noinspection PhpUndefinedMethodInspection */
 		foreach ( $this->get_form_fields() as $key => $field ) {
+			/* @noinspection PhpUndefinedMethodInspection */
 			$type = $this->get_field_type( $field );
 
 			$option_key = $this->plugin_id . $this->id . '_' . $key;
-			$value      = ! empty( $_POST[ $option_key ] ) ? wc_clean( wp_unslash( $_POST[ $option_key ] ) ) : null;
+			/* @noinspection PhpUndefinedFunctionInspection */
+			$value = ! empty( $_POST[ $option_key ] ) ? wc_clean( wp_unslash( $_POST[ $option_key ] ) ) : null;
 
 			if ( method_exists( $this, 'validate_' . $type . '_field' ) ) {
 				$value = $this->{'validate_' . $type . '_field'}( $key, $value );
 			} else {
+				/* @noinspection PhpUndefinedMethodInspection */
 				$value = $this->validate_text_field( $key, $value );
 			}
 
 			if ( array_key_exists( $key, $hashed_credential_keys ) ) {
 				if ( $value === '********************' || $value === '' ) {
+					/* @noinspection PhpUndefinedMethodInspection */
 					$value = $this->get_option( $key );
 				}
 			}
@@ -296,6 +335,7 @@ class WidgetConfigurationSettingService extends WC_Payment_Gateway {
 				$decrypted_key = HashService::decrypt( $this->settings[ $key ] );
 			} catch ( Exception $error ) {
 				$decrypted_key = null;
+				/* @noinspection PhpUndefinedMethodInspection */
 				$this->add_error( $error );
 				WC_Admin_Settings::add_error( $error );
 			}
@@ -306,6 +346,7 @@ class WidgetConfigurationSettingService extends WC_Payment_Gateway {
 					$encrypted_key = HashService::encrypt( $this->settings[ $key ] );
 				} catch ( Exception $error ) {
 					$encrypted_key = null;
+					/* @noinspection PhpUndefinedMethodInspection */
 					$this->add_error( $error );
 					WC_Admin_Settings::add_error( $error );
 				}
@@ -314,13 +355,17 @@ class WidgetConfigurationSettingService extends WC_Payment_Gateway {
 		}
 
 		foreach ( $validation_service->get_errors() as $error ) {
+			/* @noinspection PhpUndefinedMethodInspection */
 			$this->add_error( $error );
 			WC_Admin_Settings::add_error( $error );
 		}
 
+		/* @noinspection PhpUndefinedMethodInspection */
 		$option_key = $this->get_option_key();
+		/* @noinspection PhpUndefinedFunctionInspection */
 		do_action( 'woocommerce_update_option', [ 'id' => $option_key ] );
 
+		/* @noinspection PhpUndefinedFunctionInspection */
 		return update_option(
 			$option_key,
 			apply_filters( 'woocommerce_settings_api_sanitized_fields_' . $this->id, $this->settings ),
@@ -336,8 +381,12 @@ class WidgetConfigurationSettingService extends WC_Payment_Gateway {
 		return parent::generate_settings_html( $form_fields, $should_echo );
 	}
 
+	/**
+	 * Uses a method (get_form_fields) from WC_Payment_Gateway
+	 */
 	public function generate_settings_html( $form_fields = [], $should_echo = true ): ?string {
 		if ( empty( $form_fields ) ) {
+			/* @noinspection PhpUndefinedMethodInspection */
 			$form_fields = $this->get_form_fields();
 		}
 
@@ -364,7 +413,7 @@ class WidgetConfigurationSettingService extends WC_Payment_Gateway {
 		return null;
 	}
 
-	public function generate_big_label_html( $key, $value ) {
+	public function generate_big_label_html( $key, $value ): string {
 		return $this->template_service->get_admin_html( 'big-label', compact( 'key', 'value' ) );
 	}
 }

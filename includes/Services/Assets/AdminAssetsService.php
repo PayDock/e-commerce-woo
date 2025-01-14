@@ -21,8 +21,12 @@ class AdminAssetsService {
 		$this->load_scripts();
 	}
 
+	/**
+	 * Uses functions (wp_register_script and plugins_url) from WordPress
+	 */
 	public function register_scripts(): void {
 		foreach ( self::SCRIPTS as $script ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
 			wp_register_script(
 				$this->get_script_name( $script ),
 				plugins_url( $this->get_script_path( $script ), POWER_BOARD_PLUGIN_FILE ),
@@ -41,10 +45,14 @@ class AdminAssetsService {
 		return self::URL_SCRIPT_PREFIX . $script . self::URL_SCRIPT_POSTFIX;
 	}
 
+	/**
+	 * Uses functions (wp_enqueue_script and wp_localize_script) from WordPress
+	 */
 	public function load_scripts(): void {
 		foreach ( self::SCRIPTS as $script ) {
 			$script_name = $this->get_script_name( $script );
 
+			/* @noinspection PhpUndefinedFunctionInspection */
 			wp_enqueue_script(
 				$this->get_script_name( $script ),
 				false,
@@ -53,6 +61,7 @@ class AdminAssetsService {
 				true
 			);
 
+			/* @noinspection PhpUndefinedFunctionInspection */
 			wp_localize_script(
 				$script_name,
 				'powerBoardWidgetSettings',

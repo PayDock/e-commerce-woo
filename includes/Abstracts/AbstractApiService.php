@@ -1,7 +1,13 @@
 <?php
+/**
+ * This file uses classes from WordPress
+ *
+ * @noinspection PhpUndefinedClassInspection
+ */
 
 namespace PowerBoard\Abstracts;
 
+use LogicException;
 use PowerBoard\API\ConfigService;
 use WP_Error;
 
@@ -10,7 +16,7 @@ abstract class AbstractApiService {
 	const METHOD_POST   = 'POST';
 	const METHOD_DELETE = 'DELETE';
 
-	protected $action;
+	protected string $action;
 	protected $parameters     = [];
 	protected $allowed_action = [];
 
@@ -42,8 +48,13 @@ abstract class AbstractApiService {
 		return $this->run_call( $args );
 	}
 
+	/**
+	 * Uses functions (wp_json_encode, wp_parse_args, _wp_http_get_object) from WordPress
+	 * Uses a function (WC) from WooCommerce
+	 */
 	protected function run_call( $args ): array {
-		$url                                   = ConfigService::build_api_url( $this->build_endpoint() );
+		$url = ConfigService::build_api_url( $this->build_endpoint() );
+		/* @noinspection PhpUndefinedFunctionInspection */
 		$args['headers']['X-Power-Board-Meta'] = 'V'
 												. POWER_BOARD_PLUGIN_VERSION
 												. '_woocommerce_'
@@ -51,6 +62,7 @@ abstract class AbstractApiService {
 
 		switch ( $this->allowed_action[ $this->action ] ) {
 			case 'POST':
+				/* @noinspection PhpUndefinedFunctionInspection */
 				$args['body'] = wp_json_encode( $this->parameters, JSON_PRETTY_PRINT );
 				$parsed_args  = wp_parse_args(
 					$args,
@@ -61,6 +73,7 @@ abstract class AbstractApiService {
 				);
 				break;
 			case 'DELETE':
+				/* @noinspection PhpUndefinedFunctionInspection */
 				$parsed_args = wp_parse_args(
 					$args,
 					[
@@ -70,6 +83,7 @@ abstract class AbstractApiService {
 				);
 				break;
 			default:
+				/* @noinspection PhpUndefinedFunctionInspection */
 				$parsed_args = wp_parse_args(
 					$args,
 					[
@@ -78,7 +92,7 @@ abstract class AbstractApiService {
 					]
 				);
 		}
-
+		/* @noinspection PhpUndefinedFunctionInspection */
 		$request = _wp_http_get_object()->request( $url, $parsed_args );
 
 		if ( $request instanceof WP_Error ) {
@@ -90,7 +104,7 @@ abstract class AbstractApiService {
 
 		$body = json_decode( $request['body'], true );
 
-		if ( null === $body && json_last_error() !== JSON_ERROR_NONE ) {
+		if ( $body === null && json_last_error() !== JSON_ERROR_NONE ) {
 			return [
 				'status' => 403,
 				'error'  => [ 'message' => 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later. ' ],
@@ -101,10 +115,17 @@ abstract class AbstractApiService {
 		return $body;
 	}
 
+	/**
+	 * Uses a function (esc_html) from WordPress
+	 *
+	 * @noinspection PhpUndefinedFunctionInspection
+	 * @throws LogicException If action is not allowed
+	 */
 	protected function set_action( $action ): void {
 		if ( empty( $this->allowed_action[ $action ] ) ) {
+
 			/* translators: %s: Missing action name. */
-			throw new \LogicException( esc_html( sprintf( __( 'Not allowed action: %s', 'power-board' ), $action ) ) );
+			throw new LogicException( esc_html( sprintf( __( 'Not allowed action: %s', 'power-board' ), $action ) ) );
 		}
 
 		$this->action = $action;

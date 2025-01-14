@@ -20,6 +20,8 @@
  * WC requires at least: 6.5
  * WC tested up to: 9.4.1
  * Requires Plugins: woocommerce
+ *
+ * @noinspection PhpUndefinedFunctionInspection for plugin_dir_url
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -44,4 +46,4 @@ if ( ! defined( 'PLUGIN_PREFIX' ) ) {
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-PowerBoard\PowerBoardPlugin::getInstance();
+PowerBoard\PowerBoardPlugin::get_instance();

@@ -39,14 +39,15 @@
         <exclude name="Squiz.Commenting.FileComment.Missing" />
         <exclude name="Squiz.Commenting.FileComment.MissingPackageTag" />
         <exclude name="Squiz.Commenting.ClassComment.Missing" />
+        <exclude name="WooCommerce.Commenting.CommentHooks" />
         <exclude name="Squiz.Commenting.FunctionComment.Missing" />
         <exclude name="Squiz.Commenting.FunctionComment.SpacingAfterParamType" />
-        <exclude name="Squiz.Commenting.VariableComment.Missing" />
         <exclude name="Squiz.Commenting.FunctionComment.MissingParamComment" />
         <exclude name="Squiz.Commenting.FunctionComment.MissingParamTag" />
         <exclude name="Squiz.Commenting.FunctionComment.ParamCommentNotCapital" />
         <exclude name="Squiz.Commenting.FunctionComment.ParamCommentFullStop" />
         <exclude name="Squiz.Commenting.FunctionComment.ThrowsNoFullStop" />
+        <exclude name="Squiz.Commenting.VariableComment.Missing" />
 
         <!-- Allow standard class filenames (CamelCase) -->
         <exclude name="WordPress.Files.FileName.InvalidClassFileName" />

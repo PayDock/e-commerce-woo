@@ -7,19 +7,25 @@ use PowerBoard\Services\SettingsService;
 
 class WidgetController {
 
+	/**
+	 * Uses functions (sanitize_text_field, wp_verify_nonce, wp_send_json_error, __ and wp_send_json_success) from WordPress
+	 * Uses functions (WC, get_woocommerce_currency and wc_get_orders) from WooCommerce
+	 */
 	public function create_checkout_intent() {
-
+		/* @noinspection PhpUndefinedFunctionInspection */
 		$wp_nonce = ! empty( $_POST['_wpnonce'] ) ? sanitize_text_field( $_POST['_wpnonce'] ) : null;
-
+		/* @noinspection PhpUndefinedFunctionInspection */
 		if ( ! wp_verify_nonce( $wp_nonce, 'power-board-create-charge-intent' ) ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
 			wp_send_json_error( [ 'message' => __( 'Error: Security check', 'power-board' ) ] );
 
 			return;
 		}
 
-		$request           = [];
-		$settings          = SettingsService::get_instance();
+		$request  = [];
+		$settings = SettingsService::get_instance();
 
+		/* @noinspection PhpUndefinedFunctionInspection */
 		$cart = WC()->cart;
 
 		$args = [
@@ -32,16 +38,20 @@ class WidgetController {
 			if ( is_array( $_POST['total'] ) ) {
 				$request['total'] = array_map( 'sanitize_text_field', $_POST['total'] );
 			} else {
+				/* @noinspection PhpUndefinedFunctionInspection */
 				$request['total'] = sanitize_text_field( $_POST['total'] );
 			}
 		} else {
-			$request['total']['total_price']   = $cart->get_total( false ) * 100;
+			$request['total']['total_price'] = $cart->get_total( false ) * 100;
+			/* @noinspection PhpUndefinedFunctionInspection */
 			$request['total']['currency_code'] = get_woocommerce_currency();
 		}
 
 		if ( ! empty( $_POST['order_id'] ) ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
 			$reference = sanitize_text_field( $_POST['order_id'] );
 		} else {
+			/* @noinspection PhpUndefinedFunctionInspection */
 			$orders    = wc_get_orders( $args );
 			$reference = $orders[0]->ID;
 		}
@@ -92,6 +102,7 @@ class WidgetController {
 
 		$result['county'] = $request['address']['country'] ?? '';
 
+		/* @noinspection PhpUndefinedFunctionInspection */
 		wp_send_json_success( $result, 200 );
 	}
 }

@@ -55,9 +55,7 @@ class SDKAdapterService {
 	}
 
 	public function refunds( array $params ): array {
-		$this->init_charge_service();
-
-		return $this->charge_service->refunds( $params )->call();
+		return $this->init_charge_service()->refunds( $params )->call();
 	}
 
 	protected function init_charge_service(): ChargeService {

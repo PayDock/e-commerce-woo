@@ -41,7 +41,7 @@ class EnvironmentSettingsHelper {
 		];
 	}
 
-	public static function get_default( string $key ) {
+	public static function get_default( string $key ): string {
 		switch ( $key ) {
 			case EnvironmentSettingsEnum::ENVIRONMENT:
 			default:
