@@ -39,9 +39,7 @@ class OrderService {
 		$order_status = $order->get_status();
 		$total_refund = $order->get_total_refunded();
 		$order_total  = (float) $order->get_total( false );
-		if ( in_array( $order_status, [ 'pending', 'failed', 'cancelled', 'on-hold', 'refunded' ] )
-			|| ( $order_total === $total_refund )
-		) {
+		if ( $order_total === $total_refund ) {
 			/* @noinspection PhpUndefinedFunctionInspection */
 			wp_enqueue_style(
 				'hide-refund-button-styles',
