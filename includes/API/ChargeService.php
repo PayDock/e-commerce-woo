@@ -17,7 +17,8 @@ class ChargeService extends AbstractApiService {
 	];
 
 	public function create_checkout_intent( array $params ): self {
-		$this->parameters = $params;
+		$this->parameters     = $params;
+		$this->request_action = 'Create intent';
 
 		$this->set_action( 'create-intent' );
 
@@ -31,15 +32,17 @@ class ChargeService extends AbstractApiService {
 		];
 
 		$this->set_action( 'templates' );
+		$this->request_action = 'Get Configuration Template IDs';
 
 		return $this;
 	}
 
 	public function get_customisation_templates_ids( string $version ): self {
-		$this->parameters = [
+		$this->parameters     = [
 			'type'    => 'customisation',
 			'version' => $version,
 		];
+		$this->request_action = 'Get Customisations Templates ID';
 
 		$this->set_action( 'templates' );
 
@@ -48,7 +51,8 @@ class ChargeService extends AbstractApiService {
 
 
 	public function refunds( array $params ): self {
-		$this->parameters = $params;
+		$this->parameters     = $params;
+		$this->request_action = 'Refund';
 
 		$this->set_action( 'refunds' );
 

@@ -12,7 +12,6 @@ use PowerBoard\Enums\ChargeStatusesEnum;
 use PowerBoard\Enums\NotificationEventsEnum;
 use PowerBoard\Services\OrderService;
 use PowerBoard\Services\SDKAdapterService;
-use WP_Error;
 
 class PaymentController {
 
@@ -78,6 +77,7 @@ class PaymentController {
 				'amount'    => $amount_to_refund,
 			]
 		);
+
 		if ( ! empty( $result['resource']['data']['status'] ) && in_array(
 			$result['resource']['data']['status'],
 			[ 'refunded', 'refund_requested' ],

@@ -95,6 +95,10 @@ class WidgetConfigurationSettingService extends WC_Payment_Gateway {
 	}
 
 	public function init_form_fields(): void {
+		/* @noinspection PhpUndefinedFunctionInspection */
+		if ( !is_admin() ) {
+			return;
+		}
 		foreach ( SettingGroupsEnum::cases() as $setting_group ) {
 			$key = PLUGIN_PREFIX . '_' . $this->service->get_option_name(
 				$this->id,

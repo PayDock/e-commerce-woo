@@ -146,7 +146,7 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 			'axios',
 			'https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js',
 			[],
-			null,
+			POWER_BOARD_PLUGIN_VERSION,
 			true
 		);
 	}

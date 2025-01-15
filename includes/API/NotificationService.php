@@ -14,14 +14,16 @@ class NotificationService extends AbstractApiService {
 
 	public function create( $params ): NotificationService {
 		$this->set_action( 'create' );
-		$this->parameters = $params;
+		$this->parameters     = $params;
+		$this->request_action = 'Create notifications';
 
 		return $this;
 	}
 
 	public function search( array $parameters = [] ): NotificationService {
 		$this->set_action( 'search' );
-		$this->parameters = $parameters;
+		$this->parameters     = $parameters;
+		$this->request_action = 'Search notifications';
 
 		return $this;
 	}

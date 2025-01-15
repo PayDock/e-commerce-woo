@@ -44,14 +44,10 @@ class SDKAdapterService {
 	public function token( array $params = [
 		'gateway_id' => '',
 		'type'       => '',
-	], ?bool $use_widget_access_token = false ): array {
+	]): array {
 		$token_service = new TokenService();
 
-		if ( $use_widget_access_token ) {
-			return $token_service->create( $params )->call_with_widget_access_token();
-		}
-
-		return $token_service->create( $params )->call();
+		return $token_service->create( $params )->call_with_widget_access_token();
 	}
 
 	public function refunds( array $params ): array {

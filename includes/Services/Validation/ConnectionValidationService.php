@@ -258,18 +258,12 @@ class ConnectionValidationService {
 
 		ConfigService::$widget_access_token = $widget_access_token;
 
-		$result = $this->api_adapter_service->token(
-			[
-				'gateway_id' => '',
-				'type'       => '',
-			],
-			true
-		);
-		$result = empty( $result['error'] );
+		$result    = $this->api_adapter_service->token();
+		$valid_key = empty( $result['error'] );
 
 		$this->restore_credential();
 
-		return $result;
+		return $valid_key;
 	}
 
 	/**
@@ -287,6 +281,7 @@ class ConnectionValidationService {
 		$webhook_site_url      = get_site_url() . '/wc-api/power-board-webhook/';
 		$should_create_webhook = true;
 		$webhook_request       = $this->api_adapter_service->search_notifications( [ 'type' => 'webhook' ] );
+
 		if ( ! empty( $webhook_request['resource']['data'] ) ) {
 			$events = [];
 			foreach ( $webhook_request['resource']['data'] as $webhook ) {

@@ -12,7 +12,8 @@ class TokenService extends AbstractApiService {
 	];
 
 	public function create( array $params ): TokenService {
-		$this->parameters = $params;
+		$this->parameters     = $params;
+		$this->request_action = 'Create token';
 
 		$this->set_action( 'create' );
 

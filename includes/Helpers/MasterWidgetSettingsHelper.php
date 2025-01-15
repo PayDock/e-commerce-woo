@@ -49,9 +49,16 @@ class MasterWidgetSettingsHelper {
 	}
 
 	/**
-	 * Uses functions (get_transient and set_transient) from WordPress
+	 * Uses functions (get_transient, delete_transient and set_transient) from WordPress
 	 */
 	public static function get_configuration_ids_for_ui( $env, $access_token, $widget_access_token, $version ): array {
+		/* @noinspection PhpUndefinedFunctionInspection */
+		if ( ! self::is_power_board_settings_page() || ! empty( get_transient( 'is_fetching_configuration_templates' ) ) ) {
+			return [];
+		}
+		/* @noinspection PhpUndefinedFunctionInspection */
+		set_transient( 'is_fetching_configuration_templates', true );
+
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$stored_configuration_templates = get_transient( 'configuration_templates_' . $env );
 		$has_error                      = false;
@@ -77,13 +84,22 @@ class MasterWidgetSettingsHelper {
 			);
 		MasterWidgetTemplatesHelper::validate_or_update_template_id( $configuration_templates, ! empty( $has_error ), $configuration_id_key );
 
+		/* @noinspection PhpUndefinedFunctionInspection */
+		delete_transient( 'is_fetching_configuration_templates' );
 		return $configuration_templates;
 	}
 
 	/**
-	 * Uses functions (set_transient and get_transient) from WordPress
+	 * Uses functions (set_transient, delete_transient and get_transient) from WordPress
 	 */
 	public static function get_customisation_ids_for_ui( $env, $access_token, $widget_access_token, $version ): array {
+		/* @noinspection PhpUndefinedFunctionInspection */
+		if ( ! self::is_power_board_settings_page() || ! empty( get_transient( 'is_fetching_customisation_templates' ) ) ) {
+			return [];
+		}
+		/* @noinspection PhpUndefinedFunctionInspection */
+		set_transient( 'is_fetching_customisation_templates', true );
+
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$stored_customisation_templates = get_transient( 'customisation_templates_' . $env );
 		$has_error                      = false;
@@ -109,6 +125,8 @@ class MasterWidgetSettingsHelper {
 			);
 		MasterWidgetTemplatesHelper::validate_or_update_template_id( $customisation_templates, ! empty( $has_error ), $customisation_id_key );
 
+		/* @noinspection PhpUndefinedFunctionInspection */
+		delete_transient( 'is_fetching_customisation_templates' );
 		return $customisation_templates;
 	}
 
@@ -125,5 +143,14 @@ class MasterWidgetSettingsHelper {
 		$api_adapter_service = APIAdapterService::get_instance();
 		$api_adapter_service->initialise( $env, $access_token, $widget_access_token );
 		return $api_adapter_service;
+	}
+
+	/**
+	 * Uses functions (sanitize_text_field and wp_unslash) from WordPress
+	 * It is safe to ignore NonceVerification because we are sanitizing the strings and not using them to submit data
+	 */
+	public static function is_power_board_settings_page(): bool {
+		/* @noinspection PhpUndefinedFunctionInspection */
+		return isset( $_GET['page'] ) && sanitize_text_field( wp_unslash( $_GET['page'] ) ) === 'wc-settings' && isset( $_GET['tab'] ) && sanitize_text_field( wp_unslash( $_GET['tab'] ) ) === 'checkout' && isset( $_GET['section'] ) && sanitize_text_field( wp_unslash( $_GET['section'] ) ) === PLUGIN_PREFIX; // phpcs:ignore WordPress.Security.NonceVerification
 	}
 }

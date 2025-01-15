@@ -9,6 +9,7 @@ namespace PowerBoard\Abstracts;
 
 use LogicException;
 use PowerBoard\API\ConfigService;
+use PowerBoard\Helpers\LoggerHelper;
 use WP_Error;
 
 abstract class AbstractApiService {
@@ -17,6 +18,7 @@ abstract class AbstractApiService {
 	const METHOD_DELETE = 'DELETE';
 
 	protected string $action;
+	protected $request_action = null;
 	protected $parameters     = [];
 	protected $allowed_action = [];
 
@@ -111,6 +113,19 @@ abstract class AbstractApiService {
 				'body'   => $request['body'],
 			];
 		}
+
+		LoggerHelper::log_request(
+			[
+				'request'  => [
+					'url'     => $url,
+					'method'  => $parsed_args['method'],
+					'payload' => $parsed_args['body'],
+				],
+				'response' => $body,
+				'error'    => $body['error'],
+			],
+			$this->request_action
+		);
 
 		return $body;
 	}
