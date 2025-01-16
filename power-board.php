@@ -44,6 +44,10 @@ if ( ! defined( 'PLUGIN_PREFIX' ) ) {
 	define( 'PLUGIN_PREFIX', 'power_board' );
 }
 
+if ( ! defined( 'PLUGIN_NAME' ) ) {
+	define( 'PLUGIN_NAME', 'PowerBoard for WooCommerce' );
+}
+
 require_once __DIR__ . '/vendor/autoload.php';
 
 PowerBoard\PowerBoardPlugin::get_instance();
