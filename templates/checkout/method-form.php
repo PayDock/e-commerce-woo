@@ -67,8 +67,9 @@ if ( $is_order_pay_page === 'true' ) {
 
 		?>
 		<script type="text/javascript">
-			var orderData = <?php echo wp_json_encode( $order_data ); ?>;
-			var isOrderPayPage = <?php echo $is_order_pay_page === 'true' ? 'true' : 'false'; ?>;
+			let orderData = <?php echo wp_json_encode( $order_data ); ?>;
+			// noinspection JSUnusedGlobalSymbols
+			let isOrderPayPage = <?php echo $is_order_pay_page === 'true' ? 'true' : 'false'; ?>;
 		</script>
 		<?php
 
@@ -80,7 +81,8 @@ if ( $is_order_pay_page === 'true' ) {
 
 	?>
 	<script type="text/javascript">
-		var isOrderPayPage = false;
+		// noinspection JSUnusedGlobalSymbols
+		let isOrderPayPage = false;
 	</script>
 	<?php
 

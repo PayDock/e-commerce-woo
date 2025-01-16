@@ -33,6 +33,7 @@ setTimeout(
 					{}
 					);
 
+			// noinspection JSUnresolvedReference
 			const getPaymentOptionsComponents = () =>
 			CONFIG.paymentOptionsNames
 				.map( name => $( `#${CONFIG.baseCheckboxIdName}-${name}` ).parents().eq( 1 ) )
@@ -63,6 +64,7 @@ setTimeout(
 			const shippingValid = validationResults.shipping;
 
 			if (!shippingValid) {
+				// noinspection JSUnresolvedReference
 				$shippingWrapper.addClass( 'is-editing' );
 			}
 
@@ -121,6 +123,7 @@ setTimeout(
 				);
 			if ($paymentMethodInput.length > 0) {
 				setPaymentMethod( $paymentMethodInput[0].value );
+				// noinspection JSUnresolvedReference
 				jQuery( '.wc-block-components-form' )[0].dispatchEvent( new Event( "change" ) );
 			}
 		}

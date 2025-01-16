@@ -1,9 +1,12 @@
 import {__} from '@wordpress/i18n';
+// noinspection NpmUsedModulesInstalled
 import {registerPaymentMethod} from '@woocommerce/blocks-registry';
 import {decodeEntities} from '@wordpress/html-entities';
 import {getSetting} from '@woocommerce/settings';
 import {createElement, useEffect} from 'react';
+// noinspection NpmUsedModulesInstalled
 import {select} from '@wordpress/data';
+// noinspection NpmUsedModulesInstalled
 import {CART_STORE_KEY,CHECKOUT_STORE_KEY} from '@woocommerce/block-data';
 import canMakePayment from "../includes/canMakePayment";
 
@@ -46,6 +49,7 @@ const toggleWidgetVisibility = (hide) => {
 
 const initMasterWidgetCheckout = () => {
 	if (canMakePayment( settings.total_limitation, cart.getCartTotals()?.total_price )) {
+		// noinspection JSUnresolvedReference
 		const orderButton = jQuery( '.wc-block-components-checkout-place-order-button' );
 		orderButton.hide();
 
@@ -63,9 +67,13 @@ const initMasterWidgetCheckout = () => {
 					setTimeout(
 						() => {
 							toggleWidgetVisibility( false );
-							window.widgetPowerBoard    = new cba.Checkout( '#powerBoardCheckout_wrapper', response.data.resource.data.token );
+							// noinspection JSUnresolvedReference
+							window.widgetPowerBoard = new cba.Checkout( '#powerBoardCheckout_wrapper', response.data.resource.data.token );
+							// noinspection JSUnresolvedReference
 							window.widgetPowerBoard.setEnv( settings.environment )
-							const orderButton          = jQuery( '.wc-block-components-checkout-place-order-button' );
+							// noinspection JSUnresolvedReference
+							const orderButton = jQuery( '.wc-block-components-checkout-place-order-button' );
+							// noinspection JSUnresolvedReference
 							const paymentSourceElement = jQuery( '#paymentSourceToken' );
 							window.widgetPowerBoard.onPaymentSuccessful(
 							function (data) {
@@ -115,9 +123,12 @@ const initMasterWidgetCheckout = () => {
 	}
 }
 const handleFormChanged = () => {
-	let isFormValid     = jQuery( '.wc-block-components-form' )[0].checkValidity();
-	let error           = jQuery( '#fields-validation-error' )[0];
-	let loading         = jQuery( '#loading' )[0];
+	// noinspection JSUnresolvedReference
+	let isFormValid = jQuery( '.wc-block-components-form' )[0].checkValidity();
+	// noinspection JSUnresolvedReference
+	let error = jQuery( '#fields-validation-error' )[0];
+	// noinspection JSUnresolvedReference
+	let loading = jQuery( '#loading' )[0];
 	toggleWidgetVisibility( true );
 	if (isFormValid) {
 		if (loading.classList.length > 0) {
@@ -170,6 +181,7 @@ const handleWidgetError = () => {
 
 // eslint-disable-next-line no-unused-vars
 const Content                               = (props) => {
+	// noinspection JSUnresolvedReference
 	jQuery( '.wc-block-components-checkout-place-order-button' ).show();
 	const {eventRegistration, emitResponse} = props;
 	const {onPaymentSetup}                  = eventRegistration;
@@ -177,6 +189,7 @@ const Content                               = (props) => {
 	useEffect(
 		() => {
 			if (!window.unsubscribeFromFormChanges) {
+				// noinspection JSUnresolvedReference
 				window.unsubscribeFromFormChanges = jQuery( '.wc-block-components-form' )[0].addEventListener( "change", handleFormChanged );
 			}
 			const unsubscribe               = onPaymentSetup(
@@ -196,12 +209,14 @@ const Content                               = (props) => {
 				}
 
 					handleWidgetError();
+				// noinspection JSUnresolvedReference
 				return {
 					type: emitResponse.responseTypes.ERROR, message: __( paymentDataParsed.errorMessage, textDomain ),
 				}
 				}
 		);
 		return () => {
+			// noinspection JSUnresolvedReference
 			jQuery( '.wc-block-components-form' )[0].removeEventListener( "change", handleFormChanged );
 			unsubscribe();
 			};

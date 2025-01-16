@@ -25,6 +25,7 @@ const requestToHandle = (request) => {
 };
 
 // Export configuration.
+// noinspection JSCheckFunctionSignatures
 module.exports = {
 	...defaultConfig,
 	entry: {
