@@ -297,6 +297,7 @@ class WidgetConfigurationSettingService extends WC_Payment_Gateway {
 		$validation_service = new ConnectionValidationService( $this );
 
 		$hashed_credential_keys = [];
+		$settings_keys = [];
 		foreach ( CredentialSettingsEnum::cases() as $credential_settings ) {
 			$key                            = $this->service->get_option_name(
 				$this->id,
@@ -306,6 +307,29 @@ class WidgetConfigurationSettingService extends WC_Payment_Gateway {
 				]
 			);
 			$hashed_credential_keys[ $key ] = $credential_settings;
+			$settings_keys[ $key ] = $credential_settings;
+		}
+
+		$settings_keys = [];
+		foreach ( EnvironmentSettingsEnum::cases() as $environment_settings ) {
+			$key                            = $this->service->get_option_name(
+				$this->id,
+				[
+					SettingGroupsEnum::ENVIRONMENT,
+					$environment_settings,
+				]
+			);
+			$settings_keys[ $key ] = $environment_settings;
+		}
+		foreach ( MasterWidgetSettingsEnum::class::cases() as $master_widget_settings ) {
+			$key                            = $this->service->get_option_name(
+				$this->id,
+				[
+					SettingGroupsEnum::CHECKOUT,
+					$master_widget_settings,
+				]
+			);
+			$settings_keys[ $key ] = $master_widget_settings;
 		}
 
 		/* @noinspection PhpUndefinedMethodInspection */
@@ -324,8 +348,8 @@ class WidgetConfigurationSettingService extends WC_Payment_Gateway {
 				$value = $this->validate_text_field( $key, $value );
 			}
 
-			if ( array_key_exists( $key, $hashed_credential_keys ) ) {
-				if ( $value === '********************' || $value === '' ) {
+			if ( array_key_exists( $key, $hashed_credential_keys ) || array_key_exists( $key, $settings_keys) ) {
+				if ( ! empty( $validation_service->get_errors() ) || $value === '********************' || $value === '' ) {
 					/* @noinspection PhpUndefinedMethodInspection */
 					$value = $this->get_option( $key );
 				}

@@ -16,6 +16,7 @@ use PowerBoard\Services\Settings\WidgetConfigurationSettingService;
 use PowerBoard\Services\SettingsService;
 
 class ConnectionValidationService {
+	private $old_environment         = null;
 	private $old_access_token        = null;
 	private $old_widget_access_token = null;
 

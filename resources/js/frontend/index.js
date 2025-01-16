@@ -146,13 +146,13 @@ const handleWidgetError = () => {
 	const paymentMethodsContainer = document.querySelectorAll( '.wc-block-checkout__payment-method' )[0];
 	const checkoutPaymentStep     = paymentMethodsContainer?.querySelectorAll( '.wc-block-components-checkout-step__content' )?.[0];
 	const checkoutPaymentNotices  = checkoutPaymentStep?.querySelectorAll( '.wc-block-components-notices' )?.[0];
-	const removeErrorTimeout      = setTimeout(
+	const removeNoticeInterval      = setInterval(
 		() => {
 			if (checkoutPaymentNotices?.children.length > 0 || topNotices.children.length > 0) {
-				clearTimeout( removeErrorTimeout );
-				const removeNoticeInterval = setInterval(
+				clearInterval( removeNoticeInterval );
+				const removeErrorTimeout = setTimeout(
 				() => {
-					clearInterval( removeNoticeInterval );
+					clearTimeout( removeErrorTimeout );
 					const noticesToCheck   = checkoutPaymentNotices?.children.length > 0 ? checkoutPaymentNotices : topNotices;
 					for (let notice of noticesToCheck.children) {
 						if (notice.classList.contains( 'is-error' )) {
@@ -160,8 +160,8 @@ const handleWidgetError = () => {
 						}
 					}
 				},
-				5000
-					);
+				10000
+				);
 			}
 		},
 		200

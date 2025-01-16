@@ -118,19 +118,20 @@ jQuery(
 					this.initMasterWidget();
 
 					const noticesWrapper     = $( 'div.woocommerce-notices-wrapper' )[0];
-					const removeErrorTimeout = setTimeout(
+					const removeErrorInterval = setInterval(
 					() => {
 						if (noticesWrapper?.children.length > 0) {
-							clearTimeout( removeErrorTimeout );
-							setInterval(
+							clearTimeout( removeErrorInterval );
+							const removeErrorTimeout = setTimeout(
 							() => {
+								clearTimeout( removeErrorTimeout );
 								for (let notice of noticesWrapper.children) {
 									if (notice.classList.contains( 'is-error' )) {
 										notice.remove();
 									}
 								}
 							},
-							5000
+							10000
 								);
 						}
 					},
