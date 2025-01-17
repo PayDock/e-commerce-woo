@@ -321,7 +321,7 @@ class WidgetConfigurationSettingService extends WC_Payment_Gateway {
 			);
 			$settings_keys[ $key ] = $environment_settings;
 		}
-		foreach ( MasterWidgetSettingsEnum::class::cases() as $master_widget_settings ) {
+		foreach ( MasterWidgetSettingsEnum::cases() as $master_widget_settings ) {
 			$key                            = $this->service->get_option_name(
 				$this->id,
 				[
