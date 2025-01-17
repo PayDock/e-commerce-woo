@@ -4,6 +4,7 @@ stages:
  - test
  - publish
  - quality
+ - deploy_cba
 
 include:
   - project: 'paydock/platform/gitlab-templates'
@@ -40,8 +41,8 @@ phpcs_report:
 
 prepare_power_board_version:
   stage: publish
-  only:
-    - power_board
+#  only:
+#    - power_board
   needs:
     - job: create_version
       artifacts: true
@@ -56,17 +57,35 @@ prepare_power_board_version:
 publish_power_board:
   image: composer:lts
   stage: publish
-  only:
-    - power_board
+#  only:
+#    - power_board
   needs:
     - prepare_power_board_version
   script:
     - composer install
     - /bin/sh cleanup_files_for_zip.sh
+    - echo "ZIP_PUBLISH_JOB_ID=$CI_JOB_ID" > zip_publish.job_id
   artifacts:
     name: $ARTIFACT_NAME
     paths:
       - ./*
+    reports:
+      dotenv: zip_publish.job_id
+
+deploy_uat:
+  stage: deploy_cba
+  #  only:
+  #    - power_board
+  needs:
+    - job: publish_power_board
+      artifacts: true
+  trigger:
+    project: paydock/bounded-contexts/woocommerce/multi-project-downstream
+    branch: development
+  variables:
+    UPSTREAM_PROJECT_ID: $CI_PROJECT_ID
+    UPSTREAM_JOB_ID: $ZIP_PUBLISH_JOB_ID
+  when: manual
 
 prepare_paydock_version:
   stage: publish
