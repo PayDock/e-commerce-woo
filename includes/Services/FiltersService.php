@@ -21,6 +21,8 @@ class FiltersService extends AbstractSingleton {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_filter( 'woocommerce_payment_gateways', [ $this, 'registerInWooCommercePaymentClass' ] );
 		/* @noinspection PhpUndefinedFunctionInspection */
+		add_filter( 'woocommerce_thankyou_order_received_text', [ $this, 'woocommerceThankyouOrderReceivedText' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
 		add_filter( 'plugins_loaded', [ $this, 'woo_text_override' ] );
 	}
 
@@ -44,6 +46,28 @@ class FiltersService extends AbstractSingleton {
 		}
 
 		return $methods;
+	}
+
+	/**
+	 * Uses functions (absint, get_query_var, get_option and __) from WordPress
+	 * Uses a function (wc_get_order) from WooCommerce
+	 */
+	public function woocommerceThankyouOrderReceivedText( $text ) {
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$order_id = absint( get_query_var( 'order-received' ) );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$options = get_option( 'power_board_fraud_' . $order_id );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$order  = wc_get_order( $order_id );
+		$status = $order->get_status();
+
+		if ( $options === false && $status !== 'processing' ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			return __( 'Thank you. Your order has been received.', 'power-board' );
+		}
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		return __( 'Your order is being processed. We\'ll get back to you shortly', 'power-board' );
 	}
 
 	/**
