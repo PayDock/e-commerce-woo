@@ -1,11 +1,10 @@
 import { getValidationResults } from '../helpers/form.helper';
+const isOrderPayPage = window.location.href.includes( 'order-pay' ) ? true : false;
 
 jQuery(
 	function ($) {
-
 		$( document ).ready(
 		() => {
-			var isOrderPayPage                = typeof isOrderPayPage !== 'undefined' && isOrderPayPage === true;
 			const CONFIG                      = {
 				phoneInputIds: {
 					shipping: '#shipping_phone',
@@ -286,14 +285,26 @@ jQuery(
 					}
 				},
 				initMasterWidget() {
+					const data = {
+						_wpnonce: PowerBoardAjax.wpnonce,
+						address: this.getAddressData( false ).address,
+					};
+
+					if (isOrderPayPage) {
+						data.order_id = orderData.order_id;
+						data.total    = {
+							total_price: orderData.total_price,
+							total_tax: orderData.total_tax,
+							currency_code: orderData.currency_code,
+							currency_symbol: orderData.currency_symbol,
+						};
+					}
+
 					jQuery.ajax(
 					{
 						url: '/?wc-ajax=power-board-create-charge-intent',
 						type: 'POST',
-						data: {
-							_wpnonce: PowerBoardAjax.wpnonce,
-							address: this.getAddressData().address,
-						},
+						data: data,
 						success: (response) => {
 							this.toggleWidgetVisibility( false );
 							window.widgetPowerBoard = new cba.Checkout( '#classic-powerBoardCheckout_wrapper', response.data.resource.data.token );
@@ -416,7 +427,7 @@ jQuery(
 							clearTimeout( this.formChangedTimer );
 							this.formChangedTimer    = setTimeout(
 							() => {
-								const currentAddress = JSON.stringify( this.getAddressData().address );
+								const currentAddress = JSON.stringify( this.getAddressData( false ).address );
 								if (this.lastAddressVerified !== currentAddress || event.target.classList.contains( 'shipping_method' )|| event.target.id.includes( 'payment_method' )) {
 									this.lastAddressVerified = currentAddress;
 									this.setPaymentMethod( $( 'input[name="payment_method"]:checked' ).val(), true )
