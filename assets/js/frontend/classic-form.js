@@ -1,4 +1,3 @@
-import { getValidationResults } from '../helpers/form.helper';
 const isOrderPayPage = window.location.href.includes( 'order-pay' ) ? true : false;
 
 jQuery(
@@ -46,14 +45,20 @@ jQuery(
 			return true;
 			};
 			const updateVisibility      = (phoneInputs) => {
-				const validationResults = getValidationResults( phoneInputs, validatePhone );
-				const allValid          = Object.values( validationResults ).every( Boolean );
-				const shippingValid     = validationResults.shipping;
-				if (!shippingValid) {
-					$shippingWrapper.addClass( 'is-editing' );
-				}
-				$( 'button#place_order' ).styles = 'visibility:' + (allValid ? 'visible' : 'hidden');
-				getPaymentOptionsComponents().forEach(
+				const validationResults = Object.entries( phoneInputs ).reduce(
+				(acc, [key, $input]) => {
+					acc[key]            = validatePhone( $input );
+					return acc;
+				},
+				{}
+				);
+			const allValid      = Object.values( validationResults ).every( Boolean );
+			const shippingValid = validationResults.shipping;
+			if (!shippingValid) {
+				$shippingWrapper.addClass( 'is-editing' );
+			}
+			$( 'button#place_order' ).styles = 'visibility:' + (allValid ? 'visible' : 'hidden');
+			getPaymentOptionsComponents().forEach(
 				$component => {
 					$component.css(
 						{
