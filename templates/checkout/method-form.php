@@ -68,7 +68,7 @@ if ( is_wc_endpoint_url( 'order-pay' ) ) {
 
 			?>
 			<script type="text/javascript">
-				var orderData = <?php echo wp_json_encode( $order_data ); ?>;
+				let orderData = <?php echo wp_json_encode( $order_data ); ?>;
 			</script>
 			<?php
 		} else {

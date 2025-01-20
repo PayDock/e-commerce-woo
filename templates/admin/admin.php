@@ -3,8 +3,10 @@
  * PowerBoard settings page
  *
  * @var array $form_fields
- * @var \PowerBoard\Services\TemplateService $template_service
+ * @var TemplateService $template_service
  */
+
+use PowerBoard\Services\TemplateService;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;

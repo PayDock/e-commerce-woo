@@ -1,4 +1,4 @@
-const isOrderPayPage = window.location.href.includes('order-pay');
+const isOrderPayPage = window.location.href.includes( 'order-pay' );
 
 jQuery(
 	function ($) {
@@ -117,7 +117,7 @@ jQuery(
 						loading.show();
 						this.initMasterWidget();
 
-						const noticesWrapper     = $( 'div.woocommerce-notices-wrapper' )[0];
+						const noticesWrapper      = $( 'div.woocommerce-notices-wrapper' )[0];
 						const removeErrorInterval = setInterval(
 						() => {
 							if (noticesWrapper?.children.length > 0) {
@@ -130,9 +130,13 @@ jQuery(
 											notice.remove();
 										}
 									}
-								}, 10000);
+								},
+									10000
+									);
 							}
-						}, 200);
+						},
+							200
+							);
 					},
 					setFieldLikeInvalid( fieldName ) {
 						let element = document.getElementById( `${fieldName}_field` );
@@ -163,9 +167,9 @@ jQuery(
 						'email',
 						'phone'
 						];
-						let result = [];
+						let result           = [];
 						let shippingCheckbox = $( '[name="ship_to_different_address"]' )
-						let prefixes = ['billing_']
+						let prefixes         = ['billing_']
 
 						if (shippingCheckbox?.[0]?.checked || ignoreCheckbox) {
 							prefixes.push( 'shipping_' )
@@ -413,7 +417,9 @@ jQuery(
 								clearInterval( paymentMethodInterval )
 								this.setPaymentMethod( paymentMethod )
 							}
-						}, 100);
+						},
+							100
+							);
 
 						this.form = $( 'form[name="checkout"]' );
 
@@ -429,7 +435,9 @@ jQuery(
 											this.lastAddressVerified = currentAddress;
 											this.setPaymentMethod( $( 'input[name="payment_method"]:checked' ).val(), true )
 										}
-									}, 1000);
+									},
+										1000
+										);
 								} catch (e) {
 									console.error( e )
 								}

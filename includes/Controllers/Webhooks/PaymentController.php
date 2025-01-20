@@ -89,7 +89,7 @@ class PaymentController {
 
 			/* @noinspection PhpUndefinedFunctionInspection */
 			$status_note = __( 'The refund of', 'power-board' )
-							. " {$amount_to_refund} "
+							. " $amount_to_refund "
 							. __( 'has been successfully processed.', 'power-board' );
 
 			$order->payment_complete();
@@ -248,7 +248,7 @@ class PaymentController {
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$status_notes = __( 'The refund of', 'power-board' )
-						. " {$refund_amount} "
+						. " $refund_amount "
 						. __( 'has been successfully processed.', 'power-board' );
 		$order->payment_complete();
 		OrderService::update_status( $order_id, $order_status, $status_notes );
@@ -257,7 +257,7 @@ class PaymentController {
 		wc_create_refund(
 			[
 				'amount'         => $refund_amount,
-				'reason'         => __( 'The refund of', 'power-board' ) . " {$refund_amount} " . __(
+				'reason'         => __( 'The refund of', 'power-board' ) . " $refund_amount " . __(
 					'has been successfully processed.',
 					'power-board'
 				),

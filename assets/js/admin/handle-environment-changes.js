@@ -1,34 +1,36 @@
 const selectElementsToUpdateOnEnvChange = ['woocommerce_power_board_power_board_CHECKOUT_CONFIGURATION_ID', 'woocommerce_power_board_power_board_CHECKOUT_CUSTOMISATION_ID']
-const elementsToUpdateOnEnvChange = ['woocommerce_power_board_power_board_CREDENTIALS_ACCESS_KEY', 'woocommerce_power_board_power_board_CREDENTIALS_WIDGET_KEY', ...selectElementsToUpdateOnEnvChange]
-const environmentSelectBoxId = 'woocommerce_power_board_power_board_ENVIRONMENT_ENVIRONMENT';
+const elementsToUpdateOnEnvChange       = ['woocommerce_power_board_power_board_CREDENTIALS_ACCESS_KEY', 'woocommerce_power_board_power_board_CREDENTIALS_WIDGET_KEY', ...selectElementsToUpdateOnEnvChange]
+const environmentSelectBoxId            = 'woocommerce_power_board_power_board_ENVIRONMENT_ENVIRONMENT';
 
 // noinspection JSUnresolvedReference
 jQuery( document ).ready(
 	function () {
-		const environmentSelectBoxElement = document.getElementById(environmentSelectBoxId);
+		const environmentSelectBoxElement  = document.getElementById( environmentSelectBoxId );
 		const selectedEnvironmentSavedToDB = environmentSelectBoxElement.value;
-		const form = document.getElementById('mainform');
+		const form                         = document.getElementById( 'mainform' );
 
 		let savedElements = saveSelectOptionsByEnvironment()
-		const formData = getFormData();
+		const formData    = getFormData();
 
 		environmentSelectBoxElement.addEventListener(
 			'change',
 			function () {
-				elementsToUpdateOnEnvChange.forEach(element => {
-					if (selectedEnvironmentSavedToDB !== environmentSelectBoxElement.value) {
-						removeElementsValues(element);
-					} else {
-						addElementsValueAndOptions(element);
-					}
-				});
+				elementsToUpdateOnEnvChange.forEach(
+					element => {
+						if (selectedEnvironmentSavedToDB !== environmentSelectBoxElement.value) {
+							removeElementsValues( element );
+						} else {
+							addElementsValueAndOptions( element );
+						}
+				}
+					);
 			}
 		);
 
 		function removeElementsValues(element) {
 			form.elements[element].value = '';
-			if (selectElementsToUpdateOnEnvChange.includes(form.elements[element].id)) {
-				form.elements[element].innerHTML = '';
+			if (selectElementsToUpdateOnEnvChange.includes( form.elements[element].id )) {
+				form.elements[element].innerHTML     = '';
 				form.elements[element].selectedIndex = -1;
 			}
 		}
@@ -47,7 +49,7 @@ jQuery( document ).ready(
 		function getFormData() {
 			const formData = {};
 			for (let element of form.elements) {
-				if (element.name?.includes('woocommerce_power_board_power_board')) {
+				if (element.name?.includes( 'woocommerce_power_board_power_board' )) {
 					formData[element.name] = element.value;
 				}
 			}
@@ -56,13 +58,15 @@ jQuery( document ).ready(
 		}
 
 		function saveSelectOptionsByEnvironment() {
-			let savedElements = {}
-			selectElementsToUpdateOnEnvChange.forEach(id => {
-				savedElements[selectedEnvironmentSavedToDB] = {
-					...savedElements[selectedEnvironmentSavedToDB],
-					[id]: form.elements[id].innerHTML,
-				}
-			})
+			let savedElements                                   = {}
+			selectElementsToUpdateOnEnvChange.forEach(
+				id => {
+					savedElements[selectedEnvironmentSavedToDB] = {
+						...savedElements[selectedEnvironmentSavedToDB],
+						[id]: form.elements[id].innerHTML,
+					}
+			}
+				)
 			return savedElements;
 		}
 	}

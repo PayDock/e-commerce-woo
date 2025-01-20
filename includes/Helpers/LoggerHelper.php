@@ -14,7 +14,7 @@ class LoggerHelper {
 			'response' => self::filter_response_by_action( $result['response'], $request_action, $has_error ),
 		];
 		if ( $has_error ) {
-			$context['backtrace'] = $has_error;
+			$context['backtrace'] = true;
 		}
 		/* @noinspection PhpUndefinedFunctionInspection */
 		wc_get_logger()->log(
