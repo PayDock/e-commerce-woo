@@ -60,54 +60,49 @@ const initMasterWidgetCheckout = () => {
 					address: cart.getCustomerData().billingAddress,
 				},
 				success: (response) => {
-					setTimeout(
-						() => {
-							toggleWidgetVisibility( false );
-							window.widgetPowerBoard    = new cba.Checkout( '#powerBoardCheckout_wrapper', response.data.resource.data.token );
-							window.widgetPowerBoard.setEnv( settings.environment )
-							const orderButton          = jQuery( '.wc-block-components-checkout-place-order-button' );
-							const paymentSourceElement = jQuery( '#paymentSourceToken' );
-							window.widgetPowerBoard.onPaymentSuccessful(
-							function (data) {
-								paymentSourceElement.val( JSON.stringify( data ) );
-								orderButton.show();
-								orderButton.click();
+						toggleWidgetVisibility( false );
+						window.widgetPowerBoard    = new cba.Checkout( '#powerBoardCheckout_wrapper', response.data.resource.data.token );
+						window.widgetPowerBoard.setEnv( settings.environment )
+						const orderButton          = jQuery( '.wc-block-components-checkout-place-order-button' );
+						const paymentSourceElement = jQuery( '#paymentSourceToken' );
+						window.widgetPowerBoard.onPaymentSuccessful(
+						function (data) {
+							paymentSourceElement.val( JSON.stringify( data ) );
+							orderButton.show();
+							orderButton.click();
 
-								window.widgetPowerBoard = null;
-							}
-						);
-						window.widgetPowerBoard.onPaymentFailure(
-							function () {
-								paymentSourceElement.val(
-									JSON.stringify(
-										{
-											errorMessage: 'Transaction failed. Please check your payment details or contact your bank',
-										}
-									)
-								);
-								orderButton.show();
-								orderButton.click();
+							window.widgetPowerBoard = null;
+						}
+					);
+					window.widgetPowerBoard.onPaymentFailure(
+						function () {
+							paymentSourceElement.val(
+								JSON.stringify(
+									{
+										errorMessage: 'Transaction failed. Please check your payment details or contact your bank',
+									}
+								)
+							);
+							orderButton.show();
+							orderButton.click();
 
-								window.widgetPowerBoard = null;
-							}
-						);
-						window.widgetPowerBoard.onPaymentExpired(
-							function () {
-								paymentSourceElement.val(
-									JSON.stringify(
-										{
-											errorMessage: 'Your payment session has expired. Please retry your payment',
-										}
-									)
-								);
-								orderButton.show();
-								orderButton.click();
+							window.widgetPowerBoard = null;
+						}
+					);
+					window.widgetPowerBoard.onPaymentExpired(
+						function () {
+							paymentSourceElement.val(
+								JSON.stringify(
+									{
+										errorMessage: 'Your payment session has expired. Please retry your payment',
+									}
+								)
+							);
+							orderButton.show();
+							orderButton.click();
 
-								window.widgetPowerBoard = null;
-							}
-						);
-						},
-						0
+							window.widgetPowerBoard = null;
+						}
 					);
 				}
 			}
@@ -159,13 +154,9 @@ const handleWidgetError = () => {
 							notice.classList.add( 'hide' );
 						}
 					}
-				},
-				10000
-				);
+				}, 10000);
 			}
-		},
-		200
-	);
+		}, 200);
 };
 
 // eslint-disable-next-line no-unused-vars

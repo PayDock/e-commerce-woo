@@ -1,9 +1,8 @@
-setTimeout(
-	() => jQuery(
+jQuery(
 	function ($) {
 		$( document ).ready(
 		function () {
-			const CONFIG                      = {
+			const CONFIG = {
 				phoneInputIds: {
 					shipping: '#shipping-phone',
 					billing: '#billing-phone',
@@ -136,6 +135,4 @@ setTimeout(
 		200
 		)
 	}
-	),
-	1000
-	)
+)
