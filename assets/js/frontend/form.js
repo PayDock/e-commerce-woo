@@ -2,7 +2,7 @@ jQuery(
 	function ($) {
 		$( document ).ready(
 		function () {
-			const CONFIG = {
+			const CONFIG                      = {
 				phoneInputIds: {
 					shipping: '#shipping-phone',
 					billing: '#billing-phone',
@@ -50,32 +50,26 @@ jQuery(
 			};
 
 			const updateVisibility      = (phoneInputs) => {
-				const validationResults = Object.entries( phoneInputs ).reduce(
-				(acc, [key, $input]) => {
-					acc[key]            = validatePhone( $input );
-					return acc;
-				},
-				{}
-				);
+				const validationResults = window.getValidationResults( phoneInputs, validatePhone );
 
-			const allValid      = Object.values( validationResults ).every( Boolean );
-			const shippingValid = validationResults.shipping;
+				const allValid      = Object.values( validationResults ).every( Boolean );
+				const shippingValid = validationResults.shipping;
 
-			if (!shippingValid) {
-				$shippingWrapper.addClass( 'is-editing' );
-			}
+				if (!shippingValid) {
+					$shippingWrapper.addClass( 'is-editing' );
+				}
 
-			$submitButton.css( 'visibility', allValid ? 'visible' : 'hidden' );
+				$submitButton.css( 'visibility', allValid ? 'visible' : 'hidden' );
 
-			getPaymentOptionsComponents().forEach(
-				$component =>
-				$component.css(
-					{
-						opacity: allValid ? 1 : 0.5,
-						pointerEvents: allValid ? 'auto' : 'none',
-					}
+				getPaymentOptionsComponents().forEach(
+					component =>
+					component.css(
+						{
+							opacity: allValid ? 1 : 0.5,
+							pointerEvents: allValid ? 'auto' : 'none',
+						}
 					)
-			);
+				);
 			};
 
 			const initPhoneNumbersValidation = () => {

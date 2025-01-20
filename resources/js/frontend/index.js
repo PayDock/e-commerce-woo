@@ -109,23 +109,28 @@ const initMasterWidgetCheckout = () => {
 		);
 	}
 }
-const handleFormChanged = () => {
-	let isFormValid     = jQuery( '.wc-block-components-form' )[0].checkValidity();
-	let error           = jQuery( '#fields-validation-error' )[0];
-	let loading         = jQuery( '#loading' )[0];
-	toggleWidgetVisibility( true );
-	if (isFormValid) {
-		if (loading.classList.length > 0) {
-			loading.classList.remove( 'hide' );
-		}
-		error.classList.add( 'hide' );
-		initMasterWidgetCheckout();
-	} else {
-		loading.classList.add( 'hide' );
-		if (error.classList.length > 0) {
-			error.classList.remove( 'hide' );
-		}
-	}
+const handleFormChanged     = () => {
+	setTimeout(
+		() => {
+			let isFormValid = jQuery( '.wc-block-components-form' )[0].checkValidity();
+			let error       = jQuery( '#fields-validation-error' )[0];
+			let loading     = jQuery( '#loading' )[0];
+			toggleWidgetVisibility( true );
+			if (isFormValid) {
+				if (loading.classList.length > 0) {
+					loading.classList.remove( 'hide' );
+				}
+				error.classList.add( 'hide' );
+				initMasterWidgetCheckout();
+			} else {
+				loading.classList.add( 'hide' );
+				if (error.classList.length > 0) {
+					error.classList.remove( 'hide' );
+				}
+			}
+	},
+		300
+		);
 }
 
 const handleWidgetError = () => {
@@ -141,22 +146,26 @@ const handleWidgetError = () => {
 	const paymentMethodsContainer = document.querySelectorAll( '.wc-block-checkout__payment-method' )[0];
 	const checkoutPaymentStep     = paymentMethodsContainer?.querySelectorAll( '.wc-block-components-checkout-step__content' )?.[0];
 	const checkoutPaymentNotices  = checkoutPaymentStep?.querySelectorAll( '.wc-block-components-notices' )?.[0];
-	const removeNoticeInterval      = setInterval(
+	const removeNoticeInterval    = setInterval(
 		() => {
 			if (checkoutPaymentNotices?.children.length > 0 || topNotices.children.length > 0) {
 				clearInterval( removeNoticeInterval );
 				const removeErrorTimeout = setTimeout(
 				() => {
 					clearTimeout( removeErrorTimeout );
-					const noticesToCheck   = checkoutPaymentNotices?.children.length > 0 ? checkoutPaymentNotices : topNotices;
+					const noticesToCheck = checkoutPaymentNotices?.children.length > 0 ? checkoutPaymentNotices : topNotices;
 					for (let notice of noticesToCheck.children) {
 						if (notice.classList.contains( 'is-error' )) {
 							notice.classList.add( 'hide' );
 						}
 					}
-				}, 10000);
+				},
+					10000
+					);
 			}
-		}, 200);
+		},
+		200
+		);
 };
 
 // eslint-disable-next-line no-unused-vars

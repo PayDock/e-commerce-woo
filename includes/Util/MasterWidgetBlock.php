@@ -50,6 +50,14 @@ final class MasterWidgetBlock extends AbstractPaymentMethodType {
 		if ( ! self::$is_load && is_checkout() ) {
 			/* @noinspection PhpUndefinedFunctionInspection */
 			wp_enqueue_script(
+				'power-board-form-helpers',
+				POWER_BOARD_PLUGIN_URL . 'assets/js/helpers/form.helper.js',
+				[],
+				POWER_BOARD_PLUGIN_VERSION,
+				true
+			);
+			/* @noinspection PhpUndefinedFunctionInspection */
+			wp_enqueue_script(
 				'power-board-form',
 				POWER_BOARD_PLUGIN_URL . 'assets/js/frontend/form.js',
 				[ 'jquery' ],

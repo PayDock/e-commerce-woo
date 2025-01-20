@@ -30,55 +30,46 @@ jQuery(
 					},
 					{}
 				);
-			const getPaymentOptionsComponents = () =>
-				CONFIG.paymentOptionsNames
-				.map( name => $( `#${CONFIG.baseCheckboxIdName}_${name}` ).parents().eq( 1 ) )
-				.filter( $component => $component.length );
-			const validatePhone               = ($input) => {
-				const phone                   = $input.val();
-				$input.next( `.${CONFIG.errorMessageClassName}` ).remove();
-				if (phone && !CONFIG.phonePattern.test( phone )) {
-					$input.after( CONFIG.errorMessageHtml );
+				const getPaymentOptionsComponents = () =>
+					CONFIG.paymentOptionsNames
+					.map( name => $( `#${CONFIG.baseCheckboxIdName}_${name}` ).parents().eq( 1 ) )
+					.filter( $component => $component.length );
+				const validatePhone               = ($input) => {
+					const phone                   = $input.val();
+					$input.next( `.${CONFIG.errorMessageClassName}` ).remove();
+					if (phone && !CONFIG.phonePattern.test( phone )) {
+						$input.after( CONFIG.errorMessageHtml );
 
-					return false;
-				}
-				return true;
+						return false;
+					}
+					return true;
 				};
 				const updateVisibility      = (phoneInputs) => {
-					const validationResults = Object.entries( phoneInputs ).reduce(
-					(acc, [key, $input]) => {
-						acc[key]            = validatePhone( $input );
-						return acc;
-					},
-					{}
+					const validationResults = window.getValidationResults( phoneInputs, validatePhone );
+					const allValid          = Object.values( validationResults ).every( Boolean );
+					const shippingValid     = validationResults.shipping;
+					if (!shippingValid) {
+						$shippingWrapper.addClass( 'is-editing' );
+					}
+					$( 'button#place_order' ).styles = 'visibility:' + (allValid ? 'visible' : 'hidden');
+					getPaymentOptionsComponents().forEach(
+						$component => {
+							$component.css(
+								{
+									opacity: allValid ? 1 : 0.5,
+									pointerEvents: allValid ? 'auto' : 'none',
+							}
+								)
+							}
 					);
-				const allValid      = Object.values( validationResults ).every( Boolean );
-				const shippingValid = validationResults.shipping;
-				if (!shippingValid) {
-					$shippingWrapper.addClass( 'is-editing' );
-				}
-				$( 'button#place_order' ).styles = 'visibility:' + (allValid ? 'visible' : 'hidden');
-				getPaymentOptionsComponents().forEach(
-					$component => {
-						$component.css(
-							{
-								opacity: allValid ? 1 : 0.5,
-								pointerEvents: allValid ? 'auto' : 'none',
-						}
-							)
-						}
-				);
 				};
 				const initPhoneNumberValidation = () => {
 					const phoneInputs           = getPhoneInputs();
 					if (!Object.keys( phoneInputs ).length) {
 						return;
 					}
-					Object.values( phoneInputs ).forEach(
-					$input =>
-						$input.on( 'blur input', () => updateVisibility( phoneInputs ) )
-				);
-				updateVisibility( phoneInputs );
+					Object.values( phoneInputs ).forEach( input => input.on( 'blur input', () => updateVisibility( phoneInputs ) ) );
+					updateVisibility( phoneInputs );
 				};
 				initPhoneNumberValidation();
 				const powerBoardHelper         = {
