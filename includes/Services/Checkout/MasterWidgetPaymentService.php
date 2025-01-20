@@ -32,17 +32,7 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 	public function __construct() {
 		$this->id         = 'power_board_gateway';
 		$this->has_fields = true;
-		$this->supports   = [
-			'products',
-			'subscriptions',
-			'subscription_cancellation',
-			'subscription_suspension',
-			'subscription_reactivation',
-			'subscription_amount_changes',
-			'subscription_date_changes',
-			'multiple_subscriptions',
-			'default_credit_card_form',
-		];
+		$this->supports   = [ 'products', 'default_credit_card_form' ];
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$this->method_title = _x( 'PowerBoard payment', 'PowerBoard payment method', 'power-board' );
