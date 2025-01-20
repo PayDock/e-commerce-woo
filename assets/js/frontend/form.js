@@ -1,9 +1,8 @@
-setTimeout(
-	() => jQuery(
+jQuery(
 	function ($) {
 		$( document ).ready(
 		function () {
-			const CONFIG                      = {
+			const CONFIG = {
 				phoneInputIds: {
 					shipping: '#shipping-phone',
 					billing: '#billing-phone',
@@ -130,7 +129,7 @@ setTimeout(
 		const firstInitInterval             = setInterval(
 		() => {
 			const $radioSelectPaymentMethod = $( '.wc-block-components-radio-control__input' );
-			if ($radioSelectPaymentMethod !== null ) {
+			if ($radioSelectPaymentMethod) {
 				clearInterval( firstInitInterval );
 				triggerFirstPaymentMethodChanges();
 				setPaymentMethodWatcher();
@@ -139,6 +138,4 @@ setTimeout(
 		200
 		)
 	}
-	),
-	1000
-	)
+)

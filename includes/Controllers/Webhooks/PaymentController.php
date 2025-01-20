@@ -87,10 +87,9 @@ class PaymentController {
 
 			$status = 'refunded';
 
-			$order->update_meta_data( 'power_board_refunded_status', $status );
 			/* @noinspection PhpUndefinedFunctionInspection */
 			$status_note = __( 'The refund of', 'power-board' )
-							. " {$amount_to_refund} "
+							. " $amount_to_refund "
 							. __( 'has been successfully processed.', 'power-board' );
 
 			$order->payment_complete();
@@ -129,15 +128,10 @@ class PaymentController {
 		$order = wc_get_order( $order_id );
 
 		if ( is_object( $order ) ) {
-
-			$power_board_refunded_status = $order->get_meta( 'power_board_refunded_status' );
-			if ( $power_board_refunded_status ) {
-				/* @noinspection PhpUndefinedFunctionInspection */
-				remove_action( 'woocommerce_order_status_refunded', 'wc_order_fully_refunded' );
-				OrderService::update_status( $order_id, $power_board_refunded_status );
-				$order->update_meta_data( 'power_board_refunded_status', '' );
-				$order->save();
-			}
+			/* @noinspection PhpUndefinedFunctionInspection */
+			remove_action( 'woocommerce_order_status_refunded', 'wc_order_fully_refunded' );
+			OrderService::update_status( $order_id, 'refunded' );
+			$order->save();
 		}
 	}
 
@@ -247,8 +241,6 @@ class PaymentController {
 			case ChargeStatusesEnum::REFUNDED:
 			case ChargeStatusesEnum::REFUND_REQUESTED:
 				$order_status = 'refunded';
-				$order->update_meta_data( 'power_board_refunded_status', $order_status );
-				$order->save();
 				break;
 			default:
 				$order_status = $order->get_status();
@@ -256,7 +248,7 @@ class PaymentController {
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$status_notes = __( 'The refund of', 'power-board' )
-						. " {$refund_amount} "
+						. " $refund_amount "
 						. __( 'has been successfully processed.', 'power-board' );
 		$order->payment_complete();
 		OrderService::update_status( $order_id, $order_status, $status_notes );
@@ -265,7 +257,7 @@ class PaymentController {
 		wc_create_refund(
 			[
 				'amount'         => $refund_amount,
-				'reason'         => __( 'The refund of', 'power-board' ) . " {$refund_amount} " . __(
+				'reason'         => __( 'The refund of', 'power-board' ) . " $refund_amount " . __(
 					'has been successfully processed.',
 					'power-board'
 				),

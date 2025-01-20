@@ -54,20 +54,7 @@ class FiltersService extends AbstractSingleton {
 	 */
 	public function woocommerceThankyouOrderReceivedText( $text ) {
 		/* @noinspection PhpUndefinedFunctionInspection */
-		$order_id = absint( get_query_var( 'order-received' ) );
-		/* @noinspection PhpUndefinedFunctionInspection */
-		$options = get_option( 'power_board_fraud_' . $order_id );
-		/* @noinspection PhpUndefinedFunctionInspection */
-		$order  = wc_get_order( $order_id );
-		$status = $order->get_status();
-
-		if ( $options === false && $status !== 'processing' ) {
-			/* @noinspection PhpUndefinedFunctionInspection */
-			return __( 'Thank you. Your order has been received.', 'power-board' );
-		}
-
-		/* @noinspection PhpUndefinedFunctionInspection */
-		return __( 'Your order is being processed. We\'ll get back to you shortly', 'power-board' );
+		return __( 'Thank you. Your order has been received.', 'power-board' );
 	}
 
 	/**

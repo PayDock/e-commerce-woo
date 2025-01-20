@@ -3,6 +3,7 @@
 namespace PowerBoard\API;
 
 use PowerBoard\Abstracts\AbstractApiService;
+use PowerBoard\Enums\APIActionEnum;
 
 class ChargeService extends AbstractApiService {
 	const ENDPOINT               = 'charges';
@@ -18,7 +19,7 @@ class ChargeService extends AbstractApiService {
 
 	public function create_checkout_intent( array $params ): self {
 		$this->parameters     = $params;
-		$this->request_action = 'Create intent';
+		$this->request_action = APIActionEnum::CREATE_INTENT;
 
 		$this->set_action( 'create-intent' );
 
@@ -32,7 +33,7 @@ class ChargeService extends AbstractApiService {
 		];
 
 		$this->set_action( 'templates' );
-		$this->request_action = 'Get Configuration Template IDs';
+		$this->request_action = APIActionEnum::GET_CONFIGURATION_TEMPLATE_IDS;
 
 		return $this;
 	}
@@ -42,7 +43,7 @@ class ChargeService extends AbstractApiService {
 			'type'    => 'customisation',
 			'version' => $version,
 		];
-		$this->request_action = 'Get Customisations Templates ID';
+		$this->request_action = APIActionEnum::GET_CUSTOMISATION_TEMPLATE_IDS;
 
 		$this->set_action( 'templates' );
 
@@ -52,7 +53,7 @@ class ChargeService extends AbstractApiService {
 
 	public function refunds( array $params ): self {
 		$this->parameters     = $params;
-		$this->request_action = 'Refund';
+		$this->request_action = APIActionEnum::REFUND;
 
 		$this->set_action( 'refunds' );
 

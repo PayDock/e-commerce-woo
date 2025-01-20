@@ -2,20 +2,25 @@
 
 namespace PowerBoard\Helpers;
 
+use PowerBoard\Enums\APIActionEnum;
 use PowerBoard\Enums\LoggerEnum;
 
 class LoggerHelper {
-	public static function log_request(array $result, string $message ): void {
+	public static function log_api_request( array $result, string $request_action ): void {
+		$has_error = ! empty( $result['error'] );
+		$context   = [
+			'source'   => PLUGIN_NAME,
+			'request'  => $result['request'],
+			'response' => self::filter_response_by_action( $result['response'], $request_action, $has_error ),
+		];
+		if ( $has_error ) {
+			$context['backtrace'] = true;
+		}
 		/* @noinspection PhpUndefinedFunctionInspection */
 		wc_get_logger()->log(
-			$result['error'] ? LoggerEnum::ERROR : LoggerEnum::INFO,
-			$message,
-			self::decode_stringified_json(
-				[
-					'request'  => $result['request'],
-					'response' => $result['response'],
-				]
-			),
+			$has_error ? LoggerEnum::ERROR : LoggerEnum::INFO,
+			$request_action,
+			self::decode_stringified_json( $context ),
 		);
 	}
 
@@ -31,5 +36,25 @@ class LoggerHelper {
 		}
 
 		return $data;
+	}
+
+	public static function filter_response_by_action( $response, $request_action, $has_error ): array {
+		if ( $has_error ) {
+			return $response;
+		}
+
+		switch ( $request_action ) {
+			case APIActionEnum::CREATE_TOKEN:
+				unset( $response['resource']['data'] );
+				break;
+			case APIActionEnum::CREATE_INTENT:
+				unset( $response['resource']['data']['token'] );
+				break;
+			case APIActionEnum::REFUND:
+				unset( $response['resource']['data']['customer']['payment_source']['vault_token'] );
+				break;
+		}
+
+		return $response;
 	}
 }

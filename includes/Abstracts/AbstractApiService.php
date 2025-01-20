@@ -114,7 +114,7 @@ abstract class AbstractApiService {
 			];
 		}
 
-		LoggerHelper::log_request(
+		LoggerHelper::log_api_request(
 			[
 				'request'  => [
 					'url'     => $url,
@@ -124,7 +124,7 @@ abstract class AbstractApiService {
 				'response' => $body,
 				'error'    => $body['error'],
 			],
-			$this->request_action
+			! empty( $this->request_action ) ? $this->request_action : $url,
 		);
 
 		return $body;

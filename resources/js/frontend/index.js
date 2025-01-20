@@ -64,58 +64,53 @@ const initMasterWidgetCheckout = () => {
 					address: cart.getCustomerData().billingAddress,
 				},
 				success: (response) => {
-					setTimeout(
-						() => {
-							toggleWidgetVisibility( false );
-							// noinspection JSUnresolvedReference
+						toggleWidgetVisibility( false );
+						// noinspection JSUnresolvedReference
 							window.widgetPowerBoard = new cba.Checkout( '#powerBoardCheckout_wrapper', response.data.resource.data.token );
 							// noinspection JSUnresolvedReference
 							window.widgetPowerBoard.setEnv( settings.environment )
 							// noinspection JSUnresolvedReference
 							const orderButton = jQuery( '.wc-block-components-checkout-place-order-button' );
 							// noinspection JSUnresolvedReference
-							const paymentSourceElement = jQuery( '#paymentSourceToken' );
-							window.widgetPowerBoard.onPaymentSuccessful(
-							function (data) {
-								paymentSourceElement.val( JSON.stringify( data ) );
-								orderButton.show();
-								orderButton.click();
+						const paymentSourceElement = jQuery( '#paymentSourceToken' );
+						window.widgetPowerBoard.onPaymentSuccessful(
+						function (data) {
+							paymentSourceElement.val( JSON.stringify( data ) );
+							orderButton.show();
+							orderButton.click();
 
-								window.widgetPowerBoard = null;
-							}
-						);
-						window.widgetPowerBoard.onPaymentFailure(
-							function () {
-								paymentSourceElement.val(
-									JSON.stringify(
-										{
-											errorMessage: 'Transaction failed. Please check your payment details or contact your bank',
-										}
-									)
-								);
-								orderButton.show();
-								orderButton.click();
+							window.widgetPowerBoard = null;
+						}
+					);
+					window.widgetPowerBoard.onPaymentFailure(
+						function () {
+							paymentSourceElement.val(
+								JSON.stringify(
+									{
+										errorMessage: 'Transaction failed. Please check your payment details or contact your bank',
+									}
+								)
+							);
+							orderButton.show();
+							orderButton.click();
 
-								window.widgetPowerBoard = null;
-							}
-						);
-						window.widgetPowerBoard.onPaymentExpired(
-							function () {
-								paymentSourceElement.val(
-									JSON.stringify(
-										{
-											errorMessage: 'Your payment session has expired. Please retry your payment',
-										}
-									)
-								);
-								orderButton.show();
-								orderButton.click();
+							window.widgetPowerBoard = null;
+						}
+					);
+					window.widgetPowerBoard.onPaymentExpired(
+						function () {
+							paymentSourceElement.val(
+								JSON.stringify(
+									{
+										errorMessage: 'Your payment session has expired. Please retry your payment',
+									}
+								)
+							);
+							orderButton.show();
+							orderButton.click();
 
-								window.widgetPowerBoard = null;
-							}
-						);
-						},
-						0
+							window.widgetPowerBoard = null;
+						}
 					);
 				}
 			}
@@ -157,30 +152,30 @@ const handleWidgetError = () => {
 	const paymentMethodsContainer = document.querySelectorAll( '.wc-block-checkout__payment-method' )[0];
 	const checkoutPaymentStep     = paymentMethodsContainer?.querySelectorAll( '.wc-block-components-checkout-step__content' )?.[0];
 	const checkoutPaymentNotices  = checkoutPaymentStep?.querySelectorAll( '.wc-block-components-notices' )?.[0];
-	const removeErrorTimeout      = setTimeout(
+	const removeNoticeInterval    = setInterval(
 		() => {
 			if (checkoutPaymentNotices?.children.length > 0 || topNotices.children.length > 0) {
-				clearTimeout( removeErrorTimeout );
-				const removeNoticeInterval = setInterval(
+				clearInterval( removeNoticeInterval );
+				const removeErrorTimeout = setTimeout(
 				() => {
-					clearInterval( removeNoticeInterval );
-					const noticesToCheck   = checkoutPaymentNotices?.children.length > 0 ? checkoutPaymentNotices : topNotices;
+					clearTimeout( removeErrorTimeout );
+					const noticesToCheck = checkoutPaymentNotices?.children.length > 0 ? checkoutPaymentNotices : topNotices;
 					for (let notice of noticesToCheck.children) {
 						if (notice.classList.contains( 'is-error' )) {
 							notice.classList.add( 'hide' );
 						}
 					}
 				},
-				5000
+					10000
 					);
 			}
 		},
 		200
-	);
+		);
 };
 
 // eslint-disable-next-line no-unused-vars
-const Content                               = (props) => {
+const Content = (props) => {
 	// noinspection JSUnresolvedReference
 	jQuery( '.wc-block-components-checkout-place-order-button' ).show();
 	const {eventRegistration, emitResponse} = props;

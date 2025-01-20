@@ -3,6 +3,7 @@
 namespace PowerBoard\API;
 
 use PowerBoard\Abstracts\AbstractApiService;
+use PowerBoard\Enums\APIActionEnum;
 
 class TokenService extends AbstractApiService {
 	const ENDPOINT = 'payment_sources/tokens';
@@ -13,7 +14,7 @@ class TokenService extends AbstractApiService {
 
 	public function create( array $params ): TokenService {
 		$this->parameters     = $params;
-		$this->request_action = 'Create token';
+		$this->request_action = APIActionEnum::CREATE_TOKEN;
 
 		$this->set_action( 'create' );
 
