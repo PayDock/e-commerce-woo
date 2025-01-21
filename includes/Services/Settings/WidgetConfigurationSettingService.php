@@ -40,8 +40,8 @@ use WC_Payment_Gateway;
  * @property array $form_fields
  */
 class WidgetConfigurationSettingService extends WC_Payment_Gateway {
-	protected $service = null;
-	protected $template_service;
+	protected ?SettingsService $service = null;
+	protected TemplateService $template_service;
 
 	/**
 	 * Uses functions (__, is_checkout and is_admin) from WordPress
@@ -310,7 +310,6 @@ class WidgetConfigurationSettingService extends WC_Payment_Gateway {
 			$settings_keys[ $key ]          = $credential_settings;
 		}
 
-		$settings_keys = [];
 		foreach ( EnvironmentSettingsEnum::cases() as $environment_settings ) {
 			$key                   = $this->service->get_option_name(
 				$this->id,

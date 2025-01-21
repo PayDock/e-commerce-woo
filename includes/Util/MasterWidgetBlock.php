@@ -20,8 +20,9 @@ use PowerBoard\Services\SettingsService;
  */
 final class MasterWidgetBlock extends AbstractPaymentMethodType {
 	private static bool $is_load = false;
-	protected $name              = 'power_board';
-	protected $script            = 'blocks';
+	/* @noinspection PhpMissingFieldTypeInspection */
+	protected $name          = 'power_board';
+	protected string $script = 'blocks';
 	protected MasterWidgetPaymentService $gateway;
 
 	/**

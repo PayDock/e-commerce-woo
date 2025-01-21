@@ -6,8 +6,8 @@ use PowerBoard\API\ChargeService;
 use PowerBoard\API\ConfigService;
 
 class APIAdapterService {
-	private $charge_service  = null;
-	private static $instance = null;
+	private ?ChargeService $charge_service      = null;
+	private static ?APIAdapterService $instance = null;
 
 	public function initialise( $env, $access_token, $widget_access_token ): void {
 		ConfigService::init( $env, $access_token, $widget_access_token );

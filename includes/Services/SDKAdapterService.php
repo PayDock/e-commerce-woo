@@ -9,8 +9,8 @@ use PowerBoard\API\TokenService;
 use PowerBoard\Services\Settings\WidgetConfigurationSettingService;
 
 class SDKAdapterService {
-	private $charge_service  = null;
-	private static $instance = null;
+	private ?ChargeService $charge_service      = null;
+	private static ?SDKAdapterService $instance = null;
 
 	public function __construct() {
 		$settings = new WidgetConfigurationSettingService();

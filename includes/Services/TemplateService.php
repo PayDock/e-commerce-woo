@@ -10,8 +10,8 @@ class TemplateService {
 
 	private const TEMPLATE_END = '.php';
 
-	private $template_admin_dir;
-	private $template_checkout_dir;
+	private string $template_admin_dir;
+	private string $template_checkout_dir;
 
 	public function __construct( $service = null ) {
 		$this->setting_service       = $service;

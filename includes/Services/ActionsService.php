@@ -10,18 +10,17 @@ namespace PowerBoard\Services;
 
 use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
-use PowerBoard\Abstracts\AbstractSingleton;
 use PowerBoard\Controllers\Admin\WidgetController;
 use PowerBoard\Controllers\Webhooks\PaymentController;
 use PowerBoard\Enums\SettingsSectionEnum;
 use PowerBoard\Services\Settings\WidgetConfigurationSettingService;
 use PowerBoard\Util\MasterWidgetBlock;
 
-class ActionsService extends AbstractSingleton {
+class ActionsService {
+	protected static ?ActionsService $instance  = null;
 	protected const PROCESS_OPTIONS_FUNCTION    = 'process_admin_options';
 	protected const PROCESS_OPTIONS_HOOK_PREFIX = 'woocommerce_update_options_payment_gateways_';
 	protected const SECTION_HOOK                = 'woocommerce_get_sections';
-	protected static $instance                  = null;
 
 	/**
 	 * Uses a function (add_action) from WordPress
@@ -31,15 +30,23 @@ class ActionsService extends AbstractSingleton {
 		add_action(
 			'before_woocommerce_init',
 			function () {
-				$this->addCompatibilityWithWooCommerce();
+				$this->add_compatibility_with_woocommerce();
 				$this->add_payment_method_to_checkout();
-				$this->addSettingsActions();
-				$this->addOrderActions();
+				$this->add_settings_actions();
+				$this->add_order_actions();
 			}
 		);
 	}
 
-	protected function addCompatibilityWithWooCommerce(): void {
+	public static function get_instance(): ActionsService {
+		if ( is_null( self::$instance ) ) {
+			self::$instance = new self();
+		}
+
+		return self::$instance;
+	}
+
+	protected function add_compatibility_with_woocommerce(): void {
 		if ( class_exists( FeaturesUtil::class ) ) {
 			FeaturesUtil::declare_compatibility( 'custom_order_tables', POWER_BOARD_PLUGIN_FILE );
 		}
@@ -77,7 +84,7 @@ class ActionsService extends AbstractSingleton {
 	/**
 	 * Uses a function (add_action) from WordPress
 	 */
-	protected function addSettingsActions(): void {
+	protected function add_settings_actions(): void {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action(
 			self::PROCESS_OPTIONS_HOOK_PREFIX . SettingsSectionEnum::WIDGET_CONFIGURATION,
@@ -98,7 +105,7 @@ class ActionsService extends AbstractSingleton {
 	/**
 	 * Uses a function (add_action) from WordPress
 	 */
-	protected function addOrderActions() {
+	protected function add_order_actions() {
 		$order_service      = new OrderService();
 		$payment_controller = new PaymentController();
 		$widget_controller  = new WidgetController();

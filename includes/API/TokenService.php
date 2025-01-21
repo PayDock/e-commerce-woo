@@ -8,7 +8,7 @@ use PowerBoard\Enums\APIActionEnum;
 class TokenService extends AbstractApiService {
 	const ENDPOINT = 'payment_sources/tokens';
 
-	protected $allowed_action = [
+	protected array $allowed_action = [
 		'create' => self::METHOD_POST,
 	];
 

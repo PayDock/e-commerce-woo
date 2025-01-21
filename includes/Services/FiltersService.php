@@ -6,22 +6,30 @@ use PowerBoard\Abstracts\AbstractSingleton;
 use PowerBoard\Services\Checkout\MasterWidgetPaymentService;
 use PowerBoard\Services\Settings\WidgetConfigurationSettingService;
 
-class FiltersService extends AbstractSingleton {
-	protected static $instance = null;
+class FiltersService {
+	protected static ?FiltersService $instance = null;
 
 	protected function __construct() {
-		$this->addWooCommerceFilters();
-		$this->addSettingsLink();
+		$this->add_woocommerce_filters();
+		$this->add_settings_link();
+	}
+
+	public static function get_instance(): FiltersService {
+		if ( is_null( self::$instance ) ) {
+			self::$instance = new self();
+		}
+
+		return self::$instance;
 	}
 
 	/**
 	 * Uses a function (add_filter) from WordPress
 	 */
-	protected function addWooCommerceFilters(): void {
+	protected function add_woocommerce_filters(): void {
 		/* @noinspection PhpUndefinedFunctionInspection */
-		add_filter( 'woocommerce_payment_gateways', [ $this, 'registerInWooCommercePaymentClass' ] );
+		add_filter( 'woocommerce_payment_gateways', [ $this, 'register_in_woocommerce_payment_class' ] );
 		/* @noinspection PhpUndefinedFunctionInspection */
-		add_filter( 'woocommerce_thankyou_order_received_text', [ $this, 'woocommerceThankyouOrderReceivedText' ] );
+		add_filter( 'woocommerce_thankyou_order_received_text', [ $this, 'woocommerce_thank_you_order_received_text' ] );
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_filter( 'plugins_loaded', [ $this, 'woo_text_override' ] );
 	}
@@ -29,15 +37,15 @@ class FiltersService extends AbstractSingleton {
 	/**
 	 * Uses functions (add_filter, plugin_basename) from WordPress
 	 */
-	protected function addSettingsLink(): void {
+	protected function add_settings_link(): void {
 		/* @noinspection PhpUndefinedFunctionInspection */
-		add_filter( 'plugin_action_links_' . plugin_basename( POWER_BOARD_PLUGIN_FILE ), [ $this, 'getSettingLink' ] );
+		add_filter( 'plugin_action_links_' . plugin_basename( POWER_BOARD_PLUGIN_FILE ), [ $this, 'get_setting_link' ] );
 	}
 
 	/**
 	 * Uses a function (is_admin) from WordPress
 	 */
-	public function registerInWooCommercePaymentClass( array $methods ): array {
+	public function register_in_woocommerce_payment_class( array $methods ): array {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		if ( is_admin() ) {
 			$methods[] = WidgetConfigurationSettingService::class;
@@ -52,7 +60,7 @@ class FiltersService extends AbstractSingleton {
 	 * Uses functions (absint, get_query_var, get_option and __) from WordPress
 	 * Uses a function (wc_get_order) from WooCommerce
 	 */
-	public function woocommerceThankyouOrderReceivedText( $text ) {
+	public function woocommerce_thank_you_order_received_text() {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		return __( 'Thank you. Your order has been received.', 'power-board' );
 	}
@@ -60,7 +68,7 @@ class FiltersService extends AbstractSingleton {
 	/**
 	 * Uses functions (admin_url and __) from WordPress
 	 */
-	public function getSettingLink( array $links ): array {
+	public function get_setting_link( array $links ): array {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		array_unshift(
 			$links,

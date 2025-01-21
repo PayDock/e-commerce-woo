@@ -18,9 +18,9 @@ abstract class AbstractApiService {
 	const METHOD_DELETE = 'DELETE';
 
 	protected string $action;
-	protected $request_action = null;
-	protected $parameters     = [];
-	protected $allowed_action = [];
+	protected ?string $request_action = null;
+	protected array $parameters       = [];
+	protected array $allowed_action   = [];
 
 	public function call_with_widget_access_token(): array {
 		$args = [

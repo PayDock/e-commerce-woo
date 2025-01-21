@@ -8,9 +8,9 @@ use PowerBoard\Enums\SettingGroupsEnum;
 use PowerBoard\Services\Settings\WidgetConfigurationSettingService;
 
 final class SettingsService {
-	private static $instance = null;
-	private $widget_service  = null;
-	private $environment     = null;
+	private static ?SettingsService $instance                  = null;
+	private ?WidgetConfigurationSettingService $widget_service = null;
+	private ?string $environment                               = null;
 
 	public function get_environment(): ?string {
 		$widget_service    = $this->get_settings_service();

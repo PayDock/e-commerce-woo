@@ -7,7 +7,7 @@ use PowerBoard\Abstracts\AbstractApiService;
 class NotificationService extends AbstractApiService {
 	const ENDPOINT = 'notifications';
 
-	protected $allowed_action = [
+	protected array $allowed_action = [
 		'create' => self::METHOD_POST,
 		'search' => self::METHOD_GET,
 	];

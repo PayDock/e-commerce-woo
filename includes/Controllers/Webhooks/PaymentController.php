@@ -56,14 +56,11 @@ class PaymentController {
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		$action = isset( $_POST['action'] ) ? sanitize_text_field( wp_unslash( $_POST['action'] ) ) : '';
 
+		$amount_to_refund = $amount;
 		if ( $action === 'edit_order' ) {
-			$amount_to_refund = $amount;
-
 			$refund->set_amount( $amount_to_refund );
 			$refund->set_total( $amount_to_refund * -1 );
 
-		} else {
-			$amount_to_refund = $amount;
 		}
 
 		if ( $action === 'edit_order' && $order->get_meta( 'status_change_verification_failed' ) ) {

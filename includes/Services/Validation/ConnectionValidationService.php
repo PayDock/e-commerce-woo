@@ -16,22 +16,22 @@ use PowerBoard\Services\Settings\WidgetConfigurationSettingService;
 use PowerBoard\Services\SettingsService;
 
 class ConnectionValidationService {
-	private $old_environment         = null;
-	private $old_access_token        = null;
-	private $old_widget_access_token = null;
+	private ?string $old_environment         = null;
+	private ?string $old_access_token        = null;
+	private ?string $old_widget_access_token = null;
 
 	private const IS_WEBHOOK_SET_OPTION = 'is_power_board_webhook_set';
 
-	public $service                         = null;
-	private $errors                         = [];
-	private $data                           = [];
-	private $access_token_validation_failed = false;
-	private $environment_settings           = null;
-	private $access_token_settings          = null;
-	private $widget_access_token_settings   = null;
-	private $version_settings               = null;
-	private $api_adapter_service;
-	private $widget_api_adapter_service;
+	public ?WidgetConfigurationSettingService $service = null;
+	private ?array $errors                             = [];
+	private ?array $data                               = [];
+	private bool $access_token_validation_failed       = false;
+	private ?string $environment_settings              = null;
+	private ?string $access_token_settings             = null;
+	private ?string $widget_access_token_settings      = null;
+	private ?string $version_settings                  = null;
+	private SDKAdapterService $api_adapter_service;
+	private APIAdapterService $widget_api_adapter_service;
 
 
 	/**
