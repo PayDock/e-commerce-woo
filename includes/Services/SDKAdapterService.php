@@ -4,7 +4,6 @@ namespace PowerBoard\Services;
 
 use PowerBoard\API\ChargeService;
 use PowerBoard\API\ConfigService;
-use PowerBoard\API\NotificationService;
 use PowerBoard\API\TokenService;
 use PowerBoard\Services\Settings\WidgetConfigurationSettingService;
 
@@ -27,18 +26,6 @@ class SDKAdapterService {
 		}
 
 		return self::$instance;
-	}
-
-	public function search_notifications( array $parameters = [] ): array {
-		$notification_service = new NotificationService();
-
-		return $notification_service->search( $parameters )->call();
-	}
-
-	public function create_notification( array $parameters = [] ): array {
-		$notification_service = new NotificationService();
-
-		return $notification_service->create( $parameters )->call();
 	}
 
 	public function token( array $params = [
