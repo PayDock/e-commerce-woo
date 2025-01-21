@@ -30,18 +30,19 @@ jQuery(
 					},
 					{}
 				);
-				const getPaymentOptionsComponents = () =>
-					CONFIG.paymentOptionsNames
-					.map( name => $( `#${CONFIG.baseCheckboxIdName}_${name}` ).parents().eq( 1 ) )
-					.filter( $component => $component.length );
-				const validatePhone               = ($input) => {
-					const phone                   = $input.val();
-					$input.next( `.${CONFIG.errorMessageClassName}` ).remove();
-					if (phone && !CONFIG.phonePattern.test( phone )) {
-						$input.after( CONFIG.errorMessageHtml );
+			// noinspection JSUnresolvedReference
+			const getPaymentOptionsComponents = () =>
+				CONFIG.paymentOptionsNames
+				.map( name => $( `#${CONFIG.baseCheckboxIdName}_${name}` ).parents().eq( 1 ) )
+				.filter( $component => $component.length );
+			const validatePhone               = ($input) => {
+				const phone                   = $input.val();
+				$input.next( `.${CONFIG.errorMessageClassName}` ).remove();
+				if (phone && !CONFIG.phonePattern.test( phone )) {
+					$input.after( CONFIG.errorMessageHtml );
 
 						return false;
-					}
+				}
 					return true;
 				};
 				const updateVisibility      = (phoneInputs) => {
@@ -49,6 +50,7 @@ jQuery(
 					const allValid          = Object.values( validationResults ).every( Boolean );
 					const shippingValid     = validationResults.shipping;
 					if (!shippingValid) {
+            // noinspection JSUnresolvedReference
 						$shippingWrapper.addClass( 'is-editing' );
 					}
 					$( 'button#place_order' ).styles = 'visibility:' + (allValid ? 'visible' : 'hidden');
@@ -301,7 +303,9 @@ jQuery(
 								data: data,
 								success: (response) => {
 									this.toggleWidgetVisibility( false );
+									// noinspection JSUnresolvedReference
 									window.widgetPowerBoard = new cba.Checkout( '#classic-powerBoardCheckout_wrapper', response.data.resource.data.token );
+									// noinspection JSUnresolvedReference
 									window.widgetPowerBoard.setEnv( this.getConfigs().environment )
 									const showError         = (message) => this.showErrorMessage( message );
 									const handleWidgetError = () => this.handleWidgetError();
@@ -309,6 +313,7 @@ jQuery(
 
 									window.widgetPowerBoard.onPaymentSuccessful(
 										function (data) {
+                                            // noinspection JSUnresolvedReference
 											jQuery( '#chargeid' ).val( data['charge_id'] );
 											submitForm();
 
@@ -339,6 +344,7 @@ jQuery(
 					},
 					getAddressData( returnJson = true ) {
 						if (isOrderPayPage && typeof orderData !== 'undefined') {
+							// noinspection JSUnresolvedReference
 							let result = {
 								shipping_address: {
 									first_name: orderData.shipping_first_name,
@@ -388,7 +394,7 @@ jQuery(
 									value = orderData[fieldName] || null;
 								}
 								result[isShipping ? 'shipping_address' : 'address'][fieldName.replace( 'shipping_', '' ).replace( 'billing_', '' )] = value;
-							}
+								}
 							)
 
 							return result;

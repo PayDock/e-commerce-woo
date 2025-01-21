@@ -32,6 +32,7 @@ jQuery(
 					{}
 					);
 
+			// noinspection JSUnresolvedReference
 			const getPaymentOptionsComponents = () =>
 			CONFIG.paymentOptionsNames
 				.map( name => $( `#${CONFIG.baseCheckboxIdName}-${name}` ).parents().eq( 1 ) )
@@ -56,7 +57,8 @@ jQuery(
 				const shippingValid = validationResults.shipping;
 
 				if (!shippingValid) {
-					$shippingWrapper.addClass( 'is-editing' );
+          // noinspection JSUnresolvedReference
+          $shippingWrapper.addClass( 'is-editing' );
 				}
 
 				$submitButton.css( 'visibility', allValid ? 'visible' : 'hidden' );
@@ -114,6 +116,7 @@ jQuery(
 				);
 			if ($paymentMethodInput.length > 0) {
 				setPaymentMethod( $paymentMethodInput[0].value );
+				// noinspection JSUnresolvedReference
 				jQuery( '.wc-block-components-form' )[0].dispatchEvent( new Event( "change" ) );
 			}
 		}

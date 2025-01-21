@@ -7,8 +7,10 @@ jQuery(
 					function (e) {
 						e.preventDefault();
 
+						// noinspection JSUnresolvedReference
 						let urlRedirect = jQuery( this ).attr( 'href' );
-						let label       = jQuery( this ).attr( 'aria-label' );
+						// noinspection JSUnresolvedReference
+						let label = jQuery( this ).attr( 'aria-label' );
 
 						if (confirm( 'Are you sure ' + label + ' ?' )) {
 							window.location.href = urlRedirect;
