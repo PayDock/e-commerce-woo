@@ -57,14 +57,16 @@ if ( ! empty( $order_object ) && is_object( $order_object ) ) {
 							</td>
 							<td class="product-quantity">
 								<?php
-									echo apply_filters(
+								echo wp_kses_post(
+									apply_filters(
 										'woocommerce_order_item_quantity_html',
 										' <strong class="product-quantity">' . sprintf(
 											'&times;&nbsp;%s',
 											esc_html( $item->get_quantity() )
 										) . '</strong>',
-										esc_html( $item )
-									);
+										$item
+									)
+								);
 								?>
 							</td>
 							<td class="product-subtotal">
@@ -75,7 +77,7 @@ if ( ! empty( $order_object ) && is_object( $order_object ) ) {
 				<?php endif; ?>
 			</tbody>
 			<tfoot>
-				<?php if ( $order_totals ) : ?>
+				<?php if ( ! empty( $order_totals ) && is_array( $order_totals ) ) : ?>
 					<?php foreach ( $order_totals as $total ) : ?>
 						<tr>
 							<th scope="row" colspan="2"><?php echo esc_html( $total['label'] ); ?></th>

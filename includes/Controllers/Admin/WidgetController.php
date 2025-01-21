@@ -13,7 +13,8 @@ class WidgetController {
 	 */
 	public function create_checkout_intent() {
 		/* @noinspection PhpUndefinedFunctionInspection */
-		$wp_nonce = ! empty( $_POST['_wpnonce'] ) ? sanitize_text_field( $_POST['_wpnonce'] ) : null;
+		$wp_nonce = isset( $_REQUEST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ) : null;
+
 		/* @noinspection PhpUndefinedFunctionInspection */
 		if ( ! wp_verify_nonce( $wp_nonce, 'power-board-create-charge-intent' ) ) {
 			/* @noinspection PhpUndefinedFunctionInspection */
@@ -34,12 +35,11 @@ class WidgetController {
 		];
 
 		if ( ! empty( $_POST['total'] ) ) {
-
 			if ( is_array( $_POST['total'] ) ) {
-				$request['total'] = array_map( 'sanitize_text_field', $_POST['total'] );
+				$request['total'] = array_map( 'sanitize_text_field', wp_unslash( $_POST['total'] ) );
 			} else {
 				/* @noinspection PhpUndefinedFunctionInspection */
-				$request['total'] = sanitize_text_field( $_POST['total'] );
+				$request['total'] = sanitize_text_field( wp_unslash( $_POST['total'] ) );
 			}
 		} else {
 			$request['total']['total_price'] = $cart->get_total( false ) * 100;
@@ -49,7 +49,7 @@ class WidgetController {
 
 		if ( ! empty( $_POST['order_id'] ) ) {
 			/* @noinspection PhpUndefinedFunctionInspection */
-			$reference = sanitize_text_field( $_POST['order_id'] );
+			$reference = sanitize_text_field( wp_unslash( $_POST['order_id'] ) );
 		} else {
 			/* @noinspection PhpUndefinedFunctionInspection */
 			$orders    = wc_get_orders( $args );
@@ -59,7 +59,7 @@ class WidgetController {
 		$billing_address = [];
 
 		if ( ! empty( $_POST['address'] ) && is_array( $_POST['address'] ) ) {
-			$billing_address = array_map( 'sanitize_text_field', $_POST['address'] );
+			$billing_address = array_map( 'sanitize_text_field', wp_unslash( $_POST['address'] ) );
 		}
 
 		$intent_request_params = [

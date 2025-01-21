@@ -52,7 +52,9 @@ class PaymentController {
 		$power_board_charge_id = $order->get_meta( 'power_board_charge_id' );
 
 		/* @noinspection PhpUndefinedFunctionInspection */
-		$action = isset( $_POST['action'] ) ? sanitize_text_field( $_POST['action'] ) : '';
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$action = isset( $_POST['action'] ) ? sanitize_text_field( wp_unslash( $_POST['action'] ) ) : '';
 
 		if ( $action === 'edit_order' ) {
 			$amount_to_refund = $amount;
@@ -123,7 +125,7 @@ class PaymentController {
 	 * Uses a function (remove_action) from WordPress
 	 * Uses a function (wc_get_order) from WooCommerce
 	 */
-	public function after_refund_process( $order_id, $refund_id ) {
+	public function after_refund_process( $order_id ) {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$order = wc_get_order( $order_id );
 

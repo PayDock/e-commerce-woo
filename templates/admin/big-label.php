@@ -2,11 +2,15 @@
 /**
  * This file uses a function (esc_html) from WordPress
  *
- * @var array $value
+ * @var array $data
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
+}
+
+if ( isset( $data['value'] ) ) {
+	$value = $data['value'];
 }
 
 ?>

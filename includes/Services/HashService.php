@@ -32,9 +32,9 @@ class HashService {
 				$nonce      = random_bytes( self::NONCE_LENGTH );
 				$ciphertext = sodium_crypto_secretbox( $string_to_encrypt, $nonce, $key );
 
-				return 'sodium:' . base64_encode( $nonce . $ciphertext );
+				return 'sodium:' . base64_encode( $nonce . $ciphertext ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 			} catch ( Exception $error ) {
-				throw new Exception( $error );
+				throw $error;
 			}
 		} elseif ( function_exists( 'openssl_encrypt' ) ) {
 
@@ -44,7 +44,7 @@ class HashService {
 			$ciphertext_raw = openssl_encrypt( $string_to_encrypt, self::CIPHER, $key, self::OPTION, $iv );
 			$hmac           = hash_hmac( 'sha256', $ciphertext_raw, $key, true );
 
-			return 'openssl:' . base64_encode( $iv . $hmac . $ciphertext_raw );
+			return 'openssl:' . base64_encode( $iv . $hmac . $ciphertext_raw ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 
 		} else {
 			throw new Exception( 'There is no available data encryption module.' );
@@ -64,7 +64,7 @@ class HashService {
 
 		if ( strpos( $string_to_decrypt, 'sodium:' ) === 0 ) {
 			$string_to_decrypt = substr( $string_to_decrypt, 7 );
-			$decoded           = base64_decode( $string_to_decrypt );
+			$decoded           = base64_decode( $string_to_decrypt ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
 			$nonce             = substr( $decoded, 0, self::NONCE_LENGTH );
 			$ciphertext        = substr( $decoded, self::NONCE_LENGTH );
 			$key               = self::get_key( self::KEY_LENGTH );
@@ -77,11 +77,11 @@ class HashService {
 
 				return $plaintext;
 			} catch ( Exception $error ) {
-				throw new Exception( $error );
+				throw $error;
 			}
 		} elseif ( strpos( $string_to_decrypt, 'openssl:' ) === 0 ) {
 			$string_to_decrypt  = substr( $string_to_decrypt, 8 );
-			$c                  = base64_decode( $string_to_decrypt );
+			$c                  = base64_decode( $string_to_decrypt ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
 			$ivlen              = openssl_cipher_iv_length( self::CIPHER );
 			$iv                 = substr( $c, 0, $ivlen );
 			$hmac               = substr( $c, $ivlen, $sha2len = 32 );

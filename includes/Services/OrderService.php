@@ -80,13 +80,14 @@ class OrderService {
 			'cancelled'  => [ 'failed', 'cancelled' ],
 		];
 		if ( ! empty( $statuses_rules[ $old_status_key ] ) ) {
-			if ( ! in_array( $new_status_key, $statuses_rules[ $old_status_key ] ) ) {
+			if ( ! in_array( $new_status_key, $statuses_rules[ $old_status_key ], true ) ) {
 				/* @noinspection PhpUndefinedFunctionInspection */
 				$new_status_name = wc_get_order_status_name( $new_status_key );
 				/* @noinspection PhpUndefinedFunctionInspection */
 				$old_status_name = wc_get_order_status_name( $old_status_key );
 				/* @noinspection PhpUndefinedFunctionInspection */
 				$error = sprintf(
+					/* translators: 1: Old status name, 2: New status name */
 					__( 'You can not change status from "%1$s"  to "%2$s"', 'power-board' ),
 					$old_status_name,
 					$new_status_name

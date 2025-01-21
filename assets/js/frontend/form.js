@@ -56,7 +56,7 @@ jQuery(
 				const allValid      = Object.values( validationResults ).every( Boolean );
 				const shippingValid = validationResults.shipping;
 
-				if (!shippingValid) {
+				if ( !shippingValid ) {
 					// noinspection JSUnresolvedReference
 					$shippingWrapper.addClass( 'is-editing' );
 				}
@@ -76,7 +76,7 @@ jQuery(
 
 			const initPhoneNumbersValidation = () => {
 				const phoneInputs            = getPhoneInputs();
-				if (!Object.keys( phoneInputs )?.length) {
+				if ( !Object.keys( phoneInputs )?.length ) {
 					return;
 				}
 

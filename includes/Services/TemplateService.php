@@ -20,15 +20,10 @@ class TemplateService {
 	}
 
 	public function include_admin_html( string $template, array $data = [] ): void {
-
 		$settings         = SettingsService::get_instance();
 		$data['settings'] = $settings;
 
 		$data['template_service'] = $this;
-
-		if ( ! empty( $data ) ) {
-			extract( $data );
-		}
 
 		$path = $this->get_admin_path( $template );
 
@@ -40,17 +35,12 @@ class TemplateService {
 	public function get_admin_html( string $template, array $data = [] ): string {
 		ob_start();
 
-		if ( ! empty( $data ) ) {
-			extract( $data );
-		}
-
 		$this->include_admin_html( $template, $data );
 
 		return ob_get_clean();
 	}
 
 	private function get_admin_path( string $template ): string {
-
 		return $this->get_template_path( $this->template_admin_dir . DIRECTORY_SEPARATOR . $template );
 	}
 
@@ -64,10 +54,6 @@ class TemplateService {
 
 	public function include_checkout_html( string $template, array $data = [] ): void {
 		$data['template_service'] = $this;
-
-		if ( ! empty( $data ) ) {
-			extract( $data );
-		}
 
 		$path = $this->get_checkout_path( $template );
 

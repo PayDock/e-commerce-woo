@@ -2,8 +2,7 @@
 /**
  * PowerBoard settings page
  *
- * @var array $form_fields
- * @var TemplateService $template_service
+ * @var array $data
  */
 
 use PowerBoard\Services\TemplateService;
@@ -12,4 +11,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$template_service->setting_service->parent_generate_settings_html( $form_fields, true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped  --  the following require is safe it is not a user input.
+if ( isset( $data['template_service'] ) ) {
+	$template_service = $data['template_service'];
+
+	$template_service->setting_service->parent_generate_settings_html( $data['form_fields'], true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped  --  the following require is safe it is not a user input.
+}

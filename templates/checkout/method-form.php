@@ -4,14 +4,12 @@
  * This file uses functions (wc_esc_json, is_wc_endpoint_url and wc_get_order) from WooCommerce
  *
  * @noinspection PhpUndefinedFunctionInspection
- * @var string $description
- * @var string $id
- * @var string $nonce
- * @var string $settings
  * @var array $data
  */
 
-echo wpautop( wp_kses_post( $data['description'] ) );
+echo wp_kses_post(
+	wpautop( $data['description'] )
+);
 
 ?>
 <fieldset id="wc-classic-power-board-checkout" class="wc-payment-form powerboard">

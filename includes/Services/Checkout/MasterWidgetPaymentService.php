@@ -162,7 +162,9 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		$order->payment_complete();
 
 		/* @noinspection PhpUndefinedFunctionInspection */
-		$charge_id = sanitize_text_field( $_POST['chargeid'] ?? '' );
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$charge_id = isset( $_POST['chargeid'] ) ? sanitize_text_field( wp_unslash( $_POST['chargeid'] ) ) : '';
 		$order->update_meta_data( 'power_board_charge_id', $charge_id );
 		/* @noinspection PhpUndefinedFunctionInspection */
 		WC()->cart->empty_cart();
@@ -206,7 +208,8 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 	 */
 	public function power_board_create_error_notice(): ?array {
 		/* @noinspection PhpUndefinedFunctionInspection */
-		$wp_nonce = ! empty( $_POST['_wpnonce'] ) ? sanitize_text_field( $_POST['_wpnonce'] ) : null;
+		$wp_nonce = isset( $_REQUEST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ) : null;
+
 		/* @noinspection PhpUndefinedFunctionInspection */
 		if ( ! wp_verify_nonce( $wp_nonce, 'power-board-create-error-notice' ) ) {
 			/* @noinspection PhpUndefinedFunctionInspection */
@@ -216,10 +219,10 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		}
 
 		/* @noinspection PhpUndefinedFunctionInspection */
-		$error_message = sanitize_text_field( $_POST['error'] ?? '' );
+		$error_message = isset( $_POST['error'] ) ? sanitize_text_field( wp_unslash( $_POST['error'] ) ) : '';
 		if ( $error_message ) {
 			/* @noinspection PhpUndefinedFunctionInspection */
-			wc_add_notice( __( $error_message, 'power-board' ), 'error' );
+			wc_add_notice( esc_html( $error_message ), 'error' );
 		}
 
 		/* @noinspection PhpUndefinedFunctionInspection */

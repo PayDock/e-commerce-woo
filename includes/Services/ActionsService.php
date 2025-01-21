@@ -110,7 +110,7 @@ class ActionsService extends AbstractSingleton {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action( 'woocommerce_create_refund', [ $payment_controller, 'refund_process' ], 10, 2 );
 		/* @noinspection PhpUndefinedFunctionInspection */
-		add_action( 'woocommerce_order_refunded', [ $payment_controller, 'after_refund_process' ], 10, 2 );
+		add_action( 'woocommerce_order_refunded', [ $payment_controller, 'after_refund_process' ], 10, 1 );
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action( 'woocommerce_api_power-board-webhook', [ $payment_controller, 'webhook' ] );
 		/* @noinspection PhpUndefinedFunctionInspection */
