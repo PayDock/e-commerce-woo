@@ -50,7 +50,7 @@ jQuery(
 					const allValid          = Object.values( validationResults ).every( Boolean );
 					const shippingValid     = validationResults.shipping;
 					if (!shippingValid) {
-            // noinspection JSUnresolvedReference
+						// noinspection JSUnresolvedReference
 						$shippingWrapper.addClass( 'is-editing' );
 					}
 					$( 'button#place_order' ).styles = 'visibility:' + (allValid ? 'visible' : 'hidden');
@@ -313,7 +313,7 @@ jQuery(
 
 									window.widgetPowerBoard.onPaymentSuccessful(
 										function (data) {
-                                            // noinspection JSUnresolvedReference
+											// noinspection JSUnresolvedReference
 											jQuery( '#chargeid' ).val( data['charge_id'] );
 											submitForm();
 

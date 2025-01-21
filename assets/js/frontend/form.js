@@ -57,8 +57,8 @@ jQuery(
 				const shippingValid = validationResults.shipping;
 
 				if (!shippingValid) {
-          // noinspection JSUnresolvedReference
-          $shippingWrapper.addClass( 'is-editing' );
+					// noinspection JSUnresolvedReference
+					$shippingWrapper.addClass( 'is-editing' );
 				}
 
 				$submitButton.css( 'visibility', allValid ? 'visible' : 'hidden' );
