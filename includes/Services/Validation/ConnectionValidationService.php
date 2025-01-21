@@ -9,7 +9,6 @@ use PowerBoard\Enums\EnvironmentSettingsEnum;
 use PowerBoard\Enums\MasterWidgetSettingsEnum;
 use PowerBoard\Enums\SettingGroupsEnum;
 use PowerBoard\Helpers\MasterWidgetTemplatesHelper;
-use PowerBoard\Helpers\NotificationEventsHelper;
 use PowerBoard\Services\SDKAdapterService;
 use PowerBoard\Services\Settings\APIAdapterService;
 use PowerBoard\Services\Settings\WidgetConfigurationSettingService;
@@ -95,11 +94,10 @@ class ConnectionValidationService {
 
 	private function validate(): void {
 		if ( $this->validate_environment() ) {
-			if ( $this->validate_credential() ) {
-				$this->set_webhooks();
-			}
+			$this->validate_credential();
 		}
 	}
+
 	private function set_api_init_variables(): void {
 		$environment_settings_key   = SettingsService::get_instance()
 		->get_option_name(
@@ -157,17 +155,15 @@ class ConnectionValidationService {
 		return false;
 	}
 
-	private function validate_credential(): bool {
+	private function validate_credential(): void {
 		if (
 			$this->check_access_key_connection( $this->access_token_settings )
 			&& $this->check_widget_key_connection( $this->widget_access_token_settings )
 		) {
-			return true;
+			return;
 		}
 
 		$this->errors[] = 'Invalid credentials. Please update and try again. ';
-
-		return false;
 	}
 
 	private function check_access_key_connection( ?string $access_token ): bool {
@@ -265,68 +261,6 @@ class ConnectionValidationService {
 		$this->restore_credential();
 
 		return $valid_key;
-	}
-
-	/**
-	 * Uses a function (get_site_url, __, wp_json_encode, update_option) from WordPress
-	 */
-	private function set_webhooks(): void {
-		$webhook_events = NotificationEventsHelper::events();
-		/* @noinspection PhpUndefinedFunctionInspection */
-		if ( strpos( get_site_url(), 'localhost' ) !== false ) {
-			return;
-		}
-
-		$not_set_webhooks = $webhook_events;
-		/* @noinspection PhpUndefinedFunctionInspection */
-		$webhook_site_url      = get_site_url() . '/wc-api/power-board-webhook/';
-		$should_create_webhook = true;
-		$webhook_request       = $this->api_adapter_service->search_notifications( [ 'type' => 'webhook' ] );
-
-		if ( ! empty( $webhook_request['resource']['data'] ) ) {
-			$events = [];
-			foreach ( $webhook_request['resource']['data'] as $webhook ) {
-				if ( $webhook['destination'] === $webhook_site_url ) {
-					$events[] = $webhook['event'];
-				}
-			}
-
-			$not_set_webhooks = array_diff( $webhook_events, $events );
-			if ( empty( $not_set_webhooks ) ) {
-				$should_create_webhook = false;
-			}
-		}
-
-		$webhook_ids = [];
-		if ( $should_create_webhook ) {
-			foreach ( $not_set_webhooks as $event ) {
-				$result = $this->api_adapter_service->create_notification(
-					[
-						'event'            => $event,
-						'destination'      => $webhook_site_url,
-						'type'             => 'webhook',
-						'transaction_only' => false,
-					]
-				);
-
-				if ( ! empty( $result['resource']['data']['_id'] ) ) {
-					$webhook_ids[] = $result['resource']['data']['_id'];
-				} else {
-					/* @noinspection PhpUndefinedFunctionInspection */
-					$this->errors[] = __(
-						'Can\'t create webhook',
-						'power-board'
-					) . ( ! empty( $result['error'] ) ? ' ' . wp_json_encode( $result['error'] ) : '' );
-
-					return;
-				}
-			}
-
-			if ( ! empty( $webhook_ids ) ) {
-				/* @noinspection PhpUndefinedFunctionInspection */
-				update_option( self::IS_WEBHOOK_SET_OPTION, $webhook_ids );
-			}
-		}
 	}
 
 	public function get_errors(): array {
