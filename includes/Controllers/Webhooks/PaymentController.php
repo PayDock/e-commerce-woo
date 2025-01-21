@@ -253,19 +253,23 @@ class PaymentController {
 		$order->payment_complete();
 		OrderService::update_status( $order_id, $order_status, $status_notes );
 
-		/* @noinspection PhpUndefinedFunctionInspection */
-		wc_create_refund(
-			[
-				'amount'         => $refund_amount,
-				'reason'         => __( 'The refund of', 'power-board' ) . " $refund_amount " . __(
-					'has been successfully processed.',
-					'power-board'
-				),
-				'order_id'       => $order_id,
-				'refund_payment' => false,
-				'from_webhook'   => true,
-			]
-		);
+		try {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			wc_create_refund(
+				[
+					'amount'         => $refund_amount,
+					'reason'         => __( 'The refund of', 'power-board' ) . " $refund_amount " . __(
+							'has been successfully processed.',
+							'power-board'
+						),
+					'order_id'       => $order_id,
+					'refund_payment' => false,
+					'from_webhook'   => true,
+				]
+			);
+		} catch ( Exception $error ) {
+			return false;
+		}
 
 		return true;
 	}
