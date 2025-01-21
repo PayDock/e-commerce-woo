@@ -49,8 +49,6 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		// Actions.
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, [ $this, 'process_admin_options' ] );
-		/* @noinspection PhpUndefinedFunctionInspection */
-		add_action( 'woocommerce_scheduled_subscription_payment_power_board', [ $this, 'process_subscription_payment' ], 10, 2 );
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action( 'wp_enqueue_scripts', [ $this, 'payment_scripts' ] );
