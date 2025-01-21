@@ -94,11 +94,10 @@ class ConnectionValidationService {
 
 	private function validate(): void {
 		if ( $this->validate_environment() ) {
-			if ( $this->validate_credential() ) {
-				$this->set_webhooks();
-			}
+			$this->validate_credential();
 		}
 	}
+
 	private function set_api_init_variables(): void {
 		$environment_settings_key   = SettingsService::get_instance()
 		->get_option_name(
@@ -156,17 +155,15 @@ class ConnectionValidationService {
 		return false;
 	}
 
-	private function validate_credential(): bool {
+	private function validate_credential(): void {
 		if (
 			$this->check_access_key_connection( $this->access_token_settings )
 			&& $this->check_widget_key_connection( $this->widget_access_token_settings )
 		) {
-			return true;
+			return;
 		}
 
 		$this->errors[] = 'Invalid credentials. Please update and try again. ';
-
-		return false;
 	}
 
 	private function check_access_key_connection( ?string $access_token ): bool {
