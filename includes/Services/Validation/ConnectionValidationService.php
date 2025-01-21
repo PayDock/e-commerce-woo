@@ -47,7 +47,6 @@ class ConnectionValidationService {
 		$this->widget_api_adapter_service = APIAdapterService::get_instance();
 		$this->widget_api_adapter_service->initialise( $this->environment_settings, $this->access_token_settings, $this->widget_access_token_settings );
 
-		$this->validate();
 		/* @noinspection PhpUndefinedMethodInspection */
 		$option_key = $service->get_option_key();
 		/* @noinspection PhpUndefinedFunctionInspection */
