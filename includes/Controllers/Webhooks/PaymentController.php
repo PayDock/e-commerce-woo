@@ -1,9 +1,4 @@
 <?php
-/**
- * This file uses classes from WordPress
- *
- * @noinspection PhpUndefinedClassInspection
- */
 
 namespace PowerBoard\Controllers\Webhooks;
 

@@ -5,7 +5,6 @@
  * This file uses classes from WooCommerce
  *
  * @noinspection PhpUndefinedFunctionInspection
- * @noinspection PhpUndefinedClassInspection
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
