@@ -27,15 +27,11 @@ class HashService {
 		}
 
 		if ( function_exists( 'sodium_crypto_secretbox' ) ) {
-			try {
-				$key        = self::get_key( self::KEY_LENGTH );
-				$nonce      = random_bytes( self::NONCE_LENGTH );
-				$ciphertext = sodium_crypto_secretbox( $string_to_encrypt, $nonce, $key );
+			$key        = self::get_key( self::KEY_LENGTH );
+			$nonce      = random_bytes( self::NONCE_LENGTH );
+			$ciphertext = sodium_crypto_secretbox( $string_to_encrypt, $nonce, $key );
 
-				return 'sodium:' . base64_encode( $nonce . $ciphertext ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
-			} catch ( Exception $error ) {
-				throw $error;
-			}
+			return 'sodium:' . base64_encode( $nonce . $ciphertext ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 		} elseif ( function_exists( 'openssl_encrypt' ) ) {
 
 			$ivlen          = openssl_cipher_iv_length( self::CIPHER );
@@ -68,17 +64,13 @@ class HashService {
 			$nonce             = substr( $decoded, 0, self::NONCE_LENGTH );
 			$ciphertext        = substr( $decoded, self::NONCE_LENGTH );
 			$key               = self::get_key( self::KEY_LENGTH );
-			try {
-				$plaintext = sodium_crypto_secretbox_open( $ciphertext, $nonce, $key );
+			$plaintext         = sodium_crypto_secretbox_open( $ciphertext, $nonce, $key );
 
-				if ( $plaintext === false ) {
-					return $string_to_decrypt;
-				}
-
-				return $plaintext;
-			} catch ( Exception $error ) {
-				throw $error;
+			if ( $plaintext === false ) {
+				return $string_to_decrypt;
 			}
+
+			return $plaintext;
 		} elseif ( strpos( $string_to_decrypt, 'openssl:' ) === 0 ) {
 			$string_to_decrypt  = substr( $string_to_decrypt, 8 );
 			$c                  = base64_decode( $string_to_decrypt ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
@@ -108,6 +100,7 @@ class HashService {
 	private static function get_key( int $length ): string {
 
 		if ( defined( 'AUTH_KEY' ) ) {
+			/* @noinspection PhpUndefinedConstantInspection */
 			$key_material = AUTH_KEY;
 		} else {
 			$key_material = PLUGIN_PREFIX;

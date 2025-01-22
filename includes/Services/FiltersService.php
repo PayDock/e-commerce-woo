@@ -2,7 +2,6 @@
 
 namespace PowerBoard\Services;
 
-use PowerBoard\Abstracts\AbstractSingleton;
 use PowerBoard\Services\Checkout\MasterWidgetPaymentService;
 use PowerBoard\Services\Settings\WidgetConfigurationSettingService;
 
@@ -80,18 +79,6 @@ class FiltersService {
 		);
 
 		return $links;
-	}
-
-	public function my_account_classic_payment_edit( $actions, $order ) {
-
-		$order_status = $order->get_status();
-
-		if ( $order_status !== 'pending' ) {
-			unset( $actions['pay'] );
-			unset( $actions['cancel'] );
-		}
-
-		return $actions;
 	}
 
 	/**

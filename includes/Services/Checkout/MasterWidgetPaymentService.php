@@ -143,16 +143,23 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		return true;
 	}
 
+	/**
+	 * This function is used on WC_Payment_Gateway
+	 *
+	 * @noinspection PhpUnused
+	 */
 	public function get_title(): string {
 		return trim( $this->title ) ? $this->title : $this->method_title;
 	}
 
 	/**
 	 * Process the payment and return the result.
+	 * This function is used on WC_Payment_Gateway
 	 * Uses a function (sanitize_text_field) from WordPress
 	 * Uses functions (wc_get_order, WC and get_return_url) from WooCommerce
 	 * Uses method (get_return_url) from WC_Payment_Gateway
 	 *
+	 * @noinspection PhpUnused
 	 * @since 1.0.0
 	 */
 	public function process_payment( $order_id ): array {
@@ -246,7 +253,10 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 	}
 
 	/**
+	 * This function is used on WC_Payment_Gateway
 	 * Uses functions (wp_create_nonce and wp_json_encode) from WordPress
+	 *
+	 * @noinspection PhpUnused
 	 */
 	public function payment_fields() {
 		$template = new TemplateService( $this );

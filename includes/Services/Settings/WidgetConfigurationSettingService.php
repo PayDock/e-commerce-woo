@@ -287,9 +287,12 @@ class WidgetConfigurationSettingService extends WC_Payment_Gateway {
 	}
 
 	/**
+	 * This function is used on WC_Payment_Gateway
 	 * Uses functions (wp_unslash, do_action, update_option and apply_filters) from WordPress
 	 * Uses a function (wc_clean) from WooCommerce
 	 * Uses methods (init_settings, get_form_fields, get_field_type, validate_text_field, get_option, add_error and get_option_key) from WC_Payment_Gateway
+	 *
+	 * @noinspection PhpUnused
 	 */
 	public function process_admin_options() {
 		/* @noinspection PhpUndefinedMethodInspection */
@@ -407,12 +410,20 @@ class WidgetConfigurationSettingService extends WC_Payment_Gateway {
 		return SettingsSectionEnum::WIDGET_CONFIGURATION;
 	}
 
+	/**
+	 * This function is used on admin.php template
+	 *
+	 * @noinspection PhpUnused
+	 */
 	public function parent_generate_settings_html( $form_fields = [], $should_echo = true ): ?string {
 		return parent::generate_settings_html( $form_fields, $should_echo );
 	}
 
 	/**
+	 * This function is used on WC_Payment_Gateway
 	 * Uses a method (get_form_fields) from WC_Payment_Gateway
+	 *
+	 * @noinspection PhpUnused
 	 */
 	public function generate_settings_html( $form_fields = [], $should_echo = true ): ?string {
 		if ( empty( $form_fields ) ) {
@@ -443,6 +454,11 @@ class WidgetConfigurationSettingService extends WC_Payment_Gateway {
 		return null;
 	}
 
+	/**
+	 * This function is used on WC_Payment_Gateway
+	 *
+	 * @noinspection PhpUnused
+	 */
 	public function generate_big_label_html( $key, $value ): string {
 		return $this->template_service->get_admin_html( 'big-label', compact( 'key', 'value' ) );
 	}

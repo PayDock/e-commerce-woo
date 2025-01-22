@@ -5,8 +5,6 @@
  * @var array $data
  */
 
-use PowerBoard\Services\TemplateService;
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }

@@ -36,6 +36,7 @@ class WidgetController {
 
 		if ( ! empty( $_POST['total'] ) ) {
 			if ( is_array( $_POST['total'] ) ) {
+				/* @noinspection PhpUndefinedFunctionInspection */
 				$request['total'] = array_map( 'sanitize_text_field', wp_unslash( $_POST['total'] ) );
 			} else {
 				/* @noinspection PhpUndefinedFunctionInspection */
@@ -59,6 +60,7 @@ class WidgetController {
 		$billing_address = [];
 
 		if ( ! empty( $_POST['address'] ) && is_array( $_POST['address'] ) ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
 			$billing_address = array_map( 'sanitize_text_field', wp_unslash( $_POST['address'] ) );
 		}
 

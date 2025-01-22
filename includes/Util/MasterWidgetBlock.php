@@ -20,13 +20,22 @@ use PowerBoard\Services\SettingsService;
  */
 final class MasterWidgetBlock extends AbstractPaymentMethodType {
 	private static bool $is_load = false;
-	/* @noinspection PhpMissingFieldTypeInspection */
+	/**
+	 * Variable from AbstractPaymentMethodType
+	 *
+	 * @var string $name
+	 * @noinspection PhpMissingFieldTypeInspection
+	 * @noinspection PhpUnused
+	 */
 	protected $name          = 'power_board';
 	protected string $script = 'blocks';
 	protected MasterWidgetPaymentService $gateway;
 
 	/**
+	 * This function is used on AbstractPaymentMethodType
 	 * Uses a function (get_option) from WordPress
+	 *
+	 * @noinspection PhpUnused
 	 */
 	public function initialize() {
 		/* @noinspection PhpUndefinedFunctionInspection */
@@ -35,7 +44,10 @@ final class MasterWidgetBlock extends AbstractPaymentMethodType {
 	}
 
 	/**
+	 * This function is used on AbstractPaymentMethodType
 	 * Uses a method (get_setting) from AbstractPaymentMethodType
+	 *
+	 * @noinspection PhpUnused
 	 */
 	public function is_active() {
 		/* @noinspection PhpUndefinedMethodInspection */
@@ -43,8 +55,11 @@ final class MasterWidgetBlock extends AbstractPaymentMethodType {
 	}
 
 	/**
+	 * This function is used on AbstractPaymentMethodType
 	 * Uses functions (is_checkout, wp_enqueue_script, wp_localize_script, plugin_url, wp_set_script_translations and is_admin) from WordPress
 	 * Uses functions (WC and get_woocommerce_currency) from WooCommerce
+	 *
+	 * @noinspection PhpUnused
 	 */
 	public function get_payment_method_script_handles(): array {
 		/* @noinspection PhpUndefinedFunctionInspection */
@@ -151,8 +166,11 @@ final class MasterWidgetBlock extends AbstractPaymentMethodType {
 	}
 
 	/**
+	 * This function is used on AbstractPaymentMethodType
 	 * Uses a function (is_admin) from WordPress
 	 * Uses functions (WC, get_woocommerce_currency) from WooCommerce
+	 *
+	 * @noinspection PhpUnused
 	 */
 	public function get_payment_method_data(): array {
 		SDKAdapterService::get_instance();

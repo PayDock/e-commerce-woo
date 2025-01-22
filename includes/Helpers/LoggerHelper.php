@@ -18,7 +18,7 @@ class LoggerHelper {
 		}
 		/* @noinspection PhpUndefinedFunctionInspection */
 		wc_get_logger()->log(
-			$has_error ? LoggerEnum::ERROR : LoggerEnum::INFO,
+			$has_error ? LoggerEnum::ERROR : LoggerEnum::INFORMATION,
 			$request_action,
 			self::decode_stringified_json( $context ),
 		);

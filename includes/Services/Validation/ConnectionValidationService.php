@@ -15,7 +15,6 @@ use PowerBoard\Services\Settings\WidgetConfigurationSettingService;
 use PowerBoard\Services\SettingsService;
 
 class ConnectionValidationService {
-	private ?string $old_environment         = null;
 	private ?string $old_access_token        = null;
 	private ?string $old_widget_access_token = null;
 
@@ -70,9 +69,12 @@ class ConnectionValidationService {
 	 * Uses a function (do_action) from WordPress
 	 */
 	private function prepare_form_data(): void {
+		/* @noinspection PhpUndefinedMethodInspection */
 		$post_data = $this->service->get_post_data();
+		/* @noinspection PhpUndefinedMethodInspection */
 		foreach ( $this->service->get_form_fields() as $key => $field ) {
 			try {
+				/* @noinspection PhpUndefinedMethodInspection */
 				$this->data[ $key ] = $this->service->get_field_value( $key, $field, $post_data );
 
 				if ( $field['type'] === 'select' || $field['type'] === 'checkbox' ) {
@@ -87,6 +89,7 @@ class ConnectionValidationService {
 					);
 				}
 			} catch ( Exception $e ) {
+				/* @noinspection PhpUndefinedMethodInspection */
 				$this->service->add_error( $e->getMessage() );
 			}
 		}
