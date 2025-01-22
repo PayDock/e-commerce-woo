@@ -32,6 +32,9 @@ class LoggerHelper {
 		} elseif ( is_string( $data ) ) {
 			if ( json_decode( $data ) !== null && $data !== json_last_error_msg() ) {
 				return json_decode( $data, true );
+			} else {
+				$data = str_replace( '\\', '\\\\', $data );
+				$data = str_replace( '"', '\'', $data );
 			}
 		}
 
@@ -45,13 +48,14 @@ class LoggerHelper {
 
 		switch ( $request_action ) {
 			case APIActionEnum::CREATE_TOKEN:
-				unset( $response['resource']['data'] );
+				$response['resource']['data'] = '********************';
 				break;
 			case APIActionEnum::CREATE_INTENT:
-				unset( $response['resource']['data']['token'] );
+				$response['resource']['data']['token'] = '********************';
 				break;
 			case APIActionEnum::REFUND:
-				unset( $response['resource']['data']['customer']['payment_source']['vault_token'] );
+				$response['resource']['data']['customer']['payment_source']['ref_token']   = '********************';
+				$response['resource']['data']['customer']['payment_source']['vault_token'] = '********************';
 				break;
 		}
 

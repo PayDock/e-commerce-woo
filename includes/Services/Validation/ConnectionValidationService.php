@@ -18,8 +18,6 @@ class ConnectionValidationService {
 	private ?string $old_access_token        = null;
 	private ?string $old_widget_access_token = null;
 
-	private const IS_WEBHOOK_SET_OPTION = 'is_power_board_webhook_set';
-
 	public ?WidgetConfigurationSettingService $service = null;
 	private ?array $errors                             = [];
 	private ?array $data                               = [];
