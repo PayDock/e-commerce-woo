@@ -5,6 +5,7 @@ const getSelectedIndex = (element) => {
 	return element.selectedIndex;
 };
 
+// noinspection JSUnresolvedReference
 jQuery( document ).ready(
 	function ($) {
 		const element = $( '.power_board-settings' ).get();

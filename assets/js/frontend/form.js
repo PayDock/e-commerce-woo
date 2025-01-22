@@ -1,3 +1,5 @@
+// noinspection JSUnresolvedReference
+// noinspection PhpCSValidationInspection
 jQuery(
 	function ($) {
 		$( document ).ready(

@@ -48,11 +48,13 @@ const toggleWidgetVisibility = ( hide ) => {
 };
 
 const initMasterWidgetCheckout = () => {
+	// noinspection JSUnresolvedReference
 	if ( canMakePayment( settings.total_limitation, cart.getCartTotals()?.total_price ) ) {
 		// noinspection JSUnresolvedReference
 		const orderButton = jQuery( '.wc-block-components-checkout-place-order-button' );
 		orderButton.hide();
 
+		// noinspection JSUnresolvedReference
 		jQuery.ajax(
 			{
 				url: '/?wc-ajax=power-board-create-charge-intent',
@@ -73,6 +75,7 @@ const initMasterWidgetCheckout = () => {
 					const orderButton = jQuery( '.wc-block-components-checkout-place-order-button' );
 					// noinspection JSUnresolvedReference
 					const paymentSourceElement = jQuery( '#paymentSourceToken' );
+					// noinspection JSUnresolvedReference
 					window.widgetPowerBoard.onPaymentSuccessful(
 						function ( data ) {
 							paymentSourceElement.val( JSON.stringify( data ) );
@@ -82,6 +85,7 @@ const initMasterWidgetCheckout = () => {
 							window.widgetPowerBoard = null;
 						}
 					);
+					// noinspection JSUnresolvedReference
 					window.widgetPowerBoard.onPaymentFailure(
 						function () {
 							paymentSourceElement.val(
@@ -97,6 +101,7 @@ const initMasterWidgetCheckout = () => {
 							window.widgetPowerBoard = null;
 						}
 					);
+					// noinspection JSUnresolvedReference
 					window.widgetPowerBoard.onPaymentExpired(
 						function () {
 							paymentSourceElement.val(
@@ -183,6 +188,7 @@ const Content = ( props ) => {
 	const {eventRegistration, emitResponse} = props;
 	const {onPaymentSetup}                  = eventRegistration;
 
+	// noinspection JSUnresolvedReference
 	useEffect(
 		() => {
 			if ( !window.unsubscribeFromFormChanges ) {
@@ -194,6 +200,7 @@ const Content = ( props ) => {
 					const paymentData       = document.getElementById( 'paymentSourceToken' )?.value
 					const paymentDataParsed = JSON.parse( document.getElementById( 'paymentSourceToken' )?.value )
 					if ( !!paymentData && !paymentDataParsed.errorMessage ) {
+						// noinspection JSUnresolvedReference
 						return {
 							type: emitResponse.responseTypes.SUCCESS, meta: {
 								paymentMethodData: {
@@ -257,7 +264,7 @@ const Content = ( props ) => {
 	);
 };
 
-// noinspection JSUnusedGlobalSymbols
+// noinspection JSUnusedGlobalSymbols,JSUnresolvedReference,JSCheckFunctionSignatures
 const Paydock = {
 	name: "power_board_gateway",
 	label: createElement(

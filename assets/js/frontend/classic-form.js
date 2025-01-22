@@ -1,5 +1,6 @@
 const isOrderPayPage = window.location.href.includes( 'order-pay' );
 
+// noinspection JSUnresolvedReference
 jQuery(
 	function ($) {
 		$( document ).ready(
@@ -73,7 +74,7 @@ jQuery(
 					updateVisibility( phoneInputs );
 				};
 				initPhoneNumberValidation();
-				const powerBoardHelper             = {
+				const powerBoardHelper = {
 					paymentMethod: null,
 					form: null,
 					formChangedTimer: null,
@@ -81,6 +82,7 @@ jQuery(
 					showErrorMessage( errorMessage ) {
 						$( '.woocommerce-notices-wrapper:first' ).html( '' );
 						$( '.woocommerce-NoticeGroup.woocommerce-NoticeGroup-checkout' ).html( '' );
+						// noinspection JSUnresolvedReference
 						jQuery.post(
 							PowerBoardAjax.url,
 							{
@@ -265,6 +267,7 @@ jQuery(
 						}
 					},
 					initMasterWidget() {
+						// noinspection JSUnresolvedReference
 						const data = {
 							_wpnonce: PowerBoardAjax.wpnonce,
 							address: this.getAddressData( false ).address,
@@ -278,6 +281,7 @@ jQuery(
 								currency_symbol: orderData.currency_symbol,
 							};
 						}
+						// noinspection JSUnresolvedReference
 						jQuery.ajax(
 							{
 								url: '/?wc-ajax=power-board-create-charge-intent',
@@ -292,6 +296,7 @@ jQuery(
 									const showError         = ( message ) => this.showErrorMessage( message );
 									const handleWidgetError = () => this.handleWidgetError();
 									const submitForm        = () => this.form.submit();
+									// noinspection JSUnresolvedReference
 									window.widgetPowerBoard.onPaymentSuccessful(
 										function ( data ) {
 											// noinspection JSUnresolvedReference
@@ -301,6 +306,7 @@ jQuery(
 											window.widgetPowerBoard = null;
 										}
 									);
+									// noinspection JSUnresolvedReference
 									window.widgetPowerBoard.onPaymentFailure(
 										function () {
 											showError( 'Transaction failed. Please check your payment details or contact your bank' );
@@ -309,6 +315,7 @@ jQuery(
 											window.widgetPowerBoard = null;
 										}
 									);
+									// noinspection JSUnresolvedReference
 									window.widgetPowerBoard.onPaymentExpired(
 										function () {
 											showError( 'Your payment session has expired. Please retry your payment' );

@@ -1,3 +1,5 @@
+// noinspection JSUnresolvedReference
+// noinspection PhpCSValidationInspection
 jQuery( document ).ready(
 	function ($) {
 		const prefixes = ['woocommerce_power_board_power_board_'];
