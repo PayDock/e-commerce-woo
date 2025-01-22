@@ -28,8 +28,6 @@ class FiltersService {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_filter( 'woocommerce_payment_gateways', [ $this, 'register_in_woocommerce_payment_class' ] );
 		/* @noinspection PhpUndefinedFunctionInspection */
-		add_filter( 'woocommerce_thankyou_order_received_text', [ $this, 'woocommerce_thank_you_order_received_text' ] );
-		/* @noinspection PhpUndefinedFunctionInspection */
 		add_filter( 'plugins_loaded', [ $this, 'woo_text_override' ] );
 	}
 
@@ -53,15 +51,6 @@ class FiltersService {
 		}
 
 		return $methods;
-	}
-
-	/**
-	 * Uses functions (absint, get_query_var, get_option and __) from WordPress
-	 * Uses a function (wc_get_order) from WooCommerce
-	 */
-	public function woocommerce_thank_you_order_received_text() {
-		/* @noinspection PhpUndefinedFunctionInspection */
-		return __( 'Thank you. Your order has been received.', 'power-board' );
 	}
 
 	/**

@@ -294,7 +294,7 @@ class WidgetConfigurationSettingService extends WC_Payment_Gateway {
 	 *
 	 * @noinspection PhpUnused
 	 */
-	public function process_admin_options() {
+	public function process_admin_options(): bool {
 		/* @noinspection PhpUndefinedMethodInspection */
 		$this->init_settings();
 		$validation_service = new ConnectionValidationService( $this );
@@ -353,8 +353,8 @@ class WidgetConfigurationSettingService extends WC_Payment_Gateway {
 				$value = $this->validate_text_field( $key, $value );
 			}
 
-			if ( array_key_exists( $key, $hashed_credential_keys ) || array_key_exists( $key, $settings_keys ) ) {
-				if ( ! empty( $validation_service->get_errors() ) || $value === '********************' || $value === '' ) {
+			if ( array_key_exists( $key, $settings_keys ) ) {
+				if ( ! empty( $validation_service->get_errors() ) || $value === '********************' ) {
 					/* @noinspection PhpUndefinedMethodInspection */
 					$value = $this->get_option( $key );
 				}
