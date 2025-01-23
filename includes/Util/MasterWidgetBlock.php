@@ -182,7 +182,7 @@ final class MasterWidgetBlock extends AbstractPaymentMethodType {
 			WC()->cart->calculate_totals();
 		}
 
-        /* @noinspection PhpUndefinedFunctionInspection */
+		/* @noinspection PhpUndefinedFunctionInspection */
 		$total = ! is_admin() ? WC()->cart->get_total() : 0;
 
 		/* @noinspection PhpUndefinedFunctionInspection */

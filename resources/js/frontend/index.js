@@ -78,6 +78,7 @@ const initMasterWidgetCheckout = () => {
 					// noinspection JSUnresolvedReference
 					window.widgetPowerBoard.onPaymentSuccessful(
 						function ( data ) {
+							// noinspection JSUnresolvedReference
 							paymentSourceElement.val( JSON.stringify( data ) );
 							orderButton.show();
 							orderButton.click();
@@ -88,6 +89,7 @@ const initMasterWidgetCheckout = () => {
 					// noinspection JSUnresolvedReference
 					window.widgetPowerBoard.onPaymentFailure(
 						function () {
+							// noinspection JSUnresolvedReference
 							paymentSourceElement.val(
 								JSON.stringify(
 									{
@@ -104,6 +106,7 @@ const initMasterWidgetCheckout = () => {
 					// noinspection JSUnresolvedReference
 					window.widgetPowerBoard.onPaymentExpired(
 						function () {
+							// noinspection JSUnresolvedReference
 							paymentSourceElement.val(
 								JSON.stringify(
 									{

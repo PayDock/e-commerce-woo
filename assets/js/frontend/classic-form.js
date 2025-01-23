@@ -37,7 +37,8 @@ jQuery(
 					.map( name => $( `#${CONFIG.baseCheckboxIdName}_${name}` ).parents().eq( 1 ) )
 					.filter( $component => $component.length );
 				const validatePhone               = ( $input ) => {
-					const phone                   = $input.val();
+					// noinspection JSUnresolvedReference
+					const phone = $input.val();
 					$input.next( `.${CONFIG.errorMessageClassName}` ).remove();
 					if (phone && !CONFIG.phonePattern.test( phone )) {
 						$input.after( CONFIG.errorMessageHtml );
@@ -384,6 +385,7 @@ jQuery(
 						}
 					},
 					getConfigs() {
+						// noinspection JSUnresolvedReference
 						let settings                = $( `#classic-power_board_gateway-settings` ).val()
 						settings                    = JSON.parse( settings )
 						return settings;
@@ -391,6 +393,7 @@ jQuery(
 					init() {
 						const paymentMethodInterval = setInterval(
 							() => {
+								// noinspection JSUnresolvedReference
 								const paymentMethod = $( 'input[name="payment_method"]:checked' ).val();
 								if ( paymentMethod && ! this.paymentMethod ) {
 									clearInterval( paymentMethodInterval );
@@ -414,6 +417,7 @@ jQuery(
 												event.target.id.includes( 'payment_method' )
 											) {
 												this.lastAddressVerified = currentAddress;
+												// noinspection JSUnresolvedReference
 												this.setPaymentMethod(
 													$( 'input[name="payment_method"]:checked' ).val(),
 													true

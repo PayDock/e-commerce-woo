@@ -7,6 +7,7 @@ stages:
  - deploy_cba
  - deploy_multitenant
 
+# noinspection ComposeMissingKeys
 include:
   - project: 'paydock/platform/gitlab-templates'
     file: '/deploy/version.yml'
