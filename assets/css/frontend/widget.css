@@ -96,7 +96,8 @@
 	position: relative;
 }
 
-.wc-block-components-notice-banner {
+.wc-block-components-notice-banner,
+.wc-block-components-checkout-place-order-button {
 	&.hide {
 		display: none;
 	}

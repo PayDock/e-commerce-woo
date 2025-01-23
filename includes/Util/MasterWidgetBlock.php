@@ -182,12 +182,15 @@ final class MasterWidgetBlock extends AbstractPaymentMethodType {
 			WC()->cart->calculate_totals();
 		}
 
+        /* @noinspection PhpUndefinedFunctionInspection */
+		$total = ! is_admin() ? WC()->cart->get_total() : 0;
+
 		/* @noinspection PhpUndefinedFunctionInspection */
 		return [
 			// Wordpress data.
 			'widgetToken'             => $settings_service->get_widget_access_token(),
 			// Woocommerce data.
-			'amount'                  => WC()->cart->get_total(),
+			'amount'                  => $total,
 			'currency'                => strtoupper( get_woocommerce_currency() ),
 			// Widget.
 			'title'                   => 'PowerBoard',
