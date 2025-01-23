@@ -76,7 +76,7 @@ publish_power_board:
     reports:
       dotenv: zip_publish.job_id
 
-deploy_power_board_staging:
+simulate_deploy_power_board_staging:
   stage: deploy_cba
   only:
     - power_board
@@ -92,7 +92,7 @@ deploy_power_board_staging:
     UPSTREAM_JOB_ID: $ZIP_PUBLISH_JOB_ID
   when: manual
 
-deploy_power_board_uat:
+simulate_deploy_power_board_uat:
   stage: deploy_cba
   only:
     - power_board
@@ -144,7 +144,7 @@ publish_paydock:
     reports:
       dotenv: zip_publish.job_id
 
-deploy_paydock_preprod:
+simulate_deploy_paydock_preprod:
   stage: deploy_multitenant
   only:
     - main
@@ -160,7 +160,7 @@ deploy_paydock_preprod:
     UPSTREAM_JOB_ID: $ZIP_PUBLISH_JOB_ID
   when: manual
 
-deploy_paydock_sandbox:
+simulate_deploy_paydock_sandbox:
   stage: deploy_multitenant
   only:
     - main
