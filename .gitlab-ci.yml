@@ -51,6 +51,8 @@ prepare_power_board_version:
     - MAJOR_MINOR=$(cat power-board.php | grep "POWER_BOARD_PLUGIN_VERSION'," | sed -e "s/^.*\([0-9].[0-9].[0-9]\).*$/\1/")
     - echo "ARTIFACT_NAME=woo_powerboard-$MAJOR_MINOR-$VERSION" > VERSION.TXT
   artifacts:
+    paths:
+      - VERSION.TXT
     reports:
       dotenv: VERSION.TXT
 
@@ -60,7 +62,8 @@ publish_power_board:
 #  only:
 #    - power_board
   needs:
-    - prepare_power_board_version
+    - job: prepare_power_board_version
+      artifacts: true
   script:
     - composer install
     - /bin/sh cleanup_files_for_zip.sh
