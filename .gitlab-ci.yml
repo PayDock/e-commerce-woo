@@ -75,7 +75,7 @@ publish_power_board:
     reports:
       dotenv: zip_publish.job_id
 
-deploy_uat:
+deploy_power_board_staging:
   stage: deploy_cba
   #  only:
   #    - power_board
@@ -86,6 +86,23 @@ deploy_uat:
     project: paydock/bounded-contexts/woocommerce/multi-project-downstream
     branch: development
   variables:
+    DEPLOYMENT_ENV_URL: "This should be the power_board staging url"
+    UPSTREAM_PROJECT_ID: $CI_PROJECT_ID
+    UPSTREAM_JOB_ID: $ZIP_PUBLISH_JOB_ID
+  when: manual
+
+deploy_power_board_uat:
+  stage: deploy_cba
+  #  only:
+  #    - power_board
+  needs:
+    - job: publish_power_board
+      artifacts: true
+  trigger:
+    project: paydock/bounded-contexts/woocommerce/multi-project-downstream
+    branch: development
+  variables:
+    DEPLOYMENT_ENV_URL: "https://woocommerce-uat.multitenant-staging.apac.paydock.com/"
     UPSTREAM_PROJECT_ID: $CI_PROJECT_ID
     UPSTREAM_JOB_ID: $ZIP_PUBLISH_JOB_ID
   when: manual
