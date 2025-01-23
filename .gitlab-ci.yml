@@ -5,6 +5,7 @@ stages:
  - publish
  - quality
  - deploy_cba
+ - deploy_multitenant
 
 include:
   - project: 'paydock/platform/gitlab-templates'
@@ -41,8 +42,8 @@ phpcs_report:
 
 prepare_power_board_version:
   stage: publish
-#  only:
-#    - power_board
+  only:
+    - power_board
   needs:
     - job: create_version
       artifacts: true
@@ -59,8 +60,8 @@ prepare_power_board_version:
 publish_power_board:
   image: composer:lts
   stage: publish
-#  only:
-#    - power_board
+  only:
+    - power_board
   needs:
     - job: prepare_power_board_version
       artifacts: true
@@ -77,8 +78,8 @@ publish_power_board:
 
 deploy_power_board_staging:
   stage: deploy_cba
-  #  only:
-  #    - power_board
+  only:
+    - power_board
   needs:
     - job: publish_power_board
       artifacts: true
@@ -93,8 +94,8 @@ deploy_power_board_staging:
 
 deploy_power_board_uat:
   stage: deploy_cba
-  #  only:
-  #    - power_board
+  only:
+    - power_board
   needs:
     - job: publish_power_board
       artifacts: true
@@ -119,6 +120,8 @@ prepare_paydock_version:
     - MAJOR_MINOR=$(cat paydock.php | grep "PAYDOCK_PLUGIN_VERSION'," | sed -e "s/^.*\([0-9].[0-9].[0-9]\).*$/\1/")
     - echo "ARTIFACT_NAME=woo_paydock-$MAJOR_MINOR-$VERSION" > VERSION.TXT
   artifacts:
+    paths:
+      - VERSION.TXT
     reports:
       dotenv: VERSION.TXT
 
@@ -128,11 +131,47 @@ publish_paydock:
   only:
     - main
   needs:
-    - prepare_paydock_version
+    - job: prepare_paydock_version
+      artifacts: true
   script:
     - composer install
     - /bin/sh cleanup_files_for_zip.sh
+    - echo "ZIP_PUBLISH_JOB_ID=$CI_JOB_ID" > zip_publish.job_id
   artifacts:
     name: $ARTIFACT_NAME
     paths:
       - ./*
+    reports:
+      dotenv: zip_publish.job_id
+
+deploy_paydock_preprod:
+  stage: deploy_multitenant
+  only:
+    - main
+  needs:
+    - job: publish_paydock
+      artifacts: true
+  trigger:
+    project: paydock/bounded-contexts/woocommerce/multi-project-downstream
+    branch: development
+  variables:
+    DEPLOYMENT_ENV_URL: "This should be the paydock preprod url"
+    UPSTREAM_PROJECT_ID: $CI_PROJECT_ID
+    UPSTREAM_JOB_ID: $ZIP_PUBLISH_JOB_ID
+  when: manual
+
+deploy_paydock_sandbox:
+  stage: deploy_multitenant
+  only:
+    - main
+  needs:
+    - job: publish_paydock
+      artifacts: true
+  trigger:
+    project: paydock/bounded-contexts/woocommerce/multi-project-downstream
+    branch: development
+  variables:
+    DEPLOYMENT_ENV_URL: "This should be the paydock sandbox url"
+    UPSTREAM_PROJECT_ID: $CI_PROJECT_ID
+    UPSTREAM_JOB_ID: $ZIP_PUBLISH_JOB_ID
+  when: manual
