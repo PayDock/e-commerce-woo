@@ -29,6 +29,21 @@ class FiltersService {
 		add_filter( 'woocommerce_payment_gateways', [ $this, 'register_in_woocommerce_payment_class' ] );
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_filter( 'plugins_loaded', [ $this, 'woo_text_override' ] );
+		add_filter( 'admin_notices', [ $this, 'order_status_bulk_update' ] );
+	}
+
+	public function order_status_bulk_update() {
+		if (
+			isset( $_GET['page'], $_GET['bulk_action'], ) &&
+			$_GET['page'] === 'wc-orders' &&
+			$_GET['bulk_action'] !== ''
+		) {
+			echo "<script>
+				jQuery(document).ready(function($) {
+					$('div.updated').hide();
+				});
+			</script>";
+		}
 	}
 
 	/**

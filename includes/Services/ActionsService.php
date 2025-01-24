@@ -122,5 +122,7 @@ class ActionsService {
 		add_action( 'woocommerce_api_power-board-webhook', [ $payment_controller, 'webhook' ] );
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action( 'wc_ajax_power-board-create-charge-intent', [ $widget_controller, 'create_checkout_intent' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'admin_init', [ $order_service, 'remove_bulk_action_message' ] );
 	}
 }

@@ -98,9 +98,38 @@ class OrderService {
 				/* @noinspection PhpUndefinedFunctionInspection */
 				set_transient( 'power_board_status_change_error_' . get_current_user_id(), $error, 300 );
 				unset( $GLOBALS['power_board_is_updating_order_status'] );
+				$this->remove_status_related_notes( $order );
 				/* @noinspection PhpUndefinedFunctionInspection */
 				throw new Exception( esc_html( $error ) );
 			}
+		}
+	}
+
+	public function remove_status_related_notes( $order ) {
+		$order_id = $order->get_id();
+
+		$notes = wc_get_order_notes( [
+			'order_id' => $order_id,
+			'type'     => 'internal',
+		] );
+
+		if ( ! empty( $notes ) ) {
+
+			foreach ( $notes as $note ) {
+				$note_content = $note->content;
+
+				$related_notes = [
+					'Order status changed',
+					'Error during status transition',
+				];
+
+				foreach ( $related_notes as $message ) {
+					if ( strpos( $note_content, $message ) !== false ) {
+						wp_delete_comment( $note->id, true );
+					}
+				}
+			}
+
 		}
 	}
 
@@ -122,4 +151,20 @@ class OrderService {
 			delete_transient( 'power_board_status_change_error_' . get_current_user_id() );
 		}
 	}
+
+	public function remove_bulk_action_message() {
+		if (
+			isset( $_GET['page'], $_GET['bulk_action'], $_GET['changed'] ) &&
+			$_GET['page'] == 'wc-orders' &&
+			$_GET['changed'] == 1
+		) {
+			$error_key = 'power_board_status_change_error_' . get_current_user_id();
+
+			if ( get_transient( $error_key ) ) {
+				wp_safe_redirect( remove_query_arg( 'changed' ) );
+				exit;
+			}
+		}
+	}
+
 }
