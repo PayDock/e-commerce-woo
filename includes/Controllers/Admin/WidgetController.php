@@ -11,7 +11,7 @@ class WidgetController {
 	 * Uses functions (sanitize_text_field, wp_verify_nonce, wp_send_json_error, __ and wp_send_json_success) from WordPress
 	 * Uses functions (WC, get_woocommerce_currency and wc_get_orders) from WooCommerce
 	 */
-	public function create_checkout_intent() {
+	public function create_checkout_intent(): void {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$wp_nonce = isset( $_REQUEST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ) : null;
 

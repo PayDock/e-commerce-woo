@@ -374,12 +374,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPCSStandards/PHPCSUtils.git",
-                "reference": "33dd7776e8a78ddaad1500899ad8c536a7764d4a"
+                "reference": "8ef592afe141d07ab178ca85dca0853d35fbd61a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPCSStandards/PHPCSUtils/zipball/33dd7776e8a78ddaad1500899ad8c536a7764d4a",
-                "reference": "33dd7776e8a78ddaad1500899ad8c536a7764d4a",
+                "url": "https://api.github.com/repos/PHPCSStandards/PHPCSUtils/zipball/8ef592afe141d07ab178ca85dca0853d35fbd61a",
+                "reference": "8ef592afe141d07ab178ca85dca0853d35fbd61a",
                 "shasum": ""
             },
             "require": {
@@ -453,9 +453,13 @@
                 {
                     "url": "https://opencollective.com/php_codesniffer",
                     "type": "open_collective"
+                },
+                {
+                    "url": "https://thanks.dev/phpcsstandards",
+                    "type": "thanks_dev"
                 }
             ],
-            "time": "2024-12-12T07:44:32+00:00"
+            "time": "2025-01-24T10:57:08+00:00"
         },
         {
             "name": "squizlabs/php_codesniffer",
@@ -463,12 +467,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPCSStandards/PHP_CodeSniffer.git",
-                "reference": "aebd84be8f7ab740cd00f8aaa361b3c9cc354255"
+                "reference": "154bb91cea120a5a2c31c235c2a72a296cbc9170"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/aebd84be8f7ab740cd00f8aaa361b3c9cc354255",
-                "reference": "aebd84be8f7ab740cd00f8aaa361b3c9cc354255",
+                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/154bb91cea120a5a2c31c235c2a72a296cbc9170",
+                "reference": "154bb91cea120a5a2c31c235c2a72a296cbc9170",
                 "shasum": ""
             },
             "require": {
@@ -534,9 +538,13 @@
                 {
                     "url": "https://opencollective.com/php_codesniffer",
                     "type": "open_collective"
+                },
+                {
+                    "url": "https://thanks.dev/phpcsstandards",
+                    "type": "thanks_dev"
                 }
             ],
-            "time": "2025-01-12T20:34:01+00:00"
+            "time": "2025-01-23T23:10:29+00:00"
         },
         {
             "name": "woocommerce/woocommerce-sniffs",

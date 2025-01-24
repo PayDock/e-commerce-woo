@@ -37,7 +37,7 @@ final class MasterWidgetBlock extends AbstractPaymentMethodType {
 	 *
 	 * @noinspection PhpUnused
 	 */
-	public function initialize() {
+	public function initialize(): void {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$this->settings = get_option( 'woocommerce_power_board_settings', [] );
 		$this->gateway  = new MasterWidgetPaymentService();
@@ -95,8 +95,7 @@ final class MasterWidgetBlock extends AbstractPaymentMethodType {
 				'power-board-widget-css',
 				POWER_BOARD_PLUGIN_URL . 'assets/css/frontend/widget.css',
 				[],
-				POWER_BOARD_PLUGIN_VERSION,
-				'all'
+				POWER_BOARD_PLUGIN_VERSION
 			);
 
 			/* @noinspection PhpUndefinedFunctionInspection */

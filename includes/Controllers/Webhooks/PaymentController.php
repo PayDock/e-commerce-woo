@@ -17,7 +17,7 @@ class PaymentController {
 	 *
 	 * @throws Exception If is refund has failed
 	 */
-	public function refund_process( $refund, $args ) {
+	public function refund_process( $refund, $args ): void {
 		if ( ! empty( $args['from_webhook'] ) && $args['from_webhook'] === true ) {
 			return;
 		}
@@ -117,7 +117,7 @@ class PaymentController {
 	 * Uses a function (remove_action) from WordPress
 	 * Uses a function (wc_get_order) from WooCommerce
 	 */
-	public function after_refund_process( $order_id ) {
+	public function after_refund_process( $order_id ): void {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$order = wc_get_order( $order_id );
 

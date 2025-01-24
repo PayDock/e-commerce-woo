@@ -65,7 +65,7 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 	/**
 	 * Uses functions (is_checkout, wp_enqueue_script, wp_localize_script, admin_url and wp_create_nonce) from WordPress
 	 */
-	public function payment_scripts() {
+	public function payment_scripts(): void {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		if ( ! is_checkout() || ! $this->is_available() ) {
 			return;
@@ -125,8 +125,7 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 			'power-board-widget',
 			POWER_BOARD_PLUGIN_URL . '/assets/css/frontend/widget.css',
 			[],
-			POWER_BOARD_PLUGIN_VERSION,
-			'all'
+			POWER_BOARD_PLUGIN_VERSION
 		);
 
 		/* @noinspection PhpUndefinedFunctionInspection */
@@ -258,7 +257,7 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 	 *
 	 * @noinspection PhpUnused
 	 */
-	public function payment_fields() {
+	public function payment_fields(): void {
 		$template = new TemplateService( $this );
 		SDKAdapterService::get_instance();
 

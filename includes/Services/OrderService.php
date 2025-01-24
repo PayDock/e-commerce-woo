@@ -22,7 +22,7 @@ class OrderService {
 	/**
 	 * Uses a function (wc_get_order) from WooCommerce
 	 */
-	public static function update_status( $id, $new_status, $status_note = null ) {
+	public static function update_status( $id, $new_status, $status_note = null ): void {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$order = wc_get_order( $id );
 
@@ -35,7 +35,7 @@ class OrderService {
 	/**
 	 * Uses a function (wp_enqueue_style) from WordPress
 	 */
-	public function init_power_board_order_buttons( $order ) {
+	public function init_power_board_order_buttons( $order ): void {
 		$order_status = $order->get_status();
 		$total_refund = $order->get_total_refunded();
 		$order_total  = (float) $order->get_total( false );
@@ -46,7 +46,6 @@ class OrderService {
 				POWER_BOARD_PLUGIN_URL . 'assets/css/admin/hide-refund-button.css',
 				[],
 				POWER_BOARD_PLUGIN_VERSION,
-				'all'
 			);
 		}
 
@@ -57,7 +56,6 @@ class OrderService {
 				POWER_BOARD_PLUGIN_URL . 'assets/css/admin/hide-on-hold-buttons.css',
 				[],
 				POWER_BOARD_PLUGIN_VERSION,
-				'all'
 			);
 		}
 	}
@@ -69,7 +67,7 @@ class OrderService {
 	 *
 	 * @throws Exception If status change is not allowed
 	 */
-	public function status_change_verification( $order_id, $old_status_key, $new_status_key, $order ) {
+	public function status_change_verification( $order_id, $old_status_key, $new_status_key, $order ): void {
 		$order->update_meta_data( 'status_change_verification_failed', '' );
 		if ( ( $old_status_key === $new_status_key ) || ! empty( $GLOBALS['power_board_is_updating_order_status'] ) || $order_id === null ) {
 			return;
@@ -105,13 +103,15 @@ class OrderService {
 		}
 	}
 
-	public function remove_status_related_notes( $order ) {
+	public function remove_status_related_notes( $order ): void {
 		$order_id = $order->get_id();
 
-		$notes = wc_get_order_notes( [
-			'order_id' => $order_id,
-			'type'     => 'internal',
-		] );
+		$notes = wc_get_order_notes(
+			[
+				'order_id' => $order_id,
+				'type'     => 'internal',
+			]
+			);
 
 		if ( ! empty( $notes ) ) {
 
@@ -129,14 +129,13 @@ class OrderService {
 					}
 				}
 			}
-
 		}
 	}
 
 	/**
 	 * Uses functions (get_transient, get_current_user_id, esc_html and delete_transient) from WordPress
 	 */
-	public function display_status_change_error() {
+	public function display_status_change_error(): void {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$error_message = get_transient( 'power_board_status_change_error_' . get_current_user_id() );
 		if ( $error_message ) {
@@ -152,7 +151,7 @@ class OrderService {
 		}
 	}
 
-	public function remove_bulk_action_message() {
+	public function remove_bulk_action_message(): void {
 		if (
 			isset( $_GET['page'], $_GET['bulk_action'], $_GET['changed'] ) &&
 			$_GET['page'] == 'wc-orders' &&
@@ -166,5 +165,4 @@ class OrderService {
 			}
 		}
 	}
-
 }

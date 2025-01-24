@@ -191,7 +191,7 @@ class ConnectionValidationService {
 	/**
 	 * Uses functions (set_transient) from WordPress
 	 */
-	private function get_configuration_templates() {
+	private function get_configuration_templates(): void {
 		$configuration_templates_result = $this->widget_api_adapter_service->get_configuration_templates_ids( $this->version_settings );
 		$has_error                      = ! empty( $configuration_templates_result['error'] );
 		$configuration_templates        = MasterWidgetTemplatesHelper::map_templates( $configuration_templates_result['resource']['data'], $has_error );
@@ -217,7 +217,7 @@ class ConnectionValidationService {
 	/**
 	 * Uses functions (set_transient) from WordPress
 	 */
-	private function get_customisation_templates() {
+	private function get_customisation_templates(): void {
 		$customisation_templates_result = $this->widget_api_adapter_service->get_customisation_templates_ids( $this->version_settings );
 		$has_error                      = ! empty( $customisation_templates_result['error'] );
 		$customisation_templates        = MasterWidgetTemplatesHelper::map_templates( $customisation_templates_result['resource']['data'], $has_error, true );
@@ -238,12 +238,12 @@ class ConnectionValidationService {
 		MasterWidgetTemplatesHelper::validate_or_update_template_id( $customisation_templates, $has_error, $customisation_id_key );
 	}
 
-	private function save_old_credential() {
+	private function save_old_credential(): void {
 		$this->old_access_token        = ConfigService::$access_token;
 		$this->old_widget_access_token = ConfigService::$widget_access_token;
 	}
 
-	private function restore_credential() {
+	private function restore_credential(): void {
 		ConfigService::$access_token        = $this->old_access_token;
 		ConfigService::$widget_access_token = $this->old_widget_access_token;
 	}

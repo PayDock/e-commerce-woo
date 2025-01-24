@@ -424,6 +424,7 @@ class WidgetConfigurationSettingService extends WC_Payment_Gateway {
 	 * Uses a method (get_form_fields) from WC_Payment_Gateway
 	 *
 	 * @noinspection PhpUnused
+	 * @noinspection PhpParameterNameChangedDuringInheritanceInspection
 	 */
 	public function generate_settings_html( $form_fields = [], $should_echo = true ): ?string {
 		if ( empty( $form_fields ) ) {

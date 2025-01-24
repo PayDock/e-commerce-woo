@@ -56,7 +56,7 @@ class ActionsService {
 	 * Add new payment method on checkout page
 	 * Uses a function (add_action) from WordPress
 	 */
-	protected function add_payment_method_to_checkout() {
+	protected function add_payment_method_to_checkout(): void {
 		if ( ! class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) ) {
 			return;
 		}
@@ -105,7 +105,7 @@ class ActionsService {
 	/**
 	 * Uses a function (add_action) from WordPress
 	 */
-	protected function add_order_actions() {
+	protected function add_order_actions(): void {
 		$order_service      = new OrderService();
 		$payment_controller = new PaymentController();
 		$widget_controller  = new WidgetController();
@@ -117,7 +117,7 @@ class ActionsService {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action( 'woocommerce_create_refund', [ $payment_controller, 'refund_process' ], 10, 2 );
 		/* @noinspection PhpUndefinedFunctionInspection */
-		add_action( 'woocommerce_order_refunded', [ $payment_controller, 'after_refund_process' ], 10, 1 );
+		add_action( 'woocommerce_order_refunded', [ $payment_controller, 'after_refund_process' ] );
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action( 'woocommerce_api_power-board-webhook', [ $payment_controller, 'webhook' ] );
 		/* @noinspection PhpUndefinedFunctionInspection */

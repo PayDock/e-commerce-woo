@@ -19,7 +19,7 @@ class MasterWidgetTemplatesHelper {
 	/**
 	 * Uses functions (get_option and update_option) from WordPress
 	 */
-	public static function validate_or_update_template_id( ?array $templates, bool $has_error, string $template_type_key ) {
+	public static function validate_or_update_template_id( ?array $templates, bool $has_error, string $template_type_key ): void {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$settings = get_option( 'woocommerce_power_board_settings' );
 		if ( ! empty( $settings ) ) {

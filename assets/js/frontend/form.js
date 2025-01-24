@@ -53,6 +53,7 @@ jQuery(
 				return true;
 			};
 
+			// noinspection DuplicatedCode
 			const updateVisibility      = (phoneInputs) => {
 				const validationResults = window.getValidationResults( phoneInputs, validatePhone );
 
@@ -103,27 +104,27 @@ jQuery(
 			const $orderButton = $( '.wc-block-components-checkout-place-order-button' )[0];
 			switch (method) {
 				case 'power_board_gateway':
-					$orderButton.classList.add('hide');
+					$orderButton.classList.add( 'hide' );
 					break;
 				default:
 					window.widgetPowerBoard = null;
-					$orderButton.classList.remove('hide');
+					$orderButton.classList.remove( 'hide' );
 			}
 		}
 		function triggerFirstPaymentMethodChanges() {
-			const firstPaymentInterval             = setInterval(
+			const firstPaymentInterval        = setInterval(
 				() => {
-					const $checkedInput      = $( '.wc-block-components-radio-control__input:checked' );
+					const $checkedInput       = $( '.wc-block-components-radio-control__input:checked' );
 					const $checkedInputs      = Object.values( $checkedInput );
 					const $paymentMethodInput = $checkedInputs.filter(
-						inputEl => inputEl.id?.includes( 'payment-method' ));
-
-					if ($paymentMethodInput.length > 0) {
-						clearInterval( firstPaymentInterval );
-						setPaymentMethod( $paymentMethodInput[0].value );
-						// noinspection JSUnresolvedReference
-						jQuery( '.wc-block-components-form' )[0].dispatchEvent( new Event( "change" ) );
-					}
+						inputEl => inputEl.id?.includes( 'payment-method' )
+						);
+				if ($paymentMethodInput.length > 0) {
+					clearInterval( firstPaymentInterval );
+					setPaymentMethod( $paymentMethodInput[0].value );
+					// noinspection JSUnresolvedReference
+					jQuery( '.wc-block-components-form' )[0].dispatchEvent( new Event( "change" ) );
+				}
 				},
 				200
 			)

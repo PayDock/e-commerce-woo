@@ -9,7 +9,7 @@ class ConfigService {
 	public static ?string $access_token        = null;
 	public static ?string $widget_access_token = null;
 
-	public static function init( ?string $environment, ?string $access_token, ?string $widget_access_token = null ) {
+	public static function init( ?string $environment, ?string $access_token, ?string $widget_access_token = null ): void {
 		self::$environment         = $environment;
 		self::$access_token        = $access_token;
 		self::$widget_access_token = $widget_access_token;

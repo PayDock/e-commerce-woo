@@ -38,6 +38,7 @@
         <!-- Commenting should be optional to where required not mandatory -->
         <exclude name="Squiz.Commenting.FileComment.Missing" />
         <exclude name="Squiz.Commenting.FileComment.MissingPackageTag" />
+        <exclude name="Squiz.Commenting.FileComment.WrongStyle" />
         <exclude name="Squiz.Commenting.ClassComment.Missing" />
         <exclude name="WooCommerce.Commenting.CommentHooks" />
         <exclude name="Squiz.Commenting.FunctionComment.Missing" />
