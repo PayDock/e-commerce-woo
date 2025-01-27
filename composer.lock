@@ -467,12 +467,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPCSStandards/PHP_CodeSniffer.git",
-                "reference": "154bb91cea120a5a2c31c235c2a72a296cbc9170"
+                "reference": "55b35bc66044fbc6ff7b629d3bcf5022d4fe86c5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/154bb91cea120a5a2c31c235c2a72a296cbc9170",
-                "reference": "154bb91cea120a5a2c31c235c2a72a296cbc9170",
+                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/55b35bc66044fbc6ff7b629d3bcf5022d4fe86c5",
+                "reference": "55b35bc66044fbc6ff7b629d3bcf5022d4fe86c5",
                 "shasum": ""
             },
             "require": {
@@ -544,7 +544,7 @@
                     "type": "thanks_dev"
                 }
             ],
-            "time": "2025-01-23T23:10:29+00:00"
+            "time": "2025-01-25T17:50:34+00:00"
         },
         {
             "name": "woocommerce/woocommerce-sniffs",
