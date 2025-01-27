@@ -1,20 +1,17 @@
 # PowerBoard for WooCommerce #
 
-Accept more payment methods with PowerBoard. Connect multiple payment gateways with a central interface to manage the transactions.
+The Commonwealth Bank PowerBoard payment plugin for WooCommerce.
 
 ## Description ##
 
-Accept more payment methods with PowerBoard. Connect multiple payment gateways with a central interface to manage the transactions.
-
-Use PowerBoard to add a payment gateway for credit cards, bank transfers, PayPal or even Buy now pay later gateways.
+PowerBoard is a payment orchestration solution that delivers payment choice, operational efficiency and security for your business. You will be able to access connected services such as card payments, digital wallets, alternative payment methods and value-added services.
+With a few quick configuration steps, this plugin provides you with access to PowerBoard.
 
 ## Installation ##
 
 **Please note that WooCommerce must be installed and active before this plugin can be used.**
-
 Prerequisites to install and configure the PowerBoard plugin, you will need a WordPress instance running:
-
-- WooCommerce versions: 8.9.3 or 9.4.1
+- WooCommerce version: 9.5.2
 - [WooCommerce Server Requirements](https://woocommerce.com/document/server-requirements/)
 - [WooCommerce PHP and WordPress Support](https://woocommerce.com/document/update-php-wordpress/)
 
@@ -33,12 +30,8 @@ Note: Encryption of admin values within the plugin requires Sodium or as a fallb
 3. **Upload the zip file and activate the plugin**
 
 ## Third Party API and libraries
-
-This plugin provides the ability to use payment methods through the PowerBoard API:
-* for sandbox https://api.preproduction.powerboard.commbank.com.au/v1/
-* for live https://api.powerboard.commbank.com.au/v1/
-
-We also use a PowerBoard widget to implement front-end features ([More here](https://developer.powerboard.commbank.com.au/reference/powerboard-widget))
+To configure your payment flows, please navigate to the PowerBoard UI and configure the templates for the Checkout feature. For more information, see:
+https://developer.powerboard.commbank.com.au/reference/checkout
 
 ### Terms of Use and Privacy Policy
 
@@ -50,8 +43,7 @@ You can find all relevant information here:
 - [Important documents](https://www.commbank.com.au/important-info.html?ei=CB-footer_ImportantDocs)
 - [Cookies policy](https://www.commbank.com.au/important-info/cookies.html?ei=CB-footer_cookies)
 
-This plugin transmits the payment and order information that the user provides on the checkout page to Power Board only 
-when making a payment using one of the methods provided by this plugin.
+This plugin transmits the payment and order information that the user provides on the checkout page to PowerBoard when making a payment using one of the methods provided by this plugin.
 The following data is transferred for payment:
 * All payment details
 * Delivery data (if delivery is included in the price and paid for when placing the order)

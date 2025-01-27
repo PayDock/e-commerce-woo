@@ -37,7 +37,7 @@ if ( ! defined( 'POWER_BOARD_PLUGIN_URL' ) ) {
 }
 
 if ( ! defined( 'POWER_BOARD_PLUGIN_VERSION' ) ) {
-	define( 'POWER_BOARD_PLUGIN_VERSION', '3.3.0' );
+	define( 'POWER_BOARD_PLUGIN_VERSION', '1.0.0' );
 }
 
 if ( ! defined( 'PLUGIN_PREFIX' ) ) {
