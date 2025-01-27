@@ -69,7 +69,11 @@ class OrderService {
 	 */
 	public function status_change_verification( $order_id, $old_status_key, $new_status_key, $order ): void {
 		$order->update_meta_data( 'status_change_verification_failed', '' );
-		if ( ( $old_status_key === $new_status_key ) || ! empty( $GLOBALS['power_board_is_updating_order_status'] ) || $order_id === null ) {
+		if (
+			$old_status_key === $new_status_key ||
+			! empty( $GLOBALS['power_board_is_updating_order_status'] ) ||
+			$order_id === null
+		) {
 			return;
 		}
 		$statuses_rules = [
@@ -96,25 +100,24 @@ class OrderService {
 				/* @noinspection PhpUndefinedFunctionInspection */
 				set_transient( 'power_board_status_change_error_' . get_current_user_id(), $error, 300 );
 				unset( $GLOBALS['power_board_is_updating_order_status'] );
-				$this->remove_status_related_notes( $order );
+				$this->remove_status_related_notes( $order_id );
 				/* @noinspection PhpUndefinedFunctionInspection */
 				throw new Exception( esc_html( $error ) );
 			}
 		}
 	}
 
-	public function remove_status_related_notes( $order ): void {
-		$order_id = $order->get_id();
-
+	public function remove_status_related_notes( $order_id ) {
 		$notes = wc_get_order_notes(
 			[
-				'order_id' => $order_id,
-				'type'     => 'internal',
-			]
-			);
+				'order_id'   => $order_id,
+				'date_query' => [
+					'after' => '-30 sec',
+				],
+			],
+		);
 
 		if ( ! empty( $notes ) ) {
-
 			foreach ( $notes as $note ) {
 				$note_content = $note->content;
 
@@ -140,22 +143,27 @@ class OrderService {
 		$error_message = get_transient( 'power_board_status_change_error_' . get_current_user_id() );
 		if ( $error_message ) {
 			/* @noinspection PhpUndefinedFunctionInspection */
-			echo '<div id="power-board-error-message" class="notice notice-error is-dismissible"><p>' . esc_html( $error_message ) . '</p></div>';
+			echo '<div id="power-board-error-message" class="notice notice-error is-dismissible">
+				<p>' . esc_html( $error_message ) . '</p>
+			</div>';
 			echo '<script type="text/javascript">
-			jQuery(document).ready(function($) {
-				$("#message.updated.notice.notice-success").hide();
-			});
+				jQuery(document).ready(function($) {
+					$("#message.updated.notice.notice-success").hide();
+				});
 			</script>';
 			/* @noinspection PhpUndefinedFunctionInspection */
 			delete_transient( 'power_board_status_change_error_' . get_current_user_id() );
 		}
 	}
 
-	public function remove_bulk_action_message(): void {
+	// PHPCS: ignore WordPress.Security.NonceVerification.Recommended -- bulk actions are protected by built-in nonce validation and sufficient user capability checks.
+	public function remove_bulk_action_message() {
+		$is_wc_orders_page  = isset( $_GET['page'] ) && sanitize_text_field( wp_unslash( $_GET['page'] ) ) === 'wc-orders';
+		$is_shop_order_page = isset( $_GET['post_type'] ) && sanitize_text_field( wp_unslash( $_GET['post_type'] ) ) === 'shop_order';
+
 		if (
-			isset( $_GET['page'], $_GET['bulk_action'], $_GET['changed'] ) &&
-			$_GET['page'] == 'wc-orders' &&
-			$_GET['changed'] == 1
+			( $is_wc_orders_page || $is_shop_order_page ) &&
+			isset( $_GET['bulk_action'], $_GET['changed'] )
 		) {
 			$error_key = 'power_board_status_change_error_' . get_current_user_id();
 
@@ -165,4 +173,5 @@ class OrderService {
 			}
 		}
 	}
+	// phpcs:enable
 }
