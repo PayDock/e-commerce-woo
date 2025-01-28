@@ -25,6 +25,7 @@ class ConnectionValidationService {
 	private ?string $environment_settings              = null;
 	private ?string $access_token_settings             = null;
 	private ?string $widget_access_token_settings      = null;
+	private ?string $configuration_id_settings         = null;
 	private ?string $version_settings                  = null;
 	private SDKAdapterService $api_adapter_service;
 	private APIAdapterService $widget_api_adapter_service;
@@ -129,9 +130,6 @@ class ConnectionValidationService {
 			]
 		);
 		$this->access_token_settings = $this->data[ $access_token_settings_key ];
-		if ( $this->access_token_settings === '********************' || $this->access_token_settings === null ) {
-			$this->access_token_settings = $this->service->get_access_token();
-		}
 
 		$widget_access_token_settings_key   = SettingsService::get_instance()
 		->get_option_name(
@@ -142,9 +140,16 @@ class ConnectionValidationService {
 			]
 		);
 		$this->widget_access_token_settings = $this->data[ $widget_access_token_settings_key ];
-		if ( $this->widget_access_token_settings === '********************' || $this->widget_access_token_settings === null ) {
-			$this->widget_access_token_settings = $this->service->get_widget_access_token();
-		}
+
+		$configuration_template_setting_key = SettingsService::get_instance()
+															->get_option_name(
+																$this->service->id,
+																[
+																	SettingGroupsEnum::CHECKOUT,
+																	MasterWidgetSettingsEnum::CONFIGURATION_ID,
+																]
+															);
+		$this->configuration_id_settings    = $this->data[ $configuration_template_setting_key ];
 	}
 
 	private function validate_environment(): bool {
@@ -158,31 +163,42 @@ class ConnectionValidationService {
 
 	private function validate_credential(): void {
 		if (
-			$this->check_access_key_connection( $this->access_token_settings )
-			&& $this->check_widget_key_connection( $this->widget_access_token_settings )
+			$this->access_token_settings === '********************'
+			&& $this->widget_access_token_settings === '********************'
 		) {
-			return;
-		}
+			$this->check_is_configuration_template_selected();
+		} else {
+			if (
+				$this->check_access_key_connection( $this->access_token_settings )
+				&& $this->check_widget_key_connection( $this->widget_access_token_settings )
+			) {
+				return;
+			}
 
-		$this->errors[] = 'Invalid credentials. Please update and try again. ';
+			$this->errors[] = 'Invalid credentials. Please update and try again. ';
+		}
+	}
+
+	private function check_is_configuration_template_selected(): void {
+		if ( empty( $this->configuration_id_settings ) ) {
+			$this->errors[] = 'No configuration template ID selected. Please select a template and try again.';
+		}
 	}
 
 	private function check_access_key_connection( ?string $access_token ): bool {
 		$this->access_token_validation_failed = false;
-		$this->save_old_credential();
-		if ( $access_token === '********************' ) {
-			$access_token = $this->old_access_token;
-		}
-
-		ConfigService::$access_token = $access_token;
-
-		$this->get_configuration_templates();
-		$this->get_customisation_templates();
-
-		$this->restore_credential();
-
-		if ( ! $this->access_token_validation_failed ) {
+		if ( $access_token !== '********************' ) {
+			$this->save_old_credential();
 			ConfigService::$access_token = $access_token;
+
+			$this->get_configuration_templates();
+			$this->get_customisation_templates();
+
+			$this->restore_credential();
+
+			if ( ! $this->access_token_validation_failed ) {
+				ConfigService::$access_token = $access_token;
+			}
 		}
 
 		return ! $this->access_token_validation_failed;
@@ -249,17 +265,18 @@ class ConnectionValidationService {
 	}
 
 	private function check_widget_key_connection( ?string $widget_access_token ): bool {
-		$this->save_old_credential();
-		if ( $widget_access_token === '********************' ) {
-			$widget_access_token = $this->old_widget_access_token;
+		$valid_key = true;
+
+		if ( $widget_access_token !== '********************' ) {
+			$this->save_old_credential();
+
+			ConfigService::$widget_access_token = $widget_access_token;
+
+			$result    = $this->api_adapter_service->token();
+			$valid_key = empty( $result['error'] );
+
+			$this->restore_credential();
 		}
-
-		ConfigService::$widget_access_token = $widget_access_token;
-
-		$result    = $this->api_adapter_service->token();
-		$valid_key = empty( $result['error'] );
-
-		$this->restore_credential();
 
 		return $valid_key;
 	}

@@ -103,13 +103,16 @@ final class SettingsService {
 
 		if ( ConfigAPIEnum::PRODUCTION_ENVIRONMENT === $this->environment ) {
 			$sdk_url = ConfigAPIEnum::PRODUCTION_WIDGET_URL;
+			$version = 'latest';
 		} elseif ( ConfigAPIEnum::STAGING_ENVIRONMENT === $this->environment ) {
 			$sdk_url = ConfigAPIEnum::STAGING_WIDGET_URL;
+			$version = 'v1.117.2-beta';
 		} else {
 			$sdk_url = ConfigAPIEnum::SANDBOX_WIDGET_URL;
+			$version = 'v1.116.4';
 		}
 
-		return strtr( $sdk_url, [ '{version}' => 'v1.116.3-beta' ] );
+		return strtr( $sdk_url, [ '{version}' => $version ] );
 	}
 
 	public static function get_instance(): self {

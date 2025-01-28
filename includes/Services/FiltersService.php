@@ -33,9 +33,11 @@ class FiltersService {
 		add_filter( 'admin_notices', [ $this, 'order_status_bulk_update' ] );
 	}
 
-	// PHPCS: ignore WordPress.Security.NonceVerification.Recommended -- bulk actions are protected by built-in nonce validation and sufficient user capability checks.
+	// phpcs:disable WordPress.Security.NonceVerification.Recommended -- bulk actions are protected by built-in nonce validation and sufficient user capability checks.
 	public function order_status_bulk_update() {
-		$is_wc_orders_page  = isset( $_GET['page'] ) && sanitize_text_field( wp_unslash( $_GET['page'] ) ) === 'wc-orders';
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$is_wc_orders_page = isset( $_GET['page'] ) && sanitize_text_field( wp_unslash( $_GET['page'] ) ) === 'wc-orders';
+		/* @noinspection PhpUndefinedFunctionInspection */
 		$is_shop_order_page = isset( $_GET['post_type'] ) && sanitize_text_field( wp_unslash( $_GET['post_type'] ) ) === 'shop_order';
 
 		if (
