@@ -55,7 +55,7 @@ class WidgetController {
 			/* @noinspection PhpUndefinedFunctionInspection */
 			$orders = wc_get_orders( $args );
 
-			if ( ! empty( $orders ) && $orders[0] instanceof \WC_Order ) {
+			if ( ! empty( $orders ) && is_a( $orders[0], 'WC_Order' ) ) {
 				$reference = $orders[0]->get_id();
 			} else {
 				$reference = '';

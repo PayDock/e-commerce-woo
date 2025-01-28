@@ -148,9 +148,11 @@ class MasterWidgetSettingsHelper {
 	/**
 	 * Uses functions (sanitize_text_field and wp_unslash) from WordPress
 	 * It is safe to ignore NonceVerification because we are sanitizing the strings and not using them to submit data
+	 * phpcs:disable WordPress.Security.NonceVerification -- processed through the WooCommerce form handler
 	 */
 	public static function is_power_board_settings_page(): bool {
 		/* @noinspection PhpUndefinedFunctionInspection */
-		return isset( $_GET['page'] ) && sanitize_text_field( wp_unslash( $_GET['page'] ) ) === 'wc-settings' && isset( $_GET['tab'] ) && sanitize_text_field( wp_unslash( $_GET['tab'] ) ) === 'checkout' && isset( $_GET['section'] ) && sanitize_text_field( wp_unslash( $_GET['section'] ) ) === PLUGIN_PREFIX; // phpcs:ignore WordPress.Security.NonceVerification
+		return isset( $_GET['page'] ) && sanitize_text_field( wp_unslash( $_GET['page'] ) ) === 'wc-settings' && isset( $_GET['tab'] ) && sanitize_text_field( wp_unslash( $_GET['tab'] ) ) === 'checkout' && isset( $_GET['section'] ) && sanitize_text_field( wp_unslash( $_GET['section'] ) ) === PLUGIN_PREFIX;
 	}
+	// phpcs:enable
 }

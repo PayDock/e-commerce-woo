@@ -10,7 +10,6 @@ namespace PowerBoard\Abstracts;
 use LogicException;
 use PowerBoard\API\ConfigService;
 use PowerBoard\Helpers\LoggerHelper;
-use WP_Error;
 
 abstract class AbstractApiService {
 	const METHOD_GET  = 'GET';
@@ -96,7 +95,7 @@ abstract class AbstractApiService {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$request = _wp_http_get_object()->request( $url, $parsed_args );
 
-		if ( $request instanceof WP_Error ) {
+		if ( is_wp_error( $request ) ) {
 			return [
 				'status' => 403,
 				'error'  => $request,
@@ -118,7 +117,7 @@ abstract class AbstractApiService {
 				'request'  => [
 					'url'     => $url,
 					'method'  => $parsed_args['method'],
-					'payload' => $parsed_args['body'],
+					'payload' => $parsed_args['body'] ?? '',
 				],
 				'response' => $body,
 				'error'    => $body['error'],

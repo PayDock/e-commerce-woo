@@ -14,6 +14,7 @@ class PaymentController {
 	 * Handles refund process on PowerBoard
 	 * Uses functions (sanitize_text_field, __, remove_action and esc_html) from WordPress
 	 * Uses a function (wc_get_order) from WooCommerce
+	 * phpcs:disable WordPress.Security.NonceVerification -- processed through the WooCommerce form handler
 	 *
 	 * @throws Exception If is refund has failed
 	 */
@@ -48,7 +49,6 @@ class PaymentController {
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		$action = isset( $_POST['action'] ) ? sanitize_text_field( wp_unslash( $_POST['action'] ) ) : '';
 
 		$amount_to_refund = $amount;
@@ -112,6 +112,7 @@ class PaymentController {
 			throw new Exception( esc_html( $error ) );
 		}
 	}
+	// phpcs:enable
 
 	/**
 	 * Uses a function (remove_action) from WordPress

@@ -163,7 +163,7 @@ class OrderService {
 
 	/**
 	 * Removes the bulk action success message when an error has occurred.
-	 * PHPCS: ignore WordPress.Security.NonceVerification.Recommended -- bulk actions are protected by built-in nonce validation and sufficient user capability checks
+	 * phpcs:disable WordPress.Security.NonceVerification -- processed through the WooCommerce form handler
 	 *
 	 * @return void
 	 */
@@ -188,5 +188,5 @@ class OrderService {
 			}
 		}
 	}
-	/** phpcs:enable */
+	// phpcs:enable
 }

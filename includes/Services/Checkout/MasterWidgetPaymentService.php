@@ -168,6 +168,7 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 	 * Uses a function (sanitize_text_field) from WordPress
 	 * Uses functions (wc_get_order, WC and get_return_url) from WooCommerce
 	 * Uses method (get_return_url) from WC_Payment_Gateway
+	 * phpcs:disable WordPress.Security.NonceVerification -- processed through the WooCommerce form handler
 	 *
 	 * @noinspection PhpUnused
 	 * @since 1.0.0
@@ -177,8 +178,6 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		$order = wc_get_order( $order_id );
 
 		/* @noinspection PhpUndefinedFunctionInspection */
-
-        // phpcs:ignore WordPress.Security.NonceVerification.Missing
 		$checkout_order = isset( $_POST['checkoutorder'] ) ? json_decode( sanitize_text_field( wp_unslash( $_POST['checkoutorder'] ) ), true ) : [];
 
 		$order = $this->get_order_to_process_payment( $order, $checkout_order );
@@ -187,8 +186,6 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		setcookie( 'cart_total', 0, time() + 3600, '/' );
 
 		/* @noinspection PhpUndefinedFunctionInspection */
-
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		$charge_id = isset( $_POST['chargeid'] ) ? sanitize_text_field( wp_unslash( $_POST['chargeid'] ) ) : '';
 
 		$order->update_meta_data( 'power_board_charge_id', $charge_id );
@@ -202,6 +199,7 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 			'redirect' => $this->get_return_url( $order ),
 		];
 	}
+	// phpcs:enable
 
 	public function get_order_to_process_payment( $current_order, $checkout_order ): WC_Order {
 		$current_order_total  = (float) $current_order->get_total( false );

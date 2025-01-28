@@ -287,10 +287,12 @@ class WidgetConfigurationSettingService extends WC_Payment_Gateway {
 	}
 
 	/**
+	 * Processes the admin options for the payment gateway
 	 * This function is used on WC_Payment_Gateway
 	 * Uses functions (wp_unslash, do_action, update_option and apply_filters) from WordPress
 	 * Uses a function (wc_clean) from WooCommerce
 	 * Uses methods (init_settings, get_form_fields, get_field_type, validate_text_field, get_option, add_error and get_option_key) from WC_Payment_Gateway
+	 * phpcs:disable WordPress.Security.NonceVerification -- processed through the WooCommerce form handler
 	 *
 	 * @noinspection PhpUnused
 	 */
@@ -342,8 +344,6 @@ class WidgetConfigurationSettingService extends WC_Payment_Gateway {
 			$option_key = $this->plugin_id . $this->id . '_' . $key;
 
 			/* @noinspection PhpUndefinedFunctionInspection */
-
-			// phpcs:ignore WordPress.Security.NonceVerification.Missing
 			$value = ! empty( $_POST[ $option_key ] ) ? wc_clean( wp_unslash( $_POST[ $option_key ] ) ) : null;
 
 			if ( method_exists( $this, 'validate_' . $type . '_field' ) ) {
@@ -405,6 +405,7 @@ class WidgetConfigurationSettingService extends WC_Payment_Gateway {
 			'yes'
 		);
 	}
+	// phpcs:enable
 
 	protected function get_id(): string {
 		return SettingsSectionEnum::WIDGET_CONFIGURATION;

@@ -35,7 +35,7 @@ class FiltersService {
 
 	/**
 	 * Handles orders status bulk-update (admin side, WC orders page)
-	 * PHPCS: ignore WordPress.Security.NonceVerification.Recommended -- bulk actions are protected by built-in nonce validation and sufficient user capability checks
+	 * phpcs:disable WordPress.Security.NonceVerification -- processed through the WooCommerce form handler
 	 *
 	 * @return void
 	 */
@@ -57,7 +57,7 @@ class FiltersService {
 			</script>";
 		}
 	}
-	/** phpcs:enable */
+	// phpcs:enable
 
 	/**
 	 * Uses functions (add_filter, plugin_basename) from WordPress
