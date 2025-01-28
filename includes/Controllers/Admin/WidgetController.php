@@ -53,8 +53,13 @@ class WidgetController {
 			$reference = sanitize_text_field( wp_unslash( $_POST['order_id'] ) );
 		} else {
 			/* @noinspection PhpUndefinedFunctionInspection */
-			$orders    = wc_get_orders( $args );
-			$reference = $orders[0]->ID;
+			$orders = wc_get_orders( $args );
+
+			if ( ! empty( $orders ) && $orders[0] instanceof \WC_Order ) {
+				$reference = $orders[0]->get_id();
+			} else {
+				$reference = '';
+			}
 		}
 
 		$billing_address = [];
@@ -68,7 +73,7 @@ class WidgetController {
 			'amount'        => round( $request['total']['total_price'] / 100, 2 ),
 			'version'       => (int) $settings->get_checkout_template_version(),
 			'currency'      => $request['total']['currency_code'],
-			'reference'     => (string) $reference,
+			'reference'     => $reference,
 			'customer'      => [
 				'email'           => $billing_address['email'],
 				'billing_address' => [
@@ -85,6 +90,10 @@ class WidgetController {
 				'template_id' => $settings->get_checkout_configuration_id(),
 			],
 		];
+
+		if ( empty( $reference ) ) {
+			unset( $intent_request_params['reference'] );
+		}
 
 		if ( ! empty( $settings->get_checkout_customisation_id() ) ) {
 			$intent_request_params['customisation']['template_id'] = $settings->get_checkout_customisation_id();

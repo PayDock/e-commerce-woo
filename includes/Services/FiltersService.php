@@ -33,7 +33,12 @@ class FiltersService {
 		add_filter( 'admin_notices', [ $this, 'order_status_bulk_update' ] );
 	}
 
-	// phpcs:disable WordPress.Security.NonceVerification.Recommended -- bulk actions are protected by built-in nonce validation and sufficient user capability checks.
+	/**
+	 * Handles orders status bulk-update (admin side, WC orders page)
+	 * PHPCS: ignore WordPress.Security.NonceVerification.Recommended -- bulk actions are protected by built-in nonce validation and sufficient user capability checks
+	 *
+	 * @return void
+	 */
 	public function order_status_bulk_update() {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$is_wc_orders_page = isset( $_GET['page'] ) && sanitize_text_field( wp_unslash( $_GET['page'] ) ) === 'wc-orders';
@@ -52,7 +57,7 @@ class FiltersService {
 			</script>";
 		}
 	}
-	// phpcs:enable
+	/** phpcs:enable */
 
 	/**
 	 * Uses functions (add_filter, plugin_basename) from WordPress

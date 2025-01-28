@@ -107,6 +107,9 @@ class OrderService {
 		}
 	}
 
+	/**
+	 * Handles the order notes’ verbiage for switching statuses back and forth. Woo core behaviour, can't be avoided
+	 */
 	public function remove_status_related_notes( $order_id ) {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$notes = wc_get_order_notes(
@@ -158,7 +161,12 @@ class OrderService {
 		}
 	}
 
-	// phpcs:disable WordPress.Security.NonceVerification.Recommended -- bulk actions are protected by built-in nonce validation and sufficient user capability checks.
+	/**
+	 * Removes the bulk action success message when an error has occurred.
+	 * PHPCS: ignore WordPress.Security.NonceVerification.Recommended -- bulk actions are protected by built-in nonce validation and sufficient user capability checks
+	 *
+	 * @return void
+	 */
 	public function remove_bulk_action_message() {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$is_wc_orders_page = isset( $_GET['page'] ) && sanitize_text_field( wp_unslash( $_GET['page'] ) ) === 'wc-orders';
@@ -180,5 +188,5 @@ class OrderService {
 			}
 		}
 	}
-	// phpcs:enable
+	/** phpcs:enable */
 }
