@@ -1,4 +1,4 @@
-<?php
+<?php declare( strict_types=1 );
 /**
  * Copyright (c) PowerBoard, Inc. and its affiliates. All Rights Reserved
  *
@@ -7,7 +7,7 @@
  *
  * Plugin Name: PowerBoard for WooCommerce
  * Plugin URI: https://github.com/CommBank-PowerBoard/powerboard-e-commerce-woo
- * Description: PowerBoard simplify how you manage your payments. Reduce costs, technical headaches & streamline compliance using PowerBoard's payment orchestration.
+ * Description: PowerBoard is a payment orchestration solution that delivers payment choice, operational efficiency and security for your business.
  * Author: PowerBoard
  * Author URI: https://www.commbank.com.au/business/payments/take-online-payments/powerboard.html#getting-started
  * Version: 1.0.0

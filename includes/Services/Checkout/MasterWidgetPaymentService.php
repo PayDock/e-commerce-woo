@@ -1,4 +1,4 @@
-<?php
+<?php declare( strict_types=1 );
 /**
  * This file uses classes from WooCommerce
  *
@@ -183,7 +183,7 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		$order = $this->get_order_to_process_payment( $order, $checkout_order );
 		$order->set_status( 'processing' );
 		$order->payment_complete();
-		setcookie( 'cart_total', 0, time() + 3600, '/' );
+		setcookie( 'cart_total', '0', time() + 3600, '/' );
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$charge_id = isset( $_POST['chargeid'] ) ? sanitize_text_field( wp_unslash( $_POST['chargeid'] ) ) : '';

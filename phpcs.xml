@@ -70,6 +70,9 @@
 
         <!-- Prefer indenting from "Generic.WhiteSpace.ScopeIndent.Incorrect" -->
         <exclude name="PEAR.Functions.FunctionCallSignature.Indent" />
+
+        <!-- Allow strict declaration in PHP file before comment -->
+        <exclude name="PSR12.Files.FileHeader.IncorrectOrder" />
     </rule>
 
     <!-- AutoEscaped functions -->

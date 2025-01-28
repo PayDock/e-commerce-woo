@@ -1,4 +1,4 @@
-<?php
+<?php declare( strict_types=1 );
 /**
  * This file uses functions (get_query_var, esc_html_e, apply_filters, esc_attr, wp_kses_post, do_action, esc_html and wp_nonce_field) from WordPress
  * This file uses functions (wc_get_order, wc_display_item_meta, wc_get_template and wc_wp_theme_get_element_class_name) from WooCommerce
