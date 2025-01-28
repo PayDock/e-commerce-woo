@@ -23,6 +23,7 @@ echo wp_kses_post(
 	</div>
 
 	<input id="chargeid" type="hidden" name="chargeid">
+	<input id="checkoutorder" type="hidden" name="checkoutorder">
 	<input id="classic-<?php echo esc_attr( $data['id'] ); ?>-nonce" type="hidden" name="_wpnonce"
 			value="<?php echo esc_attr( $data['nonce'] ); ?>">
 	<input id="classic-<?php echo esc_attr( $data['id'] ); ?>-settings" type="hidden"

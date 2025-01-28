@@ -17,7 +17,8 @@ const settings = getSetting( 'power_board_data', {} );
 const textDomain   = 'power-board';
 const defaultLabel = __( 'PowerBoard Payments', textDomain );
 
-const label = decodeEntities( settings.title ) || defaultLabel;
+const label  = decodeEntities( settings.title ) || defaultLabel;
+let cartData = null;
 
 const toggleWidgetVisibility = ( hide ) => {
 	let widget               = document.getElementById( 'standaloneWidget' );
@@ -66,6 +67,8 @@ const initMasterWidgetCheckout = () => {
 					address: cart.getCustomerData().billingAddress,
 				},
 				success: ( response ) => {
+					// noinspection JSUnresolvedReference
+					cartData = JSON.stringify( cart.getCartData() );
 					toggleWidgetVisibility( false );
 					// noinspection JSUnresolvedReference
 					window.widgetPowerBoard = new cba.Checkout( '#powerBoardCheckout_wrapper', response.data.resource.data.token );
@@ -125,6 +128,7 @@ const initMasterWidgetCheckout = () => {
 		);
 	}
 }
+
 const handleFormChanged = () => {
 	// noinspection JSUnresolvedReference
 	let isFormValid = jQuery( '.wc-block-components-form' )[0].checkValidity();
@@ -201,7 +205,7 @@ const Content = ( props ) => {
 			const unsubscribe               = onPaymentSetup(
 				async() => {
 					const paymentData       = document.getElementById( 'paymentSourceToken' )?.value
-					const paymentDataParsed = JSON.parse( document.getElementById( 'paymentSourceToken' )?.value )
+					const paymentDataParsed = JSON.parse( paymentData )
 					if ( !!paymentData && !paymentDataParsed.errorMessage ) {
 						// noinspection JSUnresolvedReference
 						return {
@@ -209,6 +213,7 @@ const Content = ( props ) => {
 								paymentMethodData: {
 									payment_response: paymentData,
 									chargeId: paymentDataParsed['charge_id'],
+									checkoutOrder: cartData,
 									_wpnonce: settings._wpnonce
 								}
 							},

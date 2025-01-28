@@ -11,6 +11,7 @@ use PowerBoard\Services\SDKAdapterService;
 use PowerBoard\Services\SettingsService;
 use PowerBoard\Services\TemplateService;
 use WC_Payment_Gateway;
+use WC_Order;
 
 /**
  * Some properties used comes from the extension WC_Payment_Gateway from WooCommerce
@@ -93,6 +94,16 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		wp_localize_script(
+			'power-board-cart-changes-helpers',
+			'PowerBoardAjax',
+			[
+				'url'           => admin_url( 'admin-ajax.php' ),
+				'wpnonce_error' => wp_create_nonce( 'power-board-create-error-notice' ),
+			]
+		);
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		wp_localize_script(
 			'power-board-classic-form',
 			'PowerBoardAjax',
 			[
@@ -164,13 +175,22 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 	public function process_payment( $order_id ): array {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$order = wc_get_order( $order_id );
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$checkout_order = isset( $_POST['checkoutorder'] ) ? json_decode( sanitize_text_field( wp_unslash( $_POST['checkoutorder'] ) ), true ) : [];
+
+		$order = $this->get_order_to_process_payment( $order, $checkout_order );
 		$order->set_status( 'processing' );
 		$order->payment_complete();
+		setcookie( 'cart_total', 0, time() + 3600, '/' );
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		$charge_id = isset( $_POST['chargeid'] ) ? sanitize_text_field( wp_unslash( $_POST['chargeid'] ) ) : '';
+
 		$order->update_meta_data( 'power_board_charge_id', $charge_id );
 		/* @noinspection PhpUndefinedFunctionInspection */
 		WC()->cart->empty_cart();
@@ -181,6 +201,35 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 			'result'   => 'success',
 			'redirect' => $this->get_return_url( $order ),
 		];
+	}
+
+	public function get_order_to_process_payment( $current_order, $checkout_order ): WC_Order {
+		$current_order_total  = (float) $current_order->get_total( false );
+		$checkout_order_total = ! empty( $checkout_order['totals']['total_price'] ) ? ( (float) $checkout_order['totals']['total_price'] / 100 ) : null;
+
+		if ( ! empty( $checkout_order ) && $current_order_total !== $checkout_order_total ) {
+			$order_items = $current_order->get_items();
+			foreach ( $order_items as $item_id => $item ) {
+				$current_order->remove_item( $item_id );
+			}
+
+			$checkout_order_items = $checkout_order['items'];
+			foreach ( $checkout_order_items as $checkout_order_item ) {
+				$product_id = $checkout_order_item['id'];
+				$quantity   = $checkout_order_item['quantity'];
+				/* @noinspection PhpUndefinedFunctionInspection */
+				$product = wc_get_product( $product_id );
+
+				if ( $product && $product->exists() && $quantity > 0 ) {
+					$current_order->add_product( $product, $quantity );
+				}
+			}
+
+			$current_order->calculate_totals();
+			$current_order->save();
+		}
+
+		return $current_order;
 	}
 
 	/**
@@ -225,10 +274,12 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		}
 
 		/* @noinspection PhpUndefinedFunctionInspection */
-		$error_message = isset( $_POST['error'] ) ? sanitize_text_field( wp_unslash( $_POST['error'] ) ) : '';
-		if ( $error_message ) {
+		$message = isset( $_POST['message'] ) ? sanitize_text_field( wp_unslash( $_POST['message'] ) ) : '';
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$notice_type = isset( $_POST['type'] ) ? sanitize_text_field( wp_unslash( $_POST['type'] ) ) : 'error';
+		if ( $message ) {
 			/* @noinspection PhpUndefinedFunctionInspection */
-			wc_add_notice( esc_html( $error_message ), 'error' );
+			wc_add_notice( esc_html( $message ), $notice_type );
 		}
 
 		/* @noinspection PhpUndefinedFunctionInspection */

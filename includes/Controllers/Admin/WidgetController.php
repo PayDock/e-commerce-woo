@@ -104,6 +104,10 @@ class WidgetController {
 
 		$result['county'] = $request['address']['country'] ?? '';
 
+		if ( ! empty( $_POST['return_cart'] ) ) {
+			$result['cart'] = $cart;
+		}
+
 		/* @noinspection PhpUndefinedFunctionInspection */
 		wp_send_json_success( $result, 200 );
 	}

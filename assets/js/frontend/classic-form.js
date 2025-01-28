@@ -75,39 +75,16 @@ jQuery(
 					updateVisibility( phoneInputs );
 				};
 				initPhoneNumberValidation();
-				const powerBoardHelper = {
+				const powerBoardHelper            = {
 					paymentMethod: null,
 					form: null,
 					formChangedTimer: null,
 					lastAddressVerified: null,
 					showErrorMessage( errorMessage ) {
-						$( '.woocommerce-notices-wrapper:first' ).html( '' );
-						$( '.woocommerce-NoticeGroup.woocommerce-NoticeGroup-checkout' ).html( '' );
-						// noinspection JSUnresolvedReference
-						jQuery.post(
-							PowerBoardAjax.url,
-							{
-								_wpnonce: PowerBoardAjax.wpnonce_error,
-								dataType: 'html',
-								action: 'power_board_create_error_notice',
-								error: errorMessage,
-							}
-						).then(
-							( message ) => {
-								const doc          = new DOMParser().parseFromString( message.toString(), 'text/html' );
-								const noticeBanner = doc.querySelectorAll( 'div.wc-block-components-notice-banner' )[0];
-								$( '.woocommerce-notices-wrapper:first' ).append( noticeBanner );
-								$( 'html, body' ).animate(
-									{
-										scrollTop: $( 'div.woocommerce-notices-wrapper' ).offset().top - 100,
-									},
-									800
-								);
-							}
-						);
+						window.showWarning( $, errorMessage, 'error' );
 					},
 					handleWidgetError() {
-						let loading = $( '#loading' );
+						let loading               = $( '#loading' );
 						this.toggleWidgetVisibility( true );
 						loading.show();
 						this.initMasterWidget();
@@ -272,6 +249,7 @@ jQuery(
 						const data = {
 							_wpnonce: PowerBoardAjax.wpnonce,
 							address: this.getAddressData( false ).address,
+							return_cart: true,
 						};
 						if (isOrderPayPage) {
 							data.order_id = orderData.order_id;
@@ -289,6 +267,8 @@ jQuery(
 								type: 'POST',
 								data: data,
 								success: ( response ) => {
+									// noinspection JSUnresolvedReference
+									const cartData = response.data.cart;
 									this.toggleWidgetVisibility( false );
 									// noinspection JSUnresolvedReference
 									window.widgetPowerBoard = new cba.Checkout( '#classic-powerBoardCheckout_wrapper', response.data.resource.data.token );
@@ -302,6 +282,8 @@ jQuery(
 										function ( data ) {
 											// noinspection JSUnresolvedReference
 											jQuery( '#chargeid' ).val( data['charge_id'] );
+											// noinspection JSUnresolvedReference
+											jQuery( '#checkoutorder' ).val( JSON.stringify( cartData ) );
 											submitForm();
 
 											window.widgetPowerBoard = null;

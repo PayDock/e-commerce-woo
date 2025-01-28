@@ -79,6 +79,38 @@ class ActionsService {
 				$payment_method_registry->register( new MasterWidgetBlock() );
 			}
 		);
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'woocommerce_after_cart_item_quantity_update', [ $this, 'cart_item_quantity_changed' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'woocommerce_add_to_cart', [ $this, 'add_to_cart' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'woocommerce_cart_item_removed', [ $this, 'cart_item_removed' ] );
+	}
+
+	public function cart_item_quantity_changed() {
+		$this->calculate_totals_and_save_cookie();
+	}
+
+	public function add_to_cart() {
+		$this->calculate_totals_and_save_cookie();
+	}
+
+	public function cart_item_removed() {
+		$this->calculate_totals_and_save_cookie();
+	}
+
+	private function calculate_totals_and_save_cookie() {
+		/* @noinspection PhpUndefinedFunctionInspection */
+		if ( is_checkout() ) {
+			return;
+		}
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$cart = WC()->cart;
+		$cart->calculate_totals();
+		$cart_total  = $cart->get_total( false );
+		$expiry_time = time() + 3600;
+		setcookie( 'cart_total', $cart_total, $expiry_time, '/' );
 	}
 
 	/**
@@ -122,6 +154,8 @@ class ActionsService {
 		add_action( 'woocommerce_api_power-board-webhook', [ $payment_controller, 'webhook' ] );
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action( 'wc_ajax_power-board-create-charge-intent', [ $widget_controller, 'create_checkout_intent' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'wc_ajax_nopriv_power-board-create-charge-intent', [ $widget_controller, 'create_checkout_intent' ] );
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action( 'admin_init', [ $order_service, 'remove_bulk_action_message' ] );
 	}

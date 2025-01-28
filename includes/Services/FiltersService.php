@@ -29,6 +29,7 @@ class FiltersService {
 		add_filter( 'woocommerce_payment_gateways', [ $this, 'register_in_woocommerce_payment_class' ] );
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_filter( 'plugins_loaded', [ $this, 'woo_text_override' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
 		add_filter( 'admin_notices', [ $this, 'order_status_bulk_update' ] );
 	}
 

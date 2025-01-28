@@ -108,6 +108,7 @@ class OrderService {
 	}
 
 	public function remove_status_related_notes( $order_id ) {
+        /* @noinspection PhpUndefinedFunctionInspection */
 		$notes = wc_get_order_notes(
 			[
 				'order_id'   => $order_id,
@@ -128,6 +129,7 @@ class OrderService {
 
 				foreach ( $related_notes as $message ) {
 					if ( strpos( $note_content, $message ) !== false ) {
+						/* @noinspection PhpUndefinedFunctionInspection */
 						wp_delete_comment( $note->id, true );
 					}
 				}
@@ -158,16 +160,21 @@ class OrderService {
 
 	// PHPCS: ignore WordPress.Security.NonceVerification.Recommended -- bulk actions are protected by built-in nonce validation and sufficient user capability checks.
 	public function remove_bulk_action_message() {
+        /** @noinspection PhpUndefinedFunctionInspection */
 		$is_wc_orders_page  = isset( $_GET['page'] ) && sanitize_text_field( wp_unslash( $_GET['page'] ) ) === 'wc-orders';
+        /** @noinspection PhpUndefinedFunctionInspection */
 		$is_shop_order_page = isset( $_GET['post_type'] ) && sanitize_text_field( wp_unslash( $_GET['post_type'] ) ) === 'shop_order';
 
 		if (
 			( $is_wc_orders_page || $is_shop_order_page ) &&
 			isset( $_GET['bulk_action'], $_GET['changed'] )
 		) {
+			/** @noinspection PhpUndefinedFunctionInspection */
 			$error_key = 'power_board_status_change_error_' . get_current_user_id();
 
+			/** @noinspection PhpUndefinedFunctionInspection */
 			if ( get_transient( $error_key ) ) {
+				/** @noinspection PhpUndefinedFunctionInspection */
 				wp_safe_redirect( remove_query_arg( 'changed' ) );
 				exit;
 			}
