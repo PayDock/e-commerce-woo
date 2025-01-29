@@ -97,7 +97,8 @@
 }
 
 .wc-block-components-notice-banner,
-.wc-block-components-checkout-place-order-button {
+.wc-block-components-checkout-place-order-button,
+#place_order {
 	&.hide {
 		display: none;
 	}

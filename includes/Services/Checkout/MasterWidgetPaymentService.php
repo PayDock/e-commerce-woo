@@ -315,14 +315,15 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		$nonce = wp_create_nonce( 'power-board-create-charge-intent' );
 
 		/* @noinspection PhpUndefinedFunctionInspection */
+		$data = [
+			'description' => $this->description,
+			'id'          => $this->id,
+			'nonce'       => $nonce,
+			'settings'    => wp_json_encode( $settings ),
+		];
 		$template->include_checkout_html(
 			'method-form',
-			[
-				'description' => $this->description,
-				'id'          => $this->id,
-				'nonce'       => $nonce,
-				'settings'    => wp_json_encode( $settings ),
-			]
+			$data
 		);
 	}
 }

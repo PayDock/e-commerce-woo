@@ -75,7 +75,7 @@ jQuery(
 					updateVisibility( phoneInputs );
 				};
 				initPhoneNumberValidation();
-				const powerBoardHelper            = {
+				const powerBoardHelper = {
 					paymentMethod: null,
 					form: null,
 					formChangedTimer: null,
@@ -84,10 +84,11 @@ jQuery(
 						window.showWarning( $, errorMessage, 'error' );
 					},
 					handleWidgetError() {
-						let loading               = $( '#loading' );
+						let loading    = $( '#loading' );
 						this.toggleWidgetVisibility( true );
 						loading.show();
 						this.initMasterWidget();
+
 						const noticesWrapper      = $( 'div.woocommerce-notices-wrapper' )[0];
 						const removeErrorInterval = setInterval(
 							() => {
@@ -208,6 +209,7 @@ jQuery(
 						let loading = $( '#loading' );
 						loading.show();
 						error.hide();
+
 						if ( !this.isValidForm( methodName ) ) {
 							this.toggleWidgetVisibility( true );
 							loading.hide();
@@ -219,17 +221,16 @@ jQuery(
 							loading.show();
 							error.hide();
 						}
-						let orderButton    = $( 'button#place_order' )
-						orderButton.hide();
 						this.paymentMethod = methodName;
 						switch (this.paymentMethod) {
 							case 'power_board_gateway':
+								this.toggleOrderButton( true );
+								this.toggleWidgetVisibility( true );
 								this.initMasterWidget();
-								orderButton.hide();
 								break;
 							default:
 								window.widgetPowerBoard = null;
-								orderButton.show();
+								this.toggleOrderButton( false );
 						}
 					},
 					showFormValidationError( paymentMethod ) {
@@ -245,6 +246,8 @@ jQuery(
 						}
 					},
 					initMasterWidget() {
+						this.toggleOrderButton( true );
+
 						// noinspection JSUnresolvedReference
 						const data = {
 							_wpnonce: PowerBoardAjax.wpnonce,
@@ -368,9 +371,18 @@ jQuery(
 					},
 					getConfigs() {
 						// noinspection JSUnresolvedReference
-						let settings                = $( `#classic-power_board_gateway-settings` ).val()
-						settings                    = JSON.parse( settings )
+						let settings            = $( `#classic-power_board_gateway-settings` ).val()
+						settings                = JSON.parse( settings )
 						return settings;
+					},
+					toggleOrderButton( hide ) {
+						setTimeout(
+							() => {
+								let orderButton = document.querySelectorAll( 'button#place_order' )[0];
+								window.toggleOrderButton( orderButton, hide );
+							},
+							100
+						)
 					},
 					init() {
 						const paymentMethodInterval = setInterval(
@@ -378,25 +390,31 @@ jQuery(
 								// noinspection JSUnresolvedReference
 								const paymentMethod = $( 'input[name="payment_method"]:checked' ).val();
 								if ( paymentMethod && ! this.paymentMethod ) {
+									this.lastAddressVerified = JSON.stringify( this.getAddressData( false ).address );
 									clearInterval( paymentMethodInterval );
 									this.setPaymentMethod( paymentMethod );
 								}
 							},
 							100
 						);
+
 						this.form = $( 'form[name="checkout"]' );
 						this.form.on(
 							'change',
 							( event ) => {
 								try {
+									if ( event.target.id.includes( 'checkoutorder' ) || event.target.id.includes( 'chargeid' ) ) {
+										return
+									}
+
 									clearTimeout( this.formChangedTimer );
 									this.formChangedTimer        = setTimeout(
 										() => {
 											const currentAddress = JSON.stringify( this.getAddressData( false ).address );
 											if (
 												this.lastAddressVerified !== currentAddress ||
-												event.target.classList.contains( 'shipping_method' ) ||
-												event.target.id.includes( 'payment_method' )
+												event.target.id.includes( 'payment_method' ) ||
+												event.target.id.includes( 'shipping_method' )
 											) {
 												this.lastAddressVerified = currentAddress;
 												// noinspection JSUnresolvedReference
@@ -406,7 +424,7 @@ jQuery(
 												);
 											}
 										},
-										1000
+										500
 									);
 								} catch ( e ) {
 									console.error( e );
@@ -415,6 +433,7 @@ jQuery(
 						);
 					},
 				}
+
 				powerBoardHelper.init()
 			}
 		);

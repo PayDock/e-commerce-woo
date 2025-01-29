@@ -8,7 +8,6 @@ window.getValidationResults = function (phoneInputs, validatePhone) {
 	);
 };
 
-
 window.showWarning = function ($, message, type = 'error') {
 	const classicCheckoutSelector = $( '.woocommerce-notices-wrapper:first' );
 	const normalCheckoutSelector  = $( '.wc-block-components-notices:first' );
@@ -37,4 +36,15 @@ window.showWarning = function ($, message, type = 'error') {
 			);
 		}
 	);
+}
+
+window.toggleOrderButton = ( orderButton, hide ) => {
+	if ( !orderButton) {
+		return;
+	}
+	if (hide) {
+		orderButton.classList.add( 'hide' );
+	} else {
+		orderButton.classList.remove( 'hide' );
+	}
 }

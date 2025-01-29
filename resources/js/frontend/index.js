@@ -17,8 +17,9 @@ const settings = getSetting( 'power_board_data', {} );
 const textDomain   = 'power-board';
 const defaultLabel = __( 'PowerBoard Payments', textDomain );
 
-const label  = decodeEntities( settings.title ) || defaultLabel;
-let cartData = null;
+const label         = decodeEntities( settings.title ) || defaultLabel;
+let cartData        = null;
+let initWidgetTimer = null;
 
 const toggleWidgetVisibility = ( hide ) => {
 	let widget               = document.getElementById( 'standaloneWidget' );
@@ -48,12 +49,15 @@ const toggleWidgetVisibility = ( hide ) => {
 	}
 };
 
+const toggleOrderButton = ( hide ) => {
+	let orderButton     = document.querySelectorAll( '.wc-block-components-checkout-place-order-button' )[0];
+	window.toggleOrderButton( orderButton, hide );
+}
+
 const initMasterWidgetCheckout = () => {
 	// noinspection JSUnresolvedReference
 	if ( canMakePayment( settings.total_limitation, cart.getCartTotals()?.total_price ) ) {
-		// noinspection JSUnresolvedReference
-		const orderButton = jQuery( '.wc-block-components-checkout-place-order-button' );
-		orderButton.hide();
+		setTimeout( () => toggleOrderButton( true ), 100 );
 
 		// noinspection JSUnresolvedReference
 		jQuery.ajax(
@@ -75,7 +79,7 @@ const initMasterWidgetCheckout = () => {
 					// noinspection JSUnresolvedReference
 					window.widgetPowerBoard.setEnv( settings.environment )
 					// noinspection JSUnresolvedReference
-					const orderButton = jQuery( '.wc-block-components-checkout-place-order-button' );
+					const orderButton = jQuery( '.wc-block-components-checkout-place-order-button' )[0];
 					// noinspection JSUnresolvedReference
 					const paymentSourceElement = jQuery( '#paymentSourceToken' );
 					// noinspection JSUnresolvedReference
@@ -83,7 +87,6 @@ const initMasterWidgetCheckout = () => {
 						function ( data ) {
 							// noinspection JSUnresolvedReference
 							paymentSourceElement.val( JSON.stringify( data ) );
-							orderButton.show();
 							orderButton.click();
 
 							window.widgetPowerBoard = null;
@@ -100,7 +103,6 @@ const initMasterWidgetCheckout = () => {
 									}
 								)
 							);
-							orderButton.show();
 							orderButton.click();
 
 							window.widgetPowerBoard = null;
@@ -117,7 +119,6 @@ const initMasterWidgetCheckout = () => {
 									}
 								)
 							);
-							orderButton.show();
 							orderButton.click();
 
 							window.widgetPowerBoard = null;
@@ -142,13 +143,22 @@ const handleFormChanged = () => {
 			loading.classList.remove( 'hide' );
 		}
 		error.classList.add( 'hide' );
-		initMasterWidgetCheckout();
 	} else {
 		loading.classList.add( 'hide' );
 		if ( error.classList.length > 0 ) {
 			error.classList.remove( 'hide' );
 		}
 	}
+
+	clearTimeout( initWidgetTimer );
+	initWidgetTimer = setTimeout(
+		() => {
+			if ( isFormValid ) {
+				initMasterWidgetCheckout();
+			}
+		},
+		500
+	);
 }
 
 const handleWidgetError = () => {
@@ -189,9 +199,7 @@ const handleWidgetError = () => {
 };
 
 // eslint-disable-next-line no-unused-vars
-const Content = ( props ) => {
-	// noinspection JSUnresolvedReference
-	jQuery( '.wc-block-components-checkout-place-order-button' ).show();
+const Content                               = ( props ) => {
 	const {eventRegistration, emitResponse} = props;
 	const {onPaymentSetup}                  = eventRegistration;
 

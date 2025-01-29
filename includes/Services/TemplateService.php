@@ -20,7 +20,7 @@ class TemplateService {
 		$this->template_checkout_dir = implode( DIRECTORY_SEPARATOR, [ self::TEMPLATE_DIR, self::CHECKOUT_TEMPLATE_DIR ] );
 	}
 
-	public function include_admin_html( string $template, array $data = [] ): void {
+	public function include_admin_html( string $template, array &$data = [] ): void {
 		$settings         = SettingsService::get_instance();
 		$data['settings'] = $settings;
 
@@ -53,7 +53,7 @@ class TemplateService {
 		return plugin_dir_path( POWER_BOARD_PLUGIN_FILE ) . $template . self::TEMPLATE_END;
 	}
 
-	public function include_checkout_html( string $template, array $data = [] ): void {
+	public function include_checkout_html( string $template, array &$data = [] ): void {
 		$data['template_service'] = $this;
 
 		$path = $this->get_checkout_path( $template );

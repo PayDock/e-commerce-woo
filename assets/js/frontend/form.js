@@ -19,7 +19,6 @@ jQuery(
 				errorMessageHtml: `<div class ="wc-block-components-validation-error" role="alert"><p>Please enter your phone number in international format, starting with "+"</p></div>`,
 			};
 
-			const $submitButton    = $( 'button.wc-block-components-checkout-place-order-button' );
 			const $shippingWrapper = $( '#shipping-fields .wc-block-components-address-address-wrapper' );
 
 			const getPhoneInputs     = () =>
@@ -65,6 +64,7 @@ jQuery(
 					$shippingWrapper.addClass( 'is-editing' );
 				}
 
+				const $submitButton    = $( 'button.wc-block-components-checkout-place-order-button' );
 				$submitButton.css( 'visibility', allValid ? 'visible' : 'hidden' );
 
 				getPaymentOptionsComponents().forEach(
@@ -98,20 +98,26 @@ jQuery(
 		}
 		);
 		function setPaymentMethodWatcher() {
-			$( '.wc-block-components-radio-control__input' ).on( 'change', (event) => setPaymentMethod( event.target.value ) );
+			const radioButtons = $( '.wc-block-components-radio-control__input' ).filter(function() {
+				return $(this).attr('id').includes('payment-method');
+			})
+
+			radioButtons.on( 'change', (event) => setPaymentMethod( event.target.value ) );
 		}
 		function setPaymentMethod(method) {
-			const $orderButton = $( '.wc-block-components-checkout-place-order-button' )[0];
-			switch (method) {
-				case 'power_board_gateway':
-					$orderButton.classList.add( 'hide' );
-					break;
-				default:
+			if (method !== 'power_board_gateway') {
 					window.widgetPowerBoard = null;
-					$orderButton.classList.remove( 'hide' );
+					toggleOrderButton(false);
 			}
 		}
+
+		function toggleOrderButton( hide ) {
+			let orderButton = document.querySelectorAll( '.wc-block-components-checkout-place-order-button' )[0];
+			window.toggleOrderButton(orderButton, hide);
+		}
+
 		function triggerFirstPaymentMethodChanges() {
+			toggleOrderButton(true);
 			const firstPaymentInterval        = setInterval(
 				() => {
 					const $checkedInput       = $( '.wc-block-components-radio-control__input:checked' );
