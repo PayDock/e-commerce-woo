@@ -110,7 +110,7 @@ class ActionsService {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$cart = WC()->cart;
 		$cart->calculate_totals();
-		$cart_total  = $cart->get_total( false );
+		$cart_total  = (string) $cart->get_total( false );
 		$expiry_time = time() + 3600;
 		setcookie( 'cart_total', $cart_total, $expiry_time, '/' );
 	}
