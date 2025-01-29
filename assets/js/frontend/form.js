@@ -29,6 +29,7 @@ jQuery(
 						if ($input.length) {
 							acc[key] = $input;
 						}
+						console.log('getPhoneInputs', acc);
 						return acc;
 				},
 					{}
@@ -92,7 +93,24 @@ jQuery(
 			updateVisibility( phoneInputs );
 			};
 
-			initPhoneNumbersValidation();
+			const waitForShippingPhoneRender = () => {
+				let attempts = 0;
+				const maxAttempts = 10;
+
+				const interval = setInterval(() => {
+					const $shippingPhoneElement = $(CONFIG.phoneInputIds.shipping);
+
+					if ($shippingPhoneElement.length) {
+						clearInterval(interval);
+						initPhoneNumbersValidation();
+					}
+
+					attempts++;
+					if (attempts >= maxAttempts) clearInterval(interval);
+				}, 500);
+			};
+
+			waitForShippingPhoneRender();
 
 			$( '.wc-block-checkout__use-address-for-billing input[type="checkbox"]' ).on( "change", initPhoneNumbersValidation );
 		}
