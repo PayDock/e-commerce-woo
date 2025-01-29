@@ -29,7 +29,6 @@ jQuery(
 						if ($input.length) {
 							acc[key] = $input;
 						}
-						console.log('getPhoneInputs', acc);
 						return acc;
 				},
 					{}
