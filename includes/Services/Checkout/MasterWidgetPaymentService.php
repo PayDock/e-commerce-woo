@@ -1,9 +1,11 @@
-<?php declare( strict_types=1 );
+<?php
 /**
  * This file uses classes from WooCommerce
  *
  * @noinspection PhpUndefinedClassInspection
  */
+
+declare( strict_types=1 );
 
 namespace PowerBoard\Services\Checkout;
 

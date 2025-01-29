@@ -1,4 +1,4 @@
-<?php declare( strict_types=1 );
+<?php
 /**
  * Copyright (c) PowerBoard, Inc. and its affiliates. All Rights Reserved
  *
@@ -23,6 +23,8 @@
  *
  * @noinspection PhpUndefinedFunctionInspection for plugin_dir_url
  */
+
+declare( strict_types=1 );
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly

@@ -1,5 +1,4 @@
 <?php
-declare( strict_types=1 );
 /**
  * This file uses functions (wpautop, wp_kses_post, esc_attr, absint, get_query_var, wp_json_encode and esc_html__) from WordPress
  * This file uses functions (wc_esc_json, is_wc_endpoint_url and wc_get_order) from WooCommerce
@@ -7,6 +6,8 @@ declare( strict_types=1 );
  * @noinspection PhpUndefinedFunctionInspection
  * @var array $data
  */
+
+declare( strict_types=1 );
 
 echo wp_kses_post(
 	wpautop( $data['description'] )

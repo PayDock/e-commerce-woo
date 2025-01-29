@@ -69,9 +69,11 @@ class OrderService {
 	 * @throws Exception If status change is not allowed
 	 */
 	public function status_change_verification( $order_id, $old_status_key, $new_status_key, $order ): void {
-		$order->update_meta_data( 'status_change_verification_failed', '' );
+		$order->delete_meta_data( 'status_change_verification_failed', '' );
+		$current_status = $order->get_status();
 		if (
 			$old_status_key === $new_status_key ||
+			$current_status === $new_status_key ||
 			! empty( $GLOBALS['power_board_is_updating_order_status'] ) ||
 			$order_id === null
 		) {

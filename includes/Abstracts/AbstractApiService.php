@@ -1,10 +1,4 @@
 <?php declare( strict_types=1 );
-/**
- * This file uses classes from WordPress
- *
- * @noinspection PhpUndefinedClassInspection
- */
-
 namespace PowerBoard\Abstracts;
 
 use LogicException;
@@ -95,6 +89,7 @@ abstract class AbstractApiService {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$request = _wp_http_get_object()->request( $url, $parsed_args );
 
+		/* @noinspection PhpUndefinedFunctionInspection */
 		if ( is_wp_error( $request ) ) {
 			return [
 				'status' => 403,

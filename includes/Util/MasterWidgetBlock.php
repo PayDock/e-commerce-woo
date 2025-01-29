@@ -1,10 +1,12 @@
-<?php declare( strict_types=1 );
+<?php
 /**
  * This file uses classes from WooCommerce
  *
  * @noinspection PhpUndefinedClassInspection
  * @noinspection PhpUndefinedNamespaceInspection
  */
+
+declare( strict_types=1 );
 
 namespace PowerBoard\Util;
 

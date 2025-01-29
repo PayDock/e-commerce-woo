@@ -1,10 +1,12 @@
-<?php declare( strict_types=1 );
+<?php
 /**
  * This file uses classes from WooCommerce
  *
  * @noinspection PhpUndefinedClassInspection
  * @noinspection PhpUndefinedNamespaceInspection
  */
+
+declare( strict_types=1 );
 
 namespace PowerBoard\Services;
 
@@ -150,8 +152,6 @@ class ActionsService {
 		add_action( 'woocommerce_create_refund', [ $payment_controller, 'refund_process' ], 10, 2 );
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action( 'woocommerce_order_refunded', [ $payment_controller, 'after_refund_process' ] );
-		/* @noinspection PhpUndefinedFunctionInspection */
-		add_action( 'woocommerce_api_power-board-webhook', [ $payment_controller, 'webhook' ] );
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action( 'wc_ajax_power-board-create-charge-intent', [ $widget_controller, 'create_checkout_intent' ] );
 		/* @noinspection PhpUndefinedFunctionInspection */
