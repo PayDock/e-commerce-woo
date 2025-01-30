@@ -24,18 +24,28 @@ class WidgetController {
 			return;
 		}
 
+		$args     = [];
 		$request  = [];
 		$settings = SettingsService::get_instance();
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$cart = WC()->cart;
 
-		$args = [
-			'limit'     => 1,
-			'cart_hash' => $cart->get_cart_hash(),
-		];
+		if ( is_object( $cart ) ) {
+			$cart_total = $cart->get_total( false );
 
-		if ( ! empty( $_POST['total'] ) ) {
+			$args = [
+				'limit'     => 1,
+				'cart_hash' => $cart->get_cart_hash(),
+			];
+
+			if ( ! empty( $cart_total ) ) {
+				/* @noinspection PhpUndefinedFunctionInspection */
+				$request['total']['total_price'] = $cart_total * 100;
+				/* @noinspection PhpUndefinedFunctionInspection */
+				$request['total']['currency_code'] = get_woocommerce_currency();
+			}
+		} elseif ( isset( $_POST['total'] ) ) {
 			if ( is_array( $_POST['total'] ) ) {
 				/* @noinspection PhpUndefinedFunctionInspection */
 				$request['total'] = array_map( 'sanitize_text_field', wp_unslash( $_POST['total'] ) );
@@ -44,17 +54,17 @@ class WidgetController {
 				$request['total'] = sanitize_text_field( wp_unslash( $_POST['total'] ) );
 			}
 		} else {
-			$request['total']['total_price'] = $cart->get_total( false ) * 100;
-			/* @noinspection PhpUndefinedFunctionInspection */
-			$request['total']['currency_code'] = get_woocommerce_currency();
+			return;
 		}
 
 		if ( ! empty( $_POST['order_id'] ) ) {
 			/* @noinspection PhpUndefinedFunctionInspection */
 			$reference = sanitize_text_field( wp_unslash( $_POST['order_id'] ) );
 		} else {
-			/* @noinspection PhpUndefinedFunctionInspection */
-			$orders = wc_get_orders( $args );
+			if ( ! empty( $args ) ) {
+				/* @noinspection PhpUndefinedFunctionInspection */
+				$orders = wc_get_orders( $args );
+			}
 
 			if ( ! empty( $orders ) && is_a( $orders[0], 'WC_Order' ) ) {
 				$reference = $orders[0]->get_id();
