@@ -33,6 +33,7 @@ class WidgetController {
 
 		if ( is_object( $cart ) ) {
 			$cart->calculate_totals();
+
 			$cart_total = $cart->get_total( false );
 
 			$args = [

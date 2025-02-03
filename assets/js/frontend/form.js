@@ -142,12 +142,12 @@ jQuery(
 					const $paymentMethodInput = $checkedInputs.filter(
 						inputEl => inputEl.id?.includes( 'payment-method' )
 						);
-				if ($paymentMethodInput.length > 0) {
-					clearInterval( firstPaymentInterval );
-					setPaymentMethod( $paymentMethodInput[0].value );
-					// noinspection JSUnresolvedReference
-					jQuery( '.wc-block-components-form' )[0].dispatchEvent( new Event( "change" ) );
-				}
+					if ($paymentMethodInput.length > 0) {
+						clearInterval( firstPaymentInterval );
+						setPaymentMethod( $paymentMethodInput[0].value );
+						// noinspection JSUnresolvedReference
+						jQuery( '.wc-block-components-form' )[0].dispatchEvent( new Event( "change" ) );
+					}
 				},
 				200
 			)
