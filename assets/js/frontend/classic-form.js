@@ -252,7 +252,6 @@ jQuery(
 						const data = {
 							_wpnonce: PowerBoardAjax.wpnonce,
 							address: this.getAddressData( false ).address,
-							return_cart: true,
 						};
 						if (isOrderPayPage) {
 							data.order_id = orderData.order_id;
@@ -271,7 +270,6 @@ jQuery(
 								data: data,
 								success: ( response ) => {
 									// noinspection JSUnresolvedReference
-									const cartData = response.data.cart;
 									this.toggleWidgetVisibility( false );
 									// noinspection JSUnresolvedReference
 									window.widgetPowerBoard = new cba.Checkout( '#classic-powerBoardCheckout_wrapper', response.data.resource.data.token );
@@ -285,8 +283,6 @@ jQuery(
 										function ( data ) {
 											// noinspection JSUnresolvedReference
 											jQuery( '#chargeid' ).val( data['charge_id'] );
-											// noinspection JSUnresolvedReference
-											jQuery( '#checkoutorder' ).val( JSON.stringify( cartData ) );
 											submitForm();
 
 											window.widgetPowerBoard = null;
@@ -403,7 +399,7 @@ jQuery(
 							'change',
 							( event ) => {
 								try {
-									if ( event.target.id.includes( 'checkoutorder' ) || event.target.id.includes( 'chargeid' ) ) {
+									if ( event.target.id.includes( 'chargeid' ) ) {
 										return
 									}
 
