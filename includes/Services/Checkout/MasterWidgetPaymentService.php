@@ -14,6 +14,7 @@ use PowerBoard\Services\SettingsService;
 use PowerBoard\Services\TemplateService;
 use WC_Payment_Gateway;
 use WC_Order;
+use WC_Cart;
 
 /**
  * Some properties used comes from the extension WC_Payment_Gateway from WooCommerce
@@ -180,7 +181,8 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		$order = wc_get_order( $order_id );
 
 		/* @noinspection PhpUndefinedFunctionInspection */
-		$checkout_order = isset( $_POST['checkoutorder'] ) ? json_decode( sanitize_text_field( wp_unslash( $_POST['checkoutorder'] ) ), true ) : [];
+		$session        = WC()->session;
+		$checkout_order = $session->get( 'power_board_checkout_cart' );
 
 		$order = $this->get_order_to_process_payment( $order, $checkout_order );
 		$order->set_status( 'processing' );
@@ -203,9 +205,9 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 	}
 	// phpcs:enable
 
-	public function get_order_to_process_payment( $current_order, $checkout_order ): WC_Order {
-		$current_order_total  = (float) $current_order->get_total( false );
-		$checkout_order_total = ! empty( $checkout_order['totals']['total_price'] ) ? ( (float) $checkout_order['totals']['total_price'] / 100 ) : null;
+	public function get_order_to_process_payment( WC_Order $current_order, array $checkout_order ): WC_Order {
+		$current_order_total  = $current_order->get_total( false );
+		$checkout_order_total = ! empty( $checkout_order ) ? $checkout_order['total'] : null;
 
 		if ( ! empty( $checkout_order ) && $current_order_total !== $checkout_order_total ) {
 			$order_items = $current_order->get_items();
@@ -215,13 +217,33 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 
 			$checkout_order_items = $checkout_order['items'];
 			foreach ( $checkout_order_items as $checkout_order_item ) {
-				$product_id = $checkout_order_item['id'];
+				$product_id = $checkout_order_item['product_id'];
 				$quantity   = $checkout_order_item['quantity'];
 				/* @noinspection PhpUndefinedFunctionInspection */
 				$product = wc_get_product( $product_id );
 
 				if ( $product && $product->exists() && $quantity > 0 ) {
 					$current_order->add_product( $product, $quantity );
+				}
+			}
+
+			$checkout_shipping = $checkout_order['shipping_total'];
+			if ( $current_order->get_shipping_total( false ) !== $checkout_shipping ) {
+				$shipping_lines       = $current_order->get_items( 'shipping' );
+				$shipping_id          = explode( ':', $checkout_order['selected_shipping_id'] );
+				$shipping_method_id   = $shipping_id[0];
+				$shipping_instance_id = $shipping_id[1];
+				$selected_shipping    = $checkout_order['selected_shipping'];
+				foreach ( $shipping_lines as $shipping_line ) {
+					// Check if the current shipping method is flat-rate:1
+					if ( $shipping_method_id !== $shipping_line->get_method_id() && $shipping_instance_id !== $shipping_line->get_instance_id() ) {
+						$shipping_line->set_meta_data( $selected_shipping );
+						$shipping_line->set_method_id( $shipping_method_id );
+						$shipping_line->set_instance_id( $shipping_instance_id );
+						$shipping_line->set_method_title( $selected_shipping->get_label() );
+						$shipping_line->set_total( $selected_shipping->get_cost() );
+						$shipping_line->save();
+					}
 				}
 			}
 
@@ -278,6 +300,8 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$notice_type = isset( $_POST['type'] ) ? sanitize_text_field( wp_unslash( $_POST['type'] ) ) : 'error';
 		if ( $message ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			wc_clear_notices();
 			/* @noinspection PhpUndefinedFunctionInspection */
 			wc_add_notice( esc_html( $message ), $notice_type );
 		}

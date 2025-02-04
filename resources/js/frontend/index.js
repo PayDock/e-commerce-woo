@@ -18,7 +18,6 @@ const textDomain   = 'power-board';
 const defaultLabel = __( 'PowerBoard Payments', textDomain );
 
 const label              = decodeEntities( settings.title ) || defaultLabel;
-let cartData             = null;
 let address              = null;
 let lastMasterWidgetInit = null;
 
@@ -75,8 +74,6 @@ const initMasterWidgetCheckout = () => {
 				},
 				success: ( response ) => {
 					if (initTimestamp === lastMasterWidgetInit) {
-						// noinspection JSUnresolvedReference
-						cartData = JSON.stringify( cart.getCartData() );
 						toggleWidgetVisibility( false );
 						// noinspection JSUnresolvedReference
 						window.widgetPowerBoard = new cba.Checkout( '#powerBoardCheckout_wrapper', response.data.resource.data.token );
@@ -167,8 +164,10 @@ const handleWidgetDisplay = () => {
 };
 
 const handleFormChanged = () => {
-	if (cart.getCustomerData().billingAddress !== address) {
-		address = cart.getCustomerData().billingAddress;
+	// noinspection JSUnresolvedReference
+	const billingAddress = cart.getCustomerData().billingAddress;
+	if ( billingAddress !== address ) {
+		address = billingAddress;
 		handleWidgetDisplay();
 	}
 }
@@ -225,6 +224,7 @@ const Content                               = ( props ) => {
 			if ( !window.unsubscribeFromMutateObserver ) {
 				const spanTotalInterval = setInterval(
 					() => {
+						// noinspection JSUnresolvedReference
 						const spanTotal = jQuery( '.wc-block-components-totals-footer-item-tax-value' )[0];
 						if (spanTotal) {
 							clearInterval( spanTotalInterval );
@@ -262,7 +262,6 @@ const Content                               = ( props ) => {
 								paymentMethodData: {
 									payment_response: paymentData,
 									chargeId: paymentDataParsed['charge_id'],
-									checkoutOrder: cartData,
 									_wpnonce: settings._wpnonce
 								}
 							},

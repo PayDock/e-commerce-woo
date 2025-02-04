@@ -126,9 +126,22 @@ class WidgetController {
 
 		$result['county'] = $request['address']['country'] ?? '';
 
-		if ( ! empty( $_POST['return_cart'] ) ) {
-			$result['cart'] = $cart;
-		}
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$session              = WC()->session;
+		$selected_shipping_id = $session->get( 'chosen_shipping_methods' )[0];
+		$shipping_address     = $session->get( 'customer' );
+		$selected_shipping    = $session->get( 'shipping_for_package_0' )['rates'][ $selected_shipping_id ];
+		$session->set(
+			'power_board_checkout_cart',
+			[
+				'items'                => $cart->get_cart(),
+				'total'                => $cart->get_total( false ),
+				'shipping_total'       => $cart->get_shipping_total(),
+				'selected_shipping_id' => $selected_shipping_id,
+				'selected_shipping'    => $selected_shipping,
+				'shipping_address'     => $shipping_address,
+			]
+			);
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		wp_send_json_success( $result, 200 );
