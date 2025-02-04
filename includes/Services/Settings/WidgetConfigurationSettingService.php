@@ -10,12 +10,10 @@ declare( strict_types=1 );
 namespace PowerBoard\Services\Settings;
 
 use Exception;
-use PowerBoard\Enums\CredentialSettingsEnum;
 use PowerBoard\Enums\EnvironmentSettingsEnum;
 use PowerBoard\Enums\MasterWidgetSettingsEnum;
 use PowerBoard\Enums\SettingGroupsEnum;
 use PowerBoard\Enums\SettingsSectionEnum;
-use PowerBoard\Helpers\CredentialSettingsHelper;
 use PowerBoard\Helpers\EnvironmentSettingsHelper;
 use PowerBoard\Helpers\MasterWidgetSettingsHelper;
 use PowerBoard\Helpers\SettingGroupsHelper;
@@ -76,23 +74,21 @@ class WidgetConfigurationSettingService extends WC_Payment_Gateway {
 			$this->template_service = new TemplateService( $this );
 		}
 
-		foreach ( CredentialSettingsEnum::cases() as $credential_settings ) {
-			$key = $this->service->get_option_name(
-				$this->id,
-				[
-					SettingGroupsEnum::CREDENTIALS,
-					$credential_settings,
-				]
-			);
+		$key = $this->service->get_option_name(
+			$this->id,
+			[
+				SettingGroupsEnum::CREDENTIALS,
+				'ACCESS_KEY',
+			]
+		);
 
-			if ( ! empty( $this->settings[ $key ] ) ) {
-				try {
-					$decrypted_key = HashService::decrypt( $this->settings[ $key ] );
-				} catch ( Exception $error ) {
-					$decrypted_key = null;
-				}
-				$this->settings[ $key ] = $decrypted_key;
+		if ( ! empty( $this->settings[ $key ] ) ) {
+			try {
+				$decrypted_key = HashService::decrypt( $this->settings[ $key ] );
+			} catch ( Exception $error ) {
+				$decrypted_key = null;
 			}
+			$this->settings[ $key ] = $decrypted_key;
 		}
 	}
 
@@ -135,28 +131,22 @@ class WidgetConfigurationSettingService extends WC_Payment_Gateway {
 	}
 
 	private function get_credential_options(): array {
-		$fields = [];
+		$key = $this->service->get_option_name(
+			$this->id,
+			[
+				SettingGroupsEnum::CREDENTIALS,
+				'ACCESS_KEY',
+			]
+		);
 
-		foreach ( CredentialSettingsEnum::cases() as $credential_settings ) {
-			$key            = $this->service->get_option_name(
-				$this->id,
-				[
-					SettingGroupsEnum::CREDENTIALS,
-					$credential_settings,
-				]
-			);
-			$fields[ $key ] = [
-				'type'  => CredentialSettingsHelper::get_input_type( $credential_settings ),
-				'title' => CredentialSettingsHelper::get_label( $credential_settings ),
-			];
-			$description    = CredentialSettingsHelper::get_description( $credential_settings );
-			if ( $description ) {
-				$fields[ $key ]['description'] = $description;
-				$fields[ $key ]['desc_tip']    = true;
-			}
-		}
-
-		return $fields;
+		return [
+			$key => [
+				'type'        => 'password',
+				'title'       => 'API Access Token',
+				'description' => 'Enter your API Access Token. This token is used to securely authenticate your payment operations. It is also used to retrieve the values for the Checkout Template ID fields shown below.',
+				'desc_tip'    => true,
+			],
+		];
 	}
 
 	private function get_checkout_options(): array {
@@ -226,7 +216,7 @@ class WidgetConfigurationSettingService extends WC_Payment_Gateway {
 			$this->id,
 			[
 				SettingGroupsEnum::CREDENTIALS,
-				CredentialSettingsEnum::ACCESS_KEY,
+				'ACCESS_KEY',
 			]
 		);
 		if ( array_key_exists( $token_key, $this->settings ) ) {
@@ -285,17 +275,17 @@ class WidgetConfigurationSettingService extends WC_Payment_Gateway {
 
 		$hashed_credential_keys = [];
 		$settings_keys          = [];
-		foreach ( CredentialSettingsEnum::cases() as $credential_settings ) {
-			$key                            = $this->service->get_option_name(
-				$this->id,
-				[
-					SettingGroupsEnum::CREDENTIALS,
-					$credential_settings,
-				]
-			);
-			$hashed_credential_keys[ $key ] = $credential_settings;
-			$settings_keys[ $key ]          = $credential_settings;
-		}
+
+		$access_key = $this->service->get_option_name(
+			$this->id,
+			[
+				SettingGroupsEnum::CREDENTIALS,
+				'ACCESS_KEY',
+			]
+		);
+
+		$hashed_credential_keys[ $access_key ] = 'ACCESS_KEY';
+		$settings_keys[ $access_key ]          = 'ACCESS_KEY';
 
 		foreach ( EnvironmentSettingsEnum::cases() as $environment_settings ) {
 			$key                   = $this->service->get_option_name(
@@ -415,19 +405,15 @@ class WidgetConfigurationSettingService extends WC_Payment_Gateway {
 			$form_fields = $this->get_form_fields();
 		}
 
-		foreach ( CredentialSettingsEnum::cases() as $credential_settings ) {
-			$credential_key = $this->service->get_option_name(
-				$this->id,
-				[
-					SettingGroupsEnum::CREDENTIALS,
-					$credential_settings,
-				]
-			);
-
-			$this->settings[ $credential_key ] = ! empty( $this->settings[ $credential_key ] ) ? '********************' : '';
-		}
-
-		$form_fields = compact( 'form_fields' );
+		$credential_key                    = $this->service->get_option_name(
+			$this->id,
+			[
+				SettingGroupsEnum::CREDENTIALS,
+				'ACCESS_KEY',
+			]
+		);
+		$this->settings[ $credential_key ] = ! empty( $this->settings[ $credential_key ] ) ? '********************' : '';
+		$form_fields                       = compact( 'form_fields' );
 
 		if ( $should_echo ) {
 			$this->template_service->include_admin_html( 'admin', $form_fields );

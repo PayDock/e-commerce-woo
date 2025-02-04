@@ -5,7 +5,6 @@ namespace PowerBoard\Services\Validation;
 
 use Exception;
 use PowerBoard\API\ConfigService;
-use PowerBoard\Enums\CredentialSettingsEnum;
 use PowerBoard\Enums\EnvironmentSettingsEnum;
 use PowerBoard\Enums\MasterWidgetSettingsEnum;
 use PowerBoard\Enums\SettingGroupsEnum;
@@ -125,7 +124,7 @@ class ConnectionValidationService {
 			$this->service->id,
 			[
 				SettingGroupsEnum::CREDENTIALS,
-				CredentialSettingsEnum::ACCESS_KEY,
+				'ACCESS_KEY',
 			]
 		);
 		$this->access_token_settings = $this->data[ $access_token_settings_key ];
