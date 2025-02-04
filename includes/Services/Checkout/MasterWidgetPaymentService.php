@@ -182,9 +182,11 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$session        = WC()->session;
-		$checkout_order = $session->get( 'power_board_checkout_cart' );
+		$checkout_order = $session->get( 'power_board_checkout_cart_' . wp_create_nonce( 'power-board-checkout-cart' ) );
 
-		$order = $this->get_order_to_process_payment( $order, $checkout_order );
+		if (! empty( $checkout_order ) ) {
+			$order = $this->get_order_to_process_payment( $order, $checkout_order );
+        }
 		$order->set_status( 'processing' );
 		$order->payment_complete();
 		setcookie( 'cart_total', '0', time() + 3600, '/' );
@@ -207,9 +209,49 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 
 	public function get_order_to_process_payment( WC_Order $current_order, array $checkout_order ): WC_Order {
 		$current_order_total  = $current_order->get_total( false );
-		$checkout_order_total = ! empty( $checkout_order ) ? $checkout_order['total'] : null;
+		$checkout_order_total = $checkout_order['total'];
 
-		if ( ! empty( $checkout_order ) && $current_order_total !== $checkout_order_total ) {
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$current_customer  = WC()->session->get( 'customer' );
+		$checkout_customer = $checkout_order['shipping_address'];
+
+		if ( $current_customer['date_modified'] !== $checkout_customer['date_modified'] ) {
+			$current_order->set_billing_address(
+				[
+					'first_name' => $checkout_customer['first_name'],
+					'last_name'  => $checkout_customer['last_name'],
+					'company'    => $checkout_customer['company'],
+					'phone'      => $checkout_customer['phone'],
+					'email'      => $checkout_customer['email'],
+					'address_1'  => $checkout_customer['address_1'],
+					'address_2'  => $checkout_customer['address_2'],
+					'city'       => $checkout_customer['city'],
+					'state'      => $checkout_customer['state'],
+					'postcode'   => $checkout_customer['postcode'],
+					'country'    => $checkout_customer['country'],
+				]
+				);
+			$current_order->set_shipping_address(
+				[
+					'first_name' => $checkout_customer['shipping_first_name'],
+					'last_name'  => $checkout_customer['shipping_last_name'],
+					'company'    => $checkout_customer['shipping_company'],
+					'phone'      => $checkout_customer['shipping_phone'],
+					'email'      => $checkout_customer['email'],
+					'address_1'  => $checkout_customer['shipping_address_1'],
+					'address_2'  => $checkout_customer['shipping_address_2'],
+					'city'       => $checkout_customer['shipping_city'],
+					'state'      => $checkout_customer['shipping_state'],
+					'postcode'   => $checkout_customer['shipping_postcode'],
+					'country'    => $checkout_customer['shipping_country'],
+				]
+				);
+
+			$current_order->calculate_totals();
+			$current_order->save();
+		}
+
+		if ( $current_order_total !== $checkout_order_total ) {
 			$order_items = $current_order->get_items();
 			foreach ( $order_items as $item_id => $item ) {
 				$current_order->remove_item( $item_id );
@@ -228,7 +270,8 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 			}
 
 			$checkout_shipping = $checkout_order['shipping_total'];
-			if ( $current_order->get_shipping_total( false ) !== $checkout_shipping ) {
+			$current_shipping = $current_order->get_shipping_total( false );
+			if ( $current_shipping !== $checkout_shipping ) {
 				$shipping_lines       = $current_order->get_items( 'shipping' );
 				$shipping_id          = explode( ':', $checkout_order['selected_shipping_id'] );
 				$shipping_method_id   = $shipping_id[0];
