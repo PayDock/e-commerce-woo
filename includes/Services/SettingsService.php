@@ -33,11 +33,6 @@ final class SettingsService {
 		return implode( '_', array_merge( [ $id ], $fragments ) );
 	}
 
-	public function get_widget_access_token(): ?string {
-		$widget_service = $this->get_settings_service();
-		return $widget_service->get_widget_access_token();
-	}
-
 	public function get_access_token(): ?string {
 		$widget_service = $this->get_settings_service();
 		return $widget_service->get_access_token();

@@ -121,7 +121,7 @@ class WidgetController {
 		}
 
 		$api_adapter_service = APIAdapterService::get_instance();
-		$api_adapter_service->initialise( $settings->get_environment(), $settings->get_access_token(), $settings->get_widget_access_token() );
+		$api_adapter_service->initialise( $settings->get_environment(), $settings->get_access_token() );
 		$result = $api_adapter_service->create_checkout_intent( $intent_request_params );
 
 		$result['county'] = $request['address']['country'] ?? '';

@@ -9,7 +9,6 @@ class CredentialSettingsHelper {
 	public static function get_input_type( string $key ): string {
 		switch ( $key ) {
 			case CredentialSettingsEnum::ACCESS_KEY:
-			case CredentialSettingsEnum::WIDGET_KEY:
 				return 'password';
 			default:
 				return '';
@@ -20,8 +19,6 @@ class CredentialSettingsHelper {
 		switch ( $key ) {
 			case CredentialSettingsEnum::ACCESS_KEY:
 				return 'API Access Token';
-			case CredentialSettingsEnum::WIDGET_KEY:
-				return 'Widget Access Token';
 			default:
 				return '';
 		}
@@ -31,8 +28,6 @@ class CredentialSettingsHelper {
 		switch ( $key ) {
 			case CredentialSettingsEnum::ACCESS_KEY:
 				return 'Enter your API Access Token. This token is used to securely authenticate your payment operations. It is also used to retrieve the values for the Checkout Template ID fields shown below.';
-			case CredentialSettingsEnum::WIDGET_KEY:
-				return 'Enter your Widget access token. This token is used to render the payment methods, buttons and forms on your checkout page.';
 			default:
 				return '';
 		}

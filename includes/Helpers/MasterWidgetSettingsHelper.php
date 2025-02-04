@@ -32,14 +32,14 @@ class MasterWidgetSettingsHelper {
 		}
 	}
 
-	public static function get_options_for_ui( string $key, $env, $access_token, $widget_access_token, $version ): array {
+	public static function get_options_for_ui( string $key, $env, $access_token, $version ): array {
 		switch ( $key ) {
 			case MasterWidgetSettingsEnum::VERSION:
 				return self::get_versions_for_ui();
 			case MasterWidgetSettingsEnum::CONFIGURATION_ID:
-				return self::get_configuration_ids_for_ui( $env, $access_token, $widget_access_token, $version );
+				return self::get_configuration_ids_for_ui( $env, $access_token, $version );
 			case MasterWidgetSettingsEnum::CUSTOMISATION_ID:
-				return self::get_customisation_ids_for_ui( $env, $access_token, $widget_access_token, $version );
+				return self::get_customisation_ids_for_ui( $env, $access_token, $version );
 			default:
 				return [];
 		}
@@ -52,7 +52,7 @@ class MasterWidgetSettingsHelper {
 	/**
 	 * Uses functions (get_transient, delete_transient and set_transient) from WordPress
 	 */
-	public static function get_configuration_ids_for_ui( $env, $access_token, $widget_access_token, $version ): array {
+	public static function get_configuration_ids_for_ui( $env, $access_token, $version ): array {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		if ( ! self::is_power_board_settings_page() || ! empty( get_transient( 'is_fetching_configuration_templates' ) ) ) {
 			return [];
@@ -66,7 +66,7 @@ class MasterWidgetSettingsHelper {
 		if ( ! empty( $stored_configuration_templates ) ) {
 			$configuration_templates = $stored_configuration_templates;
 		} else {
-			$api_adapter_service     = self::init_api_adapter( $env, $access_token, $widget_access_token );
+			$api_adapter_service     = self::init_api_adapter( $env, $access_token );
 			$result                  = $api_adapter_service->get_configuration_templates_ids( $version );
 			$has_error               = $result['error'];
 			$configuration_templates = MasterWidgetTemplatesHelper::map_templates( $result['resource']['data'], ! empty( $has_error ) );
@@ -93,7 +93,7 @@ class MasterWidgetSettingsHelper {
 	/**
 	 * Uses functions (set_transient, delete_transient and get_transient) from WordPress
 	 */
-	public static function get_customisation_ids_for_ui( $env, $access_token, $widget_access_token, $version ): array {
+	public static function get_customisation_ids_for_ui( $env, $access_token, $version ): array {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		if ( ! self::is_power_board_settings_page() || ! empty( get_transient( 'is_fetching_customisation_templates' ) ) ) {
 			return [];
@@ -107,7 +107,7 @@ class MasterWidgetSettingsHelper {
 		if ( ! empty( $stored_customisation_templates ) ) {
 			$customisation_templates = $stored_customisation_templates;
 		} else {
-			$api_adapter_service     = self::init_api_adapter( $env, $access_token, $widget_access_token );
+			$api_adapter_service     = self::init_api_adapter( $env, $access_token );
 			$result                  = $api_adapter_service->get_customisation_templates_ids( $version );
 			$has_error               = $result['error'];
 			$customisation_templates = MasterWidgetTemplatesHelper::map_templates( $result['resource']['data'], ! empty( $has_error ), true );
@@ -140,9 +140,9 @@ class MasterWidgetSettingsHelper {
 		}
 	}
 
-	public static function init_api_adapter( $env, $access_token, $widget_access_token ): APIAdapterService {
+	public static function init_api_adapter( $env, $access_token ): APIAdapterService {
 		$api_adapter_service = APIAdapterService::get_instance();
-		$api_adapter_service->initialise( $env, $access_token, $widget_access_token );
+		$api_adapter_service->initialise( $env, $access_token );
 		return $api_adapter_service;
 	}
 

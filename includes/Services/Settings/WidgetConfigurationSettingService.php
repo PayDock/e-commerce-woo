@@ -160,11 +160,10 @@ class WidgetConfigurationSettingService extends WC_Payment_Gateway {
 	}
 
 	private function get_checkout_options(): array {
-		$fields              = [];
-		$access_token        = $this->get_access_token();
-		$widget_access_token = $this->get_widget_access_token();
-		$environment         = $this->get_environment();
-		$version             = $this->get_version();
+		$fields       = [];
+		$access_token = $this->get_access_token();
+		$environment  = $this->get_environment();
+		$version      = $this->get_version();
 
 		foreach ( MasterWidgetSettingsEnum::cases() as $checkout_settings ) {
 			$key = $this->service->get_option_name(
@@ -181,7 +180,7 @@ class WidgetConfigurationSettingService extends WC_Payment_Gateway {
 			];
 
 			if ( MasterWidgetSettingsEnum::VERSION === $checkout_settings || ! empty( $environment ) ) {
-				$options = MasterWidgetSettingsHelper::get_options_for_ui( $checkout_settings, $environment, $access_token, $widget_access_token, $version );
+				$options = MasterWidgetSettingsHelper::get_options_for_ui( $checkout_settings, $environment, $access_token, $version );
 
 				if ( ! empty( $options ) && ( MasterWidgetSettingsHelper::get_input_type( $checkout_settings ) ) === 'select' ) {
 					$fields[ $key ]['options'] = $options;
@@ -233,25 +232,6 @@ class WidgetConfigurationSettingService extends WC_Payment_Gateway {
 		if ( array_key_exists( $token_key, $this->settings ) ) {
 			try {
 				$decrypted_key = HashService::decrypt( $this->settings[ $token_key ] );
-			} catch ( Exception $error ) {
-				$decrypted_key = null;
-			}
-			return $decrypted_key;
-		}
-		return null;
-	}
-
-	public function get_widget_access_token(): ?string {
-		$widget_token_key = $this->service->get_option_name(
-			$this->id,
-			[
-				SettingGroupsEnum::CREDENTIALS,
-				CredentialSettingsEnum::WIDGET_KEY,
-			]
-		);
-		if ( array_key_exists( $widget_token_key, $this->settings ) ) {
-			try {
-				$decrypted_key = HashService::decrypt( $this->settings[ $widget_token_key ] );
 			} catch ( Exception $error ) {
 				$decrypted_key = null;
 			}

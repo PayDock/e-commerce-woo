@@ -247,8 +247,6 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 			'currency'                => strtoupper( get_woocommerce_currency() ),
 			// Widget.
 			'title'                   => 'PowerBoard',
-			// Keys.
-			'widgetToken'             => $settings_service->get_widget_access_token(),
 			// Master Widget Checkout.
 			'checkoutTemplateVersion' => $settings_service->get_checkout_template_version(),
 			'checkoutCustomisationId' => $settings_service->get_checkout_customisation_id(),

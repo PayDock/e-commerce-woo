@@ -14,20 +14,6 @@ abstract class AbstractApiService {
 	protected array $parameters       = [];
 	protected array $allowed_action   = [];
 
-	public function call_with_widget_access_token(): array {
-		$args = [
-			'headers' => [
-				'content-type' => 'application/json',
-			],
-		];
-
-		if ( ! empty( ConfigService::$widget_access_token ) ) {
-			$args['headers']['x-access-token'] = ConfigService::$widget_access_token;
-		}
-
-		return $this->run_call( $args );
-	}
-
 	public function call(): array {
 		$args = [
 			'headers' => [
