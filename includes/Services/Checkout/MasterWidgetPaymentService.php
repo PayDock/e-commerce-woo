@@ -14,7 +14,6 @@ use PowerBoard\Services\SettingsService;
 use PowerBoard\Services\TemplateService;
 use WC_Payment_Gateway;
 use WC_Order;
-use WC_Cart;
 
 /**
  * Some properties used comes from the extension WC_Payment_Gateway from WooCommerce
@@ -181,12 +180,13 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		$order = wc_get_order( $order_id );
 
 		/* @noinspection PhpUndefinedFunctionInspection */
-		$session        = WC()->session;
+		$session = WC()->session;
+		/* @noinspection PhpUndefinedFunctionInspection */
 		$checkout_order = $session->get( 'power_board_checkout_cart_' . wp_create_nonce( 'power-board-checkout-cart' ) );
 
-		if (! empty( $checkout_order ) ) {
+		if ( ! empty( $checkout_order ) ) {
 			$order = $this->get_order_to_process_payment( $order, $checkout_order );
-        }
+		}
 		$order->set_status( 'processing' );
 		$order->payment_complete();
 		setcookie( 'cart_total', '0', time() + 3600, '/' );
@@ -270,7 +270,7 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 			}
 
 			$checkout_shipping = $checkout_order['shipping_total'];
-			$current_shipping = $current_order->get_shipping_total( false );
+			$current_shipping  = $current_order->get_shipping_total( false );
 			if ( $current_shipping !== $checkout_shipping ) {
 				$shipping_lines       = $current_order->get_items( 'shipping' );
 				$shipping_id          = explode( ':', $checkout_order['selected_shipping_id'] );

@@ -1,13 +1,25 @@
 // noinspection JSUnresolvedReference
 jQuery(
 		function () {
-			let localCartTotal       = getCartTotalFromCookies();
+			let localCartTotal       = getCookies()['cart_total'];
 			const cartChangeInterval = setInterval(
 			() => {
-				let cookieCartTotal  = getCartTotalFromCookies();
+				let cookieCartTotal  = getCookies()['cart_total'];
+				let localShippingId  = getSelectedShippingValue();
+				let cookieShippingId = decodeURIComponent( getCookies()['selected_shipping'] );
 				if (localCartTotal !== cookieCartTotal) {
-					clearInterval( cartChangeInterval );
-					location.reload()
+					reloadPage();
+				} else if ( localShippingId !== cookieShippingId ) {
+					setTimeout(
+						() => {
+							localShippingId  = getSelectedShippingValue();
+							cookieShippingId = decodeURIComponent( getCookies()['selected_shipping'] );
+							if ( localShippingId !== cookieShippingId ) {
+								reloadPage();
+							}
+					},
+						500
+						)
 				}
 				localCartTotal = cookieCartTotal
 			},
@@ -16,7 +28,12 @@ jQuery(
 
 			beforeLeavePageListener();
 
-			function getCartTotalFromCookies() {
+			function reloadPage() {
+				clearInterval( cartChangeInterval );
+				location.reload()
+			}
+
+			function getCookies() {
 					let cookieArr = document.cookie.split( '; ' );
 
 					let cookies                  = {};
@@ -27,7 +44,20 @@ jQuery(
 					}
 						)
 
-					return cookies['cart_total'];
+					return cookies;
+			}
+
+			function getSelectedShippingValue() {
+				// noinspection JSUnresolvedReference
+				const selectedShipping = jQuery( '.wc-block-components-radio-control__input:checked' ).filter(
+					function () {
+						// noinspection JSUnresolvedReference
+						const id = jQuery( this ).attr( 'id' )
+						return id.includes( 'rate' ) || id.includes( 'shipping' );
+					}
+					)
+
+				return selectedShipping[0]?.value;
 			}
 
 			function beforeLeavePageListener() {
