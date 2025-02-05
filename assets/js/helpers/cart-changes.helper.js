@@ -14,16 +14,16 @@ jQuery(
 						() => {
 							localShippingId  = getSelectedShippingValue();
 							cookieShippingId = decodeURIComponent( getCookies()['selected_shipping'] );
-							if ( localShippingId !== cookieShippingId ) {
+							if ( !!localShippingId && localShippingId !== cookieShippingId ) {
 								reloadPage();
 							}
 					},
-						500
+						300
 						)
 				}
 				localCartTotal = cookieCartTotal
 			},
-			500
+			300
 			);
 
 			beforeLeavePageListener();
