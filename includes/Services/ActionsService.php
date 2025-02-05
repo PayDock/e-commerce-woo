@@ -19,7 +19,9 @@ use PowerBoard\Services\Settings\WidgetConfigurationSettingService;
 use PowerBoard\Util\MasterWidgetBlock;
 
 class ActionsService {
-	protected static ?ActionsService $instance  = null;
+	protected static ?ActionsService $instance = null;
+	protected string $last_shipping_id         = '';
+
 	protected const PROCESS_OPTIONS_FUNCTION    = 'process_admin_options';
 	protected const PROCESS_OPTIONS_HOOK_PREFIX = 'woocommerce_update_options_payment_gateways_';
 	protected const SECTION_HOOK                = 'woocommerce_get_sections';
@@ -88,6 +90,8 @@ class ActionsService {
 		add_action( 'woocommerce_add_to_cart', [ $this, 'add_to_cart' ] );
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action( 'woocommerce_cart_item_removed', [ $this, 'cart_item_removed' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'woocommerce_order_update_shipping', [ $this, 'order_update_shipping' ] );
 	}
 
 	public function cart_item_quantity_changed() {
@@ -100,6 +104,16 @@ class ActionsService {
 
 	public function cart_item_removed() {
 		$this->calculate_totals_and_save_cookie();
+	}
+
+	public function order_update_shipping() {
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$current_shipping = WC()->session->get( 'chosen_shipping_methods' )[0];
+		if ( $current_shipping !== $this->last_shipping_id ) {
+			$this->last_shipping_id = $current_shipping;
+			$expiry_time            = time() + 3600;
+			setcookie( 'selected_shipping', $current_shipping, $expiry_time, '/' );
+		}
 	}
 
 	private function calculate_totals_and_save_cookie() {

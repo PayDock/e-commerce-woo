@@ -131,6 +131,7 @@ class WidgetController {
 		$selected_shipping_id = $session->get( 'chosen_shipping_methods' )[0];
 		$shipping_address     = $session->get( 'customer' );
 		$selected_shipping    = $session->get( 'shipping_for_package_0' )['rates'][ $selected_shipping_id ];
+		/* @noinspection PhpUndefinedFunctionInspection */
 		$identifier = is_user_logged_in() ? ( '_' . wp_create_nonce( 'power-board-checkout-cart' ) ) : '';
 
 		$session->set(
