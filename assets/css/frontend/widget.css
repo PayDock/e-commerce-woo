@@ -103,3 +103,8 @@
 		display: none;
 	}
 }
+
+.zipmoney-overlay {
+	position: fixed !important;
+	inset: 0;
+}
