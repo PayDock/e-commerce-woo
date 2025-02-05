@@ -196,8 +196,6 @@ final class MasterWidgetBlock extends AbstractPaymentMethodType {
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		return [
-			// Wordpress data.
-			'widgetToken'             => $settings_service->get_widget_access_token(),
 			// Woocommerce data.
 			'amount'                  => $total,
 			'currency'                => strtoupper( get_woocommerce_currency() ),

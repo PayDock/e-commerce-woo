@@ -5,7 +5,6 @@ namespace PowerBoard\Services\Validation;
 
 use Exception;
 use PowerBoard\API\ConfigService;
-use PowerBoard\Enums\CredentialSettingsEnum;
 use PowerBoard\Enums\EnvironmentSettingsEnum;
 use PowerBoard\Enums\MasterWidgetSettingsEnum;
 use PowerBoard\Enums\SettingGroupsEnum;
@@ -16,8 +15,7 @@ use PowerBoard\Services\Settings\WidgetConfigurationSettingService;
 use PowerBoard\Services\SettingsService;
 
 class ConnectionValidationService {
-	private ?string $old_access_token        = null;
-	private ?string $old_widget_access_token = null;
+	private ?string $old_access_token = null;
 
 	public ?WidgetConfigurationSettingService $service = null;
 	private ?array $errors                             = [];
@@ -25,7 +23,6 @@ class ConnectionValidationService {
 	private bool $access_token_validation_failed       = false;
 	private ?string $environment_settings              = null;
 	private ?string $access_token_settings             = null;
-	private ?string $widget_access_token_settings      = null;
 	private ?string $configuration_id_settings         = null;
 	private ?string $version_settings                  = null;
 	private SDKAdapterService $api_adapter_service;
@@ -44,7 +41,7 @@ class ConnectionValidationService {
 
 		$this->api_adapter_service        = SDKAdapterService::get_instance();
 		$this->widget_api_adapter_service = APIAdapterService::get_instance();
-		$this->widget_api_adapter_service->initialise( $this->environment_settings, $this->access_token_settings, $this->widget_access_token_settings );
+		$this->widget_api_adapter_service->initialise( $this->environment_settings, $this->access_token_settings );
 
 		$this->validate();
 		/* @noinspection PhpUndefinedMethodInspection */
@@ -127,20 +124,10 @@ class ConnectionValidationService {
 			$this->service->id,
 			[
 				SettingGroupsEnum::CREDENTIALS,
-				CredentialSettingsEnum::ACCESS_KEY,
+				'ACCESS_KEY',
 			]
 		);
 		$this->access_token_settings = $this->data[ $access_token_settings_key ];
-
-		$widget_access_token_settings_key   = SettingsService::get_instance()
-		->get_option_name(
-			$this->service->id,
-			[
-				SettingGroupsEnum::CREDENTIALS,
-				CredentialSettingsEnum::WIDGET_KEY,
-			]
-		);
-		$this->widget_access_token_settings = $this->data[ $widget_access_token_settings_key ];
 
 		$configuration_template_setting_key = SettingsService::get_instance()
 															->get_option_name(
@@ -165,13 +152,11 @@ class ConnectionValidationService {
 	private function validate_credential(): void {
 		if (
 			$this->access_token_settings === '********************'
-			&& $this->widget_access_token_settings === '********************'
 		) {
 			$this->check_is_configuration_template_selected();
 		} else {
 			if (
 				$this->check_access_key_connection( $this->access_token_settings )
-				&& $this->check_widget_key_connection( $this->widget_access_token_settings )
 			) {
 				return;
 			}
@@ -256,30 +241,11 @@ class ConnectionValidationService {
 	}
 
 	private function save_old_credential(): void {
-		$this->old_access_token        = ConfigService::$access_token;
-		$this->old_widget_access_token = ConfigService::$widget_access_token;
+		$this->old_access_token = ConfigService::$access_token;
 	}
 
 	private function restore_credential(): void {
-		ConfigService::$access_token        = $this->old_access_token;
-		ConfigService::$widget_access_token = $this->old_widget_access_token;
-	}
-
-	private function check_widget_key_connection( ?string $widget_access_token ): bool {
-		$valid_key = true;
-
-		if ( $widget_access_token !== '********************' ) {
-			$this->save_old_credential();
-
-			ConfigService::$widget_access_token = $widget_access_token;
-
-			$result    = $this->api_adapter_service->token();
-			$valid_key = empty( $result['error'] );
-
-			$this->restore_credential();
-		}
-
-		return $valid_key;
+		ConfigService::$access_token = $this->old_access_token;
 	}
 
 	public function get_errors(): array {

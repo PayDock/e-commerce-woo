@@ -5,7 +5,6 @@ namespace PowerBoard\Services;
 
 use PowerBoard\API\ChargeService;
 use PowerBoard\API\ConfigService;
-use PowerBoard\API\TokenService;
 use PowerBoard\Services\Settings\WidgetConfigurationSettingService;
 
 class SDKAdapterService {
@@ -14,11 +13,11 @@ class SDKAdapterService {
 
 	public function __construct() {
 		$settings = new WidgetConfigurationSettingService();
-		$this->initialise( $settings->get_environment(), $settings->get_access_token(), $settings->get_widget_access_token() );
+		$this->initialise( $settings->get_environment(), $settings->get_access_token() );
 	}
 
-	public function initialise( ?string $env, ?string $access_token, ?string $widget_access_token ): void {
-		ConfigService::init( $env, $access_token, $widget_access_token );
+	public function initialise( ?string $env, ?string $access_token ): void {
+		ConfigService::init( $env, $access_token );
 	}
 
 	public static function get_instance(): self {
@@ -27,15 +26,6 @@ class SDKAdapterService {
 		}
 
 		return self::$instance;
-	}
-
-	public function token( array $params = [
-		'gateway_id' => '',
-		'type'       => '',
-	]): array {
-		$token_service = new TokenService();
-
-		return $token_service->create( $params )->call_with_widget_access_token();
 	}
 
 	public function refunds( array $params ): array {
