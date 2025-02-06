@@ -108,11 +108,15 @@ class ActionsService {
 
 	public function order_update_shipping() {
 		/* @noinspection PhpUndefinedFunctionInspection */
-		$current_shipping = WC()->session->get( 'chosen_shipping_methods' )[0];
-		if ( $current_shipping !== $this->last_shipping_id ) {
-			$this->last_shipping_id = $current_shipping;
-			$expiry_time            = time() + 3600;
-			setcookie( 'selected_shipping', $current_shipping, $expiry_time, '/' );
+		$session = WC()->session;
+
+		if ( ! empty( $session ) ) {
+			$current_shipping = $session->get( 'chosen_shipping_methods' )[0];
+			if ( $current_shipping !== null && $current_shipping !== $this->last_shipping_id ) {
+				$this->last_shipping_id = $current_shipping;
+				$expiry_time            = time() + 3600;
+				setcookie( 'selected_shipping', $current_shipping, $expiry_time, '/' );
+			}
 		}
 	}
 
