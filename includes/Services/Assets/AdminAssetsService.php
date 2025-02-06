@@ -5,7 +5,6 @@ namespace PowerBoard\Services\Assets;
 
 class AdminAssetsService {
 	private const SCRIPTS = [
-		'hide-settings',
 		'handle-settings-select-option',
 		'handle-environment-changes',
 		'deactivation-confirmation',

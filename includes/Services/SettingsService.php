@@ -6,6 +6,7 @@ namespace PowerBoard\Services;
 use PowerBoard\Enums\ConfigAPIEnum;
 use PowerBoard\Enums\MasterWidgetSettingsEnum;
 use PowerBoard\Enums\SettingGroupsEnum;
+use PowerBoard\Services\Settings\APIAdapterService;
 use PowerBoard\Services\Settings\WidgetConfigurationSettingService;
 
 final class SettingsService {
@@ -92,23 +93,47 @@ final class SettingsService {
 		);
 	}
 
+	/**
+	 * Uses functions (get_transient, set_transient) from WordPress
+	 */
+	private function get_plugin_configuration_environments(): array {
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$stored_configuration_environment = get_transient( 'environment_url' );
+
+		if ( ! empty( $stored_configuration_environment ) ) {
+			$plugin_configuration_environments = $stored_configuration_environment;
+		} else {
+			$widget_api_adapter_service = APIAdapterService::get_instance();
+			$widget_api_adapter_service->initialise( $this->get_environment(), $this->get_access_token() );
+			$plugin_configuration              = $widget_api_adapter_service->get_plugin_configuration_by_version();
+			$plugin_configuration_environments = $plugin_configuration['environment_url'];
+
+			/* @noinspection PhpUndefinedFunctionInspection */
+			set_transient( 'environment_url', $plugin_configuration_environments, 60 );
+		}
+
+		return $plugin_configuration_environments;
+	}
+
 	public function get_widget_script_url(): string {
 		if ( empty( $this->environment ) ) {
 			$this->get_environment();
 		}
 
-		if ( ConfigAPIEnum::PRODUCTION_ENVIRONMENT === $this->environment ) {
-			$sdk_url = ConfigAPIEnum::PRODUCTION_WIDGET_URL;
-			$version = 'latest';
-		} elseif ( ConfigAPIEnum::STAGING_ENVIRONMENT === $this->environment ) {
-			$sdk_url = ConfigAPIEnum::STAGING_WIDGET_URL;
-			$version = 'v1.117.2-beta';
-		} else {
-			$sdk_url = ConfigAPIEnum::SANDBOX_WIDGET_URL;
-			$version = 'v1.116.4';
+		$plugin_configuration_environments = $this->get_plugin_configuration_environments();
+
+		switch ( $this->environment ) {
+			case ConfigAPIEnum::PRODUCTION_ENVIRONMENT_VALUE:
+				$environment_key = ConfigAPIEnum::PRODUCTION_ENVIRONMENT_URL_KEY;
+				break;
+			case ConfigAPIEnum::SANDBOX_ENVIRONMENT_VALUE:
+				$environment_key = ConfigAPIEnum::SANDBOX_ENVIRONMENT_URL_KEY;
+				break;
+			case ConfigAPIEnum::STAGING_ENVIRONMENT_VALUE:
+				$environment_key = ConfigAPIEnum::STAGING_ENVIRONMENT_URL_KEY;
 		}
 
-		return strtr( $sdk_url, [ '{version}' => $version ] );
+		return ! empty( $environment_key ) ? $plugin_configuration_environments[ $environment_key ] : '';
 	}
 
 	public static function get_instance(): self {

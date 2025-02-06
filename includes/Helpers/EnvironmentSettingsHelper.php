@@ -35,10 +35,10 @@ class EnvironmentSettingsHelper {
 
 	public static function get_environments_list_for_ui(): array {
 		return [
-			''                                    => 'Select an environment',
-			ConfigAPIEnum::STAGING_ENVIRONMENT    => ConfigAPIEnum::STAGING_ENVIRONMENT_NAME,
-			ConfigAPIEnum::SANDBOX_ENVIRONMENT    => ConfigAPIEnum::SANDBOX_ENVIRONMENT_NAME,
-			ConfigAPIEnum::PRODUCTION_ENVIRONMENT => ConfigAPIEnum::PRODUCTION_ENVIRONMENT_NAME,
+			''                                          => 'Select an environment',
+			ConfigAPIEnum::STAGING_ENVIRONMENT_VALUE    => ConfigAPIEnum::STAGING_ENVIRONMENT_NAME,
+			ConfigAPIEnum::SANDBOX_ENVIRONMENT_VALUE    => ConfigAPIEnum::SANDBOX_ENVIRONMENT_NAME,
+			ConfigAPIEnum::PRODUCTION_ENVIRONMENT_VALUE => ConfigAPIEnum::PRODUCTION_ENVIRONMENT_NAME,
 		];
 	}
 

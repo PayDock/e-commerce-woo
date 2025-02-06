@@ -9,7 +9,6 @@ use PowerBoard\Enums\EnvironmentSettingsEnum;
 use PowerBoard\Enums\MasterWidgetSettingsEnum;
 use PowerBoard\Enums\SettingGroupsEnum;
 use PowerBoard\Helpers\MasterWidgetTemplatesHelper;
-use PowerBoard\Services\SDKAdapterService;
 use PowerBoard\Services\Settings\APIAdapterService;
 use PowerBoard\Services\Settings\WidgetConfigurationSettingService;
 use PowerBoard\Services\SettingsService;
@@ -20,12 +19,10 @@ class ConnectionValidationService {
 	public ?WidgetConfigurationSettingService $service = null;
 	private ?array $errors                             = [];
 	private ?array $data                               = [];
-	private bool $access_token_validation_failed       = false;
 	private ?string $environment_settings              = null;
 	private ?string $access_token_settings             = null;
 	private ?string $configuration_id_settings         = null;
-	private ?string $version_settings                  = null;
-	private SDKAdapterService $api_adapter_service;
+	private ?string $checkout_version                  = null;
 	private APIAdapterService $widget_api_adapter_service;
 
 
@@ -39,7 +36,6 @@ class ConnectionValidationService {
 
 		$this->set_api_init_variables();
 
-		$this->api_adapter_service        = SDKAdapterService::get_instance();
 		$this->widget_api_adapter_service = APIAdapterService::get_instance();
 		$this->widget_api_adapter_service->initialise( $this->environment_settings, $this->access_token_settings );
 
@@ -117,7 +113,7 @@ class ConnectionValidationService {
 				MasterWidgetSettingsEnum::VERSION,
 			]
 		);
-		$this->version_settings = $this->data[ $version_settings_key ];
+		$this->checkout_version = $this->data[ $version_settings_key ];
 
 		$access_token_settings_key   = SettingsService::get_instance()
 		->get_option_name(
@@ -145,7 +141,7 @@ class ConnectionValidationService {
 			return true;
 		}
 
-		$this->errors[] = 'No environment selected. Please select an environment and try again. ';
+		$this->errors[] = 'No environment selected. Please select an environment and try again.';
 		return false;
 	}
 
@@ -153,16 +149,31 @@ class ConnectionValidationService {
 		if (
 			$this->access_token_settings === '********************'
 		) {
-			$this->check_is_configuration_template_selected();
+			if ( $this->validate_checkout_version() ) {
+				$this->check_is_configuration_template_selected();
+			}
 		} else {
 			if (
 				$this->check_access_key_connection( $this->access_token_settings )
 			) {
+				if ( $this->validate_checkout_version() ) {
+					$this->get_configuration_templates();
+					$this->get_customisation_templates();
+				}
 				return;
 			}
 
-			$this->errors[] = 'Invalid credentials. Please update and try again. ';
+			$this->errors[] = 'Invalid credentials. Please update and try again.';
 		}
+	}
+
+	private function validate_checkout_version(): bool {
+		if ( ! empty( $this->checkout_version ) ) {
+			return true;
+		}
+
+		$this->errors[] = 'No checkout version selected. Please select a version and try again.';
+		return false;
 	}
 
 	private function check_is_configuration_template_selected(): void {
@@ -172,35 +183,32 @@ class ConnectionValidationService {
 	}
 
 	private function check_access_key_connection( ?string $access_token ): bool {
-		$this->access_token_validation_failed = false;
+		$access_token_validation_failed = false;
 		if ( $access_token !== '********************' ) {
 			$this->save_old_credential();
 			ConfigService::$access_token = $access_token;
 
-			$this->get_configuration_templates();
-			$this->get_customisation_templates();
+			$access_token_validation_failed = ! $this->get_configuration_templates_for_validation();
 
 			$this->restore_credential();
 
-			if ( ! $this->access_token_validation_failed ) {
+			if ( ! $access_token_validation_failed ) {
 				ConfigService::$access_token = $access_token;
 			}
 		}
 
-		return ! $this->access_token_validation_failed;
+		return ! $access_token_validation_failed;
 	}
 
 	/**
 	 * Uses functions (set_transient) from WordPress
 	 */
 	private function get_configuration_templates(): void {
-		$configuration_templates_result = $this->widget_api_adapter_service->get_configuration_templates_ids( $this->version_settings );
+		$configuration_templates_result = $this->widget_api_adapter_service->get_configuration_templates_ids( $this->checkout_version );
 		$has_error                      = ! empty( $configuration_templates_result['error'] );
 		$configuration_templates        = MasterWidgetTemplatesHelper::map_templates( $configuration_templates_result['resource']['data'], $has_error );
 
-		if ( $has_error ) {
-			$this->access_token_validation_failed = true;
-		} else {
+		if ( ! $has_error ) {
 			/* @noinspection PhpUndefinedFunctionInspection */
 			set_transient( 'configuration_templates_' . $this->environment_settings, $configuration_templates, 60 );
 		}
@@ -216,11 +224,22 @@ class ConnectionValidationService {
 		MasterWidgetTemplatesHelper::validate_or_update_template_id( $configuration_templates, $has_error, $configuration_id_key );
 	}
 
+	private function get_configuration_templates_for_validation(): bool {
+		$configuration_templates_result = $this->widget_api_adapter_service->get_configuration_templates_for_validation();
+		$has_error                      = ! empty( $configuration_templates_result['error'] );
+
+		if ( $has_error ) {
+			return false;
+		}
+
+		return true;
+	}
+
 	/**
 	 * Uses functions (set_transient) from WordPress
 	 */
 	private function get_customisation_templates(): void {
-		$customisation_templates_result = $this->widget_api_adapter_service->get_customisation_templates_ids( $this->version_settings );
+		$customisation_templates_result = $this->widget_api_adapter_service->get_customisation_templates_ids( $this->checkout_version );
 		$has_error                      = ! empty( $customisation_templates_result['error'] );
 		$customisation_templates        = MasterWidgetTemplatesHelper::map_templates( $customisation_templates_result['resource']['data'], $has_error, true );
 

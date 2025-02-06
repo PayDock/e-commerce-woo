@@ -35,7 +35,7 @@ class MasterWidgetSettingsHelper {
 	public static function get_options_for_ui( string $key, $env, $access_token, $version ): array {
 		switch ( $key ) {
 			case MasterWidgetSettingsEnum::VERSION:
-				return self::get_versions_for_ui();
+				return self::get_checkout_versions_for_ui( $env, $access_token );
 			case MasterWidgetSettingsEnum::CONFIGURATION_ID:
 				return self::get_configuration_ids_for_ui( $env, $access_token, $version );
 			case MasterWidgetSettingsEnum::CUSTOMISATION_ID:
@@ -45,8 +45,30 @@ class MasterWidgetSettingsHelper {
 		}
 	}
 
-	public static function get_versions_for_ui(): array {
-		return [ '1' => '1' ];
+	public static function get_checkout_versions_for_ui( $env, $access_token ): array {
+		/* @noinspection PhpUndefinedFunctionInspection */
+		if ( ! self::is_power_board_settings_page() || ! empty( get_transient( 'is_fetching_versions' ) ) ) {
+			return [];
+		}
+		/* @noinspection PhpUndefinedFunctionInspection */
+		set_transient( 'is_fetching_versions', true );
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$stored_checkout_versions = get_transient( 'checkout_versions' );
+		if ( ! empty( $stored_checkout_versions ) ) {
+			$checkout_versions_for_ui = $stored_checkout_versions;
+		} else {
+			$api_adapter_service      = self::init_api_adapter( $env, $access_token );
+			$plugin_configuration     = $api_adapter_service->get_plugin_configuration_by_version();
+			$checkout_versions_for_ui = $plugin_configuration['checkout_versions'];
+			/* @noinspection PhpUndefinedFunctionInspection */
+			set_transient( 'checkout_versions', $plugin_configuration['checkout_versions'], 60 );
+			/* @noinspection PhpUndefinedFunctionInspection */
+			set_transient( 'environment_url', $plugin_configuration['environment_url'], 60 );
+		}
+		/* @noinspection PhpUndefinedFunctionInspection */
+		delete_transient( 'is_fetching_versions' );
+		return [ '' => 'Select a checkout version' ] + $checkout_versions_for_ui;
 	}
 
 	/**
@@ -129,15 +151,6 @@ class MasterWidgetSettingsHelper {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		delete_transient( 'is_fetching_customisation_templates' );
 		return $customisation_templates;
-	}
-
-	public static function get_default( string $key ): string {
-		switch ( $key ) {
-			case MasterWidgetSettingsEnum::VERSION:
-				return '1';
-			default:
-				return '';
-		}
 	}
 
 	public static function init_api_adapter( $env, $access_token ): APIAdapterService {

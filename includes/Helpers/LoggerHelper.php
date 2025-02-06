@@ -21,25 +21,8 @@ class LoggerHelper {
 		wc_get_logger()->log(
 			$has_error ? LoggerEnum::ERROR : LoggerEnum::INFORMATION,
 			$request_action,
-			self::decode_stringified_json( $context ),
+			JsonHelper::decode_stringified_json( $context ),
 		);
-	}
-
-	public static function decode_stringified_json( $data ) {
-		if ( is_array( $data ) || is_object( $data ) ) {
-			foreach ( $data as &$value ) {
-				$value = self::decode_stringified_json( $value );
-			}
-		} elseif ( is_string( $data ) ) {
-			if ( json_decode( $data ) !== null && $data !== json_last_error_msg() ) {
-				return json_decode( $data, true );
-			} else {
-				$data = str_replace( '\\', '\\\\', $data );
-				$data = str_replace( '"', '\'', $data );
-			}
-		}
-
-		return $data;
 	}
 
 	public static function filter_response_by_action( $response, $request_action, $has_error ): array {
@@ -48,9 +31,6 @@ class LoggerHelper {
 		}
 
 		switch ( $request_action ) {
-			case APIActionEnum::CREATE_TOKEN:
-				$response['resource']['data'] = '********************';
-				break;
 			case APIActionEnum::CREATE_INTENT:
 				$response['resource']['data']['token'] = '********************';
 				break;

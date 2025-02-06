@@ -50,6 +50,10 @@ if ( ! defined( 'PLUGIN_NAME' ) ) {
 	define( 'PLUGIN_NAME', 'PowerBoard for WooCommerce' );
 }
 
+if ( ! defined( 'PLUGIN_VERSIONS_JSON_URL' ) ) {
+	define( 'PLUGIN_VERSIONS_JSON_URL', 'https://widget.powerboard.commbank.com.au/sdk/platforms/compatibility-registry.json' );
+}
+
 require_once __DIR__ . '/vendor/autoload.php';
 
 PowerBoard\PowerBoardPlugin::get_instance();

@@ -5,6 +5,7 @@ namespace PowerBoard\Services\Settings;
 
 use PowerBoard\API\ChargeService;
 use PowerBoard\API\ConfigService;
+use PowerBoard\Helpers\JsonHelper;
 
 class APIAdapterService {
 	private ?ChargeService $charge_service      = null;
@@ -26,8 +27,30 @@ class APIAdapterService {
 		return $this->get_charge_service()->create_checkout_intent( $params )->call();
 	}
 
+	public function get_plugin_configuration_by_version(): array {
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$body = JsonHelper::decode_stringified_json( wp_remote_get( PLUGIN_VERSIONS_JSON_URL )['body'] );
+
+		$result = [];
+		foreach ( $body['woocommerce'][ POWER_BOARD_PLUGIN_VERSION ] as $key => $value ) {
+			if ( $key === 'env' ) {
+				foreach ( $value as $env_value ) {
+					$result['environment_url'][ $env_value['name'] ] = $env_value['client_sdk_url'];
+				}
+			} elseif ( $key === 'checkout_version' ) {
+				$result['checkout_versions'] = array_combine( $value, $value );
+			}
+		}
+
+		return $result;
+	}
+
 	public function get_configuration_templates_ids( string $version ): array {
 		return $this->get_charge_service()->get_configuration_templates_ids( $version )->call();
+	}
+
+	public function get_configuration_templates_for_validation(): array {
+		return $this->get_charge_service()->get_configuration_templates_for_validation()->call();
 	}
 
 	public function get_customisation_templates_ids( string $version ): array {

@@ -39,6 +39,14 @@ class ChargeService extends AbstractApiService {
 		return $this;
 	}
 
+	public function get_configuration_templates_for_validation(): self {
+		$this->parameters = [ 'type' => 'configuration' ];
+		$this->set_action( 'templates' );
+		$this->request_action = APIActionEnum::GET_CONFIGURATION_TEMPLATES_FOR_VALIDATION;
+
+		return $this;
+	}
+
 	public function get_customisation_templates_ids( string $version ): self {
 		$this->parameters     = [
 			'type'    => 'customisation',
