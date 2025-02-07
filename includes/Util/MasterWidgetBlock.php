@@ -70,7 +70,7 @@ final class MasterWidgetBlock extends AbstractPaymentMethodType {
 			wp_enqueue_script(
 				'power-board-form-helpers',
 				POWER_BOARD_PLUGIN_URL . 'assets/js/helpers/form.helper.js',
-				[],
+				[ 'jquery' ],
 				POWER_BOARD_PLUGIN_VERSION,
 				true
 			);
@@ -78,7 +78,7 @@ final class MasterWidgetBlock extends AbstractPaymentMethodType {
 			wp_enqueue_script(
 				'power-board-cart-changes-helpers',
 				POWER_BOARD_PLUGIN_URL . 'assets/js/helpers/cart-changes.helper.js',
-				[],
+				[ 'jquery' ],
 				POWER_BOARD_PLUGIN_VERSION,
 				true
 			);

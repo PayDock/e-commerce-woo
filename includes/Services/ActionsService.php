@@ -36,10 +36,14 @@ class ActionsService {
 			function () {
 				$this->add_compatibility_with_woocommerce();
 				$this->add_payment_method_to_checkout();
+				$this->add_cart_hooks();
 				$this->add_settings_actions();
 				$this->add_order_actions();
 			}
 		);
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'woocommerce_blocks_loaded', [ $this, 'register_payment_method' ] );
 	}
 
 	public static function get_instance(): ActionsService {
@@ -61,10 +65,6 @@ class ActionsService {
 	 * Uses a function (add_action) from WordPress
 	 */
 	protected function add_payment_method_to_checkout(): void {
-		if ( ! class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) ) {
-			return;
-		}
-
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action(
 			'before_woocommerce_init',
@@ -75,15 +75,13 @@ class ActionsService {
 				);
 			}
 		);
+	}
 
-		/* @noinspection PhpUndefinedFunctionInspection */
-		add_action(
-			'woocommerce_blocks_payment_method_type_registration',
-			function ( PaymentMethodRegistry $payment_method_registry ) {
-				$payment_method_registry->register( new MasterWidgetBlock() );
-			}
-		);
-
+	/**
+	 * Add new payment method on checkout page
+	 * Uses a function (add_action) from WordPress
+	 */
+	protected function add_cart_hooks(): void {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action( 'woocommerce_after_cart_item_quantity_update', [ $this, 'cart_item_quantity_changed' ] );
 		/* @noinspection PhpUndefinedFunctionInspection */
@@ -92,6 +90,22 @@ class ActionsService {
 		add_action( 'woocommerce_cart_item_removed', [ $this, 'cart_item_removed' ] );
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action( 'woocommerce_order_update_shipping', [ $this, 'order_update_shipping' ] );
+	}
+
+	/**
+	 * Add new payment method on checkout page
+	 * Uses a function (add_action) from WordPress
+	 */
+	public function register_payment_method(): void {
+		if ( class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			add_action(
+				'woocommerce_blocks_payment_method_type_registration',
+				function ( PaymentMethodRegistry $payment_method_registry ) {
+					$payment_method_registry->register( new MasterWidgetBlock() );
+				}
+			);
+		}
 	}
 
 	public function cart_item_quantity_changed() {

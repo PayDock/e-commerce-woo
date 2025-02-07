@@ -57,7 +57,7 @@ class AdminAssetsService {
 			wp_enqueue_script(
 				$this->get_script_name( $script ),
 				false,
-				[],
+				[ 'jquery' ],
 				POWER_BOARD_PLUGIN_VERSION,
 				true
 			);
