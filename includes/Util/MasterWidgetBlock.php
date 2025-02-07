@@ -85,16 +85,6 @@ final class MasterWidgetBlock extends AbstractPaymentMethodType {
 			);
 
 			/* @noinspection PhpUndefinedFunctionInspection */
-			wp_localize_script(
-				'power-board-form-helpers',
-				'PowerBoardAjaxError',
-				[
-					'url'           => admin_url( 'admin-ajax.php' ),
-					'wpnonce_error' => wp_create_nonce( 'power-board-create-error-notice' ),
-				]
-			);
-
-			/* @noinspection PhpUndefinedFunctionInspection */
 			wp_enqueue_script(
 				'power-board-api',
 				SettingsService::get_instance()->get_widget_script_url(),
@@ -110,17 +100,6 @@ final class MasterWidgetBlock extends AbstractPaymentMethodType {
 				[ 'jquery' ],
 				POWER_BOARD_PLUGIN_VERSION,
 				true
-			);
-
-			/* @noinspection PhpUndefinedFunctionInspection */
-			wp_localize_script(
-				'power-board-form',
-				'PowerBoardAjax',
-				[
-					'url'           => admin_url( 'admin-ajax.php' ),
-					'wpnonce'       => wp_create_nonce( 'power-board-create-charge-intent' ),
-					'wpnonce_error' => wp_create_nonce( 'power-board-create-error-notice' ),
-				]
 			);
 
 			/* @noinspection PhpUndefinedFunctionInspection */
