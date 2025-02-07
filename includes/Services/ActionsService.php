@@ -43,6 +43,9 @@ class ActionsService {
 		);
 
 		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'plugins_loaded', [ $this, 'init_payment_gateway' ] );
+
+		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action( 'woocommerce_blocks_loaded', [ $this, 'register_payment_method' ] );
 	}
 
@@ -58,6 +61,11 @@ class ActionsService {
 		if ( class_exists( FeaturesUtil::class ) ) {
 			FeaturesUtil::declare_compatibility( 'custom_order_tables', POWER_BOARD_PLUGIN_FILE );
 		}
+	}
+
+	public function init_payment_gateway(): void {
+		/* @noinspection PhpUndefinedFunctionInspection */
+		require_once plugin_dir_path( POWER_BOARD_PLUGIN_FILE ) . 'includes/Util/MasterWidgetBlock.php';
 	}
 
 	/**
