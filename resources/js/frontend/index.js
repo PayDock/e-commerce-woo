@@ -67,7 +67,7 @@ const initMasterWidgetCheckout = () => {
 				url: '/?wc-ajax=power-board-create-charge-intent',
 				type: 'POST',
 				data: {
-					_wpnonce: PowerBoardAjax.wpnonce,
+					_wpnonce: PowerBoardAjaxIntent.wpnonce,
 					order_id: store.getOrderId(),
 					total: cart.getCartTotals(),
 					address: cart.getCustomerData().billingAddress,

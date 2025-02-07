@@ -76,15 +76,6 @@ final class MasterWidgetBlock extends AbstractPaymentMethodType {
 			);
 
 			/* @noinspection PhpUndefinedFunctionInspection */
-			wp_enqueue_script(
-				'power-board-cart-changes-helpers',
-				POWER_BOARD_PLUGIN_URL . 'assets/js/helpers/cart-changes.helper.js',
-				[ 'jquery' ],
-				POWER_BOARD_PLUGIN_VERSION,
-				true
-			);
-
-			/* @noinspection PhpUndefinedFunctionInspection */
 			wp_localize_script(
 				'power-board-form-helpers',
 				'PowerBoardAjaxError',
@@ -92,6 +83,15 @@ final class MasterWidgetBlock extends AbstractPaymentMethodType {
 					'url'           => admin_url( 'admin-ajax.php' ),
 					'wpnonce_error' => wp_create_nonce( 'power-board-create-error-notice' ),
 				]
+			);
+
+			/* @noinspection PhpUndefinedFunctionInspection */
+			wp_enqueue_script(
+				'power-board-cart-changes-helpers',
+				POWER_BOARD_PLUGIN_URL . 'assets/js/helpers/cart-changes.helper.js',
+				[ 'jquery' ],
+				POWER_BOARD_PLUGIN_VERSION,
+				true
 			);
 
 			/* @noinspection PhpUndefinedFunctionInspection */
@@ -115,11 +115,10 @@ final class MasterWidgetBlock extends AbstractPaymentMethodType {
 			/* @noinspection PhpUndefinedFunctionInspection */
 			wp_localize_script(
 				'power-board-form',
-				'PowerBoardAjax',
+				'PowerBoardAjaxIntent',
 				[
-					'url'           => admin_url( 'admin-ajax.php' ),
-					'wpnonce'       => wp_create_nonce( 'power-board-create-charge-intent' ),
-					'wpnonce_error' => wp_create_nonce( 'power-board-create-error-notice' ),
+					'url'     => admin_url( 'admin-ajax.php' ),
+					'wpnonce' => wp_create_nonce( 'power-board-create-charge-intent' ),
 				]
 			);
 
@@ -135,11 +134,10 @@ final class MasterWidgetBlock extends AbstractPaymentMethodType {
 			/* @noinspection PhpUndefinedFunctionInspection */
 			wp_localize_script(
 				'power-board-classic-form',
-				'PowerBoardAjax',
+				'PowerBoardAjaxIntent',
 				[
-					'url'           => admin_url( 'admin-ajax.php' ),
-					'wpnonce'       => wp_create_nonce( 'power-board-create-charge-intent' ),
-					'wpnonce_error' => wp_create_nonce( 'power-board-create-error-notice' ),
+					'url'     => admin_url( 'admin-ajax.php' ),
+					'wpnonce' => wp_create_nonce( 'power-board-create-charge-intent' ),
 				]
 			);
 
