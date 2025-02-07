@@ -91,7 +91,7 @@ class FiltersService {
 			$links,
 			sprintf(
 				'<a href="%1$s">%2$s</a>',
-				admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . PLUGIN_PREFIX ),
+				admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . POWER_BOARD_PLUGIN_PREFIX ),
 				__( 'Settings', 'power-board' )
 			)
 		);

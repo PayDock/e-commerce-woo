@@ -42,12 +42,12 @@ if ( ! defined( 'POWER_BOARD_PLUGIN_VERSION' ) ) {
 	define( 'POWER_BOARD_PLUGIN_VERSION', '1.0.0' );
 }
 
-if ( ! defined( 'PLUGIN_PREFIX' ) ) {
-	define( 'PLUGIN_PREFIX', 'power_board' );
+if ( ! defined( 'POWER_BOARD_PLUGIN_PREFIX' ) ) {
+	define( 'POWER_BOARD_PLUGIN_PREFIX', 'power_board' );
 }
 
-if ( ! defined( 'PLUGIN_NAME' ) ) {
-	define( 'PLUGIN_NAME', 'PowerBoard for WooCommerce' );
+if ( ! defined( 'POWER_BOARD_PLUGIN_NAME' ) ) {
+	define( 'POWER_BOARD_PLUGIN_NAME', 'PowerBoard for WooCommerce' );
 }
 
 if ( ! defined( 'PLUGIN_VERSIONS_JSON_URL' ) ) {

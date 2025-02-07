@@ -165,7 +165,7 @@ final class MasterWidgetBlock extends AbstractPaymentMethodType {
 		$script_asset_path = 'assets/build/js/frontend/' . $this->script . '.asset.php';
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$script_url   = plugins_url( $script_path, POWER_BOARD_PLUGIN_FILE );
-		$script_name  = PLUGIN_PREFIX . '-' . $this->script;
+		$script_name  = POWER_BOARD_PLUGIN_PREFIX . '-' . $this->script;
 		$script_asset = file_exists( $script_asset_path ) ? require $script_asset_path : [
 			'dependencies' => [],
 			'version'      => POWER_BOARD_PLUGIN_VERSION,
