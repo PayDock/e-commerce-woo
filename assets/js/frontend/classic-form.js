@@ -16,7 +16,7 @@ jQuery(
 					'power_board_gateway',
 					],
 					phonePattern: /^\+[1-9]{1}[0-9]{3,14}$/,
-					errorMessageHtml: `<div class ="wc-block-components-validation-error" role="alert"><p>Please enter your phone number in international format, starting with "+"</p></div>`,
+					errorMessageHtml: `<div class ="classic-checkout-validation-error wc-block-components-validation-error" role="alert"><p>Please enter your phone number in international format, starting with "+"</p></div>`,
 				};
 				const $shippingWrapper            = $( '#shipping-fields .wc-block-components-address-address-wrapper' );
 				const getPhoneInputs              = () =>

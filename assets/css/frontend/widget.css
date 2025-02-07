@@ -108,3 +108,7 @@
 	position: fixed !important;
 	inset: 0;
 }
+
+.classic-checkout-validation-error {
+	color: #cc1818;
+}
