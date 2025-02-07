@@ -10,7 +10,7 @@ class LoggerHelper {
 	public static function log_api_request( array $result, string $request_action ): void {
 		$has_error = ! empty( $result['error'] );
 		$context   = [
-			'source'   => PLUGIN_NAME,
+			'source'   => POWER_BOARD_PLUGIN_NAME,
 			'request'  => $result['request'],
 			'response' => self::filter_response_by_action( $result['response'], $request_action, $has_error ),
 		];

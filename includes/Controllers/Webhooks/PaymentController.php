@@ -35,7 +35,7 @@ class PaymentController {
 				'completed',
 			],
 			true
-		) || ( strpos( $order->get_payment_method(), PLUGIN_PREFIX ) ) === false ) {
+		) || ( strpos( $order->get_payment_method(), POWER_BOARD_PLUGIN_PREFIX ) ) === false ) {
 			return;
 		}
 
