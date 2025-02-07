@@ -1,4 +1,4 @@
-const selectElementsToUpdateOnEnvChange = ['woocommerce_power_board_power_board_CHECKOUT_CONFIGURATION_ID', 'woocommerce_power_board_power_board_CHECKOUT_CUSTOMISATION_ID']
+const selectElementsToUpdateOnEnvChange = ['woocommerce_power_board_power_board_CHECKOUT_VERSION', 'woocommerce_power_board_power_board_CHECKOUT_CONFIGURATION_ID', 'woocommerce_power_board_power_board_CHECKOUT_CUSTOMISATION_ID']
 const elementsToUpdateOnEnvChange       = ['woocommerce_power_board_power_board_CREDENTIALS_ACCESS_KEY', ...selectElementsToUpdateOnEnvChange]
 const environmentSelectBoxId            = 'woocommerce_power_board_power_board_ENVIRONMENT_ENVIRONMENT';
 
@@ -68,6 +68,5 @@ jQuery( document ).ready(
 			);
 			return savedElements;
 		}
-
 	}
 );
