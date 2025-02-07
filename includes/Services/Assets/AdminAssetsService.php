@@ -39,7 +39,7 @@ class AdminAssetsService {
 	}
 
 	private function get_script_name( string $script ): string {
-		return implode( '_', [ PLUGIN_PREFIX, self::PREFIX, self::SCRIPT_PREFIX, $script ] );
+		return implode( '_', [ POWER_BOARD_PLUGIN_PREFIX, self::PREFIX, self::SCRIPT_PREFIX, $script ] );
 	}
 
 	private function get_script_path( string $script ): string {

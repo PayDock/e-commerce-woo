@@ -98,7 +98,7 @@ class WidgetConfigurationSettingService extends WC_Payment_Gateway {
 			return;
 		}
 		foreach ( SettingGroupsEnum::cases() as $setting_group ) {
-			$key = PLUGIN_PREFIX . '_' . $this->service->get_option_name(
+			$key = POWER_BOARD_PLUGIN_PREFIX . '_' . $this->service->get_option_name(
 				$this->id,
 				[
 					$setting_group,
@@ -174,7 +174,7 @@ class WidgetConfigurationSettingService extends WC_Payment_Gateway {
 
 				if ( ! empty( $options ) && ( MasterWidgetSettingsHelper::get_input_type( $checkout_settings ) ) === 'select' ) {
 					$fields[ $key ]['options'] = $options;
-					$fields[ $key ]['class']   = PLUGIN_PREFIX . '-settings' . ( MasterWidgetSettingsEnum::CUSTOMISATION_ID === $checkout_settings ? ' is-optional' : '' );
+					$fields[ $key ]['class']   = POWER_BOARD_PLUGIN_PREFIX . '-settings' . ( MasterWidgetSettingsEnum::CUSTOMISATION_ID === $checkout_settings ? ' is-optional' : '' );
 					$fields[ $key ]['default'] = '';
 				}
 			}
@@ -203,7 +203,7 @@ class WidgetConfigurationSettingService extends WC_Payment_Gateway {
 
 			if ( ! empty( $options ) && ( EnvironmentSettingsHelper::get_input_type( $environment_settings ) ) === 'select' ) {
 				$fields[ $key ]['options'] = $options;
-				$fields[ $key ]['class']   = PLUGIN_PREFIX . '-settings';
+				$fields[ $key ]['class']   = POWER_BOARD_PLUGIN_PREFIX . '-settings';
 				$fields[ $key ]['default'] = EnvironmentSettingsHelper::get_default( $environment_settings );
 			}
 		}

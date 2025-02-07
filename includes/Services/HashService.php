@@ -104,7 +104,7 @@ class HashService {
 			/* @noinspection PhpUndefinedConstantInspection */
 			$key_material = AUTH_KEY;
 		} else {
-			$key_material = PLUGIN_PREFIX;
+			$key_material = POWER_BOARD_PLUGIN_PREFIX;
 		}
 
 		return substr( hash( 'sha256', $key_material, true ), 0, $length );

@@ -166,7 +166,7 @@ class MasterWidgetSettingsHelper {
 	 */
 	public static function is_power_board_settings_page(): bool {
 		/* @noinspection PhpUndefinedFunctionInspection */
-		return isset( $_GET['page'] ) && sanitize_text_field( wp_unslash( $_GET['page'] ) ) === 'wc-settings' && isset( $_GET['tab'] ) && sanitize_text_field( wp_unslash( $_GET['tab'] ) ) === 'checkout' && isset( $_GET['section'] ) && sanitize_text_field( wp_unslash( $_GET['section'] ) ) === PLUGIN_PREFIX;
+		return isset( $_GET['page'] ) && sanitize_text_field( wp_unslash( $_GET['page'] ) ) === 'wc-settings' && isset( $_GET['tab'] ) && sanitize_text_field( wp_unslash( $_GET['tab'] ) ) === 'checkout' && isset( $_GET['section'] ) && sanitize_text_field( wp_unslash( $_GET['section'] ) ) === POWER_BOARD_PLUGIN_PREFIX;
 	}
 	// phpcs:enable
 }
