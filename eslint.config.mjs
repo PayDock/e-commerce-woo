@@ -16,6 +16,7 @@ export default [
         "__dirname": "readonly",
         "orderData": "readonly",
         "PowerBoardAjax": "readonly",
+        "PowerBoardAjaxError": "readonly",
         "cba": "readonly",
       },
       parser: babelParser,

@@ -15,9 +15,9 @@ window.showWarning = function ($, message, type = 'error') {
 	noticesWrapper.html( '' );
 	// noinspection JSUnresolvedReference
 	jQuery.post(
-		PowerBoardAjax.url,
+		PowerBoardAjaxError.url,
 		{
-			_wpnonce: PowerBoardAjax.wpnonce_error,
+			_wpnonce: PowerBoardAjaxError.wpnonce_error,
 			dataType: 'html',
 			action: 'power_board_create_error_notice',
 			message: message,

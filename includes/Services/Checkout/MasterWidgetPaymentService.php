@@ -54,101 +54,12 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, [ $this, 'process_admin_options' ] );
 
 		/* @noinspection PhpUndefinedFunctionInspection */
-		add_action( 'wp_enqueue_scripts', [ $this, 'payment_scripts' ] );
-
-		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action( 'wp_ajax_nopriv_power_board_create_error_notice', [ $this, 'power_board_create_error_notice' ], 20 );
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action( 'wp_ajax_power_board_create_error_notice', [ $this, 'power_board_create_error_notice' ], 20 );
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action( 'woocommerce_checkout_fields', [ $this, 'setup_phone_fields_settings' ] );
-	}
-
-	/**
-	 * Uses functions (is_checkout, wp_enqueue_script, wp_localize_script, admin_url and wp_create_nonce) from WordPress
-	 */
-	public function payment_scripts(): void {
-		/* @noinspection PhpUndefinedFunctionInspection */
-		if ( ! is_checkout() || ! $this->is_available() ) {
-			return;
-		}
-
-		/* @noinspection PhpUndefinedFunctionInspection */
-		wp_enqueue_script(
-			'power-board-api',
-			SettingsService::get_instance()->get_widget_script_url(),
-			[],
-			POWER_BOARD_PLUGIN_VERSION,
-			true
-		);
-
-		/* @noinspection PhpUndefinedFunctionInspection */
-		wp_localize_script(
-			'power-board-form',
-			'PowerBoardAjax',
-			[
-				'url'           => admin_url( 'admin-ajax.php' ),
-				'wpnonce'       => wp_create_nonce( 'power-board-create-charge-intent' ),
-				'wpnonce_error' => wp_create_nonce( 'power-board-create-error-notice' ),
-			]
-		);
-
-		/* @noinspection PhpUndefinedFunctionInspection */
-		wp_localize_script(
-			'power-board-cart-changes-helpers',
-			'PowerBoardAjax',
-			[
-				'url'           => admin_url( 'admin-ajax.php' ),
-				'wpnonce_error' => wp_create_nonce( 'power-board-create-error-notice' ),
-			]
-		);
-
-		/* @noinspection PhpUndefinedFunctionInspection */
-		wp_localize_script(
-			'power-board-classic-form',
-			'PowerBoardAjax',
-			[
-				'url'           => admin_url( 'admin-ajax.php' ),
-				'wpnonce'       => wp_create_nonce( 'power-board-create-charge-intent' ),
-				'wpnonce_error' => wp_create_nonce( 'power-board-create-error-notice' ),
-			]
-		);
-
-		/* @noinspection PhpUndefinedFunctionInspection */
-		wp_enqueue_script(
-			'power-board-form',
-			POWER_BOARD_PLUGIN_URL . '/assets/js/frontend/form.js',
-			[ 'jquery' ],
-			POWER_BOARD_PLUGIN_VERSION,
-			true
-		);
-
-		/* @noinspection PhpUndefinedFunctionInspection */
-		wp_enqueue_script(
-			'power-board-classic-form',
-			POWER_BOARD_PLUGIN_URL . '/assets/js/frontend/classic-form.js',
-			[ 'jquery' ],
-			POWER_BOARD_PLUGIN_VERSION,
-			true
-		);
-
-		/* @noinspection PhpUndefinedFunctionInspection */
-		wp_enqueue_style(
-			'power-board-widget',
-			POWER_BOARD_PLUGIN_URL . '/assets/css/frontend/widget.css',
-			[],
-			POWER_BOARD_PLUGIN_VERSION
-		);
-
-		/* @noinspection PhpUndefinedFunctionInspection */
-		wp_enqueue_script(
-			'axios',
-			'https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js',
-			[],
-			POWER_BOARD_PLUGIN_VERSION,
-			true
-		);
 	}
 
 	public function is_available(): bool {
