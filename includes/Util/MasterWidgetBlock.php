@@ -58,7 +58,7 @@ final class MasterWidgetBlock extends AbstractPaymentMethodType {
 
 	/**
 	 * This function is used on AbstractPaymentMethodType
-	 * Uses functions (is_checkout, wp_enqueue_script, wp_localize_script, plugin_url, wp_set_script_translations and is_admin) from WordPress
+	 * Uses functions (is_checkout, wp_enqueue_script, wp_localize_script, admin_url, plugin_url, wp_set_script_translations, wp_create_nonce and is_admin) from WordPress
 	 * Uses functions (WC and get_woocommerce_currency) from WooCommerce
 	 *
 	 * @noinspection PhpUnused
@@ -74,6 +74,7 @@ final class MasterWidgetBlock extends AbstractPaymentMethodType {
 				POWER_BOARD_PLUGIN_VERSION,
 				true
 			);
+
 			/* @noinspection PhpUndefinedFunctionInspection */
 			wp_enqueue_script(
 				'power-board-cart-changes-helpers',
@@ -82,30 +83,15 @@ final class MasterWidgetBlock extends AbstractPaymentMethodType {
 				POWER_BOARD_PLUGIN_VERSION,
 				true
 			);
-			/* @noinspection PhpUndefinedFunctionInspection */
-			wp_enqueue_script(
-				'power-board-form',
-				POWER_BOARD_PLUGIN_URL . 'assets/js/frontend/form.js',
-				[ 'jquery' ],
-				POWER_BOARD_PLUGIN_VERSION,
-				true
-			);
 
 			/* @noinspection PhpUndefinedFunctionInspection */
 			wp_localize_script(
-				'power-board-form',
-				'powerBoardWidgetSettings',
+				'power-board-form-helpers',
+				'PowerBoardAjaxError',
 				[
-					'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL,
+					'url'           => admin_url( 'admin-ajax.php' ),
+					'wpnonce_error' => wp_create_nonce( 'power-board-create-error-notice' ),
 				]
-			);
-
-			/* @noinspection PhpUndefinedFunctionInspection */
-			wp_enqueue_style(
-				'power-board-widget-css',
-				POWER_BOARD_PLUGIN_URL . 'assets/css/frontend/widget.css',
-				[],
-				POWER_BOARD_PLUGIN_VERSION
 			);
 
 			/* @noinspection PhpUndefinedFunctionInspection */
@@ -118,12 +104,60 @@ final class MasterWidgetBlock extends AbstractPaymentMethodType {
 			);
 
 			/* @noinspection PhpUndefinedFunctionInspection */
+			wp_enqueue_script(
+				'power-board-form',
+				POWER_BOARD_PLUGIN_URL . 'assets/js/frontend/form.js',
+				[ 'jquery' ],
+				POWER_BOARD_PLUGIN_VERSION,
+				true
+			);
+
+			/* @noinspection PhpUndefinedFunctionInspection */
 			wp_localize_script(
-				'power-board-api',
-				'powerBoardWidgetSettings',
+				'power-board-form',
+				'PowerBoardAjax',
 				[
-					'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL,
+					'url'           => admin_url( 'admin-ajax.php' ),
+					'wpnonce'       => wp_create_nonce( 'power-board-create-charge-intent' ),
+					'wpnonce_error' => wp_create_nonce( 'power-board-create-error-notice' ),
 				]
+			);
+
+			/* @noinspection PhpUndefinedFunctionInspection */
+			wp_enqueue_script(
+				'power-board-classic-form',
+				POWER_BOARD_PLUGIN_URL . '/assets/js/frontend/classic-form.js',
+				[ 'jquery' ],
+				POWER_BOARD_PLUGIN_VERSION,
+				true
+			);
+
+			/* @noinspection PhpUndefinedFunctionInspection */
+			wp_localize_script(
+				'power-board-classic-form',
+				'PowerBoardAjax',
+				[
+					'url'           => admin_url( 'admin-ajax.php' ),
+					'wpnonce'       => wp_create_nonce( 'power-board-create-charge-intent' ),
+					'wpnonce_error' => wp_create_nonce( 'power-board-create-error-notice' ),
+				]
+			);
+
+			/* @noinspection PhpUndefinedFunctionInspection */
+			wp_enqueue_script(
+				'axios',
+				'https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js',
+				[],
+				POWER_BOARD_PLUGIN_VERSION,
+				true
+			);
+
+			/* @noinspection PhpUndefinedFunctionInspection */
+			wp_enqueue_style(
+				'power-board-widget-css',
+				POWER_BOARD_PLUGIN_URL . 'assets/css/frontend/widget.css',
+				[],
+				POWER_BOARD_PLUGIN_VERSION
 			);
 
 			self::$is_load = true;
@@ -151,15 +185,6 @@ final class MasterWidgetBlock extends AbstractPaymentMethodType {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		wp_localize_script(
 			$script_name,
-			'powerBoardWidgetSettings',
-			[
-				'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL,
-			]
-		);
-
-		/* @noinspection PhpUndefinedFunctionInspection */
-		wp_localize_script(
-			'power-board-api',
 			'powerBoardWidgetSettings',
 			[
 				'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL,
