@@ -79,9 +79,9 @@ class ChargeService extends AbstractApiService {
 				$result = self::CREATE_INTENT_ENDPOINT;
 				break;
 			case 'templates':
-				$result = self::GET_TEMPLATES_ENDPOINT . '?type=' . $this->parameters['type'];
+				$result  = self::GET_TEMPLATES_ENDPOINT . '?type=' . $this->parameters['type'];
 				$version = $this->parameters['version'];
-				if (! empty( $version ) ) {
+				if ( ! empty( $version ) ) {
 					$result .= '&version=' . $version;
 				}
 				unset( $this->parameters['charge_id'] );
