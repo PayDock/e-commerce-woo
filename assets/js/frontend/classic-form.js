@@ -250,7 +250,7 @@ jQuery(
 
 						// noinspection JSUnresolvedReference
 						const data = {
-							_wpnonce: PowerBoardAjax.wpnonce,
+							_wpnonce: PowerBoardAjaxIntent.wpnonce,
 							address: this.getAddressData( false ).address,
 						};
 						if (isOrderPayPage) {
