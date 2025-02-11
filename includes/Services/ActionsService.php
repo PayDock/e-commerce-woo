@@ -72,16 +72,7 @@ class ActionsService {
 	 * Uses a function (add_action) from WordPress
 	 */
 	protected function add_payment_method_to_checkout(): void {
-		/* @noinspection PhpUndefinedFunctionInspection */
-		add_action(
-			'before_woocommerce_init',
-			function () {
-				FeaturesUtil::declare_compatibility(
-					'cart_checkout_blocks',
-					POWER_BOARD_PLUGIN_FILE
-				);
-			}
-		);
+		FeaturesUtil::declare_compatibility( 'cart_checkout_blocks', POWER_BOARD_PLUGIN_FILE );
 	}
 
 	/**

@@ -71,8 +71,6 @@ class PaymentController {
 			[ 'refunded', 'refund_requested' ],
 			true
 		) ) {
-			$new_refunded_id = end( $result['resource']['data']['transactions'] )['_id'];
-
 			$status = 'refunded';
 
 			/* @noinspection PhpUndefinedFunctionInspection */
