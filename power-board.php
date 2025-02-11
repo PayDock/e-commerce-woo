@@ -54,6 +54,57 @@ if ( ! defined( 'PLUGIN_VERSIONS_JSON_URL' ) ) {
 	define( 'PLUGIN_VERSIONS_JSON_URL', 'https://widget.powerboard.commbank.com.au/sdk/platforms/compatibility-registry.json' );
 }
 
+function check_the_directory(): void {
+	$current_dir   = basename( dirname( __FILE__ ) );
+	$main_file     = basename( plugin_basename( __FILE__ ) );
+	$implied_dir   = pathinfo( $main_file, PATHINFO_FILENAME );
+
+	if ( $current_dir !== $implied_dir ) {
+		if ( ! function_exists( 'deactivate_plugins' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
+
+		if ( is_plugin_active( plugin_basename( __FILE__ ) ) ) {
+			deactivate_plugins( plugin_basename( __FILE__ ) );
+		}
+
+		$user_id = function_exists( 'get_current_user_id' ) ? get_current_user_id() : 0;
+
+		set_transient(
+			'power_board_status_change_error_' . $user_id,
+			'Error: The plugin must be installed in the "' . $implied_dir . '" directory. Current one is: "' . $current_dir . '". Please delete the plugin and install it again.',
+			300
+		);
+
+		add_action( 'admin_head', 'wrong_dir_style' );
+		add_action( 'admin_notices', 'wrong_dir_notice' );
+	}
+}
+
+function wrong_dir_style(): void {
+	if ( isset( $_GET['activate'] ) ) {
+		$user_id = function_exists( 'get_current_user_id' ) ? get_current_user_id() : 0;
+		$error   = get_transient( 'power_board_status_change_error_' . $user_id );
+
+		if ( $error ) {
+			echo '<style>#message.updated.notice{display:none;}</style>';
+		}
+	}
+}
+
+function wrong_dir_notice(): void {
+	$user_id = function_exists( 'get_current_user_id' ) ? get_current_user_id() : 0;
+	$error   = get_transient( 'power_board_status_change_error_' . $user_id );
+
+	if ( $error ) {
+		echo '<div class="notice notice-error is-dismissible"><p>' . esc_html( $error ) . '</p></div>';
+		delete_transient( 'power_board_status_change_error_' . $user_id );
+	}
+}
+
+register_activation_hook( __FILE__, 'check_the_directory' );
+add_action( 'admin_init', 'check_the_directory' );
+
 require_once __DIR__ . '/vendor/autoload.php';
 
 PowerBoard\PowerBoardPlugin::get_instance();

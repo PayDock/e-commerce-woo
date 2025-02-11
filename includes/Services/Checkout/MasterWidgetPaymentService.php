@@ -89,15 +89,15 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 	public function process_payment( $order_id ): array {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$order = wc_get_order( $order_id );
+		$checkout_order = [];
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$session = WC()->session;
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$checkout_order = $session->get( 'power_board_checkout_cart_' . wp_create_nonce( 'power-board-checkout-cart' ) );
 
-		if ( ! empty( $checkout_order ) ) {
-			$order = $this->get_order_to_process_payment( $order, $checkout_order );
-		}
+		$order = $this->get_order_to_process_payment( $order, $checkout_order );
+
 		$order->set_status( 'processing' );
 		$order->payment_complete();
 		setcookie( 'cart_total', '0', time() + 3600, '/' );
@@ -119,6 +119,10 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 	// phpcs:enable
 
 	public function get_order_to_process_payment( WC_Order $current_order, array $checkout_order ): WC_Order {
+		if ( empty( $checkout_order ) ) {
+			return $current_order;
+		}
+
 		$current_order_total  = $current_order->get_total( false );
 		$checkout_order_total = $checkout_order['total'];
 
