@@ -39,7 +39,7 @@ class PaymentController {
 			return;
 		}
 
-		$power_board_charge_id = $order->get_meta( 'power_board_charge_id' );
+		$power_board_charge_id = $order->get_meta( '_power_board_charge_id' );
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 
@@ -52,7 +52,7 @@ class PaymentController {
 
 		}
 
-		if ( $action === 'edit_order' && $order->get_meta( 'status_change_verification_failed' ) ) {
+		if ( $action === 'edit_order' && $order->get_meta( '_status_change_verification_failed' ) ) {
 			$refund->set_amount( 0 );
 			$refund->set_total( 0 );
 			$refund->set_parent_id( 0 );
@@ -90,7 +90,6 @@ class PaymentController {
 				OrderService::update_status( $order_id, $status, $status_note );
 			}
 
-			$order->update_meta_data( 'api_refunded_id', $new_refunded_id );
 			$order->save();
 		} elseif ( ! empty( $result['error'] ) ) {
 			if ( is_array( $result['error'] ) ) {

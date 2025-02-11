@@ -69,7 +69,7 @@ class OrderService {
 	 * @throws Exception If status change is not allowed
 	 */
 	public function status_change_verification( $order_id, $old_status_key, $new_status_key, $order ): void {
-		$order->delete_meta_data( 'status_change_verification_failed' );
+		$order->delete_meta_data( '_status_change_verification_failed' );
 		if (
 			$old_status_key === $new_status_key ||
 			! empty( $GLOBALS['power_board_is_updating_order_status'] ) ||
@@ -96,7 +96,7 @@ class OrderService {
 					$new_status_name
 				);
 				$GLOBALS['power_board_is_updating_order_status'] = true;
-				$order->update_meta_data( 'status_change_verification_failed', 1 );
+				$order->update_meta_data( '_status_change_verification_failed', 1 );
 				$order->update_status( $old_status_key, $error );
 				/* @noinspection PhpUndefinedFunctionInspection */
 				set_transient( 'power_board_status_change_error_' . get_current_user_id(), $error, 300 );

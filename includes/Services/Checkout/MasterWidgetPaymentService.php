@@ -105,7 +105,7 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$charge_id = isset( $_POST['chargeid'] ) ? sanitize_text_field( wp_unslash( $_POST['chargeid'] ) ) : '';
 
-		$order->update_meta_data( 'power_board_charge_id', $charge_id );
+		$order->update_meta_data( '_power_board_charge_id', $charge_id );
 		/* @noinspection PhpUndefinedFunctionInspection */
 		WC()->cart->empty_cart();
 		$order->save();
