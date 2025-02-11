@@ -31,22 +31,21 @@ class ActionsService {
 	 */
 	protected function __construct() {
 		/* @noinspection PhpUndefinedFunctionInspection */
-		add_action(
-			'before_woocommerce_init',
-			function () {
-				$this->add_compatibility_with_woocommerce();
-				$this->add_payment_method_to_checkout();
-				$this->add_cart_hooks();
-				$this->add_settings_actions();
-				$this->add_order_actions();
-			}
-		);
+		add_action( 'before_woocommerce_init', [ $this, 'init_before_woocommerce' ] );
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action( 'plugins_loaded', [ $this, 'init_payment_gateway' ] );
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action( 'woocommerce_blocks_loaded', [ $this, 'register_payment_method' ] );
+	}
+
+	public function init_before_woocommerce() {
+		$this->add_compatibility_with_woocommerce();
+		$this->add_payment_method_to_checkout();
+		$this->add_cart_hooks();
+		$this->add_settings_actions();
+		$this->add_order_actions();
 	}
 
 	public static function get_instance(): ActionsService {
@@ -107,13 +106,12 @@ class ActionsService {
 	public function register_payment_method(): void {
 		if ( class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) ) {
 			/* @noinspection PhpUndefinedFunctionInspection */
-			add_action(
-				'woocommerce_blocks_payment_method_type_registration',
-				function ( PaymentMethodRegistry $payment_method_registry ) {
-					$payment_method_registry->register( new MasterWidgetBlock() );
-				}
-			);
+			add_action( 'woocommerce_blocks_payment_method_type_registration', [ $this, 'register_master_widget_block' ] );
 		}
+	}
+
+	public function register_master_widget_block( PaymentMethodRegistry $registry ) {
+		$registry->register( new MasterWidgetBlock() );
 	}
 
 	public function cart_item_quantity_changed() {

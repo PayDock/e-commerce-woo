@@ -91,7 +91,7 @@ class MasterWidgetSettingsHelper {
 			$api_adapter_service     = self::init_api_adapter( $env, $access_token );
 			$result                  = $api_adapter_service->get_configuration_templates_ids( $version );
 			$has_error               = $result['error'];
-			$data = $result['resource']['data'] ?? [];
+			$data                    = $result['resource']['data'] ?? [];
 			$configuration_templates = MasterWidgetTemplatesHelper::map_templates( $data, ! empty( $has_error ) );
 
 			/* @noinspection PhpUndefinedFunctionInspection */
@@ -133,7 +133,7 @@ class MasterWidgetSettingsHelper {
 			$api_adapter_service     = self::init_api_adapter( $env, $access_token );
 			$result                  = $api_adapter_service->get_customisation_templates_ids( $version );
 			$has_error               = $result['error'];
-			$data = $result['resource']['data'] ?? [];
+			$data                    = $result['resource']['data'] ?? [];
 			$customisation_templates = MasterWidgetTemplatesHelper::map_templates( $data, ! empty( $has_error ), true );
 
 			/* @noinspection PhpUndefinedFunctionInspection */

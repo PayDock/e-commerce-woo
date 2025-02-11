@@ -89,7 +89,6 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 	public function process_payment( $order_id ): array {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$order = wc_get_order( $order_id );
-		$checkout_order = [];
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$session = WC()->session;
