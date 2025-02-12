@@ -8,17 +8,17 @@ use PowerBoard\Services\PaymentGateway\MasterWidgetPaymentService;
 class FiltersService {
 	protected static ?FiltersService $instance = null;
 
-	protected function __construct() {
-		$this->add_woocommerce_filters();
-		$this->add_settings_link();
-	}
-
 	public static function get_instance(): FiltersService {
 		if ( is_null( self::$instance ) ) {
 			self::$instance = new self();
 		}
 
 		return self::$instance;
+	}
+
+	protected function __construct() {
+		$this->add_woocommerce_filters();
+		$this->add_settings_link();
 	}
 
 	/**
@@ -34,6 +34,16 @@ class FiltersService {
 	public function plugins_loaded() {
 		$this->woo_text_override();
 		$this->init_payment_gateway();
+	}
+
+	/**
+	 * Uses functions (plugin_dir_path and load_textdomain) from WordPress
+	 */
+	public function woo_text_override(): void {
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$mofile = plugin_dir_path( __FILE__ ) . 'languages/woo-override-en_US.mo';
+		/* @noinspection PhpUndefinedFunctionInspection */
+		load_textdomain( 'woocommerce', $mofile );
 	}
 
 	public function init_payment_gateway(): void {
@@ -104,15 +114,5 @@ class FiltersService {
 		);
 
 		return $links;
-	}
-
-	/**
-	 * Uses functions (plugin_dir_path and load_textdomain) from WordPress
-	 */
-	public function woo_text_override(): void {
-		/* @noinspection PhpUndefinedFunctionInspection */
-		$mofile = plugin_dir_path( __FILE__ ) . 'languages/woo-override-en_US.mo';
-		/* @noinspection PhpUndefinedFunctionInspection */
-		load_textdomain( 'woocommerce', $mofile );
 	}
 }

@@ -48,6 +48,14 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 	private static ?MasterWidgetPaymentService $instance = null;
 	protected TemplateService $template_service;
 
+	public static function get_instance(): self {
+		if ( is_null( self::$instance ) ) {
+			self::$instance = new self();
+		}
+
+		return self::$instance;
+	}
+
 	/**
 	 * Uses functions (__, _x, add_action) from WordPress
 	 * Uses a method (init_settings) from WC_Payment_Gateway
@@ -104,20 +112,19 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, [ $this, 'process_admin_options' ] );
 
 		/* @noinspection PhpUndefinedFunctionInspection */
-		add_action( 'wp_ajax_nopriv_power_board_create_error_notice', [ $this, 'power_board_create_error_notice' ], 20 );
+		add_action(
+			'wp_ajax_nopriv_power_board_create_error_notice',
+			[
+				$this,
+				'power_board_create_error_notice',
+			],
+			20
+			);
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action( 'wp_ajax_power_board_create_error_notice', [ $this, 'power_board_create_error_notice' ], 20 );
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action( 'woocommerce_checkout_fields', [ $this, 'setup_phone_fields_settings' ] );
-	}
-
-	public static function get_instance(): self {
-		if ( is_null( self::$instance ) ) {
-			self::$instance = new self();
-		}
-
-		return self::$instance;
 	}
 
 	/**

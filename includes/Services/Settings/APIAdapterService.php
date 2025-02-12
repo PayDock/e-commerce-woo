@@ -11,16 +11,16 @@ class APIAdapterService {
 	private ?ChargeService $charge_service      = null;
 	private static ?APIAdapterService $instance = null;
 
-	public function initialise( $env, $access_token ): void {
-		ConfigService::init( $env, $access_token );
-	}
-
 	public static function get_instance(): self {
 		if ( is_null( self::$instance ) ) {
 			self::$instance = new self();
 		}
 
 		return self::$instance;
+	}
+
+	public function initialise( $env, $access_token ): void {
+		ConfigService::init( $env, $access_token );
 	}
 
 	public function create_checkout_intent( array $params ): array {

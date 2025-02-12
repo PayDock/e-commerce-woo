@@ -14,6 +14,14 @@ final class SettingsService {
 	private static ?SettingsService $instance           = null;
 	private ?MasterWidgetPaymentService $widget_service = null;
 
+	public static function get_instance(): self {
+		if ( is_null( self::$instance ) ) {
+			self::$instance = new self();
+		}
+
+		return self::$instance;
+	}
+
 	public function get_environment(): ?string {
 		$widget_service = $this->get_settings_service();
 		return $widget_service->get_environment();
@@ -110,13 +118,5 @@ final class SettingsService {
 		}
 
 		return ! empty( $environment_key ) ? $plugin_configuration_environments[ $environment_key ] : '';
-	}
-
-	public static function get_instance(): self {
-		if ( is_null( self::$instance ) ) {
-			self::$instance = new self();
-		}
-
-		return self::$instance;
 	}
 }

@@ -23,6 +23,14 @@ class ActionsService {
 
 	protected const SECTION_HOOK = 'woocommerce_get_sections';
 
+	public static function get_instance(): ActionsService {
+		if ( is_null( self::$instance ) ) {
+			self::$instance = new self();
+		}
+
+		return self::$instance;
+	}
+
 	/**
 	 * Uses a function (add_action) from WordPress
 	 */
@@ -39,14 +47,6 @@ class ActionsService {
 		$this->add_cart_hooks();
 		$this->add_settings_actions();
 		$this->add_order_actions();
-	}
-
-	public static function get_instance(): ActionsService {
-		if ( is_null( self::$instance ) ) {
-			self::$instance = new self();
-		}
-
-		return self::$instance;
 	}
 
 	protected function add_compatibility_with_woocommerce(): void {
@@ -69,19 +69,6 @@ class ActionsService {
 		add_action( 'woocommerce_cart_item_removed', [ $this, 'cart_item_removed' ] );
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action( 'woocommerce_order_update_shipping', [ $this, 'order_update_shipping' ] );
-	}
-
-	/**
-	 * Add new payment method on checkout page
-	 * Uses a function (add_action, plugin_dir_path) from WordPress
-	 */
-	public function register_payment_method(): void {
-		if ( class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) ) {
-			/* @noinspection PhpUndefinedFunctionInspection */
-			require_once plugin_dir_path( POWER_BOARD_PLUGIN_FILE ) . 'includes/Util/MasterWidgetBlock.php';
-			/* @noinspection PhpUndefinedFunctionInspection */
-			add_action( 'woocommerce_blocks_payment_method_type_registration', [ $this, 'register_master_widget_block' ] );
-		}
 	}
 
 	public function register_master_widget_block( PaymentMethodRegistry $registry ) {
@@ -162,5 +149,18 @@ class ActionsService {
 		add_action( 'wc_ajax_nopriv_power-board-create-charge-intent', [ $widget_controller, 'create_checkout_intent' ] );
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action( 'admin_init', [ $order_service, 'remove_bulk_action_message' ] );
+	}
+
+	/**
+	 * Add new payment method on checkout page
+	 * Uses a function (add_action, plugin_dir_path) from WordPress
+	 */
+	public function register_payment_method(): void {
+		if ( class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			require_once plugin_dir_path( POWER_BOARD_PLUGIN_FILE ) . 'includes/Util/MasterWidgetBlock.php';
+			/* @noinspection PhpUndefinedFunctionInspection */
+			add_action( 'woocommerce_blocks_payment_method_type_registration', [ $this, 'register_master_widget_block' ] );
+		}
 	}
 }
