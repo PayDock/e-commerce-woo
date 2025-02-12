@@ -11,7 +11,6 @@ declare( strict_types=1 );
 namespace PowerBoard\Util;
 
 use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
-use PowerBoard\Services\Checkout\MasterWidgetPaymentService;
 use PowerBoard\Services\SDKAdapterService;
 use PowerBoard\Services\SettingsService;
 
@@ -29,9 +28,8 @@ final class MasterWidgetBlock extends AbstractPaymentMethodType {
 	 * @noinspection PhpMissingFieldTypeInspection
 	 * @noinspection PhpUnused
 	 */
-	protected $name          = 'power_board';
+	protected $name          = POWER_BOARD_PLUGIN_PREFIX;
 	protected string $script = 'blocks';
-	protected MasterWidgetPaymentService $gateway;
 
 	/**
 	 * This function is used on AbstractPaymentMethodType
@@ -42,7 +40,6 @@ final class MasterWidgetBlock extends AbstractPaymentMethodType {
 	public function initialize(): void {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$this->settings = get_option( 'woocommerce_power_board_settings', [] );
-		$this->gateway  = new MasterWidgetPaymentService();
 	}
 
 	/**
@@ -52,8 +49,11 @@ final class MasterWidgetBlock extends AbstractPaymentMethodType {
 	 * @noinspection PhpUnused
 	 */
 	public function is_active() {
-		/* @noinspection PhpUndefinedMethodInspection */
-		return filter_var( $this->get_setting( 'enabled', false ), FILTER_VALIDATE_BOOLEAN );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$payment_gateways_class = WC()->payment_gateways();
+		$payment_gateways       = $payment_gateways_class->payment_gateways();
+
+		return ! empty( $payment_gateways[ POWER_BOARD_PLUGIN_PREFIX ] ) ? $payment_gateways[ POWER_BOARD_PLUGIN_PREFIX ]->is_available() : false;
 	}
 
 	/**

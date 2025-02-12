@@ -323,7 +323,7 @@ const Content                               = ( props ) => {
 
 // noinspection JSUnusedGlobalSymbols,JSUnresolvedReference,JSCheckFunctionSignatures
 const Paydock = {
-	name: "power_board_gateway",
+	name: "power_board",
 	label: createElement(
 		() =>
 			createElement(

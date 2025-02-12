@@ -13,7 +13,7 @@ jQuery(
 				baseCheckboxIdName: 'radio-control-wc-payment-method-options',
 				errorMessageClassName: 'wc-block-components-validation-error',
 				paymentOptionsNames: [
-				'power_board_gateway',
+				'power_board',
 				],
 				phonePattern: /^\+[1-9]{1}[0-9]{3,14}$/,
 				errorMessageHtml: `<div class ="wc-block-components-validation-error" role="alert"><p>Please enter your phone number in international format, starting with "+"</p></div>`,
@@ -122,7 +122,7 @@ jQuery(
 			radioButtons.on( 'change', (event) => setPaymentMethod( event.target.value ) );
 		}
 		function setPaymentMethod(method) {
-			if (method !== 'power_board_gateway') {
+			if (method !== 'power_board') {
 					window.widgetPowerBoard = null;
 					toggleOrderButton(false);
 			}

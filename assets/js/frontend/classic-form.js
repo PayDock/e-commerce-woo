@@ -13,7 +13,7 @@ jQuery(
 					baseCheckboxIdName: 'payment_method',
 					errorMessageClassName: 'wc-block-components-validation-error',
 					paymentOptionsNames: [
-					'power_board_gateway',
+					'power_board',
 					],
 					phonePattern: /^\+[1-9]{1}[0-9]{3,14}$/,
 					errorMessageHtml: `<div class ="classic-checkout-validation-error wc-block-components-validation-error" role="alert"><p>Please enter your phone number in international format, starting with "+"</p></div>`,
@@ -216,14 +216,14 @@ jQuery(
 							error.show();
 							return;
 						}
-						if (methodName !== 'power_board_gateway' ) {
+						if (methodName !== 'power_board' ) {
 							this.toggleWidgetVisibility( true );
 							loading.show();
 							error.hide();
 						}
 						this.paymentMethod = methodName;
 						switch (this.paymentMethod) {
-							case 'power_board_gateway':
+							case 'power_board':
 								this.toggleOrderButton( true );
 								this.toggleWidgetVisibility( true );
 								this.initMasterWidget();
@@ -367,7 +367,7 @@ jQuery(
 					},
 					getConfigs() {
 						// noinspection JSUnresolvedReference
-						let settings            = $( `#classic-power_board_gateway-settings` ).val()
+						let settings            = $( `#classic-power_board-settings` ).val()
 						settings                = JSON.parse( settings )
 						return settings;
 					},

@@ -6,7 +6,6 @@ namespace PowerBoard\Helpers;
 use PowerBoard\Enums\MasterWidgetSettingsEnum;
 use PowerBoard\Enums\SettingGroupsEnum;
 use PowerBoard\Services\Settings\APIAdapterService;
-use PowerBoard\Services\SettingsService;
 
 class MasterWidgetSettingsHelper {
 	public static function get_input_type( string $key ): string {
@@ -51,7 +50,7 @@ class MasterWidgetSettingsHelper {
 			return [];
 		}
 		/* @noinspection PhpUndefinedFunctionInspection */
-		set_transient( 'is_fetching_versions', true );
+		set_transient( 'is_fetching_versions', true, 60 );
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$stored_checkout_versions = get_transient( 'checkout_versions' );
@@ -80,7 +79,7 @@ class MasterWidgetSettingsHelper {
 			return [];
 		}
 		/* @noinspection PhpUndefinedFunctionInspection */
-		set_transient( 'is_fetching_configuration_templates', true );
+		set_transient( 'is_fetching_configuration_templates', true, 60 );
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$stored_configuration_templates = get_transient( 'configuration_templates_' . $env );
@@ -98,9 +97,8 @@ class MasterWidgetSettingsHelper {
 			set_transient( 'configuration_templates_' . $env, $configuration_templates, 60 );
 		}
 
-		$configuration_id_key = SettingsService::get_instance()
-			->get_option_name(
-				'power_board',
+		$configuration_id_key = SettingsHelper::get_option_name(
+				POWER_BOARD_PLUGIN_PREFIX,
 				[
 					SettingGroupsEnum::CHECKOUT,
 					MasterWidgetSettingsEnum::CONFIGURATION_ID,
@@ -122,7 +120,7 @@ class MasterWidgetSettingsHelper {
 			return [];
 		}
 		/* @noinspection PhpUndefinedFunctionInspection */
-		set_transient( 'is_fetching_customisation_templates', true );
+		set_transient( 'is_fetching_customisation_templates', true, 60 );
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$stored_customisation_templates = get_transient( 'customisation_templates_' . $env );
@@ -140,9 +138,8 @@ class MasterWidgetSettingsHelper {
 			set_transient( 'customisation_templates_' . $env, $customisation_templates, 60 );
 		}
 
-		$customisation_id_key = SettingsService::get_instance()
-			->get_option_name(
-				'power_board',
+		$customisation_id_key = SettingsHelper::get_option_name(
+			POWER_BOARD_PLUGIN_PREFIX,
 				[
 					SettingGroupsEnum::CHECKOUT,
 					MasterWidgetSettingsEnum::CUSTOMISATION_ID,

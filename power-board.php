@@ -55,9 +55,9 @@ if ( ! defined( 'PLUGIN_VERSIONS_JSON_URL' ) ) {
 }
 
 function check_the_directory(): void {
-	$current_dir   = basename( dirname( __FILE__ ) );
-	$main_file     = basename( plugin_basename( __FILE__ ) );
-	$implied_dir   = pathinfo( $main_file, PATHINFO_FILENAME );
+	$current_dir = basename( __DIR__ );
+	$main_file   = basename( plugin_basename( __FILE__ ) );
+	$implied_dir = pathinfo( $main_file, PATHINFO_FILENAME );
 
 	if ( $current_dir !== $implied_dir ) {
 		if ( ! function_exists( 'deactivate_plugins' ) ) {

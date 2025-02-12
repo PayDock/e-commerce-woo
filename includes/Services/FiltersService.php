@@ -3,8 +3,7 @@ declare( strict_types=1 );
 
 namespace PowerBoard\Services;
 
-use PowerBoard\Services\Checkout\MasterWidgetPaymentService;
-use PowerBoard\Services\Settings\WidgetConfigurationSettingService;
+use PowerBoard\Services\PaymentGateway\MasterWidgetPaymentService;
 
 class FiltersService {
 	protected static ?FiltersService $instance = null;
@@ -27,11 +26,33 @@ class FiltersService {
 	 */
 	protected function add_woocommerce_filters(): void {
 		/* @noinspection PhpUndefinedFunctionInspection */
-		add_filter( 'woocommerce_payment_gateways', [ $this, 'register_in_woocommerce_payment_class' ] );
-		/* @noinspection PhpUndefinedFunctionInspection */
-		add_filter( 'plugins_loaded', [ $this, 'woo_text_override' ] );
+		add_filter( 'plugins_loaded', [ $this, 'plugins_loaded' ] );
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_filter( 'admin_notices', [ $this, 'order_status_bulk_update' ] );
+	}
+
+	public function plugins_loaded() {
+		$this->woo_text_override();
+		$this->init_payment_gateway();
+	}
+
+	public function init_payment_gateway(): void {
+		if ( ! class_exists( 'WC_Payment_Gateway' ) ) {
+			return;
+		}
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		require_once plugin_dir_path( POWER_BOARD_PLUGIN_FILE ) . 'includes/Services/PaymentGateway/MasterWidgetPaymentService.php';
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_filter( 'woocommerce_payment_gateways', [ $this, 'register_in_woocommerce_payment_class' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		require_once plugin_dir_path( POWER_BOARD_PLUGIN_FILE ) . 'includes/Util/MasterWidgetBlock.php';
+	}
+
+	public function register_in_woocommerce_payment_class( array $methods ): array {
+		$methods[] = MasterWidgetPaymentService::class;
+
+		return $methods;
 	}
 
 	/**
@@ -66,20 +87,6 @@ class FiltersService {
 	protected function add_settings_link(): void {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_filter( 'plugin_action_links_' . plugin_basename( POWER_BOARD_PLUGIN_FILE ), [ $this, 'get_setting_link' ] );
-	}
-
-	/**
-	 * Uses a function (is_admin) from WordPress
-	 */
-	public function register_in_woocommerce_payment_class( array $methods ): array {
-		/* @noinspection PhpUndefinedFunctionInspection */
-		if ( is_admin() ) {
-			$methods[] = WidgetConfigurationSettingService::class;
-		} else {
-			$methods[] = MasterWidgetPaymentService::class;
-		}
-
-		return $methods;
 	}
 
 	/**

@@ -15,16 +15,13 @@ use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use PowerBoard\Controllers\Admin\WidgetController;
 use PowerBoard\Controllers\Webhooks\PaymentController;
 use PowerBoard\Enums\SettingsSectionEnum;
-use PowerBoard\Services\Settings\WidgetConfigurationSettingService;
 use PowerBoard\Util\MasterWidgetBlock;
 
 class ActionsService {
 	protected static ?ActionsService $instance = null;
 	protected string $last_shipping_id         = '';
 
-	protected const PROCESS_OPTIONS_FUNCTION    = 'process_admin_options';
-	protected const PROCESS_OPTIONS_HOOK_PREFIX = 'woocommerce_update_options_payment_gateways_';
-	protected const SECTION_HOOK                = 'woocommerce_get_sections';
+	protected const SECTION_HOOK = 'woocommerce_get_sections';
 
 	/**
 	 * Uses a function (add_action) from WordPress
@@ -34,15 +31,11 @@ class ActionsService {
 		add_action( 'before_woocommerce_init', [ $this, 'init_before_woocommerce' ] );
 
 		/* @noinspection PhpUndefinedFunctionInspection */
-		add_action( 'plugins_loaded', [ $this, 'init_payment_gateway' ] );
-
-		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action( 'woocommerce_blocks_loaded', [ $this, 'register_payment_method' ] );
 	}
 
 	public function init_before_woocommerce() {
 		$this->add_compatibility_with_woocommerce();
-		$this->add_payment_method_to_checkout();
 		$this->add_cart_hooks();
 		$this->add_settings_actions();
 		$this->add_order_actions();
@@ -59,20 +52,8 @@ class ActionsService {
 	protected function add_compatibility_with_woocommerce(): void {
 		if ( class_exists( FeaturesUtil::class ) ) {
 			FeaturesUtil::declare_compatibility( 'custom_order_tables', POWER_BOARD_PLUGIN_FILE );
+			FeaturesUtil::declare_compatibility( 'cart_checkout_blocks', POWER_BOARD_PLUGIN_FILE );
 		}
-	}
-
-	public function init_payment_gateway(): void {
-		/* @noinspection PhpUndefinedFunctionInspection */
-		require_once plugin_dir_path( POWER_BOARD_PLUGIN_FILE ) . 'includes/Util/MasterWidgetBlock.php';
-	}
-
-	/**
-	 * Add new payment method on checkout page
-	 * Uses a function (add_action) from WordPress
-	 */
-	protected function add_payment_method_to_checkout(): void {
-		FeaturesUtil::declare_compatibility( 'cart_checkout_blocks', POWER_BOARD_PLUGIN_FILE );
 	}
 
 	/**
@@ -92,10 +73,12 @@ class ActionsService {
 
 	/**
 	 * Add new payment method on checkout page
-	 * Uses a function (add_action) from WordPress
+	 * Uses a function (add_action, plugin_dir_path) from WordPress
 	 */
 	public function register_payment_method(): void {
 		if ( class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			require_once plugin_dir_path( POWER_BOARD_PLUGIN_FILE ) . 'includes/Util/MasterWidgetBlock.php';
 			/* @noinspection PhpUndefinedFunctionInspection */
 			add_action( 'woocommerce_blocks_payment_method_type_registration', [ $this, 'register_master_widget_block' ] );
 		}
@@ -148,14 +131,6 @@ class ActionsService {
 	 * Uses a function (add_action) from WordPress
 	 */
 	protected function add_settings_actions(): void {
-		/* @noinspection PhpUndefinedFunctionInspection */
-		add_action(
-			self::PROCESS_OPTIONS_HOOK_PREFIX . SettingsSectionEnum::WIDGET_CONFIGURATION,
-			[
-				new WidgetConfigurationSettingService(),
-				self::PROCESS_OPTIONS_FUNCTION,
-			]
-		);
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action(
 			self::SECTION_HOOK,

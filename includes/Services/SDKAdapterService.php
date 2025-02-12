@@ -5,14 +5,14 @@ namespace PowerBoard\Services;
 
 use PowerBoard\API\ChargeService;
 use PowerBoard\API\ConfigService;
-use PowerBoard\Services\Settings\WidgetConfigurationSettingService;
+use PowerBoard\Services\PaymentGateway\MasterWidgetPaymentService;
 
 class SDKAdapterService {
 	private ?ChargeService $charge_service      = null;
 	private static ?SDKAdapterService $instance = null;
 
 	public function __construct() {
-		$settings = new WidgetConfigurationSettingService();
+		$settings = MasterWidgetPaymentService::get_instance();
 		$this->initialise( $settings->get_environment(), $settings->get_access_token() );
 	}
 

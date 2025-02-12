@@ -56,13 +56,13 @@
 	display: none;
 }
 
-#classic-power_board_gateway{
+#classic-power_board{
 	min-height: 260px;
 	scrollbar-width: thin;
 	position: relative;
 }
 
-#classic-power_board_gateway iframe {
+#classic-power_board iframe {
 	border: 0;
 	width: 100%;
 	height: 280px;

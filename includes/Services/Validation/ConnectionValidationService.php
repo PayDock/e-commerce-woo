@@ -9,20 +9,20 @@ use PowerBoard\Enums\EnvironmentSettingsEnum;
 use PowerBoard\Enums\MasterWidgetSettingsEnum;
 use PowerBoard\Enums\SettingGroupsEnum;
 use PowerBoard\Helpers\MasterWidgetTemplatesHelper;
+use PowerBoard\Helpers\SettingsHelper;
 use PowerBoard\Services\Settings\APIAdapterService;
-use PowerBoard\Services\Settings\WidgetConfigurationSettingService;
-use PowerBoard\Services\SettingsService;
+use PowerBoard\Services\PaymentGateway\MasterWidgetPaymentService;
 
 class ConnectionValidationService {
 	private ?string $old_access_token = null;
 
-	public ?WidgetConfigurationSettingService $service = null;
-	private ?array $errors                             = [];
-	private ?array $data                               = [];
-	private ?string $environment_settings              = null;
-	private ?string $access_token_settings             = null;
-	private ?string $configuration_id_settings         = null;
-	private ?string $checkout_version                  = null;
+	public ?MasterWidgetPaymentService $service = null;
+	private ?array $errors                      = [];
+	private ?array $data                        = [];
+	private ?string $environment_settings       = null;
+	private ?string $access_token_settings      = null;
+	private ?string $configuration_id_settings  = null;
+	private ?string $checkout_version           = null;
 	private APIAdapterService $widget_api_adapter_service;
 
 
@@ -30,7 +30,7 @@ class ConnectionValidationService {
 	 * Uses functions (do_action, update_option and apply_filters) from WordPress
 	 * Uses a method (get_option_key) from WooCommerce
 	 */
-	public function __construct( WidgetConfigurationSettingService $service ) {
+	public function __construct( MasterWidgetPaymentService $service ) {
 		$this->service = $service;
 		$this->prepare_form_data();
 
@@ -95,8 +95,7 @@ class ConnectionValidationService {
 	}
 
 	private function set_api_init_variables(): void {
-		$environment_settings_key   = SettingsService::get_instance()
-		->get_option_name(
+		$environment_settings_key   = SettingsHelper::get_option_name(
 			$this->service->id,
 			[
 				SettingGroupsEnum::ENVIRONMENT,
@@ -105,8 +104,7 @@ class ConnectionValidationService {
 		);
 		$this->environment_settings = $this->data[ $environment_settings_key ];
 
-		$version_settings_key   = SettingsService::get_instance()
-		->get_option_name(
+		$version_settings_key   = SettingsHelper::get_option_name(
 			$this->service->id,
 			[
 				SettingGroupsEnum::CHECKOUT,
@@ -115,8 +113,7 @@ class ConnectionValidationService {
 		);
 		$this->checkout_version = $this->data[ $version_settings_key ];
 
-		$access_token_settings_key   = SettingsService::get_instance()
-		->get_option_name(
+		$access_token_settings_key   = SettingsHelper::get_option_name(
 			$this->service->id,
 			[
 				SettingGroupsEnum::CREDENTIALS,
@@ -125,8 +122,7 @@ class ConnectionValidationService {
 		);
 		$this->access_token_settings = $this->data[ $access_token_settings_key ];
 
-		$configuration_template_setting_key = SettingsService::get_instance()
-															->get_option_name(
+		$configuration_template_setting_key = SettingsHelper::get_option_name(
 																$this->service->id,
 																[
 																	SettingGroupsEnum::CHECKOUT,
@@ -213,8 +209,7 @@ class ConnectionValidationService {
 			set_transient( 'configuration_templates_' . $this->environment_settings, $configuration_templates, 60 );
 		}
 
-		$configuration_id_key = SettingsService::get_instance()
-			->get_option_name(
+		$configuration_id_key = SettingsHelper::get_option_name(
 				$this->service->id,
 				[
 					SettingGroupsEnum::CHECKOUT,
@@ -248,8 +243,7 @@ class ConnectionValidationService {
 			set_transient( 'customisation_templates_' . $this->environment_settings, $customisation_templates, 60 );
 		}
 
-		$customisation_id_key = SettingsService::get_instance()
-			->get_option_name(
+		$customisation_id_key = SettingsHelper::get_option_name(
 				$this->service->id,
 				[
 					SettingGroupsEnum::CHECKOUT,
