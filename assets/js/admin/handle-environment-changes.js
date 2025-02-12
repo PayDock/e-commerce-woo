@@ -7,6 +7,9 @@ const environmentSelectBoxId            = 'woocommerce_power_board_power_board_E
 jQuery( document ).ready(
 	function () {
 		const environmentSelectBoxElement  = document.getElementById( environmentSelectBoxId );
+		if (!environmentSelectBoxElement) {
+			return;
+		}
 		const selectedEnvironmentSavedToDB = environmentSelectBoxElement.value;
 		const form                         = document.getElementById( 'mainform' );
 

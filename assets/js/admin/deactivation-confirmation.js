@@ -5,7 +5,7 @@ jQuery(
 	function ($) {
 		$( document ).ready(
 			function () {
-				$( '#deactivate-power-board-for-woocommerce' ).on(
+				$( '#deactivate-powerboard-for-woocommerce' ).on(
 					'click',
 					function (e) {
 						e.preventDefault();

@@ -18,23 +18,60 @@ class AdminAssetsService {
 	private const URL_SCRIPT_POSTFIX = '.js';
 
 	public function __construct() {
-		$this->register_scripts();
-		$this->load_scripts();
+		/**
+		 * Use hook admin_enqueue_scripts
+		 *
+		 * @noinspection PhpUndefinedFunctionInspection
+		 */
+		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_scripts' ] );
 	}
 
-	/**
-	 * Uses functions (wp_register_script and plugins_url) from WordPress
-	 */
-	public function register_scripts(): void {
+	public function enqueue_scripts( string $hook ): void {
+		$allowed_pages = [ 'woocommerce_page_wc-settings', 'plugins.php' ];
+
+		if ( ! in_array( $hook, $allowed_pages, true ) ) {
+			return;
+		}
+
 		foreach ( self::SCRIPTS as $script ) {
+			$script_name = $this->get_script_name( $script );
+
 			/* @noinspection PhpUndefinedFunctionInspection */
 			wp_register_script(
-				$this->get_script_name( $script ),
+				$script_name,
 				plugins_url( $this->get_script_path( $script ), POWER_BOARD_PLUGIN_FILE ),
 				[ 'jquery' ],
 				POWER_BOARD_PLUGIN_VERSION,
 				true
 			);
+
+			/**
+			 * WordPress.Security.NonceVerification.Recommended
+			 *
+             * @phpcs:disable WordPress.Security.NonceVerification.Recommended
+			 */
+			if ( $script === 'deactivation-confirmation' ||
+				( isset( $_GET['tab'], $_GET['section'] ) && $_GET['tab'] === 'checkout' && $_GET['section'] === 'power_board' ) ) {
+				/**
+				 * Use hook wp_enqueue_script
+				 *
+				 * @noinspection PhpUndefinedFunctionInspection
+				 */
+				wp_enqueue_script( $script_name );
+
+				/**
+				 * Use function wp_localize_script
+				 *
+				 * @noinspection PhpUndefinedFunctionInspection
+				 */
+				wp_localize_script(
+					$script_name,
+					'powerBoardWidgetSettings',
+					[
+						'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL,
+					]
+				);
+			}
 		}
 	}
 
@@ -44,32 +81,5 @@ class AdminAssetsService {
 
 	private function get_script_path( string $script ): string {
 		return self::URL_SCRIPT_PREFIX . $script . self::URL_SCRIPT_POSTFIX;
-	}
-
-	/**
-	 * Uses functions (wp_enqueue_script and wp_localize_script) from WordPress
-	 */
-	public function load_scripts(): void {
-		foreach ( self::SCRIPTS as $script ) {
-			$script_name = $this->get_script_name( $script );
-
-			/* @noinspection PhpUndefinedFunctionInspection */
-			wp_enqueue_script(
-				$this->get_script_name( $script ),
-				false,
-				[ 'jquery' ],
-				POWER_BOARD_PLUGIN_VERSION,
-				true
-			);
-
-			/* @noinspection PhpUndefinedFunctionInspection */
-			wp_localize_script(
-				$script_name,
-				'powerBoardWidgetSettings',
-				[
-					'pluginUrlPrefix' => POWER_BOARD_PLUGIN_URL,
-				]
-			);
-		}
 	}
 }

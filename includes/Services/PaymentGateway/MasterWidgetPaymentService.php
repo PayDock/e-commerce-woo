@@ -82,11 +82,11 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		$this->init_form_fields();
 		/* @noinspection PhpUndefinedMethodInspection */
 		$this->init_settings();
+		new AdminAssetsService();
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		if ( is_admin() ) {
-			$this->title = $this->method_title;
-			new AdminAssetsService();
+			$this->title            = $this->method_title;
 			$this->template_service = new TemplateService( $this );
 
 			$key = SettingsHelper::get_option_name(
