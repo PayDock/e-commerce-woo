@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "67c302a203fe2d5baff4db84c6c2d558",
+    "content-hash": "f9f674ab9be0d99a67f6f5b0d4a37c32",
     "packages": [],
     "packages-dev": [
         {
@@ -467,12 +467,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPCSStandards/PHP_CodeSniffer.git",
-                "reference": "55b35bc66044fbc6ff7b629d3bcf5022d4fe86c5"
+                "reference": "98c1ce8d7a4de29b0252b61987b8723baaac391b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/55b35bc66044fbc6ff7b629d3bcf5022d4fe86c5",
-                "reference": "55b35bc66044fbc6ff7b629d3bcf5022d4fe86c5",
+                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/98c1ce8d7a4de29b0252b61987b8723baaac391b",
+                "reference": "98c1ce8d7a4de29b0252b61987b8723baaac391b",
                 "shasum": ""
             },
             "require": {
@@ -544,7 +544,7 @@
                     "type": "thanks_dev"
                 }
             ],
-            "time": "2025-01-25T17:50:34+00:00"
+            "time": "2025-02-10T14:59:55+00:00"
         },
         {
             "name": "woocommerce/woocommerce-sniffs",
@@ -662,9 +662,7 @@
     "prefer-lowest": false,
     "platform": {
         "php": ">=7.4",
-        "ext-json": "*",
-        "ext-openssl": "*",
-        "ext-sodium": "*"
+        "ext-json": "*"
     },
     "platform-dev": [],
     "plugin-api-version": "2.6.0"

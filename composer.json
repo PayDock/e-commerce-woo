@@ -11,9 +11,11 @@
     },
     "require": {
         "php": ">=7.4",
-        "ext-json": "*",
-        "ext-openssl": "*",
-        "ext-sodium": "*"
+        "ext-json": "*"
+    },
+    "suggest": {
+        "ext-sodium": "Encryption defaults to using Sodium, please make sure this is installed with your PHP installation.",
+        "ext-openssl": "Encryption will use OpenSSL package if installed as a backup option to Sodium."
     },
     "require-dev": {
         "squizlabs/php_codesniffer": "3.*",
