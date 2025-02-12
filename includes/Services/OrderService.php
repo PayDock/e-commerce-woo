@@ -27,16 +27,22 @@ class OrderService {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$order = wc_get_order( $id );
 
-		if ( is_object( $order ) ) {
-			$order->set_status( $new_status, $status_note );
-			$order->save();
+		if ( ! $order || strpos( $order->get_payment_method(), POWER_BOARD_PLUGIN_PREFIX ) === false ) {
+			return;
 		}
+
+		$order->set_status( $new_status, $status_note );
+		$order->save();
 	}
 
 	/**
 	 * Uses a function (wp_enqueue_style) from WordPress
 	 */
 	public function init_power_board_order_buttons( $order ): void {
+		if ( ! $order || strpos( $order->get_payment_method(), POWER_BOARD_PLUGIN_PREFIX ) === false ) {
+			return;
+		}
+
 		$order_status = $order->get_status();
 		$total_refund = $order->get_total_refunded();
 		$order_total  = (float) $order->get_total( false );
@@ -69,6 +75,10 @@ class OrderService {
 	 * @throws Exception If status change is not allowed
 	 */
 	public function status_change_verification( $order_id, $old_status_key, $new_status_key, $order ): void {
+		if ( ! is_object( $order ) || strpos( $order->get_payment_method(), POWER_BOARD_PLUGIN_PREFIX ) === false ) {
+			return;
+		}
+
 		$order->delete_meta_data( '_status_change_verification_failed' );
 		if (
 			$old_status_key === $new_status_key ||

@@ -21,6 +21,10 @@ class PaymentController {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$order = wc_get_order( $order_id );
 
+		if ( ! $order || strpos( $order->get_payment_method(), POWER_BOARD_PLUGIN_PREFIX ) === false ) {
+			return;
+		}
+
 		if ( empty( $args['amount'] ) && is_object( $order ) ) {
 			$amount = $order->get_total();
 		} else {
@@ -111,7 +115,12 @@ class PaymentController {
 	 */
 	public function after_refund_process( $order_id ): void {
 		/* @noinspection PhpUndefinedFunctionInspection */
-		$order        = wc_get_order( $order_id );
+		$order = wc_get_order( $order_id );
+
+		if ( ! $order || strpos( $order->get_payment_method(), POWER_BOARD_PLUGIN_PREFIX ) === false ) {
+			return;
+		}
+
 		$order_status = $order->get_status();
 
 		if ( is_object( $order ) && $order_status !== 'refunded' ) {

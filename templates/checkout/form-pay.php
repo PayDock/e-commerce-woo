@@ -7,6 +7,7 @@
  */
 
 declare( strict_types=1 );
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -17,112 +18,113 @@ if ( is_wc_endpoint_url( 'order-pay' ) ) {
 	if ( ! empty( $order_id ) ) {
 		$order_object = wc_get_order( $order_id );
 
-		if ( $order_object ) {
-			$order_totals = $order_object->get_order_item_totals();
+		if ( ! $order_object || strpos( $order_object->get_payment_method(), POWER_BOARD_PLUGIN_PREFIX ) === false ) {
+			wc_get_template( 'checkout/form-pay.php' );
+			return;
 		}
+
+		$order_totals = $order_object->get_order_item_totals() ?? [];
 	}
 }
 
-if ( ! empty( $order_object ) && is_object( $order_object ) ) {
-	?>
-	<form name="checkout" name="checkout" id="order_review" method="post">
-		<table class="shop_table">
-			<thead>
-				<tr>
-					<th class="product-name"><?php esc_html_e( 'Product', 'power-board' ); ?></th>
-					<th class="product-quantity"><?php esc_html_e( 'Qty', 'power-board' ); ?></th>
-					<th class="product-total"><?php esc_html_e( 'Totals', 'power-board' ); ?></th>
-				</tr>
-			</thead>
-			<tbody>
-				<?php if ( count( $order_object->get_items() ) > 0 ) : ?>
-					<?php foreach ( $order_object->get_items() as $item_id => $item ) : ?>
-						<?php
-						if ( ! apply_filters( 'woocommerce_order_item_visible', true, $item ) ) {
-							continue;
-						}
-						?>
-						<tr class="<?php echo esc_attr( apply_filters( 'woocommerce_order_item_class', 'order_item', $item, $order_object ) ); ?>">
-							<td class="product-name">
-								<?php
-									echo wp_kses_post( apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, false ) );
+?>
+<form name="checkout" id="order_review" method="post">
 
-									do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order_object, false );
-
-									wc_display_item_meta( $item );
-
-									do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order_object, false );
-								?>
-							</td>
-							<td class="product-quantity">
-								<?php
-								echo wp_kses_post(
-									apply_filters(
-										'woocommerce_order_item_quantity_html',
-										' <strong class="product-quantity">' . sprintf(
-											'&times;&nbsp;%s',
-											esc_html( $item->get_quantity() )
-										) . '</strong>',
-										$item
-									)
-								);
-								?>
-							</td>
-							<td class="product-subtotal">
-								<?php echo wp_kses_post( $order_object->get_formatted_line_subtotal( $item ) ); ?>
-							</td>
-						</tr>
-					<?php endforeach; ?>
-				<?php endif; ?>
-			</tbody>
-			<tfoot>
-				<?php if ( ! empty( $order_totals ) && is_array( $order_totals ) ) : ?>
-					<?php foreach ( $order_totals as $total ) : ?>
-						<tr>
-							<th scope="row" colspan="2"><?php echo esc_html( $total['label'] ); ?></th>
-							<td class="product-total"><?php echo wp_kses_post( $total['value'] ); ?></td>
-						</tr>
-					<?php endforeach; ?>
-				<?php endif; ?>
-			</tfoot>
-		</table>
-
-		<?php
-		do_action( 'woocommerce_pay_order_before_payment' );
-		?>
-
-		<div id="payment">
-			<?php if ( $order_object->needs_payment() ) : ?>
-				<ul class="wc_payment_methods payment_methods methods">
+	<table class="shop_table">
+		<thead>
+			<tr>
+				<th class="product-name"><?php esc_html_e( 'Product', 'power-board' ); ?></th>
+				<th class="product-quantity"><?php esc_html_e( 'Qty', 'power-board' ); ?></th>
+				<th class="product-total"><?php esc_html_e( 'Totals', 'power-board' ); ?></th>
+			</tr>
+		</thead>
+		<tbody>
+			<?php if ( count( $order_object->get_items() ) > 0 ) : ?>
+				<?php foreach ( $order_object->get_items() as $item_id => $item ) : ?>
 					<?php
-					if ( ! empty( $available_gateways ) ) {
-						foreach ( $available_gateways as $gateway ) {
-							wc_get_template( 'checkout/payment-method.php', [ 'gateway' => $gateway ] );
-						}
-					} else {
-						echo '<li>';
-						wc_print_notice( apply_filters( 'woocommerce_no_available_payment_methods_message', esc_html__( 'Sorry, it seems that there are no available payment methods for your location. Please contact us if you require assistance or wish to make alternate arrangements.', 'power-board' ) ), 'notice' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-						echo '</li>';
+					if ( ! apply_filters( 'woocommerce_order_item_visible', true, $item ) ) {
+						continue;
 					}
 					?>
-				</ul>
+					<tr class="<?php echo esc_attr( apply_filters( 'woocommerce_order_item_class', 'order_item', $item, $order_object ) ); ?>">
+						<td class="product-name">
+							<?php
+								echo wp_kses_post( apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, false ) );
+
+								do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order_object, false );
+
+								wc_display_item_meta( $item );
+
+								do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order_object, false );
+							?>
+						</td>
+						<td class="product-quantity">
+							<?php
+							echo wp_kses_post(
+								apply_filters(
+									'woocommerce_order_item_quantity_html',
+									' <strong class="product-quantity">' . sprintf(
+										'&times;&nbsp;%s',
+										esc_html( $item->get_quantity() )
+									) . '</strong>',
+									$item
+								)
+							);
+							?>
+						</td>
+						<td class="product-subtotal">
+							<?php echo wp_kses_post( $order_object->get_formatted_line_subtotal( $item ) ); ?>
+						</td>
+					</tr>
+				<?php endforeach; ?>
 			<?php endif; ?>
-			<div class="form-row">
-				<input type="hidden" name="woocommerce_pay" value="1" />
+		</tbody>
+		<tfoot>
+			<?php if ( ! empty( $order_totals ) && is_array( $order_totals ) ) : ?>
+				<?php foreach ( $order_totals as $total ) : ?>
+					<tr>
+						<th scope="row" colspan="2"><?php echo esc_html( $total['label'] ); ?></th>
+						<td class="product-total"><?php echo wp_kses_post( $total['value'] ); ?></td>
+					</tr>
+				<?php endforeach; ?>
+			<?php endif; ?>
+		</tfoot>
+	</table>
 
-				<?php wc_get_template( 'checkout/terms.php' ); ?>
-
-				<?php do_action( 'woocommerce_pay_order_before_submit' ); ?>
-
-				<button type="submit" class="button alt<?php echo esc_attr( wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '' ); ?>" id="place_order">
-					<?php esc_html_e( 'Pay for order', 'power-board' ); ?>
-				</button>
-
-				<?php do_action( 'woocommerce_pay_order_after_submit' ); ?>
-
-				<?php wp_nonce_field( 'woocommerce-pay', 'woocommerce-pay-nonce' ); ?>
-			</div>
-		</div>
-	</form>
 	<?php
-}
+	do_action( 'woocommerce_pay_order_before_payment' );
+	?>
+
+	<div id="payment">
+		<?php if ( $order_object->needs_payment() ) : ?>
+			<ul class="wc_payment_methods payment_methods methods">
+				<?php
+				if ( ! empty( $available_gateways ) ) {
+					foreach ( $available_gateways as $gateway ) {
+						wc_get_template( 'checkout/payment-method.php', [ 'gateway' => $gateway ] );
+					}
+				} else {
+					echo '<li>';
+					wc_print_notice( apply_filters( 'woocommerce_no_available_payment_methods_message', esc_html__( 'Sorry, it seems that there are no available payment methods for your location. Please contact us if you require assistance or wish to make alternate arrangements.', 'power-board' ) ), 'notice' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+					echo '</li>';
+				}
+				?>
+			</ul>
+		<?php endif; ?>
+		<div class="form-row">
+			<input type="hidden" name="woocommerce_pay" value="1" />
+
+			<?php wc_get_template( 'checkout/terms.php' ); ?>
+
+			<?php do_action( 'woocommerce_pay_order_before_submit' ); ?>
+
+			<button type="submit" class="button alt<?php echo esc_attr( wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '' ); ?>" id="place_order">
+				<?php esc_html_e( 'Pay for order', 'power-board' ); ?>
+			</button>
+
+			<?php do_action( 'woocommerce_pay_order_after_submit' ); ?>
+
+			<?php wp_nonce_field( 'woocommerce-pay', 'woocommerce-pay-nonce' ); ?>
+		</div>
+	</div>
+</form>

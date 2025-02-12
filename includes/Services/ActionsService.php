@@ -136,7 +136,7 @@ class ActionsService {
 		$widget_controller  = new WidgetController();
 
 		/* @noinspection PhpUndefinedFunctionInspection */
-		add_action( 'woocommerce_order_item_add_action_buttons', [ $order_service, 'init_power_board_order_buttons' ], 10, 2 );
+		add_action( 'woocommerce_order_item_add_action_buttons', [ $order_service, 'init_power_board_order_buttons' ], 10 );
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action( 'woocommerce_order_status_changed', [ $order_service, 'status_change_verification' ], 20, 4 );
 		/* @noinspection PhpUndefinedFunctionInspection */
