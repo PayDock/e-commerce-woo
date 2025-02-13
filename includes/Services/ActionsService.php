@@ -13,7 +13,7 @@ namespace PowerBoard\Services;
 use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use PowerBoard\Controllers\Admin\WidgetController;
-use PowerBoard\Controllers\Webhooks\PaymentController;
+use PowerBoard\Controllers\Integrations\PaymentController;
 use PowerBoard\Enums\SettingsSectionEnum;
 use PowerBoard\Util\MasterWidgetBlock;
 

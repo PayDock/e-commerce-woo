@@ -1,7 +1,7 @@
 <?php
 declare( strict_types=1 );
 
-namespace PowerBoard\Controllers\Webhooks;
+namespace PowerBoard\Controllers\Integrations;
 
 use Exception;
 use PowerBoard\Services\OrderService;
