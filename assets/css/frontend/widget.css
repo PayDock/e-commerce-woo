@@ -113,3 +113,13 @@
 .classic-checkout-validation-error {
 	color: #cc1818;
 }
+
+@media screen and (max-width: 450px) {
+	#powerBoardCheckout_wrapper,
+	#powerBoardCheckout_wrapper #list,
+	#powerBoardCheckout_wrapper #list iframe,
+	#standaloneWidget,
+	#standaloneWidget iframe {
+		min-width: auto !important;
+	}
+}
