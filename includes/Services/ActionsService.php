@@ -78,7 +78,7 @@ class ActionsService {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action( 'wc_ajax_nopriv_power-board-update-shipping', [ $this, 'classic_order_update_shipping' ] );
 		/* @noinspection PhpUndefinedFunctionInspection */
-		add_action( 'woocommerce_update_order_item', [ $this, 'order_update_shipping' ], 10, 3 );
+		add_action( 'woocommerce_update_order_item', [ $this, 'handle_order_update_shipping' ], 10, 3 );
 	}
 
 	public function register_master_widget_block( PaymentMethodRegistry $registry ) {
@@ -105,6 +105,18 @@ class ActionsService {
 		$this->calculate_totals_and_save_cookie();
 	}
 
+	/**
+	 * Hook woocommerce_update_order_item sends these arguments, but are not needed for this use case
+	 *
+	 * phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+	 *
+	 * @noinspection PhpUnusedParameterInspection
+	 */
+	public function handle_order_update_shipping( $order_item_id, $order_item, $order_id ) {
+		$this->order_update_shipping();
+	}
+	// phpcs:enable
+
 	public function classic_order_update_shipping() {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$wp_nonce = isset( $_REQUEST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ) : null;
@@ -120,7 +132,7 @@ class ActionsService {
 		$this->order_update_shipping();
 	}
 
-	public function order_update_shipping( $order_item_id = null, $order_item = null, $order_id = null ) {
+	public function order_update_shipping() {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$session = WC()->session;
 
@@ -198,22 +210,35 @@ class ActionsService {
 			add_action( 'woocommerce_blocks_payment_method_type_registration', [ $this, 'register_master_widget_block' ] );
 		}
 	}
-
+	/**
+	 * Handles refund messages on PowerBoard
+     * phpcs:disable WordPress.Security.NonceVerification -- processed through the WooCommerce form handler
+	 */
 	public function powerboard_refund_messages() {
 		/* @noinspection PhpUndefinedFunctionInspection */
-		if ( ! wp_doing_ajax() || $_REQUEST['action'] !== 'woocommerce_refund_line_items' ) {
+		if ( ! wp_doing_ajax() || ( isset( $_REQUEST['action'] ) && $_REQUEST['action'] !== 'woocommerce_refund_line_items' ) ) {
 			return;
 		}
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_filter( 'gettext_woocommerce', [ $this, 'powerboard_filter_refund_message' ], 10, 3 );
 	}
+    // phpcs:enable
 
+	/**
+	 * Hook gettext_woocommerce sends these arguments, but are not needed for this use case
+	 *
+     * phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+     *  phpcs:disable WordPress.Security.NonceVerification -- processed through the WooCommerce form handler
+	 *
+	 * @noinspection PhpUnusedParameterInspection
+	 */
 	public function powerboard_filter_refund_message( $translation, $text, $domain ) {
 		if ( $text !== 'Invalid refund amount' ) {
 			return $translation;
 		}
 
+		/* @noinspection PhpUndefinedFunctionInspection */
 		$order_id = ! empty( $_POST['order_id'] ) ? absint( $_POST['order_id'] ) : 0;
 		if ( ! $order_id ) {
 			return $translation;
@@ -234,11 +259,14 @@ class ActionsService {
 		);
 
 		/* @noinspection PhpUndefinedFunctionInspection */
-		$formatted_plain_text = html_entity_decode( strip_tags( $formatted_with_html ) );
+		$formatted_plain_text = html_entity_decode( wp_strip_all_tags( $formatted_with_html ) );
 
+		/* @noinspection PhpUndefinedFunctionInspection */
 		return sprintf(
+		/* translators: %s: Unknown. */
 			__( 'Invalid refund amount. Available amount: %s', 'power-board' ),
 			$formatted_plain_text
 		);
 	}
+    // phpcs:enable
 }

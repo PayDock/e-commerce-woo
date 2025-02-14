@@ -61,6 +61,7 @@ function check_the_directory(): void {
 
 	if ( $current_dir !== $implied_dir ) {
 		if ( ! function_exists( 'deactivate_plugins' ) ) {
+			/* @noinspection PhpUndefinedConstantInspection */
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 
@@ -81,6 +82,12 @@ function check_the_directory(): void {
 	}
 }
 
+/**
+ * Used on admin_head hook
+ * phpcs:disable WordPress.Security.NonceVerification -- processed through the WooCommerce form handler
+ *
+ * @noinspection PhpUnused
+ */
 function wrong_dir_style(): void {
 	if ( isset( $_GET['activate'] ) ) {
 		$user_id = function_exists( 'get_current_user_id' ) ? get_current_user_id() : 0;
@@ -91,7 +98,13 @@ function wrong_dir_style(): void {
 		}
 	}
 }
+// phpcs:enable
 
+/**
+ * Used on admin_notices hook
+ *
+ * @noinspection PhpUnused
+ */
 function wrong_dir_notice(): void {
 	$user_id = function_exists( 'get_current_user_id' ) ? get_current_user_id() : 0;
 	$error   = get_transient( 'power_board_status_change_error_' . $user_id );
