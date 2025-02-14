@@ -154,11 +154,14 @@ class ActionsService {
 	private function calculate_totals_and_save_cookie() {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$cart = WC()->cart;
-		$cart->calculate_totals();
-		$cart_total  = (string) $cart->get_total( false );
-		$expiry_time = time() + 3600;
-		/* @noinspection PhpUndefinedFunctionInspection */
-		setcookie( 'power_board_cart_total', $cart_total, $expiry_time, '/' );
+
+		if ( ! empty( $cart ) ) {
+			$cart->calculate_totals();
+			$cart_total  = (string) $cart->get_total( false );
+			$expiry_time = time() + 3600;
+			/* @noinspection PhpUndefinedFunctionInspection */
+			setcookie( 'power_board_cart_total', $cart_total, $expiry_time, '/' );
+		}
 	}
 
 	/**
