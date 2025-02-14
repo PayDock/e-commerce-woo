@@ -80,6 +80,11 @@ jQuery(
 					form: null,
 					formChangedTimer: null,
 					lastAddressVerified: null,
+					totalChangesTimeout: null,
+					totalChangesSecondTimeout: null,
+					shippingChangedTimeout: null,
+					lastMasterWidgetInit: null,
+					currentSavedShipping: null,
 					showErrorMessage( errorMessage ) {
 						window.showWarning( $, errorMessage, 'error' );
 					},
@@ -246,11 +251,13 @@ jQuery(
 						}
 					},
 					initMasterWidget() {
-						this.toggleOrderButton( true );
+						const initTimestamp       = ( new Date() ).getTime();
+						this.lastMasterWidgetInit = initTimestamp;
+						setTimeout( () => this.toggleOrderButton( true ), 100 );
 
 						// noinspection JSUnresolvedReference
 						const data = {
-							_wpnonce: PowerBoardAjaxIntent.wpnonce,
+							_wpnonce: PowerBoardAjaxCheckout.wpnonce_intent,
 							address: this.getAddressData( false ).address,
 						};
 						if (isOrderPayPage) {
@@ -269,43 +276,45 @@ jQuery(
 								type: 'POST',
 								data: data,
 								success: ( response ) => {
-									// noinspection JSUnresolvedReference
-									this.toggleWidgetVisibility( false );
-									// noinspection JSUnresolvedReference
-									window.widgetPowerBoard = new cba.Checkout( '#classic-powerBoardCheckout_wrapper', response.data.resource.data.token );
-									// noinspection JSUnresolvedReference
-									window.widgetPowerBoard.setEnv( this.getConfigs().environment )
-									const showError         = ( message ) => this.showErrorMessage( message );
-									const handleWidgetError = () => this.handleWidgetError();
-									const submitForm        = () => this.form.submit();
-									// noinspection JSUnresolvedReference
-									window.widgetPowerBoard.onPaymentSuccessful(
-										function ( data ) {
-											// noinspection JSUnresolvedReference
-											jQuery( '#chargeid' ).val( data['charge_id'] );
-											submitForm();
+									if (initTimestamp === this.lastMasterWidgetInit) {
+										// noinspection JSUnresolvedReference
+										this.toggleWidgetVisibility( false );
+										// noinspection JSUnresolvedReference
+										window.widgetPowerBoard = new cba.Checkout( '#classic-powerBoardCheckout_wrapper', response.data.resource.data.token );
+										// noinspection JSUnresolvedReference
+										window.widgetPowerBoard.setEnv( this.getConfigs().environment )
+										const showError         = ( message ) => this.showErrorMessage( message );
+										const handleWidgetError = () => this.handleWidgetError();
+										const submitForm        = () => this.form.submit();
+										// noinspection JSUnresolvedReference
+										window.widgetPowerBoard.onPaymentSuccessful(
+											function ( data ) {
+												// noinspection JSUnresolvedReference
+												jQuery( '#chargeid' ).val( data['charge_id'] );
+												submitForm();
 
-											window.widgetPowerBoard = null;
-										}
-									);
-									// noinspection JSUnresolvedReference
-									window.widgetPowerBoard.onPaymentFailure(
-										function () {
-											showError( 'Transaction failed. Please check your payment details or contact your bank' );
+												window.widgetPowerBoard = null;
+											}
+										);
+										// noinspection JSUnresolvedReference
+										window.widgetPowerBoard.onPaymentFailure(
+											function () {
+												showError( 'Transaction failed. Please check your payment details or contact your bank' );
 
-											handleWidgetError();
-											window.widgetPowerBoard = null;
-										}
-									);
-									// noinspection JSUnresolvedReference
-									window.widgetPowerBoard.onPaymentExpired(
-										function () {
-											showError( 'Your payment session has expired. Please retry your payment' );
+												handleWidgetError();
+												window.widgetPowerBoard = null;
+											}
+										);
+										// noinspection JSUnresolvedReference
+										window.widgetPowerBoard.onPaymentExpired(
+											function () {
+												showError( 'Your payment session has expired. Please retry your payment' );
 
-											handleWidgetError();
-											window.widgetPowerBoard = null;
-										}
-									);
+												handleWidgetError();
+												window.widgetPowerBoard = null;
+											}
+										);
+									}
 								}
 							}
 						);
@@ -380,6 +389,49 @@ jQuery(
 							100
 						)
 					},
+					handleCartTotalChanged( event ) {
+						if (this.totalChangesTimeout) {
+							clearTimeout( this.totalChangesTimeout );
+						}
+						if (this.totalChangesSecondTimeout) {
+							clearTimeout( this.totalChangesSecondTimeout );
+						}
+						this.toggleWidgetVisibility( true );
+
+						this.totalChangesTimeout          = setTimeout(
+							() => {
+								const orderTotal          = this.getUIOrderTotal();
+								const cartTotal           = +event.detail.cartTotal;
+								this.currentSavedShipping = event.detail.shippingId;
+								if (orderTotal) {
+									const address = JSON.stringify( this.getAddressData( false ).address );
+									if (orderTotal !== cartTotal && this.lastAddressVerified === address) {
+										if (this.totalChangesSecondTimeout) {
+											clearTimeout( this.totalChangesSecondTimeout );
+										}
+										this.totalChangesSecondTimeout = setTimeout(
+											() => {
+												const orderTotal       = this.getUIOrderTotal();
+												if (orderTotal !== cartTotal) {
+													window.reloadAfterExternalCartChanges();
+												} else {
+													this.initMasterWidget();
+												}
+											},
+											300
+										)
+									} else {
+										this.initMasterWidget();
+									}
+								}
+						},
+							300
+						)
+					},
+					getUIOrderTotal() {
+						const orderTotal = $( '.order-total' )[0];
+						return orderTotal ? +orderTotal.innerText.replace( /[^0-9.,]*/, '' ) : null;
+					},
 					init() {
 						const paymentMethodInterval = setInterval(
 							() => {
@@ -402,35 +454,71 @@ jQuery(
 									if ( event.target.id.includes( 'chargeid' ) ) {
 										return
 									}
-
-									clearTimeout( this.formChangedTimer );
-									this.formChangedTimer        = setTimeout(
-										() => {
-											const currentAddress = JSON.stringify( this.getAddressData( false ).address );
-											if (
-												this.lastAddressVerified !== currentAddress ||
-												event.target.id.includes( 'payment_method' ) ||
-												event.target.id.includes( 'shipping_method' )
-											) {
-												this.lastAddressVerified = currentAddress;
-												// noinspection JSUnresolvedReference
-												this.setPaymentMethod(
-													$( 'input[name="payment_method"]:checked' ).val(),
-													true
-												);
-											}
-										},
-										500
-									);
+									this.handleShippingChanged( event.target.id );
+									this.handleFormChanged( event.target.id );
 								} catch ( e ) {
 									console.error( e );
 								}
 							}
 						);
+
+						document.addEventListener( "power_board_cart_total_changed", this.handleCartTotalChanged.bind( this ) );
 					},
+					handleShippingChanged( eventTargetId ) {
+						if (this.shippingChangedTimeout) {
+							clearTimeout( this.shippingChangedTimeout );
+						}
+						if ( eventTargetId.includes( 'shipping_method' ) ) {
+							if (this.currentSavedShipping !== eventTargetId.value) {
+								this.shippingChangedTimeout = setTimeout(
+									() => {
+										// noinspection JSUnresolvedReference
+										jQuery.ajax(
+											{
+												url: '/?wc-ajax=power-board-update-shipping',
+												type: 'POST',
+												data: {
+													_wpnonce: PowerBoardAjaxCheckout.wpnonce_update_shipping,
+												}
+											}
+										);
+									},
+									500
+								);
+							}
+						}
+					},
+					handleFormChanged( eventTargetId ) {
+						if (this.formChangedTimer) {
+							clearTimeout( this.formChangedTimer );
+						}
+						this.formChangedTimer        = setTimeout(
+							() => {
+								const currentAddress = JSON.stringify( this.getAddressData( false ).address );
+								if (
+									this.lastAddressVerified !== currentAddress ||
+									eventTargetId.includes( 'payment_method' )
+								) {
+									this.lastAddressVerified = currentAddress;
+									// noinspection JSUnresolvedReference
+									this.setPaymentMethod(
+										$( 'input[name="payment_method"]:checked' ).val(),
+										true
+									);
+								}
+							},
+							500
+						);
+					},
+					addBeforeLeavePageListener() {
+						window.onbeforeunload = function () {
+							document.removeEventListener( "power_board_cart_total_changed", this.handleCartTotalChanged )
+						};
+					}
 				}
 
-				powerBoardHelper.init()
+				powerBoardHelper.init();
+				powerBoardHelper.addBeforeLeavePageListener();
 			}
 		);
 	}

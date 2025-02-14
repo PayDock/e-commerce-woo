@@ -269,7 +269,7 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		$order          = $this->get_order_to_process_payment( $order, $checkout_order );
 		$order->set_status( 'processing' );
 		$order->payment_complete();
-		setcookie( 'cart_total', '0', time() + 3600, '/' );
+		setcookie( 'power_board_cart_total', '0', time() + 3600, '/' );
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$charge_id = isset( $_POST['chargeid'] ) ? sanitize_text_field( wp_unslash( $_POST['chargeid'] ) ) : '';
@@ -630,7 +630,7 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		return $fields;
 	}
 
-	private function get_order_to_process_payment( WC_Order $current_order, array $checkout_order ): WC_Order {
+	private function get_order_to_process_payment( WC_Order $current_order, ?array $checkout_order ): WC_Order {
 		if ( empty( $checkout_order ) ) {
 			return $current_order;
 		}
@@ -705,7 +705,6 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 				$shipping_instance_id = $shipping_id[1];
 				$selected_shipping    = $checkout_order['selected_shipping'];
 				foreach ( $shipping_lines as $shipping_line ) {
-					// Check if the current shipping method is flat-rate:1
 					if ( $shipping_method_id !== $shipping_line->get_method_id() && $shipping_instance_id !== $shipping_line->get_instance_id() ) {
 						$shipping_line->set_meta_data( $selected_shipping );
 						$shipping_line->set_method_id( $shipping_method_id );

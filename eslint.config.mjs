@@ -15,7 +15,7 @@ export default [
         "wp": "readonly",
         "__dirname": "readonly",
         "orderData": "readonly",
-        "PowerBoardAjaxIntent": "readonly",
+        "PowerBoardAjaxCheckout": "readonly",
         "PowerBoardAjaxError": "readonly",
         "cba": "readonly",
       },

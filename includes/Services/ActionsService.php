@@ -60,16 +60,23 @@ class ActionsService {
 	}
 
 	/**
-	 * Add new payment method on checkout page
 	 * Uses a function (add_action) from WordPress
 	 */
-	protected function add_cart_hooks(): void {
+	public function add_cart_hooks(): void {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action( 'woocommerce_after_cart_item_quantity_update', [ $this, 'cart_item_quantity_changed' ] );
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action( 'woocommerce_add_to_cart', [ $this, 'add_to_cart' ] );
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action( 'woocommerce_cart_item_removed', [ $this, 'cart_item_removed' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'woocommerce_removed_coupon', [ $this, 'remove_coupon' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'woocommerce_applied_coupon', [ $this, 'add_coupon' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'wc_ajax_power-board-update-shipping', [ $this, 'classic_order_update_shipping' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'wc_ajax_nopriv_power-board-update-shipping', [ $this, 'classic_order_update_shipping' ] );
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action( 'woocommerce_update_order_item', [ $this, 'order_update_shipping' ], 10, 3 );
 	}
@@ -90,32 +97,56 @@ class ActionsService {
 		$this->calculate_totals_and_save_cookie();
 	}
 
-	public function order_update_shipping( $order_item_id, $order_item, $order_id ) {
+	public function remove_coupon() {
+		$this->calculate_totals_and_save_cookie();
+	}
+
+	public function add_coupon() {
+		$this->calculate_totals_and_save_cookie();
+	}
+
+	public function classic_order_update_shipping() {
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$wp_nonce = isset( $_REQUEST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ) : null;
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		if ( ! wp_verify_nonce( $wp_nonce, 'power-board-update-shipping' ) ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			wp_send_json_error( [ 'message' => __( 'Error: Security check', 'power-board' ) ] );
+
+			return;
+		}
+
+		$this->order_update_shipping();
+	}
+
+	public function order_update_shipping( $order_item_id = null, $order_item = null, $order_id = null ) {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$session = WC()->session;
 
 		if ( ! empty( $session ) ) {
-			$chosen_methods = $session->get( 'chosen_shipping_methods' );
+			$chosen_methods   = $session->get( 'chosen_shipping_methods' );
 			$current_shipping = is_array( $chosen_methods ) && ! empty( $chosen_methods ) ? $chosen_methods[0] : null;
 			if ( $current_shipping !== null && $current_shipping !== $this->last_shipping_id ) {
 				$this->last_shipping_id = $current_shipping;
 				$expiry_time            = time() + 3600;
-				setcookie( 'selected_shipping', $current_shipping, $expiry_time, '/' );
+				setcookie( 'power_board_selected_shipping', $current_shipping, $expiry_time, '/' );
 			}
 		}
+		$this->calculate_totals_and_save_cookie();
 	}
 
+	/**
+	 * Uses a function (WC) from WooCommerce
+	 */
 	private function calculate_totals_and_save_cookie() {
-		/* @noinspection PhpUndefinedFunctionInspection */
-		if ( is_checkout() ) {
-			return;
-		}
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$cart = WC()->cart;
 		$cart->calculate_totals();
 		$cart_total  = (string) $cart->get_total( false );
 		$expiry_time = time() + 3600;
-		setcookie( 'cart_total', $cart_total, $expiry_time, '/' );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		setcookie( 'power_board_cart_total', $cart_total, $expiry_time, '/' );
 	}
 
 	/**
@@ -169,10 +200,12 @@ class ActionsService {
 	}
 
 	public function powerboard_refund_messages() {
+		/* @noinspection PhpUndefinedFunctionInspection */
 		if ( ! wp_doing_ajax() || $_REQUEST['action'] !== 'woocommerce_refund_line_items' ) {
 			return;
 		}
 
+		/* @noinspection PhpUndefinedFunctionInspection */
 		add_filter( 'gettext_woocommerce', [ $this, 'powerboard_filter_refund_message' ], 10, 3 );
 	}
 
@@ -186,6 +219,7 @@ class ActionsService {
 			return $translation;
 		}
 
+		/* @noinspection PhpUndefinedFunctionInspection */
 		$order = wc_get_order( $order_id );
 		if ( ! $order ) {
 			return $translation;
@@ -193,18 +227,18 @@ class ActionsService {
 
 		$available_to_refund = $order->get_total() - $order->get_total_refunded();
 
+		/* @noinspection PhpUndefinedFunctionInspection */
 		$formatted_with_html = wc_price(
 			$available_to_refund,
-			array( 'currency' => $order->get_currency() )
+			[ 'currency' => $order->get_currency() ]
 		);
 
+		/* @noinspection PhpUndefinedFunctionInspection */
 		$formatted_plain_text = html_entity_decode( strip_tags( $formatted_with_html ) );
 
-		$translation = sprintf(
+		return sprintf(
 			__( 'Invalid refund amount. Available amount: %s', 'power-board' ),
 			$formatted_plain_text
 		);
-
-		return $translation;
 	}
 }

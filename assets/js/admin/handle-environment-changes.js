@@ -6,7 +6,7 @@ const environmentSelectBoxId            = 'woocommerce_power_board_power_board_E
 // noinspection JSUnresolvedReference
 jQuery( document ).ready(
 	function () {
-		const environmentSelectBoxElement  = document.getElementById( environmentSelectBoxId );
+		const environmentSelectBoxElement = document.getElementById( environmentSelectBoxId );
 		if (!environmentSelectBoxElement) {
 			return;
 		}

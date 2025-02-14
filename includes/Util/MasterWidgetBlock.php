@@ -115,10 +115,11 @@ final class MasterWidgetBlock extends AbstractPaymentMethodType {
 			/* @noinspection PhpUndefinedFunctionInspection */
 			wp_localize_script(
 				'power-board-form',
-				'PowerBoardAjaxIntent',
+				'PowerBoardAjaxCheckout',
 				[
-					'url'     => admin_url( 'admin-ajax.php' ),
-					'wpnonce' => wp_create_nonce( 'power-board-create-charge-intent' ),
+					'url'                     => admin_url( 'admin-ajax.php' ),
+					'wpnonce_intent'          => wp_create_nonce( 'power-board-create-charge-intent' ),
+					'wpnonce_update_shipping' => wp_create_nonce( 'power-board-update-shipping' ),
 				]
 			);
 
@@ -134,10 +135,11 @@ final class MasterWidgetBlock extends AbstractPaymentMethodType {
 			/* @noinspection PhpUndefinedFunctionInspection */
 			wp_localize_script(
 				'power-board-classic-form',
-				'PowerBoardAjaxIntent',
+				'PowerBoardAjaxCheckout',
 				[
-					'url'     => admin_url( 'admin-ajax.php' ),
-					'wpnonce' => wp_create_nonce( 'power-board-create-charge-intent' ),
+					'url'                     => admin_url( 'admin-ajax.php' ),
+					'wpnonce_intent'          => wp_create_nonce( 'power-board-create-charge-intent' ),
+					'wpnonce_update_shipping' => wp_create_nonce( 'power-board-update-shipping' ),
 				]
 			);
 

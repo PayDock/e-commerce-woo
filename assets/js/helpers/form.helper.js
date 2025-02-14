@@ -48,3 +48,9 @@ window.toggleOrderButton = ( orderButton, hide ) => {
 		orderButton.classList.remove( 'hide' );
 	}
 }
+
+
+window.reloadAfterExternalCartChanges = () => {
+	clearInterval( window.cartChangeInterval );
+	location.reload();
+}

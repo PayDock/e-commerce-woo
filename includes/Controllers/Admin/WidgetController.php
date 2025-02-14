@@ -30,23 +30,50 @@ class WidgetController {
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$cart = WC()->cart;
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$session = WC()->session;
+
+		if ( is_object( $session ) && isset( $_POST['selected_shipping_id'] ) && isset( $_COOKIE['power_board_selected_shipping'] ) ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			$selected_shipping_id = sanitize_text_field( wp_unslash( $_POST['selected_shipping_id'] ) );
+			/* @noinspection PhpUndefinedFunctionInspection */
+			$cookies_shipping_id = urldecode( sanitize_text_field( wp_unslash( $_COOKIE['power_board_selected_shipping'] ) ) );
+			/* @noinspection PhpUndefinedFunctionInspection */
+			$current_shipping_id = $session->get( 'chosen_shipping_methods' )[0];
+			if ( $selected_shipping_id === $cookies_shipping_id && $selected_shipping_id !== $current_shipping_id ) {
+				if ( isset( $_POST['total'] ) ) {
+					if ( is_array( $_POST['total'] ) ) {
+						/* @noinspection PhpUndefinedFunctionInspection */
+						$cart_total = array_map( 'sanitize_text_field', wp_unslash( $_POST['total'] ) );
+					} else {
+						/* @noinspection PhpUndefinedFunctionInspection */
+						$cart_total = sanitize_text_field( wp_unslash( $_POST['total'] ) );
+					}
+					$request['total'] = $cart_total;
+				} else {
+					return;
+				}
+			}
+		}
 
 		if ( is_object( $cart ) ) {
-			$cart->calculate_totals();
+			if ( empty( $cart_total ) ) {
+				$cart->calculate_totals();
+				$cart_total = $cart->get_total( false );
 
-			$cart_total = $cart->get_total( false );
+				if ( ! empty( $cart_total ) ) {
+					/* @noinspection PhpUndefinedFunctionInspection */
+					$request['total']['total_price'] = $cart_total * 100;
+					/* @noinspection PhpUndefinedFunctionInspection */
+					$request['total']['currency_code'] = get_woocommerce_currency();
+				}
+			}
 
 			$args = [
 				'limit'     => 1,
 				'cart_hash' => $cart->get_cart_hash(),
 			];
 
-			if ( ! empty( $cart_total ) ) {
-				/* @noinspection PhpUndefinedFunctionInspection */
-				$request['total']['total_price'] = $cart_total * 100;
-				/* @noinspection PhpUndefinedFunctionInspection */
-				$request['total']['currency_code'] = get_woocommerce_currency();
-			}
 		} elseif ( isset( $_POST['total'] ) ) {
 			if ( is_array( $_POST['total'] ) ) {
 				/* @noinspection PhpUndefinedFunctionInspection */
