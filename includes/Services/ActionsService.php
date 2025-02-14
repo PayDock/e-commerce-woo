@@ -40,6 +40,9 @@ class ActionsService {
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action( 'woocommerce_blocks_loaded', [ $this, 'register_payment_method' ] );
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'admin_init', [ $this, 'powerboard_refund_messages' ] );
 	}
 
 	public function init_before_woocommerce() {
@@ -68,7 +71,7 @@ class ActionsService {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action( 'woocommerce_cart_item_removed', [ $this, 'cart_item_removed' ] );
 		/* @noinspection PhpUndefinedFunctionInspection */
-		add_action( 'woocommerce_order_update_shipping', [ $this, 'order_update_shipping' ] );
+		add_action( 'woocommerce_update_order_item', [ $this, 'order_update_shipping' ], 10, 3 );
 	}
 
 	public function register_master_widget_block( PaymentMethodRegistry $registry ) {
@@ -87,12 +90,13 @@ class ActionsService {
 		$this->calculate_totals_and_save_cookie();
 	}
 
-	public function order_update_shipping() {
+	public function order_update_shipping( $order_item_id, $order_item, $order_id ) {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$session = WC()->session;
 
 		if ( ! empty( $session ) ) {
-			$current_shipping = $session->get( 'chosen_shipping_methods' )[0];
+			$chosen_methods = $session->get( 'chosen_shipping_methods' );
+			$current_shipping = is_array( $chosen_methods ) && ! empty( $chosen_methods ) ? $chosen_methods[0] : null;
 			if ( $current_shipping !== null && $current_shipping !== $this->last_shipping_id ) {
 				$this->last_shipping_id = $current_shipping;
 				$expiry_time            = time() + 3600;
@@ -162,5 +166,45 @@ class ActionsService {
 			/* @noinspection PhpUndefinedFunctionInspection */
 			add_action( 'woocommerce_blocks_payment_method_type_registration', [ $this, 'register_master_widget_block' ] );
 		}
+	}
+
+	public function powerboard_refund_messages() {
+		if ( ! wp_doing_ajax() || $_REQUEST['action'] !== 'woocommerce_refund_line_items' ) {
+			return;
+		}
+
+		add_filter( 'gettext_woocommerce', [ $this, 'powerboard_filter_refund_message' ], 10, 3 );
+	}
+
+	public function powerboard_filter_refund_message( $translation, $text, $domain ) {
+		if ( $text !== 'Invalid refund amount' ) {
+			return $translation;
+		}
+
+		$order_id = ! empty( $_POST['order_id'] ) ? absint( $_POST['order_id'] ) : 0;
+		if ( ! $order_id ) {
+			return $translation;
+		}
+
+		$order = wc_get_order( $order_id );
+		if ( ! $order ) {
+			return $translation;
+		}
+
+		$available_to_refund = $order->get_total() - $order->get_total_refunded();
+
+		$formatted_with_html = wc_price(
+			$available_to_refund,
+			array( 'currency' => $order->get_currency() )
+		);
+
+		$formatted_plain_text = html_entity_decode( strip_tags( $formatted_with_html ) );
+
+		$translation = sprintf(
+			__( 'Invalid refund amount. Available amount: %s', 'power-board' ),
+			$formatted_plain_text
+		);
+
+		return $translation;
 	}
 }
