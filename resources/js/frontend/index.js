@@ -305,7 +305,10 @@ const Content                               = ( props ) => {
 			);
 			return () => {
 				// noinspection JSUnresolvedReference
-				jQuery( '.wc-block-components-form' )[0].removeEventListener( "change", handleFormChanged );
+				const form = jQuery( '.wc-block-components-form' )[0];
+				if ( form ) {
+					form.removeEventListener( "change", handleFormChanged );
+				}
 				document.removeEventListener( "power_board_cart_total_changed", handleCartTotalChanged );
 				window.cartChangesEventListenerSetup = false;
 				unsubscribe();
