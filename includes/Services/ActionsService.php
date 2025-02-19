@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use PowerBoard\Controllers\Admin\WidgetController;
 use PowerBoard\Controllers\Integrations\PaymentController;
+use PowerBoard\Services\PaymentGateway\MasterWidgetPaymentService;
 use PowerBoard\Enums\SettingsSectionEnum;
 use PowerBoard\Util\MasterWidgetBlock;
 
@@ -181,9 +182,10 @@ class ActionsService {
 	 * Uses a function (add_action) from WordPress
 	 */
 	protected function add_order_actions(): void {
-		$order_service      = new OrderService();
-		$payment_controller = new PaymentController();
-		$widget_controller  = new WidgetController();
+		$order_service                 = new OrderService();
+		$payment_controller            = new PaymentController();
+		$widget_controller             = new WidgetController();
+		$master_widget_payment_service = MasterWidgetPaymentService::get_instance();
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action( 'woocommerce_order_item_add_action_buttons', [ $order_service, 'init_power_board_order_buttons' ], 10 );
@@ -199,6 +201,10 @@ class ActionsService {
 		add_action( 'wc_ajax_nopriv_power-board-create-charge-intent', [ $widget_controller, 'create_checkout_intent' ] );
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action( 'admin_init', [ $order_service, 'remove_bulk_action_message' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'wc_ajax_power-board-process-payment-result', [ $master_widget_payment_service, 'process_payment_result' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'wc_ajax_nopriv_power-board-process-payment-result', [ $master_widget_payment_service, 'process_payment_result' ] );
 	}
 
 	/**

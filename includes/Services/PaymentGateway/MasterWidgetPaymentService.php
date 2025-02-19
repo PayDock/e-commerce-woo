@@ -24,7 +24,6 @@ use PowerBoard\Services\TemplateService;
 use PowerBoard\Services\Validation\ConnectionValidationService;
 use Exception;
 use WC_Admin_Settings;
-use WC_Blocks_Utils;
 use WC_Order;
 use WC_Payment_Gateway;
 
@@ -286,6 +285,60 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		];
 	}
 	// phpcs:enable
+
+	/**
+	 * Processing the payment result from the widget: error / success.
+	 * Called on the "Place Order" button or via AJAX.
+	 */
+	public function process_payment_result() {
+		$order_id       = ! empty( $_REQUEST['order_id'] ) ? absint( $_REQUEST['order_id'] ) : 0;
+		$payment_data = ! empty( $_REQUEST['payment_response'] ) ? wp_unslash( $_REQUEST['payment_response'] ) : '';
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$order = wc_get_order( $order_id );
+		if ( ! $order ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			wp_send_json_error( [ 'message' => 'Order not found' ] );
+		}
+		$order->set_payment_method( POWER_BOARD_PLUGIN_PREFIX );
+		if ( ! empty( $payment_data['errorMessage'] ) ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			$error_message = sanitize_text_field( $payment_data['errorMessage'] );
+			$order->update_status( 'failed' );
+			$order->add_order_note( 'Payment failed: ' . $error_message );
+			$order->save();
+
+			/* @noinspection PhpUndefinedFunctionInspection */
+			wp_send_json_success(
+				[
+					'order_status' => 'failed',
+					'message'      => $error_message,
+				],
+				200
+			);
+		}
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$charge_id = ! empty( $payment_data['charge_id'] ) ? sanitize_text_field( $payment_data['charge_id'] ) : '';
+		$order->add_order_note( 'Payment succeeded. Charge ID: ' . $charge_id );
+		$order->update_meta_data('_power_board_charge_id', $charge_id);
+
+		if ( $order->has_status( 'failed' ) ) {
+			$order->update_status( 'processing', 'Payment successful after reattempt' );
+		} else {
+			$order->payment_complete( $charge_id );
+		}
+		$order->save();
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		wp_send_json_success(
+			[
+				'order_status' => $order->get_status(),
+				'redirect'     => $this->get_return_url( $order ),
+			],
+			200
+		);
+	}
 
 	/**
 	 * Uses functions (WC and get_woocommerce_currency) from WooCommerce

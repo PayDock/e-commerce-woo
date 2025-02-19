@@ -99,19 +99,37 @@ const initMasterWidgetCheckout = () => {
 					const orderButton = jQuery( '.wc-block-components-checkout-place-order-button' )[0];
 					// noinspection JSUnresolvedReference
 					const paymentSourceElement = jQuery( '#paymentSourceToken' );
+
 					// noinspection JSUnresolvedReference
 					window.widgetPowerBoard.onPaymentSuccessful(
 						function ( data ) {
-							// noinspection JSUnresolvedReference
-							paymentSourceElement.val( JSON.stringify( data ) );
-							orderButton.click();
+							const orderId = store.getOrderId();
+							jQuery.ajax(
+								{
+									url: '/?wc-ajax=power-board-process-payment-result',
+									method: 'POST',
+									data: {
+										order_id: orderId,
+										payment_response: data,
+									},
+									success: function (resp) {
+										if (resp.data && resp.data.redirect) {
+											window.location.href = resp.data.redirect;
+										} else {
+											// noinspection JSUnresolvedReference
+											paymentSourceElement.val( JSON.stringify( { ...data, orderId: orderId } ) );
+											orderButton.click();
 
-							window.widgetPowerBoard = null;
+											window.widgetPowerBoard = null;
+										}
+									}
+								}
+							);
 						}
 					);
 					// noinspection JSUnresolvedReference
 					window.widgetPowerBoard.onPaymentFailure(
-						function () {
+						function ( data ) {
 							// noinspection JSUnresolvedReference
 							paymentSourceElement.val(
 								JSON.stringify(
@@ -120,11 +138,27 @@ const initMasterWidgetCheckout = () => {
 										}
 								)
 							);
-							orderButton.click();
+							jQuery.ajax(
+								{
+									url: '/?wc-ajax=power-board-process-payment-result',
+									method: 'POST',
+									data: {
+										order_id: store.getOrderId(),
+										payment_response:
+											{
+												errorMessage: data.message || 'Transaction failed'
+										}
+									},
+									success: function () {
+										orderButton.click();
 
-							window.widgetPowerBoard = null;
+										window.widgetPowerBoard = null;
+									}
+								}
+							);
 						}
 					);
+
 					// noinspection JSUnresolvedReference
 					window.widgetPowerBoard.onPaymentExpired(
 						function () {
@@ -290,6 +324,7 @@ const Content                               = ( props ) => {
 								paymentMethodData: {
 									payment_response: paymentData,
 									chargeId: paymentDataParsed['charge_id'],
+									orderId: paymentDataParsed['order_id'],
 									_wpnonce: settings._wpnonce
 								}
 							},
