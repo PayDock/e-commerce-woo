@@ -291,8 +291,35 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 	 * Called on the "Place Order" button or via AJAX.
 	 */
 	public function process_payment_result() {
-		$order_id       = ! empty( $_REQUEST['order_id'] ) ? absint( $_REQUEST['order_id'] ) : 0;
-		$payment_data = ! empty( $_REQUEST['payment_response'] ) ? wp_unslash( $_REQUEST['payment_response'] ) : '';
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$wp_nonce = isset( $_REQUEST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ) : null;
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		if ( ! wp_verify_nonce( $wp_nonce, 'power-board-process-payment-result' ) ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			wp_send_json_error( [ 'message' => __( 'Error: Security check', 'power-board' ) ] );
+
+			return;
+		}
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$order_id = ! empty( $_REQUEST['order_id'] ) ? absint( $_REQUEST['order_id'] ) : null;
+
+		if ( ! isset( $order_id ) ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			$cart = WC()->cart;
+
+			$args = [
+				'limit'     => 1,
+				'cart_hash' => $cart->get_cart_hash(),
+			];
+
+			/* @noinspection PhpUndefinedFunctionInspection */
+			$orders   = wc_get_orders( $args );
+			$order_id = $orders[0]->ID;
+		}
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$payment_data = ! empty( $_REQUEST['payment_response'] ) ? array_map( 'sanitize_text_field', wp_unslash( $_REQUEST['payment_response'] ) ) : [];
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$order = wc_get_order( $order_id );
@@ -300,12 +327,16 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 			/* @noinspection PhpUndefinedFunctionInspection */
 			wp_send_json_error( [ 'message' => 'Order not found' ] );
 		}
-		$order->set_payment_method( POWER_BOARD_PLUGIN_PREFIX );
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$charge_id = ! empty( $payment_data['charge_id'] ) ? sanitize_text_field( $payment_data['charge_id'] ) : '';
+		$order->update_meta_data( '_power_board_charge_id', $charge_id );
+
 		if ( ! empty( $payment_data['errorMessage'] ) ) {
 			/* @noinspection PhpUndefinedFunctionInspection */
 			$error_message = sanitize_text_field( $payment_data['errorMessage'] );
 			$order->update_status( 'failed' );
-			$order->add_order_note( 'Payment failed: ' . $error_message );
+			$order->add_order_note( 'Payment failed: ' . $error_message . '. Charge ID: ' . $charge_id );
 			$order->save();
 
 			/* @noinspection PhpUndefinedFunctionInspection */
@@ -318,26 +349,16 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 			);
 		}
 
-		/* @noinspection PhpUndefinedFunctionInspection */
-		$charge_id = ! empty( $payment_data['charge_id'] ) ? sanitize_text_field( $payment_data['charge_id'] ) : '';
+		$order->update_status( 'pending' );
 		$order->add_order_note( 'Payment succeeded. Charge ID: ' . $charge_id );
-		$order->update_meta_data('_power_board_charge_id', $charge_id);
-
-		if ( $order->has_status( 'failed' ) ) {
-			$order->update_status( 'processing', 'Payment successful after reattempt' );
-		} else {
-			$order->payment_complete( $charge_id );
-		}
 		$order->save();
 
 		/* @noinspection PhpUndefinedFunctionInspection */
-		wp_send_json_success(
-			[
-				'order_status' => $order->get_status(),
-				'redirect'     => $this->get_return_url( $order ),
-			],
-			200
-		);
+		WC()->session->set( 'order_awaiting_payment', $order_id );
+		WC()->session->set( 'store_api_draft_order', $order_id );
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		wp_send_json_success( [], 200 );
 	}
 
 	/**

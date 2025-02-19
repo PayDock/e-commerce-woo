@@ -290,19 +290,48 @@ jQuery(
 										window.widgetPowerBoard.onPaymentSuccessful(
 											function ( data ) {
 												// noinspection JSUnresolvedReference
-												jQuery( '#chargeid' ).val( data['charge_id'] );
-												submitForm();
+												jQuery.ajax(
+													{
+														url: '/?wc-ajax=power-board-process-payment-result',
+														method: 'POST',
+														data: {
+															_wpnonce: PowerBoardAjaxCheckout.wpnonce_process_payment,
+															payment_response: data,
+														},
+														success: function () {
+															// noinspection JSUnresolvedReference
+															jQuery( '#chargeid' ).val( data['charge_id'] );
+															submitForm();
 
-												window.widgetPowerBoard = null;
+															window.widgetPowerBoard = null;
+														}
+													}
+												);
 											}
 										);
 										// noinspection JSUnresolvedReference
 										window.widgetPowerBoard.onPaymentFailure(
-											function () {
-												showError( 'Transaction failed. Please check your payment details or contact your bank' );
-
-												handleWidgetError();
-												window.widgetPowerBoard = null;
+											function ( data ) {
+												// noinspection JSUnresolvedReference
+												jQuery.ajax(
+													{
+														url: '/?wc-ajax=power-board-process-payment-result',
+														method: 'POST',
+														data: {
+															_wpnonce: PowerBoardAjaxCheckout.wpnonce_process_payment,
+															payment_response:
+																{
+																	...data,
+																	errorMessage: data.message || 'Transaction failed',
+															}
+														},
+														success: function () {
+															showError( 'Transaction failed. Please check your payment details or contact your bank' );
+															handleWidgetError();
+															window.widgetPowerBoard = null;
+														}
+													}
+												);
 											}
 										);
 										// noinspection JSUnresolvedReference

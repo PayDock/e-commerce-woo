@@ -103,25 +103,24 @@ const initMasterWidgetCheckout = () => {
 					// noinspection JSUnresolvedReference
 					window.widgetPowerBoard.onPaymentSuccessful(
 						function ( data ) {
+							// noinspection JSUnresolvedReference
 							const orderId = store.getOrderId();
+							// noinspection JSUnresolvedReference
 							jQuery.ajax(
 								{
 									url: '/?wc-ajax=power-board-process-payment-result',
 									method: 'POST',
 									data: {
+										_wpnonce: PowerBoardAjaxCheckout.wpnonce_process_payment,
 										order_id: orderId,
 										payment_response: data,
 									},
-									success: function (resp) {
-										if (resp.data && resp.data.redirect) {
-											window.location.href = resp.data.redirect;
-										} else {
+									success: function () {
 											// noinspection JSUnresolvedReference
 											paymentSourceElement.val( JSON.stringify( { ...data, orderId: orderId } ) );
 											orderButton.click();
 
 											window.widgetPowerBoard = null;
-										}
 									}
 								}
 							);
@@ -138,15 +137,18 @@ const initMasterWidgetCheckout = () => {
 										}
 								)
 							);
+							// noinspection JSUnresolvedReference
 							jQuery.ajax(
 								{
 									url: '/?wc-ajax=power-board-process-payment-result',
 									method: 'POST',
 									data: {
+										_wpnonce: PowerBoardAjaxCheckout.wpnonce_process_payment,
 										order_id: store.getOrderId(),
 										payment_response:
 											{
-												errorMessage: data.message || 'Transaction failed'
+												...data,
+												errorMessage: data.message || 'Transaction failed',
 										}
 									},
 									success: function () {
