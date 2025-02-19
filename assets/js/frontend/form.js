@@ -130,6 +130,8 @@ jQuery(
 			if (method !== 'power_board') {
 					window.widgetPowerBoard = null;
 					toggleOrderButton( false );
+			} else {
+				toggleOrderButton(true);
 			}
 		}
 
