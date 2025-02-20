@@ -172,7 +172,7 @@ jQuery(
 						this.hideFormValidationError( paymentMethod );
 						let fieldList       = this.getFieldsList();
 						let result          = true
-						fieldList.forEach(
+						fieldList.filter( field => !field.includes( 'address_2' ) ).forEach(
 							( fieldName ) => {
 								let element = document.querySelector( `[name="${fieldName}"]` );
 								if (element) {
