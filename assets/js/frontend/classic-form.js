@@ -217,6 +217,7 @@ jQuery(
 
 						if ( !this.isValidForm( methodName ) ) {
 							this.toggleWidgetVisibility( true );
+							this.toggleOrderButton( true );
 							loading.hide();
 							error.show();
 							return;
