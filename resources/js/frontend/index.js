@@ -91,8 +91,13 @@ const initMasterWidgetCheckout = () => {
 			success: ( response ) => {
 				if (initTimestamp === lastMasterWidgetInit) {
 					toggleWidgetVisibility( false );
+					const widgetSelector = '#powerBoardCheckout_wrapper';
 					// noinspection JSUnresolvedReference
-					window.widgetPowerBoard = new cba.Checkout( '#powerBoardCheckout_wrapper', response.data.resource.data.token );
+					if (!jQuery( widgetSelector )[0]) {
+						return;
+					}
+					// noinspection JSUnresolvedReference
+					window.widgetPowerBoard = new cba.Checkout( widgetSelector, response.data.resource.data.token );
 					// noinspection JSUnresolvedReference
 					window.widgetPowerBoard.setEnv( settings.environment )
 					// noinspection JSUnresolvedReference
@@ -183,6 +188,9 @@ const initMasterWidgetCheckout = () => {
 		);
 	}
 }
+
+// noinspection DuplicatedCode
+window.initMasterWidgetCheckout = initMasterWidgetCheckout;
 
 const handleWidgetDisplay = () => {
 	// noinspection JSUnresolvedReference

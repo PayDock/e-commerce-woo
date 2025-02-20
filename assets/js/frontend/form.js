@@ -132,6 +132,7 @@ jQuery(
 					toggleOrderButton( false );
 			} else {
 				toggleOrderButton(true);
+				window.initMasterWidgetCheckout();
 			}
 		}
 
