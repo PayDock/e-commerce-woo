@@ -52,9 +52,11 @@ const toggleWidgetVisibility = ( hide ) => {
 };
 
 const toggleOrderButton = ( hide ) => {
-	let orderButton     = document.querySelectorAll( '.wc-block-components-checkout-place-order-button' )[0];
-	window.toggleOrderButton( orderButton, hide );
-}
+	const orderButton   = document.querySelector( '.wc-block-components-checkout-place-order-button' );
+	if ( !orderButton ) return;
+
+	orderButton.style.visibility = hide ? 'hidden' : 'visible';
+};
 
 const getSelectedShippingValue = () => {
 	// noinspection JSUnresolvedReference

@@ -54,7 +54,7 @@ jQuery(
 						// noinspection JSUnresolvedReference
 						$shippingWrapper.addClass( 'is-editing' );
 					}
-					$( 'button#place_order' ).styles = 'visibility:' + ( allValid ? 'visible' : 'hidden' );
+					$( 'button#place_order' ).css( 'visibility', allValid ? 'visible' : 'hidden' );
 					getPaymentOptionsComponents().forEach(
 						$component => {
 							$component.css(
@@ -413,11 +413,13 @@ jQuery(
 					toggleOrderButton( hide ) {
 						setTimeout(
 							() => {
-								let orderButton = document.querySelectorAll( 'button#place_order' )[0];
-								window.toggleOrderButton( orderButton, hide );
+								const orderButton = document.querySelector( 'button#place_order' );
+								if ( orderButton ) {
+									orderButton.style.visibility = hide ? 'hidden' : 'visible';
+								}
 							},
 							100
-						)
+						);
 					},
 					handleCartTotalChanged( event ) {
 						if (this.totalChangesTimeout) {

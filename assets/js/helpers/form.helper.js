@@ -38,18 +38,6 @@ window.showWarning = function ($, message, type = 'error') {
 	);
 }
 
-window.toggleOrderButton = ( orderButton, hide ) => {
-	if ( !orderButton) {
-		return;
-	}
-	if (hide) {
-		orderButton.classList.add( 'hide' );
-	} else {
-		orderButton.classList.remove( 'hide' );
-	}
-}
-
-
 window.reloadAfterExternalCartChanges = () => {
 	clearInterval( window.cartChangeInterval );
 	location.reload();

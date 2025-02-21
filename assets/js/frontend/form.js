@@ -65,7 +65,7 @@ jQuery(
 				}
 
 				const $submitButton = $( 'button.wc-block-components-checkout-place-order-button' );
-				$submitButton.css( 'visibility', allValid ? 'visible' : 'hidden' );
+				$submitButton.toggleClass( 'hidden', !allValid );
 
 				getPaymentOptionsComponents().forEach(
 					component =>
@@ -137,8 +137,9 @@ jQuery(
 		}
 
 		function toggleOrderButton( hide ) {
-			let orderButton = document.querySelectorAll( '.wc-block-components-checkout-place-order-button' )[0];
-			window.toggleOrderButton( orderButton, hide );
+			const orderButton = document.querySelector( '.wc-block-components-checkout-place-order-button' );
+			if ( !orderButton ) return;
+			orderButton.style.visibility = hide ? 'hidden' : 'visible';
 		}
 
 		function triggerFirstPaymentMethodChanges() {
