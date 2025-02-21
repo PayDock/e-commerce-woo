@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use PowerBoard\Controllers\Admin\WidgetController;
 use PowerBoard\Controllers\Integrations\PaymentController;
+use PowerBoard\Helpers\OrderHelper;
 use PowerBoard\Services\PaymentGateway\MasterWidgetPaymentService;
 use PowerBoard\Enums\SettingsSectionEnum;
 use PowerBoard\Util\MasterWidgetBlock;
@@ -79,6 +80,10 @@ class ActionsService {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action( 'wc_ajax_nopriv_power-board-update-shipping', [ $this, 'classic_order_update_shipping' ] );
 		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'wc_ajax_power-board-update-order-notes', [ $this, 'classic_order_update_notes' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'wc_ajax_nopriv_power-board-update-order-notes', [ $this, 'classic_order_update_notes' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action( 'woocommerce_update_order_item', [ $this, 'handle_order_update_shipping' ], 10, 3 );
 	}
 
@@ -131,6 +136,29 @@ class ActionsService {
 		}
 
 		$this->order_update_shipping();
+	}
+
+	public function classic_order_update_notes() {
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$wp_nonce = isset( $_REQUEST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ) : null;
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		if ( ! wp_verify_nonce( $wp_nonce, 'power-board-update-order-notes' ) ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			wp_send_json_error( [ 'message' => __( 'Error: Security check', 'power-board' ) ] );
+
+			return;
+		}
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		WC()->session->set( 'order_comments', isset( $_REQUEST['value'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['value'] ) ) : '' );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$custom_order_id = (string) WC()->session->get( 'power_board_draft_order' );
+
+		if ( ! empty( $custom_order_id ) ) {
+			$order_id = $custom_order_id;
+			OrderHelper::update_order_customer_notes( $order_id );
+		}
 	}
 
 	public function order_update_shipping() {

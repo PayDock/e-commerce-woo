@@ -3,6 +3,7 @@ declare( strict_types=1 );
 
 namespace PowerBoard\Controllers\Admin;
 
+use PowerBoard\Helpers\OrderHelper;
 use PowerBoard\Services\Settings\APIAdapterService;
 use PowerBoard\Services\SettingsService;
 
@@ -24,7 +25,6 @@ class WidgetController {
 			return;
 		}
 
-		$args     = [];
 		$request  = [];
 		$settings = SettingsService::get_instance();
 
@@ -68,12 +68,6 @@ class WidgetController {
 					$request['total']['currency_code'] = get_woocommerce_currency();
 				}
 			}
-
-			$args = [
-				'limit'     => 1,
-				'cart_hash' => $cart->get_cart_hash(),
-			];
-
 		} elseif ( isset( $_POST['total'] ) ) {
 			if ( is_array( $_POST['total'] ) ) {
 				/* @noinspection PhpUndefinedFunctionInspection */
@@ -90,16 +84,21 @@ class WidgetController {
 			/* @noinspection PhpUndefinedFunctionInspection */
 			$reference = sanitize_text_field( wp_unslash( $_POST['order_id'] ) );
 		} else {
-			if ( ! empty( $args ) ) {
-				/* @noinspection PhpUndefinedFunctionInspection */
-				$orders = wc_get_orders( $args );
-			}
+			/* @noinspection PhpUndefinedFunctionInspection */
+			$custom_order_id = (string) WC()->session->get( 'power_board_draft_order' );
 
-			if ( ! empty( $orders ) && is_a( $orders[0], 'WC_Order' ) ) {
-				$reference = $orders[0]->get_id();
+			if ( ! empty( $custom_order_id ) ) {
+				$order_id = $custom_order_id;
+				/* @noinspection PhpUndefinedFunctionInspection */
+				$order = wc_get_order( $order_id );
+				OrderHelper::update_order( $order );
 			} else {
-				$reference = '';
+				$order_id = $this->create_draft_order();
 			}
+			/* @noinspection PhpUndefinedFunctionInspection */
+			WC()->session->set( 'power_board_draft_order', $order_id );
+
+			$reference = $order_id;
 		}
 
 		$billing_address = [];
@@ -175,5 +174,21 @@ class WidgetController {
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		wp_send_json_success( $result, 200 );
+	}
+
+	private function create_draft_order(): string {
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$cart = WC()->cart;
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$order = wc_create_order(
+			[
+				'status'    => 'checkout-draft',
+				'cart_hash' => $cart->get_cart_hash(),
+			]
+		);
+		OrderHelper::update_order( $order );
+
+		$order_id = $order->get_id();
+		return (string) $order_id;
 	}
 }

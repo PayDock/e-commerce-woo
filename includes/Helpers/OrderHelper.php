@@ -1,0 +1,80 @@
+<?php
+/**
+ * This file uses classes from WooCommerce
+ *
+ * @noinspection PhpUndefinedClassInspection
+ */
+
+declare( strict_types=1 );
+
+namespace PowerBoard\Helpers;
+
+use WC_Checkout;
+use WC_Geolocation;
+
+class OrderHelper {
+	public static function update_order( &$order ) {
+		$order->remove_order_items();
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$cart = WC()->cart;
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$session     = WC()->session;
+		$order_notes = $session->get( 'order_comments' );
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$test_billing = WC()->customer->get_billing_email( false );
+		if ( isset( $test_billing ) ) {
+			$order->hold_applied_coupons( $test_billing );
+		}
+
+		$order->set_created_via( 'checkout' );
+		$order->set_cart_hash( $cart->get_cart_hash() );
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$order->set_customer_id( apply_filters( 'woocommerce_checkout_customer_id', get_current_user_id() ) );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$order->set_currency( get_woocommerce_currency() );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$order->set_prices_include_tax( get_option( 'woocommerce_prices_include_tax' ) === 'yes' );
+		$order->set_customer_ip_address( WC_Geolocation::get_ip_address() );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$order->set_customer_user_agent( wc_get_user_agent() );
+		$order->set_customer_note( $order_notes ?? '' );
+		$order->set_payment_method( POWER_BOARD_PLUGIN_PREFIX );
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$order->set_address( WC()->customer->get_billing(), 'billing' );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$order->set_address( WC()->customer->get_shipping(), 'shipping' );
+		$order_vat_exempt = $cart->get_customer()->get_is_vat_exempt() ? 'yes' : 'no';
+		$order->add_meta_data( 'is_vat_exempt', $order_vat_exempt, true );
+		$order->set_shipping_total( $cart->get_shipping_total() );
+		$order->set_discount_total( $cart->get_discount_total() );
+		$order->set_discount_tax( $cart->get_discount_tax() );
+		$order->set_cart_tax( $cart->get_cart_contents_tax() + $cart->get_fee_tax() );
+		$order->set_shipping_tax( $cart->get_shipping_tax() );
+		$order->set_total( $cart->get_total( 'edit' ) );
+
+		$checkout = new WC_Checkout();
+		$checkout->create_order_line_items( $order, $cart );
+		$checkout->create_order_fee_lines( $order, $cart );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$checkout->create_order_shipping_lines( $order, WC()->session->get( 'chosen_shipping_methods' ), WC()->shipping()->get_packages() );
+		$checkout->create_order_tax_lines( $order, $cart );
+		$checkout->create_order_coupon_lines( $order, $cart );
+
+		$order->calculate_totals();
+		$order->save();
+	}
+
+	public static function update_order_customer_notes( $order_id ) {
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$session     = WC()->session;
+		$order_notes = $session->get( 'order_comments' );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$order = wc_get_order( $order_id );
+		$order->set_customer_note( $order_notes ?? '' );
+		$order->save();
+	}
+}

@@ -117,10 +117,11 @@ final class MasterWidgetBlock extends AbstractPaymentMethodType {
 				'power-board-form',
 				'PowerBoardAjaxCheckout',
 				[
-					'url'                     => admin_url( 'admin-ajax.php' ),
-					'wpnonce_intent'          => wp_create_nonce( 'power-board-create-charge-intent' ),
-					'wpnonce_update_shipping' => wp_create_nonce( 'power-board-update-shipping' ),
-					'wpnonce_process_payment' => wp_create_nonce( 'power-board-process-payment-result' ),
+					'url'                        => admin_url( 'admin-ajax.php' ),
+					'wpnonce_intent'             => wp_create_nonce( 'power-board-create-charge-intent' ),
+					'wpnonce_update_shipping'    => wp_create_nonce( 'power-board-update-shipping' ),
+					'wpnonce_update_order_notes' => wp_create_nonce( 'power-board-update-order-notes' ),
+					'wpnonce_process_payment'    => wp_create_nonce( 'power-board-process-payment-result' ),
 				]
 			);
 
@@ -138,10 +139,11 @@ final class MasterWidgetBlock extends AbstractPaymentMethodType {
 				'power-board-classic-form',
 				'PowerBoardAjaxCheckout',
 				[
-					'url'                     => admin_url( 'admin-ajax.php' ),
-					'wpnonce_intent'          => wp_create_nonce( 'power-board-create-charge-intent' ),
-					'wpnonce_update_shipping' => wp_create_nonce( 'power-board-update-shipping' ),
-					'wpnonce_process_payment' => wp_create_nonce( 'power-board-process-payment-result' ),
+					'url'                        => admin_url( 'admin-ajax.php' ),
+					'wpnonce_intent'             => wp_create_nonce( 'power-board-create-charge-intent' ),
+					'wpnonce_update_shipping'    => wp_create_nonce( 'power-board-update-shipping' ),
+					'wpnonce_update_order_notes' => wp_create_nonce( 'power-board-update-order-notes' ),
+					'wpnonce_process_payment'    => wp_create_nonce( 'power-board-process-payment-result' ),
 				]
 			);
 

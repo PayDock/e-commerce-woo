@@ -124,6 +124,9 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action( 'woocommerce_checkout_fields', [ $this, 'setup_phone_fields_settings' ] );
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_filter( 'woocommerce_create_order', [ $this, 'get_order_id' ], 10, 1 );
 	}
 
 	/**
@@ -277,6 +280,12 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		WC()->cart->empty_cart();
 		$order->save();
+		/* @noinspection PhpUndefinedFunctionInspection */
+		WC()->session->set( 'order_awaiting_payment', null );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		WC()->session->set( 'store_api_draft_order', null );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		WC()->session->set( 'power_board_draft_order', null );
 
 		/* @noinspection PhpUndefinedMethodInspection */
 		return [
@@ -302,22 +311,14 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 			return;
 		}
 
-		/* @noinspection PhpUndefinedFunctionInspection */
-		$order_id = ! empty( $_REQUEST['order_id'] ) ? absint( $_REQUEST['order_id'] ) : null;
-
-		if ( ! isset( $order_id ) ) {
+		if ( ! empty( $_REQUEST['order_id'] ) ) {
 			/* @noinspection PhpUndefinedFunctionInspection */
-			$cart = WC()->cart;
-
-			$args = [
-				'limit'     => 1,
-				'cart_hash' => $cart->get_cart_hash(),
-			];
-
+			$order_id = absint( $_REQUEST['order_id'] );
+		} else {
 			/* @noinspection PhpUndefinedFunctionInspection */
-			$orders   = wc_get_orders( $args );
-			$order_id = $orders[0]->ID;
+			$order_id = (string) WC()->session->get( 'power_board_draft_order' );
 		}
+
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$payment_data = ! empty( $_REQUEST['payment_response'] ) ? array_map( 'sanitize_text_field', wp_unslash( $_REQUEST['payment_response'] ) ) : [];
 
@@ -355,10 +356,17 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		WC()->session->set( 'order_awaiting_payment', $order_id );
+		/* @noinspection PhpUndefinedFunctionInspection */
 		WC()->session->set( 'store_api_draft_order', $order_id );
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		wp_send_json_success( [], 200 );
+	}
+
+	public function get_order_id(): ?string {
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$custom_order_id = (string) WC()->session->get( 'power_board_draft_order' );
+		return ! empty( $custom_order_id ) ? $custom_order_id : null;
 	}
 
 	/**

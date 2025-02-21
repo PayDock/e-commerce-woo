@@ -485,7 +485,7 @@ jQuery(
 										return
 									}
 									this.handleShippingChanged( event.target.id );
-									this.handleFormChanged( event.target.id );
+									this.handleFormChanged( event.target );
 								} catch ( e ) {
 									console.error( e );
 								}
@@ -518,12 +518,26 @@ jQuery(
 							}
 						}
 					},
-					handleFormChanged( eventTargetId ) {
+					handleFormChanged( eventTarget ) {
 						if (this.formChangedTimer) {
 							clearTimeout( this.formChangedTimer );
 						}
-						this.formChangedTimer        = setTimeout(
+						this.formChangedTimer       = setTimeout(
 							() => {
+								const eventTargetId = eventTarget.id
+								if ( eventTargetId.includes( 'order_comments' ) ) {
+									// noinspection JSUnresolvedReference
+									jQuery.ajax(
+										{
+											url: '/?wc-ajax=power-board-update-order-notes',
+											type: 'POST',
+											data: {
+												_wpnonce: PowerBoardAjaxCheckout.wpnonce_update_order_notes,
+												value: eventTarget.value,
+											}
+										}
+									);
+								}
 								const currentAddress = JSON.stringify( this.getAddressData( false ).address );
 								if (
 									this.lastAddressVerified !== currentAddress ||
