@@ -118,8 +118,15 @@
 	#powerBoardCheckout_wrapper,
 	#powerBoardCheckout_wrapper #list,
 	#powerBoardCheckout_wrapper #list iframe,
+	#classic-powerBoardCheckout_wrapper,
+	#classic-powerBoardCheckout_wrapper #list,
+	#classic-powerBoardCheckout_wrapper #list iframe,
 	#standaloneWidget,
 	#standaloneWidget iframe {
 		min-width: auto !important;
+	}
+
+	#standaloneWidget button {
+		width: 100% !important;
 	}
 }
