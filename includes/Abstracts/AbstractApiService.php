@@ -52,16 +52,6 @@ abstract class AbstractApiService {
 					]
 				);
 				break;
-			case 'DELETE':
-				/* @noinspection PhpUndefinedFunctionInspection */
-				$parsed_args = wp_parse_args(
-					$args,
-					[
-						'method'  => 'DELETE',
-						'timeout' => 10,
-					]
-				);
-				break;
 			default:
 				/* @noinspection PhpUndefinedFunctionInspection */
 				$parsed_args = wp_parse_args(
@@ -73,7 +63,7 @@ abstract class AbstractApiService {
 				);
 		}
 		/* @noinspection PhpUndefinedFunctionInspection */
-		$request = _wp_http_get_object()->request( $url, $parsed_args );
+		$request = wp_remote_request( $url, $parsed_args );
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		if ( is_wp_error( $request ) ) {
@@ -83,7 +73,9 @@ abstract class AbstractApiService {
 			];
 		}
 
-		$body = json_decode( $request['body'], true );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$response_body = wp_remote_retrieve_body( $request );
+		$body          = json_decode( $response_body, true );
 
 		if ( $body === null && json_last_error() !== JSON_ERROR_NONE ) {
 			return [
