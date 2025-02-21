@@ -24,6 +24,7 @@ let address                   = null;
 let lastMasterWidgetInit      = null;
 
 const toggleWidgetVisibility = ( hide ) => {
+	// noinspection DuplicatedCode
 	let widget               = document.getElementById( 'standaloneWidget' );
 	let widgetList           = document.getElementById( 'list' );
 	let widgetSpinner        = document.getElementById( 'spinner' );
@@ -92,6 +93,7 @@ const initMasterWidgetCheckout = () => {
 			},
 			success: ( response ) => {
 				if (initTimestamp === lastMasterWidgetInit) {
+					// noinspection DuplicatedCode
 					toggleWidgetVisibility( false );
 					const widgetSelector = '#powerBoardCheckout_wrapper';
 					// noinspection JSUnresolvedReference
@@ -226,6 +228,7 @@ const handleWidgetDisplay = () => {
 };
 
 const handleCartTotalChanged = (event) => {
+	// noinspection DuplicatedCode
 	if (totalChangesTimeout) {
 		clearTimeout( totalChangesTimeout );
 	}
@@ -257,6 +260,7 @@ const handleCartTotalChanged = (event) => {
 		)
 };
 
+// noinspection DuplicatedCode
 const getUIOrderTotal = () => {
 	// noinspection JSUnresolvedReference
 	const orderTotalElement = jQuery( '.wc-block-components-totals-footer-item-tax-value' )[0];

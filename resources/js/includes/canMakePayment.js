@@ -1,6 +1,7 @@
 export default function (total_limitation, total) {
 	const isObject = (value) => (value !== null && typeof value === 'object');
 
+	// noinspection DuplicatedCode
 	if ( ! isObject( total_limitation )) {
 		return true;
 	}
