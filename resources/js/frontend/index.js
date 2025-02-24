@@ -25,9 +25,9 @@ let lastMasterWidgetInit      = null;
 
 const toggleWidgetVisibility = ( hide ) => {
 	// noinspection DuplicatedCode
-	let widget               = document.getElementById( 'standaloneWidget' );
-	let widgetList           = document.getElementById( 'list' );
-	let widgetSpinner        = document.getElementById( 'spinner' );
+	let widget        = document.getElementById( 'standaloneWidget' );
+	let widgetList    = document.getElementById( 'list' );
+	let widgetSpinner = document.getElementById( 'spinner' );
 
 	if (hide) {
 		if (widget) {
@@ -54,7 +54,9 @@ const toggleWidgetVisibility = ( hide ) => {
 
 const toggleOrderButton = ( hide ) => {
 	const orderButton   = document.querySelector( '.wc-block-components-checkout-place-order-button' );
-	if ( !orderButton ) return;
+	if ( !orderButton ) {
+		return;
+	}
 
 	orderButton.style.visibility = hide ? 'hidden' : 'visible';
 };

@@ -159,7 +159,7 @@ class WidgetController {
 		$shipping_address  = isset( $_POST['shipping_address'] ) ? array_map( 'sanitize_text_field', wp_unslash( $_POST['shipping_address'] ) ) : $session->get( 'customer' )['shipping'];
 		$selected_shipping = $session->get( 'shipping_for_package_0' )['rates'][ $selected_shipping_id ];
 		/* @noinspection PhpUndefinedFunctionInspection */
-		$identifier = is_user_logged_in() ? ( '_' . wp_create_nonce( 'power-board-checkout-cart' ) ) : '';
+		$identifier = '_' . wp_create_nonce( 'power-board-checkout-cart' );
 
 		$session->set(
 			'power_board_checkout_cart' . $identifier,
