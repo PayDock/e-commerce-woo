@@ -14,6 +14,7 @@ use PowerBoard\Enums\MasterWidgetSettingsEnum;
 use PowerBoard\Enums\SettingGroupsEnum;
 use PowerBoard\Helpers\EnvironmentSettingsHelper;
 use PowerBoard\Helpers\MasterWidgetSettingsHelper;
+use PowerBoard\Helpers\OrderHelper;
 use PowerBoard\Helpers\SettingGroupsHelper;
 use PowerBoard\Helpers\SettingsHelper;
 use PowerBoard\Services\Assets\AdminAssetsService;
@@ -719,41 +720,12 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		$current_order_total  = $current_order->get_total( false );
 		$checkout_order_total = $checkout_order['total'];
 
-		/* @noinspection PhpUndefinedFunctionInspection */
-		$current_customer  = WC()->session->get( 'customer' );
-		$checkout_customer = $checkout_order['shipping_address'];
+		$checkout_customer_shipping = $checkout_order['shipping_address'];
+		$checkout_customer_billing  = $checkout_order['billing_address'];
 
-		if ( $current_customer['date_modified'] !== $checkout_customer['date_modified'] ) {
-			$current_order->set_billing_address(
-				[
-					'first_name' => $checkout_customer['first_name'],
-					'last_name'  => $checkout_customer['last_name'],
-					'company'    => $checkout_customer['company'],
-					'phone'      => $checkout_customer['phone'],
-					'email'      => $checkout_customer['email'],
-					'address_1'  => $checkout_customer['address_1'],
-					'address_2'  => $checkout_customer['address_2'],
-					'city'       => $checkout_customer['city'],
-					'state'      => $checkout_customer['state'],
-					'postcode'   => $checkout_customer['postcode'],
-					'country'    => $checkout_customer['country'],
-				]
-			);
-			$current_order->set_shipping_address(
-				[
-					'first_name' => $checkout_customer['shipping_first_name'],
-					'last_name'  => $checkout_customer['shipping_last_name'],
-					'company'    => $checkout_customer['shipping_company'],
-					'phone'      => $checkout_customer['shipping_phone'],
-					'email'      => $checkout_customer['email'],
-					'address_1'  => $checkout_customer['shipping_address_1'],
-					'address_2'  => $checkout_customer['shipping_address_2'],
-					'city'       => $checkout_customer['shipping_city'],
-					'state'      => $checkout_customer['shipping_state'],
-					'postcode'   => $checkout_customer['shipping_postcode'],
-					'country'    => $checkout_customer['shipping_country'],
-				]
-			);
+		if ( ! empty( $checkout_customer_shipping ) && ! empty( $checkout_customer_billing ) ) {
+			$current_order->set_shipping_address( $checkout_customer_shipping );
+			$current_order->set_billing_address( $checkout_customer_billing );
 
 			$current_order->calculate_totals();
 			$current_order->save();

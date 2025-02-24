@@ -255,11 +255,17 @@ jQuery(
 						const initTimestamp       = ( new Date() ).getTime();
 						this.lastMasterWidgetInit = initTimestamp;
 						setTimeout( () => this.toggleOrderButton( true ), 100 );
+						let billingAddress  = this.getAddressData( false ).address;
+						let shippingAddress = billingAddress;
+						if ( document.getElementById( 'ship-to-different-address-checkbox' ).checked ) {
+							shippingAddress = this.getAddressData( false ).shipping_address;
+						}
 
 						// noinspection JSUnresolvedReference
 						const data = {
 							_wpnonce: PowerBoardAjaxCheckout.wpnonce_intent,
-							address: this.getAddressData( false ).address,
+							address: billingAddress,
+							shipping_address: shippingAddress,
 						};
 						if (isOrderPayPage) {
 							data.order_id = orderData.order_id;
@@ -406,8 +412,8 @@ jQuery(
 					},
 					getConfigs() {
 						// noinspection JSUnresolvedReference
-						let settings            = $( `#classic-power_board-settings` ).val()
-						settings                = JSON.parse( settings )
+						let settings              = $( `#classic-power_board-settings` ).val()
+						settings                  = JSON.parse( settings )
 						return settings;
 					},
 					toggleOrderButton( hide ) {
@@ -436,7 +442,7 @@ jQuery(
 								const cartTotal           = +event.detail.cartTotal;
 								this.currentSavedShipping = event.detail.shippingId;
 								if (orderTotal) {
-									const address = JSON.stringify( this.getAddressData( false ).address );
+									const address = this.getAddressData( true );
 									if (orderTotal !== cartTotal && this.lastAddressVerified === address) {
 										if (this.totalChangesSecondTimeout) {
 											clearTimeout( this.totalChangesSecondTimeout );
@@ -444,10 +450,12 @@ jQuery(
 										this.totalChangesSecondTimeout = setTimeout(
 											() => {
 												const orderTotal       = this.getUIOrderTotal();
-												if (orderTotal !== cartTotal) {
-													window.reloadAfterExternalCartChanges();
-												} else {
-													this.initMasterWidget();
+												if (orderTotal) {
+													if (orderTotal !== cartTotal) {
+														window.reloadAfterExternalCartChanges();
+													} else {
+														this.initMasterWidget();
+													}
 												}
 											},
 											300
@@ -470,7 +478,7 @@ jQuery(
 								// noinspection JSUnresolvedReference
 								const paymentMethod = $( 'input[name="payment_method"]:checked' ).val();
 								if ( paymentMethod && ! this.paymentMethod ) {
-									this.lastAddressVerified = JSON.stringify( this.getAddressData( false ).address );
+									this.lastAddressVerified = this.getAddressData( true );
 									clearInterval( paymentMethodInterval );
 									this.setPaymentMethod( paymentMethod );
 								}
@@ -526,7 +534,7 @@ jQuery(
 						}
 						this.formChangedTimer       = setTimeout(
 							() => {
-								const eventTargetId = eventTarget.id
+								const eventTargetId = eventTarget.id;
 								if ( eventTargetId.includes( 'order_comments' ) ) {
 									// noinspection JSUnresolvedReference
 									jQuery.ajax(
@@ -540,7 +548,7 @@ jQuery(
 										}
 									);
 								}
-								const currentAddress = JSON.stringify( this.getAddressData( false ).address );
+								const currentAddress = this.getAddressData( true );
 								if (
 									this.lastAddressVerified !== currentAddress ||
 									eventTargetId.includes( 'payment_method' )

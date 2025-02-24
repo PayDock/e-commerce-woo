@@ -155,8 +155,9 @@ class WidgetController {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$session              = WC()->session;
 		$selected_shipping_id = $session->get( 'chosen_shipping_methods' )[0];
-		$shipping_address     = $session->get( 'customer' );
-		$selected_shipping    = $session->get( 'shipping_for_package_0' )['rates'][ $selected_shipping_id ];
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$shipping_address  = isset( $_POST['shipping_address'] ) ? array_map( 'sanitize_text_field', wp_unslash( $_POST['shipping_address'] ) ) : $session->get( 'customer' )['shipping'];
+		$selected_shipping = $session->get( 'shipping_for_package_0' )['rates'][ $selected_shipping_id ];
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$identifier = is_user_logged_in() ? ( '_' . wp_create_nonce( 'power-board-checkout-cart' ) ) : '';
 
@@ -169,6 +170,7 @@ class WidgetController {
 				'selected_shipping_id' => $selected_shipping_id,
 				'selected_shipping'    => $selected_shipping,
 				'shipping_address'     => $shipping_address,
+				'billing_address'      => $billing_address,
 			]
 		);
 

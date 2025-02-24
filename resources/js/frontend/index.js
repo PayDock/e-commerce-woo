@@ -237,23 +237,27 @@ const handleCartTotalChanged = (event) => {
 		() => {
 			const spanTotal = getUIOrderTotal();
 			const cartTotal = +event.detail.cartTotal;
-			if (spanTotal !== cartTotal) {
-				if (totalChangesSecondTimeout) {
-					clearTimeout( totalChangesSecondTimeout );
+			if (spanTotal) {
+				if (spanTotal !== cartTotal) {
+					if (totalChangesSecondTimeout) {
+						clearTimeout( totalChangesSecondTimeout );
+					}
+					totalChangesSecondTimeout = setTimeout(
+						() => {
+							const spanTotal   = getUIOrderTotal();
+							if (spanTotal) {
+								if (spanTotal !== cartTotal) {
+									window.reloadAfterExternalCartChanges();
+								} else {
+									handleWidgetDisplay();
+								}
+							}
+						},
+						300
+					)
+				} else {
+					handleWidgetDisplay();
 				}
-				totalChangesSecondTimeout = setTimeout(
-					() => {
-						const spanTotal   = getUIOrderTotal();
-						if (spanTotal !== cartTotal) {
-							window.reloadAfterExternalCartChanges();
-						} else {
-							handleWidgetDisplay();
-						}
-					},
-					300
-				)
-			} else {
-				handleWidgetDisplay();
 			}
 	},
 		300

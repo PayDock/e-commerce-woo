@@ -23,9 +23,9 @@ class OrderHelper {
 		$order_notes = $session->get( 'order_comments' );
 
 		/* @noinspection PhpUndefinedFunctionInspection */
-		$test_billing = WC()->customer->get_billing_email( false );
-		if ( isset( $test_billing ) ) {
-			$order->hold_applied_coupons( $test_billing );
+		$billing_email = WC()->customer->get_billing_email( false );
+		if ( isset( $billing_email ) ) {
+			$order->hold_applied_coupons( $billing_email );
 		}
 
 		$order->set_created_via( 'checkout' );
