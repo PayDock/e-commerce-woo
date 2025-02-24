@@ -286,6 +286,8 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		WC()->session->set( 'store_api_draft_order', null );
 		/* @noinspection PhpUndefinedFunctionInspection */
 		WC()->session->set( 'power_board_draft_order', null );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		WC()->session->set( 'order_comments', '' );
 
 		/* @noinspection PhpUndefinedMethodInspection */
 		return [

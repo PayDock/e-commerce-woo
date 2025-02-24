@@ -18,6 +18,7 @@ use PowerBoard\Helpers\OrderHelper;
 use PowerBoard\Services\PaymentGateway\MasterWidgetPaymentService;
 use PowerBoard\Enums\SettingsSectionEnum;
 use PowerBoard\Util\MasterWidgetBlock;
+use WC_Data_Exception;
 
 class ActionsService {
 	protected static ?ActionsService $instance = null;
@@ -138,6 +139,11 @@ class ActionsService {
 		$this->order_update_shipping();
 	}
 
+	/**
+	 * Updates customer notes from order when order notes field is updated.
+	 *
+	 * @throws WC_Data_Exception If trying to save invalid data to customer notes.
+	 */
 	public function classic_order_update_notes() {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$wp_nonce = isset( $_REQUEST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ) : null;
@@ -151,13 +157,16 @@ class ActionsService {
 		}
 
 		/* @noinspection PhpUndefinedFunctionInspection */
-		WC()->session->set( 'order_comments', isset( $_REQUEST['value'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['value'] ) ) : '' );
+		$order_notes = isset( $_REQUEST['value'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['value'] ) ) : '';
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		WC()->session->set( 'order_comments', $order_notes );
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$custom_order_id = (string) WC()->session->get( 'power_board_draft_order' );
 
 		if ( ! empty( $custom_order_id ) ) {
 			$order_id = $custom_order_id;
-			OrderHelper::update_order_customer_notes( $order_id );
+			OrderHelper::update_order_customer_notes( $order_id, $order_notes );
 		}
 	}
 

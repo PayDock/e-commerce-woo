@@ -11,6 +11,7 @@ namespace PowerBoard\Helpers;
 
 use WC_Checkout;
 use WC_Geolocation;
+use WC_Data_Exception;
 
 class OrderHelper {
 	public static function update_order( &$order ) {
@@ -68,10 +69,12 @@ class OrderHelper {
 		$order->save();
 	}
 
-	public static function update_order_customer_notes( $order_id ) {
-		/* @noinspection PhpUndefinedFunctionInspection */
-		$session     = WC()->session;
-		$order_notes = $session->get( 'order_comments' );
+	/**
+	 * Updates customer notes from an order.
+	 *
+	 * @throws WC_Data_Exception If trying to save invalid data to customer notes.
+	 */
+	public static function update_order_customer_notes( $order_id, $order_notes ) {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$order = wc_get_order( $order_id );
 		$order->set_customer_note( $order_notes ?? '' );
