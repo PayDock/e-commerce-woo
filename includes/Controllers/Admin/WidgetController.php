@@ -112,7 +112,7 @@ class WidgetController {
 			'amount'        => round( $request['total']['total_price'] / 100, 2 ),
 			'version'       => (int) $settings->get_checkout_template_version(),
 			'currency'      => $request['total']['currency_code'],
-			'reference'     => (string) $reference,
+			'reference'     => $reference,
 			'customer'      => [
 				'email'           => $billing_address['email'],
 				'billing_address' => [

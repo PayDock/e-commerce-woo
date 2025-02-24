@@ -131,14 +131,16 @@ jQuery(
 					window.widgetPowerBoard = null;
 					toggleOrderButton( false );
 			} else {
-				toggleOrderButton(true);
+				toggleOrderButton( true );
 				window.initMasterWidgetCheckout();
 			}
 		}
 
 		function toggleOrderButton( hide ) {
 			const orderButton = document.querySelector( '.wc-block-components-checkout-place-order-button' );
-			if ( !orderButton ) return;
+			if ( !orderButton ) {
+				return;
+			}
 			orderButton.style.visibility = hide ? 'hidden' : 'visible';
 		}
 

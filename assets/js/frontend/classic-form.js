@@ -456,6 +456,7 @@ jQuery(
 												const orderTotal       = this.getUIOrderTotal();
 												if (orderTotal) {
 													if (orderTotal !== cartTotal) {
+														// noinspection JSUnresolvedReference
 														$( document.body ).trigger( 'update_checkout' );
 													}
 

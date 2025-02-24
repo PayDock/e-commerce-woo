@@ -126,7 +126,7 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		add_action( 'woocommerce_checkout_fields', [ $this, 'setup_phone_fields_settings' ] );
 
 		/* @noinspection PhpUndefinedFunctionInspection */
-		add_filter( 'woocommerce_create_order', [ $this, 'get_order_id' ], 10, 1 );
+		add_filter( 'woocommerce_create_order', [ $this, 'get_order_id' ] );
 	}
 
 	/**
