@@ -407,6 +407,10 @@ jQuery(
 									result[isShipping ? 'shipping_address' : 'address'][fieldName.replace( 'shipping_', '' ).replace( 'billing_', '' )] = value;
 								}
 							);
+
+							if ( returnJson ) {
+								return JSON.stringify( result );
+							}
 							return result;
 						}
 					},
@@ -452,10 +456,10 @@ jQuery(
 												const orderTotal       = this.getUIOrderTotal();
 												if (orderTotal) {
 													if (orderTotal !== cartTotal) {
-														window.reloadAfterExternalCartChanges();
-													} else {
-														this.initMasterWidget();
+														$( document.body ).trigger( 'update_checkout' );
 													}
+
+													this.initMasterWidget();
 												}
 											},
 											300
