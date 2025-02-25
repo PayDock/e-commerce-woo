@@ -267,7 +267,13 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		$order = wc_get_order( $order_id );
 
 		/* @noinspection PhpUndefinedFunctionInspection */
-		$session                   = WC()->session;
+		$session = WC()->session;
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$checkout_order_identifier = 'power_board_checkout_cart_' . wp_create_nonce( 'power-board-checkout-cart' );
+		$checkout_order            = $session->get( $checkout_order_identifier );
+		$order                     = $this->get_order_to_process_payment( $order, $checkout_order );
+
 		$current_active_intent_ids = $session->get( 'power_board_active_checkout_intent_ids' ) ?? [];
 
 		/* @noinspection PhpUndefinedFunctionInspection */
@@ -277,7 +283,7 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		$intent_id = isset( $_POST['intentid'] ) ? sanitize_text_field( wp_unslash( $_POST['intentid'] ) ) : '';
 
 		if ( ! empty( $charge_id ) && ! empty( $intent_id ) && in_array( $intent_id, $current_active_intent_ids, true ) ) {
-			$valid_payment = WidgetController::check_intent_status( $intent_id, $charge_id );
+			$valid_payment = WidgetController::check_intent_status( $intent_id, $charge_id, $order_id, $order->get_total( false ) );
 		} else {
 			$valid_payment = false;
 		}
@@ -288,10 +294,6 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 			throw new Exception( 'Payment could not be processed due to an error.' );
 		}
 
-		/* @noinspection PhpUndefinedFunctionInspection */
-		$checkout_order_identifier = 'power_board_checkout_cart_' . wp_create_nonce( 'power-board-checkout-cart' );
-		$checkout_order            = $session->get( $checkout_order_identifier );
-		$order                     = $this->get_order_to_process_payment( $order, $checkout_order );
 		$order->set_status( 'processing' );
 		$order->payment_complete();
 		setcookie( 'power_board_cart_total', '0', time() + 3600, '/' );
