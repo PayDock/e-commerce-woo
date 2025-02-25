@@ -22,6 +22,7 @@ use PowerBoard\Services\SDKAdapterService;
 use PowerBoard\Services\SettingsService;
 use PowerBoard\Services\TemplateService;
 use PowerBoard\Services\Validation\ConnectionValidationService;
+use PowerBoard\Controllers\Admin\WidgetController;
 use Exception;
 use WC_Admin_Settings;
 use WC_Order;
@@ -258,6 +259,7 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 	 * phpcs:disable WordPress.Security.NonceVerification -- processed through the WooCommerce form handler
 	 *
 	 * @noinspection PhpUnused
+	 * @throws Exception If intent status is not completed
 	 * @since 1.0.0
 	 */
 	public function process_payment( $order_id ): array {
@@ -265,29 +267,46 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		$order = wc_get_order( $order_id );
 
 		/* @noinspection PhpUndefinedFunctionInspection */
-		$session = WC()->session;
-		/* @noinspection PhpUndefinedFunctionInspection */
-		$checkout_order = $session->get( 'power_board_checkout_cart_' . wp_create_nonce( 'power-board-checkout-cart' ) );
-		$order          = $this->get_order_to_process_payment( $order, $checkout_order );
-		$order->set_status( 'processing' );
-		$order->payment_complete();
-		setcookie( 'power_board_cart_total', '0', time() + 3600, '/' );
+		$session                   = WC()->session;
+		$current_active_intent_ids = $session->get( 'power_board_active_checkout_intent_ids' ) ?? [];
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$charge_id = isset( $_POST['chargeid'] ) ? sanitize_text_field( wp_unslash( $_POST['chargeid'] ) ) : '';
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$intent_id = isset( $_POST['intentid'] ) ? sanitize_text_field( wp_unslash( $_POST['intentid'] ) ) : '';
+
+		if ( ! empty( $charge_id ) && ! empty( $intent_id ) && in_array( $intent_id, $current_active_intent_ids, true ) ) {
+			$valid_payment = WidgetController::check_intent_status( $intent_id, $charge_id );
+		} else {
+			$valid_payment = false;
+		}
+
+		if ( ! $valid_payment ) {
+			$order->update_status( 'failed', 'Payment could not be processed due to an error.' );
+			$order->save();
+			throw new Exception( 'Payment could not be processed due to an error.' );
+		}
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$checkout_order_identifier = 'power_board_checkout_cart_' . wp_create_nonce( 'power-board-checkout-cart' );
+		$checkout_order            = $session->get( $checkout_order_identifier );
+		$order                     = $this->get_order_to_process_payment( $order, $checkout_order );
+		$order->set_status( 'processing' );
+		$order->payment_complete();
+		setcookie( 'power_board_cart_total', '0', time() + 3600, '/' );
 
 		$order->update_meta_data( '_power_board_charge_id', $charge_id );
 		/* @noinspection PhpUndefinedFunctionInspection */
 		WC()->cart->empty_cart();
 		$order->save();
-		/* @noinspection PhpUndefinedFunctionInspection */
-		WC()->session->set( 'order_awaiting_payment', null );
-		/* @noinspection PhpUndefinedFunctionInspection */
-		WC()->session->set( 'store_api_draft_order', null );
-		/* @noinspection PhpUndefinedFunctionInspection */
-		WC()->session->set( 'power_board_draft_order', null );
-		/* @noinspection PhpUndefinedFunctionInspection */
-		WC()->session->set( 'order_comments', '' );
+
+		$session->set( 'order_awaiting_payment', null );
+		$session->set( 'store_api_draft_order', null );
+		$session->set( 'power_board_draft_order', null );
+		$session->set( 'order_comments', '' );
+		$session->set( 'power_board_active_checkout_intent_ids', [] );
+		$session->set( $checkout_order_identifier, null );
 
 		/* @noinspection PhpUndefinedMethodInspection */
 		return [

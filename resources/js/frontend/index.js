@@ -103,7 +103,7 @@ const initMasterWidgetCheckout = () => {
 						return;
 					}
 					// noinspection JSUnresolvedReference
-					window.widgetPowerBoard = new cba.Checkout( widgetSelector, response.data.resource.data.token );
+					window.widgetPowerBoard = new cba.Checkout( widgetSelector, response.data.token );
 					// noinspection JSUnresolvedReference
 					window.widgetPowerBoard.setEnv( settings.environment )
 					// noinspection JSUnresolvedReference
@@ -346,6 +346,7 @@ const Content                               = ( props ) => {
 								paymentMethodData: {
 									payment_response: paymentData,
 									chargeId: paymentDataParsed['charge_id'],
+									intentId: paymentDataParsed['intent_id'],
 									orderId: paymentDataParsed['order_id'],
 									_wpnonce: settings._wpnonce
 								}

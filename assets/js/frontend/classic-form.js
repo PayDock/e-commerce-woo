@@ -287,12 +287,13 @@ jQuery(
 										// noinspection JSUnresolvedReference
 										this.toggleWidgetVisibility( false );
 										// noinspection JSUnresolvedReference
-										window.widgetPowerBoard = new cba.Checkout( '#classic-powerBoardCheckout_wrapper', response.data.resource.data.token );
+										window.widgetPowerBoard = new cba.Checkout( '#classic-powerBoardCheckout_wrapper', response.data.token );
 										// noinspection JSUnresolvedReference
 										window.widgetPowerBoard.setEnv( this.getConfigs().environment )
 										const showError         = ( message ) => this.showErrorMessage( message );
 										const handleWidgetError = () => this.handleWidgetError();
 										const submitForm        = () => this.form.submit();
+										const intentId          = response.data.intentId;
 										// noinspection JSUnresolvedReference
 										window.widgetPowerBoard.onPaymentSuccessful(
 											function ( data ) {
@@ -308,6 +309,8 @@ jQuery(
 														success: function () {
 															// noinspection JSUnresolvedReference
 															jQuery( '#chargeid' ).val( data['charge_id'] );
+															// noinspection JSUnresolvedReference
+															jQuery( '#intentid' ).val( intentId );
 															submitForm();
 
 															window.widgetPowerBoard = null;
@@ -496,7 +499,7 @@ jQuery(
 							'change',
 							( event ) => {
 								try {
-									if ( event.target.id.includes( 'chargeid' ) ) {
+									if ( event.target.id.includes( 'chargeid' ) || event.target.id.includes( 'intentid' ) ) {
 										return
 									}
 									this.handleShippingChanged( event.target.id );

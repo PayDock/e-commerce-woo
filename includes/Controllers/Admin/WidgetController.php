@@ -174,8 +174,31 @@ class WidgetController {
 			]
 		);
 
+		$current_active_intent_ids = $session->get( 'power_board_active_checkout_intent_ids' ) ?? [];
+		$current_intent            = $result['resource']['data']['_id'];
+		if ( !in_array( $current_intent, $current_active_intent_ids, true ) ) {
+			$current_active_intent_ids[] = $current_intent;
+			$session->set( 'power_board_active_checkout_intent_ids', $current_active_intent_ids );
+		}
+
 		/* @noinspection PhpUndefinedFunctionInspection */
-		wp_send_json_success( $result, 200 );
+		wp_send_json_success(
+			[
+				'token'    => $result['resource']['data']['token'],
+				'intentId' => $current_intent,
+			],
+			200
+			);
+	}
+
+	public static function check_intent_status( $intent_id, $charge_id ): bool {
+		$settings = SettingsService::get_instance();
+
+		$intent_request_params = [ 'intent_id' => $intent_id ];
+		$api_adapter_service   = APIAdapterService::get_instance();
+		$api_adapter_service->initialise( $settings->get_environment(), $settings->get_access_token() );
+		$result = $api_adapter_service->get_checkout_intent_by_id( $intent_request_params );
+		return $result['resource']['data']['status'] === 'completed' && $result['resource']['data']['process_reference'] === $charge_id;
 	}
 
 	private function create_draft_order(): string {

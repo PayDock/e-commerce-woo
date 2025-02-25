@@ -27,6 +27,10 @@ class APIAdapterService {
 		return $this->get_charge_service()->create_checkout_intent( $params )->call();
 	}
 
+	public function get_checkout_intent_by_id( array $params ): array {
+		return $this->get_charge_service()->get_checkout_intent_by_id( $params )->call();
+	}
+
 	public function get_plugin_configuration_by_version(): array {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$body = JsonHelper::decode_stringified_json( wp_remote_get( PLUGIN_VERSIONS_JSON_URL )['body'] );
