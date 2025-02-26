@@ -127,7 +127,7 @@ jQuery(
 			const toggleBlurPowerBoardPaymentMethod = ( show ) => {
 				const $submitButton                 = $( 'button.wc-block-components-checkout-place-order-button' );
 				// noinspection JSUnresolvedReference
-				$submitButton.toggleClass( 'hidden', !show );
+				$submitButton.toggleClass( 'hidden', !show && paymentMethod !== 'power_board' );
 
 				getPaymentOptionsComponents().forEach(
 					component =>
@@ -147,6 +147,7 @@ jQuery(
 		}
 		);
 
+		let paymentMethod                      = null;
 		let emailOrCreateAccountChangedTimeout = null;
 		let emailVerified                      = null;
 		let createAccountEmailVerified         = false;
@@ -205,6 +206,8 @@ jQuery(
 				toggleOrderButton( true );
 				window.initMasterWidgetCheckout();
 			}
+
+			paymentMethod = method;
 		}
 
 		function toggleOrderButton( hide ) {

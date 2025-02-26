@@ -88,7 +88,7 @@ jQuery(
 				}
 
 				const toggleBlurPowerBoardPaymentMethod = ( show ) => {
-					$( 'button#place_order' ).css( 'visibility', show ? 'visible' : 'hidden' );
+					$( 'button#place_order' ).css( 'visibility', show && powerBoardHelper.selectedPaymentMethod !== 'power_board' ? 'visible' : 'hidden' );
 					getPaymentOptionsComponents().forEach(
 						$component => {
 							$component.css(
@@ -102,7 +102,8 @@ jQuery(
 				}
 
 				const powerBoardHelper = {
-					paymentMethod: null,
+					paymentMethodLoaded: null,
+					selectedPaymentMethod: null,
 					form: null,
 					formChangedTimer: null,
 					lastAddressVerified: null,
@@ -263,11 +264,12 @@ jQuery(
 						}
 					},
 					setPaymentMethod( methodName, forceInit = false ) {
-						if ( !forceInit && this.paymentMethod === methodName ) {
+						if ( !forceInit && this.paymentMethodLoaded === methodName ) {
 							return;
 						}
-						let error   = $( '#fields-validation-error' );
-						let loading = $( '#loading' );
+						this.selectedPaymentMethod = methodName;
+						let error                  = $( '#fields-validation-error' );
+						let loading                = $( '#loading' );
 						loading.show();
 						error.hide();
 
@@ -283,8 +285,8 @@ jQuery(
 							loading.show();
 							error.hide();
 						}
-						this.paymentMethod = methodName;
-						switch (this.paymentMethod) {
+						this.paymentMethodLoaded = methodName;
+						switch (this.paymentMethodLoaded) {
 							case 'power_board':
 								this.toggleOrderButton( true );
 								this.toggleWidgetVisibility( true );
@@ -541,7 +543,7 @@ jQuery(
 							() => {
 								// noinspection JSUnresolvedReference
 								const paymentMethod = $( 'input[name="payment_method"]:checked' ).val();
-								if ( paymentMethod && ! this.paymentMethod ) {
+								if ( paymentMethod && ! this.paymentMethodLoaded ) {
 									this.lastAddressVerified = this.getAddressData( true );
 									clearInterval( paymentMethodInterval );
 									this.setPaymentMethod( paymentMethod );
