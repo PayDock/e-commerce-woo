@@ -105,21 +105,33 @@ jQuery(
 				document.addEventListener(
 					"power_board_already_used_email",
 					( event ) => {
-						const message                   = event.detail?.message
-						if (message) {
-							const emailInput = $( '.wc-block-components-address-form__email' );
-							setTimeout(
-								() => {
-										document.querySelector( '.power-board-account-error-message' )?.remove();
-										emailInput.after( `<p class="power-board-account-error-message">${message}</p>` );
-							},
-								100
-								)
-							toggleBlurPowerBoardPaymentMethod( false );
-						} else {
-							toggleBlurPowerBoardPaymentMethod( true );
-							document.querySelector( '.power-board-account-error-message' )?.remove();
+						if (emailOrCreateAccountErrorTimeout) {
+							clearTimeout( emailOrCreateAccountErrorTimeout );
 						}
+						emailOrCreateAccountErrorTimeout = setTimeout(
+							() => {
+								// noinspection JSUnresolvedReference
+								const createAccountCheckbox = jQuery( '.wc-block-components-checkbox.wc-block-checkout__create-account' );
+								const errorMessageEl        = document.querySelector( '.power-board-account-error-message' );
+								if (createAccountCheckbox[0]) {
+									if ( errorMessageEl ) {
+										errorMessageEl.remove();
+									}
+									const message = event.detail?.message;
+									if (message) {
+										const powerBoardMessage = document.createElement( "p" );
+										powerBoardMessage.classList.add( "power-board-account-error-message" );
+										powerBoardMessage.id        = "power-board-account-error-message";
+										powerBoardMessage.innerText = message;
+										createAccountCheckbox.after( powerBoardMessage );
+										toggleBlurPowerBoardPaymentMethod( false );
+									} else {
+										toggleBlurPowerBoardPaymentMethod( true );
+									}
+								}
+							},
+							300
+						)
 					}
 				);
 			}
@@ -149,8 +161,8 @@ jQuery(
 
 		let paymentMethod                      = null;
 		let emailOrCreateAccountChangedTimeout = null;
+		let emailOrCreateAccountErrorTimeout   = null;
 		let emailVerified                      = null;
-		let createAccountEmailVerified         = false;
 
 		function watchForEmailChange() {
 			// noinspection JSUnresolvedReference
@@ -161,25 +173,23 @@ jQuery(
 					if (
 					target.id === 'email'
 					|| target.parentElement.parentElement.classList.contains( 'wc-block-checkout__create-account' ) ) {
+					const createAccountCheckbox = document.querySelector( '.wc-block-components-checkbox.wc-block-checkout__create-account' )?.querySelector( 'input' ).checked;
 					if (emailOrCreateAccountChangedTimeout) {
 						clearTimeout( emailOrCreateAccountChangedTimeout );
 					}
-					emailOrCreateAccountChangedTimeout  = setTimeout(
+					emailOrCreateAccountChangedTimeout = setTimeout(
 						() => {
-							const createAccountCheckbox = document.querySelector( '.wc-block-components-checkbox.wc-block-checkout__create-account' )?.querySelector( 'input' ).checked;
 							if ( createAccountCheckbox === true ) {
 								const emailEl    = document.getElementById( 'email' );
 								const emailValue = emailEl.value;
-								if (emailValue && (emailVerified !== emailValue || !createAccountEmailVerified)) {
+								if (emailValue) {
 									emailVerified = emailValue;
 									window.checkEmailToCreateAccount( emailEl );
-									createAccountEmailVerified = true;
 								} else if (emailVerified !== null) {
 									window.clearEmailVerification();
 								}
 							} else if (emailVerified !== null) {
 								window.clearEmailVerification();
-								createAccountEmailVerified = false;
 							}
 							},
 						500

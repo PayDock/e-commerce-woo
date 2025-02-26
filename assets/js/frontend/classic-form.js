@@ -5,7 +5,8 @@ jQuery(
 	function ($) {
 		$( document ).ready(
 			() => {
-				const CONFIG                      = {
+				let emailOrCreateAccountErrorTimeout = null;
+				const CONFIG                         = {
 					phoneInputIds: {
 						shipping: '#shipping_phone',
 						billing: '#billing_phone',
@@ -16,14 +17,14 @@ jQuery(
 					'power_board',
 					],
 					phonePattern: /^\+[1-9]{1}[0-9]{3,14}$/,
-					errorMessageHtml: `<div class ="classic-checkout-validation-error wc-block-components-validation-error" role="alert"><p>Please enter your phone number in international format, starting with "+"</p></div>`,
+					errorMessageHtml: `<div class    ="classic-checkout-validation-error wc-block-components-validation-error" role="alert"><p>Please enter your phone number in international format, starting with "+"</p></div>`,
 				};
-				const $shippingWrapper            = $( '#shipping-fields .wc-block-components-address-address-wrapper' );
-				const getPhoneInputs              = () =>
+				const $shippingWrapper               = $( '#shipping-fields .wc-block-components-address-address-wrapper' );
+				const getPhoneInputs                 = () =>
 					Object.entries( CONFIG.phoneInputIds )
 					.reduce(
 						( acc, [key, selector] ) => {
-							const $input          = $( selector );
+							const $input             = $( selector );
 							if ( $input.length ) {
 								acc[key] = $input;
 							}
@@ -69,21 +70,34 @@ jQuery(
 					document.addEventListener(
 						"power_board_already_used_email",
 						(event) => {
-							const emailInput                = $( '#billing_email' );
-							if (event.detail?.message) {
-								setTimeout(
-									() => {
-											document.querySelector( '.power-board-account-error-message' )?.remove();
-											emailInput.after( `<p class="power-board-account-error-message">${event.detail?.message}</p>` );
-								},
-									100
-									)
-								toggleBlurPowerBoardPaymentMethod( false );
-							} else {
-								toggleBlurPowerBoardPaymentMethod( true );
-								document.querySelector( '.power-board-account-error-message' )?.remove();
+							if (emailOrCreateAccountErrorTimeout) {
+								clearTimeout( emailOrCreateAccountErrorTimeout );
 							}
-					}
+							emailOrCreateAccountErrorTimeout    = setTimeout(
+								() => {
+									const createAccountCheckbox = document.querySelector( '.create-account' );
+									if (createAccountCheckbox) {
+										const errorMessageEl = document.querySelector( '.power-board-account-error-message' );
+										if (errorMessageEl) {
+											errorMessageEl.remove();
+										}
+
+										const message = event.detail?.message
+										if (message) {
+											const powerBoardMessage = document.createElement( "p" );
+											powerBoardMessage.classList.add( "power-board-account-error-message" );
+											powerBoardMessage.id        = "power-board-account-error-message";
+											powerBoardMessage.innerText = message;
+											createAccountCheckbox.appendChild( powerBoardMessage );
+											toggleBlurPowerBoardPaymentMethod( false );
+										} else {
+											toggleBlurPowerBoardPaymentMethod( true );
+										}
+									}
+								},
+								300
+							)
+								}
 						);
 				}
 
@@ -113,8 +127,7 @@ jQuery(
 					emailOrCreateAccountChangedTimeout: null,
 					lastMasterWidgetInit: null,
 					currentSavedShipping: null,
-					emailVerified: false,
-					createAccountEmailVerified: false,
+					emailVerified: null,
 					showErrorMessage( errorMessage ) {
 						window.showWarning( $, errorMessage, 'error' );
 					},
@@ -147,25 +160,23 @@ jQuery(
 					},
 					handleEmailChanges( target ) {
 						if ( target.id === 'billing_email' || target.id === 'createaccount') {
+							const createAccountCheckbox = document.getElementById( 'createaccount' )?.checked;
 							if (this.emailOrCreateAccountChangedTimeout) {
 								clearTimeout( this.emailOrCreateAccountChangedTimeout );
 							}
 							this.emailOrCreateAccountChangedTimeout = setTimeout(
 								() => {
-									const createAccountCheckbox     = document.getElementById( 'createaccount' )?.checked;
 									if ( createAccountCheckbox === true ) {
 										const emailEl    = document.getElementById( 'billing_email' );
 										const emailValue = emailEl.value;
-										if (emailValue && (this.emailVerified !== emailValue || !this.createAccountEmailVerified)) {
+										if (emailValue) {
 											this.emailVerified = emailValue;
 											window.checkEmailToCreateAccount( emailEl );
-											this.createAccountEmailVerified = true;
 										} else if (this.emailVerified !== null) {
 											window.clearEmailVerification();
 										}
 									} else if (this.emailVerified !== null) {
 										window.clearEmailVerification();
-										this.createAccountEmailVerified = false;
 									}
 							},
 								500
