@@ -89,6 +89,15 @@
 	}
 }
 
+.power-board-account-error-message {
+	color: #cc1818;
+	font-size: .75em;
+	max-width: 100%;
+	min-height: 1em;
+	margin: 8px 0 0;
+	white-space: normal;
+}
+
 .payment_box p{
 	width: 100%;
 }

@@ -150,8 +150,6 @@ class WidgetController {
 		$api_adapter_service->initialise( $settings->get_environment(), $settings->get_access_token() );
 		$result = $api_adapter_service->create_checkout_intent( $intent_request_params );
 
-		$result['county'] = $request['address']['country'] ?? '';
-
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$session              = WC()->session;
 		$selected_shipping_id = $session->get( 'chosen_shipping_methods' )[0];

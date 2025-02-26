@@ -80,8 +80,9 @@ final class MasterWidgetBlock extends AbstractPaymentMethodType {
 				'power-board-form-helpers',
 				'PowerBoardAjaxError',
 				[
-					'url'           => admin_url( 'admin-ajax.php' ),
-					'wpnonce_error' => wp_create_nonce( 'power-board-create-error-notice' ),
+					'url'                 => admin_url( 'admin-ajax.php' ),
+					'wpnonce_error'       => wp_create_nonce( 'power-board-create-error-notice' ),
+					'wpnonce_check_email' => wp_create_nonce( 'power-board-check-email' ),
 				]
 			);
 

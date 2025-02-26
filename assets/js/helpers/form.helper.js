@@ -38,6 +38,30 @@ window.showWarning = function ($, message, type = 'error') {
 	);
 }
 
+window.checkEmailToCreateAccount = function ( emailEl ) {
+	// noinspection JSUnresolvedReference
+	jQuery.post(
+		PowerBoardAjaxError.url,
+		{
+			_wpnonce: PowerBoardAjaxError.wpnonce_check_email,
+			dataType: 'html',
+			action: 'power_board_check_email',
+			email: emailEl.value,
+		}
+	).then(
+		( response ) => {
+			const message = response.data.message;
+			const event   = new CustomEvent( 'power_board_already_used_email', { detail: { message: message !== "valid_email" ? message : null } } );
+			document.dispatchEvent( event );
+		}
+	);
+}
+
+window.clearEmailVerification = function () {
+		const event = new CustomEvent( 'power_board_already_used_email', null );
+		document.dispatchEvent( event );
+}
+
 window.reloadAfterExternalCartChanges = () => {
 	clearInterval( window.cartChangeInterval );
 	location.reload();

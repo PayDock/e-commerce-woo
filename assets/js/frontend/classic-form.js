@@ -34,9 +34,10 @@ jQuery(
 				// noinspection JSUnresolvedReference
 				const getPaymentOptionsComponents = () =>
 					CONFIG.paymentOptionsNames
-					.map( name => $( `#${CONFIG.baseCheckboxIdName}_${name}` ).parents().eq( 1 ) )
+					.map( name => $( `.${CONFIG.baseCheckboxIdName}_${name}` ) )
 					.filter( $component => $component.length );
-				const validatePhone               = ( $input ) => {
+				// noinspection DuplicatedCode
+				const validatePhone = ( $input ) => {
 					// noinspection JSUnresolvedReference
 					const phone = $input.val();
 					$input.next( `.${CONFIG.errorMessageClassName}` ).remove();
@@ -54,17 +55,7 @@ jQuery(
 						// noinspection JSUnresolvedReference
 						$shippingWrapper.addClass( 'is-editing' );
 					}
-					$( 'button#place_order' ).css( 'visibility', allValid ? 'visible' : 'hidden' );
-					getPaymentOptionsComponents().forEach(
-						$component => {
-							$component.css(
-								{
-									opacity: allValid ? 1 : 0.5,
-									pointerEvents: allValid ? 'auto' : 'none',
-								}
-							)
-						}
-					);
+					toggleBlurPowerBoardPaymentMethod( allValid );
 				};
 				const initPhoneNumberValidation = () => {
 					const phoneInputs           = getPhoneInputs();
@@ -74,7 +65,42 @@ jQuery(
 					Object.values( phoneInputs ).forEach( input => input.on( 'blur input', () => updateVisibility( phoneInputs ) ) );
 					updateVisibility( phoneInputs );
 				};
-				initPhoneNumberValidation();
+				const setInvalidEmailToCreateAccountWatcher = () => {
+					document.addEventListener(
+						"power_board_already_used_email",
+						(event) => {
+							const emailInput                = $( '#billing_email' );
+							if (event.detail?.message) {
+								setTimeout(
+									() => {
+											document.querySelector( '.power-board-account-error-message' )?.remove();
+											emailInput.after( `<p class="power-board-account-error-message">${event.detail?.message}</p>` );
+								},
+									100
+									)
+								toggleBlurPowerBoardPaymentMethod( false );
+							} else {
+								toggleBlurPowerBoardPaymentMethod( true );
+								document.querySelector( '.power-board-account-error-message' )?.remove();
+							}
+					}
+						);
+				}
+
+				const toggleBlurPowerBoardPaymentMethod = ( show ) => {
+					$( 'button#place_order' ).css( 'visibility', show ? 'visible' : 'hidden' );
+					getPaymentOptionsComponents().forEach(
+						$component => {
+							$component.css(
+								{
+									opacity: show ? 1 : 0.5,
+									pointerEvents: show ? 'auto' : 'none',
+								}
+							)
+						}
+					);
+				}
+
 				const powerBoardHelper = {
 					paymentMethod: null,
 					form: null,
@@ -83,8 +109,11 @@ jQuery(
 					totalChangesTimeout: null,
 					totalChangesSecondTimeout: null,
 					shippingChangedTimeout: null,
+					emailOrCreateAccountChangedTimeout: null,
 					lastMasterWidgetInit: null,
 					currentSavedShipping: null,
+					emailVerified: false,
+					createAccountEmailVerified: false,
 					showErrorMessage( errorMessage ) {
 						window.showWarning( $, errorMessage, 'error' );
 					},
@@ -114,6 +143,33 @@ jQuery(
 							},
 							200
 						);
+					},
+					handleEmailChanges( target ) {
+						if ( target.id === 'billing_email' || target.id === 'createaccount') {
+							if (this.emailOrCreateAccountChangedTimeout) {
+								clearTimeout( this.emailOrCreateAccountChangedTimeout );
+							}
+							this.emailOrCreateAccountChangedTimeout = setTimeout(
+								() => {
+									const createAccountCheckbox     = document.getElementById( 'createaccount' )?.checked;
+									if ( createAccountCheckbox === true ) {
+										const emailEl    = document.getElementById( 'billing_email' );
+										const emailValue = emailEl.value;
+										if (emailValue && (this.emailVerified !== emailValue || !this.createAccountEmailVerified)) {
+											this.emailVerified = emailValue;
+											window.checkEmailToCreateAccount( emailEl );
+											this.createAccountEmailVerified = true;
+										} else if (this.emailVerified !== null) {
+											window.clearEmailVerification();
+										}
+									} else if (this.emailVerified !== null) {
+										window.clearEmailVerification();
+										this.createAccountEmailVerified = false;
+									}
+							},
+								500
+								);
+						}
 					},
 					setFieldLikeInvalid( fieldName ) {
 						let element = document.getElementById( `${fieldName}_field` );
@@ -504,6 +560,7 @@ jQuery(
 									}
 									this.handleShippingChanged( event.target.id );
 									this.handleFormChanged( event.target );
+									this.handleEmailChanges( event.target );
 								} catch ( e ) {
 									console.error( e );
 								}
@@ -581,6 +638,8 @@ jQuery(
 
 				powerBoardHelper.init();
 				powerBoardHelper.addBeforeLeavePageListener();
+				initPhoneNumberValidation();
+				setInvalidEmailToCreateAccountWatcher();
 			}
 		);
 	}

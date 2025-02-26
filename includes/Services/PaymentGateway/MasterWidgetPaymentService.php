@@ -128,6 +128,10 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_filter( 'woocommerce_create_order', [ $this, 'get_order_id' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_filter( 'wp_ajax_power_board_check_email', [ $this, 'check_email' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_filter( 'wp_ajax_nopriv_power_board_check_email', [ $this, 'check_email' ] );
 	}
 
 	/**
@@ -390,6 +394,48 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$custom_order_id = (string) WC()->session->get( 'power_board_draft_order' );
 		return ! empty( $custom_order_id ) ? $custom_order_id : null;
+	}
+
+	public function check_email() {
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$wp_nonce = isset( $_REQUEST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ) : null;
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		if ( ! wp_verify_nonce( $wp_nonce, 'power-board-check-email' ) ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			wp_send_json_error( [ 'message' => __( 'Error: Security check', 'power-board' ) ] );
+
+			return null;
+		}
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$email = isset( $_POST['email'] ) ? sanitize_text_field( wp_unslash( $_POST['email'] ) ) : '';
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		if ( ! is_user_logged_in() ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			if ( email_exists( $email ) ) {
+
+				/* @noinspection PhpUndefinedFunctionInspection */
+				wp_send_json_success(
+					[
+						'message' => sprintf(
+						// Translators: %s Email address.
+							esc_html__( 'An account is already registered with %s. Please log in or use a different email address.', 'power-board' ),
+							esc_html( $email )
+						),
+					],
+					200
+					);
+			}
+		}
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		wp_send_json_success(
+			[
+				'message' => 'valid_email',
+			],
+			200
+			);
 	}
 
 	/**
