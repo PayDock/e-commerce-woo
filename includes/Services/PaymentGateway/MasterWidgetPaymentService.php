@@ -363,6 +363,7 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		if ( ! empty( $payment_data['errorMessage'] ) ) {
 			/* @noinspection PhpUndefinedFunctionInspection */
 			$error_message = sanitize_text_field( $payment_data['errorMessage'] );
+			$order->set_payment_method( POWER_BOARD_PLUGIN_PREFIX );
 			$order->update_status( 'failed' );
 			$order->add_order_note( 'Payment failed: ' . $error_message . '. Charge ID: ' . $charge_id );
 			$order->save();

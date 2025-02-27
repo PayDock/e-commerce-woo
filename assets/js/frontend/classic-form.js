@@ -6,6 +6,8 @@ jQuery(
 		$( document ).ready(
 			() => {
 				let emailOrCreateAccountErrorTimeout = null;
+				let emailCreationValid               = true;
+				let phoneNumberValid                 = true;
 				const CONFIG                         = {
 					phoneInputIds: {
 						shipping: '#shipping_phone',
@@ -56,7 +58,8 @@ jQuery(
 						// noinspection JSUnresolvedReference
 						$shippingWrapper.addClass( 'is-editing' );
 					}
-					toggleBlurPowerBoardPaymentMethod( allValid );
+					phoneNumberValid = allValid;
+					toggleBlurPowerBoardPaymentMethod();
 				};
 				const initPhoneNumberValidation = () => {
 					const phoneInputs           = getPhoneInputs();
@@ -89,10 +92,11 @@ jQuery(
 											powerBoardMessage.id        = "power-board-account-error-message";
 											powerBoardMessage.innerText = message;
 											createAccountCheckbox.appendChild( powerBoardMessage );
-											toggleBlurPowerBoardPaymentMethod( false );
+											emailCreationValid = false;
 										} else {
-											toggleBlurPowerBoardPaymentMethod( true );
+											emailCreationValid = true;
 										}
+										toggleBlurPowerBoardPaymentMethod();
 									}
 								},
 								300
@@ -101,8 +105,11 @@ jQuery(
 						);
 				}
 
-				const toggleBlurPowerBoardPaymentMethod = ( show ) => {
-					$( 'button#place_order' ).css( 'visibility', show && powerBoardHelper.selectedPaymentMethod !== 'power_board' ? 'visible' : 'hidden' );
+				const toggleBlurPowerBoardPaymentMethod = () => {
+					const show                          = emailCreationValid && phoneNumberValid;
+					if ( powerBoardHelper.selectedPaymentMethod === 'power_board' ) {
+						$( 'button#place_order' ).css( 'visibility', 'hidden' );
+					}
 					getPaymentOptionsComponents().forEach(
 						$component => {
 							$component.css(

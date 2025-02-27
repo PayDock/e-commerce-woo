@@ -64,7 +64,8 @@ jQuery(
 					$shippingWrapper.addClass( 'is-editing' );
 				}
 
-				toggleBlurPowerBoardPaymentMethod( allValid );
+				phoneNumberValid = allValid;
+				toggleBlurPowerBoardPaymentMethod();
 			};
 
 			const initPhoneNumbersValidation = () => {
@@ -124,10 +125,11 @@ jQuery(
 										powerBoardMessage.id        = "power-board-account-error-message";
 										powerBoardMessage.innerText = message;
 										createAccountCheckbox.after( powerBoardMessage );
-										toggleBlurPowerBoardPaymentMethod( false );
+										emailCreationValid = false;
 									} else {
-										toggleBlurPowerBoardPaymentMethod( true );
+										emailCreationValid = true;
 									}
+									toggleBlurPowerBoardPaymentMethod();
 								}
 							},
 							300
@@ -136,10 +138,16 @@ jQuery(
 				);
 			}
 
-			const toggleBlurPowerBoardPaymentMethod = ( show ) => {
+			let emailCreationValid = true;
+			let phoneNumberValid   = true;
+
+			const toggleBlurPowerBoardPaymentMethod = () => {
+				const show                          = emailCreationValid && phoneNumberValid;
 				const $submitButton                 = $( 'button.wc-block-components-checkout-place-order-button' );
-				// noinspection JSUnresolvedReference
-				$submitButton.toggleClass( 'hidden', !show && paymentMethod !== 'power_board' );
+				if ( paymentMethod === 'power_board' ) {
+					// noinspection JSUnresolvedReference
+					$submitButton.toggleClass( 'hidden', true );
+				}
 
 				getPaymentOptionsComponents().forEach(
 					component =>
