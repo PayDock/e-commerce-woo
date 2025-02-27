@@ -173,38 +173,47 @@ jQuery(
 		let emailVerified                      = null;
 
 		function watchForEmailChange() {
-			// noinspection JSUnresolvedReference
-			jQuery( '.wc-block-components-form' ).on(
-				'change',
-				event => {
-					const target = event.target;
-					if (
-					target.id === 'email'
-					|| target.parentElement.parentElement.classList.contains( 'wc-block-checkout__create-account' ) ) {
-					const createAccountCheckbox = document.querySelector( '.wc-block-components-checkbox.wc-block-checkout__create-account' )?.querySelector( 'input' ).checked;
-					if (emailOrCreateAccountChangedTimeout) {
-						clearTimeout( emailOrCreateAccountChangedTimeout );
-					}
-					emailOrCreateAccountChangedTimeout = setTimeout(
-						() => {
-							if ( createAccountCheckbox === true ) {
-								const emailEl    = document.getElementById( 'email' );
-								const emailValue = emailEl.value;
-								if (emailValue) {
-									emailVerified = emailValue;
-									window.checkEmailToCreateAccount( emailEl );
-								} else if (emailVerified !== null) {
-									window.clearEmailVerification();
+			const checkFormAvailableInterval = setInterval(
+				() => {
+					// noinspection JSUnresolvedReference
+					const $form = jQuery( '.wc-block-components-form' );
+					if ( $form[0] ) {
+						clearInterval( checkFormAvailableInterval );
+						$form.on(
+							'change',
+							event => {
+								const target = event.target;
+								if (
+									target.id === 'email'
+									|| target.parentElement.parentElement.classList.contains( 'wc-block-checkout__create-account' ) ) {
+									const createAccountCheckbox = document.querySelector( '.wc-block-components-checkbox.wc-block-checkout__create-account' )?.querySelector( 'input' ).checked;
+								if (emailOrCreateAccountChangedTimeout) {
+									clearTimeout( emailOrCreateAccountChangedTimeout );
 								}
-							} else if (emailVerified !== null) {
-								window.clearEmailVerification();
+									emailOrCreateAccountChangedTimeout = setTimeout(
+										() => {
+											if ( createAccountCheckbox === true ) {
+												const emailEl    = document.getElementById( 'email' );
+												const emailValue = emailEl.value;
+												if (emailValue) {
+													emailVerified = emailValue;
+													window.checkEmailToCreateAccount( emailEl );
+												} else if (emailVerified !== null) {
+													window.clearEmailVerification();
+												}
+											} else if (emailVerified !== null) {
+												window.clearEmailVerification();
+											}
+										},
+										500
+									);
+								}
 							}
-							},
-						500
-						);
+						)
 					}
-			}
-				)
+				},
+				200
+			)
 		}
 		function setPaymentMethodWatcher() {
 			const radioButtons = $( '.wc-block-components-radio-control__input' ).filter(
