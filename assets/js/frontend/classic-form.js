@@ -197,8 +197,8 @@ jQuery(
 							element.classList.remove( "woocommerce-invalid-required-field" )
 						}
 					},
-					getFieldsList( ignoreCheckbox = false ) {
-						const fieldsNames    = [
+					getFieldsList( ignoreCheckbox = false, completeList = false ) {
+						const fieldsNames = [
 							'first_name',
 							'last_name',
 							'country',
@@ -210,6 +210,10 @@ jQuery(
 							'email',
 							'phone',
 						];
+
+						if (completeList) {
+							fieldsNames.push( 'company' );
+						}
 						let result           = [];
 						let shippingCheckbox = $( '[name="ship_to_different_address"]' )
 						let prefixes         = ['billing_']
@@ -220,11 +224,13 @@ jQuery(
 							( prefix ) => {
 								fieldsNames.map(
 									( field ) => {
-										if ('shipping_' === prefix && ['email', 'phone'].includes( field )) {
-											return;
-										}
-										if ('billing_' === prefix && ['phone'].includes( field )) {
-											return;
+										if ( !completeList ) {
+											if ('shipping_' === prefix && ['email', 'phone'].includes( field )) {
+												return;
+											}
+											if ('billing_' === prefix && ['phone'].includes( field )) {
+												return;
+											}
 										}
 										result.push( `${prefix}${field}` )
 									}
@@ -459,7 +465,7 @@ jQuery(
 							}
 							return result;
 						} else {
-							let fieldList    = this.getFieldsList( true );
+							let fieldList    = this.getFieldsList( true, true );
 							let result       = {
 								shipping_address: {},
 								address: {}
