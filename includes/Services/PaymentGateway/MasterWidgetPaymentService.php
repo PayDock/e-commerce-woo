@@ -128,10 +128,6 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_filter( 'woocommerce_create_order', [ $this, 'get_order_id' ] );
-		/* @noinspection PhpUndefinedFunctionInspection */
-		add_filter( 'wp_ajax_power_board_check_email', [ $this, 'check_email' ] );
-		/* @noinspection PhpUndefinedFunctionInspection */
-		add_filter( 'wp_ajax_nopriv_power_board_check_email', [ $this, 'check_email' ] );
 	}
 
 	/**
@@ -388,7 +384,36 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		WC()->session->set( 'store_api_draft_order', $order_id );
 
 		/* @noinspection PhpUndefinedFunctionInspection */
+		$create_account = ! empty( $_REQUEST['create_account'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['create_account'] ) ) : false;
+		$email          = $order->get_billing_email( false );
+		if ( $create_account === 'true' && ! $this->check_email( $email ) ) {
+			$this->refund_charge( $charge_id, $order->get_total( false ) );
+			$order->add_order_note( 'Attempted account creation with ' . $email . ', but this email is already registered. The charge has been refunded.' );
+
+			/* @noinspection PhpUndefinedFunctionInspection */
+			wp_send_json_error(
+				[
+					'message' => sprintf(
+								// Translators: %s Email address.
+									esc_html__( 'An account is already registered with %s. Please log in or use a different email address.  The associated charge has been refunded, and you will need to complete the payment again.', 'power-board' ),
+									esc_html( $email )
+								),
+				]
+				);
+		}
+
+		/* @noinspection PhpUndefinedFunctionInspection */
 		wp_send_json_success( [], 200 );
+	}
+
+	public function refund_charge( $charge_id, $amount_to_refund ) {
+		$sdk_adapter = SDKAdapterService::get_instance();
+		$sdk_adapter->refunds(
+			[
+				'charge_id' => $charge_id,
+				'amount'    => $amount_to_refund,
+			]
+			);
 	}
 
 	public function get_order_id(): ?string {
@@ -397,46 +422,13 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		return ! empty( $custom_order_id ) ? $custom_order_id : null;
 	}
 
-	public function check_email() {
+	public function check_email( $email ): bool {
 		/* @noinspection PhpUndefinedFunctionInspection */
-		$wp_nonce = isset( $_REQUEST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ) : null;
-
-		/* @noinspection PhpUndefinedFunctionInspection */
-		if ( ! wp_verify_nonce( $wp_nonce, 'power-board-check-email' ) ) {
-			/* @noinspection PhpUndefinedFunctionInspection */
-			wp_send_json_error( [ 'message' => __( 'Error: Security check', 'power-board' ) ] );
-
-			return null;
-		}
-		/* @noinspection PhpUndefinedFunctionInspection */
-		$email = isset( $_POST['email'] ) ? sanitize_text_field( wp_unslash( $_POST['email'] ) ) : '';
-
-		/* @noinspection PhpUndefinedFunctionInspection */
-		if ( ! is_user_logged_in() ) {
-			/* @noinspection PhpUndefinedFunctionInspection */
-			if ( email_exists( $email ) ) {
-
-				/* @noinspection PhpUndefinedFunctionInspection */
-				wp_send_json_success(
-					[
-						'message' => sprintf(
-						// Translators: %s Email address.
-							esc_html__( 'An account is already registered with %s. Please log in or use a different email address.', 'power-board' ),
-							esc_html( $email )
-						),
-					],
-					200
-					);
-			}
+		if ( ! is_user_logged_in() && email_exists( $email ) ) {
+			return false;
 		}
 
-		/* @noinspection PhpUndefinedFunctionInspection */
-		wp_send_json_success(
-			[
-				'message' => 'valid_email',
-			],
-			200
-			);
+		return true;
 	}
 
 	/**

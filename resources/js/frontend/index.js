@@ -125,13 +125,20 @@ const initMasterWidgetCheckout = () => {
 										_wpnonce: PowerBoardAjaxCheckout.wpnonce_process_payment,
 										order_id: orderId,
 										payment_response: data,
+										create_account: document.querySelector( '.wc-block-components-checkbox.wc-block-checkout__create-account' )?.querySelector( 'input' ).checked,
 									},
-									success: function () {
+									success: function (response) {
+										if (response.success) {
 											// noinspection JSUnresolvedReference
 											paymentSourceElement.val( JSON.stringify( { ...data, orderId: orderId } ) );
 											orderButton.click();
 
 											window.widgetPowerBoard = null;
+										} else {
+											// noinspection JSUnresolvedReference
+											window.showWarning( response.data.message );
+											initMasterWidgetCheckout();
+										}
 									}
 								}
 							);

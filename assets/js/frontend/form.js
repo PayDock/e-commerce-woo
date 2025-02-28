@@ -64,8 +64,7 @@ jQuery(
 					$shippingWrapper.addClass( 'is-editing' );
 				}
 
-				phoneNumberValid = allValid;
-				toggleBlurPowerBoardPaymentMethod();
+				toggleBlurPowerBoardPaymentMethod( allValid );
 			};
 
 			const initPhoneNumbersValidation = () => {
@@ -102,47 +101,7 @@ jQuery(
 					);
 			};
 
-			const setInvalidEmailToCreateAccountWatcher = () => {
-				document.addEventListener(
-					"power_board_already_used_email",
-					( event ) => {
-						if (emailOrCreateAccountErrorTimeout) {
-							clearTimeout( emailOrCreateAccountErrorTimeout );
-						}
-						emailOrCreateAccountErrorTimeout = setTimeout(
-							() => {
-								// noinspection JSUnresolvedReference
-								const createAccountCheckbox = jQuery( '.wc-block-components-checkbox.wc-block-checkout__create-account' );
-								const errorMessageEl        = document.querySelector( '.power-board-account-error-message' );
-								if (createAccountCheckbox[0]) {
-									if ( errorMessageEl ) {
-										errorMessageEl.remove();
-									}
-									const message = event.detail?.message;
-									if (message) {
-										const powerBoardMessage = document.createElement( "p" );
-										powerBoardMessage.classList.add( "power-board-account-error-message" );
-										powerBoardMessage.id        = "power-board-account-error-message";
-										powerBoardMessage.innerText = message;
-										createAccountCheckbox.after( powerBoardMessage );
-										emailCreationValid = false;
-									} else {
-										emailCreationValid = true;
-									}
-									toggleBlurPowerBoardPaymentMethod();
-								}
-							},
-							300
-						)
-					}
-				);
-			}
-
-			let emailCreationValid = true;
-			let phoneNumberValid   = true;
-
-			const toggleBlurPowerBoardPaymentMethod = () => {
-				const show                          = emailCreationValid && phoneNumberValid;
+			const toggleBlurPowerBoardPaymentMethod = ( show ) => {
 				const $submitButton                 = $( 'button.wc-block-components-checkout-place-order-button' );
 				if ( paymentMethod === 'power_board' ) {
 					// noinspection JSUnresolvedReference
@@ -161,60 +120,12 @@ jQuery(
 			}
 
 			waitForShippingPhoneRender();
-			setInvalidEmailToCreateAccountWatcher();
 
 			$( '.wc-block-checkout__use-address-for-billing input[type="checkbox"]' ).on( "change", initPhoneNumbersValidation );
 		}
 		);
+		let paymentMethod = null;
 
-		let paymentMethod                      = null;
-		let emailOrCreateAccountChangedTimeout = null;
-		let emailOrCreateAccountErrorTimeout   = null;
-		let emailVerified                      = null;
-
-		function watchForEmailChange() {
-			const checkFormAvailableInterval = setInterval(
-				() => {
-					// noinspection JSUnresolvedReference
-					const $form = jQuery( '.wc-block-components-form' );
-					if ( $form[0] ) {
-						clearInterval( checkFormAvailableInterval );
-						$form.on(
-							'change',
-							event => {
-								const target = event.target;
-								if (
-									target.id === 'email'
-									|| target.parentElement.parentElement.classList.contains( 'wc-block-checkout__create-account' ) ) {
-									const createAccountCheckbox = document.querySelector( '.wc-block-components-checkbox.wc-block-checkout__create-account' )?.querySelector( 'input' ).checked;
-								if (emailOrCreateAccountChangedTimeout) {
-									clearTimeout( emailOrCreateAccountChangedTimeout );
-								}
-									emailOrCreateAccountChangedTimeout = setTimeout(
-										() => {
-											if ( createAccountCheckbox === true ) {
-												const emailEl    = document.getElementById( 'email' );
-												const emailValue = emailEl.value;
-												if (emailValue) {
-													emailVerified = emailValue;
-													window.checkEmailToCreateAccount( emailEl );
-												} else if (emailVerified !== null) {
-													window.clearEmailVerification();
-												}
-											} else if (emailVerified !== null) {
-												window.clearEmailVerification();
-											}
-										},
-										500
-									);
-								}
-							}
-						)
-					}
-				},
-				200
-			)
-		}
 		function setPaymentMethodWatcher() {
 			const radioButtons = $( '.wc-block-components-radio-control__input' ).filter(
 				function () {
@@ -272,7 +183,6 @@ jQuery(
 				clearInterval( firstInitInterval );
 				triggerFirstPaymentMethodChanges();
 				setPaymentMethodWatcher();
-				watchForEmailChange();
 			}
 		},
 		200

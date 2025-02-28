@@ -80,6 +80,14 @@ class WidgetController {
 			return;
 		}
 
+		$shipping_address = isset( $_POST['shipping_address'] ) ? array_map( 'sanitize_text_field', wp_unslash( $_POST['shipping_address'] ) ) : $session->get( 'customer' )['shipping'];
+		$billing_address  = [];
+
+		if ( ! empty( $_POST['address'] ) && is_array( $_POST['address'] ) ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			$billing_address = array_map( 'sanitize_text_field', wp_unslash( $_POST['address'] ) );
+		}
+
 		if ( ! empty( $_POST['order_id'] ) ) {
 			/* @noinspection PhpUndefinedFunctionInspection */
 			$reference = sanitize_text_field( wp_unslash( $_POST['order_id'] ) );
@@ -91,21 +99,14 @@ class WidgetController {
 				$order_id = $custom_order_id;
 				/* @noinspection PhpUndefinedFunctionInspection */
 				$order = wc_get_order( $order_id );
-				OrderHelper::update_order( $order );
+				OrderHelper::update_order( $order, $billing_address, $shipping_address );
 			} else {
-				$order_id = $this->create_draft_order();
+				$order_id = $this->create_draft_order( $billing_address, $shipping_address );
 			}
 			/* @noinspection PhpUndefinedFunctionInspection */
 			WC()->session->set( 'power_board_draft_order', $order_id );
 
 			$reference = $order_id;
-		}
-
-		$billing_address = [];
-
-		if ( ! empty( $_POST['address'] ) && is_array( $_POST['address'] ) ) {
-			/* @noinspection PhpUndefinedFunctionInspection */
-			$billing_address = array_map( 'sanitize_text_field', wp_unslash( $_POST['address'] ) );
 		}
 
 		$intent_request_params = [
@@ -154,7 +155,6 @@ class WidgetController {
 		$session              = WC()->session;
 		$selected_shipping_id = $session->get( 'chosen_shipping_methods' )[0];
 		/* @noinspection PhpUndefinedFunctionInspection */
-		$shipping_address  = isset( $_POST['shipping_address'] ) ? array_map( 'sanitize_text_field', wp_unslash( $_POST['shipping_address'] ) ) : $session->get( 'customer' )['shipping'];
 		$selected_shipping = $session->get( 'shipping_for_package_0' )['rates'][ $selected_shipping_id ];
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$identifier = '_' . wp_create_nonce( 'power-board-checkout-cart' );
@@ -203,7 +203,7 @@ class WidgetController {
 			&& $result['resource']['data']['process_reference'] === $charge_id;
 	}
 
-	private function create_draft_order(): string {
+	private function create_draft_order( $billing_address = null, $shipping_address = null ): string {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$cart = WC()->cart;
 		/* @noinspection PhpUndefinedFunctionInspection */
@@ -213,7 +213,7 @@ class WidgetController {
 				'cart_hash' => $cart->get_cart_hash(),
 			]
 		);
-		OrderHelper::update_order( $order );
+		OrderHelper::update_order( $order, $billing_address, $shipping_address );
 
 		$order_id = $order->get_id();
 		return (string) $order_id;

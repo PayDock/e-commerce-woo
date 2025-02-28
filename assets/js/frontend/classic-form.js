@@ -5,10 +5,7 @@ jQuery(
 	function ($) {
 		$( document ).ready(
 			() => {
-				let emailOrCreateAccountErrorTimeout = null;
-				let emailCreationValid               = true;
-				let phoneNumberValid                 = true;
-				const CONFIG                         = {
+				const CONFIG                      = {
 					phoneInputIds: {
 						shipping: '#shipping_phone',
 						billing: '#billing_phone',
@@ -19,14 +16,14 @@ jQuery(
 					'power_board',
 					],
 					phonePattern: /^\+[1-9]{1}[0-9]{3,14}$/,
-					errorMessageHtml: `<div class    ="classic-checkout-validation-error wc-block-components-validation-error" role="alert"><p>Please enter your phone number in international format, starting with "+"</p></div>`,
+					errorMessageHtml: `<div class ="classic-checkout-validation-error wc-block-components-validation-error" role="alert"><p>Please enter your phone number in international format, starting with "+"</p></div>`,
 				};
-				const $shippingWrapper               = $( '#shipping-fields .wc-block-components-address-address-wrapper' );
-				const getPhoneInputs                 = () =>
+				const $shippingWrapper            = $( '#shipping-fields .wc-block-components-address-address-wrapper' );
+				const getPhoneInputs              = () =>
 					Object.entries( CONFIG.phoneInputIds )
 					.reduce(
 						( acc, [key, selector] ) => {
-							const $input             = $( selector );
+							const $input          = $( selector );
 							if ( $input.length ) {
 								acc[key] = $input;
 							}
@@ -58,8 +55,7 @@ jQuery(
 						// noinspection JSUnresolvedReference
 						$shippingWrapper.addClass( 'is-editing' );
 					}
-					phoneNumberValid = allValid;
-					toggleBlurPowerBoardPaymentMethod();
+					toggleBlurPowerBoardPaymentMethod( allValid );
 				};
 				const initPhoneNumberValidation = () => {
 					const phoneInputs           = getPhoneInputs();
@@ -69,44 +65,7 @@ jQuery(
 					Object.values( phoneInputs ).forEach( input => input.on( 'blur input', () => updateVisibility( phoneInputs ) ) );
 					updateVisibility( phoneInputs );
 				};
-				const setInvalidEmailToCreateAccountWatcher = () => {
-					document.addEventListener(
-						"power_board_already_used_email",
-						(event) => {
-							if (emailOrCreateAccountErrorTimeout) {
-								clearTimeout( emailOrCreateAccountErrorTimeout );
-							}
-							emailOrCreateAccountErrorTimeout    = setTimeout(
-								() => {
-									const createAccountCheckbox = document.querySelector( '.create-account' );
-									if (createAccountCheckbox) {
-										const errorMessageEl = document.querySelector( '.power-board-account-error-message' );
-										if (errorMessageEl) {
-											errorMessageEl.remove();
-										}
-
-										const message = event.detail?.message
-										if (message) {
-											const powerBoardMessage = document.createElement( "p" );
-											powerBoardMessage.classList.add( "power-board-account-error-message" );
-											powerBoardMessage.id        = "power-board-account-error-message";
-											powerBoardMessage.innerText = message;
-											createAccountCheckbox.appendChild( powerBoardMessage );
-											emailCreationValid = false;
-										} else {
-											emailCreationValid = true;
-										}
-										toggleBlurPowerBoardPaymentMethod();
-									}
-								},
-								300
-							)
-								}
-						);
-				}
-
-				const toggleBlurPowerBoardPaymentMethod = () => {
-					const show                          = emailCreationValid && phoneNumberValid;
+				const toggleBlurPowerBoardPaymentMethod = ( show ) => {
 					if ( powerBoardHelper.selectedPaymentMethod === 'power_board' ) {
 						$( 'button#place_order' ).css( 'visibility', 'hidden' );
 					}
@@ -131,12 +90,16 @@ jQuery(
 					totalChangesTimeout: null,
 					totalChangesSecondTimeout: null,
 					shippingChangedTimeout: null,
-					emailOrCreateAccountChangedTimeout: null,
 					lastMasterWidgetInit: null,
 					currentSavedShipping: null,
-					emailVerified: null,
 					showErrorMessage( errorMessage ) {
-						window.showWarning( $, errorMessage, 'error' );
+						window.showWarning( errorMessage, 'error' );
+					},
+					reInitMasterWidget() {
+						let loading    = $( '#loading' );
+						this.toggleWidgetVisibility( true );
+						loading.show();
+						this.initMasterWidget();
 					},
 					handleWidgetError() {
 						let loading    = $( '#loading' );
@@ -164,31 +127,6 @@ jQuery(
 							},
 							200
 						);
-					},
-					handleEmailChanges( target ) {
-						if ( target.id === 'billing_email' || target.id === 'createaccount') {
-							const createAccountCheckbox = document.getElementById( 'createaccount' )?.checked;
-							if (this.emailOrCreateAccountChangedTimeout) {
-								clearTimeout( this.emailOrCreateAccountChangedTimeout );
-							}
-							this.emailOrCreateAccountChangedTimeout = setTimeout(
-								() => {
-									if ( createAccountCheckbox === true ) {
-										const emailEl    = document.getElementById( 'billing_email' );
-										const emailValue = emailEl.value;
-										if (emailValue) {
-											this.emailVerified = emailValue;
-											window.checkEmailToCreateAccount( emailEl );
-										} else if (this.emailVerified !== null) {
-											window.clearEmailVerification();
-										}
-									} else if (this.emailVerified !== null) {
-										window.clearEmailVerification();
-									}
-							},
-								500
-								);
-						}
 					},
 					setFieldLikeInvalid( fieldName ) {
 						let element = document.getElementById( `${fieldName}_field` );
@@ -372,10 +310,11 @@ jQuery(
 										window.widgetPowerBoard = new cba.Checkout( '#classic-powerBoardCheckout_wrapper', response.data.token );
 										// noinspection JSUnresolvedReference
 										window.widgetPowerBoard.setEnv( this.getConfigs().environment )
-										const showError         = ( message ) => this.showErrorMessage( message );
-										const handleWidgetError = () => this.handleWidgetError();
-										const submitForm        = () => this.form.submit();
-										const intentId          = response.data.intentId;
+										const showError          = ( message ) => this.showErrorMessage( message );
+										const handleWidgetError  = () => this.handleWidgetError();
+										const reInitMasterWidget = () => this.reInitMasterWidget();
+										const submitForm         = () => this.form.submit();
+										const intentId           = response.data.intentId;
 										// noinspection JSUnresolvedReference
 										window.widgetPowerBoard.onPaymentSuccessful(
 											function ( data ) {
@@ -387,15 +326,21 @@ jQuery(
 														data: {
 															_wpnonce: PowerBoardAjaxCheckout.wpnonce_process_payment,
 															payment_response: data,
+															create_account: document.getElementById( 'createaccount' )?.checked,
 														},
-														success: function () {
-															// noinspection JSUnresolvedReference
-															jQuery( '#chargeid' ).val( data['charge_id'] );
-															// noinspection JSUnresolvedReference
-															jQuery( '#intentid' ).val( intentId );
-															submitForm();
+														success: function (response) {
+															if (response.success) {
+																// noinspection JSUnresolvedReference
+																jQuery( '#chargeid' ).val( data['charge_id'] );
+																// noinspection JSUnresolvedReference
+																jQuery( '#intentid' ).val( intentId );
+																submitForm();
 
-															window.widgetPowerBoard = null;
+																window.widgetPowerBoard = null;
+															} else {
+																showError( response.data.message );
+																reInitMasterWidget();
+															}
 														}
 													}
 												);
@@ -586,7 +531,6 @@ jQuery(
 									}
 									this.handleShippingChanged( event.target.id );
 									this.handleFormChanged( event.target );
-									this.handleEmailChanges( event.target );
 								} catch ( e ) {
 									console.error( e );
 								}
@@ -665,7 +609,6 @@ jQuery(
 				powerBoardHelper.init();
 				powerBoardHelper.addBeforeLeavePageListener();
 				initPhoneNumberValidation();
-				setInvalidEmailToCreateAccountWatcher();
 			}
 		);
 	}

@@ -14,7 +14,7 @@ use WC_Geolocation;
 use WC_Data_Exception;
 
 class OrderHelper {
-	public static function update_order( &$order ) {
+	public static function update_order( &$order, $billing_address = null, $shipping_address = null ) {
 		$order->remove_order_items();
 
 		/* @noinspection PhpUndefinedFunctionInspection */
@@ -45,9 +45,9 @@ class OrderHelper {
 		$order->set_payment_method( POWER_BOARD_PLUGIN_PREFIX );
 
 		/* @noinspection PhpUndefinedFunctionInspection */
-		$order->set_address( WC()->customer->get_billing(), 'billing' );
+		$order->set_address( ! empty( $billing_address ) ? $billing_address : WC()->customer->get_billing(), 'billing' );
 		/* @noinspection PhpUndefinedFunctionInspection */
-		$order->set_address( WC()->customer->get_shipping(), 'shipping' );
+		$order->set_address( ! empty( $shipping_address ) ? $shipping_address : WC()->customer->get_shipping(), 'shipping' );
 		$order_vat_exempt = $cart->get_customer()->get_is_vat_exempt() ? 'yes' : 'no';
 		$order->add_meta_data( 'is_vat_exempt', $order_vat_exempt, true );
 		$order->set_shipping_total( $cart->get_shipping_total() );
