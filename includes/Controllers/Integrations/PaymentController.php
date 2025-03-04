@@ -95,7 +95,16 @@ class PaymentController {
 			$order->save();
 		} elseif ( ! empty( $result['error'] ) ) {
 			if ( is_array( $result['error'] ) ) {
-				$result['error'] = implode( '; ', $result['error'] );
+				if (
+					$result['error']['code'] === 'UnfulfilledCondition'
+					&& $result['error']['details']['path'] === 'status'
+					&& strpos( $result['error']['message'], 'refund request' ) !== false
+				) {
+					/* @noinspection PhpUndefinedFunctionInspection */
+					$result['error'] = __( 'The previous refund is not yet finished, please try again later', 'power-board' );
+				} else {
+					$result['error'] = implode( '; ', $result['error'] );
+				}
 			}
 			/* @noinspection PhpUndefinedFunctionInspection */
 			throw new Exception( esc_html( $result['error'] ) );
