@@ -142,7 +142,7 @@ jQuery(
 					toggleOrderButton( false );
 			} else {
 				toggleOrderButton( true );
-				window.initMasterWidgetCheckout();
+				window.handleWidgetDisplay();
 			}
 
 			paymentMethod = method;

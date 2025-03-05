@@ -202,9 +202,6 @@ const initMasterWidgetCheckout = () => {
 	}
 }
 
-// noinspection DuplicatedCode
-window.initMasterWidgetCheckout = initMasterWidgetCheckout;
-
 const handleWidgetDisplay = () => {
 	// noinspection JSUnresolvedReference
 	let isFormValid = jQuery( '.wc-block-components-form' )[0].checkValidity();
@@ -235,6 +232,7 @@ const handleWidgetDisplay = () => {
 		);
 	}
 };
+window.handleWidgetDisplay = handleWidgetDisplay;
 
 const handleCartTotalChanged = (event) => {
 	// noinspection DuplicatedCode
