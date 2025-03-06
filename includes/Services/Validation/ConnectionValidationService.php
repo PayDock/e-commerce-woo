@@ -14,7 +14,8 @@ use PowerBoard\Services\Settings\APIAdapterService;
 use PowerBoard\Services\PaymentGateway\MasterWidgetPaymentService;
 
 class ConnectionValidationService {
-	private ?string $old_access_token = null;
+	private ?string $old_access_token                     = null;
+	private static bool $invalid_credentials_shown_global = false;
 
 	public ?MasterWidgetPaymentService $service = null;
 	private ?array $errors                      = [];
@@ -159,7 +160,10 @@ class ConnectionValidationService {
 				return;
 			}
 
-			$this->errors[] = 'Invalid credentials. Please update and try again.';
+			if ( ! self::$invalid_credentials_shown_global ) {
+				$this->errors[] = 'Invalid credentials. Please update and try again.';
+				self::$invalid_credentials_shown_global = true;
+			}
 		}
 	}
 
@@ -262,6 +266,6 @@ class ConnectionValidationService {
 	}
 
 	public function get_errors(): array {
-		return $this->errors;
+		return array_unique( $this->errors );
 	}
 }
