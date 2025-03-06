@@ -25,6 +25,11 @@ class PaymentController {
 			return;
 		}
 
+		if ( isset( $args['amount'] ) && $args['amount'] <= 0 ) {
+			$error = __( 'Please enter a valid amount and/or stock quantity to process a refund', 'power-board' );
+			throw new Exception( esc_html( $error ) );
+		}
+
 		if ( empty( $args['amount'] ) && is_object( $order ) ) {
 			$amount = $order->get_total();
 		} else {
