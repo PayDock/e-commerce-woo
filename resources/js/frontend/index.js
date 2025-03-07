@@ -95,7 +95,7 @@ const initMasterWidgetCheckout = () => {
 				selected_shipping_id: getSelectedShippingValue(),
 			},
 			success: ( response ) => {
-				if (initTimestamp === lastMasterWidgetInit) {
+				if (response.success && initTimestamp === lastMasterWidgetInit) {
 					// noinspection DuplicatedCode
 					toggleWidgetVisibility( false );
 					const widgetSelector = '#powerBoardCheckout_wrapper';
@@ -205,7 +205,13 @@ const initMasterWidgetCheckout = () => {
 
 const handleWidgetDisplay = () => {
 	// noinspection JSUnresolvedReference
-	let isFormValid = jQuery( '.wc-block-components-form' )[0].checkValidity();
+	let isFormValid = jQuery( '.wc-block-components-form' )[0].checkValidity() && isShippingFormValid();
+
+	// noinspection JSUnresolvedReference
+	let useSameBillingAndShipping = jQuery( '.wc-block-checkout__use-address-for-billing input[type="checkbox"]' ).checked;
+	if ( !useSameBillingAndShipping ) {
+		isFormValid = isFormValid && isBillingFormValid();
+	}
 	// noinspection JSUnresolvedReference
 	let error = jQuery( '#fields-validation-error' )[0];
 	// noinspection JSUnresolvedReference
@@ -234,6 +240,33 @@ const handleWidgetDisplay = () => {
 	}
 };
 window.handleWidgetDisplay = handleWidgetDisplay;
+
+const isBillingFormValid = () => {
+	// noinspection JSUnresolvedReference
+	const billingAddressFormData = cart.getCustomerData().billingAddress;
+	return !!billingAddressFormData
+	&& !!billingAddressFormData.address_1
+	&& !!billingAddressFormData.city
+	&& !!billingAddressFormData.country
+	&& !!billingAddressFormData.email
+	&& !!billingAddressFormData.first_name
+	&& !!billingAddressFormData.last_name
+	&& !!billingAddressFormData.postcode
+	&& !!billingAddressFormData.state
+}
+
+const isShippingFormValid = () => {
+	// noinspection JSUnresolvedReference
+	const shippingAddressFormData = cart.getCustomerData().shippingAddress
+	return !!shippingAddressFormData
+	&& !!shippingAddressFormData.address_1
+	&& !!shippingAddressFormData.city
+	&& !!shippingAddressFormData.country
+	&& !!shippingAddressFormData.first_name
+	&& !!shippingAddressFormData.last_name
+	&& !!shippingAddressFormData.postcode
+	&& !!shippingAddressFormData.state
+}
 
 const handleCartTotalChanged = (event) => {
 	// noinspection DuplicatedCode
@@ -280,15 +313,20 @@ const getUIOrderTotal = () => {
 };
 
 const handleFormChanged = () => {
-	// noinspection JSUnresolvedReference
-	const billingAddressFormData  = cart.getCustomerData().billingAddress;
-	// noinspection JSUnresolvedReference
-	const shippingAddressFormData = cart.getCustomerData().shippingAddress;
-	if ( billingAddress !== billingAddressFormData || shippingAddress !== shippingAddressFormData ) {
-		billingAddress  = billingAddressFormData;
-		shippingAddress = shippingAddressFormData;
-		handleWidgetDisplay();
-	}
+	setTimeout(
+		() => {
+			// noinspection JSUnresolvedReference
+			const billingAddressFormData = cart.getCustomerData().billingAddress;
+			// noinspection JSUnresolvedReference
+			const shippingAddressFormData = cart.getCustomerData().shippingAddress;
+			if ( billingAddress !== billingAddressFormData || shippingAddress !== shippingAddressFormData ) {
+				billingAddress  = billingAddressFormData;
+				shippingAddress = shippingAddressFormData;
+				handleWidgetDisplay();
+			}
+	},
+		0
+		)
 }
 
 const handleWidgetError = () => {

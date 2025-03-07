@@ -109,6 +109,11 @@ class WidgetController {
 			$reference = $order_id;
 		}
 
+		if ( ! $this->check_is_complete_address( $billing_address ) ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			wp_send_json_error( [ 'message' => __( 'Incomplete billing address', 'power-board' ) ] );
+		}
+
 		$intent_request_params = [
 			'amount'        => round( $request['total']['total_price'] / 100, 2 ),
 			'version'       => (int) $settings->get_checkout_template_version(),
@@ -152,7 +157,10 @@ class WidgetController {
 		$result = $api_adapter_service->create_checkout_intent( $intent_request_params );
 
 		/* @noinspection PhpUndefinedFunctionInspection */
-		$session              = WC()->session;
+		$session->set( 'order_awaiting_payment', $reference );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$session->set( 'store_api_draft_order', $reference );
+
 		$selected_shipping_id = $session->get( 'chosen_shipping_methods' )[0];
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$selected_shipping = $session->get( 'shipping_for_package_0' )['rates'][ $selected_shipping_id ];
@@ -187,6 +195,18 @@ class WidgetController {
 			],
 			200
 			);
+	}
+
+	protected function check_is_complete_address( $address ): bool {
+		return ! empty( $address )
+			&& ! empty( $address['email'] )
+			&& ! empty( $address['first_name'] )
+			&& ! empty( $address['last_name'] )
+			&& ! empty( $address['address_1'] )
+			&& ! empty( $address['city'] )
+			&& ! empty( $address['state'] )
+			&& ! empty( $address['country'] )
+			&& ! empty( $address['postcode'] );
 	}
 
 	public static function check_intent_status( $intent_id, $charge_id, $order_id, $total_amount ): bool {

@@ -303,7 +303,7 @@ jQuery(
 								type: 'POST',
 								data: data,
 								success: ( response ) => {
-									if (initTimestamp === this.lastMasterWidgetInit) {
+									if (response.success && initTimestamp === this.lastMasterWidgetInit) {
 										// noinspection JSUnresolvedReference
 										this.toggleWidgetVisibility( false );
 										// noinspection JSUnresolvedReference

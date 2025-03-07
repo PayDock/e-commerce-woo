@@ -161,7 +161,7 @@ class ConnectionValidationService {
 			}
 
 			if ( ! self::$invalid_credentials_shown_global ) {
-				$this->errors[] = 'Invalid credentials. Please update and try again.';
+				$this->errors[]                         = 'Invalid credentials. Please update and try again.';
 				self::$invalid_credentials_shown_global = true;
 			}
 		}

@@ -289,14 +289,21 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		}
 
 		if ( ! $valid_payment ) {
-			$order->update_status( 'failed', 'Payment could not be processed due to an error.' );
+			$failed_message = 'Payment could not be processed due to an error.';
+			if ( ! empty( $charge_id ) ) {
+				$this->refund_charge( $charge_id, $order->get_total( false ) );
+				$order_note_failed_message = $failed_message . ' The charge with id ' . $charge_id . ' has been refunded.';
+			}
+
+			$order->update_status( 'failed', $order_note_failed_message ?? $failed_message );
 			$order->save();
-			throw new Exception( 'Payment could not be processed due to an error.' );
+			/* @noinspection PhpUndefinedFunctionInspection */
+			throw new Exception( esc_html( $failed_message ) );
 		}
 
+		$order->add_order_note( 'Payment succeeded. Charge ID: ' . $charge_id );
 		$order->set_status( 'processing' );
 		$order->payment_complete();
-		setcookie( 'power_board_cart_total', '0', time() + 3600, '/' );
 
 		$order->update_meta_data( '_power_board_charge_id', $charge_id );
 		/* @noinspection PhpUndefinedFunctionInspection */
@@ -354,7 +361,6 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$charge_id = ! empty( $payment_data['charge_id'] ) ? sanitize_text_field( $payment_data['charge_id'] ) : '';
-		$order->update_meta_data( '_power_board_charge_id', $charge_id );
 
 		if ( ! empty( $payment_data['errorMessage'] ) ) {
 			/* @noinspection PhpUndefinedFunctionInspection */
@@ -374,32 +380,33 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 			);
 		}
 
-		$order->update_status( 'pending' );
-		$order->add_order_note( 'Payment succeeded. Charge ID: ' . $charge_id );
+		$order->update_meta_data( '_power_board_charge_id', $charge_id );
 		$order->save();
 
 		/* @noinspection PhpUndefinedFunctionInspection */
-		WC()->session->set( 'order_awaiting_payment', $order_id );
-		/* @noinspection PhpUndefinedFunctionInspection */
-		WC()->session->set( 'store_api_draft_order', $order_id );
+		$session = WC()->session;
+		$session->set( 'order_awaiting_payment', (string) $order_id );
+		$session->set( 'store_api_draft_order', (string) $order_id );
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$create_account = ! empty( $_REQUEST['create_account'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['create_account'] ) ) : false;
-		$email          = $order->get_billing_email( false );
-		if ( $create_account === 'true' && ! $this->check_email( $email ) ) {
-			$this->refund_charge( $charge_id, $order->get_total( false ) );
-			$order->add_order_note( 'Attempted account creation with ' . $email . ', but this email is already registered. The charge has been refunded.' );
+		if ( $create_account === 'true' ) {
+			$email = $order->get_billing_email( false );
+			if ( ! $this->check_email( $email ) ) {
+				$this->refund_charge( $charge_id, $order->get_total( false ) );
+				$order->add_order_note( 'Attempted account creation with ' . $email . ', but this email is already registered. The charge has been refunded.' );
 
-			/* @noinspection PhpUndefinedFunctionInspection */
-			wp_send_json_error(
-				[
-					'message' => sprintf(
-								// Translators: %s Email address.
-									esc_html__( 'An account is already registered with %s. Please log in or use a different email address.  The associated charge has been refunded, and you will need to complete the payment again.', 'power-board' ),
-									esc_html( $email )
-								),
-				]
+				/* @noinspection PhpUndefinedFunctionInspection */
+				wp_send_json_error(
+					[
+						'message' => sprintf(
+						// Translators: %s Email address.
+							esc_html__( 'An account is already registered with %s. Please log in or use a different email address.  The associated charge has been refunded, and you will need to complete the payment again.', 'power-board' ),
+							esc_html( $email )
+						),
+					]
 				);
+			}
 		}
 
 		/* @noinspection PhpUndefinedFunctionInspection */
@@ -419,7 +426,9 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 	public function get_order_id(): ?string {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$custom_order_id = (string) WC()->session->get( 'power_board_draft_order' );
-		return ! empty( $custom_order_id ) ? $custom_order_id : null;
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$order_awaiting_payment = (string) WC()->session->get( 'order_awaiting_payment' );
+		return ! empty( $custom_order_id ) ? $custom_order_id : $order_awaiting_payment;
 	}
 
 	public function check_email( $email ): bool {
