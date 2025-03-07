@@ -20,7 +20,8 @@ const defaultLabel = __( 'PowerBoard Payments', textDomain );
 const label                   = decodeEntities( settings.title ) || defaultLabel;
 let totalChangesTimeout       = null;
 let totalChangesSecondTimeout = null;
-let address                   = null;
+let billingAddress            = null;
+let shippingAddress           = null;
 let lastMasterWidgetInit      = null;
 
 const toggleWidgetVisibility = ( hide ) => {
@@ -280,9 +281,12 @@ const getUIOrderTotal = () => {
 
 const handleFormChanged = () => {
 	// noinspection JSUnresolvedReference
-	const billingAddress = cart.getCustomerData().billingAddress;
-	if ( billingAddress !== address ) {
-		address = billingAddress;
+	const billingAddressFormData  = cart.getCustomerData().billingAddress;
+	// noinspection JSUnresolvedReference
+	const shippingAddressFormData = cart.getCustomerData().shippingAddress;
+	if ( billingAddress !== billingAddressFormData || shippingAddress !== shippingAddressFormData ) {
+		billingAddress  = billingAddressFormData;
+		shippingAddress = shippingAddressFormData;
 		handleWidgetDisplay();
 	}
 }
