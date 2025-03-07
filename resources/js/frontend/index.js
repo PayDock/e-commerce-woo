@@ -203,7 +203,7 @@ const initMasterWidgetCheckout = () => {
 	}
 }
 
-const handleWidgetDisplay = () => {
+const handleWidgetDisplay = ( waitForExternalWidgetDisplay = false ) => {
 	// noinspection JSUnresolvedReference
 	let isFormValid = jQuery( '.wc-block-components-form' )[0].checkValidity() && isShippingFormValid();
 
@@ -229,7 +229,7 @@ const handleWidgetDisplay = () => {
 		}
 	}
 
-	if ( isFormValid ) {
+	if ( isFormValid && !waitForExternalWidgetDisplay ) {
 		clearTimeout( window.initWidgetTimer );
 		window.initWidgetTimer = setTimeout(
 			() => {
@@ -319,10 +319,14 @@ const handleFormChanged = () => {
 			const billingAddressFormData = cart.getCustomerData().billingAddress;
 			// noinspection JSUnresolvedReference
 			const shippingAddressFormData = cart.getCustomerData().shippingAddress;
+			// noinspection JSUnresolvedReference
+			const isShippingRateBeingSelected = cart.isShippingRateBeingSelected();
 			if ( billingAddress !== billingAddressFormData || shippingAddress !== shippingAddressFormData ) {
 				billingAddress  = billingAddressFormData;
 				shippingAddress = shippingAddressFormData;
 				handleWidgetDisplay();
+			} else if ( isShippingRateBeingSelected ) {
+				handleWidgetDisplay( true );
 			}
 	},
 		0
