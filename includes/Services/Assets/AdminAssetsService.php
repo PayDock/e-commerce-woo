@@ -7,6 +7,7 @@ class AdminAssetsService {
 	private const SCRIPTS = [
 		'handle-settings-select-option',
 		'handle-environment-changes',
+		'handle-config-template-error-styles',
 		'deactivation-confirmation',
 	];
 

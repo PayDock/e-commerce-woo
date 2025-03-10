@@ -47,6 +47,7 @@ use WC_Payment_Gateway;
 class MasterWidgetPaymentService extends WC_Payment_Gateway {
 	private static ?MasterWidgetPaymentService $instance = null;
 	protected TemplateService $template_service;
+	protected const  NOT_AVAILABLE_CONFIG_TEMPLATE_ERROR = 'The selected configuration template is no longer available. Please select a new template and save your configuration.';
 
 	public static function get_instance(): self {
 		if ( is_null( self::$instance ) ) {
@@ -548,6 +549,8 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 	 * @noinspection PhpUnused
 	 */
 	public function process_admin_options(): bool {
+		/* @noinspection PhpUndefinedFunctionInspection */
+		set_transient( 'power_board_selected_template_not_available', false );
 		/* @noinspection PhpUndefinedMethodInspection */
 		$this->init_settings();
 		$validation_service = new ConnectionValidationService( $this );
@@ -725,6 +728,16 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		$access_token = $this->get_access_token();
 		$environment  = $this->get_environment();
 		$version      = $this->get_version();
+		$add_error    = false;
+
+		if ( MasterWidgetSettingsHelper::is_power_board_settings_page() ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			$selected_template_not_available = get_transient( 'power_board_selected_template_not_available' );
+
+			if ( isset( $selected_template_not_available ) && $selected_template_not_available === '1' ) {
+				$add_error = true;
+			}
+		}
 
 		foreach ( MasterWidgetSettingsEnum::cases() as $checkout_settings ) {
 			$key = SettingsHelper::get_option_name(
@@ -736,8 +749,9 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 			);
 
 			$fields[ $key ] = [
-				'type'  => MasterWidgetSettingsHelper::get_input_type( $checkout_settings ),
-				'title' => preg_replace( [ '/ Id/', '/ id/' ], ' ID', MasterWidgetSettingsHelper::get_label( $checkout_settings ) ),
+				'type'        => MasterWidgetSettingsHelper::get_input_type( $checkout_settings ),
+				'title'       => preg_replace( [ '/ Id/', '/ id/' ], ' ID', MasterWidgetSettingsHelper::get_label( $checkout_settings ) ),
+				'description' => MasterWidgetSettingsEnum::CONFIGURATION_ID === $checkout_settings && $add_error ? self::NOT_AVAILABLE_CONFIG_TEMPLATE_ERROR : null,
 			];
 
 			if ( MasterWidgetSettingsEnum::VERSION === $checkout_settings || ! empty( $environment ) ) {

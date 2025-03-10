@@ -220,7 +220,7 @@ class ConnectionValidationService {
 					MasterWidgetSettingsEnum::CONFIGURATION_ID,
 				]
 			);
-		MasterWidgetTemplatesHelper::validate_or_update_template_id( $configuration_templates, $has_error, $configuration_id_key );
+		MasterWidgetTemplatesHelper::validate_or_update_template_id( $configuration_templates, $has_error, $configuration_id_key, true );
 	}
 
 	private function get_configuration_templates_for_validation(): bool {

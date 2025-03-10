@@ -104,7 +104,7 @@ class MasterWidgetSettingsHelper {
 					MasterWidgetSettingsEnum::CONFIGURATION_ID,
 				]
 			);
-		MasterWidgetTemplatesHelper::validate_or_update_template_id( $configuration_templates, ! empty( $has_error ), $configuration_id_key );
+		MasterWidgetTemplatesHelper::validate_or_update_template_id( $configuration_templates, ! empty( $has_error ), $configuration_id_key, true );
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		delete_transient( 'is_fetching_configuration_templates' );
