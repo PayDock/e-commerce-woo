@@ -82,6 +82,7 @@ jQuery(
 				}
 
 				const powerBoardHelper = {
+					invalidPostcode: false,
 					paymentMethodLoaded: null,
 					selectedPaymentMethod: null,
 					form: null,
@@ -189,8 +190,11 @@ jQuery(
 							return true;
 						}
 						this.hideFormValidationError( paymentMethod );
-						let fieldList       = this.getFieldsList();
-						let result          = true
+						let fieldList = this.getFieldsList();
+						let result    = true
+						if ( this.invalidPostcode ) {
+							result = false;
+						}
 						fieldList.filter( field => !field.includes( 'address_2' ) ).forEach(
 							( fieldName ) => {
 								let element = document.querySelector( `[name="${fieldName}"]` );
@@ -303,83 +307,92 @@ jQuery(
 								type: 'POST',
 								data: data,
 								success: ( response ) => {
-									if (response.success && initTimestamp === this.lastMasterWidgetInit) {
-										// noinspection JSUnresolvedReference
-										this.toggleWidgetVisibility( false );
-										// noinspection JSUnresolvedReference
-										window.widgetPowerBoard = new cba.Checkout( '#classic-powerBoardCheckout_wrapper', response.data.token );
-										// noinspection JSUnresolvedReference
-										window.widgetPowerBoard.setEnv( this.getConfigs().environment )
-										const showError          = ( message ) => this.showErrorMessage( message );
-										const handleWidgetError  = () => this.handleWidgetError();
-										const reInitMasterWidget = () => this.reInitMasterWidget();
-										const submitForm         = () => this.form.submit();
-										const intentId           = response.data.intentId;
-										// noinspection JSUnresolvedReference
-										window.widgetPowerBoard.onPaymentSuccessful(
-											function ( data ) {
-												// noinspection JSUnresolvedReference
-												jQuery.ajax(
-													{
-														url: '/?wc-ajax=power-board-process-payment-result',
-														method: 'POST',
-														data: {
-															_wpnonce: PowerBoardAjaxCheckout.wpnonce_process_payment,
-															payment_response: data,
-															create_account: document.getElementById( 'createaccount' )?.checked,
-														},
-														success: function (response) {
-															if (response.success) {
-																// noinspection JSUnresolvedReference
-																jQuery( '#chargeid' ).val( data['charge_id'] );
-																// noinspection JSUnresolvedReference
-																jQuery( '#intentid' ).val( intentId );
-																submitForm();
+									if ( !this.isValidForm( 'power_board' ) ) {
+										let error   = $( '#fields-validation-error' );
+										let loading = $( '#loading' );
+										this.toggleWidgetVisibility( true );
+										this.toggleOrderButton( true );
+										loading.hide();
+										error.show();
+									} else {
+										if (response.success && initTimestamp === this.lastMasterWidgetInit) {
+											// noinspection JSUnresolvedReference
+											this.toggleWidgetVisibility( false );
+											// noinspection JSUnresolvedReference
+											window.widgetPowerBoard = new cba.Checkout( '#classic-powerBoardCheckout_wrapper', response.data.token );
+											// noinspection JSUnresolvedReference
+											window.widgetPowerBoard.setEnv( this.getConfigs().environment )
+											const showError          = ( message ) => this.showErrorMessage( message );
+											const handleWidgetError  = () => this.handleWidgetError();
+											const reInitMasterWidget = () => this.reInitMasterWidget();
+											const submitForm         = () => this.form.submit();
+											const intentId           = response.data.intentId;
+											// noinspection JSUnresolvedReference
+											window.widgetPowerBoard.onPaymentSuccessful(
+												function ( data ) {
+													// noinspection JSUnresolvedReference
+													jQuery.ajax(
+														{
+															url: '/?wc-ajax=power-board-process-payment-result',
+															method: 'POST',
+															data: {
+																_wpnonce: PowerBoardAjaxCheckout.wpnonce_process_payment,
+																payment_response: data,
+																create_account: document.getElementById( 'createaccount' )?.checked,
+															},
+															success: function (response) {
+																if (response.success) {
+																	// noinspection JSUnresolvedReference
+																	jQuery( '#chargeid' ).val( data['charge_id'] );
+																	// noinspection JSUnresolvedReference
+																	jQuery( '#intentid' ).val( intentId );
+																	submitForm();
 
+																	window.widgetPowerBoard = null;
+																} else {
+																	showError( response.data.message );
+																	reInitMasterWidget();
+																}
+															}
+														}
+													);
+												}
+											);
+											// noinspection JSUnresolvedReference
+											window.widgetPowerBoard.onPaymentFailure(
+												function ( data ) {
+													// noinspection JSUnresolvedReference
+													jQuery.ajax(
+														{
+															url: '/?wc-ajax=power-board-process-payment-result',
+															method: 'POST',
+															data: {
+																_wpnonce: PowerBoardAjaxCheckout.wpnonce_process_payment,
+																payment_response:
+																	{
+																		...data,
+																		errorMessage: data.message || 'Transaction failed',
+																}
+															},
+															success: function () {
+																showError( 'Transaction failed. Please check your payment details or contact your bank' );
+																handleWidgetError();
 																window.widgetPowerBoard = null;
-															} else {
-																showError( response.data.message );
-																reInitMasterWidget();
 															}
 														}
-													}
-												);
-											}
-										);
-										// noinspection JSUnresolvedReference
-										window.widgetPowerBoard.onPaymentFailure(
-											function ( data ) {
-												// noinspection JSUnresolvedReference
-												jQuery.ajax(
-													{
-														url: '/?wc-ajax=power-board-process-payment-result',
-														method: 'POST',
-														data: {
-															_wpnonce: PowerBoardAjaxCheckout.wpnonce_process_payment,
-															payment_response:
-																{
-																	...data,
-																	errorMessage: data.message || 'Transaction failed',
-															}
-														},
-														success: function () {
-															showError( 'Transaction failed. Please check your payment details or contact your bank' );
-															handleWidgetError();
-															window.widgetPowerBoard = null;
-														}
-													}
-												);
-											}
-										);
-										// noinspection JSUnresolvedReference
-										window.widgetPowerBoard.onPaymentExpired(
-											function () {
-												showError( 'Your payment session has expired. Please retry your payment' );
+													);
+												}
+											);
+											// noinspection JSUnresolvedReference
+											window.widgetPowerBoard.onPaymentExpired(
+												function () {
+													showError( 'Your payment session has expired. Please retry your payment' );
 
-												handleWidgetError();
-												window.widgetPowerBoard = null;
-											}
-										);
+													handleWidgetError();
+													window.widgetPowerBoard = null;
+												}
+											);
+										}
 									}
 								}
 							}
@@ -515,7 +528,7 @@ jQuery(
 								if ( paymentMethod && ! this.paymentMethodLoaded ) {
 									this.lastAddressVerified = this.getAddressData( true );
 									clearInterval( paymentMethodInterval );
-									this.setPaymentMethod( paymentMethod );
+									this.checkIsValidPostCodeAndLoadPayment( false );
 								}
 							},
 							100
@@ -567,27 +580,14 @@ jQuery(
 						if (this.formChangedTimer) {
 							clearTimeout( this.formChangedTimer );
 						}
-						this.formChangedTimer       = setTimeout(
+						this.formChangedTimer        = setTimeout(
 							() => {
-								const eventTargetId = eventTarget.id;
-								if ( eventTargetId.includes( 'order_comments' ) ) {
-									// noinspection JSUnresolvedReference
-									jQuery.ajax(
-										{
-											url: '/?wc-ajax=power-board-update-order-notes',
-											type: 'POST',
-											data: {
-												_wpnonce: PowerBoardAjaxCheckout.wpnonce_update_order_notes,
-												value: eventTarget.value,
-											}
-										}
-									);
-								}
+								const eventTargetId  = eventTarget.id;
+								this.handleOrderCommentsChanges( eventTargetId, eventTarget.value );
 								const currentAddress = this.getAddressData( true );
-								if (
-									this.lastAddressVerified !== currentAddress ||
-									eventTargetId.includes( 'payment_method' )
-								) {
+								if ( eventTargetId.includes( 'billing_postcode' ) || eventTargetId.includes( 'billing_country' ) || eventTargetId.includes( 'billing_state' ) ) {
+									this.checkIsValidPostCodeAndLoadPayment();
+								} else if (this.lastAddressVerified !== currentAddress || eventTargetId.includes( 'payment_method' )) {
 									this.lastAddressVerified = currentAddress;
 									// noinspection JSUnresolvedReference
 									this.setPaymentMethod(
@@ -598,6 +598,63 @@ jQuery(
 							},
 							500
 						);
+					},
+					checkIsValidPostCodeAndLoadPayment( forcePaymentMethodInit = true ) {
+						const postcode = document.getElementById( 'billing_postcode' ).value;
+						const country  = document.getElementById( 'billing_country' ).value;
+						// noinspection JSUnresolvedReference
+						const selectedPaymentMethod = $( 'input[name="payment_method"]:checked' ).val();
+
+						if ( postcode && country ) {
+							// noinspection JSUnresolvedReference
+							jQuery.ajax(
+								{
+									url: '/?wc-ajax=power-board-check-postcode',
+									type: 'POST',
+									data: {
+										_wpnonce: PowerBoardAjaxCheckout.wpnonce_check_postcode,
+										postcode: postcode,
+										country: country,
+									},
+									success: ( response ) => {
+										if ( response.success ) {
+											this.invalidPostcode = false;
+											document.querySelector( '.power-board-postcode-error-message' )?.remove();
+										} else {
+											this.invalidPostcode = true;
+											const postcodeInput  = document.getElementById( 'billing_postcode' );
+											document.querySelector( '.power-board-postcode-error-message' )?.remove();
+											const messageContainer = document.createElement( "div" );
+											messageContainer.setAttribute( 'class', 'classic-checkout-validation-error wc-block-components-validation-error power-board-postcode-error-message' );
+											messageContainer.setAttribute( 'role', 'alert' );
+											const	message   = document.createElement( "p" );
+											message.innerText = response.data.message;
+											messageContainer.appendChild( message );
+											postcodeInput.after( messageContainer );
+										}
+
+										this.setPaymentMethod( selectedPaymentMethod, forcePaymentMethodInit );
+									}
+								}
+							);
+						} else {
+							this.setPaymentMethod( selectedPaymentMethod, forcePaymentMethodInit );
+						}
+					},
+					handleOrderCommentsChanges( eventTargetId, value ) {
+						if ( eventTargetId.includes( 'order_comments' ) ) {
+							// noinspection JSUnresolvedReference
+							jQuery.ajax(
+								{
+									url: '/?wc-ajax=power-board-update-order-notes',
+									type: 'POST',
+									data: {
+										_wpnonce: PowerBoardAjaxCheckout.wpnonce_update_order_notes,
+										value: value,
+									}
+								}
+							);
+						}
 					},
 					addBeforeLeavePageListener() {
 						window.onbeforeunload = function () {

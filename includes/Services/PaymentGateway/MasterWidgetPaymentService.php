@@ -27,6 +27,7 @@ use Exception;
 use WC_Admin_Settings;
 use WC_Order;
 use WC_Payment_Gateway;
+use WC_Validation;
 
 /**
  * Some properties used comes from the extension WC_Payment_Gateway from WooCommerce
@@ -439,6 +440,47 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		}
 
 		return true;
+	}
+
+	public function check_postcode() {
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$wp_nonce = isset( $_REQUEST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ) : null;
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		if ( ! wp_verify_nonce( $wp_nonce, 'power-board-check-postcode' ) ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			wp_send_json_error( [ 'message' => __( 'Error: Security check', 'power-board' ) ] );
+		}
+
+		/**
+		 * Disable ValidatedSanitizedInput.MissingUnslash warning to be able to compare original string with unslashed one
+         * @phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+         * @phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		 *
+		 * @noinspection PhpUndefinedFunctionInspection
+		 */
+		$original_postcode = $_POST['postcode'] ?? '';
+        // phpcs:enable WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+        // phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$sanitized_postcode = isset( $_POST['postcode'] ) ? sanitize_text_field( wp_unslash( $_POST['postcode'] ) ) : '';
+
+		if ( $original_postcode !== $sanitized_postcode ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			wp_send_json_error( [ 'message' => __( 'Please enter a valid postcode/ZIP.', 'power-board' ) ] );
+		}
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$country  = isset( $_POST['country'] ) ? sanitize_text_field( wp_unslash( $_POST['country'] ) ) : '';
+		$postcode = $sanitized_postcode;
+		/* @noinspection PhpUndefinedFunctionInspection */
+		if ( $postcode && ! WC_Validation::is_postcode( $postcode, $country ) ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			wp_send_json_error( [ 'message' => __( 'Please enter a valid postcode/ZIP.', 'power-board' ) ] );
+		}
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		wp_send_json_success( [], 200 );
 	}
 
 	/**

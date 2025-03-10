@@ -122,6 +122,7 @@ final class MasterWidgetBlock extends AbstractPaymentMethodType {
 					'wpnonce_intent'             => wp_create_nonce( 'power-board-create-charge-intent' ),
 					'wpnonce_update_shipping'    => wp_create_nonce( 'power-board-update-shipping' ),
 					'wpnonce_update_order_notes' => wp_create_nonce( 'power-board-update-order-notes' ),
+					'wpnonce_check_postcode'     => wp_create_nonce( 'power-board-check-postcode' ),
 					'wpnonce_process_payment'    => wp_create_nonce( 'power-board-process-payment-result' ),
 				]
 			);
@@ -144,6 +145,7 @@ final class MasterWidgetBlock extends AbstractPaymentMethodType {
 					'wpnonce_intent'             => wp_create_nonce( 'power-board-create-charge-intent' ),
 					'wpnonce_update_shipping'    => wp_create_nonce( 'power-board-update-shipping' ),
 					'wpnonce_update_order_notes' => wp_create_nonce( 'power-board-update-order-notes' ),
+					'wpnonce_check_postcode'     => wp_create_nonce( 'power-board-check-postcode' ),
 					'wpnonce_process_payment'    => wp_create_nonce( 'power-board-process-payment-result' ),
 				]
 			);

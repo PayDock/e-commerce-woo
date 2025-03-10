@@ -95,107 +95,115 @@ const initMasterWidgetCheckout = () => {
 				selected_shipping_id: getSelectedShippingValue(),
 			},
 			success: ( response ) => {
-				if (response.success && initTimestamp === lastMasterWidgetInit) {
-					// noinspection DuplicatedCode
-					toggleWidgetVisibility( false );
-					const widgetSelector = '#powerBoardCheckout_wrapper';
+				if ( ! checkIsFormValid() ) {
 					// noinspection JSUnresolvedReference
-					if (!jQuery( widgetSelector )[0]) {
-						return;
-					}
+					let error = jQuery( '#fields-validation-error' )[0];
 					// noinspection JSUnresolvedReference
-					window.widgetPowerBoard = new cba.Checkout( widgetSelector, response.data.token );
-					// noinspection JSUnresolvedReference
-					window.widgetPowerBoard.setEnv( settings.environment )
-					// noinspection JSUnresolvedReference
-					const orderButton = jQuery( '.wc-block-components-checkout-place-order-button' )[0];
-					// noinspection JSUnresolvedReference
-					const paymentSourceElement = jQuery( '#paymentSourceToken' );
+					let loading = jQuery( '#loading' )[0];
+					showInvalidFormError( loading, error );
+				} else {
+					if (response.success && initTimestamp === lastMasterWidgetInit) {
+						// noinspection DuplicatedCode
+						toggleWidgetVisibility( false );
+						const widgetSelector = '#powerBoardCheckout_wrapper';
+						// noinspection JSUnresolvedReference
+						if (!jQuery( widgetSelector )[0]) {
+							return;
+						}
+						// noinspection JSUnresolvedReference
+						window.widgetPowerBoard = new cba.Checkout( widgetSelector, response.data.token );
+						// noinspection JSUnresolvedReference
+						window.widgetPowerBoard.setEnv( settings.environment )
+						// noinspection JSUnresolvedReference
+						const orderButton = jQuery( '.wc-block-components-checkout-place-order-button' )[0];
+						// noinspection JSUnresolvedReference
+						const paymentSourceElement = jQuery( '#paymentSourceToken' );
 
-					// noinspection JSUnresolvedReference
-					window.widgetPowerBoard.onPaymentSuccessful(
-						function ( data ) {
-							// noinspection JSUnresolvedReference
-							const orderId = store.getOrderId();
-							// noinspection JSUnresolvedReference
-							jQuery.ajax(
-								{
-									url: '/?wc-ajax=power-board-process-payment-result',
-									method: 'POST',
-									data: {
-										_wpnonce: PowerBoardAjaxCheckout.wpnonce_process_payment,
-										order_id: orderId,
-										payment_response: data,
-										create_account: document.querySelector( '.wc-block-components-checkbox.wc-block-checkout__create-account' )?.querySelector( 'input' ).checked,
-									},
-									success: function (response) {
-										if (response.success) {
-											// noinspection JSUnresolvedReference
-											paymentSourceElement.val( JSON.stringify( { ...data, orderId: orderId } ) );
+						// noinspection JSUnresolvedReference
+						window.widgetPowerBoard.onPaymentSuccessful(
+							function ( data ) {
+								// noinspection JSUnresolvedReference
+								const orderId = store.getOrderId();
+								// noinspection JSUnresolvedReference
+								jQuery.ajax(
+									{
+										url: '/?wc-ajax=power-board-process-payment-result',
+										method: 'POST',
+										data: {
+											_wpnonce: PowerBoardAjaxCheckout.wpnonce_process_payment,
+											order_id: orderId,
+											payment_response: data,
+											create_account: document.querySelector( '.wc-block-components-checkbox.wc-block-checkout__create-account' )?.querySelector( 'input' ).checked,
+										},
+										success: function (response) {
+											if (response.success) {
+												// noinspection JSUnresolvedReference
+												paymentSourceElement.val( JSON.stringify( { ...data, orderId: orderId } ) );
+												orderButton.click();
+
+												window.widgetPowerBoard = null;
+											} else {
+												// noinspection JSUnresolvedReference
+												window.showWarning( response.data.message );
+												initMasterWidgetCheckout();
+											}
+										}
+									}
+								);
+							}
+						);
+						// noinspection JSUnresolvedReference
+						window.widgetPowerBoard.onPaymentFailure(
+							function ( data ) {
+								// noinspection JSUnresolvedReference
+								paymentSourceElement.val(
+									JSON.stringify(
+										{
+											errorMessage: 'Transaction failed. Please check your payment details or contact your bank',
+										}
+									)
+								);
+								// noinspection JSUnresolvedReference
+								jQuery.ajax(
+									{
+										url: '/?wc-ajax=power-board-process-payment-result',
+										method: 'POST',
+										data: {
+											_wpnonce: PowerBoardAjaxCheckout.wpnonce_process_payment,
+											order_id: store.getOrderId(),
+											payment_response:
+												{
+													...data,
+													errorMessage: data.message || 'Transaction failed',
+											}
+										},
+										success: function () {
 											orderButton.click();
 
 											window.widgetPowerBoard = null;
-										} else {
-											// noinspection JSUnresolvedReference
-											window.showWarning( response.data.message );
-											initMasterWidgetCheckout();
 										}
 									}
-								}
-							);
-						}
-					);
-					// noinspection JSUnresolvedReference
-					window.widgetPowerBoard.onPaymentFailure(
-						function ( data ) {
-							// noinspection JSUnresolvedReference
-							paymentSourceElement.val(
-								JSON.stringify(
-									{
-										errorMessage: 'Transaction failed. Please check your payment details or contact your bank',
-										}
-								)
-							);
-							// noinspection JSUnresolvedReference
-							jQuery.ajax(
-								{
-									url: '/?wc-ajax=power-board-process-payment-result',
-									method: 'POST',
-									data: {
-										_wpnonce: PowerBoardAjaxCheckout.wpnonce_process_payment,
-										order_id: store.getOrderId(),
-										payment_response:
-											{
-												...data,
-												errorMessage: data.message || 'Transaction failed',
-										}
-									},
-									success: function () {
-										orderButton.click();
+								);
+							}
+						);
 
-										window.widgetPowerBoard = null;
-									}
-								}
-							);
-						}
-					);
-
-					// noinspection JSUnresolvedReference
-					window.widgetPowerBoard.onPaymentExpired(
-						function () {
-							// noinspection JSUnresolvedReference
-							paymentSourceElement.val(
-								JSON.stringify(
-									{
-										errorMessage: 'Your payment session has expired. Please retry your payment',
+						// noinspection JSUnresolvedReference
+						window.widgetPowerBoard.onPaymentExpired(
+							function () {
+								// noinspection JSUnresolvedReference
+								paymentSourceElement.val(
+									JSON.stringify(
+										{
+											errorMessage: 'Your payment session has expired. Please retry your payment',
 										}
-								)
-							);
-							orderButton.click();
+									)
+								);
+								orderButton.click();
 
-							window.widgetPowerBoard = null;
-						}
-					);
+								window.widgetPowerBoard = null;
+							}
+						);
+					}
 				}
 			}
 			}
@@ -203,7 +211,7 @@ const initMasterWidgetCheckout = () => {
 	}
 }
 
-const handleWidgetDisplay = ( waitForExternalWidgetDisplay = false ) => {
+const checkIsFormValid = () => {
 	// noinspection JSUnresolvedReference
 	let isFormValid = jQuery( '.wc-block-components-form' )[0].checkValidity() && isShippingFormValid();
 
@@ -212,6 +220,19 @@ const handleWidgetDisplay = ( waitForExternalWidgetDisplay = false ) => {
 	if ( !useSameBillingAndShipping ) {
 		isFormValid = isFormValid && isBillingFormValid();
 	}
+
+	return isFormValid;
+};
+
+const showInvalidFormError = (loading, error) => {
+	loading.classList.add( 'hide' );
+	if ( error.classList.length > 0 ) {
+		error.classList.remove( 'hide' );
+	}
+};
+
+const handleWidgetDisplay = ( waitForExternalWidgetDisplay = false ) => {
+	let isFormValid       = checkIsFormValid();
 	// noinspection JSUnresolvedReference
 	let error = jQuery( '#fields-validation-error' )[0];
 	// noinspection JSUnresolvedReference
@@ -223,10 +244,7 @@ const handleWidgetDisplay = ( waitForExternalWidgetDisplay = false ) => {
 		}
 		error.classList.add( 'hide' );
 	} else {
-		loading.classList.add( 'hide' );
-		if ( error.classList.length > 0 ) {
-			error.classList.remove( 'hide' );
-		}
+		showInvalidFormError( loading, error );
 	}
 
 	if ( isFormValid && !waitForExternalWidgetDisplay ) {

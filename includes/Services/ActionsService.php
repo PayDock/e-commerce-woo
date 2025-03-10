@@ -242,6 +242,10 @@ class ActionsService {
 		add_action( 'wc_ajax_power-board-process-payment-result', [ $master_widget_payment_service, 'process_payment_result' ] );
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action( 'wc_ajax_nopriv_power-board-process-payment-result', [ $master_widget_payment_service, 'process_payment_result' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'wc_ajax_power-board-check-postcode', [ $master_widget_payment_service, 'check_postcode' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'wc_ajax_nopriv_power-board-check-postcode', [ $master_widget_payment_service, 'check_postcode' ] );
 	}
 
 	/**
