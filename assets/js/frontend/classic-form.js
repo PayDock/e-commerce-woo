@@ -12,13 +12,9 @@ jQuery(
 					},
 					baseCheckboxIdName: 'payment_method',
 					errorMessageClassName: 'wc-block-components-validation-error',
-					paymentOptionsNames: [
-					'power_board',
-					],
 					phonePattern: /^\+[1-9]{1}[0-9]{3,14}$/,
 					errorMessageHtml: `<div class ="classic-checkout-validation-error wc-block-components-validation-error" role="alert"><p>Please enter your phone number in international format, starting with "+"</p></div>`,
 				};
-				const $shippingWrapper            = $( '#shipping-fields .wc-block-components-address-address-wrapper' );
 				const getPhoneInputs              = () =>
 					Object.entries( CONFIG.phoneInputIds )
 					.reduce(
@@ -31,11 +27,6 @@ jQuery(
 						},
 						{}
 					);
-				// noinspection JSUnresolvedReference
-				const getPaymentOptionsComponents = () =>
-					CONFIG.paymentOptionsNames
-					.map( name => $( `.${CONFIG.baseCheckboxIdName}_${name}` ) )
-					.filter( $component => $component.length );
 				// noinspection DuplicatedCode
 				const validatePhone = ( $input ) => {
 					// noinspection JSUnresolvedReference
@@ -43,44 +34,22 @@ jQuery(
 					$input.next( `.${CONFIG.errorMessageClassName}` ).remove();
 					if (phone && !CONFIG.phonePattern.test( phone )) {
 						$input.after( CONFIG.errorMessageHtml );
+						// noinspection JSUnresolvedReference
+						$input.addClass( 'power-board-invalid-phone' );
 						return false;
 					}
+					// noinspection JSUnresolvedReference
+					$input.removeClass( 'power-board-invalid-phone' );
 					return true;
-				};
-				const updateVisibility      = ( phoneInputs ) => {
-					const validationResults = window.getValidationResults( phoneInputs, validatePhone );
-					const allValid          = Object.values( validationResults ).every( Boolean );
-					const shippingValid     = validationResults.shipping;
-					if ( !shippingValid ) {
-						// noinspection JSUnresolvedReference
-						$shippingWrapper.addClass( 'is-editing' );
-					}
-					toggleBlurPowerBoardPaymentMethod( allValid );
 				};
 				const initPhoneNumberValidation = () => {
 					const phoneInputs           = getPhoneInputs();
 					if ( !Object.keys( phoneInputs ).length ) {
 						return;
 					}
-					Object.values( phoneInputs ).forEach( input => input.on( 'blur input', () => updateVisibility( phoneInputs ) ) );
-					updateVisibility( phoneInputs );
+					Object.values( phoneInputs ).forEach( input => input.on( 'blur input', () => window.getValidationResults( phoneInputs, validatePhone ) ) );
+					window.getValidationResults( phoneInputs, validatePhone );
 				};
-				const toggleBlurPowerBoardPaymentMethod = ( show ) => {
-					if ( powerBoardHelper.selectedPaymentMethod === 'power_board' ) {
-						$( 'button#place_order' ).css( 'visibility', 'hidden' );
-					}
-					getPaymentOptionsComponents().forEach(
-						$component => {
-							$component.css(
-								{
-									opacity: show ? 1 : 0.5,
-									pointerEvents: show ? 'auto' : 'none',
-								}
-							)
-						}
-					);
-				}
-
 				const powerBoardHelper = {
 					invalidPostcode: false,
 					paymentMethodLoaded: null,
@@ -103,10 +72,7 @@ jQuery(
 						this.initMasterWidget();
 					},
 					handleWidgetError() {
-						let loading    = $( '#loading' );
-						this.toggleWidgetVisibility( true );
-						loading.show();
-						this.initMasterWidget();
+						this.reInitMasterWidget();
 
 						const noticesWrapper      = $( 'div.woocommerce-notices-wrapper' )[0];
 						const removeErrorInterval = setInterval(
@@ -213,7 +179,27 @@ jQuery(
 								}
 							}
 						)
-						return result;
+
+					if ( result ) {
+						// noinspection JSUnresolvedReference
+						let isPhoneNumberValid = this.isBillingPhoneValid();
+
+						// noinspection JSUnresolvedReference
+						let useSameBillingAndShipping = jQuery( '#ship-to-different-address-checkbox' ).checked;
+						if ( !useSameBillingAndShipping ) {
+							isPhoneNumberValid = isPhoneNumberValid && this.isShippingPhoneValid();
+						}
+
+						return isPhoneNumberValid;
+					}
+
+					return result;
+					},
+					isShippingPhoneValid() {
+						return !document.getElementById( 'shipping_phone' )?.classList?.contains( 'power-board-invalid-phone' );
+					},
+					isBillingPhoneValid() {
+						return !document.getElementById( 'billing_phone' )?.classList?.contains( 'power-board-invalid-phone' );
 					},
 					toggleWidgetVisibility( hide ) {
 						let widget        = $( '#classic-powerBoardCheckout_wrapper #standaloneWidget' );
@@ -279,10 +265,11 @@ jQuery(
 						const initTimestamp       = ( new Date() ).getTime();
 						this.lastMasterWidgetInit = initTimestamp;
 						setTimeout( () => this.toggleOrderButton( true ), 100 );
-						let billingAddress  = this.getAddressData( false ).address;
+						let addressData     = this.getAddressData( false );
+						let billingAddress  = addressData.address;
 						let shippingAddress = billingAddress;
 						if ( document.getElementById( 'ship-to-different-address-checkbox' ).checked ) {
-							shippingAddress = this.getAddressData( false ).shipping_address;
+							shippingAddress = addressData.shipping_address;
 						}
 
 						// noinspection JSUnresolvedReference

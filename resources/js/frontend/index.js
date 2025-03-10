@@ -213,12 +213,12 @@ const initMasterWidgetCheckout = () => {
 
 const checkIsFormValid = () => {
 	// noinspection JSUnresolvedReference
-	let isFormValid = jQuery( '.wc-block-components-form' )[0].checkValidity() && isShippingFormValid();
+	let isFormValid = jQuery( '.wc-block-components-form' )[0].checkValidity() && isShippingFormValid() && isShippingPhoneValid();
 
 	// noinspection JSUnresolvedReference
 	let useSameBillingAndShipping = jQuery( '.wc-block-checkout__use-address-for-billing input[type="checkbox"]' ).checked;
 	if ( !useSameBillingAndShipping ) {
-		isFormValid = isFormValid && isBillingFormValid();
+		isFormValid = isFormValid && isBillingFormValid() && isBillingPhoneValid();
 	}
 
 	return isFormValid;
@@ -284,6 +284,14 @@ const isShippingFormValid = () => {
 	&& !!shippingAddressFormData.last_name
 	&& !!shippingAddressFormData.postcode
 	&& !!shippingAddressFormData.state
+}
+
+const isShippingPhoneValid = () => {
+	return !document.getElementById( 'shipping-phone' )?.classList?.contains( 'power-board-invalid-phone' );
+}
+
+const isBillingPhoneValid = () => {
+	return !document.getElementById( 'billing-phone' )?.classList?.contains( 'power-board-invalid-phone' );
 }
 
 const handleCartTotalChanged = (event) => {

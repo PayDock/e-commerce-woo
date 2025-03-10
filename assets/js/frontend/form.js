@@ -9,16 +9,10 @@ jQuery(
 					shipping: '#shipping-phone',
 					billing: '#billing-phone',
 				},
-				baseCheckboxIdName: 'radio-control-wc-payment-method-options',
 				errorMessageClassName: 'wc-block-components-validation-error',
-				paymentOptionsNames: [
-				'power_board',
-				],
 				phonePattern: /^\+[1-9]{1}[0-9]{3,14}$/,
 				errorMessageHtml: `<div class ="wc-block-components-validation-error" role="alert"><p>Please enter your phone number in international format, starting with "+"</p></div>`,
 			};
-
-			const $shippingWrapper = $( '#shipping-fields .wc-block-components-address-address-wrapper' );
 
 			const getPhoneInputs     = () =>
 			Object.entries( CONFIG.phoneInputIds )
@@ -33,38 +27,21 @@ jQuery(
 					{}
 					);
 
-			// noinspection JSUnresolvedReference
-			const getPaymentOptionsComponents = () =>
-			CONFIG.paymentOptionsNames
-				.map( name => $( `#${CONFIG.baseCheckboxIdName}-${name}` ).parents().eq( 1 ) )
-				.filter( $component => $component.length );
-
 			// noinspection DuplicatedCode
 			const validatePhone = ($input) => {
 				const phone     = $input.val();
 				$input.next( `.${CONFIG.errorMessageClassName}` ).remove();
 				if (phone && !CONFIG.phonePattern.test( phone )) {
 					$input.after( CONFIG.errorMessageHtml );
+					// noinspection JSUnresolvedReference
+					$input.addClass( 'power-board-invalid-phone' );
 
 					return false;
 				}
+				// noinspection JSUnresolvedReference
+				$input.removeClass( 'power-board-invalid-phone' );
 
 				return true;
-			};
-
-			// noinspection DuplicatedCode
-			const updateVisibility      = (phoneInputs) => {
-				const validationResults = window.getValidationResults( phoneInputs, validatePhone );
-
-				const allValid      = Object.values( validationResults ).every( Boolean );
-				const shippingValid = validationResults.shipping;
-
-				if ( !shippingValid ) {
-					// noinspection JSUnresolvedReference
-					$shippingWrapper.addClass( 'is-editing' );
-				}
-
-				toggleBlurPowerBoardPaymentMethod( allValid );
 			};
 
 			const initPhoneNumbersValidation = () => {
@@ -74,11 +51,16 @@ jQuery(
 				}
 
 				Object.values( phoneInputs ).forEach(
-				$input =>
-				$input.on( 'blur input', () => updateVisibility( phoneInputs ) )
+				$input => $input.on(
+					'blur input',
+					() => window.getValidationResults(
+						phoneInputs,
+					validatePhone
+						)
+					)
 			);
 
-			updateVisibility( phoneInputs );
+				window.getValidationResults( phoneInputs, validatePhone );
 			};
 
 			const waitForShippingPhoneRender = () => {
@@ -91,6 +73,8 @@ jQuery(
 						if ($shippingPhoneElement.length) {
 							clearInterval( interval );
 							initPhoneNumbersValidation();
+
+							$( '.wc-block-checkout__use-address-for-billing input[type="checkbox"]' ).on( "change", initPhoneNumbersValidation );
 						}
 						attempts++;
 						if (attempts >= maxAttempts) {
@@ -101,30 +85,9 @@ jQuery(
 					);
 			};
 
-			const toggleBlurPowerBoardPaymentMethod = ( show ) => {
-				const $submitButton                 = $( 'button.wc-block-components-checkout-place-order-button' );
-				if ( paymentMethod === 'power_board' ) {
-					// noinspection JSUnresolvedReference
-					$submitButton.toggleClass( 'hidden', true );
-				}
-
-				getPaymentOptionsComponents().forEach(
-					component =>
-						component.css(
-							{
-								opacity: show ? 1 : 0.5,
-								pointerEvents: show ? 'auto' : 'none',
-							}
-						)
-				);
-			}
-
 			waitForShippingPhoneRender();
-
-			$( '.wc-block-checkout__use-address-for-billing input[type="checkbox"]' ).on( "change", initPhoneNumbersValidation );
 		}
 		);
-		let paymentMethod = null;
 
 		function setPaymentMethodWatcher() {
 			const radioButtons = $( '.wc-block-components-radio-control__input' ).filter(
@@ -144,8 +107,6 @@ jQuery(
 				toggleOrderButton( true );
 				window.handleWidgetDisplay();
 			}
-
-			paymentMethod = method;
 		}
 
 		function toggleOrderButton( hide ) {
