@@ -189,7 +189,7 @@ const initMasterWidgetCheckout = () => {
 
 						// noinspection JSUnresolvedReference
 						window.widgetPowerBoard.onPaymentExpired(
-							function () {
+							function ( data ) {
 								// noinspection JSUnresolvedReference
 								paymentSourceElement.val(
 									JSON.stringify(
@@ -198,9 +198,35 @@ const initMasterWidgetCheckout = () => {
 										}
 									)
 								);
-								orderButton.click();
 
-								window.widgetPowerBoard = null;
+								// noinspection JSUnresolvedReference
+								if ( data.charge_id ) {
+									// noinspection JSUnresolvedReference
+									jQuery.ajax(
+										{
+											url: '/?wc-ajax=power-board-process-payment-result',
+											method: 'POST',
+											data: {
+												_wpnonce: PowerBoardAjaxCheckout.wpnonce_process_payment,
+												order_id: store.getOrderId(),
+												payment_response:
+													{
+														...data,
+														errorMessage: 'Payment session has expired',
+												}
+											},
+											success: function () {
+												orderButton.click();
+
+												window.widgetPowerBoard = null;
+											}
+										}
+									);
+								} else {
+									orderButton.click();
+
+									window.widgetPowerBoard = null;
+								}
 							}
 						);
 					}
