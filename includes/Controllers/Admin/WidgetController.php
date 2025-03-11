@@ -156,11 +156,6 @@ class WidgetController {
 		$api_adapter_service->initialise( $settings->get_environment(), $settings->get_access_token() );
 		$result = $api_adapter_service->create_checkout_intent( $intent_request_params );
 
-		/* @noinspection PhpUndefinedFunctionInspection */
-		$session->set( 'order_awaiting_payment', $reference );
-		/* @noinspection PhpUndefinedFunctionInspection */
-		$session->set( 'store_api_draft_order', $reference );
-
 		$selected_shipping_id = $session->get( 'chosen_shipping_methods' )[0];
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$selected_shipping = $session->get( 'shipping_for_package_0' )['rates'][ $selected_shipping_id ];

@@ -386,11 +386,6 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		$order->save();
 
 		/* @noinspection PhpUndefinedFunctionInspection */
-		$session = WC()->session;
-		$session->set( 'order_awaiting_payment', (string) $order_id );
-		$session->set( 'store_api_draft_order', (string) $order_id );
-
-		/* @noinspection PhpUndefinedFunctionInspection */
 		$create_account = ! empty( $_REQUEST['create_account'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['create_account'] ) ) : false;
 		if ( $create_account === 'true' ) {
 			$email = $order->get_billing_email( false );
@@ -410,6 +405,11 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 				);
 			}
 		}
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$session = WC()->session;
+		$session->set( 'order_awaiting_payment', (string) $order_id );
+		$session->set( 'store_api_draft_order', (string) $order_id );
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		wp_send_json_success( [], 200 );
