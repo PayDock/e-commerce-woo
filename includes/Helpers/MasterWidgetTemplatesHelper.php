@@ -20,7 +20,7 @@ class MasterWidgetTemplatesHelper {
 	/**
 	 * Uses functions (get_option and update_option) from WordPress
 	 */
-	public static function validate_or_update_template_id( ?array $templates, bool $has_error, string $template_type_key, bool $mandatory_field = false ): void {
+	public static function validate_or_update_template_id( ?array $templates, bool $has_error, string $template_type_key, string $template_type_id ): void {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$settings = get_option( 'woocommerce_power_board_settings' );
 		if ( ! empty( $settings ) ) {
@@ -29,10 +29,8 @@ class MasterWidgetTemplatesHelper {
 				$settings[ $template_type_key ] = '';
 				/* @noinspection PhpUndefinedFunctionInspection */
 				update_option( 'woocommerce_power_board_settings', $settings );
-				if ( $mandatory_field === true ) {
-					/* @noinspection PhpUndefinedFunctionInspection */
-					set_transient( 'power_board_selected_template_not_available', '1' );
-				}
+				/* @noinspection PhpUndefinedFunctionInspection */
+				set_transient( 'power_board_selected_' . $template_type_id . '_template_not_available', '1' );
 			}
 		}
 	}

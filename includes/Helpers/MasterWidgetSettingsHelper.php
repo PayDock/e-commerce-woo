@@ -104,7 +104,7 @@ class MasterWidgetSettingsHelper {
 					MasterWidgetSettingsEnum::CONFIGURATION_ID,
 				]
 			);
-		MasterWidgetTemplatesHelper::validate_or_update_template_id( $configuration_templates, ! empty( $has_error ), $configuration_id_key, true );
+		MasterWidgetTemplatesHelper::validate_or_update_template_id( $configuration_templates, ! empty( $has_error ), $configuration_id_key, MasterWidgetSettingsEnum::CONFIGURATION_ID );
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		delete_transient( 'is_fetching_configuration_templates' );
@@ -145,7 +145,7 @@ class MasterWidgetSettingsHelper {
 					MasterWidgetSettingsEnum::CUSTOMISATION_ID,
 				]
 			);
-		MasterWidgetTemplatesHelper::validate_or_update_template_id( $customisation_templates, ! empty( $has_error ), $customisation_id_key );
+		MasterWidgetTemplatesHelper::validate_or_update_template_id( $customisation_templates, ! empty( $has_error ), $customisation_id_key, MasterWidgetSettingsEnum::CUSTOMISATION_ID );
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		delete_transient( 'is_fetching_customisation_templates' );

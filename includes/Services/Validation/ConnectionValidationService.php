@@ -220,7 +220,7 @@ class ConnectionValidationService {
 					MasterWidgetSettingsEnum::CONFIGURATION_ID,
 				]
 			);
-		MasterWidgetTemplatesHelper::validate_or_update_template_id( $configuration_templates, $has_error, $configuration_id_key, true );
+		MasterWidgetTemplatesHelper::validate_or_update_template_id( $configuration_templates, $has_error, $configuration_id_key, MasterWidgetSettingsEnum::CONFIGURATION_ID );
 	}
 
 	private function get_configuration_templates_for_validation(): bool {
@@ -254,7 +254,7 @@ class ConnectionValidationService {
 					MasterWidgetSettingsEnum::CUSTOMISATION_ID,
 				]
 			);
-		MasterWidgetTemplatesHelper::validate_or_update_template_id( $customisation_templates, $has_error, $customisation_id_key );
+		MasterWidgetTemplatesHelper::validate_or_update_template_id( $customisation_templates, $has_error, $customisation_id_key, MasterWidgetSettingsEnum::CUSTOMISATION_ID );
 	}
 
 	private function save_old_credential(): void {
