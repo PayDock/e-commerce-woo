@@ -43,10 +43,24 @@ class OrderService {
 			return;
 		}
 
-		$order_status = $order->get_status();
-		$total_refund = $order->get_total_refunded();
-		$order_total  = (float) $order->get_total( false );
-		if ( $order_total === $total_refund || $order_status === 'failed' || $order_status === 'pending' ) {
+		$order_status          = $order->get_status();
+		$total_refund          = $order->get_total_refunded();
+		$order_total           = (float) $order->get_total( false );
+		$power_board_charge_id = $order->get_meta( '_power_board_charge_id' );
+		if (
+			$order_total === $total_refund ||
+			!in_array(
+				$order_status,
+				[
+					'processing',
+					'refunded',
+					'completed',
+					'cancelled',
+				],
+				true
+			) ||
+			empty( $power_board_charge_id )
+		) {
 			/* @noinspection PhpUndefinedFunctionInspection */
 			wp_enqueue_style(
 				'hide-refund-button-styles',
@@ -89,8 +103,8 @@ class OrderService {
 		}
 		$statuses_rules = [
 			'processing' => [ 'refunded', 'cancelled', 'failed', 'pending', 'completed' ],
-			'refunded'   => [ 'cancelled', 'failed', 'refunded' ],
-			'cancelled'  => [ 'failed', 'cancelled' ],
+			'refunded'   => [ 'cancelled', 'failed' ],
+			'cancelled'  => [ 'failed', 'cancelled', 'refunded' ],
 		];
 		if ( ! empty( $statuses_rules[ $old_status_key ] ) ) {
 			if ( ! in_array( $new_status_key, $statuses_rules[ $old_status_key ], true ) ) {

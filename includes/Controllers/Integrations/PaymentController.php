@@ -25,8 +25,18 @@ class PaymentController {
 			return;
 		}
 
+		$power_board_charge_id = $order->get_meta( '_power_board_charge_id' );
+		if ( empty( $power_board_charge_id ) ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			$error = __( 'Unable to process refund. The payment for this order was not successfully completed.', 'power-board' );
+			/* @noinspection PhpUndefinedFunctionInspection */
+			throw new Exception( esc_html( $error ) );
+		}
+
 		if ( isset( $args['amount'] ) && $args['amount'] <= 0 ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
 			$error = __( 'Please enter a valid amount and/or stock quantity to process a refund', 'power-board' );
+			/* @noinspection PhpUndefinedFunctionInspection */
 			throw new Exception( esc_html( $error ) );
 		}
 
@@ -42,9 +52,10 @@ class PaymentController {
 				'processing',
 				'refunded',
 				'completed',
+				'cancelled',
 			],
 			true
-		) || ( strpos( $order->get_payment_method(), POWER_BOARD_PLUGIN_PREFIX ) ) === false ) {
+		) ) {
 			return;
 		}
 
@@ -87,8 +98,6 @@ class PaymentController {
 							. " $amount_to_refund "
 							. __( 'has been successfully processed.', 'power-board' );
 
-			$order->payment_complete();
-
 			/* @noinspection PhpUndefinedFunctionInspection */
 			remove_action( 'woocommerce_order_status_refunded', 'wc_order_fully_refunded' );
 			if ( $order->get_status() === $status ) {
@@ -111,6 +120,7 @@ class PaymentController {
 					$result['error'] = implode( '; ', $result['error'] );
 				}
 			}
+			$order->add_order_note( 'PowerBoard refund failed: ' . $result['error'] );
 			/* @noinspection PhpUndefinedFunctionInspection */
 			throw new Exception( esc_html( $result['error'] ) );
 		} else {

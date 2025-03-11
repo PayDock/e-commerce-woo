@@ -273,7 +273,7 @@ class ActionsService {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_filter( 'gettext_woocommerce', [ $this, 'powerboard_filter_refund_message' ], 10, 3 );
 	}
-    // phpcs:enable
+	// phpcs:enable
 
 	/**
 	 * Hook gettext_woocommerce sends these arguments, but are not needed for this use case
