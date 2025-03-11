@@ -1,5 +1,3 @@
-const isOrderPayPage = window.location.href.includes( 'order-pay' );
-
 // noinspection JSUnresolvedReference
 jQuery(
 	function ($) {
@@ -152,9 +150,6 @@ jQuery(
 						return result;
 					},
 					isValidForm( paymentMethod ) {
-						if (isOrderPayPage) {
-							return true;
-						}
 						this.hideFormValidationError( paymentMethod );
 						let fieldList = this.getFieldsList();
 						let result    = true
@@ -172,8 +167,6 @@ jQuery(
 										this.showFormValidationError( paymentMethod );
 										result = false;
 									}
-								} else if (typeof orderData !== 'undefined' && orderData[fieldName]) {
-									this.setFieldLikeValid( fieldName );
 								} else {
 									result = false;
 								}
@@ -278,15 +271,6 @@ jQuery(
 							address: billingAddress,
 							shipping_address: shippingAddress,
 						};
-						if (isOrderPayPage) {
-							data.order_id = orderData.order_id;
-							data.total    = {
-								total_price: orderData.total_price,
-								total_tax: orderData.total_tax,
-								currency_code: orderData.currency_code,
-								currency_symbol: orderData.currency_symbol,
-							};
-						}
 						// noinspection JSUnresolvedReference
 						jQuery.ajax(
 							{
@@ -386,63 +370,28 @@ jQuery(
 						);
 					},
 					getAddressData( returnJson = true ) {
-						if (isOrderPayPage && typeof orderData !== 'undefined') {
-							// noinspection JSUnresolvedReference
-							let result = {
-								shipping_address: {
-									first_name: orderData.shipping_first_name,
-									last_name: orderData.shipping_last_name,
-									address_1: orderData.shipping_address_1,
-									address_2: orderData.shipping_address_2,
-									city: orderData.shipping_city,
-									state: orderData.shipping_state,
-									postcode: orderData.shipping_postcode,
-									country: orderData.shipping_country,
-								},
-								address: {
-									first_name: orderData.billing_first_name,
-									last_name: orderData.billing_last_name,
-									address_1: orderData.billing_address_1,
-									address_2: orderData.billing_address_2,
-									city: orderData.billing_city,
-									state: orderData.billing_state,
-									postcode: orderData.billing_postcode,
-									country: orderData.billing_country,
-									email: orderData.billing_email,
-									phone: orderData.billing_phone,
+						let fieldList    = this.getFieldsList( true, true );
+						let result       = {
+							shipping_address: {},
+							address: {}
+						};
+						fieldList.forEach(
+							( fieldName ) => {
+								let type = 'input';
+								if ( fieldName.includes( 'state' ) || fieldName.includes( 'country' ) ) {
+									type = 'select'
 								}
-							};
-							if ( returnJson ) {
-								return JSON.stringify( result );
+								let elements   = document.querySelectorAll( `${type}[name="${fieldName}"]` );
+								let value      = elements.length > 0 ? elements[0].value : null;
+								let isShipping = fieldName.includes( 'shipping' );
+								result[isShipping ? 'shipping_address' : 'address'][fieldName.replace( 'shipping_', '' ).replace( 'billing_', '' )] = value;
 							}
-							return result;
-						} else {
-							let fieldList    = this.getFieldsList( true, true );
-							let result       = {
-								shipping_address: {},
-								address: {}
-							};
-							fieldList.forEach(
-								( fieldName ) => {
-									let type = 'input';
-									if ( fieldName.includes( 'state' ) || fieldName.includes( 'country' ) ) {
-										type = 'select'
-									}
-									let elements   = document.querySelectorAll( `${type}[name="${fieldName}"]` );
-									let value      = elements.length > 0 ? elements[0].value : null;
-									let isShipping = fieldName.includes( 'shipping' );
-									if ( !value && typeof orderData !== 'undefined' ) {
-										value = orderData[fieldName] || null;
-									}
-									result[isShipping ? 'shipping_address' : 'address'][fieldName.replace( 'shipping_', '' ).replace( 'billing_', '' )] = value;
-								}
-							);
+						);
 
-							if ( returnJson ) {
-								return JSON.stringify( result );
-							}
-							return result;
+						if ( returnJson ) {
+							return JSON.stringify( result );
 						}
+						return result;
 					},
 					getConfigs() {
 						// noinspection JSUnresolvedReference

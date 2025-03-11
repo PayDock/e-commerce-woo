@@ -29,6 +29,8 @@ class FiltersService {
 		add_filter( 'plugins_loaded', [ $this, 'plugins_loaded' ] );
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_filter( 'admin_notices', [ $this, 'order_status_bulk_update' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_filter( 'woocommerce_available_payment_gateways', [ $this, 'my_account_pay_for_order' ] );
 	}
 
 	public function plugins_loaded() {
@@ -114,5 +116,14 @@ class FiltersService {
 		);
 
 		return $links;
+	}
+
+	public function my_account_pay_for_order( $gateways ) {
+		if ( is_wc_endpoint_url( 'order-pay' ) ) {
+			if ( ! empty( $gateways['power_board'] ) ) {
+				unset( $gateways['power_board'] );
+			}
+		}
+		return $gateways;
 	}
 }
