@@ -59,24 +59,21 @@ class PaymentController {
 			return;
 		}
 
-		$power_board_charge_id = $order->get_meta( '_power_board_charge_id' );
-
 		/* @noinspection PhpUndefinedFunctionInspection */
 
 		$action = isset( $_POST['action'] ) ? sanitize_text_field( wp_unslash( $_POST['action'] ) ) : '';
 
 		$amount_to_refund = $amount;
-		if ( $action === 'edit_order' ) {
+		if ( ( $action === 'edit_order' || $action === 'editpost' ) ) {
+			if ( $order->get_meta( '_status_change_verification_failed' ) ) {
+				$refund->set_amount( 0 );
+				$refund->set_total( 0 );
+				$refund->set_parent_id( 0 );
+				return;
+			}
+
 			$refund->set_amount( $amount_to_refund );
 			$refund->set_total( $amount_to_refund * -1 );
-
-		}
-
-		if ( $action === 'edit_order' && $order->get_meta( '_status_change_verification_failed' ) ) {
-			$refund->set_amount( 0 );
-			$refund->set_total( 0 );
-			$refund->set_parent_id( 0 );
-			return;
 		}
 
 		$result = SDKAdapterService::get_instance()->refunds(
