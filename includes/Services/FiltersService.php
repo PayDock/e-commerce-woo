@@ -119,6 +119,7 @@ class FiltersService {
 	}
 
 	public function my_account_pay_for_order( $gateways ) {
+		/* @noinspection PhpUndefinedFunctionInspection */
 		if ( is_wc_endpoint_url( 'order-pay' ) ) {
 			if ( ! empty( $gateways['power_board'] ) ) {
 				unset( $gateways['power_board'] );

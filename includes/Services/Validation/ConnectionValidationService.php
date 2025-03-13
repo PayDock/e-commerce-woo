@@ -175,7 +175,7 @@ class ConnectionValidationService {
 		}
 
 		if ( ! self::$no_version_selected_shown_global ) {
-			$this->errors[] = 'No checkout version selected. Please select a version and try again.';
+			$this->errors[]                         = 'No checkout version selected. Please select a version and try again.';
 			self::$no_version_selected_shown_global = true;
 		}
 
@@ -185,7 +185,7 @@ class ConnectionValidationService {
 	private function check_is_configuration_template_selected(): void {
 		if ( empty( $this->configuration_id_settings ) ) {
 			if ( ! self::$no_config_template_shown_global ) {
-				$this->errors[] = 'No configuration template ID selected. Please select a template and try again.';
+				$this->errors[]                        = 'No configuration template ID selected. Please select a template and try again.';
 				self::$no_config_template_shown_global = true;
 			}
 		}

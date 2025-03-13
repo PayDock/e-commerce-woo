@@ -94,6 +94,7 @@ class OrderService {
 		}
 
 		$order->delete_meta_data( '_status_change_verification_failed' );
+		$order->save();
 		if (
 			$old_status_key === $new_status_key ||
 			! empty( $GLOBALS['power_board_is_updating_order_status'] ) ||

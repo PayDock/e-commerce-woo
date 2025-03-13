@@ -65,7 +65,7 @@ class PaymentController {
 
 		$amount_to_refund = round( (float) $amount, 2 );
 		if ( ( $action === 'edit_order' || $action === 'editpost' ) ) {
-			if ( $order->get_meta( '_status_change_verification_failed' ) ) {
+			if ( $order->get_meta( '_status_change_verification_failed' ) === '1' ) {
 				$refund->set_amount( 0 );
 				$refund->set_total( 0 );
 				$refund->set_parent_id( 0 );

@@ -288,6 +288,7 @@ window.handleWidgetDisplay = handleWidgetDisplay;
 const isBillingFormValid = () => {
 	// noinspection JSUnresolvedReference
 	const billingAddressFormData = cart.getCustomerData().billingAddress;
+	// noinspection JSUnresolvedReference
 	return !!billingAddressFormData
 	&& !!billingAddressFormData.address_1
 	&& !!billingAddressFormData.city
@@ -302,6 +303,7 @@ const isBillingFormValid = () => {
 const isShippingFormValid = () => {
 	// noinspection JSUnresolvedReference
 	const shippingAddressFormData = cart.getCustomerData().shippingAddress
+	// noinspection JSUnresolvedReference
 	return !!shippingAddressFormData
 	&& !!shippingAddressFormData.address_1
 	&& !!shippingAddressFormData.city

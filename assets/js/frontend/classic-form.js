@@ -388,9 +388,9 @@ jQuery(
 							}
 						);
 
-						if ( returnJson ) {
-							return JSON.stringify( result );
-						}
+					if ( returnJson ) {
+						return JSON.stringify( result );
+					}
 						return result;
 					},
 					getConfigs() {

@@ -80,6 +80,7 @@ class WidgetController {
 			return;
 		}
 
+		/* @noinspection PhpUndefinedFunctionInspection */
 		$shipping_address = isset( $_POST['shipping_address'] ) ? array_map( 'sanitize_text_field', wp_unslash( $_POST['shipping_address'] ) ) : $session->get( 'customer' )['shipping'];
 		$billing_address  = [];
 
