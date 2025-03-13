@@ -44,8 +44,8 @@ class OrderService {
 		}
 
 		$order_status          = $order->get_status();
-		$total_refund          = $order->get_total_refunded();
-		$order_total           = (float) $order->get_total( false );
+		$total_refund          = round( (float) $order->get_total_refunded(), 2 );
+		$order_total           = round( (float) $order->get_total( false ), 2 );
 		$power_board_charge_id = $order->get_meta( '_power_board_charge_id' );
 		if (
 			$order_total === $total_refund ||

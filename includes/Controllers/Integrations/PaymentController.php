@@ -63,7 +63,7 @@ class PaymentController {
 
 		$action = isset( $_POST['action'] ) ? sanitize_text_field( wp_unslash( $_POST['action'] ) ) : '';
 
-		$amount_to_refund = $amount;
+		$amount_to_refund = round( (float) $amount, 2 );
 		if ( ( $action === 'edit_order' || $action === 'editpost' ) ) {
 			if ( $order->get_meta( '_status_change_verification_failed' ) ) {
 				$refund->set_amount( 0 );
