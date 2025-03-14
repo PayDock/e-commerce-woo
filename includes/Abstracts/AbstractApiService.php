@@ -29,7 +29,7 @@ abstract class AbstractApiService {
 	}
 
 	/**
-	 * Uses functions (wp_json_encode, wp_parse_args, _wp_http_get_object) from WordPress
+	 * Uses functions (wp_json_encode, wp_parse_args, wp_remote_request) from WordPress
 	 * Uses a function (WC) from WooCommerce
 	 */
 	protected function run_call( $args ): array {
