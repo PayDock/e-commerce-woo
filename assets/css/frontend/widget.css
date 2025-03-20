@@ -89,6 +89,11 @@
 	}
 }
 
+.woocommerce form .form-row.woocommerce-validated input.input-text.power-board-invalid-phone,
+.woocommerce form .form-row.woocommerce-validated input.input-text.power-board-invalid-postcode {
+	border-color: #cc1818;
+}
+
 .power-board-account-error-message {
 	color: #cc1818;
 	font-size: .75em;

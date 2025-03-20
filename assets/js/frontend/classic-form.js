@@ -554,8 +554,10 @@ jQuery(
 									},
 									success: ( response ) => {
 										if ( response.success ) {
+											const postcodeInput  = document.getElementById( 'billing_postcode' );
 											this.invalidPostcode = false;
 											document.querySelector( '.power-board-postcode-error-message' )?.remove();
+											postcodeInput.classList.remove( 'power-board-invalid-postcode' );
 										} else {
 											this.invalidPostcode = true;
 											const postcodeInput  = document.getElementById( 'billing_postcode' );
@@ -567,6 +569,7 @@ jQuery(
 											message.innerText = response.data.message;
 											messageContainer.appendChild( message );
 											postcodeInput.after( messageContainer );
+											postcodeInput.classList.add( 'power-board-invalid-postcode' );
 										}
 
 										this.setPaymentMethod( selectedPaymentMethod, forcePaymentMethodInit );
