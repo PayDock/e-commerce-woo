@@ -15,6 +15,9 @@ use WC_Data_Exception;
 
 class OrderHelper {
 	public static function update_order( &$order, $billing_address = null, $shipping_address = null ) {
+		if ( ! $order instanceof WC_Order ) {
+			return;
+		}
 		$order->remove_order_items();
 
 		/* @noinspection PhpUndefinedFunctionInspection */

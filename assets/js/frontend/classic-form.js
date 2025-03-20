@@ -214,9 +214,11 @@ jQuery(
 						}
 						this.selectedPaymentMethod = methodName;
 						let error                  = $( '#fields-validation-error' );
+						let createIntentError      = $( '#intent-creation-error' );
 						let loading                = $( '#loading' );
 						loading.show();
 						error.hide();
+						createIntentError.hide();
 
 						if ( !this.isValidForm( methodName ) ) {
 							this.toggleWidgetVisibility( true );
@@ -286,83 +288,94 @@ jQuery(
 										loading.hide();
 										error.show();
 									} else {
-										if (response.success && initTimestamp === this.lastMasterWidgetInit) {
-											// noinspection JSUnresolvedReference
-											this.toggleWidgetVisibility( false );
-											// noinspection JSUnresolvedReference
-											window.widgetPowerBoard = new cba.Checkout( '#classic-powerBoardCheckout_wrapper', response.data.token );
-											// noinspection JSUnresolvedReference
-											window.widgetPowerBoard.setEnv( this.getConfigs().environment )
-											const showError          = ( message ) => this.showErrorMessage( message );
-											const handleWidgetError  = () => this.handleWidgetError();
-											const reInitMasterWidget = () => this.reInitMasterWidget();
-											const submitForm         = () => this.form.submit();
-											const intentId           = response.data.intentId;
-											// noinspection JSUnresolvedReference
-											window.widgetPowerBoard.onPaymentSuccessful(
-												function ( data ) {
-													// noinspection JSUnresolvedReference
-													jQuery.ajax(
-														{
-															url: '/?wc-ajax=power-board-process-payment-result',
-															method: 'POST',
-															data: {
-																_wpnonce: PowerBoardAjaxCheckout.wpnonce_process_payment,
-																payment_response: data,
-																create_account: document.getElementById( 'createaccount' )?.checked,
-															},
-															success: function (response) {
-																if (response.success) {
-																	// noinspection JSUnresolvedReference
-																	jQuery( '#chargeid' ).val( data['charge_id'] );
-																	// noinspection JSUnresolvedReference
-																	jQuery( '#intentid' ).val( intentId );
-																	submitForm();
+										if (initTimestamp === this.lastMasterWidgetInit) {
+											if (response.success) {
+												// noinspection JSUnresolvedReference
+												this.toggleWidgetVisibility( false );
+												// noinspection JSUnresolvedReference
+												window.widgetPowerBoard = new cba.Checkout( '#classic-powerBoardCheckout_wrapper', response.data.token );
+												// noinspection JSUnresolvedReference
+												window.widgetPowerBoard.setEnv( this.getConfigs().environment )
+												const showError          = ( message ) => this.showErrorMessage( message );
+												const handleWidgetError  = () => this.handleWidgetError();
+												const reInitMasterWidget = () => this.reInitMasterWidget();
+												const submitForm         = () => this.form.submit();
+												const intentId           = response.data.intentId;
+												// noinspection JSUnresolvedReference
+												window.widgetPowerBoard.onPaymentSuccessful(
+													function ( data ) {
+														// noinspection JSUnresolvedReference
+														jQuery.ajax(
+															{
+																url: '/?wc-ajax=power-board-process-payment-result',
+																method: 'POST',
+																data: {
+																	_wpnonce: PowerBoardAjaxCheckout.wpnonce_process_payment,
+																	payment_response: data,
+																	create_account: document.getElementById( 'createaccount' )?.checked,
+																},
+																success: function (response) {
+																	if (response.success) {
+																		// noinspection JSUnresolvedReference
+																		jQuery( '#chargeid' ).val( data['charge_id'] );
+																		// noinspection JSUnresolvedReference
+																		jQuery( '#intentid' ).val( intentId );
+																		submitForm();
 
+																		window.widgetPowerBoard = null;
+																	} else {
+																		showError( response.data.message );
+																		reInitMasterWidget();
+																	}
+																}
+															}
+														);
+													}
+												);
+												// noinspection JSUnresolvedReference
+												window.widgetPowerBoard.onPaymentFailure(
+													function ( data ) {
+														// noinspection JSUnresolvedReference
+														jQuery.ajax(
+															{
+																url: '/?wc-ajax=power-board-process-payment-result',
+																method: 'POST',
+																data: {
+																	_wpnonce: PowerBoardAjaxCheckout.wpnonce_process_payment,
+																	payment_response:
+																		{
+																			...data,
+																			errorMessage: data.message || 'Transaction failed',
+																	}
+																},
+																success: function () {
+																	showError( 'Transaction failed. Please check your payment details or contact your bank' );
+																	handleWidgetError();
 																	window.widgetPowerBoard = null;
-																} else {
-																	showError( response.data.message );
-																	reInitMasterWidget();
 																}
 															}
-														}
-													);
-												}
-											);
-											// noinspection JSUnresolvedReference
-											window.widgetPowerBoard.onPaymentFailure(
-												function ( data ) {
-													// noinspection JSUnresolvedReference
-													jQuery.ajax(
-														{
-															url: '/?wc-ajax=power-board-process-payment-result',
-															method: 'POST',
-															data: {
-																_wpnonce: PowerBoardAjaxCheckout.wpnonce_process_payment,
-																payment_response:
-																	{
-																		...data,
-																		errorMessage: data.message || 'Transaction failed',
-																}
-															},
-															success: function () {
-																showError( 'Transaction failed. Please check your payment details or contact your bank' );
-																handleWidgetError();
-																window.widgetPowerBoard = null;
-															}
-														}
-													);
-												}
-											);
-											// noinspection JSUnresolvedReference
-											window.widgetPowerBoard.onPaymentExpired(
-												function () {
-													showError( 'Your payment session has expired. Please retry your payment' );
+														);
+													}
+												);
+												// noinspection JSUnresolvedReference
+												window.widgetPowerBoard.onPaymentExpired(
+													function () {
+														showError( 'Your payment session has expired. Please retry your payment' );
 
-													handleWidgetError();
-													window.widgetPowerBoard = null;
-												}
-											);
+														handleWidgetError();
+														window.widgetPowerBoard = null;
+													}
+												);
+											} else {
+												// noinspection JSUnresolvedReference
+												let error = jQuery( '#intent-creation-error' );
+												// noinspection JSUnresolvedReference
+												let loading = jQuery( '#loading' );
+												this.toggleWidgetVisibility( true );
+												this.toggleOrderButton( true );
+												loading.hide();
+												error.show();
+											}
 										}
 									}
 								}
