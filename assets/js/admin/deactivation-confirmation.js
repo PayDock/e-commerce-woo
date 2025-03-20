@@ -5,21 +5,46 @@ jQuery(
 	function ($) {
 		$( document ).ready(
 			function () {
-				$( '#deactivate-powerboard-for-woocommerce' ).on(
-					'click',
-					function (e) {
-						e.preventDefault();
+				const waitForDeactivationButton = () => {
+					let attempts                 = 0;
+					const maxAttempts            = 10;
 
-						// noinspection JSUnresolvedReference
-						let urlRedirect = jQuery( this ).attr( 'href' );
-						// noinspection JSUnresolvedReference
-						let label = jQuery( this ).attr( 'aria-label' );
+					const interval                      = setInterval(
+						() => {
+							const deactivationButton           = $( '#deactivate-powerboard-for-woocommerce' );
+							if (deactivationButton.length) {
+								clearInterval( interval );
+								addDeactivationConfirmation( deactivationButton )
+							}
 
-						if (confirm( 'Are you sure ' + label + ' ?' )) {
-							window.location.href = urlRedirect;
+							if (attempts >= maxAttempts) {
+								clearInterval( interval );
+							}
+							attempts++;
+						},
+						500
+					);
+				};
+
+				const addDeactivationConfirmation = ( deactivationButton ) => {
+					deactivationButton.on(
+						'click',
+						function (e) {
+							e.preventDefault();
+
+							// noinspection JSUnresolvedReference
+							let urlRedirect = jQuery( this ).attr( 'href' );
+							// noinspection JSUnresolvedReference
+							let label = jQuery( this ).attr( 'aria-label' );
+
+							if (confirm( 'Are you sure ' + label + ' ?' )) {
+								window.location.href = urlRedirect;
+							}
 						}
-					}
-				);
+					);
+				};
+
+				waitForDeactivationButton();
 			}
 		);
 	}
