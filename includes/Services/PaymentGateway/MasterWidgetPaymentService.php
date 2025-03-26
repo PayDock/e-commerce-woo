@@ -13,6 +13,7 @@ use PowerBoard\Enums\EnvironmentSettingsEnum;
 use PowerBoard\Enums\MasterWidgetSettingsEnum;
 use PowerBoard\Enums\SettingGroupsEnum;
 use PowerBoard\Helpers\EnvironmentSettingsHelper;
+use PowerBoard\Helpers\LoggerHelper;
 use PowerBoard\Helpers\MasterWidgetSettingsHelper;
 use PowerBoard\Helpers\SettingGroupsHelper;
 use PowerBoard\Helpers\SettingsHelper;
@@ -354,6 +355,18 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$payment_data = ! empty( $_REQUEST['payment_response'] ) ? array_map( 'sanitize_text_field', wp_unslash( $_REQUEST['payment_response'] ) ) : [];
 
+		LoggerHelper::log_callback_event(
+			'Received callback from Checkout',
+			[
+				'order_id'         => $order_id ?? null,
+				'charge_id'        => $payment_data['charge_id'] ?? null,
+				'status'           => $payment_data['status'] ?? null,
+				'error_message'    => $payment_data['errorMessage'] ?? null,
+				'raw_data'         => $payment_data,
+			],
+			'info'
+		);
+
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$order = wc_get_order( $order_id );
 		if ( ! $order ) {
@@ -371,6 +384,16 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 			$order->update_status( 'failed' );
 			$order->add_order_note( 'Payment failed: ' . $error_message . '. Charge ID: ' . $charge_id );
 			$order->save();
+
+			LoggerHelper::log_callback_event(
+				'Payment error',
+				[
+					'order_id'      => $order_id ?? null,
+					'charge_id'     => $charge_id ?? null,
+					'error_message' => $error_message ?? null,
+				],
+				'error'
+			);
 
 			/* @noinspection PhpUndefinedFunctionInspection */
 			wp_send_json_success(
@@ -410,6 +433,15 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		$session = WC()->session;
 		$session->set( 'order_awaiting_payment', (string) $order_id );
 		$session->set( 'store_api_draft_order', (string) $order_id );
+
+		LoggerHelper::log_callback_event(
+			'Payment completed',
+			[
+				'order_id'  => $order_id ?? null,
+				'charge_id' => $charge_id ?? null,
+			],
+			'info'
+		);
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		wp_send_json_success( [], 200 );
