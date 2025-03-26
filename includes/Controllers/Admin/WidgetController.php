@@ -179,7 +179,7 @@ class WidgetController {
 
 		if ( ! empty( $result['error'] ) ) {
 			/* @noinspection PhpUndefinedFunctionInspection */
-			wp_send_json_error( [ 'message' => __( 'Something went wrong, please try again later.', 'power-board' ) ] );
+			wp_send_json_error( [ 'message' => __( 'Something went wrong, please refresh the page and try again.', 'power-board' ) ] );
 		}
 
 		$selected_shipping_id = $session->get( 'chosen_shipping_methods' )[0];
