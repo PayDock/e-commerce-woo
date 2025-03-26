@@ -72,4 +72,106 @@ class MasterWidgetTemplatesHelperTest extends TestCase {
 		];
 		$this->assertSame( $expected, $actual );
 	}
+
+	public static function validate_template_id( ?array $templates, bool $has_error, string $template_type_key, array $settings ): array {
+		$invalid_key = false;
+		if ( ! empty( $settings ) ) {
+			$selected_template = ! empty( $settings[ $template_type_key ] ) ? $settings[ $template_type_key ] : [];
+			if ( ! empty( $selected_template ) && ( $has_error || empty( $templates ) || ! array_key_exists( $selected_template, $templates ) ) ) {
+				$settings[ $template_type_key ] = '';
+				$invalid_key                    = true;
+			}
+		}
+
+		return [
+			'settings'    => $settings,
+			'invalid_key' => $invalid_key,
+		];
+	}
+	public function test_empty_settings_validate_template_id(): void {
+		$templates         = [
+			'test_template_id' => 'test_template_name | test_template_id',
+		];
+		$has_error         = false;
+		$template_type_key = 'test_template_key';
+		$settings          = [];
+		$actual            = MasterWidgetTemplatesHelper::validate_template_id( $templates, $has_error, $template_type_key, $settings );
+		$expected          = [
+			'settings'    => $settings,
+			'invalid_key' => false,
+		];
+		$this->assertSame( $expected, $actual );
+	}
+
+	public function test_empty_templates_validate_template_id(): void {
+		$templates         = [];
+		$has_error         = false;
+		$template_type_key = 'test_template_key';
+		$settings          = [
+			'test_template_key' => 'test_template_id',
+		];
+		$actual            = MasterWidgetTemplatesHelper::validate_template_id( $templates, $has_error, $template_type_key, $settings );
+		$expected          = [
+			'settings'    => [
+				'test_template_key' => '',
+			],
+			'invalid_key' => true,
+		];
+		$this->assertSame( $expected, $actual );
+	}
+
+	public function test_valid_validate_template_id(): void {
+		$templates         = [
+			'test_template_id' => 'test_template_name | test_template_id',
+		];
+		$has_error         = false;
+		$template_type_key = 'test_template_key';
+		$settings          = [
+			'test_template_key' => 'test_template_id',
+		];
+		$actual            = MasterWidgetTemplatesHelper::validate_template_id( $templates, $has_error, $template_type_key, $settings );
+		$expected          = [
+			'settings'    => $settings,
+			'invalid_key' => false,
+		];
+		$this->assertSame( $expected, $actual );
+	}
+
+	public function test_invalid_validate_template_id(): void {
+		$templates         = [
+			'test_template_id' => 'test_template_name | test_template_id',
+		];
+		$has_error         = true;
+		$template_type_key = 'test_template_key';
+		$settings          = [
+			'test_template_key' => 'test_template_invalid_id',
+		];
+		$actual            = MasterWidgetTemplatesHelper::validate_template_id( $templates, $has_error, $template_type_key, $settings );
+		$expected          = [
+			'settings'    => [
+				'test_template_key' => '',
+			],
+			'invalid_key' => true,
+		];
+		$this->assertSame( $expected, $actual );
+	}
+
+	public function test_template_error_validate_template_id(): void {
+		$templates         = [
+			'test_template_id' => 'test_template_name | test_template_id',
+		];
+		$has_error         = true;
+		$template_type_key = 'test_template_key';
+		$settings          = [
+			'test_template_key' => 'test_template_id',
+		];
+		$actual            = MasterWidgetTemplatesHelper::validate_template_id( $templates, $has_error, $template_type_key, $settings );
+		$expected          = [
+			'settings'    => [
+				'test_template_key' => '',
+			],
+			'invalid_key' => true,
+		];
+		$this->assertSame( $expected, $actual );
+	}
 }
