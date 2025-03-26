@@ -151,7 +151,7 @@ class MasterWidgetTemplatesHelperTest extends TestCase {
 			'settings'    => [
 				'test_template_key' => '',
 			],
-			'invalid_key' => true,
+			'invalid_key' => false,
 		];
 		$this->assertSame( $expected, $actual );
 	}
