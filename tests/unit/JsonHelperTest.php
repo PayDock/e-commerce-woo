@@ -24,6 +24,6 @@ class JsonHelperTest extends TestCase {
 					'message' => 'The requested refund amount exceeds the available charge/transaction amount. Available amount is 1.99',
 				],
 			];
-		$this->assertSame( $expected, $actual );
+		$this->assertSame( $expected, $actual, 'Should decode the JSON string and return a valid JSON object.' );
 	}
 }
