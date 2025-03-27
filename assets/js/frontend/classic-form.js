@@ -393,6 +393,10 @@ jQuery(
 								let type = 'input';
 								if ( fieldName.includes( 'state' ) || fieldName.includes( 'country' ) ) {
 									type = 'select'
+
+									if ( fieldName.includes( 'country' ) && document.querySelectorAll( `select[name="country"]` ).length === 0 ) {
+										type = 'input'
+									}
 								}
 								let elements   = document.querySelectorAll( `${type}[name="${fieldName}"]` );
 								let value      = elements.length > 0 ? elements[0].value : null;

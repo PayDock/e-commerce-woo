@@ -89,6 +89,26 @@ class WidgetController {
 			$billing_address = array_map( 'sanitize_text_field', wp_unslash( $_POST['address'] ) );
 		}
 
+		if ( empty( $billing_address['country'] ) || empty( $shipping_address['country'] ) ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			$countries = WC()->countries;
+			if ( ! empty( $countries ) ) {
+				$allowed_countries = $countries->get_allowed_countries();
+
+				if ( count( $allowed_countries ) === 1 ) {
+					$allowed_country = key( $allowed_countries );
+
+					if ( empty( $billing_address['country'] ) ) {
+						$billing_address['country'] = $allowed_country;
+					}
+
+					if ( empty( $shipping_address['country'] ) ) {
+						$shipping_address['country'] = $allowed_country;
+					}
+				}
+			}
+		}
+
 		if ( ! empty( $_POST['order_id'] ) ) {
 			/* @noinspection PhpUndefinedFunctionInspection */
 			$reference = sanitize_text_field( wp_unslash( $_POST['order_id'] ) );
