@@ -394,7 +394,7 @@ jQuery(
 								if ( fieldName.includes( 'state' ) || fieldName.includes( 'country' ) ) {
 									type = 'select'
 
-									if ( fieldName.includes( 'country' ) && document.querySelectorAll( `select[name="country"]` ).length === 0 ) {
+									if ( fieldName.includes( 'country' ) && document.querySelectorAll( `select[name="${fieldName}"]` ).length === 0 ) {
 										type = 'input'
 									}
 								}
