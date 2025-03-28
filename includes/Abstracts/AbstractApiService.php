@@ -23,8 +23,9 @@ abstract class AbstractApiService {
 			],
 		];
 
-		if ( ! empty( ConfigService::$access_token ) ) {
-			$args['headers']['x-access-token'] = ConfigService::$access_token;
+		$token = pb_get_access_token();
+		if ( ! empty( $token ) ) {
+			$args['headers']['x-access-token'] = $token;
 		}
 
 		return $this->run_call( $args );
@@ -35,7 +36,7 @@ abstract class AbstractApiService {
 	 * Uses a function (WC) from WooCommerce
 	 */
 	protected function run_call( $args ): array {
-		$url = ConfigService::build_api_url( $this->build_endpoint() );
+		$url = pb_build_api_url( $this->build_endpoint() );
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$args['headers']['X-Power-Board-Meta'] = 'V'
 												. POWER_BOARD_PLUGIN_VERSION
