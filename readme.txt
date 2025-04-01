@@ -91,6 +91,7 @@ Also, we use helper code that not need compile what contained in assets path.
   - Resolved duplicate error messages on the settings page when the Version or Configuration template was not selected.
   - Addressed issue where the widget failed to load on classic checkout when only one country was selected as the selling location.
   - Fixed issue where the refund button was still visible on an order that had already been fully refunded.
+  - Removed "Place order" button when order is updated using multiple tabs.
 
 * Technical Changes
 
