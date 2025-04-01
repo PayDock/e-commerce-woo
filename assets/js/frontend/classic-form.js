@@ -436,11 +436,10 @@ jQuery(
 						}
 						this.toggleWidgetVisibility( true );
 
-						this.totalChangesTimeout          = setTimeout(
+						this.totalChangesTimeout = setTimeout(
 							() => {
-								const orderTotal          = this.getUIOrderTotal();
-								const cartTotal           = +event.detail.cartTotal;
-								this.currentSavedShipping = event.detail.shippingId;
+								const orderTotal = this.getUIOrderTotal();
+								const cartTotal  = +event.detail.cartTotal;
 								if (orderTotal) {
 									const address = this.getAddressData( true );
 									if (orderTotal !== cartTotal && this.lastAddressVerified === address) {
@@ -452,8 +451,12 @@ jQuery(
 												const orderTotal       = this.getUIOrderTotal();
 												if (orderTotal) {
 													if (orderTotal !== cartTotal) {
-														// noinspection JSUnresolvedReference
-														$( document.body ).trigger( 'update_checkout' );
+														if (this.currentSavedShipping === event.detail.shippingId) {
+															window.reloadAfterExternalCartChanges();
+														} else {
+															// noinspection JSUnresolvedReference
+															$( document.body ).trigger( 'update_checkout' );
+														}
 													}
 
 													this.initMasterWidget();
@@ -465,6 +468,7 @@ jQuery(
 										this.initMasterWidget();
 									}
 								}
+								this.currentSavedShipping = event.detail.shippingId;
 						},
 							300
 						)

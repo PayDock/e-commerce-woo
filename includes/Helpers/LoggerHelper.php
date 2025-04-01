@@ -27,7 +27,7 @@ class LoggerHelper {
 		$message = $request_action;
 
 		if ( ! empty( $result['order_id'] ) ) {
-			$message  = '[order_id: ' . $result['order_id'] . '] ' . $message;
+			$message             = '[order_id: ' . $result['order_id'] . '] ' . $message;
 			$context['order_id'] = $result['order_id'];
 		}
 

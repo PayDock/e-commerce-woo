@@ -6,17 +6,16 @@ jQuery(
 		$( document ).ready(
 			function () {
 				const waitForDeactivationButton = () => {
-					let attempts                 = 0;
-					const maxAttempts            = 10;
+					let attempts                = 0;
+					const maxAttempts           = 10;
 
-					const interval                      = setInterval(
+					const interval                   = setInterval(
 						() => {
-							const deactivationButton           = $( '#deactivate-powerboard-for-woocommerce' );
+							const deactivationButton = $( '#deactivate-powerboard-for-woocommerce' );
 							if (deactivationButton.length) {
 								clearInterval( interval );
 								addDeactivationConfirmation( deactivationButton )
 							}
-
 							if (attempts >= maxAttempts) {
 								clearInterval( interval );
 							}

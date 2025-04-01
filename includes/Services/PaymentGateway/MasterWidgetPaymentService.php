@@ -358,11 +358,11 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		LoggerHelper::log_callback_event(
 			'Received callback from Checkout',
 			[
-				'order_id'         => $order_id ?? null,
-				'charge_id'        => $payment_data['charge_id'] ?? null,
-				'status'           => $payment_data['status'] ?? null,
-				'error_message'    => $payment_data['errorMessage'] ?? null,
-				'raw_data'         => $payment_data,
+				'order_id'      => $order_id ?? null,
+				'charge_id'     => $payment_data['charge_id'] ?? null,
+				'status'        => $payment_data['status'] ?? null,
+				'error_message' => $payment_data['errorMessage'] ?? null,
+				'raw_data'      => $payment_data,
 			],
 			'info'
 		);
