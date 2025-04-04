@@ -1,149 +1,108 @@
 <?php
+declare( strict_types=1 );
 
-namespace Paydock\API;
+namespace WooPlugin\API;
 
-use Paydock\Abstracts\AbstractApiService;
+use WooPlugin\Abstracts\AbstractApiService;
+use WooPlugin\Enums\APIActionEnum;
 
 class ChargeService extends AbstractApiService {
-	const ENDPOINT = 'charges';
-	const WALLETS_INITIALIZE_ENDPOINT = 'wallet';
-	const STANDALONE_FRAUD_ENDPOINT = 'fraud';
-	const STANDALONE_3DS_ENDPOINT = 'standalone-3ds';
-	const CAPTURE_ENDPOINT = 'capture';
-	const REFUNDS_ENDPOINT = 'refunds';
-	const FRAUD_ATTACH_ENDPOINT = 'fraud/attach';
+	const ENDPOINT                  = 'charges';
+	const CREATE_INTENT_ENDPOINT    = 'checkouts/intent';
+	const GET_INTENT_BY_ID_ENDPOINT = 'checkouts';
+	const GET_TEMPLATES_ENDPOINT    = 'checkouts/templates';
+	const REFUNDS_ENDPOINT          = 'refunds';
 
-	protected $directCharge = null;
-
-	protected $id = null;
-	protected $allowedAction = [ 
-		'create' => self::METHOD_POST,
-		'update' => self::METHOD_POST,
-		'wallet-initialize' => self::METHOD_POST,
-		'standalone-fraud' => self::METHOD_POST,
-		'standalone-3ds' => self::METHOD_POST,
-		'capture' => self::METHOD_POST,
-		'refunds' => self::METHOD_POST,
-		'cancel-authorised' => self::METHOD_DELETE,
-		'fraud-attach' => self::METHOD_POST,
+	protected array $allowed_action = [
+		'create-intent'    => self::METHOD_POST,
+		'get-intent-by-id' => self::METHOD_GET,
+		'templates'        => self::METHOD_GET,
+		'refunds'          => self::METHOD_POST,
 	];
 
-	public function create( array $params ): self {
-		$this->parameters = $params;
+	public function create_checkout_intent( array $params ): self {
+		$this->parameters     = $params;
+		$this->request_action = APIActionEnum::CREATE_INTENT;
 
-		$this->setAction( 'create' );
-
-		return $this;
-	}
-
-	public function update( string $id, array $params ): self {
-		$this->id = $id;
-		$this->parameters = $params;
-
-		$this->setAction( 'update' );
+		$this->set_action( 'create-intent' );
 
 		return $this;
 	}
 
-	public function standaloneFraud( array $params ): self {
-		$this->parameters = $params;
+	public function get_checkout_intent_by_id( array $params ): self {
+		$this->parameters     = $params;
+		$this->request_action = APIActionEnum::VALIDATE_INTENT_STATUS;
 
-		$this->setAction( 'standalone-fraud' );
-
-		return $this;
-	}
-
-	public function standalone3Ds( array $params ): self {
-		$this->parameters = $params;
-
-		$this->setAction( 'standalone-3ds' );
+		$this->set_action( 'get-intent-by-id' );
 
 		return $this;
 	}
 
-	public function walletsInitialize( array $params, ?bool $directCharge ): self {
-		$this->parameters = $params;
+	public function get_configuration_templates_ids( string $version ): self {
+		$this->parameters = [
+			'type'    => 'configuration',
+			'version' => $version,
+		];
 
-		$this->setAction( 'wallet-initialize' );
-
-		$this->directCharge = $directCharge;
+		$this->set_action( 'templates' );
+		$this->request_action = APIActionEnum::GET_CONFIGURATION_TEMPLATE_IDS;
 
 		return $this;
 	}
 
-	public function capture( array $params ): self {
-		$this->parameters = $params;
+	public function get_configuration_templates_for_validation(): self {
+		$this->parameters = [ 'type' => 'configuration' ];
+		$this->set_action( 'templates' );
+		$this->request_action = APIActionEnum::GET_CONFIGURATION_TEMPLATES_FOR_VALIDATION;
 
-		$this->setAction( 'capture' );
+		return $this;
+	}
+
+	public function get_customisation_templates_ids( string $version ): self {
+		$this->parameters     = [
+			'type'    => 'customisation',
+			'version' => $version,
+		];
+		$this->request_action = APIActionEnum::GET_CUSTOMISATION_TEMPLATE_IDS;
+
+		$this->set_action( 'templates' );
 
 		return $this;
 	}
 
 
 	public function refunds( array $params ): self {
-		$this->parameters = $params;
+		$this->parameters     = $params;
+		$this->request_action = APIActionEnum::REFUND;
 
-		$this->setAction( 'refunds' );
-
-		return $this;
-	}
-
-	public function cancelAuthorised( array $params ): self {
-		$this->parameters = $params;
-
-		$this->setAction( 'cancel-authorised' );
+		$this->set_action( 'refunds' );
 
 		return $this;
 	}
 
-	public function fraudAttach( string $id, array $params ): self {
-		$this->id = $id;
-		$this->parameters = $params;
-
-		$this->setAction( 'fraud-attach' );
-
-		return $this;
-	}
-
-	protected function buildEndpoint(): ?string {
+	protected function build_endpoint(): ?string {
 		switch ( $this->action ) {
-			case 'create':
-				$result = self::ENDPOINT;
-				if ( isset( $this->parameters['capture'] ) ) {
-					$result .= '?capture=' . ( $this->parameters['capture'] ? 'true' : 'false' );
-					unset( $this->parameters['capture'] );
-				}
-				break;
-			case 'standalone-fraud':
-				$result = self::ENDPOINT . '/' . self::STANDALONE_FRAUD_ENDPOINT;
-				break;
-			case 'standalone-3ds':
-				$result = self::ENDPOINT . '/' . self::STANDALONE_3DS_ENDPOINT;
-				break;
 			case 'refunds':
 				$result = self::ENDPOINT . '/' . $this->parameters['charge_id'] . '/' . self::REFUNDS_ENDPOINT;
 				unset( $this->parameters['charge_id'] );
 				break;
-			case 'capture':
-			case 'cancel-authorised':
-				$result = self::ENDPOINT . '/' . $this->parameters['charge_id'] . '/' . self::CAPTURE_ENDPOINT;
+			case 'create-intent':
+				$result = self::CREATE_INTENT_ENDPOINT;
+				break;
+			case 'get-intent-by-id':
+				$result = self::GET_INTENT_BY_ID_ENDPOINT . '/' . $this->parameters['intent_id'];
+				unset( $this->parameters['intent_id'] );
+				break;
+			case 'templates':
+				$result  = self::GET_TEMPLATES_ENDPOINT . '?type=' . $this->parameters['type'];
+				$version = $this->parameters['version'];
+				if ( ! empty( $version ) ) {
+					$result .= '&version=' . $version;
+				}
 				unset( $this->parameters['charge_id'] );
-				break;
-			case 'wallet-initialize':
-				$result = self::ENDPOINT . '/' . self::WALLETS_INITIALIZE_ENDPOINT;
-				break;
-			case 'update':
-				$result = self::ENDPOINT . '/' . $this->id;
-				break;
-			case 'fraud-attach':
-				$result = self::ENDPOINT . '/' . $this->id . '/' . self::FRAUD_ATTACH_ENDPOINT;
 				break;
 			default:
 				$result = self::ENDPOINT;
-		}
-
-		if ( isset( $this->directCharge ) && ! is_null( $this->directCharge ) ) {
-			$result .= '?capture=' . ( $this->directCharge ? 'true' : 'false' );
 		}
 
 		return $result;

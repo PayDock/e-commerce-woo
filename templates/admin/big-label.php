@@ -1,9 +1,28 @@
-<?php if ( ! defined( 'ABSPATH' ) ) {
+<?php
+declare( strict_types=1 );
+/**
+ * This file uses a function (esc_html) from WordPress
+ *
+ * @var array $data
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
 	exit;
-} // Exit if accessed directly ?>
-<tr valign="top">
+}
+
+if ( isset( $data['value'] ) ) {
+	$value = $data['value'];
+}
+
+?>
+<tr>
 	<th scope="row" class="titledesc">
-		<h1><?php echo wp_kses_post( $value['title'] ); ?></h1>
+		<h1>
+		<?php
+		/* @noinspection PhpUndefinedFunctionInspection */
+		echo isset( $value['title'] ) ? esc_html( $value['title'] ) : '';
+		?>
+		</h1>
 	</th>
 	<td class="forminp">
 	</td>

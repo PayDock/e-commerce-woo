@@ -1,64 +1,59 @@
 <?php
+declare( strict_types=1 );
 
-namespace Paydock\Services\Validation;
+namespace WooPlugin\Services\Validation;
 
 use Exception;
-use Paydock\Abstracts\AbstractSettingService;
-use Paydock\API\ConfigService;
-use Paydock\Enums\BankAccountSettings;
-use Paydock\Enums\CardSettings;
-use Paydock\Enums\CredentialSettings;
-use Paydock\Enums\CredentialsTypes;
-use Paydock\Enums\DSTypes;
-use Paydock\Enums\FraudTypes;
-use Paydock\Enums\NotificationEvents;
-use Paydock\Enums\OtherPaymentMethods;
-use Paydock\Enums\SettingGroups;
-use Paydock\Enums\SettingsTabs;
-use Paydock\Enums\WalletPaymentMethods;
-use Paydock\Enums\WalletSettings;
-use Paydock\Services\SDKAdapterService;
-use Paydock\Services\SettingsService;
+use WooPlugin\API\ConfigService;
+use WooPlugin\Enums\EnvironmentSettingsEnum;
+use WooPlugin\Enums\MasterWidgetSettingsEnum;
+use WooPlugin\Enums\SettingGroupsEnum;
+use WooPlugin\Helpers\MasterWidgetTemplatesHelper;
+use WooPlugin\Helpers\SettingsHelper;
+use WooPlugin\Services\Settings\APIAdapterService;
+use WooPlugin\Services\PaymentGateway\MasterWidgetPaymentService;
 
 class ConnectionValidationService {
-	private $oldAccessToken = null;
-	private $oldWidgetAccessToken = null;
-	private $oldPublicKey = null;
-	private $oldSecretKey = null;
-	private const ENABLED_CONDITION = 'yes';
+	private ?string $old_access_token                     = null;
+	private static bool $invalid_credentials_shown_global = false;
+	private static bool $no_version_selected_shown_global = false;
+	private static bool $no_config_template_shown_global  = false;
 
-	private const UNSELECTED_CRD_VALUE = 'Please select payment methods...';
+	public ?MasterWidgetPaymentService $service = null;
+	private ?array $errors                      = [];
+	private ?array $data                        = [];
+	private ?string $environment_settings       = null;
+	private ?string $access_token_settings      = null;
+	private ?string $configuration_id_settings  = null;
+	private ?string $checkout_version           = null;
+	private APIAdapterService $widget_api_adapter_service;
 
-	private const AVAILABLE_CARD_TYPES = [
-		'mastercard' => 'MasterCard',
-		'visa' => 'Visa',
-		'amex' => 'American Express',
-		'diners' => 'Diners Club',
-		'japcb' => 'Japanese Credit Bureau',
-		'maestro' => 'Maestro',
-		'ausbc' => 'Australian Bank Card',
-	];
-	private const IS_WEBHOOK_SET_OPTION = 'is_paydock_webhook_set';
 
-	public $service = null;
-	private $errors = [];
-	private $result = [];
-	private $data = [];
-	private $getawayIds = [];
-	private $servicesIds = [];
-	private $adapterService = null;
-
-	public function __construct( AbstractSettingService $service ) {
+	/**
+	 * Uses functions (do_action, update_option and apply_filters) from WordPress
+	 * Uses a method (get_option_key) from WooCommerce
+	 */
+	public function __construct( MasterWidgetPaymentService $service ) {
 		$this->service = $service;
-		$this->adapterService = SDKAdapterService::getInstance();
-		$this->adapterService->initialise( SettingsTabs::LIVE_CONNECTION()->value === $this->service->id );
+		$this->prepare_form_data();
 
-		$this->prepareFormData();
+		$this->set_api_init_variables();
+
+		$this->widget_api_adapter_service = APIAdapterService::get_instance();
+		$this->widget_api_adapter_service->initialise( $this->environment_settings, $this->access_token_settings );
+
 		$this->validate();
-
+		/* @noinspection PhpUndefinedMethodInspection */
 		$option_key = $service->get_option_key();
+		/* @noinspection PhpUndefinedFunctionInspection */
 		do_action( 'woocommerce_update_option', [ 'id' => $option_key ] );
 
+		/**
+		 * Filter
+		 *
+		 * @noinspection PhpUndefinedFunctionInspection
+		 * @since 1.0.0
+		 */
 		update_option(
 			$option_key,
 			apply_filters( 'woocommerce_settings_api_sanitized_fields_' . $service->id, $service->settings ),
@@ -66,532 +61,220 @@ class ConnectionValidationService {
 		);
 	}
 
-	private function prepareFormData(): void {
+	/**
+	 * Uses a function (do_action) from WordPress
+	 */
+	private function prepare_form_data(): void {
+		/* @noinspection PhpUndefinedMethodInspection */
 		$post_data = $this->service->get_post_data();
+		/* @noinspection PhpUndefinedMethodInspection */
 		foreach ( $this->service->get_form_fields() as $key => $field ) {
 			try {
+				/* @noinspection PhpUndefinedMethodInspection */
 				$this->data[ $key ] = $this->service->get_field_value( $key, $field, $post_data );
-				$this->result[ $key ] = $this->data[ $key ];
 
-				if ( 'select' === $field['type'] || 'checkbox' === $field['type'] ) {
-					do_action( 'woocommerce_update_non_option_setting', [
-						'id' => $key,
-						'type' => $field['type'],
-						'value' => $this->data[ $key ],
-					] );
+				if ( $field['type'] === 'select' || $field['type'] === 'checkbox' ) {
+					/* @noinspection PhpUndefinedFunctionInspection */
+					do_action(
+						'woocommerce_update_non_option_setting',
+						[
+							'id'    => $key,
+							'type'  => $field['type'],
+							'value' => $this->data[ $key ],
+						]
+					);
 				}
-			} catch (Exception $e) {
+			} catch ( Exception $e ) {
+				/* @noinspection PhpUndefinedMethodInspection */
 				$this->service->add_error( $e->getMessage() );
 			}
 		}
 	}
 
 	private function validate(): void {
-		if ( $this->validateCredential() ) {
-			$this->validateCard();
-			$this->validateWallets();
-			$this->validateAPMs();
-			$this->setWebhooks();
+		if ( $this->validate_environment() ) {
+			$this->validate_credential();
 		}
 	}
 
-	private function validateCredential(): bool {
-		$accessKey = SettingsService::getInstance()
-			->getOptionName( $this->service->id, [
-				SettingGroups::CREDENTIALS()->name,
-				CredentialSettings::ACCESS_KEY()->name,
-			] );
+	private function set_api_init_variables(): void {
+		$environment_settings_key   = SettingsHelper::get_option_name(
+			$this->service->id,
+			[
+				SettingGroupsEnum::ENVIRONMENT,
+				EnvironmentSettingsEnum::ENVIRONMENT,
+			]
+		);
+		$this->environment_settings = $this->data[ $environment_settings_key ];
 
-		$widgetKey = SettingsService::getInstance()
-			->getOptionName( $this->service->id, [
-				SettingGroups::CREDENTIALS()->name,
-				CredentialSettings::WIDGET_KEY()->name,
-			] );
+		$version_settings_key   = SettingsHelper::get_option_name(
+			$this->service->id,
+			[
+				SettingGroupsEnum::CHECKOUT,
+				MasterWidgetSettingsEnum::VERSION,
+			]
+		);
+		$this->checkout_version = $this->data[ $version_settings_key ];
 
-		$publicKey = SettingsService::getInstance()
-			->getOptionName( $this->service->id, [
-				SettingGroups::CREDENTIALS()->name,
-				CredentialSettings::PUBLIC_KEY()->name,
-			] );
+		$access_token_settings_key   = SettingsHelper::get_option_name(
+			$this->service->id,
+			[
+				SettingGroupsEnum::CREDENTIALS,
+				'ACCESS_KEY',
+			]
+		);
+		$this->access_token_settings = $this->data[ $access_token_settings_key ];
 
-		$secretKey = SettingsService::getInstance()
-			->getOptionName( $this->service->id, [
-				SettingGroups::CREDENTIALS()->name,
-				CredentialSettings::SECRET_KEY()->name,
-			] );
+		$configuration_template_setting_key = SettingsHelper::get_option_name(
+																$this->service->id,
+																[
+																	SettingGroupsEnum::CHECKOUT,
+																	MasterWidgetSettingsEnum::CONFIGURATION_ID,
+																]
+															);
+		$this->configuration_id_settings    = $this->data[ $configuration_template_setting_key ];
+	}
 
-		$typeKey = SettingsService::getInstance()
-			->getOptionName( $this->service->id, [
-				SettingGroups::CREDENTIALS()->name,
-				CredentialSettings::TYPE()->name,
-			] );
-
-		$isAccessKey = CredentialsTypes::ACCESS_KEY()->name == $this->data[ $typeKey ];
-
-		if (
-			(
-				$isAccessKey
-				&& ! empty( $this->data[ $accessKey ] )
-				&& ! empty( $this->data[ $widgetKey ] )
-				&& $this->checkAccessKeyConnection( $this->data[ $accessKey ] )
-				&& $this->checkWidgetKeyConnection( $this->data[ $widgetKey ] )
-			) || (
-				! $isAccessKey
-				&& ! empty( $this->data[ $publicKey ] )
-				&& ! empty( $this->data[ $secretKey ] )
-				&& $this->checkCredentialConnection( $this->data[ $publicKey ], $this->data[ $secretKey ] )
-			)
-		) {
+	private function validate_environment(): bool {
+		if ( ! empty( $this->environment_settings ) ) {
 			return true;
 		}
 
-		$this->errors[] = 'Invalid credentials. Please update and try again. ';
-
+		$this->errors[] = 'No environment selected. Please select an environment and try again.';
 		return false;
 	}
 
-	private function checkAccessKeyConnection( ?string $accessToken ): bool {
-		$this->saveOldCredential();
-		if ( $accessToken === '********************' || $accessToken === null ) {
-			$accessToken = $this->oldAccessToken;
-		}
-
-		ConfigService::$accessToken = $accessToken;
-		ConfigService::$publicKey = null;
-		ConfigService::$secretKey = null;
-
-		$this->getawayIds = $this->adapterService->searchGateway( [ 'sort_direction' => 'DESC' ] );
-		$this->servicesIds = $this->adapterService->searchServices( [ 'sort_direction' => 'DESC' ] );
-
-		$result = empty( $this->getawayIds['error'] );
-
-		$this->restoreCredential();
-
-		if ( $result ) {
-			ConfigService::$accessToken = $accessToken;
-		}
-
-		return $result;
-	}
-	private function saveOldCredential() {
-		$this->oldAccessToken = ConfigService::$accessToken;
-		$this->oldWidgetAccessToken = ConfigService::$widgetAccessToken;
-		$this->oldPublicKey = ConfigService::$publicKey;
-		$this->oldSecretKey = ConfigService::$secretKey;
-	}
-
-	private function restoreCredential() {
-		ConfigService::$accessToken = $this->oldAccessToken;
-		ConfigService::$widgetAccessToken = $this->oldWidgetAccessToken;
-		ConfigService::$publicKey = $this->oldPublicKey;
-		ConfigService::$secretKey = $this->oldSecretKey;
-	}
-	private function checkWidgetKeyConnection( ?string $widgetAccessToken ): bool {
-		$this->saveOldCredential();
-		if ( $widgetAccessToken === '********************' || $widgetAccessToken === null ) {
-			$widgetAccessToken = $this->oldWidgetAccessToken;
-		}
-
-		ConfigService::$widgetAccessToken = $widgetAccessToken;
-		ConfigService::$publicKey = null;
-		ConfigService::$secretKey = null;
-
-		$result = $this->adapterService->token([ 'gateway_id' => '', 'type' => '' ], true);
-		$result = empty( $result['error'] );
-
-		$this->restoreCredential();
-
-		return $result;
-	}
-
-	private function checkCredentialConnection( ?string $public, ?string $secret ): bool {
-		$this->saveOldCredential();
-		if ( $secret === '********************' || $secret === null ) {
-			$secret = $this->oldSecretKey;
-		}
-		if ( $public === '********************' || $public === null ) {
-			$public = $this->oldPublicKey;
-		}
-		ConfigService::$publicKey = $public;
-		ConfigService::$secretKey = $secret;
-		ConfigService::$accessToken = null;
-		ConfigService::$widgetAccessToken = null;
-
-		$result = $this->checkPublicKey() && $this->checkSecretKey();
-
-		if (!$result) {
-			$this->restoreCredential();
-		}
-		return $result;
-	}
-
-	private function checkPublicKey(): bool {
-		$result = $this->adapterService->token();
-		$result = empty( $result['error'] );
-		return $result;
-	}
-
-	private function checkSecretKey(): bool {
-		$this->getawayIds = $this->adapterService->searchGateway( [ 'sort_direction' => 'DESC' ] );
-		$this->servicesIds = $this->adapterService->searchServices( [ 'sort_direction' => 'DESC' ] );
-
-		$result = empty( $this->getawayIds['error'] );
-		return $result;
-	}
-
-	private function validateCard(): void {
-		$enableKey = SettingsService::getInstance()
-			->getOptionName( $this->service->id, [
-				SettingGroups::CARD()->name,
-				CardSettings::ENABLE()->name,
-			] );
-
-		$gatewayIdKey = SettingsService::getInstance()
-			->getOptionName( $this->service->id, [
-				SettingGroups::CARD()->name,
-				CardSettings::GATEWAY_ID()->name,
-			] );
-
-		$fraudEnableServiceKey = SettingsService::getInstance()
-			->getOptionName( $this->service->id, [
-				SettingGroups::CARD()->name,
-				CardSettings::FRAUD()->name,
-			] );
-
-		$fraudGatewayIdKey = SettingsService::getInstance()
-			->getOptionName( $this->service->id, [
-				SettingGroups::CARD()->name,
-				CardSettings::FRAUD_SERVICE_ID()->name,
-			] );
-
-		$_3DSEnableServiceKey = SettingsService::getInstance()
-			->getOptionName( $this->service->id, [
-				SettingGroups::CARD()->name,
-				CardSettings::DS()->name,
-			] );
-
-		$_3DSGatewayIdKey = SettingsService::getInstance()
-			->getOptionName( $this->service->id, [
-				SettingGroups::CARD()->name,
-				CardSettings::DS_SERVICE_ID()->name,
-			] );
-
-		$this->result[ $enableKey ] = $this->data[ $enableKey ];
-
-		if ( 'yes' !== $this->data[ $enableKey ] ) {
-			$this->result[ $gatewayIdKey ] = $this->data[ $gatewayIdKey ];
-		}
-
-		$supportedCardTypesKey = SettingsService::getInstance()->getOptionName( $this->service->id, [
-			SettingGroups::CARD()->name,
-			CardSettings::SUPPORTED_CARD_TYPES()->name,
-		] );
-
-
-		if ( 'yes' == $this->data[ $enableKey ] && ! empty( $this->data[ $gatewayIdKey ] ) ) {
-			$isValidGateway = $this->validateId( $this->data[ $gatewayIdKey ] );
-			if ( $isValidGateway ) {
-				$this->result[ $gatewayIdKey ] = $this->data[ $gatewayIdKey ];
-				$supportCardTypeByGatewayId = $this->getSupportCardTypeByGatewayId( $this->data[ $gatewayIdKey ] );
-				if ( $supportCardTypeByGatewayId ) {
-					if ( $this->data[ $supportedCardTypesKey ] ) {
-						if ( self::UNSELECTED_CRD_VALUE == $this->data[ $supportedCardTypesKey ] ) {
-							$this->errors[] = 'You have not selected a supported card type. Please choose from the list of supported card types to continue.';
-						} else {
-							$supportCardType = strtolower(
-								str_replace(
-									' ',
-									'',
-									$this->data[ $supportedCardTypesKey ]
-								)
-							);
-							$arraySupportedCardTypesKeys = explode( ',', $supportCardType );
-							if ( empty(
-								array_intersect(
-									$arraySupportedCardTypesKeys,
-									array_keys( self::AVAILABLE_CARD_TYPES )
-								)
-							) ) {
-								$this->errors[] = 'The selected card types (' . implode(
-									',',
-									$arraySupportedCardTypesKeys
-								) . ') are not supported with this Gateway ID.';
-							}
-						}
-					} else {
-						$this->errors[] = 'You have not selected a supported card type. Please choose from the list of supported card types to continue.';
-					}
-				}
-
-			} else {
-				$this->errors[] = 'Incorrect Gateway ID for the card: ' . $this->data[ $gatewayIdKey ];
-			}
-
-			if (
-				$isValidGateway
-				&& ( FraudTypes::DISABLE()->name !== $this->data[ $fraudEnableServiceKey ] )
-				&& ! $this->validateId( $this->data[ $fraudGatewayIdKey ] )
-			) {
-				$this->errors[] = 'Incorrect Fraud Service ID: ' . $this->data[ $fraudGatewayIdKey ];
-			}
-
-			if (
-				$isValidGateway
-				&& ( DSTypes::STANDALONE()->name === $this->data[ $_3DSEnableServiceKey ] )
-				&& ! $this->validateId( $this->data[ $_3DSGatewayIdKey ] )
-			) {
-				$this->errors[] = 'Incorrect 3DS Service ID: ' . $this->data[ $_3DSGatewayIdKey ];
-			}
-		}
-	}
-
-	private function validateId( string $id, bool $fraudPassiveMode = false ): bool {
-		foreach ( $this->getawayIds['resource']['data'] as $getawayId ) {
-			if ( $getawayId['_id'] == $id ) {
-				return true;
-			}
-		}
-
-		foreach ( $this->servicesIds['resource']['data'] as $servicesId ) {
-			if (
-				(
-					! $fraudPassiveMode
-					&& $id == $servicesId['_id']
-				) || (
-					$id == $servicesId['_id']
-					&& $fraudPassiveMode
-					&& isset( $servicesId['fraud_options']['mode'] )
-					&& 'active' !== $servicesId['fraud_options']['mode']
-				)
-			) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	private function getSupportCardTypeByGatewayId( $gatewayIdKey ): ?string {
-		foreach ( $this->getawayIds['resource']['data'] as $getawayId ) {
-			if ( $getawayId['_id'] == $gatewayIdKey ) {
-				return strtolower( $getawayId['type'] );
-			}
-		}
-
-		return false;
-	}
-
-	private function validateBankAccount(): void {
-		return;
-
-		$enabledKey = SettingsService::getInstance()
-			->getOptionName( $this->service->id, [
-				SettingGroups::BANK_ACCOUNT()->name,
-				BankAccountSettings::ENABLE()->name,
-			] );
-		$gatewayKey = SettingsService::getInstance()
-			->getOptionName( $this->service->id, [
-				SettingGroups::BANK_ACCOUNT()->name,
-				BankAccountSettings::GATEWAY_ID()->name,
-			] );
-
-		$result = false;
-
-		if ( self::ENABLED_CONDITION !== $this->data[ $enabledKey ] ) {
-			$result = true;
-		}
-
-		if ( ! $result && $this->validateId( $this->data[ $gatewayKey ] ) ) {
-			$result = true;
-		}
-
-		if ( ! $result ) {
-			$this->errors[] = 'Incorrect Gateway ID for Bank Accoun';
-		}
-	}
-
-	private function validateWallets(): void {
-		foreach ( WalletPaymentMethods::cases() as $method ) {
-			$result = true;
-			$enabledKey = SettingsService::getInstance()
-				->getOptionName( $this->service->id, [
-					SettingGroups::WALLETS()->name,
-					$method->name,
-					WalletSettings::ENABLE()->name,
-				] );
-			$gatewayKey = SettingsService::getInstance()
-				->getOptionName( $this->service->id, [
-					SettingGroups::WALLETS()->name,
-					$method->name,
-					WalletSettings::GATEWAY_ID()->name,
-				] );
-			$fraudEnableKey = SettingsService::getInstance()
-				->getOptionName( $this->service->id, [
-					SettingGroups::WALLETS()->name,
-					$method->name,
-					WalletSettings::FRAUD()->name,
-				] );
-			$fraudGatewayIdKey = SettingsService::getInstance()
-				->getOptionName( $this->service->id, [
-					SettingGroups::WALLETS()->name,
-					$method->name,
-					WalletSettings::FRAUD_SERVICE_ID()->name,
-				] );
-			$isEnabled = self::ENABLED_CONDITION === $this->data[ $enabledKey ];
-			if ( $isEnabled ) {
-				switch ( $method->name ) {
-					case WalletPaymentMethods::PAY_PAL_SMART_BUTTON()->name:
-					case WalletPaymentMethods::AFTERPAY()->name:
-					default:
-						$result = $this->validateId( $this->data[ $gatewayKey ] );
-						break;
-				}
-			}
-
-			if ( ! $result ) {
-				$this->errors[] = 'Incorrect Gateway ID for ' . $method->getLabel() . ' wallet';
-			}
-
-			if (
-				$isEnabled
-				&& ( self::ENABLED_CONDITION == $this->data[ $fraudEnableKey ] )
-				&& ! $this->validateId( $this->data[ $fraudGatewayIdKey ] )
-			) {
-				$this->errors[] = 'Incorrect Fraud Service ID for '
-					. $method->getLabel()
-					. ' wallet';
-			} elseif (
-				$isEnabled
-				&& ( self::ENABLED_CONDITION == $this->data[ $fraudEnableKey ] )
-				&& WalletPaymentMethods::AFTERPAY()->name == $method->name
-				&& ! $this->validateId( $this->data[ $fraudGatewayIdKey ], true )
-			) {
-				$this->errors[] = 'Fraud service mode is not supported with Alternative Payment Method';
-			}
-		}
-	}
-
-	private function validateAPMs(): void {
-		foreach ( OtherPaymentMethods::cases() as $method ) {
-			$result = true;
-			$enabledKey = SettingsService::getInstance()
-				->getOptionName( $this->service->id, [
-					SettingGroups::A_P_M_S()->name,
-					$method->name,
-					WalletSettings::ENABLE()->name,
-				] );
-			$gatewayKey = SettingsService::getInstance()
-				->getOptionName( $this->service->id, [
-					SettingGroups::A_P_M_S()->name,
-					$method->name,
-					WalletSettings::GATEWAY_ID()->name,
-				] );
-			$fraudEnableKey = SettingsService::getInstance()
-				->getOptionName( $this->service->id, [
-					SettingGroups::A_P_M_S()->name,
-					$method->name,
-					WalletSettings::FRAUD()->name,
-				] );
-			$fraudGatewayIdKey = SettingsService::getInstance()
-				->getOptionName( $this->service->id, [
-					SettingGroups::A_P_M_S()->name,
-					$method->name,
-					WalletSettings::FRAUD_SERVICE_ID()->name,
-				] );
-			$isEnabled = self::ENABLED_CONDITION === $this->data[ $enabledKey ];
-			if ( $isEnabled ) {
-				switch ( true ) {
-					case OtherPaymentMethods::AFTERPAY() === $method:
-						$result = $this->validateId( $this->data[ $gatewayKey ] );
-						break;
-					default:
-						$result = $this->validateId( $this->data[ $gatewayKey ] );
-						break;
-				}
-			}
-
-			if ( ! $result ) {
-				$this->errors[] = 'Incorrect Fraud Service ID for ' . $method->getLabel() . ' Alternative Payment Method .';
-			}
-
-			if (
-				$isEnabled
-				&& ( self::ENABLED_CONDITION == $this->data[ $fraudEnableKey ] )
-				&& ! $this->validateId( $this->data[ $fraudGatewayIdKey ] )
-			) {
-				$this->errors[] = 'Incorrect '
-					. $method->getLabel()
-					. ' APM Fraud Service ID: '
-					. $this->data[ $fraudGatewayIdKey ];
-			} elseif (
-				$isEnabled
-				&& ( self::ENABLED_CONDITION == $this->data[ $fraudEnableKey ] )
-				&& ! $this->validateId( $this->data[ $fraudGatewayIdKey ], true )
-			) {
-				$this->errors[] = 'Fraud service mode is not supported with Alternative Payment Method';
-			}
-		}
-	}
-
-	private function setWebhooks(): void {
-		$webhookEvents = NotificationEvents::events();
-		if ( false !== strpos( get_site_url(), 'localhost' ) ) {
-			return;
-		}
-
-		$notSettedWebhooks = $webhookEvents;
-		$webhookSiteUrl = get_site_url() . '/wc-api/paydock-webhook/';
-		$shouldCreateWebhook = true;
-		$webhookRequest = $this->adapterService->searchNotifications( [ 'type' => 'webhook' ] );
-		if ( ! empty( $webhookRequest['resource']['data'] ) ) {
-			$events = [];
-			foreach ( $webhookRequest['resource']['data'] as $webhook ) {
-				if ( $webhook['destination'] === $webhookSiteUrl ) {
-					$events[] = $webhook['event'];
-				}
-			}
-
-			$notSettedWebhooks = array_diff( $webhookEvents, $events );
-			if ( empty( $notSettedWebhooks ) ) {
-				$shouldCreateWebhook = false;
-			}
-		}
-
-		$webhookIds = [];
-		if ( $shouldCreateWebhook ) {
-			foreach ( $notSettedWebhooks as $event ) {
-				$result = $this->adapterService->createNotification( [
-					'event' => $event,
-					'destination' => $webhookSiteUrl,
-					'type' => 'webhook',
-					'transaction_only' => false,
-				] );
-
-				if ( ! empty( $result['resource']['data']['_id'] ) ) {
-					$webhookIds[] = $result['resource']['data']['_id'];
-				} else {
-					$this->errors[] = __(
-						'Can\'t create webhook',
-						'paydock'
-					) . ( ! empty( $result['error'] ) ? ' ' . wp_json_encode( $result['error'] ) : '' );
-
-					return;
-				}
-			}
-
-			if ( ! empty( $webhookIds ) ) {
-				update_option( self::IS_WEBHOOK_SET_OPTION, $webhookIds );
+	private function validate_credential(): void {
+		if (
+			$this->access_token_settings === '********************'
+		) {
+			if ( $this->validate_checkout_version() ) {
+				$this->check_is_configuration_template_selected();
 			}
 		} else {
-			return;
+			if (
+				$this->check_access_key_connection( $this->access_token_settings )
+			) {
+				if ( $this->validate_checkout_version() ) {
+					$this->get_configuration_templates();
+					$this->get_customisation_templates();
+				}
+				return;
+			}
+
+			if ( ! self::$invalid_credentials_shown_global ) {
+				$this->errors[]                         = 'Invalid credentials. Please update and try again.';
+				self::$invalid_credentials_shown_global = true;
+			}
 		}
 	}
 
-	public function getResult(): array {
-		return $this->result;
+	private function validate_checkout_version(): bool {
+		if ( ! empty( $this->checkout_version ) ) {
+			return true;
+		}
+
+		if ( ! self::$no_version_selected_shown_global ) {
+			$this->errors[]                         = 'No checkout version selected. Please select a version and try again.';
+			self::$no_version_selected_shown_global = true;
+		}
+
+		return false;
 	}
 
-	public function getErrors(): array {
-		return $this->errors;
+	private function check_is_configuration_template_selected(): void {
+		if ( empty( $this->configuration_id_settings ) ) {
+			if ( ! self::$no_config_template_shown_global ) {
+				$this->errors[]                        = 'No configuration template ID selected. Please select a template and try again.';
+				self::$no_config_template_shown_global = true;
+			}
+		}
+	}
+
+	private function check_access_key_connection( ?string $access_token ): bool {
+		$access_token_validation_failed = false;
+		if ( $access_token !== '********************' ) {
+			$this->save_old_credential();
+			ConfigService::$access_token = $access_token;
+
+			$access_token_validation_failed = ! $this->get_configuration_templates_for_validation();
+
+			$this->restore_credential();
+
+			if ( ! $access_token_validation_failed ) {
+				ConfigService::$access_token = $access_token;
+			}
+		}
+
+		return ! $access_token_validation_failed;
+	}
+
+	/**
+	 * Uses functions (set_transient) from WordPress
+	 */
+	private function get_configuration_templates(): void {
+		$configuration_templates_result = $this->widget_api_adapter_service->get_configuration_templates_ids( $this->checkout_version );
+		$has_error                      = ! empty( $configuration_templates_result['error'] );
+		$configuration_templates        = MasterWidgetTemplatesHelper::map_templates( $configuration_templates_result['resource']['data'], $has_error );
+
+		if ( ! $has_error ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			set_transient( PLUGIN_PREFIX . '_configuration_templates_' . $this->environment_settings, $configuration_templates, 60 );
+		}
+
+		$configuration_id_key = SettingsHelper::get_option_name(
+				$this->service->id,
+				[
+					SettingGroupsEnum::CHECKOUT,
+					MasterWidgetSettingsEnum::CONFIGURATION_ID,
+				]
+			);
+		MasterWidgetTemplatesHelper::validate_or_update_template_id( $configuration_templates, $has_error, $configuration_id_key, MasterWidgetSettingsEnum::CONFIGURATION_ID );
+	}
+
+	private function get_configuration_templates_for_validation(): bool {
+		$configuration_templates_result = $this->widget_api_adapter_service->get_configuration_templates_for_validation();
+		$has_error                      = ! empty( $configuration_templates_result['error'] );
+
+		if ( $has_error ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Uses functions (set_transient) from WordPress
+	 */
+	private function get_customisation_templates(): void {
+		$customisation_templates_result = $this->widget_api_adapter_service->get_customisation_templates_ids( $this->checkout_version );
+		$has_error                      = ! empty( $customisation_templates_result['error'] );
+		$customisation_templates        = MasterWidgetTemplatesHelper::map_templates( $customisation_templates_result['resource']['data'], $has_error, true );
+
+		if ( ! $has_error ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			set_transient( PLUGIN_PREFIX . '_customisation_templates_' . $this->environment_settings, $customisation_templates, 60 );
+		}
+
+		$customisation_id_key = SettingsHelper::get_option_name(
+				$this->service->id,
+				[
+					SettingGroupsEnum::CHECKOUT,
+					MasterWidgetSettingsEnum::CUSTOMISATION_ID,
+				]
+			);
+		MasterWidgetTemplatesHelper::validate_or_update_template_id( $customisation_templates, $has_error, $customisation_id_key, MasterWidgetSettingsEnum::CUSTOMISATION_ID );
+	}
+
+	private function save_old_credential(): void {
+		$this->old_access_token = ConfigService::$access_token;
+	}
+
+	private function restore_credential(): void {
+		ConfigService::$access_token = $this->old_access_token;
+	}
+
+	public function get_errors(): array {
+		return array_unique( $this->errors );
 	}
 }

@@ -1,171 +1,130 @@
 <?php
+declare( strict_types=1 );
 
-namespace Paydock\Services;
+namespace WooPlugin\Services;
 
-use Paydock\Abstracts\AbstractSingleton;
-use Paydock\Enums\OrderListColumns;
-use Paydock\Enums\SettingsTabs;
-use Paydock\Enums\WalletPaymentMethods;
-use Paydock\Hooks\ActivationHook;
-use Paydock\PaydockPlugin;
-use Paydock\Services\Checkout\AfterpayAPMsPaymentServiceService;
-use Paydock\Services\Checkout\AfterpayWalletService;
-use Paydock\Services\Checkout\ApplePayWalletService;
-use Paydock\Services\Checkout\BankAccountPaymentService;
-use Paydock\Services\Checkout\CardPaymentService;
-use Paydock\Services\Checkout\GooglePayWalletService;
-use Paydock\Services\Checkout\PayPalWalletService;
-use Paydock\Services\Checkout\ZipAPMsPaymentServiceService;
-use Paydock\Services\Settings\LiveConnectionSettingService;
-use Paydock\Services\Settings\LogsSettingService;
-use Paydock\Services\Settings\SandboxConnectionSettingService;
-use Paydock\Services\Settings\WidgetSettingService;
+use WooPlugin\Services\PaymentGateway\MasterWidgetPaymentService;
 
-class FiltersService extends AbstractSingleton {
-	protected static $instance = null;
+class FiltersService {
+	protected static ?FiltersService $instance = null;
+
+	public static function get_instance(): FiltersService {
+		if ( is_null( self::$instance ) ) {
+			self::$instance = new self();
+		}
+
+		return self::$instance;
+	}
 
 	protected function __construct() {
-		$this->addWooCommerceFilters();
-		$this->addSettingsLink();
+		$this->add_woocommerce_filters();
+		$this->add_settings_link();
 	}
 
-	public function ordersListNewColumn( $columns ) {
-		$new_columns = [];
+	/**
+	 * Uses a function (add_filter) from WordPress
+	 */
+	protected function add_woocommerce_filters(): void {
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_filter( 'plugins_loaded', [ $this, 'plugins_loaded' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_filter( 'admin_notices', [ $this, 'order_status_bulk_update' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_filter( 'woocommerce_available_payment_gateways', [ $this, 'my_account_pay_for_order' ] );
+	}
 
-		foreach ( $columns as $column_name => $column_info ) {
-			$new_columns[ $column_name ] = $column_info;
+	public function plugins_loaded() {
+		$this->woo_text_override();
+		$this->init_payment_gateway();
+	}
 
-			if ( OrderListColumns::AFTER_COLUMN === $column_name ) {
-				$new_columns[ OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey() ] = OrderListColumns::PAYMENT_SOURCE_TYPE()->getLabel();
-			}
+	/**
+	 * Uses functions (plugin_dir_path and load_textdomain) from WordPress
+	 */
+	public function woo_text_override(): void {
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$mofile = plugin_dir_path( __FILE__ ) . 'languages/woo-override-en_US.mo';
+		/* @noinspection PhpUndefinedFunctionInspection */
+		load_textdomain( 'woocommerce', $mofile );
+	}
+
+	public function init_payment_gateway(): void {
+		if ( ! class_exists( 'WC_Payment_Gateway' ) ) {
+			return;
 		}
 
-		return $new_columns;
+		/* @noinspection PhpUndefinedFunctionInspection */
+		require_once plugin_dir_path( PLUGIN_FILE ) . 'includes/Services/PaymentGateway/MasterWidgetPaymentService.php';
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_filter( 'woocommerce_payment_gateways', [ $this, 'register_in_woocommerce_payment_class' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		require_once plugin_dir_path( PLUGIN_FILE ) . 'includes/Util/MasterWidgetBlock.php';
 	}
 
-	public function ordersListNewColumnContent( $column, $order ) {
-		if ( OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey() === $column ) {
-			$status = $order->get_meta( OrderListColumns::PAYMENT_SOURCE_TYPE()->getKey() );
-
-			echo esc_html( is_array( $status ) ? reset( $status ) : $status );
-		}
-	}
-
-	public function changeOrderAmount( $formatted_total, $order ) {
-		$page = filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRING );
-		if ( ! empty( $page ) && 'wc-orders' === $page ) {
-			$capturedAmount = $order->get_meta( 'capture_amount' );
-			if ( ! empty( $capturedAmount ) ) {
-
-				if ( $capturedAmount == $order->get_total() ) {
-					return $formatted_total;
-				}
-
-				$price           = wc_price( ( $capturedAmount - $order->get_total_refunded() ),
-					[ 'currency' => $order->get_currency() ] );
-				$originalPrice   = wc_price( $order->get_total(), [ 'currency' => $order->get_currency() ] );
-				$formatted_total = sprintf(
-					'<del aria-hidden="true">%1$s</del><ins>%2$s</ins>',
-					$originalPrice,
-					$price
-				);
-			}
-		}
-
-		return $formatted_total;
-	}
-
-	public function addCaptureAmountCustomColumn( $columns ) {
-		$new_columns                   = ( is_array( $columns ) ) ? $columns : [];
-		$new_columns['capture_amount'] = 'Capture Amount';
-
-		return $new_columns;
-	}
-
-	protected function addWooCommerceFilters(): void {
-		add_filter( 'woocommerce_payment_gateways', [ $this, 'registerInWooCommercePaymentClass' ] );
-		add_filter( 'woocommerce_thankyou_order_received_text', [ $this, 'woocommerceThankyouOrderReceivedText' ] );
-		add_filter( 'manage_woocommerce_page_wc-orders_columns', [ $this, 'ordersListNewColumn' ] );
-		add_filter( 'manage_woocommerce_page_wc-orders_custom_column', [ $this, 'ordersListNewColumnContent' ], 10, 2 );
-		add_filter( 'woocommerce_get_formatted_order_total', [ $this, 'changeOrderAmount' ], 10, 2 );
-		add_filter( 'manage_edit-shop_order_columns', [ $this, 'addCaptureAmountCustomColumn' ], 20 );
-	}
-
-	protected function addSettingsLink(): void {
-		add_filter( 'plugin_action_links_' . plugin_basename( PAYDOCK_PLUGIN_FILE ), [ $this, 'getSettingLink' ] );
-	}
-
-	public function registerInWooCommercePaymentClass( array $methods ): array {
-		global $current_section;
-		global $current_tab;
-
-		$methods[] = LiveConnectionSettingService::class;
-		if ( 'checkout' != $current_tab
-		     || in_array(
-			     $current_section,
-			     array_map(
-				     function ( SettingsTabs $tab ) {
-					     return $tab->value;
-				     },
-				     SettingsTabs::secondary()
-			     )
-		     ) ) {
-			$methods[] = SandboxConnectionSettingService::class;
-			$methods[] = WidgetSettingService::class;
-			$methods[] = LogsSettingService::class;
-			$methods[] = CardPaymentService::class;
-			$methods[] = BankAccountPaymentService::class;
-			$methods[] = ApplePayWalletService::class;
-			$methods[] = GooglePayWalletService::class;
-			$methods[] = AfterpayWalletService::class;
-			$methods[] = PayPalWalletService::class;
-			$methods[] = AfterpayAPMsPaymentServiceService::class;
-			$methods[] = ZipAPMsPaymentServiceService::class;
-		}
-
+	public function register_in_woocommerce_payment_class( array $methods ): array {
+		$methods[] = MasterWidgetPaymentService::class;
 
 		return $methods;
 	}
 
-	public function woocommerceThankyouOrderReceivedText( $text ) {
-		$settings = SettingsService::getInstance();
-		$orderId = absint( get_query_var( 'order-received' ) );
-		$options  = get_option( "paydock_fraud_{$orderId}" );
-		$order    = wc_get_order( $orderId );
-		$status   = $order->get_meta( ActivationHook::CUSTOM_STATUS_META_KEY );
-		$afterpayError = filter_input( INPUT_GET, 'afterpay-error', FILTER_SANITIZE_STRING );
-		$afterpaySuccess = filter_input( INPUT_GET, 'afterpay-success', FILTER_SANITIZE_STRING );
+	/**
+	 * Handles orders status bulk-update (admin side, WC orders page)
+	 * phpcs:disable WordPress.Security.NonceVerification -- processed through the WooCommerce form handler
+	 *
+	 * @return void
+	 */
+	public function order_status_bulk_update() {
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$is_wc_orders_page = isset( $_GET['page'] ) && sanitize_text_field( wp_unslash( $_GET['page'] ) ) === 'wc-orders';
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$is_shop_order_page = isset( $_GET['post_type'] ) && sanitize_text_field( wp_unslash( $_GET['post_type'] ) ) === 'shop_order';
 
-		if ( ! empty( $afterpayError ) && ( 'true' === $afterpayError ) ) {
-			OrderService::updateStatus($orderId, 'wc-paydock-cancelled');
-			return __( 'Order has been cancelled', 'paydock' );
+		if (
+			( $is_wc_orders_page || $is_shop_order_page ) &&
+			isset( $_GET['bulk_action'] ) &&
+			$_GET['bulk_action'] !== ''
+		) {
+			echo "<script>
+				jQuery(document).ready(function($) {
+					$('div.updated').hide();
+				});
+			</script>";
 		}
-		if ( ! empty( $afterpaySuccess ) && ( $afterpaySuccess === 'true' ) ) {
-			if ($settings->isWalletDirectCharge( WalletPaymentMethods::AFTERPAY() )) {
-				$order->payment_complete();
-				$order->update_meta_data( 'paydock_directly_charged', 1 );
-				$order->save();
-			} else {
-				OrderService::updateStatus($orderId, 'wc-paydock-authorize');
-			}
-		}
-		if ( false === $options && 'processing' !== $status ) {
-			return __( 'Thank you. Your order has been received.', 'paydock' );
-		}
+	}
+	// phpcs:enable
 
-		return __( 'Your order is being processed. We\'ll get back to you shortly', 'paydock' );
+	/**
+	 * Uses functions (add_filter, plugin_basename) from WordPress
+	 */
+	protected function add_settings_link(): void {
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_filter( 'plugin_action_links_' . plugin_basename( PLUGIN_FILE ), [ $this, 'get_setting_link' ] );
 	}
 
-	public function getSettingLink( array $links ): array {
+	/**
+	 * Uses functions (admin_url and __) from WordPress
+	 */
+	public function get_setting_link( array $links ): array {
+		/* @noinspection PhpUndefinedFunctionInspection */
 		array_unshift(
 			$links,
 			sprintf(
 				'<a href="%1$s">%2$s</a>',
-				admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . PaydockPlugin::PLUGIN_PREFIX ),
-				__( 'Settings', 'paydock' )
+				admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . PLUGIN_PREFIX ),
+				__( 'Settings', PLUGIN_TEXT_DOMAIN )
 			)
 		);
 
 		return $links;
+	}
+
+	public function my_account_pay_for_order( $gateways ) {
+		/* @noinspection PhpUndefinedFunctionInspection */
+		if ( is_wc_endpoint_url( 'order-pay' ) ) {
+			if ( ! empty( $gateways[ PLUGIN_PREFIX ] ) ) {
+				unset( $gateways[ PLUGIN_PREFIX ] );
+			}
+		}
+		return $gateways;
 	}
 }

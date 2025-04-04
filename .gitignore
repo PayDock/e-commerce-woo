@@ -28,3 +28,9 @@ Thumbs.db
 /wc-apidocs/
 
 webhook.txt
+
+# Vendor
+/vendor/
+
+# PHPCS caching file ignore
+.phpcs.cache

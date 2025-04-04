@@ -1,159 +1,322 @@
 <?php
+/**
+ * This file uses classes from WooCommerce
+ *
+ * @noinspection PhpUndefinedClassInspection
+ * @noinspection PhpUndefinedNamespaceInspection
+ */
 
-namespace Paydock\Services;
+declare( strict_types=1 );
+
+namespace WooPlugin\Services;
 
 use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
-use Paydock\Abstracts\AbstractSingleton;
-use Paydock\Controllers\Admin\WidgetController;
-use Paydock\Controllers\Webhooks\PaymentController;
-use Paydock\Enums\SettingsTabs;
-use Paydock\Services\Checkout\BankAccountPaymentService;
-use Paydock\Util\AfterpayAPMsBlock;
-use Paydock\Util\AfterpayWalletBlock;
-use Paydock\Util\ApplePayWalletBlock;
-use Paydock\Util\BankAccountBlock;
-use Paydock\Util\GooglePayWalletBlock;
-use Paydock\Util\PayPalWalletBlock;
-use Paydock\Util\PaydockGatewayBlocks;
-use Paydock\Util\ZipAPMsBlock;
+use WooPlugin\Controllers\Admin\WidgetController;
+use WooPlugin\Controllers\Integrations\PaymentController;
+use WooPlugin\Helpers\OrderHelper;
+use WooPlugin\Services\PaymentGateway\MasterWidgetPaymentService;
+use WooPlugin\Enums\SettingsSectionEnum;
+use WooPlugin\Util\MasterWidgetBlock;
+use WC_Data_Exception;
 
-class ActionsService extends AbstractSingleton {
-	protected const PROCESS_OPTIONS_FUNCTION = 'process_admin_options';
-	protected const PROCESS_OPTIONS_HOOK_PREFIX = 'woocommerce_update_options_payment_gateways_';
+class ActionsService {
+	protected static ?ActionsService $instance = null;
+	protected string $last_shipping_id         = '';
+
 	protected const SECTION_HOOK = 'woocommerce_get_sections';
-	protected static $instance = null;
 
+	public static function get_instance(): ActionsService {
+		if ( is_null( self::$instance ) ) {
+			self::$instance = new self();
+		}
+
+		return self::$instance;
+	}
+
+	/**
+	 * Uses a function (add_action) from WordPress
+	 */
 	protected function __construct() {
-		add_action( 'init', function () {
-			if ( ! session_id() ) {
-				session_start();
-			}
-		} );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'before_woocommerce_init', [ $this, 'init_before_woocommerce' ] );
 
-		add_action( 'before_woocommerce_init', function () {
-			$this->addCompatibilityWithWooCommerce();
-			$this->addPaymentActions();
-			$this->addPaymentMethodToChekout();
-			$this->addSettingsActions();
-			$this->addEndpoints();
-			$this->addOrderActions();
-		} );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'woocommerce_blocks_loaded', [ $this, 'register_payment_method' ] );
 
-		add_filter( 'gettext', array( $this, 'custom_refund_message' ), 20, 3 );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'admin_init', [ $this, 'woo_plugin_refund_messages' ] );
 	}
 
-	public function custom_refund_message( $translated_text, $text, $domain ) {
-
-		if ( 'woocommerce' === $domain ) {
-
-			$message_to_change = strpos( $translated_text, 'Invalid refund amount' );
-
-			if ( $message_to_change !== false ) {
-				$translated_text = 'The requested refund amount exceeds the available charge/Transaction amount';
-			}
-
-		}
-
-		return $translated_text;
-
+	public function init_before_woocommerce() {
+		$this->add_compatibility_with_woocommerce();
+		$this->add_cart_hooks();
+		$this->add_settings_actions();
+		$this->add_order_actions();
 	}
 
-	protected function addCompatibilityWithWooCommerce(): void {
+	protected function add_compatibility_with_woocommerce(): void {
 		if ( class_exists( FeaturesUtil::class ) ) {
-			FeaturesUtil::declare_compatibility( 'custom_order_tables', PAYDOCK_PLUGIN_FILE );
-		}
-	}
-
-	protected function addPaymentActions() {
-		$payments = [
-			'paydock_bank_account_gateway' => new BankAccountPaymentService(),
-		];
-		foreach ( $payments as $paymentKey => $payment ) {
-			add_action(
-				'woocommerce_update_options_payment_gateways_' . $paymentKey,
-				[ $payment, 'process_admin_options' ]
-			);
-			add_action( 'woocommerce_scheduled_subscription_payment_' . $paymentKey, [
-				$payment,
-				'process_subscription_payment',
-			], 10, 2 );
-			add_action( 'woocommerce_after_checkout_billing_form', [
-				$payment,
-				'woocommerce_before_checkout_form',
-			], 10, 1 );
+			FeaturesUtil::declare_compatibility( 'custom_order_tables', PLUGIN_FILE );
+			FeaturesUtil::declare_compatibility( 'cart_checkout_blocks', PLUGIN_FILE );
 		}
 	}
 
 	/**
-	 * Add new payment method on chekout page
+	 * Uses a function (add_action) from WordPress
 	 */
-	protected function addPaymentMethodToChekout() {
-		if ( ! class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) ) {
+	public function add_cart_hooks(): void {
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'woocommerce_after_cart_item_quantity_update', [ $this, 'cart_item_quantity_changed' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'woocommerce_add_to_cart', [ $this, 'add_to_cart' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'woocommerce_cart_item_removed', [ $this, 'cart_item_removed' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'woocommerce_removed_coupon', [ $this, 'remove_coupon' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'woocommerce_applied_coupon', [ $this, 'add_coupon' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'wc_ajax_woo-plugin-update-shipping', [ $this, 'classic_order_update_shipping' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'wc_ajax_nopriv_woo-plugin-update-shipping', [ $this, 'classic_order_update_shipping' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'wc_ajax_woo-plugin-update-order-notes', [ $this, 'classic_order_update_notes' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'wc_ajax_nopriv_woo-plugin-update-order-notes', [ $this, 'classic_order_update_notes' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'woocommerce_update_order_item', [ $this, 'handle_order_update_shipping' ], 10, 3 );
+	}
+
+	public function register_master_widget_block( PaymentMethodRegistry $registry ) {
+		$registry->register( new MasterWidgetBlock() );
+	}
+
+	public function cart_item_quantity_changed() {
+		$this->calculate_totals_and_save_cookie();
+	}
+
+	public function add_to_cart() {
+		$this->calculate_totals_and_save_cookie();
+	}
+
+	public function cart_item_removed() {
+		$this->calculate_totals_and_save_cookie();
+	}
+
+	public function remove_coupon() {
+		$this->calculate_totals_and_save_cookie();
+	}
+
+	public function add_coupon() {
+		$this->calculate_totals_and_save_cookie();
+	}
+
+	/**
+	 * Hook woocommerce_update_order_item sends these arguments, but are not needed for this use case
+	 *
+	 * phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+	 *
+	 * @noinspection PhpUnusedParameterInspection
+	 */
+	public function handle_order_update_shipping( $order_item_id, $order_item, $order_id ) {
+		$this->order_update_shipping();
+	}
+	// phpcs:enable
+
+	public function classic_order_update_shipping() {
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$wp_nonce = isset( $_REQUEST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ) : null;
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		if ( ! wp_verify_nonce( $wp_nonce, PLUGIN_TEXT_DOMAIN . '-update-shipping' ) ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			wp_send_json_error( [ 'message' => __( 'Error: Security check', PLUGIN_TEXT_DOMAIN ) ] );
+
 			return;
 		}
 
-		add_action( 'before_woocommerce_init', function () {
-			FeaturesUtil::declare_compatibility(
-				'cart_checkout_blocks',
-				PAYDOCK_PLUGIN_FILE,
-				true
-			);
-		} );
+		$this->order_update_shipping();
+	}
 
+	/**
+	 * Updates customer notes from order when order notes field is updated.
+	 *
+	 * @throws WC_Data_Exception If trying to save invalid data to customer notes.
+	 */
+	public function classic_order_update_notes() {
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$wp_nonce = isset( $_REQUEST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ) : null;
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		if ( ! wp_verify_nonce( $wp_nonce, PLUGIN_TEXT_DOMAIN . '-update-order-notes' ) ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			wp_send_json_error( [ 'message' => __( 'Error: Security check', PLUGIN_TEXT_DOMAIN ) ] );
+
+			return;
+		}
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$order_notes = isset( $_REQUEST['value'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['value'] ) ) : '';
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		WC()->session->set( 'order_comments', $order_notes );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$custom_order_id = (string) WC()->session->get( PLUGIN_PREFIX . '_draft_order' );
+
+		if ( ! empty( $custom_order_id ) ) {
+			$order_id = $custom_order_id;
+			OrderHelper::update_order_customer_notes( $order_id, $order_notes );
+		}
+	}
+
+	public function order_update_shipping() {
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$session = WC()->session;
+
+		if ( ! empty( $session ) ) {
+			$chosen_methods   = $session->get( 'chosen_shipping_methods' );
+			$current_shipping = is_array( $chosen_methods ) && ! empty( $chosen_methods ) ? $chosen_methods[0] : null;
+			if ( $current_shipping !== null && $current_shipping !== $this->last_shipping_id ) {
+				$this->last_shipping_id = $current_shipping;
+				$expiry_time            = time() + 3600;
+				setcookie( PLUGIN_PREFIX . '_selected_shipping', $current_shipping, $expiry_time, '/' );
+			}
+		}
+		$this->calculate_totals_and_save_cookie();
+	}
+
+	/**
+	 * Uses a function (WC) from WooCommerce
+	 */
+	private function calculate_totals_and_save_cookie() {
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$cart = WC()->cart;
+
+		if ( ! empty( $cart ) ) {
+			$cart->calculate_totals();
+			$cart_total  = (string) $cart->get_total( false );
+			$expiry_time = time() + 3600;
+			/* @noinspection PhpUndefinedFunctionInspection */
+			setcookie( PLUGIN_PREFIX . '_cart_total', $cart_total, $expiry_time, '/' );
+		}
+	}
+
+	/**
+	 * Uses a function (add_action) from WordPress
+	 */
+	protected function add_settings_actions(): void {
+		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action(
-			'woocommerce_blocks_payment_method_type_registration',
-			function ( PaymentMethodRegistry $payment_method_registry ) {
-				$payment_method_registry->register( new PaydockGatewayBlocks() );
-				$payment_method_registry->register( new BankAccountBlock() );
-				$payment_method_registry->register( new ApplePayWalletBlock() );
-				$payment_method_registry->register( new GooglePayWalletBlock() );
-				$payment_method_registry->register( new AfterpayWalletBlock() );
-				$payment_method_registry->register( new PayPalWalletBlock() );
-				$payment_method_registry->register( new AfterpayAPMsBlock() );
-				$payment_method_registry->register( new ZipAPMsBlock() );
+			self::SECTION_HOOK,
+			function ( $system_tabs ) {
+				return array_merge( $system_tabs, [ SettingsSectionEnum::WIDGET_CONFIGURATION => '' ] );
 			}
 		);
 	}
 
-	protected function addSettingsActions(): void {
-		foreach ( SettingsTabs::cases() as $settingsTab ) {
-			add_action( self::PROCESS_OPTIONS_HOOK_PREFIX . $settingsTab->value, [
-				$settingsTab->getSettingService(),
-				self::PROCESS_OPTIONS_FUNCTION,
-			] );
-			add_action( self::SECTION_HOOK, function ( $systemTabs ) use ( $settingsTab ) {
-				return array_merge( $systemTabs, [
-					$settingsTab->value => '',
-				] );
-			} );
+	/**
+	 * Uses a function (add_action) from WordPress
+	 */
+	protected function add_order_actions(): void {
+		$order_service                 = new OrderService();
+		$payment_controller            = new PaymentController();
+		$widget_controller             = new WidgetController();
+		$master_widget_payment_service = MasterWidgetPaymentService::get_instance();
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'woocommerce_order_item_add_action_buttons', [ $order_service, 'init_woo_plugin_order_buttons' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'woocommerce_order_status_changed', [ $order_service, 'status_change_verification' ], 20, 4 );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'woocommerce_create_refund', [ $payment_controller, 'refund_process' ], 10, 2 );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'woocommerce_order_refunded', [ $payment_controller, 'after_refund_process' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'wc_ajax_woo-plugin-create-charge-intent', [ $widget_controller, 'create_checkout_intent' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'wc_ajax_nopriv_woo-plugin-create-charge-intent', [ $widget_controller, 'create_checkout_intent' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'admin_init', [ $order_service, 'remove_bulk_action_message' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'wc_ajax_woo-plugin-process-payment-result', [ $master_widget_payment_service, 'process_payment_result' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'wc_ajax_nopriv_woo-plugin-process-payment-result', [ $master_widget_payment_service, 'process_payment_result' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'wc_ajax_woo-plugin-check-postcode', [ $master_widget_payment_service, 'check_postcode' ] );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'wc_ajax_nopriv_woo-plugin-check-postcode', [ $master_widget_payment_service, 'check_postcode' ] );
+	}
+
+	/**
+	 * Add new payment method on checkout page
+	 * Uses a function (add_action, plugin_dir_path) from WordPress
+	 */
+	public function register_payment_method(): void {
+		if ( class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			require_once plugin_dir_path( PLUGIN_FILE ) . 'includes/Util/MasterWidgetBlock.php';
+			/* @noinspection PhpUndefinedFunctionInspection */
+			add_action( 'woocommerce_blocks_payment_method_type_registration', [ $this, 'register_master_widget_block' ] );
 		}
 	}
+	/**
+	 * Handles refund messages
+     * phpcs:disable WordPress.Security.NonceVerification -- processed through the WooCommerce form handler
+	 */
+	public function woo_plugin_refund_messages() {
+		/* @noinspection PhpUndefinedFunctionInspection */
+		if ( ! wp_doing_ajax() || ( isset( $_REQUEST['action'] ) && $_REQUEST['action'] !== 'woocommerce_refund_line_items' ) ) {
+			return;
+		}
 
-	protected function addEndpoints() {
-		add_action( 'rest_api_init', function () {
-			register_rest_route( 'paydock/v1', '/wallets/charge',
-				[ // nosemgrep: audit.php.wp.security.rest-route.permission-callback.return-true  -- /wallets/charge is a public endpoint and doesn't need any permission checks.
-					'methods'             => \WP_REST_Server::CREATABLE,
-					'callback'            => [ new WidgetController(), 'createWalletCharge' ],
-					'permission_callback' => '__return_true',
-				] );
-		} );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_filter( 'gettext_woocommerce', [ $this, 'woo_plugin_filter_refund_message' ], 10, 3 );
 	}
+	// phpcs:enable
 
-	protected function addOrderActions() {
-		$orderService      = new OrderService();
-		$paymentController = new PaymentController();
-		add_action( 'woocommerce_order_item_add_action_buttons', [ $orderService, 'iniPaydockOrderButtons' ], 10,
-			2 );
-		add_action( 'woocommerce_order_status_changed', [ $orderService, 'statusChangeVerification' ], 20, 4 );
-		add_action( 'woocommerce_admin_order_totals_after_total',
-			[ $orderService, 'informationAboutPartialCaptured' ] );
-		add_action( 'admin_notices', [ $orderService, 'displayStatusChangeError' ] );
-		add_action( 'wp_ajax_paydock-capture-charge', [ $paymentController, 'capturePayment' ] );
-		add_action( 'wp_ajax_paydock-cancel-authorised', [ $paymentController, 'cancelAuthorised' ] );
-		add_action( 'woocommerce_create_refund', [ $paymentController, 'refundProcess' ], 10, 2 );
-		add_action( 'woocommerce_order_refunded', [ $paymentController, 'afterRefundProcess' ], 10, 2 );
-		add_action( 'woocommerce_api_paydock-webhook', [ $paymentController, 'webhook' ] );
-    }
+	/**
+	 * Hook gettext_woocommerce sends these arguments, but are not needed for this use case
+	 *
+     * phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+     *  phpcs:disable WordPress.Security.NonceVerification -- processed through the WooCommerce form handler
+	 *
+	 * @noinspection PhpUnusedParameterInspection
+	 */
+	public function woo_plugin_filter_refund_message( $translation, $text, $domain ) {
+		if ( $text !== 'Invalid refund amount' ) {
+			return $translation;
+		}
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$order_id = ! empty( $_POST['order_id'] ) ? absint( $_POST['order_id'] ) : 0;
+		if ( ! $order_id ) {
+			return $translation;
+		}
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$order = wc_get_order( $order_id );
+		if ( ! $order ) {
+			return $translation;
+		}
+
+		$available_to_refund = $order->get_total() - $order->get_total_refunded();
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$formatted_with_html = wc_price(
+			$available_to_refund,
+			[ 'currency' => $order->get_currency() ]
+		);
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$formatted_plain_text = html_entity_decode( wp_strip_all_tags( $formatted_with_html ) );
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		return sprintf(
+		/* translators: %s: Unknown. */
+			__( 'Invalid refund amount. Available amount: %s', PLUGIN_TEXT_DOMAIN ),
+			$formatted_plain_text
+		);
+	}
+    // phpcs:enable
 }

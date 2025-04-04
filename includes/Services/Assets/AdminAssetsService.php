@@ -1,85 +1,91 @@
 <?php
+declare( strict_types=1 );
 
-namespace Paydock\Services\Assets;
-
-use Paydock\PaydockPlugin;
+namespace WooPlugin\Services\Assets;
 
 class AdminAssetsService {
 	private const SCRIPTS = [
-		'tabs',
-		'connections',
-		'card-select',
+		'handle-settings-select-option',
+		'handle-environment-changes',
+		'handle-config-template-error-styles',
 		'deactivation-confirmation',
-		// 'admin-helpers'
-	];
-	private const STYLES = [
-		'card-select',
 	];
 
 	private const PREFIX = 'admin';
 
 	private const SCRIPT_PREFIX = 'script';
-	private const STYLE_PREFIX = 'style';
 
-	private const URL_SCRIPT_PREFIX = 'assets/js/admin/';
+	private const URL_SCRIPT_PREFIX  = 'assets/js/admin/';
 	private const URL_SCRIPT_POSTFIX = '.js';
 
-	private const URL_STYLE_PREFIX = 'assets/css/admin/';
-	private const URL_STYLE_POSTFIX = '.css';
-
 	public function __construct() {
-		$this->registerScripts();
-		$this->loadScripts();
-		$this->addStyles();
+		/**
+		 * Use hook admin_enqueue_scripts
+		 *
+		 * @noinspection PhpUndefinedFunctionInspection
+		 */
+		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_scripts' ] );
 	}
 
-	public function registerScripts(): void {
+	public function enqueue_scripts( string $hook ): void {
+		$allowed_pages = [ 'woocommerce_page_wc-settings', 'plugins.php' ];
+
+		if ( ! in_array( $hook, $allowed_pages, true ) ) {
+			return;
+		}
+
 		foreach ( self::SCRIPTS as $script ) {
+			$script_name = $this->get_script_name( $script );
+
+			/* @noinspection PhpUndefinedFunctionInspection */
 			wp_register_script(
-				$this->getScriptName( $script ),
-				plugins_url( $this->getScriptPath( $script ), PAYDOCK_PLUGIN_FILE ),
-				[],
-				PAYDOCK_PLUGIN_VERSION,
+				$script_name,
+				plugins_url( $this->get_script_path( $script ), PLUGIN_FILE ),
+				[ 'jquery' ],
+				PLUGIN_VERSION,
 				true
 			);
+
+			/**
+			 * WordPress.Security.NonceVerification.Recommended
+			 *
+             * @phpcs:disable WordPress.Security.NonceVerification.Recommended
+			 */
+			if ( $script === 'deactivation-confirmation' ||
+				( isset( $_GET['tab'], $_GET['section'] ) && $_GET['tab'] === 'checkout' && $_GET['section'] === PLUGIN_PREFIX ) ) {
+				/**
+				 * Use hook wp_enqueue_script
+				 *
+				 * @noinspection PhpUndefinedFunctionInspection
+				 */
+				wp_enqueue_script( $script_name );
+
+				/**
+				 * Use function wp_localize_script
+				 *
+				 * @noinspection PhpUndefinedFunctionInspection
+				 */
+				wp_localize_script(
+					$script_name,
+					'widgetSettings',
+					[
+						'pluginUrlPrefix'  => PLUGIN_URL,
+						'pluginPrefix'     => PLUGIN_PREFIX,
+						'pluginTextDomain' => PLUGIN_TEXT_DOMAIN,
+						'pluginTextName'   => PLUGIN_TEXT_NAME,
+						'pluginName'       => PLUGIN_NAME,
+						'pluginWidgetName' => PLUGIN_WIDGET_NAME,
+					]
+				);
+			}
 		}
 	}
 
-	private function getScriptName( string $script ): string {
-		return implode( '_', [ PaydockPlugin::PLUGIN_PREFIX, self::PREFIX, self::SCRIPT_PREFIX, $script ] );
+	private function get_script_name( string $script ): string {
+		return implode( '_', [ PLUGIN_PREFIX, self::PREFIX, self::SCRIPT_PREFIX, $script ] );
 	}
 
-	private function getScriptPath( string $script ): string {
+	private function get_script_path( string $script ): string {
 		return self::URL_SCRIPT_PREFIX . $script . self::URL_SCRIPT_POSTFIX;
 	}
-
-	public function loadScripts(): void {
-		foreach ( self::SCRIPTS as $script ) {
-			$scriptName = $this->getScriptName( $script );
-			wp_enqueue_script( $this->getScriptName( $script ), '', [], PAYDOCK_PLUGIN_VERSION, true );
-			wp_localize_script( $scriptName, 'paydockWidgetSettings', [
-				'pluginUrlPrefix' => PAYDOCK_PLUGIN_URL
-			] );
-		}
-	}
-
-	private function addStyles(): void {
-		foreach ( self::STYLES as $style ) {
-			wp_enqueue_style(
-				$this->getStyleName( $style ),
-				plugins_url( $this->getStylePath( $style ), PAYDOCK_PLUGIN_FILE ),
-				[],
-				PAYDOCK_PLUGIN_VERSION
-			);
-		}
-	}
-
-	private function getStyleName( string $script ): string {
-		return implode( '_', [ PaydockPlugin::PLUGIN_PREFIX, self::PREFIX, self::STYLE_PREFIX, $script ] );
-	}
-
-	private function getStylePath( string $script ): string {
-		return self::URL_STYLE_PREFIX . $script . self::URL_STYLE_POSTFIX;
-	}
-
 }

@@ -1,32 +1,18 @@
-<?php
+<?php declare( strict_types=1 );
+namespace WooPlugin\Abstracts;
 
-namespace Paydock\Abstracts;
-
-use Paydock\API\ConfigService;
-use WP_Error;
+use LogicException;
+use WooPlugin\API\ConfigService;
+use WooPlugin\Helpers\LoggerHelper;
 
 abstract class AbstractApiService {
-	const METHOD_GET = 'GET';
+	const METHOD_GET  = 'GET';
 	const METHOD_POST = 'POST';
-	const METHOD_DELETE = 'DELETE';
 
-	protected $action;
-	protected $parameters = [];
-	protected $allowedAction = [];
-
-	public function callWithWidgetAccessToken(): array {
-		$args = [
-			'headers' => [
-				'content-type' => 'application/json',
-			],
-		];
-
-		if (! empty( ConfigService::$widgetAccessToken )) {
-			$args['headers']['x-access-token'] = ConfigService::$widgetAccessToken;
-		}
-
-		return $this->runCall($args);
-	}
+	protected string $action;
+	protected ?string $request_action = null;
+	protected array $parameters       = [];
+	protected array $allowed_action   = [];
 
 	public function call(): array {
 		$args = [
@@ -35,72 +21,107 @@ abstract class AbstractApiService {
 			],
 		];
 
-		if ( ! empty( ConfigService::$accessToken ) ) {
-			$args['headers']['x-access-token'] = ConfigService::$accessToken;
-		} else {
-			if ( ! empty( ConfigService::$secretKey ) ) {
-				$args['headers']['x-user-secret-key'] = ConfigService::$secretKey;
-			}
-
-			if ( ! empty( ConfigService::$publicKey ) ) {
-				$args['headers']['x-user-public-key'] = ConfigService::$publicKey;
-			}
+		if ( ! empty( ConfigService::$access_token ) ) {
+			$args['headers']['x-access-token'] = ConfigService::$access_token;
 		}
 
-		return $this->runCall($args);
+		return $this->run_call( $args );
 	}
 
-	protected function runCall($args): array {
-		$url  = ConfigService::buildApiUrl( $this->buildEndpoint() );
-		$args['headers']['X-paydock-Meta'] = 'V'
-		                                         . PAYDOCK_PLUGIN_VERSION
-		                                         . '_woocommerce_'
-		                                         . WC()->version;
+	/**
+	 * Uses functions (wp_json_encode, wp_parse_args, wp_remote_request) from WordPress
+	 * Uses a function (WC) from WooCommerce
+	 */
+	protected function run_call( $args ): array {
+		$url = ConfigService::build_api_url( $this->build_endpoint() );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$args['headers'][ 'X-' . PLUGIN_TEXT_DOMAIN . '-Meta' ] = 'V'
+												. PLUGIN_VERSION
+												. '_woocommerce_'
+												. WC()->version;
 
-		switch ( $this->allowedAction[ $this->action ] ) {
+		switch ( $this->allowed_action[ $this->action ] ) {
 			case 'POST':
+				/* @noinspection PhpUndefinedFunctionInspection */
 				$args['body'] = wp_json_encode( $this->parameters, JSON_PRETTY_PRINT );
-				$parsed_args  = wp_parse_args( $args, [
-					'method'  => 'POST',
-					'timeout' => 10,
-				] );
-				break;
-			case 'DELETE':
-				$parsed_args = wp_parse_args( $args, [
-					'method'  => 'DELETE',
-					'timeout' => 10,
-				] );
+				$parsed_args  = wp_parse_args(
+					$args,
+					[
+						'method'  => 'POST',
+						'timeout' => 10,
+					]
+				);
 				break;
 			default:
-				$parsed_args = wp_parse_args( $args, [
-					'method'  => 'GET',
-					'timeout' => 10,
-				] );
+				/* @noinspection PhpUndefinedFunctionInspection */
+				$parsed_args = wp_parse_args(
+					$args,
+					[
+						'method'  => 'GET',
+						'timeout' => 10,
+					]
+				);
+		}
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$request = wp_remote_request( $url, $parsed_args );
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		if ( is_wp_error( $request ) ) {
+			return [
+				'status' => 403,
+				'error'  => $request,
+			];
 		}
 
-		$request = _wp_http_get_object()->request( $url, $parsed_args );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$response_body = wp_remote_retrieve_body( $request );
+		$body          = json_decode( $response_body, true );
 
-		if ( $request instanceof WP_Error ) {
-			return [ 'status' => 403, 'error' => $request ];
-		}
-
-		$body = json_decode( $request['body'], true );
-
-		if ( null === $body && json_last_error() !== JSON_ERROR_NONE ) {
+		if ( $body === null && json_last_error() !== JSON_ERROR_NONE ) {
 			return [
 				'status' => 403,
 				'error'  => [ 'message' => 'Oops! We\'re experiencing some technical difficulties at the moment. Please try again later. ' ],
-				'body'   => $request['body']
+				'body'   => $request['body'],
 			];
 		}
+
+		if ( ! empty( $this->parameters['reference'] ) && empty( $this->parameters['order_id'] ) ) {
+			$this->parameters['order_id'] = $this->parameters['reference'];
+		}
+
+		$log_data = [
+			'request'  => [
+				'url'     => $url,
+				'method'  => $parsed_args['method'],
+				'payload' => $parsed_args['body'] ?? '',
+			],
+			'response' => $body,
+			'error'    => $body['error'] ?? null,
+		];
+
+		if ( ! empty( $this->parameters['order_id'] ) ) {
+			$log_data['order_id'] = $this->parameters['order_id'];
+		}
+
+		LoggerHelper::log_api_request(
+			$log_data,
+			! empty( $this->request_action ) ? $this->request_action : $url,
+		);
 
 		return $body;
 	}
 
-	protected function setAction( $action ): void {
-		if ( empty( $this->allowedAction[ $action ] ) ) {
+	/**
+	 * Uses a function (esc_html) from WordPress
+	 *
+	 * @noinspection PhpUndefinedFunctionInspection
+	 * @throws LogicException If action is not allowed
+	 */
+	protected function set_action( $action ): void {
+		if ( empty( $this->allowed_action[ $action ] ) ) {
+
 			/* translators: %s: Missing action name. */
-			throw new \LogicException( esc_html( sprintf( __( 'Not allowed action: %s', 'paydock' ), $action ) ) );
+			throw new LogicException( esc_html( sprintf( __( 'Not allowed action: %s', PLUGIN_TEXT_DOMAIN ), $action ) ) );
 		}
 
 		$this->action = $action;

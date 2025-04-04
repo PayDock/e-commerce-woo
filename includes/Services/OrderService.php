@@ -1,156 +1,218 @@
 <?php
+declare( strict_types=1 );
 
-namespace Paydock\Services;
+namespace WooPlugin\Services;
 
-use Paydock\Hooks\ActivationHook;
+use Exception;
 
 class OrderService {
+	protected TemplateService $template_service;
 
-	protected $templateService;
-
+	/**
+	 * Uses functions (is_admin and add_action) from WordPress
+	 */
 	public function __construct() {
+		/* @noinspection PhpUndefinedFunctionInspection */
 		if ( is_admin() ) {
-			$this->templateService = new TemplateService( $this );
+			$this->template_service = new TemplateService( $this );
+			/* @noinspection PhpUndefinedFunctionInspection */
+			add_action( 'admin_notices', [ $this, 'display_status_change_error' ] );
 		}
 	}
 
-	public static function updateStatus( $id, $custom_status, $status_note = null ) {
+	/**
+	 * Uses a function (wc_get_order) from WooCommerce
+	 */
+	public static function update_status( $id, $new_status, $status_note = null ): void {
+		/* @noinspection PhpUndefinedFunctionInspection */
 		$order = wc_get_order( $id );
 
-		if ( is_object( $order ) ) {
-				$order->set_status( ActivationHook::CUSTOM_STATUSES[ $custom_status ], $status_note );
-				$order->update_meta_data( ActivationHook::CUSTOM_STATUS_META_KEY, $custom_status );
-				$order->save();
-		}
-	}
-
-	public function iniPaydockOrderButtons( $order ) {
-		$orderCustomStatus = $order->get_meta( ActivationHook::CUSTOM_STATUS_META_KEY );
-		$orderStatus       = $order->get_status();
-		$capturedAmount    = $order->get_meta( 'capture_amount' );
-		$totalRefaund      = $order->get_total_refunded();
-		$orderTotal      = (float) $order->get_total(false);
-		if ( in_array( $orderStatus, [
-				'pending',
-				'failed',
-				'cancelled',
-				'on-hold',
-			] )
-		     || in_array( $orderCustomStatus, [
-				'paydock-requested',
-				'wc-paydock-requested',
-				'paydock-refunded',
-				'WC-paydock-refunded',
-				'paydock-authorize',
-				'wc-paydock-authorize'
-			] )
-		     || ( $orderTotal == $totalRefaund )
-		     || ( $capturedAmount == $totalRefaund )
-		) {
-			wp_enqueue_style(
-				'hide-refund-button-styles',
-				PAYDOCK_PLUGIN_URL . 'assets/css/admin/hide-refund-button.css',
-				[],
-				PAYDOCK_PLUGIN_VERSION
-			);
-		}
-		if ( in_array( $orderStatus, [
-				'processing',
-				'on-hold',
-			] ) && in_array( $orderCustomStatus, [
-				'paydock-authorize',
-				'wc-paydock-authorize',
-				'paydock-paid',
-				'wc-paydock-paid',
-				'wc-paydock-p-paid',
-				'paydock-p-paid'
-			] ) ) {
-			$this->templateService->includeAdminHtml( 'paydock-capture-block', compact( 'order' ) );
-			wp_enqueue_script(
-				'paydock-capture-block',
-				PAYDOCK_PLUGIN_URL . 'assets/js/admin/paydock-capture-block.js',
-				[],
-				time(),
-				true
-			);
-			wp_localize_script( 'paydock-capture-block', 'paydockCaptureBlockSettings', [
-				'wpnonce' => esc_attr( wp_create_nonce( 'capture-or-cancel' ) ),
-			] );
-		}
-		if ( in_array( $orderStatus, [
-				'on-hold',
-			] ) ) {
-			wp_enqueue_style(
-				'hide-on-hold-buttons',
-				PAYDOCK_PLUGIN_URL . 'assets/css/admin/hide-on-hold-buttons.css',
-				[],
-				PAYDOCK_PLUGIN_VERSION
-			);
-		}
-	}
-
-	public function statusChangeVerification( $orderId, $oldStatusKey, $newStatusKey, $order ) {
-		$order->update_meta_data( 'status_change_verification_failed', "" );
-		if ( ( $oldStatusKey == $newStatusKey ) || ! empty( $GLOBALS['paydock_is_updating_order_status'] ) || null === $orderId ) {
+		if ( ! $order || strpos( $order->get_payment_method(), PLUGIN_PREFIX ) === false ) {
 			return;
 		}
-		$rulesForStatuses = [
-			'processing' => [
-				'refunded',
-				'cancelled',
-				'failed',
-				'pending',
-				'completed',
-			],
-			'refunded'   => [ 'cancelled', 'failed', 'refunded' ],
-			'cancelled'  => [ 'failed', 'cancelled' ],
+
+		$order->set_status( $new_status, $status_note );
+		$order->save();
+	}
+
+	/**
+	 * Uses a function (wp_enqueue_style) from WordPress
+	 */
+	public function init_woo_plugin_order_buttons( $order ): void {
+		if ( ! $order || strpos( $order->get_payment_method(), PLUGIN_PREFIX ) === false ) {
+			return;
+		}
+
+		$order_status = $order->get_status();
+		$total_refund = round( (float) $order->get_total_refunded(), 2 );
+		$order_total  = round( (float) $order->get_total( false ), 2 );
+		$charge_id    = $order->get_meta( '_' . PLUGIN_PREFIX . '_charge_id' );
+		if (
+			$order_total === $total_refund ||
+			!in_array(
+				$order_status,
+				[
+					'processing',
+					'refunded',
+					'completed',
+					'cancelled',
+				],
+				true
+			) ||
+			empty( $charge_id )
+		) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			wp_enqueue_style(
+				'hide-refund-button-styles',
+				PLUGIN_URL . 'assets/css/admin/hide-refund-button.css',
+				[],
+				PLUGIN_VERSION,
+			);
+		}
+
+		if ( $order_status === 'on-hold' ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			wp_enqueue_style(
+				'hide-on-hold-buttons',
+				PLUGIN_URL . 'assets/css/admin/hide-on-hold-buttons.css',
+				[],
+				PLUGIN_VERSION,
+			);
+		}
+	}
+
+	/**
+	 * Checks if status change is allowed
+	 * Uses functions (__, set_transient, get_current_user_id and esc_html) from WordPress
+	 * Uses a function (wc_get_order_status_name) from WooCommerce
+	 *
+	 * @throws Exception If status change is not allowed
+	 */
+	public function status_change_verification( $order_id, $old_status_key, $new_status_key, $order ): void {
+		if ( ! is_object( $order ) || strpos( $order->get_payment_method(), PLUGIN_PREFIX ) === false ) {
+			return;
+		}
+
+		$order->delete_meta_data( '_status_change_verification_failed' );
+		$order->save();
+		if (
+			$old_status_key === $new_status_key ||
+			! empty( $GLOBALS[ PLUGIN_PREFIX . '_is_updating_order_status' ] ) ||
+			$order_id === null
+		) {
+			return;
+		}
+		$statuses_rules = [
+			'processing' => [ 'refunded', 'cancelled', 'failed', 'pending', 'completed' ],
+			'refunded'   => [ 'cancelled', 'failed' ],
+			'cancelled'  => [ 'failed', 'cancelled', 'refunded' ],
 		];
-		if ( ! empty( $rulesForStatuses[ $oldStatusKey ] ) ) {
-			if ( ! in_array( $newStatusKey, $rulesForStatuses[ $oldStatusKey ] ) ) {
-				$newStatusName                                   = wc_get_order_status_name( $newStatusKey );
-				$oldStatusName                                   = wc_get_order_status_name( $oldStatusKey );
-				$error                                           = sprintf(
-				/* translators: %1$s: Old status of processing order.
-				 * translators: %2$s: New status of processing order.
-				 */
-					__( 'You can not change status from "%1$s"  to "%2$s"', 'paydock' ),
-					$oldStatusName,
-					$newStatusName
+		if ( ! empty( $statuses_rules[ $old_status_key ] ) ) {
+			if ( ! in_array( $new_status_key, $statuses_rules[ $old_status_key ], true ) ) {
+				/* @noinspection PhpUndefinedFunctionInspection */
+				$new_status_name = wc_get_order_status_name( $new_status_key );
+				/* @noinspection PhpUndefinedFunctionInspection */
+				$old_status_name = wc_get_order_status_name( $old_status_key );
+				/* @noinspection PhpUndefinedFunctionInspection */
+				$error = sprintf(
+					/* translators: 1: Old status name, 2: New status name */
+					__( 'You can not change status from "%1$s"  to "%2$s"', PLUGIN_TEXT_DOMAIN ),
+					$old_status_name,
+					$new_status_name
 				);
-				$GLOBALS['paydock_is_updating_order_status'] = true;
-				$order->update_meta_data( 'status_change_verification_failed', 1 );
-				$order->update_status( $oldStatusKey, $error );
-				update_option( 'paydock_status_change_error', $error );
-				unset( $GLOBALS['paydock_is_updating_order_status'] );
-				throw new \Exception( esc_html( $error ) );
+				$GLOBALS[ PLUGIN_PREFIX . '_is_updating_order_status' ] = true;
+				$order->update_meta_data( '_status_change_verification_failed', 1 );
+				$order->update_status( $old_status_key, $error );
+				/* @noinspection PhpUndefinedFunctionInspection */
+				set_transient( PLUGIN_PREFIX . '_status_change_error_' . get_current_user_id(), $error, 300 );
+				unset( $GLOBALS[ PLUGIN_PREFIX . '_is_updating_order_status' ] );
+				$this->remove_status_related_notes( $order_id );
+				/* @noinspection PhpUndefinedFunctionInspection */
+				throw new Exception( esc_html( $error ) );
 			}
 		}
 	}
 
-	public function informationAboutPartialCaptured( $orderId ) {
+	/**
+	 * Handles the order notes’ verbiage for switching statuses back and forth. Woo core behaviour, can't be avoided
+	 */
+	public function remove_status_related_notes( $order_id ) {
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$notes = wc_get_order_notes(
+			[
+				'order_id'   => $order_id,
+				'date_query' => [
+					'after' => '-30 sec',
+				],
+			],
+		);
 
-		$order = wc_get_order( $orderId );
+		if ( ! empty( $notes ) ) {
+			foreach ( $notes as $note ) {
+				$note_content = $note->content;
 
-		if ( is_object( $order ) ) {
+				$related_notes = [
+					'Order status changed',
+					'Error during status transition',
+				];
 
-			$capturedAmount = $order->get_meta( 'capture_amount' );
-
-			if ( ! empty( $capturedAmount ) ) {
-					$this->templateService->includeAdminHtml( 'information-about-partial-captured', compact( 'order', 'capturedAmount' ) );
+				foreach ( $related_notes as $message ) {
+					if ( strpos( $note_content, $message ) !== false ) {
+						/* @noinspection PhpUndefinedFunctionInspection */
+						wp_delete_comment( $note->id, true );
+					}
+				}
 			}
-
 		}
-
 	}
 
-	public function displayStatusChangeError() {
-		$screen = get_current_screen();
-		if ( 'woocommerce_page_wc-orders' == $screen->id ) {
-			$message = get_option( 'paydock_status_change_error', '' );
-			if ( ! empty( $message ) ) {
-				echo '<div class=\'notice notice-error is-dismissible\'><p>' . esc_html( $message ) . '</p></div>';
-				delete_option( 'paydock_status_change_error' );
+	/**
+	 * Uses functions (get_transient, get_current_user_id, esc_html and delete_transient) from WordPress
+	 */
+	public function display_status_change_error(): void {
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$error_message = get_transient( PLUGIN_PREFIX . '_status_change_error_' . get_current_user_id() );
+		if ( $error_message ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			echo '<div id="woo-plugin-error-message" class="notice notice-error is-dismissible">
+				<p>' . esc_html( $error_message ) . '</p>
+			</div>';
+			echo '<script type="text/javascript">
+				jQuery(document).ready(function($) {
+					$("#message.updated.notice.notice-success").hide();
+				});
+			</script>';
+			/* @noinspection PhpUndefinedFunctionInspection */
+			delete_transient( PLUGIN_PREFIX . '_status_change_error_' . get_current_user_id() );
+		}
+	}
+
+	/**
+	 * Removes the bulk action success message when an error has occurred.
+	 * phpcs:disable WordPress.Security.NonceVerification -- processed through the WooCommerce form handler
+	 *
+	 * @return void
+	 */
+	public function remove_bulk_action_message() {
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$is_wc_orders_page = isset( $_GET['page'] ) && sanitize_text_field( wp_unslash( $_GET['page'] ) ) === 'wc-orders';
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$is_shop_order_page = isset( $_GET['post_type'] ) && sanitize_text_field( wp_unslash( $_GET['post_type'] ) ) === 'shop_order';
+
+		if (
+			( $is_wc_orders_page || $is_shop_order_page ) &&
+			isset( $_GET['bulk_action'], $_GET['changed'] )
+		) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			$error_key = PLUGIN_PREFIX . '_status_change_error_' . get_current_user_id();
+
+			/* @noinspection PhpUndefinedFunctionInspection */
+			if ( get_transient( $error_key ) ) {
+				/* @noinspection PhpUndefinedFunctionInspection */
+				wp_safe_redirect( remove_query_arg( 'changed' ) );
+				exit;
 			}
 		}
 	}
+	// phpcs:enable
 }

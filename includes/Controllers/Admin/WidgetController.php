@@ -1,185 +1,262 @@
 <?php
+declare( strict_types=1 );
 
-namespace Paydock\Controllers\Admin;
+namespace WooPlugin\Controllers\Admin;
 
-use Paydock\Enums\WalletPaymentMethods;
-use Paydock\Helpers\ShippingHelper;
-use Paydock\Repositories\LogRepository;
-use Paydock\Services\SDKAdapterService;
-use Paydock\Services\SettingsService;
-use WP_REST_Request;
+use WooPlugin\Helpers\OrderHelper;
+use WooPlugin\Services\Settings\APIAdapterService;
+use WooPlugin\Services\SettingsService;
 
 class WidgetController {
-	public function createWalletCharge( WP_REST_Request $request ) {
-		$settings = SettingsService::getInstance();
-		$order    = wc_get_order( $request['order_id'] );
 
-		$loggerRepository = new LogRepository();
+	/**
+	 * Uses functions (sanitize_text_field, wp_verify_nonce, wp_send_json_error, __ and wp_send_json_success) from WordPress
+	 * Uses functions (WC, get_woocommerce_currency and wc_get_orders) from WooCommerce
+	 */
+	public function create_checkout_intent(): void {
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$wp_nonce = isset( $_REQUEST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ) : null;
 
-		$request    = $request->get_json_params();
-		$result     = [];
-		$isAfterPay = false;
+		/* @noinspection PhpUndefinedFunctionInspection */
+		if ( ! wp_verify_nonce( $wp_nonce, PLUGIN_TEXT_DOMAIN . '-create-charge-intent' ) ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			wp_send_json_error( [ 'message' => __( 'Error: Security check', PLUGIN_TEXT_DOMAIN ) ] );
 
-		switch ( $request['type'] ) {
-			case 'afterpay':
-				$isAfterPay = true;
-				$payment    = WalletPaymentMethods::AFTERPAY();
-				break;
-			case 'apple-pay':
-				$payment = WalletPaymentMethods::APPLE_PAY();
-				break;
-			case 'google-pay':
-				$payment = WalletPaymentMethods::GOOGLE_PAY();
-				break;
-			case 'pay-pal':
-				$payment = WalletPaymentMethods::PAY_PAL_SMART_BUTTON();
-				break;
+			return;
 		}
 
-		$key = strtolower( $payment->name );
-		if ( $settings->isWalletEnabled( $payment ) ) {
-			$reference = $request['order_id'];
+		$request  = [];
+		$settings = SettingsService::get_instance();
 
-			$items = [];
-			foreach ( $request['items'] as $item ) {
-				$image = wp_get_attachment_image_url( get_post_thumbnail_id( $item['id'] ), 'full' );
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$cart = WC()->cart;
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$session = WC()->session;
 
-				$itemData = [
-					'amount'   => round( $item['prices']['price'] / 100, 2 ),
-					'name'     => $item['name'],
-					'type'     => $item['type'],
-					'quantity' => $item['quantity'],
-					'item_uri' => $item['permalink'],
-				];
-
-				if ( ! empty( $image ) ) {
-					$itemData['image_uri'] = $image;
+		if ( is_object( $session ) && isset( $_POST['selected_shipping_id'] ) && isset( $_COOKIE[ PLUGIN_PREFIX . '_selected_shipping' ] ) ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			$selected_shipping_id = sanitize_text_field( wp_unslash( $_POST['selected_shipping_id'] ) );
+			/* @noinspection PhpUndefinedFunctionInspection */
+			$cookies_shipping_id = urldecode( sanitize_text_field( wp_unslash( $_COOKIE[ PLUGIN_PREFIX . '_selected_shipping' ] ) ) );
+			/* @noinspection PhpUndefinedFunctionInspection */
+			$current_shipping_id = $session->get( 'chosen_shipping_methods' )[0];
+			if ( $selected_shipping_id === $cookies_shipping_id && $selected_shipping_id !== $current_shipping_id ) {
+				if ( isset( $_POST['total'] ) ) {
+					if ( is_array( $_POST['total'] ) ) {
+						/* @noinspection PhpUndefinedFunctionInspection */
+						$cart_total = array_map( 'sanitize_text_field', wp_unslash( $_POST['total'] ) );
+					} else {
+						/* @noinspection PhpUndefinedFunctionInspection */
+						$cart_total = sanitize_text_field( wp_unslash( $_POST['total'] ) );
+					}
+					$request['total'] = $cart_total;
+				} else {
+					return;
 				}
-
-				$items[] = $itemData;
 			}
-			$billingAdress   = $request['address'];
-			$shippingAddress = $request['shipping_address'];
+		}
 
-			foreach ( $shippingAddress as $key => $value ) {
-				if ( empty( trim( $value ) ) ) {
-					$shippingAddress[ $key ] = $billingAdress[ $key ];
+		if ( is_object( $cart ) ) {
+			if ( empty( $cart_total ) ) {
+				$cart->calculate_totals();
+				$cart_total = $cart->get_total( false );
+
+				if ( ! empty( $cart_total ) ) {
+					/* @noinspection PhpUndefinedFunctionInspection */
+					$request['total']['total_price'] = $cart_total * 100;
+					/* @noinspection PhpUndefinedFunctionInspection */
+					$request['total']['currency_code'] = get_woocommerce_currency();
 				}
 			}
-
-			$chargeRequest = [
-				'amount'    => round( $request['total']['total_price'] / 100, 2 ),
-				'currency'  => $request['total']['currency_code'],
-				'reference' => (string) $reference,
-				'customer'  => [
-					'first_name'     => $billingAdress['first_name'],
-					'last_name'      => $billingAdress['last_name'],
-					'email'          => $billingAdress['email'],
-					'payment_source' => [
-						'gateway_id'       => $settings->getWalletGatewayId( $payment ),
-						'address_line1'    => $billingAdress['address_1'],
-						'address_city'     => $billingAdress['city'],
-						'address_state'    => $billingAdress['state'],
-						'address_country'  => $billingAdress['country'],
-						'address_postcode' => $billingAdress['postcode'],
-					],
-				],
-				'meta'      => [
-					'store_name' => get_bloginfo( 'name' ),
-				],
-				'items'     => $items,
-				'shipping'  => [
-					'amount'           => round( $request['total']['total_shipping'] / 100, 2 ),
-					'currency'         => $request['total']['currency_code'],
-					'address_line1'    => $shippingAddress['address_1'],
-					'address_city'     => $shippingAddress['city'],
-					'address_state'    => $shippingAddress['state'],
-					'address_country'  => $shippingAddress['country'],
-					'address_postcode' => $shippingAddress['postcode'],
-					'contact'          => [
-						'first_name' => $shippingAddress['first_name'],
-						'last_name'  => $shippingAddress['last_name'],
-					],
-				],
-			];
-
-			if ( ! empty( $billingAdress['phone'] ) ) {
-				$chargeRequest['customer']['phone'] = $billingAdress['phone'];
+		} elseif ( isset( $_POST['total'] ) ) {
+			if ( is_array( $_POST['total'] ) ) {
+				/* @noinspection PhpUndefinedFunctionInspection */
+				$request['total'] = array_map( 'sanitize_text_field', wp_unslash( $_POST['total'] ) );
+			} else {
+				/* @noinspection PhpUndefinedFunctionInspection */
+				$request['total'] = sanitize_text_field( wp_unslash( $_POST['total'] ) );
 			}
+		} else {
+			return;
+		}
 
-			if ( ! empty( $billingAdress['address_2'] ) ) {
-				$chargeRequest['customer']['payment_source']['address_line2'] = $billingAdress['address_2'];
-			}
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$shipping_address = isset( $_POST['shipping_address'] ) ? array_map( 'sanitize_text_field', wp_unslash( $_POST['shipping_address'] ) ) : $session->get( 'customer' )['shipping'];
+		$billing_address  = [];
 
-			if ( ! empty( $shippingAddress['phone'] ) ) {
-				$chargeRequest['shipping']['contact']['phone'] = $shippingAddress['phone'];
-			}
+		if ( ! empty( $_POST['address'] ) && is_array( $_POST['address'] ) ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			$billing_address = array_map( 'sanitize_text_field', wp_unslash( $_POST['address'] ) );
+		}
 
-			if ( ! empty( $shippingAddress['address_2'] ) ) {
-				$chargeRequest['shipping']['address_line2'] = $shippingAddress['address_2'];
-			}
+		if ( empty( $billing_address['country'] ) || empty( $shipping_address['country'] ) ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			$countries = WC()->countries;
+			if ( ! empty( $countries ) ) {
+				$allowed_countries = $countries->get_allowed_countries();
 
-			if ( ! empty( $request['shipping_rates'] ) ) {
-				$shippingRates = reset( $request['shipping_rates'] );
-				foreach ( $shippingRates['shipping_rates'] as $shippingRate ) {
-					if ( $shippingRate['selected'] ) {
-						if ( 'pickup_location' === $shippingRate['method_id'] ) {
-							$location = ShippingHelper::getPickupLocationByKey( $shippingRate['rate_id'] );
-							if ( false !== $location ) {
-								$chargeRequest['shipping']['address_line1']    = $location['address']['address_1'];
-								$chargeRequest['shipping']['address_city']     = $location['address']['city'];
-								$chargeRequest['shipping']['address_state']    = $location['address']['state'];
-								$chargeRequest['shipping']['address_country']  = $location['address']['country'];
-								$chargeRequest['shipping']['address_postcode'] = $location['address']['postcode'];
-								unset( $chargeRequest['shipping']['address_line2'] );
-							}
-						}
-						break;
+				if ( count( $allowed_countries ) === 1 ) {
+					$allowed_country = key( $allowed_countries );
+
+					if ( empty( $billing_address['country'] ) ) {
+						$billing_address['country'] = $allowed_country;
+					}
+
+					if ( empty( $shipping_address['country'] ) ) {
+						$shipping_address['country'] = $allowed_country;
 					}
 				}
 			}
-
-			if ( WalletPaymentMethods::APPLE_PAY()->name === $payment->name ) {
-				$chargeRequest['customer']['payment_source']['wallet_type'] = 'apple';
-			}
-
-			$fraudService = $settings->getWalletFraudServiceId( $payment );
-			if (
-				$settings->isWalletFraud( $payment )
-				&& ! empty( $fraudService )
-			) {
-				$chargeRequest['fraud'] = [
-					'service_id' => $fraudService,
-					'data'       => [],
-				];
-			}
-
-			if ( $isAfterPay ) {
-				$chargeRequest['meta']['success_url'] = add_query_arg( 'afterpay-success', 'true',
-					$order->get_checkout_order_received_url() );
-				$chargeRequest['meta']['error_url']   = add_query_arg( 'afterpay-error', 'true',
-					$order->get_checkout_order_received_url() );
-			}
-
-			$result = SDKAdapterService::getInstance()
-			                           ->createWalletCharge( $chargeRequest,
-				                           $settings->isWalletDirectCharge( $payment ) );
-
-			$result['county'] = $request['address']['country'] ?? '';
-
-			if ( WalletPaymentMethods::PAY_PAL_SMART_BUTTON()->name === $payment->name ) {
-				$result['pay_later'] = 'yes' === $settings->isPayPallSmartButtonPayLater();
-			}
-
-			if ( ! empty( $result[ $key ]['error'] ) ) {
-				$operation = ucfirst( strtolower( $result[ $key ]['resource']['type'] ?? 'undefined' ) );
-				$status    = $result[ $key ]['error']['message'] ?? 'empty status';
-				$message   = $result[ $key ]['error']['details'][0]['gateway_specific_description'] ?? 'empty message';
-
-				$loggerRepository->createLogRecord( '', $operation, $status, $message, LogRepository::ERROR );
-			}
 		}
 
-		return rest_ensure_response( $result );
+		if ( ! empty( $_POST['order_id'] ) ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			$reference = sanitize_text_field( wp_unslash( $_POST['order_id'] ) );
+		} else {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			$custom_order_id = (string) WC()->session->get( PLUGIN_PREFIX . '_draft_order' );
+
+			if ( ! empty( $custom_order_id ) ) {
+				$order_id = $custom_order_id;
+				/* @noinspection PhpUndefinedFunctionInspection */
+				$order = wc_get_order( $order_id );
+				OrderHelper::update_order( $order, $billing_address, $shipping_address );
+			} else {
+				$order_id = $this->create_draft_order( $billing_address, $shipping_address );
+			}
+			/* @noinspection PhpUndefinedFunctionInspection */
+			WC()->session->set( PLUGIN_PREFIX . '_draft_order', $order_id );
+
+			$reference = $order_id;
+		}
+
+		if ( ! $this->check_is_complete_address( $billing_address ) ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			wp_send_json_error( [ 'message' => __( 'Incomplete billing address', PLUGIN_TEXT_DOMAIN ) ] );
+		}
+
+		$intent_request_params = [
+			'amount'        => round( $request['total']['total_price'] / 100, 2 ),
+			'version'       => (int) $settings->get_checkout_template_version(),
+			'currency'      => $request['total']['currency_code'],
+			'reference'     => $reference,
+			'customer'      => [
+				'email'           => $billing_address['email'],
+				'billing_address' => [
+					'first_name'       => $billing_address['first_name'],
+					'last_name'        => $billing_address['last_name'],
+					'address_line1'    => $billing_address['address_1'],
+					'address_city'     => $billing_address['city'],
+					'address_state'    => $billing_address['state'],
+					'address_country'  => $billing_address['country'],
+					'address_postcode' => $billing_address['postcode'],
+				],
+			],
+			'configuration' => [
+				'template_id' => $settings->get_checkout_configuration_id(),
+			],
+		];
+
+		if ( empty( $reference ) ) {
+			unset( $intent_request_params['reference'] );
+		}
+
+		if ( ! empty( $settings->get_checkout_customisation_id() ) ) {
+			$intent_request_params['customisation']['template_id'] = $settings->get_checkout_customisation_id();
+		}
+
+		if ( ! empty( $billing_address['phone'] ) ) {
+			$intent_request_params['customer']['phone'] = $billing_address['phone'];
+		}
+
+		if ( ! empty( $billing_address['address_2'] ) ) {
+			$intent_request_params['customer']['billing_address']['address_line2'] = $billing_address['address_2'];
+		}
+
+		$api_adapter_service = APIAdapterService::get_instance();
+		$api_adapter_service->initialise( $settings->get_environment(), $settings->get_access_token() );
+		$result = $api_adapter_service->create_checkout_intent( $intent_request_params );
+
+		if ( ! empty( $result['error'] ) ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			wp_send_json_error( [ 'message' => __( 'Something went wrong, please refresh the page and try again.', PLUGIN_TEXT_DOMAIN ) ] );
+		}
+
+		$selected_shipping_id = $session->get( 'chosen_shipping_methods' )[0];
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$selected_shipping = $session->get( 'shipping_for_package_0' )['rates'][ $selected_shipping_id ];
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$identifier = '_' . wp_create_nonce( PLUGIN_TEXT_DOMAIN . '-checkout-cart' );
+
+		$session->set(
+			PLUGIN_PREFIX . '_checkout_cart' . $identifier,
+			[
+				'items'                => $cart->get_cart(),
+				'total'                => $cart->get_total( false ),
+				'shipping_total'       => $cart->get_shipping_total(),
+				'selected_shipping_id' => $selected_shipping_id,
+				'selected_shipping'    => $selected_shipping,
+				'shipping_address'     => $shipping_address,
+				'billing_address'      => $billing_address,
+			]
+		);
+
+		$current_active_intent_ids = $session->get( PLUGIN_PREFIX . '_active_checkout_intent_ids' ) ?? [];
+		$current_intent            = $result['resource']['data']['_id'];
+		if ( !in_array( $current_intent, $current_active_intent_ids, true ) ) {
+			$current_active_intent_ids[] = $current_intent;
+			$session->set( PLUGIN_PREFIX . '_active_checkout_intent_ids', $current_active_intent_ids );
+		}
+
+		/* @noinspection PhpUndefinedFunctionInspection */
+		wp_send_json_success(
+			[
+				'token'    => $result['resource']['data']['token'],
+				'intentId' => $current_intent,
+			],
+			200
+			);
+	}
+
+	protected function check_is_complete_address( $address ): bool {
+		return ! empty( $address )
+			&& ! empty( $address['email'] )
+			&& ! empty( $address['first_name'] )
+			&& ! empty( $address['last_name'] )
+			&& ! empty( $address['address_1'] )
+			&& ! empty( $address['city'] )
+			&& ! empty( $address['state'] )
+			&& ! empty( $address['country'] )
+			&& ! empty( $address['postcode'] );
+	}
+
+	public static function check_intent_status( $intent_id, $charge_id, $order_id, $total_amount ): bool {
+		$settings = SettingsService::get_instance();
+
+		$intent_request_params = [ 'intent_id' => $intent_id ];
+		$api_adapter_service   = APIAdapterService::get_instance();
+		$api_adapter_service->initialise( $settings->get_environment(), $settings->get_access_token() );
+		$result = $api_adapter_service->get_checkout_intent_by_id( $intent_request_params );
+
+		return (float) $result['resource']['data']['amount'] === (float) $total_amount
+			&& (string) $result['resource']['data']['reference'] === (string) $order_id
+			&& $result['resource']['data']['status'] === 'completed'
+			&& $result['resource']['data']['process_reference'] === $charge_id;
+	}
+
+	private function create_draft_order( $billing_address = null, $shipping_address = null ): string {
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$cart = WC()->cart;
+		/* @noinspection PhpUndefinedFunctionInspection */
+		$order = wc_create_order(
+			[
+				'status'    => 'checkout-draft',
+				'cart_hash' => $cart->get_cart_hash(),
+			]
+		);
+		OrderHelper::update_order( $order, $billing_address, $shipping_address );
+
+		$order_id = $order->get_id();
+		return (string) $order_id;
 	}
 }

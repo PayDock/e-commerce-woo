@@ -1,42 +1,24 @@
 <?php
+declare( strict_types=1 );
 
-namespace Paydock\API;
-
-use Paydock\Enums\ConfigAPI;
+namespace WooPlugin\API;
 
 class ConfigService {
-	public static $environment = null;
-	public static $accessToken = null;
-	public static $widgetAccessToken = null;
-	public static $secretKey = null;
-	public static $publicKey = null;
+	public static ?string $environment  = null;
+	public static ?string $access_token = null;
 
-	public static function init( string $environment, string $secretKeyOrAccessToken, ?string $publicKeyOrWidgetAccessToken = null ) {
-		self::$environment = $environment;
+	public static function init( ?string $environment, ?string $access_token ): void {
+		self::$environment  = $environment;
+		self::$access_token = $access_token;
+	}
 
-		if ( self::isAccessToken( $secretKeyOrAccessToken ) ) {
-			self::$secretKey = null;
-			self::$publicKey = null;
-			self::$accessToken = $secretKeyOrAccessToken;
-			self::$widgetAccessToken = $publicKeyOrWidgetAccessToken;
+	public static function build_api_url( ?string $endpoint = null ): string {
+		if ( self::$environment === PLUGIN_PRODUCTION_ENVIRONMENT_VALUE ) {
+			return PLUGIN_PRODUCTION_API_URL . $endpoint;
+		} elseif ( self::$environment === PLUGIN_STAGING_ENVIRONMENT_VALUE ) {
+			return PLUGIN_STAGING_API_URL . $endpoint;
 		} else {
-			self::$secretKey = $secretKeyOrAccessToken;
-		  self::$publicKey = $publicKeyOrWidgetAccessToken;
-			self::$accessToken = null;
-			self::$widgetAccessToken = null;
+			return PLUGIN_SANDBOX_API_URL . $endpoint;
 		}
-
-	}
-
-	public static function isAccessToken( string $token ): bool {
-		return count( explode( '.', $token ) ) === 3;
-	}
-
-	public static function buildApiUrl( ?string $endpoint = null ): string {
-		if ( ConfigAPI::PRODUCTION_ENVIRONMENT()->value === self::$environment ) {
-			return ConfigAPI::PRODUCTION_API_URL()->value . $endpoint;
-		}
-
-		return ConfigAPI::SANDBOX_API_URL()->value . $endpoint;
 	}
 }

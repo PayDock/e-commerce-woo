@@ -1,303 +1,564 @@
 import {__} from '@wordpress/i18n';
+// noinspection NpmUsedModulesInstalled
 import {registerPaymentMethod} from '@woocommerce/blocks-registry';
 import {decodeEntities} from '@wordpress/html-entities';
 import {getSetting} from '@woocommerce/settings';
 import {createElement, useEffect} from 'react';
-import {
-    checkboxSavedCardsComponent,
-    inBuild3Ds,
-    selectSavedCardsComponent,
-    sleep,
-    standalone3Ds
-} from '../includes/wc-paydock';
+// noinspection NpmUsedModulesInstalled
 import {select} from '@wordpress/data';
-import {CART_STORE_KEY} from '@woocommerce/block-data';
+// noinspection NpmUsedModulesInstalled
+import {CART_STORE_KEY,CHECKOUT_STORE_KEY} from '@woocommerce/block-data';
+import canMakePayment from "../includes/canMakePayment";
+const pluginWidgetName = window.widgetSettings.pluginWidgetName;
+const pluginTextName   = window.widgetSettings.pluginTextName;
+const pluginPrefix     = window.widgetSettings.pluginPrefix;
+const textDomain       = window.widgetSettings.pluginTextDomain;
+const store            = select( CHECKOUT_STORE_KEY );
+const cart             = select( CART_STORE_KEY );
+const settings         = getSetting( pluginPrefix + '_data', {} );
 
-const cart = select(CART_STORE_KEY);
-const settings = getSetting('paydock_data', {});
+const defaultLabel = __( pluginTextName + ' Payments', textDomain );
 
-const textDomain = 'paydock';
-const labels = {
-    defaultLabel: __('Paydock Payments', textDomain),
-    saveCardLabel: __('Save payment details', textDomain),
-    selectTokenLabel: __('Saved payment details', textDomain),
-    fillDataError: __('Please fill in the card data', textDomain),
-    notSupport3DS: __('Payment has been rejected by Paydock. Please try a different payment method'),
-    fillCCDataError: __('Please fill in the required credit card form fields', textDomain),
-    requiredDataError: __('Please fill in the required fields of the form to display payment methods', textDomain),
-    additionalDataRejected: __('Payment has been rejected by Paydock. Please try again in a few minutes', textDomain)
+const label                   = decodeEntities( settings.title ) || defaultLabel;
+let totalChangesTimeout       = null;
+let totalChangesSecondTimeout = null;
+let billingAddress            = null;
+let shippingAddress           = null;
+let lastMasterWidgetInit      = null;
+
+const toggleWidgetVisibility = ( hide ) => {
+	// noinspection DuplicatedCode
+	let widget        = document.getElementById( 'standaloneWidget' );
+	let widgetList    = document.getElementById( 'list' );
+	let widgetSpinner = document.getElementById( 'spinner' );
+
+	if (hide) {
+		if (widget) {
+			widget.style.display = 'none';
+		}
+		if (widgetList) {
+			widgetList.style.display = 'none';
+		}
+		if (widgetSpinner) {
+			widgetSpinner.style.display = 'none';
+		}
+	} else {
+		if (widget) {
+			widget.style.display = 'flex';
+		}
+		if (widgetList) {
+			widgetList.style.display = 'flex';
+		}
+		if (widgetSpinner) {
+			widgetSpinner.style.display = 'flex';
+		}
+	}
+};
+
+const toggleOrderButton = ( hide ) => {
+	const orderButton   = document.querySelector( '.wc-block-components-checkout-place-order-button' );
+	if ( !orderButton ) {
+		return;
+	}
+
+	orderButton.style.visibility = hide ? 'hidden' : 'visible';
+};
+
+const getSelectedShippingValue = () => {
+	// noinspection JSUnresolvedReference
+	const selectedShipping = jQuery( '.wc-block-components-radio-control__input:checked' ).filter(
+		function () {
+			// noinspection JSUnresolvedReference
+			const id = jQuery( this ).attr( 'id' )
+			return id.includes( 'rate' ) || id.includes( 'shipping' );
+		}
+	)
+
+	return selectedShipping[0]?.value;
 }
 
-const label = decodeEntities(settings.title) || labels.defaultLabel;
+const initMasterWidgetCheckout = () => {
+	// noinspection JSUnresolvedReference
+	if ( canMakePayment( settings.total_limitation, cart.getCartTotals()?.total_price ) ) {
+		const initTimestamp  = ( new Date() ).getTime();
+		lastMasterWidgetInit = initTimestamp;
+		setTimeout( () => toggleOrderButton( true ), 100 );
 
-let formSubmittedAlready = false;
-const Content = (props) => {
-    const {eventRegistration, emitResponse} = props;
-    const {onPaymentSetup, onCheckoutValidation, onShippingRateSelectSuccess} = eventRegistration;
+		// noinspection JSUnresolvedReference
+		jQuery.ajax(
+		{
+			url: '/?wc-ajax=woo-plugin-create-charge-intent',
+			type: 'POST',
+			data: {
+				_wpnonce: WooPluginAjaxCheckout.wpnonce_intent,
+				order_id: store.getOrderId(),
+				total: cart.getCartTotals(),
+				address: cart.getCustomerData().billingAddress,
+				selected_shipping_id: getSelectedShippingValue(),
+			},
+			success: ( response ) => {
+				if ( ! checkIsFormValid() ) {
+					// noinspection JSUnresolvedReference
+					let error = jQuery( '#fields-validation-error' )[0];
+					// noinspection JSUnresolvedReference
+					let loading = jQuery( '#loading' )[0];
+					showInvalidFormError( loading, error );
+				} else {
+					if (initTimestamp === lastMasterWidgetInit) {
+						if (response.success) {
+							// noinspection DuplicatedCode
+							toggleWidgetVisibility( false );
+							const widgetSelector = '#wooPluginCheckout_wrapper';
+							// noinspection JSUnresolvedReference
+							if (!jQuery( widgetSelector )[0]) {
+								return;
+							}
+							// noinspection JSUnresolvedReference
+							window.widgetWooPlugin = new window[pluginWidgetName].Checkout( widgetSelector, response.data.token );
+							// noinspection JSUnresolvedReference
+							window.widgetWooPlugin.setEnv( settings.environment )
+							// noinspection JSUnresolvedReference
+							const orderButton = jQuery( '.wc-block-components-checkout-place-order-button' )[0];
+							// noinspection JSUnresolvedReference
+							const paymentSourceElement = jQuery( '#paymentSourceToken' );
 
-    jQuery('.wc-block-components-checkout-place-order-button').show();
+							// noinspection JSUnresolvedReference
+							window.widgetWooPlugin.onPaymentSuccessful(
+								function ( data ) {
+									// noinspection JSUnresolvedReference
+									const orderId = store.getOrderId();
+									// noinspection JSUnresolvedReference
+									jQuery.ajax(
+										{
+											url: '/?wc-ajax=woo-plugin-process-payment-result',
+											method: 'POST',
+											data: {
+												_wpnonce: WooPluginAjaxCheckout.wpnonce_process_payment,
+												order_id: orderId,
+												payment_response: data,
+												create_account: document.querySelector( '.wc-block-components-checkbox.wc-block-checkout__create-account' )?.querySelector( 'input' ).checked,
+											},
+											success: function (response) {
+												if (response.success) {
+													// noinspection JSUnresolvedReference
+													paymentSourceElement.val( JSON.stringify( { ...data, orderId: orderId } ) );
+													orderButton.click();
 
-    useEffect(() => {
-        let newAmount = null;
+													window.widgetWooPlugin = null;
+												} else {
+													// noinspection JSUnresolvedReference
+													window.showWarning( response.data.message );
+													initMasterWidgetCheckout();
+												}
+											}
+										}
+									);
+								}
+							);
+							// noinspection JSUnresolvedReference
+							window.widgetWooPlugin.onPaymentFailure(
+								function ( data ) {
+									// noinspection JSUnresolvedReference
+									paymentSourceElement.val(
+										JSON.stringify(
+											{
+												errorMessage: 'Transaction failed. Please check your payment details or contact your bank',
+											}
+										)
+									);
+									// noinspection JSUnresolvedReference
+									jQuery.ajax(
+										{
+											url: '/?wc-ajax=woo-plugin-process-payment-result',
+											method: 'POST',
+											data: {
+												_wpnonce: WooPluginAjaxCheckout.wpnonce_process_payment,
+												order_id: store.getOrderId(),
+												payment_response:
+													{
+														...data,
+														errorMessage: data.message || 'Transaction failed',
+												}
+											},
+											success: function () {
+												orderButton.click();
 
-        const unsubscribeFromShippingEvent = onShippingRateSelectSuccess(async () => {
-            const { total_price: currentTotalPrice } = cart.getCartTotals();
+												window.widgetWooPlugin = null;
+											}
+										}
+									);
+								}
+							);
 
-            newAmount = Number(currentTotalPrice / 100).toFixed(2);
-        });
+							// noinspection JSUnresolvedReference
+							window.widgetWooPlugin.onPaymentExpired(
+								function ( data ) {
+									// noinspection JSUnresolvedReference
+									paymentSourceElement.val(
+										JSON.stringify(
+											{
+												errorMessage: 'Your payment session has expired. Please retry your payment',
+											}
+										)
+									);
 
-        const validation = onCheckoutValidation(async () => {
-            var errorMessageDismissButton = document.querySelectorAll('.wc-block-components-notice-banner__dismiss')[0]
-            if (errorMessageDismissButton) {
-                errorMessageDismissButton.click();
-            }
+									// noinspection JSUnresolvedReference
+									if ( data.charge_id ) {
+										// noinspection JSUnresolvedReference
+										jQuery.ajax(
+											{
+												url: '/?wc-ajax=woo-plugin-process-payment-result',
+												method: 'POST',
+												data: {
+													_wpnonce: WooPluginAjaxCheckout.wpnonce_process_payment,
+													order_id: store.getOrderId(),
+													payment_response:
+														{
+															...data,
+															errorMessage: 'Payment session has expired',
+													}
+												},
+												success: function () {
+													orderButton.click();
 
-            formSubmittedAlready = window.widgetReloaded ? false : formSubmittedAlready
+													window.widgetWooPlugin = null;
+												}
+											}
+										);
+									} else {
+										orderButton.click();
 
-            if (window.hasOwnProperty('paydockValidation')) {
-                if (!paydockValidation.paydockCCFormValidation()) {
-                    var validationState = window.widgetPaydock.getValidationState();
+										window.widgetWooPlugin = null;
+									}
+								}
+							);
+						} else {
+							// noinspection JSUnresolvedReference
+							let error = jQuery( '#intent-creation-error' )[0];
+							// noinspection JSUnresolvedReference
+							let loading = jQuery( '#loading' )[0];
+							showInvalidFormError( loading, error );
+						}
+					}
+				}
+			}
+			}
+		);
+	}
+}
 
-                    var invalid_fields = [];
-                    validationState.invalid_fields.forEach(field => {
-                        switch(field) {
-                            case "card_name":
-                                invalid_fields.push("Card Name");
-                                break;
-                            case "card_number":
-                                invalid_fields.push("Card Number");
-                                break;
-                            case "expiry_date":
-                                invalid_fields.push("Expiry Date");
-                                break;
-                            case "card_ccv":
-                                invalid_fields.push("Card CCV");
-                                break;
-                        }
-                    });
+const checkIsFormValid = () => {
+	// noinspection JSUnresolvedReference
+	let isFormValid = jQuery( '.wc-block-components-form' )[0].checkValidity() && isShippingFormValid() && isShippingPhoneValid();
 
-                    var errorMessage = labels.fillCCDataError + (invalid_fields.length ? `: ${invalid_fields.join(", ")}` : "");
+	// noinspection JSUnresolvedReference
+	let useSameBillingAndShipping = jQuery( '.wc-block-checkout__use-address-for-billing input[type="checkbox"]' ).checked;
+	if ( !useSameBillingAndShipping ) {
+		isFormValid = isFormValid && isBillingFormValid() && isBillingPhoneValid();
+	}
 
-                    return {
-                        type: emitResponse.responseTypes.ERROR,
-                        errorMessage: errorMessage
-                    }
-                }
-
-                if (!paydockValidation.wcFormValidation()) {
-                    return {
-                        type: emitResponse.responseTypes.ERROR,
-                        errorMessage: labels.requiredDataError
-                    }
-                }
-            }
-
-            if (settings.selectedToken.length > 0) {
-                const selectedToken = settings.tokens.find(item => item.vault_token === settings.selectedToken)
-                if (!!selectedToken && selectedToken.hasOwnProperty('customer_id')) {
-                    return true;
-                } else {
-                    if (['IN_BUILD', 'STANDALONE'].includes(settings.card3DS)) {
-                        settings.charge3dsId = settings.card3DS === 'IN_BUILD'
-                            ? await inBuild3Ds(true, newAmount)
-                            : await standalone3Ds();
-
-                        if (settings.charge3dsId === false) {
-                            return {
-                                type: emitResponse.responseTypes.ERROR,
-                                errorMessage: labels.notSupport3DS,
-                            }
-                        }
-
-                        if ('error' === settings.charge3dsId) {
-                            return {
-                                type: emitResponse.responseTypes.ERROR,
-                                errorMessage: labels.additionalDataRejected,
-                            }
-                        }
-
-                    }
-                }
-
-                return true;
-            }
-
-            if (formSubmittedAlready) {
-                return true;
-            }
-
-            let phoneValue = '';
-            if (document.getElementById('shipping-phone') !== null) {
-                phoneValue = document.getElementById('shipping-phone').value
-            }
-
-            if (document.getElementById('billing-phone') !== null) {
-                phoneValue = document.getElementById('billing-phone').value
-            }
-
-            window.widgetPaydock.updateFormValues({
-                email: document.getElementById('email').value,
-                phone: phoneValue
-            });
-            window.widgetPaydock.trigger(window.paydock.TRIGGER.SUBMIT_FORM);
-
-            let result = false;
-            window.widgetPaydock.on(window.paydock.EVENT.FINISH, () => {
-                result = true
-
-                const savedCards = document.querySelector('.paydock-select-saved-cards')
-                if (savedCards !== null) {
-                    savedCards.style = 'display: none'
-                }
-            })
-
-            const paymentSourceToken = document.querySelector('[name="paydock_payment_source_token"]')
-            for (let second = 1; second <= 100; second++) {
-                await sleep(100);
-                if (paymentSourceToken !== null && paymentSourceToken.value.length) {
-                    if (paymentSourceToken.value === 'error') {
-                        return {
-                            type: emitResponse.responseTypes.ERROR,
-                            errorMessage: labels.additionalDataRejected,
-                        }
-                    }
-                    if (settings.paymentSourceToken.length === 0 || window.widgetReloaded) {
-                        settings.paymentSourceToken = paymentSourceToken.value
-                    }
-                    result = true
-                }
-
-                if (result) {
-                    formSubmittedAlready = true
-                    break;
-                }
-            }
-
-            if (result) {
-                if (['IN_BUILD', 'STANDALONE'].includes(settings.card3DS)) {
-                    settings.charge3dsId = settings.card3DS === 'IN_BUILD'
-                        ? await inBuild3Ds(false, newAmount)
-                        : await standalone3Ds();
-
-                    if (settings.charge3dsId === false) {
-                        return {
-                            type: emitResponse.responseTypes.ERROR,
-                            errorMessage: labels.notSupport3DS,
-                        }
-                    }
-
-                    if ('error' === settings.charge3dsId) {
-                        return {
-                            type: emitResponse.responseTypes.ERROR,
-                            errorMessage: labels.additionalDataRejected,
-                        }
-                    }
-                }
-
-                return true;
-            }
-
-            return {
-                type: emitResponse.responseTypes.ERROR,
-                errorMessage: labels.fillDataError,
-            }
-        });
-
-        const unsubscribe = onPaymentSetup(async () => {
-            const paymentSourceToken = document.querySelector('[name="paydock_payment_source_token"]')
-            if (paymentSourceToken === null) {
-                return;
-            }
-
-            settings.paymentSourceToken = paymentSourceToken.value;
-            if (settings.paymentSourceToken.length > 0 || settings.selectedToken.length > 0) {
-                const data = {...settings}
-                data.tokens = '';
-                data.styles = '';
-                data.supports = '';
-
-                if(data.total_limitation){
-                    delete data.total_limitation;
-                }
-
-                return {
-                    type: emitResponse.responseTypes.SUCCESS,
-                    meta: {
-                        paymentMethodData: data
-                    },
-                };
-            }
-
-            return {
-                type: emitResponse.responseTypes.ERROR,
-                message: labels.fillDataError,
-            };
-        });
-        return () => {
-            validation() && unsubscribe() && unsubscribeFromShippingEvent();
-        };
-    }, [
-        emitResponse.responseTypes.ERROR,
-        emitResponse.responseTypes.SUCCESS,
-        onPaymentSetup,
-        onCheckoutValidation,
-    ]);
-
-    return createElement('div',
-        null,
-        createElement(
-            "div",
-            null,
-            decodeEntities(settings.description || '')
-        ),
-        selectSavedCardsComponent(labels.selectTokenLabel),
-        createElement(
-            "div",
-            {id: 'paydockWidgetCard_wrapper'}
-        ),
-        createElement(
-            "div",
-            {id: 'paydockWidget3ds'}
-        ),
-        createElement(
-            "input",
-            {
-                type: 'hidden',
-                name: 'paydock_payment_source_token'
-            }
-        ),
-        checkboxSavedCardsComponent(labels.saveCardLabel)
-    );
+	return isFormValid;
 };
 
-const Paydok = {
-    name: "paydock_gateway",
-    label: createElement(() =>
-        createElement(
-            "div",
-            {
-                className: 'paydock-payment-method-label'
-            },
-            createElement("img", {
-                src: '/wp-content/plugins/paydock/assets/images/icons/card.png',
-                alt: label,
-                className: 'paydock-payment-method-label-icon card'
-            }),
-            "  " + label,
-            createElement("img", {
-                src: '/wp-content/plugins/paydock/assets/images/logo.png',
-                alt: label,
-                className: 'paydock-payment-method-label-logo'
-            })
-        )
-    ),
-    content: <Content/>,
-    edit: <Content/>,
-    canMakePayment: () => true,
-    ariaLabel: label,
-    supports: {
-        features: settings.supports,
-    },
+const showInvalidFormError = (loading, error) => {
+	loading.classList.add( 'hide' );
+	if ( error.classList.length > 0 ) {
+		error.classList.remove( 'hide' );
+	}
 };
 
-registerPaymentMethod(Paydok);
+const handleWidgetDisplay = ( waitForExternalWidgetDisplay = false ) => {
+	let isFormValid       = checkIsFormValid();
+	// noinspection JSUnresolvedReference
+	let error = jQuery( '#fields-validation-error' )[0];
+	// noinspection JSUnresolvedReference
+	let intentCreationError = jQuery( '#intent-creation-error' )[0];
+	// noinspection JSUnresolvedReference
+	let loading = jQuery( '#loading' )[0];
+	toggleWidgetVisibility( true );
+	intentCreationError.classList.add( 'hide' );
+	if ( isFormValid ) {
+		if ( loading.classList.length > 0 ) {
+			loading.classList.remove( 'hide' );
+		}
+		error.classList.add( 'hide' );
+	} else {
+		showInvalidFormError( loading, error );
+	}
+
+	if ( isFormValid && !waitForExternalWidgetDisplay ) {
+		clearTimeout( window.initWidgetTimer );
+		window.initWidgetTimer = setTimeout(
+			() => {
+				initMasterWidgetCheckout();
+			},
+			500
+		);
+	}
+};
+window.handleWidgetDisplay = handleWidgetDisplay;
+
+const isBillingFormValid = () => {
+	// noinspection JSUnresolvedReference
+	const billingAddressFormData = cart.getCustomerData().billingAddress;
+	// noinspection JSUnresolvedReference
+	return !!billingAddressFormData
+	&& !!billingAddressFormData.address_1
+	&& !!billingAddressFormData.city
+	&& !!billingAddressFormData.country
+	&& !!billingAddressFormData.email
+	&& !!billingAddressFormData.first_name
+	&& !!billingAddressFormData.last_name
+	&& !!billingAddressFormData.postcode
+	&& !!billingAddressFormData.state
+}
+
+const isShippingFormValid = () => {
+	// noinspection JSUnresolvedReference
+	const shippingAddressFormData = cart.getCustomerData().shippingAddress
+	// noinspection JSUnresolvedReference
+	return !!shippingAddressFormData
+	&& !!shippingAddressFormData.address_1
+	&& !!shippingAddressFormData.city
+	&& !!shippingAddressFormData.country
+	&& !!shippingAddressFormData.first_name
+	&& !!shippingAddressFormData.last_name
+	&& !!shippingAddressFormData.postcode
+	&& !!shippingAddressFormData.state
+}
+
+const isShippingPhoneValid = () => {
+	return !document.getElementById( 'shipping-phone' )?.classList?.contains( 'woo-plugin-invalid-phone' );
+}
+
+const isBillingPhoneValid = () => {
+	return !document.getElementById( 'billing-phone' )?.classList?.contains( 'woo-plugin-invalid-phone' );
+}
+
+const handleCartTotalChanged = (event) => {
+	// noinspection DuplicatedCode
+	if (totalChangesTimeout) {
+		clearTimeout( totalChangesTimeout );
+	}
+	toggleWidgetVisibility( true );
+	totalChangesTimeout     = setTimeout(
+		() => {
+			const spanTotal = getUIOrderTotal();
+			const cartTotal = +event.detail.cartTotal;
+			if (spanTotal) {
+				if (spanTotal !== cartTotal) {
+					if (totalChangesSecondTimeout) {
+						clearTimeout( totalChangesSecondTimeout );
+					}
+					totalChangesSecondTimeout = setTimeout(
+						() => {
+							const spanTotal   = getUIOrderTotal();
+							if (spanTotal) {
+								if (spanTotal !== cartTotal) {
+									window.reloadAfterExternalCartChanges();
+								} else {
+									handleWidgetDisplay();
+								}
+							}
+						},
+						300
+					)
+				} else {
+					handleWidgetDisplay();
+				}
+			}
+	},
+		300
+		)
+};
+
+// noinspection DuplicatedCode
+const getUIOrderTotal = () => {
+	// noinspection JSUnresolvedReference
+	const orderTotalElement = jQuery( '.wc-block-components-totals-footer-item-tax-value' )[0];
+	return orderTotalElement ? +orderTotalElement?.innerText.replace( /[^0-9.,]*/, '' ) : null;
+};
+
+const handleFormChanged = () => {
+	setTimeout(
+		() => {
+			// noinspection JSUnresolvedReference
+			const billingAddressFormData = cart.getCustomerData().billingAddress;
+			// noinspection JSUnresolvedReference
+			const shippingAddressFormData = cart.getCustomerData().shippingAddress;
+			// noinspection JSUnresolvedReference
+			const isShippingRateBeingSelected = cart.isShippingRateBeingSelected();
+			if ( billingAddress !== billingAddressFormData || shippingAddress !== shippingAddressFormData ) {
+				billingAddress  = billingAddressFormData;
+				shippingAddress = shippingAddressFormData;
+				handleWidgetDisplay();
+			} else if ( isShippingRateBeingSelected ) {
+				handleWidgetDisplay( true );
+			}
+	},
+		0
+		)
+}
+
+const handleWidgetError = () => {
+	let loading         = document.getElementById( 'loading' );
+	if ( loading.classList.length > 0 ) {
+		loading.classList.remove( 'hide' );
+	}
+	toggleWidgetVisibility( true );
+	initMasterWidgetCheckout();
+
+	const checkoutContainer       = document.querySelectorAll( '.wc-block-checkout' )[0];
+	const topNotices              = checkoutContainer.querySelectorAll( '.wc-block-components-notices' )[0];
+	const paymentMethodsContainer = document.querySelectorAll( '.wc-block-checkout__payment-method' )[0];
+	const checkoutPaymentStep     = paymentMethodsContainer?.querySelectorAll( '.wc-block-components-checkout-step__content' )?.[0];
+	const checkoutPaymentNotices  = checkoutPaymentStep?.querySelectorAll( '.wc-block-components-notices' )?.[0];
+	const removeNoticeInterval    = setInterval(
+		() => {
+			if ( checkoutPaymentNotices?.children.length > 0 || topNotices.children.length > 0 ) {
+				clearInterval( removeNoticeInterval );
+
+				const removeErrorTimeout = setTimeout(
+					() => {
+						// noinspection JSUnresolvedReference
+						clearTimeout( removeErrorTimeout );
+						const noticesToCheck = checkoutPaymentNotices?.children.length > 0 ? checkoutPaymentNotices : topNotices;
+						for ( const notice of noticesToCheck.children ) {
+							if ( notice.classList.contains( 'is-error' ) ) {
+								notice.classList.add( 'hide' );
+							}
+						}
+					},
+					10000
+				);
+			}
+		},
+		200
+	);
+};
+
+// eslint-disable-next-line no-unused-vars
+const Content                               = ( props ) => {
+	const {eventRegistration, emitResponse} = props;
+	const {onPaymentSetup}                  = eventRegistration;
+
+	// noinspection JSUnresolvedReference
+	useEffect(
+		() => {
+			if ( !window.unsubscribeFromFormChanges ) {
+				// noinspection JSUnresolvedReference
+				window.unsubscribeFromFormChanges = jQuery( '.wc-block-components-form' )[0].addEventListener( "change", handleFormChanged );
+			}
+			if ( !window.cartChangesEventListenerSetup ) {
+				document.addEventListener( pluginPrefix + "_cart_total_changed", handleCartTotalChanged );
+				window.cartChangesEventListenerSetup = true;
+			}
+			const unsubscribe               = onPaymentSetup(
+				async() => {
+					const paymentData       = document.getElementById( 'paymentSourceToken' )?.value
+					const paymentDataParsed = JSON.parse( paymentData )
+					if ( !!paymentData && !paymentDataParsed.errorMessage ) {
+						// noinspection JSUnresolvedReference
+						return {
+							type: emitResponse.responseTypes.SUCCESS, meta: {
+								paymentMethodData: {
+									payment_response: paymentData,
+									chargeId: paymentDataParsed['charge_id'],
+									intentId: paymentDataParsed['intent_id'],
+									orderId: paymentDataParsed['order_id'],
+									_wpnonce: settings._wpnonce
+								}
+							},
+						};
+					}
+
+					handleWidgetError();
+					// noinspection JSUnresolvedReference
+					return {
+						type: emitResponse.responseTypes.ERROR, message: __( paymentDataParsed.errorMessage, textDomain ),
+					}
+				}
+			);
+			return () => {
+				// noinspection JSUnresolvedReference
+				const form = jQuery( '.wc-block-components-form' )[0];
+				if ( form ) {
+					form.removeEventListener( "change", handleFormChanged );
+				}
+				document.removeEventListener( pluginPrefix + "_cart_total_changed", handleCartTotalChanged );
+				window.cartChangesEventListenerSetup = false;
+				unsubscribe();
+			};
+		},
+		[emitResponse.responseTypes.ERROR, emitResponse.responseTypes.SUCCESS, onPaymentSetup]
+	);
+
+	const input = createElement(
+		"input",
+		{
+			type: 'hidden', id: 'paymentSourceToken'
+		}
+	);
+
+	return createElement(
+		'div',
+		{className: 'master-widget-wrapper'},
+		createElement(
+			"div",
+			{id: 'loading'},
+			createElement(
+				"p",
+				{className: 'loading-text'},
+				'Loading...',
+			),
+		),
+		createElement(
+			"div",
+			{id: 'fields-validation-error', className: 'hide'},
+			createElement(
+				"p",
+				{className: 'woo-plugin-validation-error'},
+				'Please fill in the required fields of the form to display payment methods',
+			),
+		),
+		createElement(
+			"div",
+			{id: 'intent-creation-error', className: 'hide'},
+			createElement(
+				"p",
+				{className: 'woo-plugin-validation-error'},
+				'Something went wrong, please refresh the page and try again.',
+			),
+		),
+		createElement(
+			"div",
+			{id: 'wooPluginCheckout_wrapper'}
+		),
+		input
+	);
+};
+
+// noinspection JSUnusedGlobalSymbols,JSUnresolvedReference,JSCheckFunctionSignatures
+const WooPlugin = {
+	name: pluginPrefix,
+	label: createElement(
+		() =>
+			createElement(
+				"div",
+				{
+					className: 'woo-plugin-payment-method-label'
+				},
+				label,
+				createElement(
+					"img",
+					{
+						src: `${window.widgetSettings.pluginUrlPrefix}assets/images/logo.png`,
+						alt: label,
+						className: 'woo-plugin-payment-method-label-logo'
+					}
+				)
+			)
+	), content: <Content />, edit: <Content />, canMakePayment: () => true, ariaLabel: label, supports: { features: settings.supports }
+};
+
+registerPaymentMethod( WooPlugin );

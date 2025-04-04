@@ -1,0 +1,110 @@
+<?php
+
+$is_prod = $argv[1] === 'prod';
+
+$phpcs_text = <<<EOT
+<?xml version="1.0"?>
+<ruleset name="WooCommerce Coding Standards">
+    <description>My projects ruleset.</description>
+
+    <!-- Exclude the Composer Vendor directory. -->
+    <exclude-pattern>/vendor/*</exclude-pattern>
+
+    <!-- Exclude the Node Modules directory. -->
+    <exclude-pattern>/node_modules/*</exclude-pattern>
+    <!-- Exclude the generated files' directory. -->
+    <exclude-pattern>/assets/build/*</exclude-pattern>
+    <!-- Exclude minified Javascript files. -->
+    <exclude-pattern>*.min.js</exclude-pattern>
+
+    <exclude-pattern>*/assets/build/js/*</exclude-pattern>
+
+    <exclude-pattern>*/.git/*</exclude-pattern>
+
+    <!-- Strip the filepaths down to the relevant bit. -->
+    <arg name="basepath" value="."/>
+
+    <!-- Check up to 8 files simultaneously. -->
+    <arg name="parallel" value="8"/>
+
+    <!-- Cache runs for speed boost. -->
+    <arg name="cache" value=".phpcs.cache"/>
+
+    <!-- Configs -->
+    <config name="minimum_supported_wp_version" value="6.5" />
+
+    <!-- Rules -->
+    <rule ref="WooCommerce-Core" />
+
+    <rule ref="WordPress-Extra">
+        <!-- Disable dot of end string docblock -->
+        <exclude name="Squiz.Commenting.InlineComment.InvalidEndChar" />
+
+        <!-- Commenting should be optional to where required not mandatory -->
+        <exclude name="Squiz.Commenting.FileComment.Missing" />
+        <exclude name="Squiz.Commenting.FileComment.MissingPackageTag" />
+        <exclude name="Squiz.Commenting.FileComment.WrongStyle" />
+        <exclude name="Squiz.Commenting.ClassComment.Missing" />
+        <exclude name="WooCommerce.Commenting.CommentHooks" />
+        <exclude name="Squiz.Commenting.FunctionComment.Missing" />
+        <exclude name="Squiz.Commenting.FunctionComment.SpacingAfterParamType" />
+        <exclude name="Squiz.Commenting.FunctionComment.MissingParamComment" />
+        <exclude name="Squiz.Commenting.FunctionComment.MissingParamTag" />
+        <exclude name="Squiz.Commenting.FunctionComment.ParamCommentNotCapital" />
+        <exclude name="Squiz.Commenting.FunctionComment.ParamCommentFullStop" />
+        <exclude name="Squiz.Commenting.FunctionComment.ThrowsNoFullStop" />
+        <exclude name="Squiz.Commenting.VariableComment" />
+        <exclude name="Squiz.Commenting.VariableComment.Missing" />
+
+        <!-- Allow standard class filenames (CamelCase) -->
+        <exclude name="WordPress.Files.FileName.InvalidClassFileName" />
+        <exclude name="WordPress.Files.FileName.NotHyphenatedLowercase" />
+
+        <!-- Allow short ternary syntax and short arrays and short open tag -->
+        <exclude name="Generic.Arrays.DisallowShortArraySyntax" />
+        <exclude name="Universal.Arrays.DisallowShortArraySyntax" />
+        <exclude name="WordPress.PHP.DisallowShortTernary.Found" />
+        <exclude name="Generic.PHP.DisallowShortOpenTag.EchoFound" />
+
+        <!-- Allow standard conditional expressions -->
+        <exclude name="WordPress.PHP.YodaConditions" />
+
+        <!-- Allow no spaces before and after operators -->
+        <exclude name="WordPress.WhiteSpace.OperatorSpacing.NoSpaceBefore" />
+        <exclude name="WordPress.WhiteSpace.OperatorSpacing.NoSpaceAfter" />
+
+        <!-- Prefer indenting from "Generic.WhiteSpace.ScopeIndent.Incorrect" -->
+        <exclude name="PEAR.Functions.FunctionCallSignature.Indent" />
+
+        <!-- Allow strict declaration in PHP file before comment -->
+        <exclude name="PSR12.Files.FileHeader.IncorrectOrder" />
+    </rule>
+
+    <!-- AutoEscaped functions -->
+    <rule ref="WordPress.Security.EscapeOutput">
+        <properties>
+            <property name="customAutoEscapedFunctions" type="array">
+                <element value="rd_render_attributes" />
+                <element value="rd_get_picture_html" />
+            </property>
+        </properties>
+    </rule>
+
+    <!-- Disallow long array syntax. -->
+    <rule ref="Generic.Arrays.DisallowLongArraySyntax"/>
+
+    <!-- Prohibit Yoda Conditions expressions -->
+    <rule ref="Generic.ControlStructures.DisallowYodaConditions"/>
+
+    <rule ref="WordPress.WP.I18n">
+        <properties>
+            <property name="text_domain" type="array" value="power-board" />
+        </properties>
+    </rule>
+
+    <config name="testVersion" value="7.4-"/>
+    <rule ref="PHPCompatibility" />
+</ruleset>
+EOT;
+
+file_put_contents( ( $is_prod ? '.' : '../..' ) . '/phpcs.xml', $phpcs_text );

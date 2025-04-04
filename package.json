@@ -1,17 +1,25 @@
 {
-	"name": "woocommerce-gateway-paydock",
-	"title": "WooCommerce Paydock Payment",
-	"version": "0.2.4",
-	"author": "JSP",
+	"name": "woocommerce-gateway",
+	"title": "WooCommerce Payment Plugin",
+	"version": "1.0.0",
+	"author": "Paydock",
 	"keywords": [],
 	"engines": {
 		"node": ">=6.9.4",
 		"npm": ">=1.1.0"
 	},
 	"devDependencies": {
+		"@babel/core": "7.26.0",
+		"@babel/eslint-parser": "7.25.9",
+		"@babel/preset-react": "7.26.3",
+		"@babel/types": "7.23.9",
+		"@eslint/js": "9.17.0",
 		"@woocommerce/dependency-extraction-webpack-plugin": "2.2.0",
+		"@woocommerce/eslint-plugin": "2.3.0",
 		"@wordpress/scripts": "26.19.0",
 		"cross-env": "7.0.3",
+		"eslint": "8.57.1",
+		"globals": "15.13.0",
 		"webpack": "5.94.0",
 		"webpack-cli": "4.10.0"
 	},
@@ -26,11 +34,9 @@
 		"check-engines": "wp-scripts check-engines"
 	},
 	"dependencies": {
-		"@babel/types": "7.23.9",
 		"@woocommerce/settings": "1.0.0",
 		"@wordpress/html-entities": "3.53.0",
-		"axios": "1.7.7",
-		"caniuse-lite": "1.0.30001585",
+		"@wordpress/i18n": "5.16.0",
 		"react": "18.3.1",
 		"react-select": "5.8.0"
 	}
