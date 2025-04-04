@@ -12,9 +12,13 @@ namespace PowerBoard\Helpers;
 use WC_Checkout;
 use WC_Geolocation;
 use WC_Data_Exception;
+use WC_Order;
 
 class OrderHelper {
 	public static function update_order( &$order, $billing_address = null, $shipping_address = null ) {
+		if ( ! ( $order instanceof WC_Order ) ) {
+			return;
+		}
 		$order->remove_order_items();
 
 		/* @noinspection PhpUndefinedFunctionInspection */

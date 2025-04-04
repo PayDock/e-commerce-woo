@@ -68,7 +68,8 @@
 	height: 280px;
 }
 
-#fields-validation-error {
+#fields-validation-error,
+#intent-creation-error {
 	position: absolute;
 	top: 0;
 	bottom: 0;
@@ -87,6 +88,11 @@
 		text-align: center;
 		margin: 0;
 	}
+}
+
+.woocommerce form .form-row.woocommerce-validated input.input-text.power-board-invalid-phone,
+.woocommerce form .form-row.woocommerce-validated input.input-text.power-board-invalid-postcode {
+	border-color: #cc1818;
 }
 
 .power-board-account-error-message {

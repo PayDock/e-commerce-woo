@@ -80,12 +80,33 @@ class WidgetController {
 			return;
 		}
 
+		/* @noinspection PhpUndefinedFunctionInspection */
 		$shipping_address = isset( $_POST['shipping_address'] ) ? array_map( 'sanitize_text_field', wp_unslash( $_POST['shipping_address'] ) ) : $session->get( 'customer' )['shipping'];
 		$billing_address  = [];
 
 		if ( ! empty( $_POST['address'] ) && is_array( $_POST['address'] ) ) {
 			/* @noinspection PhpUndefinedFunctionInspection */
 			$billing_address = array_map( 'sanitize_text_field', wp_unslash( $_POST['address'] ) );
+		}
+
+		if ( empty( $billing_address['country'] ) || empty( $shipping_address['country'] ) ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			$countries = WC()->countries;
+			if ( ! empty( $countries ) ) {
+				$allowed_countries = $countries->get_allowed_countries();
+
+				if ( count( $allowed_countries ) === 1 ) {
+					$allowed_country = key( $allowed_countries );
+
+					if ( empty( $billing_address['country'] ) ) {
+						$billing_address['country'] = $allowed_country;
+					}
+
+					if ( empty( $shipping_address['country'] ) ) {
+						$shipping_address['country'] = $allowed_country;
+					}
+				}
+			}
 		}
 
 		if ( ! empty( $_POST['order_id'] ) ) {
@@ -155,6 +176,11 @@ class WidgetController {
 		$api_adapter_service = APIAdapterService::get_instance();
 		$api_adapter_service->initialise( $settings->get_environment(), $settings->get_access_token() );
 		$result = $api_adapter_service->create_checkout_intent( $intent_request_params );
+
+		if ( ! empty( $result['error'] ) ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			wp_send_json_error( [ 'message' => __( 'Something went wrong, please refresh the page and try again.', 'power-board' ) ] );
+		}
 
 		$selected_shipping_id = $session->get( 'chosen_shipping_methods' )[0];
 		/* @noinspection PhpUndefinedFunctionInspection */

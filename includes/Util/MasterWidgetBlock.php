@@ -151,15 +151,6 @@ final class MasterWidgetBlock extends AbstractPaymentMethodType {
 			);
 
 			/* @noinspection PhpUndefinedFunctionInspection */
-			wp_enqueue_script(
-				'axios',
-				'https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js',
-				[],
-				POWER_BOARD_PLUGIN_VERSION,
-				true
-			);
-
-			/* @noinspection PhpUndefinedFunctionInspection */
 			wp_enqueue_style(
 				'power-board-widget-css',
 				POWER_BOARD_PLUGIN_URL . 'assets/css/frontend/widget.css',

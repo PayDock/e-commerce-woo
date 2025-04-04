@@ -16,6 +16,8 @@ use PowerBoard\Services\PaymentGateway\MasterWidgetPaymentService;
 class ConnectionValidationService {
 	private ?string $old_access_token                     = null;
 	private static bool $invalid_credentials_shown_global = false;
+	private static bool $no_version_selected_shown_global = false;
+	private static bool $no_config_template_shown_global  = false;
 
 	public ?MasterWidgetPaymentService $service = null;
 	private ?array $errors                      = [];
@@ -172,13 +174,20 @@ class ConnectionValidationService {
 			return true;
 		}
 
-		$this->errors[] = 'No checkout version selected. Please select a version and try again.';
+		if ( ! self::$no_version_selected_shown_global ) {
+			$this->errors[]                         = 'No checkout version selected. Please select a version and try again.';
+			self::$no_version_selected_shown_global = true;
+		}
+
 		return false;
 	}
 
 	private function check_is_configuration_template_selected(): void {
 		if ( empty( $this->configuration_id_settings ) ) {
-			$this->errors[] = 'No configuration template ID selected. Please select a template and try again.';
+			if ( ! self::$no_config_template_shown_global ) {
+				$this->errors[]                        = 'No configuration template ID selected. Please select a template and try again.';
+				self::$no_config_template_shown_global = true;
+			}
 		}
 	}
 

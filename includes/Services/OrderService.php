@@ -44,8 +44,8 @@ class OrderService {
 		}
 
 		$order_status          = $order->get_status();
-		$total_refund          = $order->get_total_refunded();
-		$order_total           = (float) $order->get_total( false );
+		$total_refund          = round( (float) $order->get_total_refunded(), 2 );
+		$order_total           = round( (float) $order->get_total( false ), 2 );
 		$power_board_charge_id = $order->get_meta( '_power_board_charge_id' );
 		if (
 			$order_total === $total_refund ||
@@ -94,6 +94,7 @@ class OrderService {
 		}
 
 		$order->delete_meta_data( '_status_change_verification_failed' );
+		$order->save();
 		if (
 			$old_status_key === $new_status_key ||
 			! empty( $GLOBALS['power_board_is_updating_order_status'] ) ||

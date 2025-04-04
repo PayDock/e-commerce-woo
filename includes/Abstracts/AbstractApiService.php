@@ -1,4 +1,6 @@
-<?php declare( strict_types=1 );
+<?php
+declare( strict_types=1 );
+
 namespace PowerBoard\Abstracts;
 
 use LogicException;
@@ -29,7 +31,7 @@ abstract class AbstractApiService {
 	}
 
 	/**
-	 * Uses functions (wp_json_encode, wp_parse_args, _wp_http_get_object) from WordPress
+	 * Uses functions (wp_json_encode, wp_parse_args, wp_remote_request) from WordPress
 	 * Uses a function (WC) from WooCommerce
 	 */
 	protected function run_call( $args ): array {
@@ -85,16 +87,26 @@ abstract class AbstractApiService {
 			];
 		}
 
-		LoggerHelper::log_api_request(
-			[
-				'request'  => [
-					'url'     => $url,
-					'method'  => $parsed_args['method'],
-					'payload' => $parsed_args['body'] ?? '',
-				],
-				'response' => $body,
-				'error'    => $body['error'],
+		if ( ! empty( $this->parameters['reference'] ) && empty( $this->parameters['order_id'] ) ) {
+			$this->parameters['order_id'] = $this->parameters['reference'];
+		}
+
+		$log_data = [
+			'request'  => [
+				'url'     => $url,
+				'method'  => $parsed_args['method'],
+				'payload' => $parsed_args['body'] ?? '',
 			],
+			'response' => $body,
+			'error'    => $body['error'] ?? null,
+		];
+
+		if ( ! empty( $this->parameters['order_id'] ) ) {
+			$log_data['order_id'] = $this->parameters['order_id'];
+		}
+
+		LoggerHelper::log_api_request(
+			$log_data,
 			! empty( $this->request_action ) ? $this->request_action : $url,
 		);
 

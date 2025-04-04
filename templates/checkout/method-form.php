@@ -20,6 +20,9 @@ echo wp_kses_post(
 	<div id="fields-validation-error" style="display: none;">
 		<p class="power-board-validation-error">Please fill in the required fields of the form to display payment methods</p>
 	</div>
+	<div id="intent-creation-error" style="display: none;">
+		<p class="power-board-validation-error">Something went wrong, please refresh the page and try again.</p>
+	</div>
 	<div id="loading">
 		<p class="loading-text">Loading...</p>
 	</div>
