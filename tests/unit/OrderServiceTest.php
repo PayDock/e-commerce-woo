@@ -4,7 +4,7 @@ declare( strict_types=1 );
 namespace unit;
 
 use PHPUnit\Framework\TestCase;
-use PowerBoard\Services\OrderService;
+use WooPlugin\Services\OrderService;
 
 class OrderServiceTest extends TestCase {
 	public function test_check_is_status_change_allowed_draft_to_processing() {

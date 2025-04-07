@@ -4,7 +4,7 @@ declare( strict_types=1 );
 namespace unit;
 
 use PHPUnit\Framework\TestCase;
-use PowerBoard\Helpers\MasterWidgetTemplatesHelper;
+use WooPlugin\Helpers\MasterWidgetTemplatesHelper;
 
 class MasterWidgetTemplatesHelperTest extends TestCase {
 
