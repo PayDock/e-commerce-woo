@@ -5,6 +5,8 @@ namespace WooPlugin\Abstracts;
 
 use ReflectionClass;
 
+use ReflectionClass;
+
 abstract class AbstractEnum {
 	public static function cases(): array {
 		$ref_class = new ReflectionClass( static::class );

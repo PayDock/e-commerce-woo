@@ -67,7 +67,7 @@ jQuery(
 						window.showWarning( errorMessage, 'error' );
 					},
 					reInitMasterWidget() {
-						let loading   = $( '#loading' );
+						let loading    = $( '#loading' );
 						this.toggleWidgetVisibility( true );
 						loading.show();
 						this.initMasterWidget();

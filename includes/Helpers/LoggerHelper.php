@@ -12,11 +12,11 @@ class LoggerHelper {
 		$context   = [
 			'source'   => PLUGIN_NAME,
 			'request'  => $result['request'] ?? null,
-            'response' => self::filter_response_by_action(
-                $result['response'] ?? [],
-                $request_action,
-                $has_error
-            ),
+			'response' => self::filter_response_by_action(
+				$result['response'] ?? [],
+				$request_action,
+				$has_error
+			),
 		];
 
 		if ( $has_error ) {
