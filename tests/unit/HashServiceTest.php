@@ -4,15 +4,15 @@ declare( strict_types=1 );
 namespace unit;
 
 use PHPUnit\Framework\TestCase;
-use PowerBoard\API\ChargeService;
-use PowerBoard\Services\HashService;
+use WooPlugin\API\ChargeService;
+use WooPlugin\Services\HashService;
 
 class HashServiceTest extends TestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
-		if ( ! defined( 'POWER_BOARD_PLUGIN_PREFIX' ) ) {
-			define( 'POWER_BOARD_PLUGIN_PREFIX', 'power_board' );
+		if ( ! defined( 'PLUGIN_PREFIX' ) ) {
+			define( 'PLUGIN_PREFIX', 'plugin_prefix_mock' );
 		}
 	}
 
@@ -27,6 +27,7 @@ class HashServiceTest extends TestCase {
 		$string_to_encrypt = 'test';
 		$expected          = $string_to_encrypt;
 		$encrypted_string  = HashService::encrypt( $string_to_encrypt );
+        var_dump($encrypted_string);
 		$actual            = HashService::decrypt( $encrypted_string );
 
 		$this->assertEquals( $expected, $actual, 'Should return the initial string.' );
@@ -49,7 +50,7 @@ class HashServiceTest extends TestCase {
 	}
 
 	public function test_decrypt() {
-		$string_to_decrypt = 'sodium:VYf/G6m7o08f/v5553+R+0lwPriERAJqypnhJ3d0KMf3Rnh/FzlJ2oRvEec=';
+		$string_to_decrypt = 'sodium:Mb/Pl7+FmZt9bbQeulnrQYBV/MNhogLRLXuXCv3k1/ay4kLnJ6ilFh7/wmI=';
 		$expected          = 'test';
 		$actual            = HashService::decrypt( $string_to_decrypt );
 

@@ -4,7 +4,7 @@ declare( strict_types=1 );
 namespace unit;
 
 use PHPUnit\Framework\TestCase;
-use PowerBoard\API\ChargeService;
+use WooPlugin\API\ChargeService;
 
 class ChargeServiceTest extends TestCase {
 	protected ChargeService $charge_service;
