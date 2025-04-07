@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "376b3661a3d9870e50e50c0198571adb",
+    "content-hash": "7aae3097f5c38c668d10771a9c48ca40",
     "packages": [],
     "packages-dev": [
         {
@@ -616,12 +616,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPCSStandards/PHPCSUtils.git",
-                "reference": "d4f086b6aab7d911cb3232569b3b2880ad1d184e"
+                "reference": "748d046c4a0933206069763ebc9f01db65b14c67"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPCSStandards/PHPCSUtils/zipball/d4f086b6aab7d911cb3232569b3b2880ad1d184e",
-                "reference": "d4f086b6aab7d911cb3232569b3b2880ad1d184e",
+                "url": "https://api.github.com/repos/PHPCSStandards/PHPCSUtils/zipball/748d046c4a0933206069763ebc9f01db65b14c67",
+                "reference": "748d046c4a0933206069763ebc9f01db65b14c67",
                 "shasum": ""
             },
             "require": {
@@ -701,7 +701,7 @@
                     "type": "thanks_dev"
                 }
             ],
-            "time": "2025-03-19T09:58:52+00:00"
+            "time": "2025-04-05T03:53:02+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
@@ -709,12 +709,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-code-coverage.git",
-                "reference": "044468bd8008d364a6b67bff0484bd28a722e85b"
+                "reference": "3ec5a1cafe676a7d3673e308499565a0c37a7a05"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/044468bd8008d364a6b67bff0484bd28a722e85b",
-                "reference": "044468bd8008d364a6b67bff0484bd28a722e85b",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/3ec5a1cafe676a7d3673e308499565a0c37a7a05",
+                "reference": "3ec5a1cafe676a7d3673e308499565a0c37a7a05",
                 "shasum": ""
             },
             "require": {
@@ -779,7 +779,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-03-18T09:35:54+00:00"
+            "time": "2025-04-03T15:03:34+00:00"
         },
         {
             "name": "phpunit/php-file-iterator",
@@ -1036,12 +1036,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "dd3bb4b763ac0e0c924216a1f04407ba059eb2d1"
+                "reference": "39c156f6d76a33ab21229550549abd9fdede8783"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/dd3bb4b763ac0e0c924216a1f04407ba059eb2d1",
-                "reference": "dd3bb4b763ac0e0c924216a1f04407ba059eb2d1",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/39c156f6d76a33ab21229550549abd9fdede8783",
+                "reference": "39c156f6d76a33ab21229550549abd9fdede8783",
                 "shasum": ""
             },
             "require": {
@@ -1055,7 +1055,7 @@
                 "phar-io/manifest": "^2.0.4",
                 "phar-io/version": "^3.2.1",
                 "php": ">=8.3",
-                "phpunit/php-code-coverage": "^12.1.0",
+                "phpunit/php-code-coverage": "^12.1.2",
                 "phpunit/php-file-iterator": "^6.0.0",
                 "phpunit/php-invoker": "^6.0.0",
                 "phpunit/php-text-template": "^5.0.0",
@@ -1078,7 +1078,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "12.1-dev"
+                    "dev-main": "12.2-dev"
                 }
             },
             "autoload": {
@@ -1126,7 +1126,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-03-25T09:59:09+00:00"
+            "time": "2025-04-07T12:57:24+00:00"
         },
         {
             "name": "sebastian/cli-parser",
@@ -1960,12 +1960,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPCSStandards/PHP_CodeSniffer.git",
-                "reference": "615e25a908eacffd6839ccd241e0ed361a606d4f"
+                "reference": "99818768ce205f0d5629a928f782fae32a1df9d3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/615e25a908eacffd6839ccd241e0ed361a606d4f",
-                "reference": "615e25a908eacffd6839ccd241e0ed361a606d4f",
+                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/99818768ce205f0d5629a928f782fae32a1df9d3",
+                "reference": "99818768ce205f0d5629a928f782fae32a1df9d3",
                 "shasum": ""
             },
             "require": {
@@ -2037,7 +2037,7 @@
                     "type": "thanks_dev"
                 }
             ],
-            "time": "2025-03-25T12:49:20+00:00"
+            "time": "2025-04-05T22:41:20+00:00"
         },
         {
             "name": "staabm/side-effects-detector",

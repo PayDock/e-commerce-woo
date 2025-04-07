@@ -26,10 +26,10 @@ class MasterWidgetTemplatesHelper {
 		$template_validation = self::validate_template_id( $templates, $has_error, $template_type_key, $settings );
 
 		if ( ! empty( $template_validation ) && $template_validation['invalid_key'] === true ) {
-            /* @noinspection PhpUndefinedFunctionInspection */
-            update_option( 'woocommerce_' . PLUGIN_PREFIX . '_settings', $settings );
-            /* @noinspection PhpUndefinedFunctionInspection */
-            set_transient( PLUGIN_PREFIX . '_selected_' . $template_type_id . '_template_not_available', '1' );
+			/* @noinspection PhpUndefinedFunctionInspection */
+			update_option( 'woocommerce_' . PLUGIN_PREFIX . '_settings', $settings );
+			/* @noinspection PhpUndefinedFunctionInspection */
+			set_transient( PLUGIN_PREFIX . '_selected_' . $template_type_id . '_template_not_available', '1' );
 		}
 	}
 
