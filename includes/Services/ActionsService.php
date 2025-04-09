@@ -260,7 +260,7 @@ class ActionsService {
 		$meta_data_count = count( $meta_data );
 		$id              = '';
 		for ( $i = 0; $i < $meta_data_count; $i++ ) {
-			if ( $meta_data[ $i ]->key === 'power_board_payment_method' ) {
+			if ( $meta_data[ $i ]->key === PLUGIN_PREFIX . '_payment_method' ) {
 				$id = $meta_data[ $i ]->id;
 				break;
 			}
