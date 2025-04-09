@@ -239,7 +239,7 @@ class WidgetController {
 			&& ! empty( $address['postcode'] );
 	}
 
-	public static function check_intent_status( $intent_id, $charge_id, $order_id, $total_amount ): bool {
+	public static function check_intent_status( $intent_id, $charge_id, $order_id, $order ): bool {
 		$settings = SettingsService::get_instance();
 
 		$intent_request_params = [ 'intent_id' => $intent_id ];
@@ -247,7 +247,7 @@ class WidgetController {
 		$api_adapter_service->initialise( $settings->get_environment(), $settings->get_access_token() );
 		$result = $api_adapter_service->get_checkout_intent_by_id( $intent_request_params );
 
-		$is_intent_valid = (float) $result['resource']['data']['amount'] === (float) $total_amount
+		$is_intent_valid = (float) $result['resource']['data']['amount'] === (float) $order->get_total( false )
 			&& (string) $result['resource']['data']['reference'] === (string) $order_id
 			&& $result['resource']['data']['status'] === 'completed'
 			&& $result['resource']['data']['process_reference'] === $charge_id;
@@ -260,8 +260,6 @@ class WidgetController {
 					if ( ! empty( $decoded_context['payment_method'] ) ) {
 						$test           = $decoded_context['payment_method'];
 						$payment_method = PaymentMethodHelper::get_payment_method( $test );
-						/* @noinspection PhpUndefinedFunctionInspection */
-						$order = wc_get_order( $order_id );
 						$order->add_meta_data( PLUGIN_PREFIX . '_payment_method', $payment_method );
 						$order->save();
 						break;
