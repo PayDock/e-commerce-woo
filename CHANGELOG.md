@@ -1,33 +1,47 @@
 # Changelog
 
-## [1.1.0] - 2025-03-28
+## [4.0.0] - 2025-04-08
 
 ### Compatibility
 
-- Compatible with WooCommerce version `9.5.2`.
+  - Compatible with WooCommerce version `9.5.2`.
 
 ### Added
-
-- Enhanced logging to provide more detailed information during the payment process.
-- Added informative message when intent request fails.
-
-### Bug Fixes
-
-- Fixed issue where plugin deactivation warning not being displayed.
-- Corrected outline color for validation error on classic checkout.
-- Resolved duplicate error messages on the settings page when the Version or Configuration template was not selected.
-- Addressed issue where the widget failed to load on classic checkout when only one country was selected as the selling location.
-- Fixed issue where the refund button was still visible on an order that had already been fully refunded.
-- Removed "Place order" button when order is updated using multiple tabs.
+  - Enhanced logging capability to improvement merchant observability.
 
 ### Technical Changes
+  - Updated the plugin to utilise the Paydock Checkout feature. This displays as one payment option but provides access to all previously available payment methods. Merchants must configure their supported payment methods and options via the Paydock dashboard using the Checkout templates functionality.
 
-- Cleaned up the code by removing unused library and outdated comments.
-
-## [1.0.0] - 2025-03-13
-
-Initial Release
-
+## [3.0.5] - 2024-07-23
 ### Compatibility
+  - Compatible with WooCommerce version `8.9.3`.
 
-- Compatible with WooCommerce version `9.5.2`.
+### Changes
+  - Statuses, openssl, paths
+
+## [3.0.4] - 2024-07-17
+### Changes
+  - Fixes, updates, tweaks
+
+## [2.0.53] - 2024-07-09
+### Changes
+  - Min-max feature
+
+## [2.0.46] - 2024-05-30
+### Changes
+  - Patch, small fixes
+
+## [2.0.44] - 2024-05-28
+### Changes
+  - Screenshots, readme, changelog, etc.
+
+## [2.0.37] - 2024-05-22
+### Changes
+  - Completely new version
+
+## [1.0.28] - 2024-04-28
+### Changes
+  - Fix bugs
+
+## [1.0.19] - 2024-04-27
+Initial release
