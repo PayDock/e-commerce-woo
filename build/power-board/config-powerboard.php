@@ -1,7 +1,7 @@
 <?php
 return [
 	'PLUGIN_NAME'                    => 'PowerBoard for WooCommerce',
-	'PLUGIN_URI'                     => 'https://github.com/PayDock/jsp-woocommerce/tree/power_board',
+	'PLUGIN_URI'                     => 'https://github.com/CommBank-PowerBoard/powerboard-e-commerce-woo',
 	'PLUGIN_DESCRIPTION'             => 'PowerBoard simplify how you manage your payments. Reduce costs, technical headaches & streamline compliance using PowerBoard\'s payment orchestration.',
 	'PLUGIN_AUTHOR'                  => 'PowerBoard',
 	'PLUGIN_AUTHOR_URI'              => 'https://www.commbank.com.au/business/payments/take-online-payments/powerboard.html#getting-started',

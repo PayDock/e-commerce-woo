@@ -29,14 +29,14 @@ $plugin_content = <<<EOT
  * Author: {$config['PLUGIN_AUTHOR']}
  * Author URI: {$config['PLUGIN_AUTHOR_URI']}
  * Version: {$config['PLUGIN_VERSION']}
- * Requires at least: 6.4.2
+ * Requires at least: 6.6
  * Text Domain: {$config['PLUGIN_TEXT_DOMAIN']}
- * Tested up to: 6.6
+ * Tested up to: 6.7.1
  * Stable tag: {$config['PLUGIN_VERSION']}
  * License: GPL-3.0
  * License URI: http://www.gnu.org/licenses/gpl-3.0.html
- * WC requires at least: 6.4.2
- * WC tested up to: 8.5
+ * WC requires at least: 6.6
+ * WC tested up to: 9.5.2
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
