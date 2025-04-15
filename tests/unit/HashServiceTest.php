@@ -27,8 +27,8 @@ class HashServiceTest extends TestCase {
 		$string_to_encrypt = 'test';
 		$expected          = $string_to_encrypt;
 		$encrypted_string  = HashService::encrypt( $string_to_encrypt );
-        var_dump($encrypted_string);
-		$actual            = HashService::decrypt( $encrypted_string );
+		var_dump( $encrypted_string );
+		$actual = HashService::decrypt( $encrypted_string );
 
 		$this->assertEquals( $expected, $actual, 'Should return the initial string.' );
 	}
