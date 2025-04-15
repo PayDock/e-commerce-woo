@@ -80,7 +80,7 @@ publish_power_board:
     - job: prepare_power_board_version
       artifacts: true
   script:
-    - composer install
+    - composer install --no-dev
     - /bin/sh build/power-board/build-powerboard.prod.sh
     - /bin/sh build/power-board/clear-cs-warnings-powerboard.sh
     - /bin/sh cleanup_files_for_zip.sh
@@ -161,7 +161,7 @@ publish_paydock:
     - job: prepare_paydock_version
       artifacts: true
   script:
-    - composer install
+    - composer install --no-dev
     - /bin/sh build/paydock/build-paydock.prod.sh
     - /bin/sh build/paydock/clear-cs-warnings-paydock.sh
     - /bin/sh cleanup_files_for_zip.sh
