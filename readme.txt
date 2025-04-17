@@ -41,6 +41,19 @@ This page includes setup instructions, configuration steps, and important inform
 == Changelog ==
 *** Changelog ***
 
+[4.1.0] - 2025-04-17
+* Compatibility
+  - Compatible with WooCommerce version `9.5.2`.
+
+* Added
+  - Added compatibility fix for "Woo Additional Terms" plugin.
+
+* Changed
+  - Moved order status update out of order creation to enable compatibility with "Preorders" external plugin.
+
+* Fixed
+  - Fixed an issue where the Classic checkout could sometimes process a new order with the order ID of an already processing order.
+
 [4.0.0] - 2025-04-08
 
 * Compatibility

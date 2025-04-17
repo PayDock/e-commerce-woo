@@ -360,8 +360,7 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 				'status'        => $payment_data['status'] ?? null,
 				'error_message' => $payment_data['errorMessage'] ?? null,
 				'raw_data'      => $payment_data,
-			],
-			'info'
+			]
 		);
 
 		/* @noinspection PhpUndefinedFunctionInspection */
@@ -436,8 +435,7 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 			[
 				'order_id'  => $order_id ?? null,
 				'charge_id' => $charge_id ?? null,
-			],
-			'info'
+			]
 		);
 
 		/* @noinspection PhpUndefinedFunctionInspection */
@@ -454,15 +452,27 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 			);
 	}
 
+    /**
+     * Returns order id if order was created previously on PowerBoard
+     * phpcs:disable WordPress.Security.NonceVerification -- processed through the WooCommerce form handler
+     *
+     * @return string
+     */
 	public function get_order_id(): ?string {
-		/* @noinspection PhpUndefinedFunctionInspection */
-		$custom_order_id = (string) WC()->session->get( PLUGIN_PREFIX . '_draft_order' );
-		/* @noinspection PhpUndefinedFunctionInspection */
-		$order_awaiting_payment = (string) WC()->session->get( 'order_awaiting_payment' );
-		return ! empty( $custom_order_id ) ? $custom_order_id : $order_awaiting_payment;
-	}
+        $payment_method = isset( $_POST['payment_method'] ) ? sanitize_text_field( wp_unslash( $_POST['payment_method'] ) ) : '';
+        if ( $payment_method === POWER_BOARD_PLUGIN_PREFIX ) {
+            /* @noinspection PhpUndefinedFunctionInspection */
+            $custom_order_id = (string) WC()->session->get( PLUGIN_PREFIX . '_draft_order' );
+            /* @noinspection PhpUndefinedFunctionInspection */
+            $order_awaiting_payment = (string) WC()->session->get( 'order_awaiting_payment' );
+            return ! empty( $custom_order_id ) ? $custom_order_id : $order_awaiting_payment;
+        }
 
-	public function check_email( $email ): bool {
+        return null;
+	}
+    // phpcs:enable
+
+    public function check_email( $email ): bool {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		if ( ! is_user_logged_in() && email_exists( $email ) ) {
 			return false;
