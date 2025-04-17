@@ -78,13 +78,13 @@ publish_power_board:
     - /bin/sh build/power-board/clear-cs-warnings-powerboard.sh
     - /bin/sh cleanup_files_for_zip.sh
     - echo "ZIP_PUBLISH_JOB_ID=$CI_JOB_ID" > zip_publish.job_id
-    - mkdir -p ../power-board
-    - cp -r ./* ../power-board/
-    - mv ../power-board/ ./
+    - mkdir -p ../powerboard-for-woocommerce
+    - cp -r ./* ../powerboard-for-woocommerce/
+    - mv ../powerboard-for-woocommerce/ ./
   artifacts:
     name: $ARTIFACT_NAME
     paths:
-      - power-board/
+      - powerboard-for-woocommerce/
     reports:
       dotenv: zip_publish.job_id
 
@@ -159,13 +159,13 @@ publish_paydock:
     - /bin/sh build/paydock/clear-cs-warnings-paydock.sh
     - /bin/sh cleanup_files_for_zip.sh
     - echo "ZIP_PUBLISH_JOB_ID=$CI_JOB_ID" > zip_publish.job_id
-    - mkdir -p ../paydock
-    - cp -r ./* ../paydock/
-    - mv ../paydock/ ./
+    - mkdir -p ../paydock-for-woocommerce
+    - cp -r ./* ../paydock-for-woocommerce/
+    - mv ../paydock-for-woocommerce/ ./
   artifacts:
     name: $ARTIFACT_NAME
     paths:
-      - paydock/
+      - paydock-for-woocommerce/
     reports:
       dotenv: zip_publish.job_id
 

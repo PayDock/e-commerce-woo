@@ -1,6 +1,7 @@
 <?php
 return [
 	'PLUGIN_NAME'                    => 'PowerBoard for WooCommerce',
+	'PLUGIN_NAME_KEY'                => 'powerboard-for-woocommerce',
 	'PLUGIN_URI'                     => 'https://github.com/CommBank-PowerBoard/powerboard-e-commerce-woo',
 	'PLUGIN_DESCRIPTION'             => 'PowerBoard simplify how you manage your payments. Reduce costs, technical headaches & streamline compliance using PowerBoard\'s payment orchestration.',
 	'PLUGIN_AUTHOR'                  => 'PowerBoard',

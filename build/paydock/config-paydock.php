@@ -1,6 +1,7 @@
 <?php
 return [
 	'PLUGIN_NAME'                    => 'Paydock for WooCommerce',
+	'PLUGIN_NAME_KEY'                => 'paydock-for-woocommerce',
 	'PLUGIN_URI'                     => 'https://github.com/PayDock/e-commerce-woo',
 	'PLUGIN_DESCRIPTION'             => 'Paydock simplify how you manage your payments. Reduce costs, technical headaches & streamline compliance using Paydock\'s payment orchestration.',
 	'PLUGIN_AUTHOR'                  => 'Paydock',
