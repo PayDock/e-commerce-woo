@@ -6,7 +6,7 @@ return [
 	'PLUGIN_DESCRIPTION'             => 'Paydock simplify how you manage your payments. Reduce costs, technical headaches & streamline compliance using Paydock\'s payment orchestration.',
 	'PLUGIN_AUTHOR'                  => 'Paydock',
 	'PLUGIN_AUTHOR_URI'              => 'https://paydock.com/',
-	'PLUGIN_VERSION'                 => '4.0.0',
+	'PLUGIN_VERSION'                 => '4.1.0',
 	'PLUGIN_WIDGET_NAME'             => 'paydock',
 	'PLUGIN_TEXT_DOMAIN'             => 'paydock',
 	'PLUGIN_PREFIX'                  => 'paydock',

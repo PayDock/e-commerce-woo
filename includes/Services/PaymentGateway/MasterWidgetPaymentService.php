@@ -460,7 +460,7 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
      */
 	public function get_order_id(): ?string {
         $payment_method = isset( $_POST['payment_method'] ) ? sanitize_text_field( wp_unslash( $_POST['payment_method'] ) ) : '';
-        if ( $payment_method === POWER_BOARD_PLUGIN_PREFIX ) {
+        if ( $payment_method === PLUGIN_PREFIX ) {
             /* @noinspection PhpUndefinedFunctionInspection */
             $custom_order_id = (string) WC()->session->get( PLUGIN_PREFIX . '_draft_order' );
             /* @noinspection PhpUndefinedFunctionInspection */

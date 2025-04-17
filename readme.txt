@@ -6,7 +6,7 @@ Tags: paydock, woocommerce, payment, gateways, payment gateways
 Requires PHP: 7.4
 Requires at least: 6.6
 Tested up to: 6.7.1
-Stable tag: 1.0.0
+Stable tag: 4.1.0
 License: GPL-3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
