@@ -120,8 +120,15 @@ class WidgetController {
 				$order_id = $custom_order_id;
 				/* @noinspection PhpUndefinedFunctionInspection */
 				$order = wc_get_order( $order_id );
-				OrderHelper::update_order( $order, $billing_address, $shipping_address );
-			} else {
+                $order_status = $order->get_status();
+
+                if ( $order_status !== 'checkout-draft' && $order_status !== 'failed' ) {
+                    $order_id = $this->create_draft_order( $billing_address, $shipping_address );
+                } else {
+                    OrderHelper::update_order( $order, $billing_address, $shipping_address );
+                }
+
+            } else {
 				$order_id = $this->create_draft_order( $billing_address, $shipping_address );
 			}
 			/* @noinspection PhpUndefinedFunctionInspection */
@@ -250,11 +257,12 @@ class WidgetController {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$order = wc_create_order(
 			[
-				'status'    => 'checkout-draft',
 				'cart_hash' => $cart->get_cart_hash(),
 			]
 		);
-		OrderHelper::update_order( $order, $billing_address, $shipping_address );
+        $order->set_status( 'checkout-draft' );
+
+        OrderHelper::update_order( $order, $billing_address, $shipping_address );
 
 		$order_id = $order->get_id();
 		return (string) $order_id;

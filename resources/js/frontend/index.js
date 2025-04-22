@@ -256,6 +256,11 @@ const checkIsFormValid = () => {
 	if ( !useSameBillingAndShipping ) {
 		isFormValid = isFormValid && isBillingFormValid() && isBillingPhoneValid();
 	}
+	// noinspection JSUnresolvedReference
+	let additionalTerms = document.getElementById( '_woo_additional_terms' );
+	if ( additionalTerms && !additionalTerms.checked ) {
+		isFormValid = false;
+	}
 
 	return isFormValid;
 };
@@ -379,7 +384,7 @@ const getUIOrderTotal = () => {
 	return orderTotalElement ? +orderTotalElement?.innerText.replace( /[^0-9.,]*/, '' ) : null;
 };
 
-const handleFormChanged = () => {
+const handleFormChanged = ( event ) => {
 	setTimeout(
 		() => {
 			// noinspection JSUnresolvedReference
@@ -388,7 +393,7 @@ const handleFormChanged = () => {
 			const shippingAddressFormData = cart.getCustomerData().shippingAddress;
 			// noinspection JSUnresolvedReference
 			const isShippingRateBeingSelected = cart.isShippingRateBeingSelected();
-			if ( billingAddress !== billingAddressFormData || shippingAddress !== shippingAddressFormData ) {
+			if ( billingAddress !== billingAddressFormData || shippingAddress !== shippingAddressFormData || ( event.target.id.includes( '_woo_additional_terms' ) )  ) {
 				billingAddress  = billingAddressFormData;
 				shippingAddress = shippingAddressFormData;
 				handleWidgetDisplay();
@@ -447,7 +452,7 @@ const Content                               = ( props ) => {
 		() => {
 			if ( !window.unsubscribeFromFormChanges ) {
 				// noinspection JSUnresolvedReference
-				window.unsubscribeFromFormChanges = jQuery( '.wc-block-components-form' )[0].addEventListener( "change", handleFormChanged );
+				window.unsubscribeFromFormChanges = jQuery( '.wc-block-components-form' )[0].addEventListener( "change", event => handleFormChanged( event ) );
 			}
 			if ( !window.cartChangesEventListenerSetup ) {
 				document.addEventListener( pluginPrefix + "_cart_total_changed", handleCartTotalChanged );
