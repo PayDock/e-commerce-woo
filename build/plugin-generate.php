@@ -47,6 +47,10 @@ if ( ! defined( 'PLUGIN_NAME' ) ) {
 	define( 'PLUGIN_NAME', '{$config['PLUGIN_NAME']}' );
 }
 
+if ( ! defined( 'PLUGIN_NAME_KEY' ) ) {
+	define( 'PLUGIN_NAME_KEY', '{$config['PLUGIN_NAME_KEY']}' );
+}
+
 if ( ! defined( 'PLUGIN_FILE' ) ) {
 	define( 'PLUGIN_FILE', __FILE__ );
 }

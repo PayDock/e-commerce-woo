@@ -283,7 +283,7 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		$intent_id = isset( $_POST['intentid'] ) ? sanitize_text_field( wp_unslash( $_POST['intentid'] ) ) : '';
 
 		if ( ! empty( $charge_id ) && ! empty( $intent_id ) && in_array( $intent_id, $current_active_intent_ids, true ) ) {
-			$valid_payment = WidgetController::check_intent_status( $intent_id, $charge_id, $order_id, $order->get_total( false ) );
+			$valid_payment = WidgetController::check_intent_status( $intent_id, $charge_id, $order_id, $order );
 		} else {
 			$valid_payment = false;
 		}
@@ -301,7 +301,9 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 			throw new Exception( esc_html( $failed_message ) );
 		}
 
-		$order->add_order_note( 'Payment succeeded. Charge ID: ' . $charge_id );
+		$payment_method = $order->get_meta( PLUGIN_PREFIX . '_payment_method' );
+
+		$order->add_order_note( 'Payment succeeded. Payment Method: ' . $payment_method . '. Charge ID: ' . $charge_id );
 		$order->set_status( 'processing' );
 		$order->payment_complete();
 
@@ -452,15 +454,27 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 			);
 	}
 
+    /**
+     * Returns order id if order was created previously on PowerBoard
+     * phpcs:disable WordPress.Security.NonceVerification -- processed through the WooCommerce form handler
+     *
+     * @return string
+     */
 	public function get_order_id(): ?string {
-		/* @noinspection PhpUndefinedFunctionInspection */
-		$custom_order_id = (string) WC()->session->get( PLUGIN_PREFIX . '_draft_order' );
-		/* @noinspection PhpUndefinedFunctionInspection */
-		$order_awaiting_payment = (string) WC()->session->get( 'order_awaiting_payment' );
-		return ! empty( $custom_order_id ) ? $custom_order_id : $order_awaiting_payment;
-	}
+        $payment_method = isset( $_POST['payment_method'] ) ? sanitize_text_field( wp_unslash( $_POST['payment_method'] ) ) : '';
+        if ( $payment_method === PLUGIN_PREFIX ) {
+            /* @noinspection PhpUndefinedFunctionInspection */
+            $custom_order_id = (string) WC()->session->get( PLUGIN_PREFIX . '_draft_order' );
+            /* @noinspection PhpUndefinedFunctionInspection */
+            $order_awaiting_payment = (string) WC()->session->get( 'order_awaiting_payment' );
+            return ! empty( $custom_order_id ) ? $custom_order_id : $order_awaiting_payment;
+        }
 
-	public function check_email( $email ): bool {
+        return null;
+	}
+    // phpcs:enable
+
+    public function check_email( $email ): bool {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		if ( ! is_user_logged_in() && email_exists( $email ) ) {
 			return false;

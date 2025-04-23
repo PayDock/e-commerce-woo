@@ -36,7 +36,7 @@ if ( ! class_exists( '\WooPlugin\WooPluginPlugin' ) ) {
 			$current_dir = basename( plugin_dir_path( __DIR__ ) );
 			/* @noinspection PhpUndefinedFunctionInspection */
 			$main_file   = plugin_basename( plugin_dir_path( __DIR__ ) ) . '/plugin.php';
-			$implied_dir = PLUGIN_TEXT_DOMAIN;
+			$implied_dir = PLUGIN_NAME_KEY;
 
 			if ( $current_dir !== $implied_dir ) {
 				if ( ! function_exists( 'deactivate_plugins' ) ) {

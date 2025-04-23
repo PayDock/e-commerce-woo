@@ -19,6 +19,7 @@ use WooPlugin\Services\PaymentGateway\MasterWidgetPaymentService;
 use WooPlugin\Enums\SettingsSectionEnum;
 use WooPlugin\Util\MasterWidgetBlock;
 use WC_Data_Exception;
+use WC_Order;
 
 class ActionsService {
 	protected static ?ActionsService $instance = null;
@@ -53,6 +54,7 @@ class ActionsService {
 		$this->add_cart_hooks();
 		$this->add_settings_actions();
 		$this->add_order_actions();
+		$this->add_edit_order_actions();
 	}
 
 	protected function add_compatibility_with_woocommerce(): void {
@@ -246,6 +248,31 @@ class ActionsService {
 		add_action( 'wc_ajax_woo-plugin-check-postcode', [ $master_widget_payment_service, 'check_postcode' ] );
 		/* @noinspection PhpUndefinedFunctionInspection */
 		add_action( 'wc_ajax_nopriv_woo-plugin-check-postcode', [ $master_widget_payment_service, 'check_postcode' ] );
+	}
+
+	public function add_edit_order_actions() {
+		/* @noinspection PhpUndefinedFunctionInspection */
+		add_action( 'woocommerce_admin_order_data_after_billing_address', [ $this, 'disable_payment_method_custom_field_on_order_page' ] );
+	}
+
+	public function disable_payment_method_custom_field_on_order_page( WC_Order $order ): void {
+		$meta_data       = $order->get_meta_data();
+		$meta_data_count = count( $meta_data );
+		$id              = '';
+		for ( $i = 0; $i < $meta_data_count; $i++ ) {
+			if ( $meta_data[ $i ]->key === PLUGIN_PREFIX . '_payment_method' ) {
+				$id = $meta_data[ $i ]->id;
+				break;
+			}
+		}
+		echo '<script type="text/javascript">
+			jQuery(document).ready(function($) {
+        		if ( ' . $id . ' !== "" ) {
+					$("#meta-' . $id . '-key").prop("disabled", true);
+					$("#meta-' . $id . '-value").prop("disabled", true);
+        		}
+			});
+		</script>';
 	}
 
 	/**

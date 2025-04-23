@@ -64,7 +64,7 @@ Note: Encryption of admin values within the plugin requires Sodium or as a fallb
 
       **Note** - Please ensure that once your access token is created, that you enter it here and then press save. This will then populate the ‘Configuration Template ID’ and ‘Customisation Template ID’ dropdown lists with the templates you have created in the Checkout feature.
 
-   3. **Version** – The version of the Checkout feature that you want to integrate with, in v4.0.0 of the WooCommerce plugin, only version = 1 will be available. 
+   3. **Version** – The version of the Checkout feature that you want to integrate with, in v4.1.0 of the WooCommerce plugin, only version = 1 will be available. 
    As more features and functionality are added to the checkout feature, this version number will increment and provide additional features in the WooCommerce plugin.
 
    4. **Configuration template ID – As per ‘API Access Token’ step 3.ii**, once you have entered a valid access token and pressed save this will populate the dropdown list with the available configuration template ID’s you have created in your Paydock company dashboard.
@@ -104,7 +104,7 @@ Please note, a refund will only be completed from WooCommerce -> Paydock -> Gate
 This section provides additional information about the Paydock plugin for WooCommerce.
 
 ### Version compatibility
-The v4.0.0 WooCommerce plugin has been tested and validated against a vanilla installation of:
+The v4.1.0 WooCommerce plugin has been tested and validated against a vanilla installation of:
    - WooCommerce version: 9.5.2
    - WordPress version: 6.7.1
    - PHP version 8.2

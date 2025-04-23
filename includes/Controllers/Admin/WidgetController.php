@@ -3,7 +3,9 @@ declare( strict_types=1 );
 
 namespace WooPlugin\Controllers\Admin;
 
+use WooPlugin\Helpers\JsonHelper;
 use WooPlugin\Helpers\OrderHelper;
+use WooPlugin\Helpers\PaymentMethodHelper;
 use WooPlugin\Services\Settings\APIAdapterService;
 use WooPlugin\Services\SettingsService;
 
@@ -120,8 +122,15 @@ class WidgetController {
 				$order_id = $custom_order_id;
 				/* @noinspection PhpUndefinedFunctionInspection */
 				$order = wc_get_order( $order_id );
-				OrderHelper::update_order( $order, $billing_address, $shipping_address );
-			} else {
+                $order_status = $order->get_status();
+
+                if ( $order_status !== 'checkout-draft' && $order_status !== 'failed' ) {
+                    $order_id = $this->create_draft_order( $billing_address, $shipping_address );
+                } else {
+                    OrderHelper::update_order( $order, $billing_address, $shipping_address );
+                }
+
+            } else {
 				$order_id = $this->create_draft_order( $billing_address, $shipping_address );
 			}
 			/* @noinspection PhpUndefinedFunctionInspection */
@@ -230,7 +239,7 @@ class WidgetController {
 			&& ! empty( $address['postcode'] );
 	}
 
-	public static function check_intent_status( $intent_id, $charge_id, $order_id, $total_amount ): bool {
+	public static function check_intent_status( $intent_id, $charge_id, $order_id, $order ): bool {
 		$settings = SettingsService::get_instance();
 
 		$intent_request_params = [ 'intent_id' => $intent_id ];
@@ -238,10 +247,28 @@ class WidgetController {
 		$api_adapter_service->initialise( $settings->get_environment(), $settings->get_access_token() );
 		$result = $api_adapter_service->get_checkout_intent_by_id( $intent_request_params );
 
-		return (float) $result['resource']['data']['amount'] === (float) $total_amount
+		$is_intent_valid = (float) $result['resource']['data']['amount'] === (float) $order->get_total( false )
 			&& (string) $result['resource']['data']['reference'] === (string) $order_id
 			&& $result['resource']['data']['status'] === 'completed'
 			&& $result['resource']['data']['process_reference'] === $charge_id;
+
+		if ( $is_intent_valid ) {
+			$intent_journey = $result['resource']['data']['journey'];
+			for ( $i = count( $intent_journey ) - 1; $i >= 0; $i-- ) {
+				if ( ! empty( $intent_journey[ $i ]['context'] ) ) {
+					$decoded_context = JsonHelper::decode_stringified_json( $intent_journey[ $i ]['context'] );
+					if ( ! empty( $decoded_context['payment_method'] ) ) {
+						$test           = $decoded_context['payment_method'];
+						$payment_method = PaymentMethodHelper::get_payment_method( $test );
+						$order->add_meta_data( PLUGIN_PREFIX . '_payment_method', $payment_method );
+						$order->save();
+						break;
+					}
+				}
+			}
+		}
+
+		return $is_intent_valid;
 	}
 
 	private function create_draft_order( $billing_address = null, $shipping_address = null ): string {
@@ -250,11 +277,12 @@ class WidgetController {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$order = wc_create_order(
 			[
-				'status'    => 'checkout-draft',
 				'cart_hash' => $cart->get_cart_hash(),
 			]
 		);
-		OrderHelper::update_order( $order, $billing_address, $shipping_address );
+        $order->set_status( 'checkout-draft' );
+
+        OrderHelper::update_order( $order, $billing_address, $shipping_address );
 
 		$order_id = $order->get_id();
 		return (string) $order_id;
