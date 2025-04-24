@@ -13,4 +13,5 @@ rm phpcs.xml
 rm eslint.config.mjs
 rm VERSION.TXT
 rm -r build
+rm -r tests
 rm cleanup_files_for_zip.sh
