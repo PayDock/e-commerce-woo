@@ -90,19 +90,19 @@ if ( ! defined( 'PLUGIN_PRODUCTION_ENVIRONMENT_NAME' ) ) {
 }
 
 if ( ! defined( 'PLUGIN_SANDBOX_API_URL' ) ) {
-	define( 'PLUGIN_SANDBOX_API_URL', 'https://api-sandbox.paydock.com/v1/' );
+	define( 'PLUGIN_SANDBOX_API_URL', 'https://apista-11.paydock.com/v1/' );
 }
 
 if ( ! defined( 'PLUGIN_SANDBOX_ENVIRONMENT_VALUE' ) ) {
-	define( 'PLUGIN_SANDBOX_ENVIRONMENT_VALUE', 'sandbox' );
+	define( 'PLUGIN_SANDBOX_ENVIRONMENT_VALUE', 'staging-11' );
 }
 
 if ( ! defined( 'PLUGIN_SANDBOX_ENVIRONMENT_URL_KEY' ) ) {
-	define( 'PLUGIN_SANDBOX_ENVIRONMENT_URL_KEY', 'sandbox' );
+	define( 'PLUGIN_SANDBOX_ENVIRONMENT_URL_KEY', 'staging-11' );
 }
 
 if ( ! defined( 'PLUGIN_SANDBOX_ENVIRONMENT_NAME' ) ) {
-	define( 'PLUGIN_SANDBOX_ENVIRONMENT_NAME', 'Sandbox' );
+	define( 'PLUGIN_SANDBOX_ENVIRONMENT_NAME', 'Staging-11' );
 }
 
 if ( ! defined( 'PLUGIN_STAGING_API_URL' ) ) {

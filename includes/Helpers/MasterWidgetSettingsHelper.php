@@ -63,7 +63,7 @@ class MasterWidgetSettingsHelper {
 			/* @noinspection PhpUndefinedFunctionInspection */
 			set_transient( PLUGIN_PREFIX . '_checkout_versions', $plugin_configuration['checkout_versions'], 60 );
 			/* @noinspection PhpUndefinedFunctionInspection */
-			set_transient( PLUGIN_PREFIX . '_environment_url', $plugin_configuration['environment_url'], 60 );
+			set_transient( PLUGIN_PREFIX . '_environment_url', 'https://widget.paydock.com/sdk/v1.112.30-beta/widget.umd.js', 60 );
 		}
 		/* @noinspection PhpUndefinedFunctionInspection */
 		delete_transient( PLUGIN_PREFIX . '_is_fetching_versions' );

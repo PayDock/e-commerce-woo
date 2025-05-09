@@ -91,7 +91,7 @@ final class SettingsService {
 			$widget_api_adapter_service = APIAdapterService::get_instance();
 			$widget_api_adapter_service->initialise( $this->get_environment(), $this->get_access_token() );
 			$plugin_configuration              = $widget_api_adapter_service->get_plugin_configuration_by_version();
-			$plugin_configuration_environments = $plugin_configuration['environment_url'];
+			$plugin_configuration_environments = "https://widget.paydock.com/sdk/v1.112.30-beta/widget.umd.js";
 
 			/* @noinspection PhpUndefinedFunctionInspection */
 			set_transient( PLUGIN_PREFIX . '_environment_url', $plugin_configuration_environments, 60 );
