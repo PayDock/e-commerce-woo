@@ -30,7 +30,7 @@ if ( ! defined( 'PLUGIN_NAME' ) ) {
 }
 
 if ( ! defined( 'PLUGIN_NAME_KEY' ) ) {
-	define( 'PLUGIN_NAME_KEY', 'paydock-for-woocommerce' );
+	define( 'PLUGIN_NAME_KEY', 'paydock' );
 }
 
 if ( ! defined( 'PLUGIN_FILE' ) ) {
@@ -94,15 +94,15 @@ if ( ! defined( 'PLUGIN_SANDBOX_API_URL' ) ) {
 }
 
 if ( ! defined( 'PLUGIN_SANDBOX_ENVIRONMENT_VALUE' ) ) {
-	define( 'PLUGIN_SANDBOX_ENVIRONMENT_VALUE', 'staging-11' );
+	define( 'PLUGIN_SANDBOX_ENVIRONMENT_VALUE', 'staging 11' );
 }
 
 if ( ! defined( 'PLUGIN_SANDBOX_ENVIRONMENT_URL_KEY' ) ) {
-	define( 'PLUGIN_SANDBOX_ENVIRONMENT_URL_KEY', 'staging-11' );
+	define( 'PLUGIN_SANDBOX_ENVIRONMENT_URL_KEY', 'staging 11' );
 }
 
 if ( ! defined( 'PLUGIN_SANDBOX_ENVIRONMENT_NAME' ) ) {
-	define( 'PLUGIN_SANDBOX_ENVIRONMENT_NAME', 'Staging-11' );
+	define( 'PLUGIN_SANDBOX_ENVIRONMENT_NAME', 'Staging 11' );
 }
 
 if ( ! defined( 'PLUGIN_STAGING_API_URL' ) ) {
@@ -120,6 +120,8 @@ if ( ! defined( 'PLUGIN_STAGING_ENVIRONMENT_URL_KEY' ) ) {
 if ( ! defined( 'PLUGIN_STAGING_ENVIRONMENT_NAME' ) ) {
 	define( 'PLUGIN_STAGING_ENVIRONMENT_NAME', '' );
 }
+
+define( 'WP_DEBUG', true );
 
 require_once __DIR__ . '/vendor/autoload.php';
 
