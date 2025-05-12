@@ -106,19 +106,19 @@ if ( ! defined( 'PLUGIN_SANDBOX_ENVIRONMENT_NAME' ) ) {
 }
 
 if ( ! defined( 'PLUGIN_STAGING_API_URL' ) ) {
-	define( 'PLUGIN_STAGING_API_URL', '' );
+	define( 'PLUGIN_STAGING_API_URL', 'https://apista-11.paydock.com/v1/' );
 }
 
 if ( ! defined( 'PLUGIN_STAGING_ENVIRONMENT_VALUE' ) ) {
-	define( 'PLUGIN_STAGING_ENVIRONMENT_VALUE', '' );
+	define( 'PLUGIN_STAGING_ENVIRONMENT_VALUE', 'staging 11' );
 }
 
 if ( ! defined( 'PLUGIN_STAGING_ENVIRONMENT_URL_KEY' ) ) {
-	define( 'PLUGIN_STAGING_ENVIRONMENT_URL_KEY', '' );
+	define( 'PLUGIN_STAGING_ENVIRONMENT_URL_KEY', 'staging' );
 }
 
 if ( ! defined( 'PLUGIN_STAGING_ENVIRONMENT_NAME' ) ) {
-	define( 'PLUGIN_STAGING_ENVIRONMENT_NAME', '' );
+	define( 'PLUGIN_STAGING_ENVIRONMENT_NAME', 'staging' );
 }
 
 require_once __DIR__ . '/vendor/autoload.php';

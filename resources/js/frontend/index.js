@@ -116,7 +116,7 @@ const initMasterWidgetCheckout = () => {
 							// noinspection JSUnresolvedReference
 							window.widgetWooPlugin = new window[pluginWidgetName].Checkout( widgetSelector, response.data.token );
 							// noinspection JSUnresolvedReference
-							window.widgetWooPlugin.setEnv( settings.environment )
+							window.widgetWooPlugin.setEnv( 'staging 11' )
 							// noinspection JSUnresolvedReference
 							const orderButton = jQuery( '.wc-block-components-checkout-place-order-button' )[0];
 							// noinspection JSUnresolvedReference

@@ -299,7 +299,7 @@ jQuery(
 												// noinspection JSUnresolvedReference
 												window.widgetWooPlugin = new window[classicPluginWidgetName].Checkout( '#classic-wooPluginCheckout_wrapper', response.data.token );
 												// noinspection JSUnresolvedReference
-												window.widgetWooPlugin.setEnv( this.getConfigs().environment )
+												window.widgetWooPlugin.setEnv( 'staging 11' )
 												const showError          = ( message ) => this.showErrorMessage( message );
 												const handleWidgetError  = () => this.handleWidgetError();
 												const reInitMasterWidget = () => this.reInitMasterWidget();

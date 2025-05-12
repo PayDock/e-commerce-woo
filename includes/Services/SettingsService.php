@@ -116,6 +116,14 @@ final class SettingsService {
 				$environment_key = PLUGIN_STAGING_ENVIRONMENT_URL_KEY;
 		}
 
-		return ! empty( $environment_key ) ? $plugin_configuration_environments[ $environment_key ] : '';
+		if ( !empty( $environment_key ) ) {
+			if ( $environment_key == 'sandbox' ) {
+				return 'https://widget.paydock.com/sdk/v1.122.3-beta/widget.umd.min.js';
+			} else {
+				return 'https://widget.paydock.com/sdk/v1.112.30-beta/widget.umd.js';
+			}
+		} else {
+			return ' ';
+		}
 	}
 }
