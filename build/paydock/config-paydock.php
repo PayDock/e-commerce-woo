@@ -22,4 +22,8 @@ return [
 	'SANDBOX_ENVIRONMENT_VALUE'      => 'sandbox',
 	'SANDBOX_ENVIRONMENT_URL_KEY'    => 'sandbox',
 	'SANDBOX_ENVIRONMENT_NAME'       => 'Sandbox',
+	'STAGING_API_URL'                => 'https://apista-11.paydock.com/v1/',
+	'STAGING_ENVIRONMENT_VALUE'      => 'staging 11',
+	'STAGING_ENVIRONMENT_URL_KEY'    => 'staging',
+	'STAGING_ENVIRONMENT_NAME'       => 'Staging',
 ];
