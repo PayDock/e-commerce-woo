@@ -33,7 +33,7 @@ jQuery(
 					// noinspection JSUnresolvedReference
 					const phone = $input.val();
 					$input.next( `.${CONFIG.errorMessageClassName}` ).remove();
-					if (phone && !CONFIG.phonePattern.test( phone )) {
+					if ( phone && !CONFIG.phonePattern.test( phone ) ) {
 						$input.after( CONFIG.errorMessageHtml );
 						// noinspection JSUnresolvedReference
 						$input.addClass( 'woo-plugin-invalid-phone' );
@@ -155,42 +155,39 @@ jQuery(
 					isValidForm( paymentMethod ) {
 						this.hideFormValidationError( paymentMethod );
 						let fieldList                 = this.getFieldsList();
-						let result                    = true
+						let result                    = true;
 						const additionalTermsCheckbox = document.getElementById( '_woo_additional_terms' );
-						if ( this.invalidPostcode || ( additionalTermsCheckbox && !additionalTermsCheckbox.checked ) ) {
+						const invalidPhone            = document.getElementById( 'shipping-phone' )?.className.includes( 'woo-plugin-invalid-phone' ) || document.getElementById( 'billing-phone' )?.className.includes( 'woo-plugin-invalid-phone' );
+						if ( this.invalidPostcode || this.invalidEmail || invalidPhone || ( additionalTermsCheckbox && !additionalTermsCheckbox.checked ) ) {
+							result = false;
+						}
+						const defaultTermsCheckbox = document.getElementById( 'terms' );
+						if ( defaultTermsCheckbox && !defaultTermsCheckbox.checked ) {
 							result = false;
 						}
 						fieldList.filter( field => !field.includes( 'address_2' ) ).forEach(
 							( fieldName ) => {
-								let element = document.querySelector( `[name="${fieldName}"]` );
-								if (element) {
-									if (element.value) {
-										this.setFieldLikeValid( fieldName );
-									} else {
-										this.setFieldLikeInvalid( fieldName );
-										this.showFormValidationError( paymentMethod );
-										result = false;
-									}
+								const el = document.getElementById( fieldName );
+								if ( el && el.value ) {
+									this.setFieldLikeValid( fieldName );
 								} else {
+									this.setFieldLikeInvalid( fieldName );
+									this.showFormValidationError( paymentMethod );
 									result = false;
 								}
 							}
-						)
-
-					if ( result ) {
-						// noinspection JSUnresolvedReference
-						let isPhoneNumberValid = this.isBillingPhoneValid();
-
-						// noinspection JSUnresolvedReference
-						let useSameBillingAndShipping = jQuery( '#ship-to-different-address-checkbox' ).checked;
-						if ( !useSameBillingAndShipping ) {
-							isPhoneNumberValid = isPhoneNumberValid && this.isShippingPhoneValid();
+						);
+						if ( result ) {
+							// noinspection JSUnresolvedReference
+							let isPhoneNumberValid = this.isBillingPhoneValid();
+							// noinspection JSUnresolvedReference
+							const useSameBillingAndShipping = document.getElementById( 'ship-to-different-address-checkbox' )?.checked;
+							if ( !useSameBillingAndShipping ) {
+								isPhoneNumberValid = isPhoneNumberValid && this.isShippingPhoneValid();
+							}
+							return isPhoneNumberValid;
 						}
-
-						return isPhoneNumberValid;
-					}
-
-					return result;
+						return result;
 					},
 					isShippingPhoneValid() {
 						return !document.getElementById( 'shipping_phone' )?.classList?.contains( 'woo-plugin-invalid-phone' );
@@ -217,18 +214,27 @@ jQuery(
 							return;
 						}
 						this.selectedPaymentMethod = methodName;
-						let error                  = $( '#fields-validation-error' );
+						let error                  = $( '#required-fields-validation-error' );
+						let invalidFieldsError     = $( '#invalid-fields-error' );
 						let createIntentError      = $( '#intent-creation-error' );
 						let loading                = $( '#loading' );
 						loading.show();
 						error.hide();
+						invalidFieldsError.hide();
 						createIntentError.hide();
 
 						if ( !this.isValidForm( methodName ) && methodName === classicPluginPrefix ) {
 							this.toggleWidgetVisibility( true );
 							this.toggleOrderButton( true );
 							loading.hide();
-							error.show();
+
+							const invalidPhone = document.getElementById( 'shipping_phone' )?.className.includes( 'woo-plugin-invalid-phone' ) || document.getElementById( 'billing_phone' )?.className.includes( 'woo-plugin-invalid-phone' );
+							if ( this.invalidPostcode || this.invalidEmail || invalidPhone ) {
+								invalidFieldsError.show();
+							} else {
+								error.show();
+							}
+
 							return;
 						}
 						if (methodName !== classicPluginPrefix ) {
@@ -264,10 +270,11 @@ jQuery(
 						const initTimestamp       = ( new Date() ).getTime();
 						this.lastMasterWidgetInit = initTimestamp;
 						setTimeout( () => this.toggleOrderButton( true ), 100 );
-						let addressData     = this.getAddressData( false );
-						let billingAddress  = addressData.address;
-						let shippingAddress = billingAddress;
-						if ( document.getElementById( 'ship-to-different-address-checkbox' ).checked ) {
+						let addressData      = this.getAddressData( false );
+						let billingAddress   = addressData.address;
+						let shippingAddress  = billingAddress;
+						const shipToCheckbox = document.getElementById( 'ship-to-different-address-checkbox' );
+						if ( shipToCheckbox && shipToCheckbox.checked ) {
 							shippingAddress = addressData.shipping_address;
 						}
 
@@ -286,6 +293,9 @@ jQuery(
 								success: ( response ) => {
 									if ( !this.isValidForm( classicPluginPrefix ) ) {
 										let error   = $( '#fields-validation-error' );
+										if ( this.invalidPostcode || this.invalidEmail ) {
+											error = $( '#invalid-fields-error' );
+										}
 										let loading = $( '#loading' );
 										this.toggleWidgetVisibility( true );
 										this.toggleOrderButton( true );
@@ -387,31 +397,22 @@ jQuery(
 						);
 					},
 					getAddressData( returnJson = true ) {
-						let fieldList    = this.getFieldsList( true, true );
-						let result       = {
+						let fieldList          = this.getFieldsList( true, true );
+						let result             = {
 							shipping_address: {},
 							address: {}
 						};
 						fieldList.forEach(
 							( fieldName ) => {
-								let type = 'input';
-								if ( fieldName.includes( 'state' ) || fieldName.includes( 'country' ) ) {
-									type = 'select'
-
-									if ( fieldName.includes( 'country' ) && document.querySelectorAll( `select[name="${fieldName}"]` ).length === 0 ) {
-										type = 'input'
-									}
-								}
-								let elements   = document.querySelectorAll( `${type}[name="${fieldName}"]` );
-								let value      = elements.length > 0 ? elements[0].value : null;
-								let isShipping = fieldName.includes( 'shipping' );
+								let element    = document.getElementById( fieldName );
+								let value      = element ? element.value : '';
+								let isShipping = fieldName.startsWith( 'shipping_' );
 								result[isShipping ? 'shipping_address' : 'address'][fieldName.replace( 'shipping_', '' ).replace( 'billing_', '' )] = value;
 							}
 						);
-
-					if ( returnJson ) {
-						return JSON.stringify( result );
-					}
+						if ( returnJson ) {
+							return JSON.stringify( result );
+						}
 						return result;
 					},
 					getConfigs() {
@@ -496,6 +497,13 @@ jQuery(
 						);
 
 						this.form = $( 'form[name="checkout"]' );
+						$( '#ship-to-different-address-checkbox' ).on(
+							'change',
+							function () {
+								const selectedPayment = $( 'input[name="payment_method"]:checked' ).val();
+								powerBoardHelper.setPaymentMethod( selectedPayment, true );
+							}
+						);
 						this.form.on(
 							'change',
 							( event ) => {
@@ -512,6 +520,14 @@ jQuery(
 						);
 
 						document.addEventListener( classicPluginPrefix + "_cart_total_changed", this.handleCartTotalChanged.bind( this ) );
+
+						$( document.body ).on( 'updated_checkout', () => {
+							const selectedPayment = $( 'input[name="payment_method"]:checked' ).val();
+							if ( selectedPayment === 'power_board' ) {
+								this.setPaymentMethod( selectedPayment, true );
+							}
+						});
+
 					},
 					handleShippingChanged( eventTargetId ) {
 						if (this.shippingChangedTimeout) {
@@ -548,10 +564,13 @@ jQuery(
 								const currentAddress = this.getAddressData( true );
 								if ( eventTargetId.includes( 'billing_postcode' ) || eventTargetId.includes( 'billing_country' ) || eventTargetId.includes( 'billing_state' ) ) {
 									this.checkIsValidPostCodeAndLoadPayment();
+								} else if ( eventTargetId.includes( 'billing_email' ) ) {
+									this.checkIsValidEmailAndLoadPayment();
 								} else if (
 									this.lastAddressVerified !== currentAddress
 									|| eventTargetId.includes( 'payment_method' )
 									|| eventTargetId.includes( '_woo_additional_terms' )
+									|| eventTargetId.includes( 'terms' )
 								) {
 
 									this.lastAddressVerified = currentAddress;
@@ -591,24 +610,69 @@ jQuery(
 										} else {
 											this.invalidPostcode = true;
 											const postcodeInput  = document.getElementById( 'billing_postcode' );
-											document.querySelector( '.woo-plugin-postcode-error-message' )?.remove();
-											const messageContainer = document.createElement( "div" );
-											messageContainer.setAttribute( 'class', 'classic-checkout-validation-error wc-block-components-validation-error woo-plugin-postcode-error-message' );
-											messageContainer.setAttribute( 'role', 'alert' );
-											const	message   = document.createElement( "p" );
-											message.innerText = response.data.message;
-											messageContainer.appendChild( message );
-											postcodeInput.after( messageContainer );
-											postcodeInput.classList.add( 'woo-plugin-invalid-postcode' );
+											this.addErrorMessageToField( postcodeInput, response.data.message, 'postcode' );
 										}
 
-										this.setPaymentMethod( selectedPaymentMethod, forcePaymentMethodInit );
+										if ( loadPayment ) {
+											this.setPaymentMethod( selectedPaymentMethod, true );
+										}
 									}
 								}
 							);
 						} else {
-							this.setPaymentMethod( selectedPaymentMethod, forcePaymentMethodInit );
+							if ( loadPayment ) {
+								this.setPaymentMethod( selectedPaymentMethod, true );
+							}
 						}
+					},
+					checkIsValidEmailAndLoadPayment( loadPayment = true ) {
+						const email = document.getElementById( 'billing_email' ).value;
+						// noinspection JSUnresolvedReference
+						const selectedPaymentMethod = $( 'input[name="payment_method"]:checked' ).val();
+
+						if ( email ) {
+							// noinspection JSUnresolvedReference
+							jQuery.ajax(
+								{
+									url: '/?wc-ajax=woo-plugin-check-email',
+									type: 'POST',
+									data: {
+										_wpnonce: PowerBoardAjaxCheckout.wpnonce_check_email,
+										email: email,
+									},
+									success: ( response ) => {
+										const emailInput = document.getElementById( 'billing_email' );
+										if ( response.success ) {
+											this.invalidEmail = false;
+											document.querySelector( '.woo-plugin-email-error-message' )?.remove();
+											emailInput.classList.remove( 'woo-plugin-invalid-email' );
+										} else {
+											this.invalidEmail = true;
+											this.addErrorMessageToField( emailInput, response.data.message, 'email' );
+										}
+
+										if ( loadPayment ) {
+											this.setPaymentMethod( selectedPaymentMethod, true );
+										}
+									}
+								}
+							);
+						} else {
+							if ( loadPayment ) {
+								this.setPaymentMethod( selectedPaymentMethod, true );
+							}
+						}
+					},
+					addErrorMessageToField( fieldInput, errorMessage, fieldIdentifier ) {
+						document.querySelector( '.woo-plugin-' + fieldIdentifier + '-error-message' )?.remove();
+						const messageContainer = document.createElement( "div" );
+						messageContainer.setAttribute( 'class', 'classic-checkout-validation-error wc-block-components-validation-error woo-plugin-' + fieldIdentifier + '-error-message' );
+						messageContainer.setAttribute( 'role', 'alert' );
+						const	message   = document.createElement( "p" );
+						message.innerText = errorMessage;
+						messageContainer.appendChild( message );
+						fieldInput.after( messageContainer );
+						fieldInput.classList.add( 'woo-plugin-invalid-' + fieldIdentifier );
 					},
 					handleOrderCommentsChanges( eventTargetId, value ) {
 						if ( eventTargetId.includes( 'order_comments' ) ) {

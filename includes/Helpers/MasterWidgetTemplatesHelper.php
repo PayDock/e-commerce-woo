@@ -23,6 +23,11 @@ class MasterWidgetTemplatesHelper {
 	public static function validate_or_update_template_id( ?array $templates, bool $has_error, string $template_type_key, string $template_type_id ): void {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$settings            = get_option( 'woocommerce_' . PLUGIN_PREFIX . '_settings' );
+
+		if ( ! is_array( $settings ) ) {
+			$settings = [];
+		}
+
 		$template_validation = self::validate_template_id( $templates, $has_error, $template_type_key, $settings );
 
 		if ( ! empty( $template_validation ) && $template_validation['invalid_key'] === true ) {

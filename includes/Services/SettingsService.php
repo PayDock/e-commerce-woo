@@ -97,13 +97,15 @@ final class SettingsService {
 			set_transient( PLUGIN_PREFIX . '_environment_url', $plugin_configuration_environments, 60 );
 		}
 
-		return $plugin_configuration_environments;
+		return is_array( $plugin_configuration_environments ) ? $plugin_configuration_environments : [];
 	}
 
 	public function get_widget_script_url(): string {
 		$environment = $this->get_environment();
 
 		$plugin_configuration_environments = $this->get_plugin_configuration_environments();
+
+		$environment_key = '';
 
 		switch ( $environment ) {
 			case PLUGIN_PRODUCTION_ENVIRONMENT_VALUE:
@@ -116,6 +118,6 @@ final class SettingsService {
 				$environment_key = PLUGIN_STAGING_ENVIRONMENT_URL_KEY;
 		}
 
-		return ! empty( $environment_key ) ? $plugin_configuration_environments[ $environment_key ] : '';
+		return isset( $plugin_configuration_environments[ $environment_key ] ) ? (string) $plugin_configuration_environments[ $environment_key ] : '';
 	}
 }

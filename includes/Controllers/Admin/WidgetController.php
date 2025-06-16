@@ -4,6 +4,7 @@ declare( strict_types=1 );
 namespace WooPlugin\Controllers\Admin;
 
 use WooPlugin\Helpers\JsonHelper;
+use WooPlugin\Helpers\LoggerHelper;
 use WooPlugin\Helpers\OrderHelper;
 use WooPlugin\Helpers\PaymentMethodHelper;
 use WooPlugin\Services\Settings\APIAdapterService;
@@ -111,6 +112,12 @@ class WidgetController {
 			}
 		}
 
+		/* @noinspection PhpUndefinedFunctionInspection */
+		if ( ! is_email( $billing_address['email'] ) ) {
+			/* @noinspection PhpUndefinedFunctionInspection */
+			wp_send_json_error( [ 'message' => __( 'Please enter a valid email address', PLUGIN_TEXT_DOMAIN ) ] );
+		}
+
 		if ( ! empty( $_POST['order_id'] ) ) {
 			/* @noinspection PhpUndefinedFunctionInspection */
 			$reference = sanitize_text_field( wp_unslash( $_POST['order_id'] ) );
@@ -122,15 +129,18 @@ class WidgetController {
 				$order_id = $custom_order_id;
 				/* @noinspection PhpUndefinedFunctionInspection */
 				$order = wc_get_order( $order_id );
-                $order_status = $order->get_status();
 
-                if ( $order_status !== 'checkout-draft' && $order_status !== 'failed' ) {
-                    $order_id = $this->create_draft_order( $billing_address, $shipping_address );
-                } else {
-                    OrderHelper::update_order( $order, $billing_address, $shipping_address );
-                }
+				if ( is_object( $order ) ) {
+					OrderHelper::update_order( $order, $billing_address, $shipping_address );
+					$order_status = $order->get_status();
+				} else {
+					$order_status = false;
+				}
 
-            } else {
+				if ( $order_status !== 'checkout-draft' && $order_status !== 'failed' ) {
+					$order_id = $this->create_draft_order( $billing_address, $shipping_address );
+				}
+			} else {
 				$order_id = $this->create_draft_order( $billing_address, $shipping_address );
 			}
 			/* @noinspection PhpUndefinedFunctionInspection */
@@ -202,6 +212,11 @@ class WidgetController {
 			[
 				'items'                => $cart->get_cart(),
 				'total'                => $cart->get_total( false ),
+				'discounts'            => [
+					'applied_coupons' => $cart->get_applied_coupons(),
+					'discounts_total' => $cart->get_discount_total(),
+					'tax'             => $cart->get_discount_tax(),
+				],
 				'shipping_total'       => $cart->get_shipping_total(),
 				'selected_shipping_id' => $selected_shipping_id,
 				'selected_shipping'    => $selected_shipping,
@@ -252,6 +267,23 @@ class WidgetController {
 			&& $result['resource']['data']['status'] === 'completed'
 			&& $result['resource']['data']['process_reference'] === $charge_id;
 
+		if ( ! $is_intent_valid ) {
+			LoggerHelper::log_callback_event(
+				'Intent validation failed',
+				[
+					'intent_id'         => $intent_id,
+					'charge_id'         => $charge_id,
+					'order_id'          => $order_id,
+					'order_total'       => $order->get_total( false ),
+					'api_amount'        => $result['resource']['data']['amount'] ?? null,
+					'api_reference'     => $result['resource']['data']['reference'] ?? null,
+					'process_reference' => $result['resource']['data']['process_reference'] ?? null,
+					'api_status'        => $result['resource']['data']['status'] ?? null,
+				],
+				'error'
+			);
+		}
+
 		if ( $is_intent_valid ) {
 			$intent_journey = $result['resource']['data']['journey'];
 			for ( $i = count( $intent_journey ) - 1; $i >= 0; $i-- ) {
@@ -260,7 +292,8 @@ class WidgetController {
 					if ( ! empty( $decoded_context['payment_method'] ) ) {
 						$test           = $decoded_context['payment_method'];
 						$payment_method = PaymentMethodHelper::get_payment_method( $test );
-						$order->add_meta_data( PLUGIN_PREFIX . '_payment_method', $payment_method );
+						$order->update_meta_data( PLUGIN_PREFIX . '_payment_method', $payment_method );
+						$order->set_payment_method_title( $payment_method );
 						$order->save();
 						break;
 					}

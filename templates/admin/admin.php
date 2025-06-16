@@ -10,6 +10,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/* @noinspection PhpUndefinedFunctionInspection */
+\settings_fields( 'wooplugin_settings' );
+/* @noinspection PhpUndefinedFunctionInspection */
+\settings_errors( 'wooplugin_checkout_version' );
+
 if ( isset( $data['template_service'] ) ) {
 	$template_service = $data['template_service'];
 
