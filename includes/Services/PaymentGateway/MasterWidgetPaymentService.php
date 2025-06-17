@@ -480,7 +480,7 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 	}
 
     /**
-     * Returns order id if order was created previously on PowerBoard
+     * Returns order id if order was created previously in the API
      * phpcs:disable WordPress.Security.NonceVerification -- processed through the WooCommerce form handler
      *
      * @return string
@@ -1084,11 +1084,11 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 
 	public function log_admin_settings_load(): void {
 		if ( isset( $_GET['section'] ) && $_GET['section'] == $this->id ) {
-			$this->log_powerboard_admin_load();
+			$this->log_settings_admin_load();
 		}
 	}
 
-	protected function log_powerboard_admin_load(): void {
+	protected function log_settings_admin_load(): void {
 		if ( self::$admin_settings_load_logged ) {
 			return;
 		}

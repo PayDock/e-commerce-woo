@@ -106,7 +106,7 @@ class LoggerHelper {
 
 		/* @noinspection PhpUndefinedConstantInspection */
 		if ( WP_DEBUG ) {
-			error_log( 'PowerBoard: ' . $message );
+			error_log( PLUGIN_NAME . ': ' . $message );
 		}
 	}
 

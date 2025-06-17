@@ -24,7 +24,7 @@ echo wp_kses_post(
 		<p class="woo-plugin-validation-error">Something went wrong, please refresh the page and try again.</p>
 	</div>
 	<div id="invalid-fields-error" style="display: none;">
-		<p class="power-board-validation-error">Please enter valid information in all fields to display payment methods</p>
+		<p class="woo-plugin-validation-error">Please enter valid information in all fields to display payment methods</p>
 	</div>
 	<div id="loading">
 		<p class="loading-text">Loading...</p>

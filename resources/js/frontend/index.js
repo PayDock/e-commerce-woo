@@ -301,7 +301,7 @@ const handleWidgetDisplay = ( waitForExternalWidgetDisplay = false ) => {
 	} else {
 		const validPostcode = document.getElementById( 'shipping-postcode' )?.checkValidity() && document.getElementById( 'billing-postcode' )?.checkValidity();
 		const validEmail    = document.getElementById( 'email' ).checkValidity();
-		const validPhone    = !document.getElementById( 'shipping-phone' )?.className.includes( 'power-board-invalid-phone' ) && !document.getElementById( 'billing-phone' )?.className.includes( 'power-board-invalid-phone' );
+		const validPhone    = !document.getElementById( 'shipping-phone' )?.className.includes( pluginPrefix + '-invalid-phone' ) && !document.getElementById( 'billing-phone' )?.className.includes( pluginPrefix + '-invalid-phone' );
 		if ( !validPostcode || !validEmail || !validPhone ) {
 			error.classList.add( 'hide' );
 			// noinspection JSUnresolvedReference
@@ -419,7 +419,7 @@ const handleShippingChanged = () => {
 						url: '/?wc-ajax=woo-plugin-update-shipping',
 						type: 'POST',
 						data: {
-							_wpnonce: PowerBoardAjaxCheckout.wpnonce_update_shipping,
+							_wpnonce: WooPluginAjaxCheckout.wpnonce_update_shipping,
 						}
 					}
 				);
@@ -587,7 +587,7 @@ const Content                               = ( props ) => {
 			{id: 'invalid-fields-error', className: 'hide'},
 			createElement(
 				"p",
-				{className: 'power-board-validation-error'},
+				{className: 'woo-plugin-validation-error'},
 				'Please enter valid information in all fields to display payment methods.',
 			),
 		),

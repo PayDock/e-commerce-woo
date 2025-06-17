@@ -33,7 +33,7 @@ if ( ! class_exists( '\WooPlugin\WooPluginPlugin' ) ) {
 		public function register_style_fixes(): void {
 			?>
 			<style>
-				#classic-powerBoardCheckout_wrapper button,
+				#classic-wooPluginCheckout_wrapper button,
 				#standaloneWidget button,
 				#standaloneWidget #afterpay-checkout-button,
 				#standaloneWidget #gpay-button-online-api-id,
@@ -42,7 +42,7 @@ if ( ! class_exists( '\WooPlugin\WooPluginPlugin' ) ) {
 				#standaloneWidget .paypal-buttons button {
 					background-image: none !important;
 				}
-				#classic-powerBoardCheckout_wrapper iframe {
+				#classic-wooPluginCheckout_wrapper iframe {
 					background: transparent !important;
 					display: block !important;
 					max-width: 100% !important;

@@ -501,7 +501,7 @@ jQuery(
 							'change',
 							function () {
 								const selectedPayment = $( 'input[name="payment_method"]:checked' ).val();
-								powerBoardHelper.setPaymentMethod( selectedPayment, true );
+								wooPluginHelper.setPaymentMethod( selectedPayment, true );
 							}
 						);
 						this.form.on(
@@ -523,7 +523,7 @@ jQuery(
 
 						$( document.body ).on( 'updated_checkout', () => {
 							const selectedPayment = $( 'input[name="payment_method"]:checked' ).val();
-							if ( selectedPayment === 'power_board' ) {
+							if ( selectedPayment === classicPluginPrefix ) {
 								this.setPaymentMethod( selectedPayment, true );
 							}
 						});
@@ -637,7 +637,7 @@ jQuery(
 									url: '/?wc-ajax=woo-plugin-check-email',
 									type: 'POST',
 									data: {
-										_wpnonce: PowerBoardAjaxCheckout.wpnonce_check_email,
+										_wpnonce: WooPluginAjaxCheckout.wpnonce_check_email,
 										email: email,
 									},
 									success: ( response ) => {

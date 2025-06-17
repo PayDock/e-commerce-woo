@@ -27,8 +27,8 @@ class PaymentMethodHelper {
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$payment_gateways = WC()->payment_gateways->get_available_payment_gateways();
 
-		if ( isset( $payment_gateways[ POWER_BOARD_PLUGIN_PREFIX ] ) ) {
-			$gateway = $payment_gateways[ POWER_BOARD_PLUGIN_PREFIX ];
+		if ( isset( $payment_gateways[ PLUGIN_PREFIX ] ) ) {
+			$gateway = $payment_gateways[ PLUGIN_PREFIX ];
 
 			if ( method_exists( $gateway, $method_name ) ) {
 				$gateway->$method_name();
