@@ -876,7 +876,16 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		$environment  = $this->get_environment();
 		$version      = $this->get_version();
 
-		$this->configuration_id_options = MasterWidgetSettingsHelper::get_options_for_ui( MasterWidgetSettingsEnum::CONFIGURATION_ID, $environment, $access_token, $version );
+		if ( $version ) {
+			$this->configuration_id_options = MasterWidgetSettingsHelper::get_options_for_ui(
+				MasterWidgetSettingsEnum::CONFIGURATION_ID,
+				$environment,
+				$access_token,
+				$version
+			);
+		} else {
+			$this->configuration_id_options = [];
+		}
 
 		$key = SettingsHelper::get_option_name(
 			$this->id,
