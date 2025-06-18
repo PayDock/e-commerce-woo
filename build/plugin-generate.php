@@ -139,6 +139,11 @@ if ( ! defined( 'PLUGIN_STAGING_ENVIRONMENT_NAME' ) ) {
 	define( 'PLUGIN_STAGING_ENVIRONMENT_NAME', '$staging_name' );
 }
 
+if ( ! defined( 'PLUGIN_PATH' ) ) {
+	$current_dir = plugin_dir_path( __FILE__ );
+	define( 'PLUGIN_PATH', $current_dir );
+}
+
 require_once __DIR__ . '/vendor/autoload.php';
 
 WooPlugin\WooPluginPlugin::get_instance();
