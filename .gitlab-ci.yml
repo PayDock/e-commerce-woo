@@ -1,20 +1,21 @@
 image: 412245956714.dkr.ecr.ap-southeast-2.amazonaws.com/docker-hub/library/amazoncorretto:21-alpine
 
 stages:
- - test
- - publish
- - quality
- - deploy_cba
- - deploy_multitenant
+  - test
+  - publish
+  - quality
+  - test_automation
+  - deploy_cba
+  - deploy_multitenant
 
 # noinspection ComposeMissingKeys
 include:
-  - project: 'paydock/platform/gitlab-templates'
-    file: '/deploy/version.yml'
-  - project: 'paydock/platform/gitlab-templates'
-    file: '/security/gitlab-security-scans.yaml'
-  - project: 'paydock/platform/gitlab-templates'
-    file: '/code_quality.yml'
+  - project: "paydock/platform/gitlab-templates"
+    file: "/deploy/version.yml"
+  - project: "paydock/platform/gitlab-templates"
+    file: "/security/gitlab-security-scans.yaml"
+  - project: "paydock/platform/gitlab-templates"
+    file: "/code_quality.yml"
 
 run_tests:
   image: composer:lts
@@ -51,9 +52,9 @@ phpcs_report:
 prepare_power_board_version:
   image: composer:lts
   stage: publish
-#  only:
-#    - main
-#    - power_board
+  #  only:
+  #    - main
+  #    - power_board
   needs:
     - job: create_version
       artifacts: true
@@ -73,9 +74,9 @@ prepare_power_board_version:
 publish_power_board:
   image: composer:lts
   stage: publish
-#  only:
-#    - main
-#    - power_board
+  #  only:
+  #    - main
+  #    - power_board
   needs:
     - job: prepare_power_board_version
       artifacts: true
@@ -97,9 +98,9 @@ publish_power_board:
 
 simulate_deploy_power_board_staging:
   stage: deploy_cba
-#  only:
-#    - main
-#    - power_board
+  #  only:
+  #    - main
+  #    - power_board
   needs:
     - job: publish_power_board
       artifacts: true
@@ -114,9 +115,9 @@ simulate_deploy_power_board_staging:
 
 simulate_deploy_power_board_uat:
   stage: deploy_cba
-#  only:
-#    - main
-#    - power_board
+  #  only:
+  #    - main
+  #    - power_board
   needs:
     - job: publish_power_board
       artifacts: true
@@ -132,9 +133,9 @@ simulate_deploy_power_board_uat:
 prepare_paydock_version:
   image: composer:lts
   stage: publish
-#  only:
-#    - main
-#    - power_board
+  #  only:
+  #    - main
+  #    - power_board
   needs:
     - job: create_version
       artifacts: true
@@ -154,9 +155,9 @@ prepare_paydock_version:
 publish_paydock:
   image: composer:lts
   stage: publish
-#  only:
-#    - main
-#    - power_board
+  #  only:
+  #    - main
+  #    - power_board
   needs:
     - job: prepare_paydock_version
       artifacts: true
@@ -178,9 +179,9 @@ publish_paydock:
 
 simulate_deploy_paydock_preprod:
   stage: deploy_multitenant
-#  only:
-#    - main
-#    - power_board
+  #  only:
+  #    - main
+  #    - power_board
   needs:
     - job: publish_paydock
       artifacts: true
@@ -195,9 +196,9 @@ simulate_deploy_paydock_preprod:
 
 simulate_deploy_paydock_sandbox:
   stage: deploy_multitenant
-#  only:
-#    - main
-#    - power_board
+  #  only:
+  #    - main
+  #    - power_board
   needs:
     - job: publish_paydock
       artifacts: true
@@ -209,3 +210,39 @@ simulate_deploy_paydock_sandbox:
     UPSTREAM_PROJECT_ID: $CI_PROJECT_ID
     UPSTREAM_JOB_ID: $ZIP_PUBLISH_JOB_ID
   when: manual
+
+cba_qa_automation_tests:
+  stage: test_automation
+  needs:
+    - publish_power_board
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+  variables:
+    E_COMMERCE_UI: "true"
+    ENVIRONMENT: "cba-staging"
+    ADD_ARGS: "--woocommerce_env=cba-qa --woocommerce_plugin_name='PowerBoard for WooCommerce'"
+    ZIP_PUBLISH_JOB_ID: $ZIP_PUBLISH_JOB_ID
+    UPSTREAM_PROJECT_ID: $CI_PROJECT_ID
+    INTEGRATED_ENV: "true"
+  trigger:
+    project: paydock/shared/testing/autotests
+    branch: dev
+    strategy: depend
+
+multitenant_qa_automation_tests:
+  stage: test_automation
+  needs:
+    - publish_paydock
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+  variables:
+    E_COMMERCE_UI: "true"
+    ENVIRONMENT: "mt-sandbox"
+    ADD_ARGS: "--woocommerce_env=mt-qa --woocommerce_plugin_name='Paydock for WooCommerce'"
+    ZIP_PUBLISH_JOB_ID: $ZIP_PUBLISH_JOB_ID
+    UPSTREAM_PROJECT_ID: $CI_PROJECT_ID
+    INTEGRATED_ENV: "true"
+  trigger:
+    project: paydock/shared/testing/autotests
+    branch: dev
+    strategy: depend
