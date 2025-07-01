@@ -141,5 +141,5 @@ trigger_downstream:
     strategy: depend
     forward:
       pipeline_variables: false
-    variables:
-      REPOSITORY_URI: "412245956714.dkr.ecr.ap-southeast-2.amazonaws.com/woocommerce"
+  variables:
+    REPOSITORY_URI: "412245956714.dkr.ecr.ap-southeast-2.amazonaws.com/woocommerce"
