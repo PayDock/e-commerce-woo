@@ -135,3 +135,4 @@ When a charge is created in Paydock (completed or failed), it will be captured i
    
 You can see there are 2 charge_id’s that were created, one for the failed attempt and one for the succeeded attempt. The refund was performed in the context of the succeeded attempt.
 ![image](assets/images/charge-id.png)
+
