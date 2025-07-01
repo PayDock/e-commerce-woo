@@ -96,40 +96,6 @@ publish_power_board:
     reports:
       dotenv: zip_publish.job_id
 
-simulate_deploy_power_board_staging:
-  stage: deploy_cba
-  #  only:
-  #    - main
-  #    - power_board
-  needs:
-    - job: publish_power_board
-      artifacts: true
-  trigger:
-    project: paydock/bounded-contexts/woocommerce/multi-project-downstream
-    branch: development
-  variables:
-    DEPLOYMENT_ENV_URL: "This should be the power_board staging url"
-    UPSTREAM_PROJECT_ID: $CI_PROJECT_ID
-    UPSTREAM_JOB_ID: $ZIP_PUBLISH_JOB_ID
-  when: manual
-
-simulate_deploy_power_board_uat:
-  stage: deploy_cba
-  #  only:
-  #    - main
-  #    - power_board
-  needs:
-    - job: publish_power_board
-      artifacts: true
-  trigger:
-    project: paydock/bounded-contexts/woocommerce/multi-project-downstream
-    branch: development
-  variables:
-    DEPLOYMENT_ENV_URL: "https://woocommerce-uat.multitenant-staging.apac.paydock.com/"
-    UPSTREAM_PROJECT_ID: $CI_PROJECT_ID
-    UPSTREAM_JOB_ID: $ZIP_PUBLISH_JOB_ID
-  when: manual
-
 prepare_paydock_version:
   image: composer:lts
   stage: publish
@@ -177,72 +143,52 @@ publish_paydock:
     reports:
       dotenv: zip_publish.job_id
 
-simulate_deploy_paydock_preprod:
+trigger_downstream_pipeline:
   stage: deploy_multitenant
-  #  only:
-  #    - main
-  #    - power_board
   needs:
     - job: publish_paydock
       artifacts: true
-  trigger:
-    project: paydock/bounded-contexts/woocommerce/multi-project-downstream
-    branch: development
-  variables:
-    DEPLOYMENT_ENV_URL: "This should be the paydock preprod url"
-    UPSTREAM_PROJECT_ID: $CI_PROJECT_ID
-    UPSTREAM_JOB_ID: $ZIP_PUBLISH_JOB_ID
-  when: manual
-
-simulate_deploy_paydock_sandbox:
-  stage: deploy_multitenant
-  #  only:
-  #    - main
-  #    - power_board
-  needs:
-    - job: publish_paydock
+    - job: publish_power_board
       artifacts: true
   trigger:
-    project: paydock/bounded-contexts/woocommerce/multi-project-downstream
-    branch: development
-  variables:
-    DEPLOYMENT_ENV_URL: "This should be the paydock sandbox url"
-    UPSTREAM_PROJECT_ID: $CI_PROJECT_ID
-    UPSTREAM_JOB_ID: $ZIP_PUBLISH_JOB_ID
-  when: manual
-
-cba_qa_automation_tests:
-  stage: test_automation
-  needs:
-    - publish_power_board
-  rules:
-    - if: $CI_COMMIT_BRANCH == "main"
-  variables:
-    E_COMMERCE_UI: "true"
-    ENVIRONMENT: "cba-staging"
-    ADD_ARGS: "--woocommerce_env=cba-qa --woocommerce_plugin_name='PowerBoard for WooCommerce'"
-    ZIP_PUBLISH_JOB_ID: $ZIP_PUBLISH_JOB_ID
-    UPSTREAM_PROJECT_ID: $CI_PROJECT_ID
-    INTEGRATED_ENV: "true"
-  trigger:
-    project: paydock/shared/testing/autotests
-    branch: dev
+    project: paydock/bounded-contexts/woocommerce-test-site
+    branch: mt-qa-test
     strategy: depend
-
-multitenant_qa_automation_tests:
-  stage: test_automation
-  needs:
-    - publish_paydock
-  rules:
-    - if: $CI_COMMIT_BRANCH == "main"
   variables:
-    E_COMMERCE_UI: "true"
-    ENVIRONMENT: "mt-sandbox"
-    ADD_ARGS: "--woocommerce_env=mt-qa --woocommerce_plugin_name='Paydock for WooCommerce'"
-    ZIP_PUBLISH_JOB_ID: $ZIP_PUBLISH_JOB_ID
-    UPSTREAM_PROJECT_ID: $CI_PROJECT_ID
-    INTEGRATED_ENV: "true"
-  trigger:
-    project: paydock/shared/testing/autotests
-    branch: dev
-    strategy: depend
+    SOURCE_PROJECT_ID: $CI_PROJECT_ID
+    SOURCE_JOB_ID: $CI_JOB_ID
+  when: on_success
+# simulate_deploy_paydock_preprod:
+#   stage: deploy_multitenant
+#   #  only:
+#   #    - main
+#   #    - power_board
+#   needs:
+#     - job: publish_paydock
+#       artifacts: true
+#   trigger:
+#     project: paydock/bounded-contexts/woocommerce/multi-project-downstream
+#     branch: development
+#   variables:
+#     DEPLOYMENT_ENV_URL: "This should be the paydock preprod url"
+#     UPSTREAM_PROJECT_ID: $CI_PROJECT_ID
+#     UPSTREAM_JOB_ID: $ZIP_PUBLISH_JOB_ID
+#   when: manual
+
+# simulate_deploy_paydock_sandbox:
+#   stage: deploy_multitenant
+#   #  only:
+#   #    - main
+#   #    - power_board
+#   needs:
+#     - job: publish_paydock
+#       artifacts: true
+#   trigger:
+#     project: paydock/bounded-contexts/woocommerce/multi-project-downstream
+#     branch: development
+#   variables:
+#     DEPLOYMENT_ENV_URL: "This should be the paydock sandbox url"
+#     UPSTREAM_PROJECT_ID: $CI_PROJECT_ID
+#     UPSTREAM_JOB_ID: $ZIP_PUBLISH_JOB_ID
+#   when: manual
+
