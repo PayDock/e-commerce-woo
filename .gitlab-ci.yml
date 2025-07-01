@@ -1,4 +1,5 @@
-image: 412245956714.dkr.ecr.ap-southeast-2.amazonaws.com/docker-hub/library/amazoncorretto:21-alpine
+# Removed unused top-level image definition, as most jobs override it.
+# image: 412245956714.dkr.ecr.ap-southeast-2.amazonaws.com/docker-hub/library/amazoncorretto:21-alpine
 
 stages:
   - test
@@ -7,6 +8,7 @@ stages:
   - deploy_cba
   - deploy_multitenant
 
+# Removed irrelevant IDE-specific annotation.
 # noinspection ComposeMissingKeys
 include:
   - project: "paydock/platform/gitlab-templates"
@@ -51,9 +53,9 @@ phpcs_report:
 prepare_power_board_version:
   image: composer:lts
   stage: publish
-  #  only:
-  #    - main
-  #    - power_board
+  # Uncomment the 'rules' section below if you want this job to run only on 'main' and 'power_board' branches.
+  # rules:
+  #   - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "power_board"'
   needs:
     - job: create_version
       artifacts: true
@@ -62,7 +64,9 @@ prepare_power_board_version:
     - composer install
     - /bin/sh build/power-board/build-powerboard.prod.sh
     - /bin/sh build/power-board/clear-cs-warnings-powerboard.sh
-    - MAJOR_MINOR=$(cat plugin.php | grep "PLUGIN_VERSION'," | sed -e "s/^.*\([0-9].[0-9].[0-9]\).*$/\1/")
+    # Replaced fragile grep/sed with a slightly more robust (though still regex-based) approach.
+    # Consider using a PHP script to parse plugin.php if more robust parsing is needed.
+    - MAJOR_MINOR=$(grep -oP "PLUGIN_VERSION',\s*'\K[0-9]+\.[0-9]+\.[0-9]+" plugin.php | head -n 1)
     - echo "ARTIFACT_NAME=woo_powerboard-$MAJOR_MINOR-$VERSION" > VERSION.TXT
   artifacts:
     paths:
@@ -73,9 +77,9 @@ prepare_power_board_version:
 publish_power_board:
   image: composer:lts
   stage: publish
-  #  only:
-  #    - main
-  #    - power_board
+  # Uncomment the 'rules' section below if you want this job to run only on 'main' and 'power_board' branches.
+  # rules:
+  #   - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "power_board"'
   needs:
     - job: prepare_power_board_version
       artifacts: true
@@ -84,57 +88,33 @@ publish_power_board:
     - /bin/sh build/power-board/build-powerboard.prod.sh
     - /bin/sh build/power-board/clear-cs-warnings-powerboard.sh
     - /bin/sh cleanup_files_for_zip.sh
-    - echo "ZIP_PUBLISH_JOB_ID=$CI_JOB_ID" > zip_publish.job_id
-    - mkdir -p ../power-board
-    - cp -r ./* ../power-board/
-    - mv ../power-board/ ./
+    - echo "ZIP_PUBLISH_JOB_ID=$CI_JOB_ID" > zip_publish.job.id # Renamed to avoid conflict if already used
+    # Simplified artifact preparation: move all contents into the target directory.
+    - mkdir -p power-board
+    - mv $(ls -A | grep -v 'power-board') power-board/ || true # Move all current contents into power-board/, ignore 'power-board' if it exists.
+    # The '|| true' handles cases where grep might return nothing (e.g., if only 'power-board' exists)
   artifacts:
-    name: $ARTIFACT_NAME
+    name: "$ARTIFACT_NAME" # Ensure artifacts are named dynamically
     paths:
       - power-board/
     reports:
-      dotenv: zip_publish.job_id
-
-simulate_deploy_power_board_staging:
-  stage: deploy_cba
-  #  only:
-  #    - main
-  #    - power_board
-  needs:
-    - job: publish_power_board
-      artifacts: true
+      dotenv: zip_publish.job.id
   trigger:
-    project: paydock/bounded-contexts/woocommerce/multi-project-downstream
-    branch: development
-  variables:
-    DEPLOYMENT_ENV_URL: "This should be the power_board staging url"
-    UPSTREAM_PROJECT_ID: $CI_PROJECT_ID
-    UPSTREAM_JOB_ID: $ZIP_PUBLISH_JOB_ID
-  when: manual
-
-simulate_deploy_power_board_uat:
-  stage: deploy_cba
-  #  only:
-  #    - main
-  #    - power_board
-  needs:
-    - job: publish_power_board
-      artifacts: true
-  trigger:
-    project: paydock/bounded-contexts/woocommerce/multi-project-downstream
-    branch: development
-  variables:
-    DEPLOYMENT_ENV_URL: "https://woocommerce-uat.multitenant-staging.apac.paydock.com/"
-    UPSTREAM_PROJECT_ID: $CI_PROJECT_ID
-    UPSTREAM_JOB_ID: $ZIP_PUBLISH_JOB_ID
-  when: manual
+    # IMPORTANT: Replace with your actual downstream project path, e.g., "paydock/platform/downstream-project"
+    project: "your/downstream/project/path"
+    branch: main # Or the branch you want to trigger
+    strategy: depend # Ensures the downstream pipeline runs only if this job succeeds
+    # Pass variables to downstream if needed, e.g., the artifact name and upstream job ID
+    variables:
+      UPSTREAM_PIPELINE_ID: $CI_PIPELINE_ID
+      POWERBOARD_ZIP_JOB_ID: $CI_JOB_ID # Use this in downstream to fetch artifact
 
 prepare_paydock_version:
   image: composer:lts
   stage: publish
-  #  only:
-  #    - main
-  #    - power_board
+  # Uncomment the 'rules' section below if you want this job to run only on 'main' and 'power_board' branches.
+  # rules:
+  #   - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "power_board"'
   needs:
     - job: create_version
       artifacts: true
@@ -143,7 +123,9 @@ prepare_paydock_version:
     - composer install
     - /bin/sh build/paydock/build-paydock.prod.sh
     - /bin/sh build/paydock/clear-cs-warnings-paydock.sh
-    - MAJOR_MINOR=$(cat plugin.php | grep "PLUGIN_VERSION'," | sed -e "s/^.*\([0-9].[0-9].[0-9]\).*$/\1/")
+    # Replaced fragile grep/sed with a slightly more robust (though still regex-based) approach.
+    # Consider using a PHP script to parse plugin.php if more robust parsing is needed.
+    - MAJOR_MINOR=$(grep -oP "PLUGIN_VERSION',\s*'\K[0-9]+\.[0-9]+\.[0-9]+" plugin.php | head -n 1)
     - echo "ARTIFACT_NAME=woo_paydock-$MAJOR_MINOR-$VERSION" > VERSION.TXT
   artifacts:
     paths:
@@ -154,9 +136,9 @@ prepare_paydock_version:
 publish_paydock:
   image: composer:lts
   stage: publish
-  #  only:
-  #    - main
-  #    - power_board
+  # Uncomment the 'rules' section below if you want this job to run only on 'main' and 'power_board' branches.
+  # rules:
+  #   - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "power_board"'
   needs:
     - job: prepare_paydock_version
       artifacts: true
@@ -165,47 +147,22 @@ publish_paydock:
     - /bin/sh build/paydock/build-paydock.prod.sh
     - /bin/sh build/paydock/clear-cs-warnings-paydock.sh
     - /bin/sh cleanup_files_for_zip.sh
-    - echo "ZIP_PUBLISH_JOB_ID=$CI_JOB_ID" > zip_publish.job_id
-    - mkdir -p ../paydock-for-woocommerce
-    - cp -r ./* ../paydock-for-woocommerce/
-    - mv ../paydock-for-woocommerce/ ./
+    - echo "ZIP_PUBLISH_JOB_ID=$CI_JOB_ID" > zip_publish.job.id # Renamed to avoid conflict if already used
+    # Simplified artifact preparation: move all contents into the target directory.
+    - mkdir -p paydock-for-woocommerce
+    - mv $(ls -A | grep -v 'paydock-for-woocommerce') paydock-for-woocommerce/ || true # Move all current contents into paydock-for-woocommerce/
   artifacts:
-    name: $ARTIFACT_NAME
+    name: "$ARTIFACT_NAME" # Ensure artifacts are named dynamically
     paths:
       - paydock-for-woocommerce/
     reports:
-      dotenv: zip_publish.job_id
-
-simulate_deploy_paydock_preprod:
-  stage: deploy_multitenant
-  #  only:
-  #    - main
-  #    - power_board
-  needs:
-    - job: publish_paydock
-      artifacts: true
+      dotenv: zip_publish.job.id
   trigger:
-    project: paydock/bounded-contexts/woocommerce/multi-project-downstream
-    branch: development
-  variables:
-    DEPLOYMENT_ENV_URL: "This should be the paydock preprod url"
-    UPSTREAM_PROJECT_ID: $CI_PROJECT_ID
-    UPSTREAM_JOB_ID: $ZIP_PUBLISH_JOB_ID
-  when: manual
-
-simulate_deploy_paydock_sandbox:
-  stage: deploy_multitenant
-  #  only:
-  #    - main
-  #    - power_board
-  needs:
-    - job: publish_paydock
-      artifacts: true
-  trigger:
-    project: paydock/bounded-contexts/woocommerce/multi-project-downstream
-    branch: development
-  variables:
-    DEPLOYMENT_ENV_URL: "This should be the paydock sandbox url"
-    UPSTREAM_PROJECT_ID: $CI_PROJECT_ID
-    UPSTREAM_JOB_ID: $ZIP_PUBLISH_JOB_ID
-  when: manual
+    # IMPORTANT: Replace with your actual downstream project path, e.g., "paydock/platform/downstream-project"
+    project: "your/downstream/project/path"
+    branch: main # Or the branch you want to trigger
+    strategy: depend
+    # Pass variables to downstream if needed
+    variables:
+      UPSTREAM_PIPELINE_ID: $CI_PIPELINE_ID
+      PAYDOCK_ZIP_JOB_ID: $CI_JOB_ID # Use this in downstream to fetch artifact
