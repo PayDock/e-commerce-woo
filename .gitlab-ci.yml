@@ -1,10 +1,10 @@
 image: 412245956714.dkr.ecr.ap-southeast-2.amazonaws.com/docker-hub/library/amazoncorretto:21-alpine
 
 stages:
-  # - test
+  - test
   - publish
-  # - quality
-  # - test_automation
+  - quality
+  - test_automation
   - deploy_cba
   - deploy_multitenant
 
@@ -17,37 +17,37 @@ include:
   - project: "paydock/platform/gitlab-templates"
     file: "/code_quality.yml"
 
-# run_tests:
-#   image: composer:lts
-#   stage: test
-#   script:
-#     - composer install
-#     - ./vendor/bin/phpunit ./tests
+run_tests:
+  image: composer:lts
+  stage: test
+  script:
+    - composer install
+    - ./vendor/bin/phpunit ./tests
 
-# run_phpcs:
-#   image: composer:lts
-#   stage: quality
-#   script:
-#     - composer install
-#     - ./vendor/bin/phpcs --report=json . > phpcs-report.json || true
-#     - ls phpcs-report.json
-#   artifacts:
-#     name: phpcs-report.json
-#     paths:
-#       - phpcs-report.json
+run_phpcs:
+  image: composer:lts
+  stage: quality
+  script:
+    - composer install
+    - ./vendor/bin/phpcs --report=json . > phpcs-report.json || true
+    - ls phpcs-report.json
+  artifacts:
+    name: phpcs-report.json
+    paths:
+      - phpcs-report.json
 
-# phpcs_report:
-#   image: python:3.9-slim
-#   stage: quality
-#   needs:
-#     - job: run_phpcs
-#       artifacts: true
-#   script:
-#     - python phpcs2codeclimate.py
-#   artifacts:
-#     reports:
-#       codequality:
-#         - code_climate_phpcs_report.json
+phpcs_report:
+  image: python:3.9-slim
+  stage: quality
+  needs:
+    - job: run_phpcs
+      artifacts: true
+  script:
+    - python phpcs2codeclimate.py
+  artifacts:
+    reports:
+      codequality:
+        - code_climate_phpcs_report.json
 
 prepare_power_board_version:
   image: composer:lts
