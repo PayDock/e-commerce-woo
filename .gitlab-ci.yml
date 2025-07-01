@@ -146,3 +146,4 @@ trigger_downstream:
     REPOSITORY_URI: "412245956714.dkr.ecr.ap-southeast-2.amazonaws.com/woocommerce"
     UPSTREAM_PROJECT_ID: "$CI_PROJECT_ID" # GitLab project ID of upstream
     UPSTREAM_PIPELINE_ID: "$CI_PIPELINE_ID"
+    UPSTREAM_BRANCH: "$CI_COMMIT_REF_NAME"
