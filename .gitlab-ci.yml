@@ -157,6 +157,7 @@ trigger_downstream_pipeline:
   variables:
     SOURCE_PROJECT_ID: $CI_PROJECT_ID
     SOURCE_JOB_ID: $CI_JOB_ID
+    REPOSITORY_URI: ""
   when: on_success
 # simulate_deploy_paydock_preprod:
 #   stage: deploy_multitenant
