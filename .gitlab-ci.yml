@@ -151,7 +151,7 @@ trigger_downstream_pipeline:
     - job: publish_power_board
       artifacts: true
   trigger:
-    project: paydock/bounded-contexts/woocommerce-test-site
+    project: paydock/bounded-contexts/woocommerce/woocommerce-test-site
     branch: mt-qa-test
     strategy: depend
   variables:
