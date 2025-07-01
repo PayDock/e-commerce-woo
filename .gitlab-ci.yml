@@ -1,5 +1,8 @@
-# Removed unused top-level image definition, as most jobs override it.
-# image: 412245956714.dkr.ecr.ap-southeast-2.amazonaws.com/docker-hub/library/amazoncorretto:21-alpine
+# The top-level image is not used by any jobs that explicitly define their own image.
+# If you have jobs that *don't* specify an image, this one would be used.
+# Given the jobs here all specify 'composer:lts' or 'python:3.9-slim', this line can be safely removed
+# or kept as a global default for potential future jobs.
+image: 412245956714.dkr.ecr.ap-southeast-2.amazonaws.com/docker-hub/library/amazoncorretto:21-alpine
 
 stages:
   - test
@@ -8,7 +11,7 @@ stages:
   - deploy_cba
   - deploy_multitenant
 
-# Removed irrelevant IDE-specific annotation.
+# This is an IDE-specific annotation and has no effect on GitLab CI/CD. It can be removed.
 # noinspection ComposeMissingKeys
 include:
   - project: "paydock/platform/gitlab-templates"
@@ -53,19 +56,21 @@ phpcs_report:
 prepare_power_board_version:
   image: composer:lts
   stage: publish
-  # Uncomment the 'rules' section below if you want this job to run only on 'main' and 'power_board' branches.
+  # The 'only' keyword is deprecated. Use 'rules' instead for more flexible control.
+  # If you want this job to run only on 'main' and 'power_board' branches, uncomment and use the 'rules' block below.
   # rules:
   #   - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "power_board"'
   needs:
-    - job: create_version
+    - job: create_version # Assumes 'create_version' job is defined in the included version.yml
       artifacts: true
   script:
     - VERSION=$(cat version)
     - composer install
     - /bin/sh build/power-board/build-powerboard.prod.sh
     - /bin/sh build/power-board/clear-cs-warnings-powerboard.sh
-    # Replaced fragile grep/sed with a slightly more robust (though still regex-based) approach.
-    # Consider using a PHP script to parse plugin.php if more robust parsing is needed.
+    # This regex attempts to capture version like X.Y.Z from PLUGIN_VERSION,'X.Y.Z'
+    # It's more robust than the previous one but still relies on a specific string format.
+    # Consider alternative ways to manage/extract version if possible (e.g., from composer.json, a dedicated version file).
     - MAJOR_MINOR=$(grep -oP "PLUGIN_VERSION',\s*'\K[0-9]+\.[0-9]+\.[0-9]+" plugin.php | head -n 1)
     - echo "ARTIFACT_NAME=woo_powerboard-$MAJOR_MINOR-$VERSION" > VERSION.TXT
   artifacts:
@@ -74,45 +79,68 @@ prepare_power_board_version:
     reports:
       dotenv: VERSION.TXT
 
-publish_power_board:
+# This job is responsible for building and packaging the 'power-board' artifact.
+package_power_board:
   image: composer:lts
   stage: publish
-  # Uncomment the 'rules' section below if you want this job to run only on 'main' and 'power_board' branches.
+  # Uncomment rules if this job should also be restricted to specific branches.
   # rules:
   #   - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "power_board"'
   needs:
     - job: prepare_power_board_version
-      artifacts: true
+      artifacts: true # Ensures 'VERSION.TXT' (with ARTIFACT_NAME) is available
   script:
-    - composer install --no-dev
+    - composer install --no-dev # Install production dependencies only
     - /bin/sh build/power-board/build-powerboard.prod.sh
     - /bin/sh build/power-board/clear-cs-warnings-powerboard.sh
     - /bin/sh cleanup_files_for_zip.sh
-    - echo "ZIP_PUBLISH_JOB_ID=$CI_JOB_ID" > zip_publish.job.id # Renamed to avoid conflict if already used
-    # Simplified artifact preparation: move all contents into the target directory.
+    # Store the current job ID. This will be consumed by dotenv in the artifacts report.
+    - echo "ZIP_PUBLISH_JOB_ID=$CI_JOB_ID" > zip_publish.job.id
+    # Create the target directory for the artifact.
     - mkdir -p power-board
-    - mv $(ls -A | grep -v 'power-board') power-board/ || true # Move all current contents into power-board/, ignore 'power-board' if it exists.
-    # The '|| true' handles cases where grep might return nothing (e.g., if only 'power-board' exists)
+    # Move all current contents into the 'power-board' directory.
+    # 'ls -A' lists all files including hidden ones, excluding . and ..
+    # 'grep -v 'power-board'' excludes the target directory itself from the list to avoid errors.
+    # '|| true' prevents the job from failing if 'ls -A' returns nothing (e.g., if the directory is already empty or only contains 'power-board').
+    - mv $(ls -A | grep -v 'power-board') power-board/ || true
   artifacts:
-    name: "$ARTIFACT_NAME" # Ensure artifacts are named dynamically
+    # Use the dynamically set ARTIFACT_NAME from prepare_power_board_version job.
+    name: "$ARTIFACT_NAME"
     paths:
-      - power-board/
+      - power-board/ # This specifies the directory to be zipped as an artifact.
     reports:
-      dotenv: zip_publish.job.id
+      dotenv: zip_publish.job.id # Makes ZIP_PUBLISH_JOB_ID available as a variable to downstream jobs.
+
+# This job is solely responsible for triggering the downstream pipeline for 'power-board'.
+# It cannot have a 'script' section because it has a 'trigger' section.
+publish_power_board:
+  stage: publish
+  image: alpine/git:latest # A very lightweight image, as no heavy tools are needed for just triggering.
+  # Uncomment rules if this job should also be restricted to specific branches.
+  # rules:
+  #   - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "power_board"'
+  needs:
+    # This job needs the 'package_power_board' job to complete successfully and its artifacts to be available.
+    - job: package_power_board
+      artifacts: true # This makes variables from 'package_power_board's dotenv report available.
   trigger:
-    # IMPORTANT: Replace with your actual downstream project path, e.g., "paydock/platform/downstream-project"
+    # IMPORTANT: You MUST replace "your/downstream/project/path" with the actual full path to your downstream project.
+    # Example: project: "my-group/my-subgroup/my-downstream-project"
     project: "your/downstream/project/path"
-    branch: main # Or the branch you want to trigger
-    strategy: depend # Ensures the downstream pipeline runs only if this job succeeds
-    # Pass variables to downstream if needed, e.g., the artifact name and upstream job ID
+    branch: main # Specify the branch in the downstream project to trigger.
+    strategy: depend # Ensures the downstream pipeline will only run if this upstream job succeeds.
+    # Pass variables to the downstream pipeline. These can be consumed by jobs in the downstream .gitlab-ci.yml.
     variables:
-      UPSTREAM_PIPELINE_ID: $CI_PIPELINE_ID
-      POWERBOARD_ZIP_JOB_ID: $CI_JOB_ID # Use this in downstream to fetch artifact
+      UPSTREAM_PIPELINE_ID: $CI_PIPELINE_ID # The ID of the current (upstream) pipeline.
+      # These variables are sourced from the 'zip_publish.job.id' and 'VERSION.TXT' dotenv reports
+      # of the 'package_power_board' job. GitLab automatically loads them.
+      POWERBOARD_ZIP_JOB_ID: $ZIP_PUBLISH_JOB_ID # The job ID of the packaging job (useful for fetching specific artifacts).
+      POWERBOARD_ARTIFACT_NAME: $ARTIFACT_NAME # The dynamic name of the artifact created.
 
 prepare_paydock_version:
   image: composer:lts
   stage: publish
-  # Uncomment the 'rules' section below if you want this job to run only on 'main' and 'power_board' branches.
+  # Uncomment rules if this job should also be restricted to specific branches.
   # rules:
   #   - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "power_board"'
   needs:
@@ -123,8 +151,6 @@ prepare_paydock_version:
     - composer install
     - /bin/sh build/paydock/build-paydock.prod.sh
     - /bin/sh build/paydock/clear-cs-warnings-paydock.sh
-    # Replaced fragile grep/sed with a slightly more robust (though still regex-based) approach.
-    # Consider using a PHP script to parse plugin.php if more robust parsing is needed.
     - MAJOR_MINOR=$(grep -oP "PLUGIN_VERSION',\s*'\K[0-9]+\.[0-9]+\.[0-9]+" plugin.php | head -n 1)
     - echo "ARTIFACT_NAME=woo_paydock-$MAJOR_MINOR-$VERSION" > VERSION.TXT
   artifacts:
@@ -133,10 +159,11 @@ prepare_paydock_version:
     reports:
       dotenv: VERSION.TXT
 
-publish_paydock:
+# This job is responsible for building and packaging the 'paydock' artifact.
+package_paydock:
   image: composer:lts
   stage: publish
-  # Uncomment the 'rules' section below if you want this job to run only on 'main' and 'power_board' branches.
+  # Uncomment rules if this job should also be restricted.
   # rules:
   #   - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "power_board"'
   needs:
@@ -147,22 +174,33 @@ publish_paydock:
     - /bin/sh build/paydock/build-paydock.prod.sh
     - /bin/sh build/paydock/clear-cs-warnings-paydock.sh
     - /bin/sh cleanup_files_for_zip.sh
-    - echo "ZIP_PUBLISH_JOB_ID=$CI_JOB_ID" > zip_publish.job.id # Renamed to avoid conflict if already used
-    # Simplified artifact preparation: move all contents into the target directory.
+    - echo "ZIP_PUBLISH_JOB_ID=$CI_JOB_ID" > zip_publish.job.id
     - mkdir -p paydock-for-woocommerce
-    - mv $(ls -A | grep -v 'paydock-for-woocommerce') paydock-for-woocommerce/ || true # Move all current contents into paydock-for-woocommerce/
+    - mv $(ls -A | grep -v 'paydock-for-woocommerce') paydock-for-woocommerce/ || true
   artifacts:
-    name: "$ARTIFACT_NAME" # Ensure artifacts are named dynamically
+    name: "$ARTIFACT_NAME"
     paths:
       - paydock-for-woocommerce/
     reports:
       dotenv: zip_publish.job.id
+
+# This job is solely responsible for triggering the downstream pipeline for 'paydock'.
+publish_paydock:
+  stage: publish
+  image: alpine/git:latest
+  # Uncomment rules if this job should also be restricted.
+  # rules:
+  #   - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "power_board"'
+  needs:
+    - job: package_paydock
+      artifacts: true
   trigger:
-    # IMPORTANT: Replace with your actual downstream project path, e.g., "paydock/platform/downstream-project"
+    # IMPORTANT: You MUST replace "your/downstream/project/path" with the actual full path to your downstream project.
+    # Example: project: "my-group/my-subgroup/my-downstream-project"
     project: "your/downstream/project/path"
-    branch: main # Or the branch you want to trigger
+    branch: main
     strategy: depend
-    # Pass variables to downstream if needed
     variables:
       UPSTREAM_PIPELINE_ID: $CI_PIPELINE_ID
-      PAYDOCK_ZIP_JOB_ID: $CI_JOB_ID # Use this in downstream to fetch artifact
+      PAYDOCK_ZIP_JOB_ID: $ZIP_PUBLISH_JOB_ID
+      PAYDOCK_ARTIFACT_NAME: $ARTIFACT_NAME
