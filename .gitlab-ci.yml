@@ -140,4 +140,6 @@ trigger_downstream:
     branch: mt-qa-test
     strategy: depend
     forward:
-      pipeline_variables: true
+      pipeline_variables: false
+    variables:
+      REPOSITORY_URI: "412245956714.dkr.ecr.ap-southeast-2.amazonaws.com/woocommerce"
