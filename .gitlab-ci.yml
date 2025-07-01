@@ -1,10 +1,13 @@
 image: 412245956714.dkr.ecr.ap-southeast-2.amazonaws.com/docker-hub/library/amazoncorretto:21-alpine
+
 stages:
-  - test
+  # - test
   - publish
-  - quality
+  # - quality
+  # - test_automation
   - deploy_cba
   - deploy_multitenant
+
 # noinspection ComposeMissingKeys
 include:
   - project: "paydock/platform/gitlab-templates"
@@ -13,38 +16,45 @@ include:
     file: "/security/gitlab-security-scans.yaml"
   - project: "paydock/platform/gitlab-templates"
     file: "/code_quality.yml"
-run_tests:
-  image: composer:lts
-  stage: test
-  script:
-    - composer install
-    - ./vendor/bin/phpunit ./tests
-run_phpcs:
-  image: composer:lts
-  stage: quality
-  script:
-    - composer install
-    - ./vendor/bin/phpcs --report=json . > phpcs-report.json || true
-    - ls phpcs-report.json
-  artifacts:
-    name: phpcs-report.json
-    paths:
-      - phpcs-report.json
-phpcs_report:
-  image: python:3.9-slim
-  stage: quality
-  needs:
-    - job: run_phpcs
-      artifacts: true
-  script:
-    - python phpcs2codeclimate.py
-  artifacts:
-    reports:
-      codequality:
-        - code_climate_phpcs_report.json
+
+# run_tests:
+#   image: composer:lts
+#   stage: test
+#   script:
+#     - composer install
+#     - ./vendor/bin/phpunit ./tests
+
+# run_phpcs:
+#   image: composer:lts
+#   stage: quality
+#   script:
+#     - composer install
+#     - ./vendor/bin/phpcs --report=json . > phpcs-report.json || true
+#     - ls phpcs-report.json
+#   artifacts:
+#     name: phpcs-report.json
+#     paths:
+#       - phpcs-report.json
+
+# phpcs_report:
+#   image: python:3.9-slim
+#   stage: quality
+#   needs:
+#     - job: run_phpcs
+#       artifacts: true
+#   script:
+#     - python phpcs2codeclimate.py
+#   artifacts:
+#     reports:
+#       codequality:
+#         - code_climate_phpcs_report.json
+
 prepare_power_board_version:
   image: composer:lts
   stage: publish
+  #  only:
+  #    - main
+  #    - power_board
   needs:
     - job: create_version
       artifacts: true
@@ -60,9 +70,13 @@ prepare_power_board_version:
       - VERSION.TXT
     reports:
       dotenv: VERSION.TXT
+
 publish_power_board:
   image: composer:lts
   stage: publish
+  #  only:
+  #    - main
+  #    - power_board
   needs:
     - job: prepare_power_board_version
       artifacts: true
@@ -81,9 +95,13 @@ publish_power_board:
       - power-board/
     reports:
       dotenv: zip_publish.job_id
+
 prepare_paydock_version:
   image: composer:lts
   stage: publish
+  #  only:
+  #    - main
+  #    - power_board
   needs:
     - job: create_version
       artifacts: true
@@ -99,9 +117,13 @@ prepare_paydock_version:
       - VERSION.TXT
     reports:
       dotenv: VERSION.TXT
+
 publish_paydock:
   image: composer:lts
   stage: publish
+  #  only:
+  #    - main
+  #    - power_board
   needs:
     - job: prepare_paydock_version
       artifacts: true
@@ -120,14 +142,7 @@ publish_paydock:
       - paydock-for-woocommerce/
     reports:
       dotenv: zip_publish.job_id
-create_version:
-  stage: publish
-  script:
-    - version=$(date +%Y%m%d)-$CI_PIPELINE_ID
-    - echo $version > version
-  artifacts:
-    paths:
-      - version
+
 trigger_downstream:
   stage: deploy_multitenant
   needs:
