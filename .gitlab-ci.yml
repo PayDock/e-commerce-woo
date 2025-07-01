@@ -144,3 +144,5 @@ trigger_downstream:
       pipeline_variables: false
   variables:
     REPOSITORY_URI: "412245956714.dkr.ecr.ap-southeast-2.amazonaws.com/woocommerce"
+    UPSTREAM_PROJECT_ID: "$CI_PROJECT_ID" # GitLab project ID of upstream
+    UPSTREAM_PIPELINE_ID: "$CI_PIPELINE_ID"
