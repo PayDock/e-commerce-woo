@@ -179,7 +179,7 @@ class ActionsService {
 
 	public function order_update_shipping() {
 		/* @noinspection PhpUndefinedFunctionInspection */
-		$session = WC()->session;
+		$session          = WC()->session;
 		$current_shipping = null;
 
 		if ( ! empty( $session ) ) {
@@ -230,7 +230,7 @@ class ActionsService {
 
 		if ( ! empty( $cart ) ) {
 			$cart->calculate_totals();
-			$cart_total  = (string) $cart->get_total( false );
+			$cart_total = (string) $cart->get_total( false );
 
 			/* @noinspection PhpUndefinedFunctionInspection */
 			setcookie(
@@ -332,10 +332,10 @@ class ActionsService {
 		}
 		echo '<script type="text/javascript">
 			jQuery(document).ready(function($) {
-        		if ( ' . $id . ' !== "" ) {
+				if ( ' . $id . ' !== "" ) {
 					$("#meta-' . $id . '-key").prop("disabled", true);
 					$("#meta-' . $id . '-value").prop("disabled", true);
-        		}
+				}
 			});
 		</script>';
 	}

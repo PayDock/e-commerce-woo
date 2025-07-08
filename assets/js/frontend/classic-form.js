@@ -64,7 +64,12 @@ jQuery(
 					lastMasterWidgetInit: null,
 					currentSavedShipping: null,
 					showErrorMessage( errorMessage ) {
-						window.showWarning( errorMessage, 'error' );
+						window.scrollTo( { top: 0, behavior: 'smooth' } );
+						let $wrapper = $( '.woocommerce-notices-wrapper' ).first();
+						if ( ! $wrapper.length ) {
+							$wrapper = $( 'form[name="checkout"]' ).prepend( '<div class="woocommerce-notices-wrapper"></div>' ).find( '.woocommerce-notices-wrapper' );
+						}
+						$wrapper.empty().append( '<ul class="woocommerce-error" role="alert">' + '<li>' + errorMessage + '</li>' + '</ul>' );
 					},
 					reInitMasterWidget() {
 						let loading   = $( '#loading' );
@@ -157,7 +162,7 @@ jQuery(
 						let fieldList                 = this.getFieldsList();
 						let result                    = true;
 						const additionalTermsCheckbox = document.getElementById( '_woo_additional_terms' );
-						const invalidPhone            = document.getElementById( 'shipping-phone' )?.className.includes( 'woo-plugin-invalid-phone' ) || document.getElementById( 'billing-phone' )?.className.includes( 'woo-plugin-invalid-phone' );
+						const invalidPhone            = document.getElementById( 'shipping_phone' )?.className.includes( 'woo-plugin-invalid-phone' ) || document.getElementById( 'billing_phone' )?.className.includes( 'woo-plugin-invalid-phone' );
 						if ( this.invalidPostcode || this.invalidEmail || invalidPhone || ( additionalTermsCheckbox && !additionalTermsCheckbox.checked ) ) {
 							result = false;
 						}
@@ -267,7 +272,7 @@ jQuery(
 						}
 					},
 					initMasterWidget() {
-						const initTimestamp       = ( new Date() ).getTime();
+						const initTimestamp       = Date.now();
 						this.lastMasterWidgetInit = initTimestamp;
 						setTimeout( () => this.toggleOrderButton( true ), 100 );
 						let addressData      = this.getAddressData( false );
@@ -284,6 +289,10 @@ jQuery(
 							address: billingAddress,
 							shipping_address: shippingAddress,
 						};
+
+						const createCheckbox = document.getElementById( 'createaccount' );
+						const createAccount  = createCheckbox && createCheckbox.checked ? 'true' : 'false';
+
 						// noinspection JSUnresolvedReference
 						jQuery.ajax(
 							{
@@ -302,22 +311,22 @@ jQuery(
 										loading.hide();
 										error.show();
 									} else {
-										if (initTimestamp === this.lastMasterWidgetInit) {
-											if (response.success) {
+										if ( initTimestamp === this.lastMasterWidgetInit ) {
+											if ( response.success ) {
 												// noinspection JSUnresolvedReference
 												this.toggleWidgetVisibility( false );
 												// noinspection JSUnresolvedReference
 												window.widgetWooPlugin = new window[classicPluginWidgetName].Checkout( '#classic-wooPluginCheckout_wrapper', response.data.token );
 												// noinspection JSUnresolvedReference
-												window.widgetWooPlugin.setEnv( this.getConfigs().environment )
-												const showError          = ( message ) => this.showErrorMessage( message );
+												window.widgetWooPlugin.setEnv( this.getConfigs().environment );
+												const showError          = message => this.showErrorMessage( message );
 												const handleWidgetError  = () => this.handleWidgetError();
 												const reInitMasterWidget = () => this.reInitMasterWidget();
 												const submitForm         = () => this.form.submit();
 												const intentId           = response.data.intentId;
 												// noinspection JSUnresolvedReference
 												window.widgetWooPlugin.onPaymentSuccessful(
-													function ( data ) {
+													( data ) => {
 														// noinspection JSUnresolvedReference
 														jQuery.ajax(
 															{
@@ -326,16 +335,15 @@ jQuery(
 																data: {
 																	_wpnonce: WooPluginAjaxCheckout.wpnonce_process_payment,
 																	payment_response: data,
-																	create_account: document.getElementById( 'createaccount' )?.checked,
+																	create_account: createAccount,
 																},
-																success: function (response) {
-																	if (response.success) {
+																success: ( response ) => {
+																	if ( response.success ) {
 																		// noinspection JSUnresolvedReference
-																		jQuery( '#chargeid' ).val( data['charge_id'] );
+																		jQuery( '#chargeid' ).val( data.charge_id );
 																		// noinspection JSUnresolvedReference
 																		jQuery( '#intentid' ).val( intentId );
 																		submitForm();
-
 																		window.widgetWooPlugin = null;
 																	} else {
 																		showError( response.data.message );
@@ -348,7 +356,7 @@ jQuery(
 												);
 												// noinspection JSUnresolvedReference
 												window.widgetWooPlugin.onPaymentFailure(
-													function ( data ) {
+													( data ) => {
 														// noinspection JSUnresolvedReference
 														jQuery.ajax(
 															{
@@ -356,13 +364,12 @@ jQuery(
 																method: 'POST',
 																data: {
 																	_wpnonce: WooPluginAjaxCheckout.wpnonce_process_payment,
-																	payment_response:
-																		{
-																			...data,
-																			errorMessage: data.message || 'Transaction failed',
+																	payment_response: {
+																		...data,
+																		errorMessage: data.message || 'Transaction failed',
 																	}
 																},
-																success: function () {
+																success: () => {
 																	showError( 'Transaction failed. Please check your payment details or contact your bank' );
 																	handleWidgetError();
 																	window.widgetWooPlugin = null;
@@ -373,9 +380,8 @@ jQuery(
 												);
 												// noinspection JSUnresolvedReference
 												window.widgetWooPlugin.onPaymentExpired(
-													function () {
+													() => {
 														showError( 'Your payment session has expired. Please retry your payment' );
-
 														handleWidgetError();
 														window.widgetWooPlugin = null;
 													}
@@ -521,12 +527,15 @@ jQuery(
 
 						document.addEventListener( classicPluginPrefix + "_cart_total_changed", this.handleCartTotalChanged.bind( this ) );
 
-						$( document.body ).on( 'updated_checkout', () => {
-							const selectedPayment = $( 'input[name="payment_method"]:checked' ).val();
-							if ( selectedPayment === classicPluginPrefix ) {
-								this.setPaymentMethod( selectedPayment, true );
+						$( document.body ).on(
+							'updated_checkout',
+							() => {
+								const selectedPayment = $( 'input[name="payment_method"]:checked' ).val();
+								if ( selectedPayment === classicPluginPrefix ) {
+									this.setPaymentMethod( selectedPayment, true );
+								}
 							}
-						});
+						);
 
 					},
 					handleShippingChanged( eventTargetId ) {

@@ -10,15 +10,18 @@
  * Description: Paydock simplify how you manage your payments. Reduce costs, technical headaches & streamline compliance using Paydock's payment orchestration.
  * Author: Paydock
  * Author URI: https://paydock.com/
- * Version: 4.1.0
+ * Version: 4.2.0
  * Requires at least: 6.6
  * Text Domain: paydock
- * Tested up to: 6.7.1
- * Stable tag: 4.1.0
+ * Tested up to: 6.8.1
+ * Stable tag: 4.2.0
  * License: GPL-3.0
  * License URI: http://www.gnu.org/licenses/gpl-3.0.html
  * WC requires at least: 6.6
- * WC tested up to: 9.5.2
+ * WC tested up to: 9.9.3
+ * Requires Plugins: woocommerce
+ *
+ * @noinspection PhpUndefinedFunctionInspection for plugin_dir_url
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -42,7 +45,7 @@ if ( ! defined( 'PLUGIN_URL' ) ) {
 }
 
 if ( ! defined( 'PLUGIN_VERSION' ) ) {
-	define( 'PLUGIN_VERSION', '4.1.0' );
+	define( 'PLUGIN_VERSION', '4.2.0' );
 }
 
 if ( ! defined( 'PLUGIN_WIDGET_NAME' ) ) {

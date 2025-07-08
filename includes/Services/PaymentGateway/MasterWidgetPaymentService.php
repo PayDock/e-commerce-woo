@@ -15,6 +15,7 @@ use WooPlugin\Enums\SettingGroupsEnum;
 use WooPlugin\Helpers\EnvironmentSettingsHelper;
 use WooPlugin\Helpers\LoggerHelper;
 use WooPlugin\Helpers\MasterWidgetSettingsHelper;
+use WooPlugin\Helpers\OrderHelper;
 use WooPlugin\Helpers\SettingGroupsHelper;
 use WooPlugin\Helpers\SettingsHelper;
 use WooPlugin\Services\Assets\AdminAssetsService;
@@ -83,7 +84,6 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		$this->init_form_fields();
 		/* @noinspection PhpUndefinedMethodInspection */
 		$this->init_settings();
-		new AdminAssetsService();
 		/* @noinspection PhpUndefinedFunctionInspection */
 		if ( is_admin() ) {
 			$this->title            = $this->method_title;
@@ -268,7 +268,10 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 	 */
 	public function process_payment( $order_id ): array {
 		/* @noinspection PhpUndefinedFunctionInspection */
-		$order = wc_get_order( $order_id );
+		$order         = wc_get_order( $order_id );
+		$initial_order = $order;
+
+		OrderHelper::LogOrderInfo( $initial_order, 'Order received to complete payment' );
 
 		/* @noinspection PhpUndefinedFunctionInspection */
 		$session = WC()->session;
@@ -299,22 +302,73 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		if ( ! $valid_payment ) {
 			$failed_message = 'Payment could not be processed due to an error.';
 
+			$initial_order_items = [];
+			foreach ( $initial_order->get_items() as $initial_item ) {
+				$initial_order_items[] = $initial_item->get_data();
+			}
+
+			$initial_coupon_items = [];
+			foreach ( $initial_order->get_coupons() as $initial_coupon ) {
+				$initial_coupon_items[] = $initial_coupon->get_data();
+			}
+
+			$current_order_items = [];
+			foreach ( $order->get_items() as $current_item ) {
+				$current_order_items[] = $current_item->get_data();
+			}
+
+			$current_coupon_items = [];
+			foreach ( $order->get_coupons() as $current_coupon ) {
+				$current_coupon_items[] = $current_coupon->get_data();
+			}
+
 			LoggerHelper::log(
 				'Payment processing failed in process_payment()',
 				'error',
 				[
 					'intent_id'                 => $intent_id,
+					'current_active_intent_ids' => $current_active_intent_ids,
 					'charge_id'                 => $charge_id,
 					'order_id'                  => $order_id,
 					'order_total'               => $order->get_total( false ),
-					'current_active_intent_ids' => $current_active_intent_ids,
 					'valid_payment'             => $valid_payment,
 					'error_message'             => $failed_message,
+					'initial_order'             => [
+						'items'                 => $initial_order_items,
+						'total'                 => $initial_order->get_total( false ),
+						'discounts'             => [
+							'applied_coupons'   => $initial_coupon_items,
+							'discounts_total'   => $initial_order->get_discount_total(),
+							'tax'               => $initial_order->get_discount_tax(),
+						],
+						'shipping_total'        => $initial_order->get_shipping_total(),
+						'selected_shipping'     => $initial_order->get_shipping_method(),
+						'shipping_address'      => $initial_order->get_formatted_shipping_address(),
+						'billing_address'       => $initial_order->get_formatted_billing_address(),
+					],
+					'checkout_order'            => $checkout_order,
+					'current_order'             => [
+						'items'                 => $current_order_items,
+						'total'                 => $order->get_total( false ),
+						'discounts'             => [
+							'applied_coupons'   => $current_coupon_items,
+							'discounts_total'   => $order->get_discount_total(),
+							'tax'               => $order->get_discount_tax(),
+						],
+						'shipping_total'        => $order->get_shipping_total(),
+						'selected_shipping'     => $order->get_shipping_method(),
+						'shipping_address'      => $order->get_formatted_shipping_address(),
+						'billing_address'       => $order->get_formatted_billing_address(),
+					],
 				]
 			);
 
 			if ( ! empty( $charge_id ) ) {
-				$this->refund_charge( $charge_id, $order->get_total( false ) );
+				if ( empty( $checkout_order ) ) {
+					$this->refund_charge( $charge_id, $order->get_total() );
+				} else {
+					$this->refund_charge( $charge_id, $checkout_order['total'] );
+				}
 				$order_note_failed_message = $failed_message . ' The charge with id ' . $charge_id . ' has been refunded.';
 			}
 
@@ -338,6 +392,7 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		$session->set( 'order_comments', '' );
 		$session->set( PLUGIN_PREFIX . '_active_checkout_intent_ids', [] );
 		$session->set( $checkout_order_identifier, null );
+		$session->save_data();
 
 		/* @noinspection PhpUndefinedMethodInspection */
 		return [
@@ -996,6 +1051,9 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 
 	private function get_order_to_process_payment( WC_Order $current_order, ?array $checkout_order ): WC_Order {
 		if ( empty( $checkout_order ) ) {
+			LoggerHelper::log(
+				'Checkout order is empty'
+			);
 			return $current_order;
 		}
 
@@ -1006,6 +1064,10 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		$checkout_customer_billing  = $checkout_order['billing_address'];
 
 		if ( ! empty( $checkout_customer_shipping ) && ! empty( $checkout_customer_billing ) ) {
+			LoggerHelper::log(
+				'Updating Woo order with Checkout shipping and billing address'
+			);
+
 			$current_order->set_shipping_address( $checkout_customer_shipping );
 			$current_order->set_billing_address( $checkout_customer_billing );
 
@@ -1013,6 +1075,10 @@ class MasterWidgetPaymentService extends WC_Payment_Gateway {
 		}
 
 		if ( $current_order_total !== $checkout_order_total ) {
+			LoggerHelper::log(
+				'Updating Woo order with Checkout products, shipping method and coupons'
+			);
+
 			$order_items = $current_order->get_items();
 			foreach ( $order_items as $item_id => $item ) {
 				$current_order->remove_item( $item_id );

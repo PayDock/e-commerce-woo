@@ -5,6 +5,7 @@ namespace WooPlugin;
 
 use WooPlugin\Services\ActionsService;
 use WooPlugin\Services\FiltersService;
+use WooPlugin\Services\Assets\AdminAssetsService;
 
 if ( ! class_exists( '\WooPlugin\WooPluginPlugin' ) ) {
 
@@ -17,6 +18,24 @@ if ( ! class_exists( '\WooPlugin\WooPluginPlugin' ) ) {
 		protected function __construct() {
 			ActionsService::get_instance();
 			FiltersService::get_instance();
+
+			if ( is_admin() ) {
+				global $pagenow;
+
+				if (
+					$pagenow === 'plugins.php' ||
+					(
+						$pagenow === 'admin.php' &&
+						isset( $_GET['page'], $_GET['tab'], $_GET['section'] ) &&
+						$_GET['page'] === 'wc-settings' &&
+						$_GET['tab'] === 'checkout' &&
+						$_GET['section'] === PLUGIN_PREFIX
+					)
+				) {
+					AdminAssetsService::get_instance();
+				}
+			}
+
 			// Reset button styles inside the widget
 			/* @noinspection PhpUndefinedFunctionInspection */
 			add_action( 'wp_head', [ $this, 'register_style_fixes' ] );

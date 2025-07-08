@@ -13,7 +13,7 @@ Connect services such as card payments, digital wallets, alternative payment met
 
 Prerequisites to install and configure the Paydock plugin, you will need a WordPress instance running:
 
-- WooCommerce version: 9.5.2
+- WooCommerce version: 9.9.3
 - [WooCommerce Server Requirements](https://woocommerce.com/document/server-requirements/)
 - [WooCommerce PHP and WordPress Support](https://woocommerce.com/document/update-php-wordpress/)
 

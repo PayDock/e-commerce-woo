@@ -82,7 +82,7 @@ const getSelectedShippingValue = () => {
 const initMasterWidgetCheckout = () => {
 	// noinspection JSUnresolvedReference
 	if ( canMakePayment( settings.total_limitation, cart.getCartTotals()?.total_price ) ) {
-		const initTimestamp  = ( new Date() ).getTime();
+		const initTimestamp  = Date.now();
 		lastMasterWidgetInit = initTimestamp;
 		setTimeout( () => toggleOrderButton( true ), 100 );
 
@@ -139,18 +139,23 @@ const initMasterWidgetCheckout = () => {
 												_wpnonce: WooPluginAjaxCheckout.wpnonce_process_payment,
 												order_id: orderId,
 												payment_response: data,
-												create_account: document.querySelector( '.wc-block-components-checkbox.wc-block-checkout__create-account' )?.querySelector( 'input' ).checked,
+												create_account: document.querySelector( '.wc-block-components-checkbox.wc-block-checkout__create-account input' )?.checked ? 'true' : 'false',
 											},
-											success: function (response) {
-												if (response.success) {
+											success: function ( response ) {
+												if ( response.success ) {
 													// noinspection JSUnresolvedReference
 													paymentSourceElement.val( JSON.stringify( { ...data, orderId: orderId } ) );
 													orderButton.click();
-
 													window.widgetWooPlugin = null;
 												} else {
-													// noinspection JSUnresolvedReference
-													window.showWarning( response.data?.message );
+													const msg = response.data?.message || 'An account is already registered.';
+													const msgHtml = '<ul class="woocommerce-error" role="alert"><li>' + msg + '</li></ul>';
+													let container = document.querySelector('.wc-block-components-notices');
+													if ( container ) {
+														container.innerHTML = msgHtml;
+														container.scrollIntoView( { behavior: 'smooth', block: 'start' } );
+													}
+													window.widgetWooPlugin = null;
 													initMasterWidgetCheckout();
 												}
 											}
