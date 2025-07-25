@@ -129,6 +129,27 @@ create_version:
   artifacts:
     paths:
       - version
+
+rigger_multitenant_automation:
+  stage: test_automation
+  needs:
+    - job: publish_paydock
+      artifacts: true
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+  trigger: 
+    project: "paydock/shared/testing/autotests"
+    branch: main
+    strategy: depend
+    variables: 
+      E_COMMERCE_UI: "true"
+      ENVIRONMENT: "mt-sandbox"
+      UPSTREAM_PROJECT_ID: "$CI_PROJECT_ID"
+      UPSTREAM_PIPELINE_ID: "$CI_PIPELINE_ID"
+      UPSTREAM_JOB_ID: "$ZIP_PUBLISH_JOB_ID" 
+      UPSTREAM_BRANCH: "$CI_COMMIT_REF_NAME"
+      ADD_ARGS: '--woocommerce_env=mt-qa --woocommerce_plugin_name="Paydock for WooCommerce"
+
 trigger_downstream:
   stage: deploy_multitenant
   needs:
