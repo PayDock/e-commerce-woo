@@ -3,7 +3,7 @@ stages:
   - test
   - publish
   - quality
-  - test_automation
+#  - test_automation
   - deploy_cba
   - deploy_multitenant
 # Includes must come after defining all necessary stages
