@@ -132,7 +132,9 @@ create_version:
 
 trigger_multitenant_automation:
   stage: test_automation
-  # rules:
+  rules:
+    - exists:
+        - paydock-for-woocommerce/**/*
   #   - if: '$CI_COMMIT_BRANCH == "main"'
   trigger:
     project: "paydock/shared/testing/autotests"
