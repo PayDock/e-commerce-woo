@@ -11,7 +11,7 @@ class SettingGroupsHelper {
 			case SettingGroupsEnum::ENVIRONMENT:
 				return 'Environment';
 			case SettingGroupsEnum::CREDENTIALS:
-				return 'API Credential';
+				return 'API Credentials';
 			case SettingGroupsEnum::CHECKOUT:
 				return 'Checkout';
 			default:
