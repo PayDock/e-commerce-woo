@@ -1,7 +1,7 @@
 <?php
 declare( strict_types=1 );
 
-namespace PowerBoard\Helpers;
+namespace WooPlugin\Helpers;
 
 class PaymentMethodHelper {
 	public static function get_payment_method( string $payment_method ): string {
